@@ -32,7 +32,7 @@ class ListModel: ObservableObject {
     }
 
     func createList(modelContext: ModelContext, name: String, description: String, type: String, visibility: [String]) async throws {
-        let newList: NewListResponseDTO? = try await fetchDataService.postUrl(
+        let newList: NewListResponseDTO? = try await fetchDataService.post(
             toEndpoint: "/api/lists?action=create",
             payload: NewListDTO(name: name, description: description, visibility: visibility, type: type)
         )
@@ -45,7 +45,7 @@ class ListModel: ObservableObject {
 
     func addEntitiesToList(listId: String, entityUris: [String]) async throws {
         let addToListDTO: AddToListDTO = .init(id: listId, uris: entityUris)
-        let addToListResponse: AddToListResponseDTO? = try await fetchDataService.postUrl(
+        let addToListResponse: AddToListResponseDTO? = try await fetchDataService.post(
             toEndpoint: "/api/lists?action=add-elements",
             payload: addToListDTO
         )

@@ -21,7 +21,7 @@ class APIService {
         return env.apiBaseUrl
     }
 
-    func postUrl<T: Codable, U: Codable>(toEndpoint: String, payload: T) async throws -> U? {
+    func post<T: Codable, U: Codable>(toEndpoint: String, payload: T) async throws -> U? {
         do {
             guard let url = URL(string: "\(env.apiBaseUrl)\(toEndpoint)") else { throw NetworkError.badUrl }
             var request = URLRequest(url: url)

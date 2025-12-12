@@ -9,10 +9,21 @@ import SwiftUI
 import SwiftData
 
 struct InventoryView: View {
+    @EnvironmentObject private var userModel: UserModel
     @Query(sort: \InventoryItem.edition?.title) var allItems: [InventoryItem]
 
     @State private var searchText: String = ""
     @State private var path: NavigationPath = .init()
+
+    let user: User
+
+    init(user: User) {
+        self.user = user
+        let userId = user._id
+        _allItems = Query(filter: #Predicate<InventoryItem> { item in
+            item.ownerId == userId
+        }, sort: [SortDescriptor(\InventoryItem.edition?.title)])
+    }
 
     var filteredItems: [InventoryItem] {
         if searchText.isEmpty {
@@ -23,7 +34,7 @@ struct InventoryView: View {
 
                 let idContainQuery = item._id.range(of: searchText, options: .caseInsensitive) != nil
 
-                let authorContainQuery = item.edition?.authors.joined().range(of: searchText, options: .caseInsensitive) != nil
+                let authorContainQuery = item.edition?.authorNames.joined().range(of: searchText, options: .caseInsensitive) != nil
 
                 return titleContainQuery || idContainQuery || authorContainQuery ? item : nil
             }
@@ -50,9 +61,6 @@ struct InventoryView: View {
                         //
                     }
                 }
-//                ToolbarItem(placement: .topBarLeading) {
-//                    EditButton()
-//                }
             }
             .listStyle(.plain)
             .searchable(text: $searchText)

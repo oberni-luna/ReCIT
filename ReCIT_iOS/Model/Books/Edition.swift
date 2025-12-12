@@ -15,27 +15,30 @@ public class Edition: Identifiable {
     var title: String
     var subtitle: String?
     var lang: String?
-    var authors: [String]
+    var authorNames: [String]
     var image: String?
     var series: String?
+    var works: [Work] = []
 
-    init(uri: String, title: String, subtitle: String? = nil, lang: String?, authors: [String], image: String? = nil, series: String? = nil) {
+    @Relationship(deleteRule: .nullify, inverse: \InventoryItem.edition) var items: [InventoryItem] = []
+    
+    init(uri: String, title: String, subtitle: String? = nil, lang: String?, authorNames: [String], image: String? = nil, series: String? = nil, items: [InventoryItem] = []) {
         self.uri = uri
         self.title = title
         self.subtitle = subtitle
         self.lang = lang
-        self.authors = authors
+        self.authorNames = authorNames
         self.image = image
         self.series = series
     }
 
-    convenience init(uri: String, entitySnapshotDTO: EntitySnapshotDTO, baseUrl: String) {
+    convenience init(uri: String, entitySnapshotDTO: EntitySnapshotDTO, baseUrl: String, works: [Work] = [], items: [InventoryItem] = []) {
         self.init(
             uri: uri,
             title: entitySnapshotDTO.`entity:title`,
             subtitle: entitySnapshotDTO.`entity:subtitle`,
             lang: entitySnapshotDTO.`entity:lang`,
-            authors: entitySnapshotDTO.`entity:authors`?.components(separatedBy: ",") ?? [],
+            authorNames: entitySnapshotDTO.`entity:authors`?.components(separatedBy: ",") ?? [],
             image: entitySnapshotDTO.`entity:image` != nil ? "\(baseUrl)\(entitySnapshotDTO.`entity:image` ?? "")" : nil,
             series: entitySnapshotDTO.`entity:series`
         )

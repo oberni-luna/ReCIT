@@ -9,7 +9,10 @@ import SwiftUI
 import SwiftData
 
 struct ProfileView: View {
-    @ObservedObject var authModel: AuthModel
+    @EnvironmentObject var authModel: AuthModel
+    @EnvironmentObject var userModel: UserModel
+    @Environment(\.modelContext) var modelContext
+
     @State private var isOn: Bool = false
     @Query var users: [User]
 
@@ -32,6 +35,7 @@ struct ProfileView: View {
                 
                 AsyncButton(action: {
                     Task {
+                        try? await userModel.logout(modelContext: modelContext)
                         await authModel.logout()
                     }
                 }, label: {

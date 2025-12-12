@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 class InventoryModel: ObservableObject {
-
+    private static let unkownAuthorId: String = "unknown"
     private let apiService: APIService
     @Published var myUser: User?
 
@@ -17,25 +17,93 @@ class InventoryModel: ObservableObject {
         self.apiService = fetchDataService
     }
 
-    func syncItems(forUser: User, modelContext: ModelContext) async throws {
-        let itemsDTO: ItemsDTO? = try await apiService.fetchData(fromEndpoint: "/api/items?action=by-users&users=\(forUser._id)")
-        if let itemsDTO {
-            for itemDTO in itemsDTO.items {
-                let myItem = InventoryItem(itemDTO: itemDTO, baseUrl: apiService.baseUrl())
+    func syncInventory(forUser: User, modelContext: ModelContext) async throws {
+        let result: InventoryResultDTO? = try await apiService.fetchData(fromEndpoint: "/api/items?action=inventory-view&user=\(forUser._id)")
+        if let result {
+            // synchroniser l'auteur et les oeuvres
+            for author in result.worksTree.author.keys {
+                let authorWorks = result.worksTree.author[author] ?? []
+                let uris = "\(authorWorks.joined(separator: "|"))"
+                let url = "/api/entities?uris=\(uris)&action=by-uris&attributes=info&attributes=labels&attributes=descriptions&attributes=image&attributes=claims" //attributes=sitelinks&
+                let worksDTO: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: url)
 
-                let predicate = #Predicate<InventoryItem> { object in
-                    object._id == itemDTO._id
+                guard let workDTOs = worksDTO?.entities else { continue }
+
+                if author == InventoryModel.unkownAuthorId {
+                    for work in workDTOs {
+                        modelContext.insert(Work(entityDTO: work.value, authors: []))
+                    }
+                } else {
+                    guard let authorModel = try await getOrFetchAuthor(modelContext: modelContext, uri: author) else { continue }
+                    for work in workDTOs {
+                        authorModel.works.append(Work(entityDTO: work.value, authors: [authorModel]))
+                    }
+                    modelContext.insert(authorModel)
                 }
-                let descriptor = FetchDescriptor(predicate: predicate)
-                if let existingItem = try? modelContext.fetch(descriptor).first {
-                    modelContext.delete(existingItem)
+            }
+
+            // synchroniser les items et leurs éditions
+            for workUri in result.workUriItemsMap.keys {
+                guard let relatedWork = try? getLocalWork(modelContext: modelContext, uri: workUri) else { continue }
+
+                guard let ids: String = result.workUriItemsMap[workUri]?.joined(separator: "|") else { continue }
+                let itemsUrl = "/api/items?ids=\(ids)&action=by-ids"
+                
+                guard let itemsDTO: ItemsDTO = try await apiService.fetchData(fromEndpoint: itemsUrl) else {continue}
+
+                for itemDTO in itemsDTO.items {
+                    if let myItem = try? getLocalItem(modelContext: modelContext, id: itemDTO._id) {
+                        if myItem.edition?.works.filter({ $0.uri == relatedWork.uri }).count == 0 {
+                            myItem.edition?.works.append(relatedWork)
+                        }
+                        modelContext.insert(myItem)
+                    } else {
+                        let myItem = InventoryItem(itemDTO: itemDTO, forUser: forUser, baseUrl: apiService.baseUrl())
+                        myItem.edition?.works.append(relatedWork)
+                        modelContext.insert(myItem)
+                    }
                 }
-                modelContext.insert(myItem)
             }
             try modelContext.save()
-        } else {
-            throw NetworkError.badResponse
         }
     }
 
+    private func getOrFetchAuthor(modelContext: ModelContext, uri: String) async throws -> Author? {
+        if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri) {
+            return author
+        }
+
+        let authorUrl: String = "/api/entities?uris=\(uri)&action=by-uris&attributes=info&attributes=labels&attributes=descriptions&attributes=image&attributes=claims"
+        let authorsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: authorUrl)
+
+        guard let authorDto = authorsDto?.entities.values.first else {
+            return nil
+        }
+        return Author(entityDTO: authorDto)
+    }
+
+    private func getLocalWork(modelContext: ModelContext, uri: String) throws -> Work? {
+        let predicate = #Predicate<Work> { object in
+            object.uri == uri
+        }
+        let descriptor = FetchDescriptor(predicate: predicate)
+        return try modelContext.fetch(descriptor).first
+    }
+
+    private func getLocalAuthor(modelContext: ModelContext, uri: String) throws -> Author? {
+        let predicate = #Predicate<Author> { object in
+            object.uri == uri
+        }
+        let descriptor = FetchDescriptor(predicate: predicate)
+        return try modelContext.fetch(descriptor).first
+    }
+    
+    private func getLocalItem(modelContext: ModelContext, id: String) throws -> InventoryItem? {
+        let predicate = #Predicate<InventoryItem> { object in
+            object._id == id
+        }
+        let descriptor = FetchDescriptor(predicate: predicate)
+        return try modelContext.fetch(descriptor).first
+    }
+    
 }

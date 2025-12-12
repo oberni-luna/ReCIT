@@ -15,7 +15,9 @@ struct ReCIT: App {
             InventoryItem.self,
             User.self,
             Edition.self,
-            EntityList.self
+            EntityList.self,
+            Author.self,
+            Work.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
@@ -34,7 +36,8 @@ struct ReCIT: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(authModel: authModel)
+            RootView()
+                .environmentObject(authModel)
                 .modelContainer(sharedModelContainer)
         }
     }

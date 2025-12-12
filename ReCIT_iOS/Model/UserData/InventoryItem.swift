@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-public final class InventoryItem {
+public final class InventoryItem{
 
     @Attribute(.unique) var _id: String
     var _rev: String
@@ -20,7 +20,8 @@ public final class InventoryItem {
     var updated: Date?
     var busy: Bool
 
-    @Relationship(deleteRule: .cascade) var edition: Edition?
+    var edition: Edition?
+    var owner: User?
 
     init(_id: String, _rev: String, transaction: TransactionType, visibility: [VisibilityAttributes], ownerId: String, created: Date, updated: Date?, busy: Bool, edition: Edition) {
         self._id = _id
@@ -34,7 +35,7 @@ public final class InventoryItem {
         self.edition = edition
     }
 
-    convenience init(itemDTO: ItemDTO, baseUrl: String) {
+    convenience init(itemDTO: ItemDTO, forUser: User, baseUrl: String) {
         let updatedDate: Date? = if let updated = itemDTO.updated {
             Date(timeIntervalSince1970: updated)
         } else {
@@ -45,12 +46,13 @@ public final class InventoryItem {
             _id: itemDTO._id,
             _rev: itemDTO._rev,
             transaction: TransactionType(rawValue: itemDTO.transaction) ?? .inventorying,
-            visibility: itemDTO.visibility.compactMap { VisibilityAttributes(rawValue: $0) ?? .private },
+            visibility: itemDTO.visibility?.compactMap { VisibilityAttributes(rawValue: $0) ?? .private } ?? [],
             ownerId: itemDTO.owner,
             created: Date(timeIntervalSince1970: itemDTO.created),
             updated: updatedDate,
             busy: itemDTO.busy,
-            edition: Edition(uri: itemDTO.entity, entitySnapshotDTO: itemDTO.snapshot, baseUrl: baseUrl)
+            edition: Edition(uri: itemDTO.entity, entitySnapshotDTO: itemDTO.snapshot, baseUrl: baseUrl, works: [])
         )
+        self.owner = forUser
     }
 }

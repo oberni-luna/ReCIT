@@ -21,7 +21,7 @@ public class User: Identifiable, Equatable {
     var email: String?
     var position: Coordinates?
     var avatarURLValue: String?
-//    @Relationship(deleteRule: .cascade, inverse: \Item.owner) var items = [Item]()
+    @Relationship(deleteRule: .cascade, inverse: \InventoryItem.owner) var items: [InventoryItem] = []
 
     init(_id: String, _rev: String, username: String, email: String?, position: Coordinates?, avatarURLValue: String?) {
         self._id = _id
@@ -43,7 +43,7 @@ public class User: Identifiable, Equatable {
 
         self.init(
             _id: userDTO._id,
-            _rev: userDTO._rev,
+            _rev: userDTO._rev ?? "",
             username: userDTO.username,
             email: userDTO.email,
             position: position,

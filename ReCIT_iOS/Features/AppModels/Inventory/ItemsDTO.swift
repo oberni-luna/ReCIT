@@ -18,7 +18,7 @@ struct ItemDTO: Codable {
     let _rev: String
     let entity: String
     let transaction: String
-    let visibility: [String]
+    let visibility: [String]?
     let owner: String
     let created: Double
     let updated: Double?

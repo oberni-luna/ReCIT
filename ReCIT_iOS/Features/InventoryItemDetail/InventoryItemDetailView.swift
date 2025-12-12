@@ -33,10 +33,10 @@ struct InventoryItemDetailView: View {
                         Text(subtitle)
                             .font(.subheadline)
                     }
+                    
+//                    Text(invEntity.works.authors.map{ $0.name }.joined(separator: ", "))
 
-                    Text(invEntity.authors.joined(separator: ", "))
-
-                    addToListButton
+                    Text(.init(invEntity.works.map { "**\($0.title)** : \($0.authors.map {$0.name}.joined(separator: ","))" }.joined(separator: "\n")))
                 }
             }
             .padding()
@@ -60,6 +60,3 @@ struct InventoryItemDetailView: View {
     }
 }
 
-#Preview {
-    InventoryItemDetailView(item: InventoryItem(_id: "1", _rev: "11", transaction: .inventorying, visibility: [.groups], ownerId: "1", created: Date(), updated: Date(), busy: false, edition: Edition(uri: "1", title: "Le livre de Olive", lang: "fr", authors: ["Olivier Berni"], image: "https://jusdolive.fr/wp-content/uploads/2019/04/couverture-livre.jpg")))
-}

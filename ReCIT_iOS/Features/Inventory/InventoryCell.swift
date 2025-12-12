@@ -26,7 +26,7 @@ struct InventoryCell: View {
                             .font(.subheadline)
                     }
 
-                    Text(edition.authors.joined(separator: ", "))
+                    Text(edition.authorNames.joined(separator: ", "))
                         .font(.caption)
 
 #if DEBUG

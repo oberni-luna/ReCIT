@@ -18,7 +18,7 @@ class UserModel: ObservableObject {
         self.fetchDataService = fetchDataService
     }
 
-    func syncUser(modelContext: ModelContext) async throws {
+    func syncMyUser(modelContext: ModelContext) async throws {
         let userDTO: UserDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/user")
         if let userDTO {
             let mySyncedUser = User(userDTO: userDTO)
@@ -26,6 +26,58 @@ class UserModel: ObservableObject {
             self.myUser = mySyncedUser
         } else {
             throw NetworkError.badResponse
+        }
+    }
+
+    func syncOtherUser(modelContext: ModelContext, userIds: [String]) async throws {
+        let ids = userIds.joined(separator: "|")
+        guard ids.isEmpty == false else { return }
+
+        let usersDTO: UsersDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/users?action=by-ids&ids=\(ids)")
+
+        guard let users = usersDTO?.users, !users.isEmpty else { return }
+
+        for user in users {
+            let otherUser = User(userDTO: user.value)
+            modelContext.insert(otherUser)
+        }
+    }
+
+    func syncUserNetwork(modelContext: ModelContext) async throws {
+        let userNetwork: UserNetworkDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/relations")
+        guard let userNetwork else { return }
+
+        let userIds = Array(Set(userNetwork.network))
+        if userIds.isEmpty { return }
+
+        try await syncOtherUser(modelContext: modelContext, userIds: userIds)
+    }
+
+    func getAllUsers(modelContext: ModelContext) -> [User] {
+        do {
+            let data = try modelContext.fetch(FetchDescriptor<User>())
+            return data
+        } catch {
+            return []
+        }
+    }
+
+    func clearUserData(modelContext: ModelContext) async throws {
+        if let myUser {
+            do {
+                modelContext.delete(myUser)
+                try modelContext.save()
+            } catch {
+                print("Failed to delete user related content")
+            }
+        }
+    }
+
+    func logout(modelContext: ModelContext) async throws {
+        do {
+            try await clearUserData(modelContext: modelContext)
+        } catch {
+            print("Failed to delete user related content")
         }
     }
 

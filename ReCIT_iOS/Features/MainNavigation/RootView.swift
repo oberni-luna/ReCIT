@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct RootView: View {
-    @ObservedObject var authModel: AuthModel
+    @EnvironmentObject var authModel: AuthModel
 
     @StateObject private var userModel: UserModel = .init()
     @StateObject private var listModel: ListModel = .init()
@@ -24,6 +24,7 @@ struct RootView: View {
             .environmentObject(userModel)
             .environmentObject(listModel)
             .environmentObject(inventoryModel)
+            .environmentObject(authModel)
             .sheet(isPresented: $isLoginSheetPresented) {
                 LoginView(authModel: authModel)
             }
@@ -44,11 +45,18 @@ struct RootView: View {
         Task {
             if authModel.isAuthenticated {
                 do {
-                    try await userModel.syncUser(modelContext: modelContext)
+                    try await userModel.syncMyUser(modelContext: modelContext)
 
                     if let myUser = userModel.myUser {
-                        try await inventoryModel.syncItems(forUser: myUser, modelContext: modelContext)
-                        try await listModel.syncLists(forUser: myUser, modelContext: modelContext)
+                        try await userModel.clearUserData(modelContext: modelContext)
+                        try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext)
+                        try await userModel.syncUserNetwork(modelContext: modelContext)
+
+                        for user in userModel.getAllUsers(modelContext: modelContext) {
+                            try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
+                        }
+//                        try await inventoryModel.syncItems(forUser: myUser, modelContext: modelContext)
+//                        try await listModel.syncLists(forUser: myUser, modelContext: modelContext)
                     }
                 } catch {
                     print("⚠️⚠️⚠️⚠️⚠️ Error during user sync: \(error)")

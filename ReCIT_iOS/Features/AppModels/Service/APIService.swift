@@ -8,6 +8,8 @@
 import Foundation
 
 class APIService {
+    private let logQuery: Bool = true
+    private let logResponses: Bool = true
 
     private let session: URLSession
     private let env: Env
@@ -31,7 +33,7 @@ class APIService {
             let encoder = JSONEncoder()
             let data = try encoder.encode(payload)
             request.httpBody = data
-
+            
             let (responseData, response) = try await URLSession.shared.data(for: request)
 
             guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
@@ -63,11 +65,22 @@ class APIService {
     private func downloadData<T: Codable>(fromEndpoint: String) async -> T? {
         do {
             guard let url = URL(string: "\(env.apiBaseUrl)\(fromEndpoint)") else { throw NetworkError.badUrl }
+
+            if logQuery {
+                print("******** Query ********")
+                print(url)
+            }
+
             let (data, response) = try await URLSession.shared.data(from: url)
+
+            if logResponses {
+                print(" Reponse :")
+                print("\(String(bytes: data, encoding: .utf8) ?? "No data")")
+            }
+
             guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
             guard response.statusCode >= 200 && response.statusCode < 300 else { throw NetworkError.badStatus }
-            guard let decodedResponse = try? JSONDecoder().decode(T.self, from: data) else { throw NetworkError.failedToDecodeResponse }
-
+            let decodedResponse = try JSONDecoder().decode(T.self, from: data)
             return decodedResponse
         } catch NetworkError.badUrl {
             print("There was an error creating the URL")
@@ -78,7 +91,7 @@ class APIService {
         } catch NetworkError.failedToDecodeResponse {
             print("Failed to decode response into the given type")
         } catch {
-            print("An error occured downloading the data")
+            print("An error occured downloading the data: \(error)")
         }
 
         return nil

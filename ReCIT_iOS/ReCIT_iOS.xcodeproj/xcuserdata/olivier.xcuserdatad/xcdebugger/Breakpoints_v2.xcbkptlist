@@ -14,8 +14,8 @@
             filePath = "Features/MainNavigation/RootView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "47"
-            endingLineNumber = "47"
+            startingLineNumber = "48"
+            endingLineNumber = "48"
             landmarkName = "refreshUserData()"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "Features/MainNavigation/RootView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "51"
-            endingLineNumber = "51"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
             landmarkName = "refreshUserData()"
             landmarkType = "7">
          </BreakpointContent>
@@ -39,75 +39,17 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "8B20B64E-0702-453A-A7F6-F0AD4D6DABE3"
-            shouldBeEnabled = "Yes"
+            uuid = "FC7EE1BC-116A-48B6-A1D4-C6D5BE8B2AC9"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Features/AppModels/List/ListModel.swift"
+            filePath = "Features/AppModels/Service/APIService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "48"
-            endingLineNumber = "48"
-            landmarkName = "addEntitiesToList(listId:entityUris:)"
+            startingLineNumber = "83"
+            endingLineNumber = "83"
+            landmarkName = "downloadData(fromEndpoint:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "8B20B64E-0702-453A-A7F6-F0AD4D6DABE3 - 76e5a0918eaf2642"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for ReCIT_iOS.ListModel.addEntitiesToList(listId: Swift.String, entityUris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; ()"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/List/ListModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "48"
-                  endingLineNumber = "48">
-               </Location>
-               <Location
-                  uuid = "8B20B64E-0702-453A-A7F6-F0AD4D6DABE3 - 4df8a82e4337534d"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(2) await resume partial function for ReCIT_iOS.ListModel.addEntitiesToList(listId: Swift.String, entityUris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; ()"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/List/ListModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "48"
-                  endingLineNumber = "48">
-               </Location>
-               <Location
-                  uuid = "8B20B64E-0702-453A-A7F6-F0AD4D6DABE3 - 1b7774fde0c86244"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(3) suspend resume partial function for ReCIT_iOS.ListModel.addEntitiesToList(listId: Swift.String, entityUris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; ()"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/List/ListModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "48"
-                  endingLineNumber = "48">
-               </Location>
-               <Location
-                  uuid = "8B20B64E-0702-453A-A7F6-F0AD4D6DABE3 - 510e622a17e51c47"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(4) suspend resume partial function for ReCIT_iOS.ListModel.addEntitiesToList(listId: Swift.String, entityUris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; ()"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/List/ListModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "48"
-                  endingLineNumber = "48">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

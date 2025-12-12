@@ -12,21 +12,16 @@ struct ItemCountDTO: Codable {
     let `items:last-add`: Int?
 }
 
-struct UserSnapshotDTO: Codable {
-    let `private` : ItemCountDTO
-    let network: ItemCountDTO
-    let `public`: ItemCountDTO
-}
-
-struct UserDTO: Identifiable, Codable {
-    var id: String { _id }
+struct UserDTO: Codable {
     let _id: String
-    let _rev: String
+    let _rev: String?
     let username: String
     let email: String?
     let position: [Double]?
     let picture: String?
     let language: String?
-    let snapshot: UserSnapshotDTO?
+}
 
+struct UsersDTO: Codable {
+    let users: [String: UserDTO]
 }

@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct MainTabView: View {
+    @EnvironmentObject private var userModel: UserModel
     let authModel: AuthModel
     
     enum TabConfig: String, Hashable, CaseIterable {
@@ -88,15 +89,19 @@ private extension MainTabView {
     func view(for tab: TabConfig) -> some View {
         switch tab {
         case .community:
-            EntityListView()
+            CommunityView()
         case .inventory:
-            InventoryView()
+            if let user = userModel.myUser {
+                InventoryView(user: user)
+            } else {
+                EmptyView()
+            }
         case .transactions:
             Text("Transactions View")
                 .navigationTitle("Transactions")
                 .navigationBarTitleDisplayMode(.inline)
         case .settings:
-            ProfileView(authModel: authModel)
+            ProfileView()
                 .navigationTitle("Réglages")
                 .navigationBarTitleDisplayMode(.inline)
         }

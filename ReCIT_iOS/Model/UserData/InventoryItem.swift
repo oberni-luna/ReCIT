@@ -19,11 +19,11 @@ public final class InventoryItem{
     var created: Date
     var updated: Date?
     var busy: Bool
-
+    var details: String?
     var edition: Edition?
     var owner: User?
 
-    init(_id: String, _rev: String, transaction: TransactionType, visibility: [VisibilityAttributes], ownerId: String, created: Date, updated: Date?, busy: Bool, edition: Edition) {
+    init(_id: String, _rev: String, transaction: TransactionType, visibility: [VisibilityAttributes], ownerId: String, created: Date, updated: Date?, busy: Bool, details: String? = nil, edition: Edition) {
         self._id = _id
         self._rev = _rev
         self.transaction = transaction
@@ -33,6 +33,7 @@ public final class InventoryItem{
         self.updated = updated
         self.busy = busy
         self.edition = edition
+        self.details = details
     }
 
     convenience init(itemDTO: ItemDTO, forUser: User, baseUrl: String) {
@@ -51,6 +52,7 @@ public final class InventoryItem{
             created: Date(timeIntervalSince1970: itemDTO.created),
             updated: updatedDate,
             busy: itemDTO.busy,
+            details: itemDTO.details,
             edition: Edition(uri: itemDTO.entity, entitySnapshotDTO: itemDTO.snapshot, baseUrl: baseUrl, works: [])
         )
         self.owner = forUser

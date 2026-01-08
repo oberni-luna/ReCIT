@@ -68,6 +68,11 @@ class InventoryModel: ObservableObject {
         }
     }
 
+    func postNewItem(modelContext: ModelContext, entity: Edition, transaction: TransactionType, visibility: [VisibilityAttributes]) async throws {
+
+        
+    }
+
     private func getOrFetchAuthor(modelContext: ModelContext, uri: String) async throws -> Author? {
         if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri) {
             return author
@@ -105,5 +110,7 @@ class InventoryModel: ObservableObject {
         let descriptor = FetchDescriptor(predicate: predicate)
         return try modelContext.fetch(descriptor).first
     }
+
     
+
 }

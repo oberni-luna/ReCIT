@@ -34,8 +34,6 @@ struct InventoryItemDetailView: View {
                             .font(.subheadline)
                     }
                     
-//                    Text(invEntity.works.authors.map{ $0.name }.joined(separator: ", "))
-
                     Text(.init(invEntity.works.map { "**\($0.title)** : \($0.authors.map {$0.name}.joined(separator: ","))" }.joined(separator: "\n")))
                 }
             }
@@ -55,7 +53,7 @@ struct InventoryItemDetailView: View {
                     }
                 }
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.bordered)
         }
     }
 }

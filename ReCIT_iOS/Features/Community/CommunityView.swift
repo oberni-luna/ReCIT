@@ -42,8 +42,8 @@ struct CommunityView: View {
                     }
                 }
             }
-            .navigationDestination(for: Work.self) { work in
-
+            .navigationDestination(for: Edition.self) { edition in
+                EditionView(edition: edition)
             }
             .navigationTitle("👫 In the community")
             .listStyle(.plain)

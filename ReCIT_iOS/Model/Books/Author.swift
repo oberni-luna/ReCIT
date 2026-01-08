@@ -29,7 +29,6 @@ public class Author: Identifiable {
         self.image = image
     }
 
-//    https://commons.wikimedia.org/wiki/Special:FilePath/11exupery-inline1-500.jpg?width=56
     convenience init (entityDTO: EntityResultDTO) {
         let imageUrl: String? = if let img = entityDTO.image?["url"] { "\(Constant.imageBaseUrl)\(img)" } else { nil }
 

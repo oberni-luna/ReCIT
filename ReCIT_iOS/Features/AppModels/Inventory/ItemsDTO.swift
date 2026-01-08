@@ -18,6 +18,7 @@ struct ItemDTO: Codable {
     let _rev: String
     let entity: String
     let transaction: String
+    let details: String?
     let visibility: [String]?
     let owner: String
     let created: Double
@@ -34,4 +35,22 @@ struct EntitySnapshotDTO: Codable {
     let `entity:image`: String?
     let `entity:series`: String?
     let `entity:ordinal`: String?
+}
+
+//{
+//  "entity": "isbn:9782956690641",
+//  "details" : "Super livre que j'adore",
+//  "transaction": "inventorying",
+//  "visibility": [
+//    "friends",
+//    "groups"
+//  ],
+//  "shelves": []
+//}
+struct NewItemDTO: Codable {
+    let entity: String
+    let details: String
+    let transaction: String
+    let visibility: [String]
+    let shelves: [String]
 }

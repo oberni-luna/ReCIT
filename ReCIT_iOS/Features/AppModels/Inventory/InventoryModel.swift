@@ -68,9 +68,55 @@ class InventoryModel: ObservableObject {
         }
     }
 
-    func postNewItem(modelContext: ModelContext, entity: Edition, transaction: TransactionType, visibility: [VisibilityAttributes]) async throws {
+    func postNewItem(modelContext: ModelContext, entityUri: String, transaction: TransactionType, visibility: [VisibilityAttributes], forUser: User) async throws -> InventoryItem {
+        let payload = NewItemDTO(
+            entity: entityUri,
+            details: "",
+            transaction: transaction.rawValue,
+            visibility: visibility.map { $0.rawValue },
+            shelves: []
+        )
 
-        
+        guard let itemDTO: ItemDTO = try await apiService.post(toEndpoint: "/api/items?action=add", payload: payload) else {
+            throw NetworkError.badResponse
+        }
+
+        let newItem = InventoryItem(itemDTO: itemDTO, forUser: forUser, baseUrl: apiService.baseUrl())
+        modelContext.insert(newItem)
+        try modelContext.save()
+        return newItem
+    }
+
+    func searchEditions(query: String, lang: String? = "fr", limit: Int = 20, offset: Int = 0) async throws -> [SearchResult] {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedQuery.isEmpty == false else { return [] }
+
+        let encodedQuery = trimmedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? trimmedQuery
+        let language = lang ?? "fr"
+
+        let endpoint = "/api/search?types=humans|works&search=\(encodedQuery)&lang=\(language)&limit=\(limit)&offset=\(offset)&exact=false"
+        let response: SearchResultsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
+
+        return response?.results.map { result in
+            SearchResult(
+                id: result.id,
+                uri: result.uri,
+                title: result.label,
+                description: result.description,
+                imageUrl: absoluteImageUrl(result.image),
+                score: result.score ?? 0,
+                type: SearchResultType(rawValue: result.type) ?? .unknown
+            )
+        }
+        .sorted { $0.score > $1.score } ?? []
+    }
+
+    private func absoluteImageUrl(_ path: String?) -> String? {
+        guard let path else { return nil }
+        if path.hasPrefix("http") {
+            return path
+        }
+        return "\(apiService.baseUrl())\(path)"
     }
 
     private func getOrFetchAuthor(modelContext: ModelContext, uri: String) async throws -> Author? {

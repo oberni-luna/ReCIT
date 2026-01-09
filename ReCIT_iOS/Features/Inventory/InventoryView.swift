@@ -14,6 +14,7 @@ struct InventoryView: View {
 
     @State private var searchText: String = ""
     @State private var path: NavigationPath = .init()
+    @State private var isAddItemPresented: Bool = false
 
     let user: User
 
@@ -58,12 +59,15 @@ struct InventoryView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("add", systemImage: "plus") {
-                        //
+                        isAddItemPresented = true
                     }
                 }
             }
             .listStyle(.plain)
             .searchable(text: $searchText)
+            .sheet(isPresented: $isAddItemPresented) {
+                SearchView(user: user)
+            }
         }
     }
 }

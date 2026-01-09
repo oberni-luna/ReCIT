@@ -8,13 +8,13 @@
 import SwiftUI
 import SwiftData
 
-struct AddInventoryItemView: View {
+struct SearchView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
     @State private var searchText: String = ""
-    @State private var results: [EditionSearchResult] = []
+    @State private var results: [SearchResult] = []
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
     @State private var addingItemId: String?
@@ -68,7 +68,7 @@ struct AddInventoryItemView: View {
                     .padding(.vertical, 4)
                 }
             }
-            .navigationTitle("Ajouter un livre")
+            .navigationTitle("Search")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Fermer") {
@@ -103,7 +103,7 @@ struct AddInventoryItemView: View {
     }
 
     @MainActor
-    private func addToInventory(_ result: EditionSearchResult) async {
+    private func addToInventory(_ result: SearchResult) async {
         addingItemId = result.id
         errorMessage = nil
         do {

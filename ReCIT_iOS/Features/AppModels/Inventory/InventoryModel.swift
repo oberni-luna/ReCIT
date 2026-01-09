@@ -87,25 +87,28 @@ class InventoryModel: ObservableObject {
         return newItem
     }
 
-    func searchEditions(query: String, lang: String? = Locale.current.languageCode, limit: Int = 20, offset: Int = 0) async throws -> [EditionSearchResult] {
+    func searchEditions(query: String, lang: String? = "fr", limit: Int = 20, offset: Int = 0) async throws -> [SearchResult] {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedQuery.isEmpty == false else { return [] }
 
         let encodedQuery = trimmedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? trimmedQuery
         let language = lang ?? "fr"
 
-        let endpoint = "/api/search?types=editions&search=\(encodedQuery)&lang=\(language)&limit=\(limit)&offset=\(offset)&exact=false"
+        let endpoint = "/api/search?types=humans|works&search=\(encodedQuery)&lang=\(language)&limit=\(limit)&offset=\(offset)&exact=false"
         let response: SearchResultsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
 
         return response?.results.map { result in
-            EditionSearchResult(
+            SearchResult(
                 id: result.id,
                 uri: result.uri,
                 title: result.label,
                 description: result.description,
-                imageUrl: absoluteImageUrl(result.image)
+                imageUrl: absoluteImageUrl(result.image),
+                score: result.score ?? 0,
+                type: SearchResultType(rawValue: result.type) ?? .unknown
             )
-        } ?? []
+        }
+        .sorted { $0.score > $1.score } ?? []
     }
 
     private func absoluteImageUrl(_ path: String?) -> String? {

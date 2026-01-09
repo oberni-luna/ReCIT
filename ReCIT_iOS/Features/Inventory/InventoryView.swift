@@ -66,7 +66,7 @@ struct InventoryView: View {
             .listStyle(.plain)
             .searchable(text: $searchText)
             .sheet(isPresented: $isAddItemPresented) {
-                AddInventoryItemView(user: user)
+                SearchView(user: user)
             }
         }
     }

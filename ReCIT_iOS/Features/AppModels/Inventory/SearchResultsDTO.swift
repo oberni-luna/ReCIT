@@ -18,12 +18,5 @@ struct SearchResultDTO: Codable {
     let label: String
     let description: String?
     let image: String?
-}
-
-struct EditionSearchResult: Identifiable {
-    let id: String
-    let uri: String
-    let title: String
-    let description: String?
-    let imageUrl: String?
+    let score: CGFloat?
 }

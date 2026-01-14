@@ -39,17 +39,12 @@ struct SearchView: View {
 
                 ForEach(results) { result in
                     HStack(alignment: .top, spacing: 12) {
-                        CellThumbnail(imageUrl: result.imageUrl)
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(result.title)
-                                .font(.headline)
-                            if let description = result.description, !description.isEmpty {
-                                Text(description)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
+                        NavigationLink {
+                            SearchResultDetailView(result: result)
+                        } label: {
+                            SearchResultCell(result: result)
                         }
+                        .buttonStyle(.plain)
 
                         Spacer()
 

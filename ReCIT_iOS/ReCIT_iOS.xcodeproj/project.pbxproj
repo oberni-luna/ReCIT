@@ -80,6 +80,16 @@
 		09ACF44D2E5E07EB00D59BC0 /* Env.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		09F414562F194709000D3E4D /* Exceptions for "Components" folder in "ReCIT_iOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CachedAsyncImage.swift,
+			);
+			target = 094FD19B2E4A38D40023705A /* ReCIT_iOS */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		094FD1AE2E4A38D60023705A /* Tests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -93,6 +103,9 @@
 		};
 		098A641E2E573D140032185B /* Components */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				09F414562F194709000D3E4D /* Exceptions for "Components" folder in "ReCIT_iOS" target */,
+			);
 			path = Components;
 			sourceTree = "<group>";
 		};

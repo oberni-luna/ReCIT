@@ -47,18 +47,6 @@ struct SearchView: View {
                         .buttonStyle(.plain)
 
                         Spacer()
-
-                        if addingItemId == result.id {
-                            ProgressView()
-                        } else {
-                            Button("Ajouter") {
-                                Task {
-                                    await addToInventory(result)
-                                }
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.small)
-                        }
                     }
                     .padding(.vertical, 4)
                 }
@@ -66,7 +54,7 @@ struct SearchView: View {
             .navigationTitle("Search")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer") {
+                    Button("Fermer", systemImage: "xmark") {
                         dismiss()
                     }
                 }
@@ -95,24 +83,5 @@ struct SearchView: View {
             errorMessage = "Impossible de récupérer les résultats."
         }
         isLoading = false
-    }
-
-    @MainActor
-    private func addToInventory(_ result: SearchResult) async {
-        addingItemId = result.id
-        errorMessage = nil
-        do {
-            _ = try await inventoryModel.postNewItem(
-                modelContext: modelContext,
-                entityUri: result.uri,
-                transaction: .inventorying,
-                visibility: [.private],
-                forUser: user
-            )
-            dismiss()
-        } catch {
-            errorMessage = "Impossible d'ajouter ce livre à votre inventaire."
-        }
-        addingItemId = nil
     }
 }

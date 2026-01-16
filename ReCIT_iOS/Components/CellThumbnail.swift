@@ -9,6 +9,12 @@ import SwiftUI
 
 struct CellThumbnail: View {
     let imageUrl: String?
+    let cornerRadius: DesignSystem.CornerRadius
+
+    init(imageUrl: String?, cornerRadius: DesignSystem.CornerRadius = .medium) {
+        self.imageUrl = imageUrl
+        self.cornerRadius = cornerRadius
+    }
 
     var body: some View {
         Group {
@@ -19,7 +25,7 @@ struct CellThumbnail: View {
             }
         }
         .frame(width: 48, height: 48)
-        .clipShape(RoundedRectangle(cornerRadius: .medium))
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius ?? .medium))
     }
 }
 

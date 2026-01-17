@@ -20,26 +20,22 @@ struct EditionView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: .xSmall) {
+            VStack(alignment: .leading, spacing: .medium) {
+                EditionHeaderView(edition: edition)
+                    .padding(.horizontal, .medium)
 
-                EditionImage(imageUrl: edition.image, contentMode: .fit)
-                    .frame(maxHeight: 256)
-                    .clipped()
-
-                Text(edition.title)
-                    .font(.largeTitle)
-                    .bold()
-                if let subtitle = edition.subtitle {
-                    Text(subtitle)
-                        .font(.subheadline)
+                ScrollView(.horizontal) {
+                    HStack(spacing: .small) {
+                        ForEach(edition.items) { item in
+                            if let owner = item.owner {
+                                UserCellView(user: owner, description: "Dans l'inventaire de")
+                            }
+                        }
+                    }
+                    .padding(.horizontal, .medium)
                 }
 
-                Text(.init(edition.works.map { "**\($0.title)** : \($0.authors.map {$0.name}.joined(separator: ","))" }.joined(separator: "\n")))
-
-                addButton
-
             }
-            .padding()
         }
     }
 

@@ -59,9 +59,9 @@ private struct SearchResultDetailContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 if result.imageUrl != nil {
-                    EditionImage(imageUrl: result.imageUrl, contentMode: .fit)
-                        .frame(maxHeight: 260)
-                        .clipped()
+//                    EditionImage(imageUrl: result.imageUrl, contentMode: .fit)
+//                        .frame(maxHeight: 260)
+//                        .clipped()
                 }
 
                 Text(result.title)

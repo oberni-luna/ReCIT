@@ -11,7 +11,7 @@ public enum DesignSystem: Sendable {
     @MainActor
     public static func start() {
         setupFonts()
-        setupNavigationBar()
+//        setupNavigationBar()
         setupAlertTintColor()
     }
 

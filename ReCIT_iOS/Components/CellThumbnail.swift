@@ -18,14 +18,21 @@ struct CellThumbnail: View {
 
     var body: some View {
         Group {
-            if let imageUrl {
-                EditionImage(imageUrl: imageUrl, contentMode: .fill)
+            if let imageUrl, let url = URL(string: imageUrl) {
+                AsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    ProgressView()
+                }
             } else {
                 Color.surfaceDisable
             }
         }
         .frame(width: 48, height: 48)
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius ?? .medium))
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .shadow(color: .black.opacity(0.1), radius: 2)
     }
 }
 

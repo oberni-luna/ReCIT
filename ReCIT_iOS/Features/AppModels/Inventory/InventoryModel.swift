@@ -18,6 +18,13 @@ class InventoryModel: ObservableObject {
     }
 
     func syncInventory(forUser: User, modelContext: ModelContext) async throws {
+        print("## Sync user \(forUser.username)")
+        guard forUser.lastItemAdded > forUser.lastInventorySync else {
+            print("     -> no need to refresh")
+            return
+        }
+        print("     -> syncing... ")
+
         let result: InventoryResultDTO? = try await apiService.fetchData(fromEndpoint: "/api/items?action=inventory-view&user=\(forUser._id)")
         if let result {
             // synchroniser l'auteur et les oeuvres
@@ -64,6 +71,9 @@ class InventoryModel: ObservableObject {
                     }
                 }
             }
+
+            forUser.lastInventorySync = Date().timeIntervalSince1970 * 1000 // to get milliseconds
+
             try modelContext.save()
         }
     }

@@ -8,8 +8,8 @@
 import Foundation
 
 class APIService {
-    private let logQuery: Bool = true
-    private let logResponses: Bool = true
+    private let logQuery: Bool = false
+    private let logResponses: Bool = false
 
     private let session: URLSession
     private let env: Env

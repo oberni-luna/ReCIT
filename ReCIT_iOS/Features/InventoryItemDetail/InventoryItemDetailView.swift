@@ -20,24 +20,16 @@ struct InventoryItemDetailView: View {
     @ViewBuilder
     var itemContentView: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: .xSmall) {
-                if let invEntity = item.edition {
-                    EditionImage(imageUrl: invEntity.image, contentMode: .fit)
-                        .frame(maxHeight: 256)
-                        .clipped()
-
-                    Text(invEntity.title)
-                        .font(.largeTitle)
-                        .bold()
-                    if let subtitle = invEntity.subtitle {
-                        Text(subtitle)
-                            .font(.subheadline)
-                    }
-                    
-                    Text(.init(invEntity.works.map { "**\($0.title)** : \($0.authors.map {$0.name}.joined(separator: ","))" }.joined(separator: "\n")))
+            VStack(alignment: .leading, spacing: .medium) {
+                if let edition = item.edition {
+                    EditionHeaderView(edition: edition)
                 }
+                if let owner = item.owner {
+                    UserCellView(user: owner, description: "Owner")
+                }
+                
             }
-            .padding()
+            .padding(.horizontal, .medium)
         }
     }
 

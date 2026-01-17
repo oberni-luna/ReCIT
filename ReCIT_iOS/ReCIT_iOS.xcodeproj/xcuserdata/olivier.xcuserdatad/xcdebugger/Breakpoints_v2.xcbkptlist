@@ -7,38 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "675F74D3-2809-44A4-9DA7-FCB7A55AD01A"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Features/MainNavigation/RootView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "50"
-            endingLineNumber = "50"
-            landmarkName = "refreshUserData()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "B5215CFF-3575-41D9-853C-C2467B5336B7"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Features/MainNavigation/RootView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "62"
-            endingLineNumber = "62"
-            landmarkName = "refreshUserData()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "FC7EE1BC-116A-48B6-A1D4-C6D5BE8B2AC9"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -62,10 +30,190 @@
             filePath = "Features/AppModels/Inventory/InventoryModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "95"
-            endingLineNumber = "95"
+            startingLineNumber = "105"
+            endingLineNumber = "105"
             landmarkName = "searchEditions(query:lang:limit:offset:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "95B66E89-3F0C-4F42-8ADC-B12132730A6B"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Features/AppModels/Inventory/InventoryModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "22"
+            endingLineNumber = "22"
+            landmarkName = "syncInventory(forUser:modelContext:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "97C0DBF4-67BB-4723-A340-6D1F0AD90ADE"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Features/AppModels/User/UserModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "28"
+            endingLineNumber = "28"
+            landmarkName = "syncMyUser(modelContext:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "97C0DBF4-67BB-4723-A340-6D1F0AD90ADE - a2ef573d65bbe087"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(3) suspend resume partial function for ReCIT_iOS.UserModel.syncMyUser(modelContext: SwiftData.ModelContext) async throws -&gt; ()"
+                  moduleName = "ReCIT_iOS.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/User/UserModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "28"
+                  endingLineNumber = "28">
+               </Location>
+               <Location
+                  uuid = "97C0DBF4-67BB-4723-A340-6D1F0AD90ADE - a2ef573d65bbe087"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(3) suspend resume partial function for ReCIT_iOS.UserModel.syncMyUser(modelContext: SwiftData.ModelContext) async throws -&gt; ()"
+                  moduleName = "ReCIT_iOS.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/User/UserModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "28"
+                  endingLineNumber = "28">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C3D610BC-1FB7-448D-98E2-430A52A8F10B"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Features/AppModels/User/UserModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "24"
+            endingLineNumber = "24"
+            landmarkName = "syncMyUser(modelContext:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A1C93823-B08D-4A4A-9004-096FF551B6D8"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Features/MainNavigation/RootView+RefreshUserData.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "17"
+            endingLineNumber = "17"
+            landmarkName = "refreshUserData()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "A1C93823-B08D-4A4A-9004-096FF551B6D8 - fa6175dc569f23e8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(3) suspend resume partial function for closure #1 () async -&gt; () in ReCIT_iOS.RootView.refreshUserData() -&gt; ()"
+                  moduleName = "ReCIT_iOS.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/MainNavigation/RootView+RefreshUserData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "17"
+                  endingLineNumber = "17">
+               </Location>
+               <Location
+                  uuid = "A1C93823-B08D-4A4A-9004-096FF551B6D8 - fa6175dc569f23e8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(3) suspend resume partial function for closure #1 () async -&gt; () in ReCIT_iOS.RootView.refreshUserData() -&gt; ()"
+                  moduleName = "ReCIT_iOS.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/MainNavigation/RootView+RefreshUserData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "17"
+                  endingLineNumber = "17">
+               </Location>
+               <Location
+                  uuid = "A1C93823-B08D-4A4A-9004-096FF551B6D8 - c4c279e8f0df3fac"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(11) suspend resume partial function for closure #1 () async -&gt; () in ReCIT_iOS.RootView.refreshUserData() -&gt; ()"
+                  moduleName = "ReCIT_iOS.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/MainNavigation/RootView+RefreshUserData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "17"
+                  endingLineNumber = "17">
+               </Location>
+               <Location
+                  uuid = "A1C93823-B08D-4A4A-9004-096FF551B6D8 - 5909b40a5840f5aa"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(13) suspend resume partial function for closure #1 () async -&gt; () in ReCIT_iOS.RootView.refreshUserData() -&gt; ()"
+                  moduleName = "ReCIT_iOS.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/MainNavigation/RootView+RefreshUserData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "17"
+                  endingLineNumber = "17">
+               </Location>
+               <Location
+                  uuid = "A1C93823-B08D-4A4A-9004-096FF551B6D8 - 232d0e5cf43950a9"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(14) suspend resume partial function for closure #1 () async -&gt; () in ReCIT_iOS.RootView.refreshUserData() -&gt; ()"
+                  moduleName = "ReCIT_iOS.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/MainNavigation/RootView+RefreshUserData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "17"
+                  endingLineNumber = "17">
+               </Location>
+               <Location
+                  uuid = "A1C93823-B08D-4A4A-9004-096FF551B6D8 - b774bafe5daa0e97"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(16) suspend resume partial function for closure #1 () async -&gt; () in ReCIT_iOS.RootView.refreshUserData() -&gt; ()"
+                  moduleName = "ReCIT_iOS.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/MainNavigation/RootView+RefreshUserData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "17"
+                  endingLineNumber = "17">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

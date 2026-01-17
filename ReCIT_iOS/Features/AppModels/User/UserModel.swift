@@ -21,12 +21,29 @@ class UserModel: ObservableObject {
     func syncMyUser(modelContext: ModelContext) async throws {
         let userDTO: UserDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/user")
         if let userDTO {
-            let mySyncedUser = User(userDTO: userDTO)
-            modelContext.insert(mySyncedUser)
-            self.myUser = mySyncedUser
+            let mySyncedUser = User(userDTO: userDTO, baseUrl: fetchDataService.baseUrl())
+            let user = try getLocalUser(modelContext: modelContext, _id: mySyncedUser._id)
+
+            if let user {
+                user.update(with: mySyncedUser)
+                myUser = user
+            } else {
+                modelContext.insert(mySyncedUser)
+                myUser = mySyncedUser
+            }
+
+            try modelContext.save()
         } else {
             throw NetworkError.badResponse
         }
+    }
+
+    private func getLocalUser(modelContext: ModelContext, _id: String) throws -> User? {
+        let predicate = #Predicate<User> { object in
+            object._id == _id
+        }
+        let descriptor = FetchDescriptor(predicate: predicate)
+        return try modelContext.fetch(descriptor).first
     }
 
     func syncOtherUser(modelContext: ModelContext, userIds: [String]) async throws {
@@ -37,26 +54,35 @@ class UserModel: ObservableObject {
 
         guard let users = usersDTO?.users, !users.isEmpty else { return }
 
-        for user in users {
-            let otherUser = User(userDTO: user.value)
-            modelContext.insert(otherUser)
+        for userDTO in users {
+            let otherUser = User(userDTO: userDTO.value, baseUrl: fetchDataService.baseUrl())
+            let user = try getLocalUser(modelContext: modelContext, _id: otherUser._id)
+
+            if let user {
+                user.update(with: otherUser)
+            } else {
+                modelContext.insert(otherUser)
+            }
         }
+        try modelContext.save()
     }
 
     func syncUserNetwork(modelContext: ModelContext) async throws {
+        guard let myUser else { return }
+
         let userNetwork: UserNetworkDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/relations")
         guard let userNetwork else { return }
-
-        let userIds = Array(Set(userNetwork.network))
+        
+        let userIds = Array(Set(userNetwork.network).filter { $0 != myUser._id })
         if userIds.isEmpty { return }
-
+        
         try await syncOtherUser(modelContext: modelContext, userIds: userIds)
     }
 
-    func getAllUsers(modelContext: ModelContext) -> [User] {
+    func getAllOtherUsers(modelContext: ModelContext) -> [User] {
         do {
             let data = try modelContext.fetch(FetchDescriptor<User>())
-            return data
+            return data.filter { $0._id != myUser?._id }
         } catch {
             return []
         }

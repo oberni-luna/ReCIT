@@ -9,7 +9,7 @@ import Foundation
 
 struct ItemCountDTO: Codable {
     let `items:count`: Int
-    let `items:last-add`: Int?
+    let `items:last-add`: Double?
 }
 
 struct UserDTO: Codable {
@@ -20,7 +20,11 @@ struct UserDTO: Codable {
     let position: [Double]?
     let picture: String?
     let language: String?
+    let snapshot: [String:ItemCountDTO]?
 }
+
+//"snapshot": {
+//                "network": {
 
 struct UsersDTO: Codable {
     let users: [String: UserDTO]

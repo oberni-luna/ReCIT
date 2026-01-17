@@ -11,10 +11,10 @@ import SwiftData
 struct RootView: View {
     @EnvironmentObject var authModel: AuthModel
 
-    @StateObject private var userModel: UserModel = .init()
-    @StateObject private var listModel: ListModel = .init()
-    @StateObject private var inventoryModel: InventoryModel = .init()
-    @StateObject private var entityModel: EntityModel = .init()
+    @StateObject var userModel: UserModel = .init()
+    @StateObject var listModel: ListModel = .init()
+    @StateObject var inventoryModel: InventoryModel = .init()
+    @StateObject var entityModel: EntityModel = .init()
 
     @Environment(\.modelContext) var modelContext
 
@@ -43,30 +43,7 @@ struct RootView: View {
             }
     }
 
-    func refreshUserData() {
-        Task {
-            if authModel.isAuthenticated {
-                do {
-                    try await userModel.syncMyUser(modelContext: modelContext)
-
-                    if let myUser = userModel.myUser {
-                        try await userModel.clearUserData(modelContext: modelContext)
-                        try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext)
-
-                        try await userModel.syncUserNetwork(modelContext: modelContext)
-
-                        for user in userModel.getAllUsers(modelContext: modelContext) {
-                            try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
-                        }
-//                        try await inventoryModel.syncItems(forUser: myUser, modelContext: modelContext)
-                        try await listModel.syncLists(forUser: myUser, modelContext: modelContext)
-                    }
-                } catch {
-                    print("⚠️⚠️⚠️⚠️⚠️ Error during user sync: \(error)")
-                }
-            }
-        }
-    }
+    
 }
 
 //#Preview {

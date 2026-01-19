@@ -38,7 +38,7 @@ public final class InventoryItem{
 
     convenience init(itemDTO: ItemDTO, forUser: User, baseUrl: String) {
         let updatedDate: Date? = if let updated = itemDTO.updated {
-            Date(timeIntervalSince1970: updated)
+            Date(timeIntervalSince1970: updated / 1000)
         } else {
             nil
         }
@@ -49,7 +49,7 @@ public final class InventoryItem{
             transaction: TransactionType(rawValue: itemDTO.transaction) ?? .inventorying,
             visibility: itemDTO.visibility?.compactMap { VisibilityAttributes(rawValue: $0) ?? .private } ?? [],
             ownerId: itemDTO.owner,
-            created: Date(timeIntervalSince1970: itemDTO.created),
+            created: Date(timeIntervalSince1970: itemDTO.created / 1000),
             updated: updatedDate,
             busy: itemDTO.busy,
             details: itemDTO.details,

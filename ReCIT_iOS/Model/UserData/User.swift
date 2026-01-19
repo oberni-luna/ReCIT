@@ -22,16 +22,18 @@ public class User: Identifiable, Equatable {
     var position: Coordinates?
     var avatarURLValue: String?
     var lastItemAdded: Double = 0
+    var itemCount: Int = 0
     var lastInventorySync: Double = 0
     @Relationship(deleteRule: .cascade, inverse: \InventoryItem.owner) var items: [InventoryItem] = []
 
-    init(_id: String, _rev: String, username: String, email: String?, position: Coordinates?, avatarURLValue: String?, lastItemAdded: Double = 0) {
+    init(_id: String, _rev: String, username: String, email: String?, position: Coordinates?, avatarURLValue: String?, itemCount: Int, lastItemAdded: Double = 0) {
         self._id = _id
         self._rev = _rev
         self.username = username
         self.email = email
         self.position = position
         self.avatarURLValue = avatarURLValue
+        self.itemCount = itemCount
         self.lastItemAdded = lastItemAdded
     }
 
@@ -47,6 +49,7 @@ public class User: Identifiable, Equatable {
             self.email = user.email
             self.position = user.position
             self.avatarURLValue = user.avatarURLValue
+            self.itemCount = user.itemCount
             self.lastItemAdded = user.lastItemAdded
         }
     }
@@ -63,6 +66,7 @@ public class User: Identifiable, Equatable {
             email: userDTO.email,
             position: position,
             avatarURLValue: userDTO.picture != nil ? "\(baseUrl)\(userDTO.picture ?? "")" : nil,
+            itemCount: userDTO.snapshot?.values.map { $0.`items:count` }.max() ?? 0,
             lastItemAdded: userDTO.snapshot?.values.map { $0.`items:last-add` ?? 0 }.max() ?? 0
         )
     }

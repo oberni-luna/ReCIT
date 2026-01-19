@@ -16,6 +16,7 @@ struct MainTabView: View {
         case community
         case inventory
         case transactions
+        case lists
         case settings
 
         // Use for dev in order to hide tab on progress for exemple
@@ -26,8 +27,10 @@ struct MainTabView: View {
             case .inventory:
                 false
             case .transactions:
-                false
+                true
             case .settings:
+                false
+            case .lists:
                 false
             }
         }
@@ -42,6 +45,8 @@ struct MainTabView: View {
                 "arrow.left.arrow.right"
             case .settings:
                 "gearshape"
+            case .lists:
+                "list.bullet"
             }
         }
 
@@ -55,6 +60,8 @@ struct MainTabView: View {
                 "Transactions"
             case .settings:
                 "Settings"
+            case .lists:
+                "Lists"
             }
         }
     }
@@ -64,19 +71,19 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             ForEach(TabConfig.allCases, id: \.self) { tabConfig in
+                if !tabConfig.isHidden {
+                    let symbolVariant: SymbolVariants = (selectedTab == tabConfig ? .fill : .none)
 
-                let symbolVariant: SymbolVariants = (selectedTab == tabConfig ? .fill : .none)
-
-                Tab(value: tabConfig) {
-                    view(for: tabConfig)
-                        .navigationTitle(tabConfig.title)
-                } label: {
-                    Label {
-                        Text(tabConfig.title)
-                    } icon: {
-                        Image(systemName: tabConfig.systemIcon)
+                    Tab(value: tabConfig) {
+                        view(for: tabConfig)
+                    } label: {
+                        Label {
+                            Text(tabConfig.title)
+                        } icon: {
+                            Image(systemName: tabConfig.systemIcon)
+                        }
+                        .environment(\.symbolVariants, symbolVariant)
                     }
-                    .environment(\.symbolVariants, symbolVariant)
                 }
             }
         }
@@ -104,6 +111,9 @@ private extension MainTabView {
             ProfileView()
                 .navigationTitle("Réglages")
                 .navigationBarTitleDisplayMode(.inline)
+        case .lists:
+            EntityListView()
+                .navigationTitle("Listes")
         }
     }
 }

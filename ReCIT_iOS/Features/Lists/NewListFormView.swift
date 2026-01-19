@@ -17,7 +17,7 @@ struct NewListFormView: View {
     @State private var type: EntityListType = .work
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        NavigationStack {
             Form {
                 Section {
                     Picker("Type", selection: $type) {
@@ -26,12 +26,12 @@ struct NewListFormView: View {
                         }
                     }
                 }
-
+                
                 Section {
                     TextField("Name", text: $name)
                     TextEditor(text: $description)
                 }
-
+                
                 Section {
                     AsyncButton(action: {
                         do {
@@ -53,8 +53,15 @@ struct NewListFormView: View {
                     })
                 }
             }
+            .navigationTitle("Create new list")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Fermer", systemImage: "xmark") {
+                        dismiss()
+                    }
+                }
+            }
         }
-        .navigationTitle("Create new list")
     }
 }
 

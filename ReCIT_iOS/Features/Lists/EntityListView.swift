@@ -42,7 +42,7 @@ struct EntityListView: View {
                 }
             }
             .navigationDestination(for: EntityList.self) { list in
-                
+                Text("Detail for list \(list.name)")
             }
             .navigationTitle("📋 Lists")
             .toolbar {

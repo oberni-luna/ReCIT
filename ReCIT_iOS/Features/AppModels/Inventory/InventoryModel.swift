@@ -97,7 +97,7 @@ class InventoryModel: ObservableObject {
         return newItem
     }
 
-    func searchEditions(query: String, lang: String? = "fr", limit: Int = 20, offset: Int = 0) async throws -> [SearchResult] {
+    func searchEntity(query: String, lang: String? = "fr", limit: Int = 20, offset: Int = 0) async throws -> [SearchResult] {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedQuery.isEmpty == false else { return [] }
 

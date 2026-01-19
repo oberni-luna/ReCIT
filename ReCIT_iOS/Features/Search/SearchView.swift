@@ -78,7 +78,7 @@ struct SearchView: View {
         isLoading = true
         errorMessage = nil
         do {
-            results = try await inventoryModel.searchEditions(query: trimmedQuery)
+            results = try await inventoryModel.searchEntity(query: trimmedQuery)
         } catch {
             errorMessage = "Impossible de récupérer les résultats."
         }

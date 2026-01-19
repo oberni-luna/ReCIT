@@ -121,6 +121,68 @@ class InventoryModel: ObservableObject {
         .sorted { $0.score > $1.score } ?? []
     }
 
+
+    func searchWorkEditions(workUri: String) {
+        //    https://inventaire.io/api/entities?action=reverse-claims&property=wdt:P629&value=inv:b783fb2ed94e3267444fc38708890cfd&refresh=false
+
+//        {"uris":["isbn:9782915173802"]}
+//        https://inventaire.io/api/entities?action=by-uris&uris=isbn:9782368467701|isbn:9782368463291|isbn:9782368465394&autocreate=true
+    }
+
+    func searchAuthorWorks(authorUri: String) {
+//        https://inventaire.io/api/entities?action=author-works&uri=wd:Q47091793&refresh=false
+
+//        {
+//            "series": [
+//                {
+//                    "uri": "wd:Q93132238",
+//                    "score": 110
+//                }
+//            ],
+//            "works": [
+//                {
+//                    "uri": "wd:Q93132243",
+//                    "date": "2017-03-01",
+//                    "serie": "wd:Q93132238",
+//                    "score": 46
+//                },
+//                {
+//                    "uri": "wd:Q93132249",
+//                    "score": 31
+//                },
+//                {
+//                    "uri": "wd:Q93132245",
+//                    "date": "2020",
+//                    "serie": "wd:Q93132238",
+//                    "score": 30
+//                },
+//                {
+//                    "uri": "wd:Q93132244",
+//                    "date": "2018",
+//                    "serie": "wd:Q93132238",
+//                    "score": 29
+//                },
+//                {
+//                    "uri": "inv:07290adaec17bf3f57847accdb196f67",
+//                    "score": 25
+//                },
+//                {
+//                    "uri": "inv:ca64a84ce0844d9109d0c11fc20e4efc",
+//                    "score": 13
+//                },
+//                {
+//                    "uri": "inv:108f2010fdf8994bdc604ba198376e0a",
+//                    "score": 11
+//                },
+//                {
+//                    "uri": "inv:399a754013f1f364e6c06eb766797c05",
+//                    "score": 1
+//                }
+//            ],
+//            "articles": []
+//        }
+    }
+
     private func absoluteImageUrl(_ path: String?) -> String? {
         guard let path else { return nil }
         if path.hasPrefix("http") {

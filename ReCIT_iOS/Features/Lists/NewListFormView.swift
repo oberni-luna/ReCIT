@@ -31,25 +31,28 @@ struct NewListFormView: View {
                     TextField("Name", text: $name)
                     TextEditor(text: $description)
                 }
-            }
-            AsyncButton(action: {
-                do {
-                    try await listModel.createList(
-                        modelContext: modelContext,
-                        name: name,
-                        description: description,
-                        type: type.rawValue,
-                        visibility: []
-                    )
-                    dismiss()
-                } catch {
-                    print(error)
+
+                Section {
+                    AsyncButton(action: {
+                        do {
+                            try await listModel.createList(
+                                modelContext: modelContext,
+                                name: name,
+                                description: description,
+                                type: type.rawValue,
+                                visibility: []
+                            )
+                            dismiss()
+                        } catch {
+                            print(error)
+                        }
+                    },
+                                actionOptions: [.showProgressView],
+                                label: {
+                        Text("Submit")
+                    })
                 }
-            },
-                        actionOptions: [.showProgressView],
-                        label: {
-                Text("Submit")
-            })
+            }
         }
         .navigationTitle("Create new list")
     }

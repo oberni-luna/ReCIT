@@ -7,7 +7,7 @@
 
 import CoreFoundation
 
-struct SearchResult: Identifiable {
+struct SearchResult: Identifiable, Hashable {
     let id: String
     let uri: String
     let title: String

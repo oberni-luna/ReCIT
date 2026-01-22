@@ -29,21 +29,17 @@ class InventoryModel: ObservableObject {
         if let result {
             // synchroniser l'auteur et les oeuvres
             for author in result.worksTree.author.keys {
-                let authorWorks = result.worksTree.author[author] ?? []
-                let uris = "\(authorWorks.joined(separator: "|"))"
-                let url = "/api/entities?uris=\(uris)&action=by-uris&attributes=info&attributes=labels&attributes=descriptions&attributes=image&attributes=claims" //attributes=sitelinks&
-                let worksDTO: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: url)
-
-                guard let workDTOs = worksDTO?.entities else { continue }
+                guard let authorWorks = result.worksTree.author[author] else { continue }
+                guard let workDTOs = try? await fetchEntities(modelContext: modelContext, uri: authorWorks) else { continue }
 
                 if author == InventoryModel.unkownAuthorId {
                     for work in workDTOs {
-                        modelContext.insert(Work(entityDTO: work.value, authors: []))
+                        modelContext.insert(Work(entityDTO: work, authors: []))
                     }
                 } else {
                     guard let authorModel = try await getOrFetchAuthor(modelContext: modelContext, uri: author) else { continue }
                     for work in workDTOs {
-                        authorModel.works.append(Work(entityDTO: work.value, authors: [authorModel]))
+                        authorModel.works.append(Work(entityDTO: work, authors: [authorModel]))
                     }
                     modelContext.insert(authorModel)
                 }
@@ -142,8 +138,11 @@ class InventoryModel: ObservableObject {
         guard let path else { return nil }
         if path.hasPrefix("http") {
             return path
+        } else if path.hasPrefix("/img") {
+            return "\(apiService.baseUrl())\(path)"
+        } else {
+            return "https://commons.wikimedia.org/wiki/Special:FilePath/\(path)?width=200"
         }
-        return "\(apiService.baseUrl())\(path)"
     }
 
     func getOrFetchWorks(modelContext: ModelContext, uris: [String]) async throws -> [Work]? {
@@ -191,22 +190,47 @@ class InventoryModel: ObservableObject {
 
     func getOrFetchEditions(modelContext: ModelContext, uris: [String]) async throws -> [Edition]? {
 
-        guard let editionsDto = try await fetchEntities(modelContext: modelContext, uri: uris) else {
-            return nil
+        var editions: [Edition] = []
+        var urisToFetch: [String] = []
+        for uri in uris {
+            if let edition = try? getLocalEdition(modelContext: modelContext, uri: uri) {
+                editions.append(edition)
+            } else {
+                urisToFetch.append(uri)
+            }
         }
 
-        return  editionsDto.compactMap { editionDto in
-            Edition(entityDto: editionDto, baseUrl: apiService.baseUrl())
+        guard let editionsDto = try await fetchEntities(modelContext: modelContext, uri: urisToFetch) else {
+            return editions
         }
+
+        editions.append(contentsOf: editionsDto.compactMap { editionDto in
+            Edition(entityDto: editionDto, baseUrl: apiService.baseUrl())
+        })
+
+        return editions
+    }
+
+    func getLocalEdition(modelContext: ModelContext, uri: String) throws -> Edition? {
+        let predicate = #Predicate<Edition> { object in
+            object.uri == uri
+        }
+        let descriptor = FetchDescriptor(predicate: predicate)
+        return try modelContext.fetch(descriptor).first
     }
 
     private func fetchEntities(modelContext: ModelContext, uri: [String]) async throws -> [EntityResultDTO]? {
+            var results: [EntityResultDTO] = []
 
-        let entityUrl: String = "/api/entities?action=by-uris&uris=\(uri.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
-        let resultsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: entityUrl)
+            for uriBatch in uri.splitInSubArrays(of: 50) {
+                let entityUrl: String = "/api/entities?action=by-uris&uris=\(uriBatch.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
+                let resultsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: entityUrl)
 
-        return resultsDto.map { Array($0.entities.values) }
-    }
+                results.append(contentsOf: resultsDto.map { Array($0.entities.values) } ?? [])
+            }
+
+            return results
+        }
 
     private func getLocalWork(modelContext: ModelContext, uri: String) throws -> Work? {
         let predicate = #Predicate<Work> { object in

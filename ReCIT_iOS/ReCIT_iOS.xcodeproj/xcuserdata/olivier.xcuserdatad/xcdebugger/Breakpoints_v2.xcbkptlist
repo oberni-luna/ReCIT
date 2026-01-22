@@ -23,32 +23,32 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "A5495FE0-BAEC-4F32-9F34-641BF0EE897E"
+            uuid = "64EBB7E1-2C96-4ADC-A724-E5F058A0789D"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Features/AppModels/Inventory/InventoryModel.swift"
+            filePath = "Model/Books/Work.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "150"
-            endingLineNumber = "150"
-            landmarkName = "getOrFetchWorks(modelContext:uris:)"
+            startingLineNumber = "42"
+            endingLineNumber = "42"
+            landmarkName = "init(entityDTO:authors:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "BA4F7833-408F-4ABB-B3BD-5AEB26312586"
+            uuid = "227FD520-C37B-416D-B787-365320CDD4DC"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Features/AppModels/Inventory/InventoryModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "136"
-            endingLineNumber = "136"
-            landmarkName = "getWorkEdition(modelContext:work:)"
+            startingLineNumber = "138"
+            endingLineNumber = "138"
+            landmarkName = "absoluteImageUrl(_:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

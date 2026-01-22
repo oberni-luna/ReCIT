@@ -21,7 +21,7 @@ struct AuthorResultDetailView: View {
 
     @State private var state: ViewState = .loadingAuthor
 
-    let result: SearchResult
+    let authorUri: String
     @Binding var path: NavigationPath
 
     var body: some View {
@@ -65,7 +65,7 @@ struct AuthorResultDetailView: View {
                         if !work.title.isEmpty {
                             let result:SearchResult = SearchResult(id: work.uri, uri: work.uri, title: work.title, description: work.subtitle, imageUrl: work.image, score: 0, type: .works)
                             Button {
-                                path.append(result)
+                                path.append(EntityDestination.work(uri: work.uri))
                             } label: {
                                 SearchResultCell(result: result)
                             }
@@ -84,7 +84,7 @@ struct AuthorResultDetailView: View {
     @MainActor
     private func fetchAuthor() async {
         do {
-            if let author = try await inventoryModel.getOrFetchAuthor(modelContext: modelContext, uri: result.uri) {
+            if let author = try await inventoryModel.getOrFetchAuthor(modelContext: modelContext, uri: authorUri) {
                 self.state = .loadingWorks(author: author)
             } else {
                 self.state = .error(error: NSError(domain: "No author", code: 0, userInfo: nil))

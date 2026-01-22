@@ -21,7 +21,7 @@ struct WorkResultDetailView: View {
 
     @State private var state: ViewState = .loadingWork
 
-    let result: SearchResult
+    let workUri: String
     @Binding var path: NavigationPath
 
     var body: some View {
@@ -78,7 +78,7 @@ struct WorkResultDetailView: View {
     @MainActor
     private func fetchWork() async {
         do {
-            if let work = try await inventoryModel.getOrFetchWork(modelContext: modelContext, uri: result.uri) {
+            if let work = try await inventoryModel.getOrFetchWork(modelContext: modelContext, uri: workUri) {
                 self.state = .loadingEditions(work: work)
             } else {
                 self.state = .error(error: NSError(domain: "No work", code: 0, userInfo: nil))
@@ -93,7 +93,7 @@ struct WorkResultDetailView: View {
         do {
             switch state {
             case .loadingEditions(work: let work):
-                if let editions = try await inventoryModel.getWorkEdition(modelContext: modelContext, work: work) {
+                if let editions = try await inventoryModel.getWorkEditions(modelContext: modelContext, work: work) {
                     self.state = .loaded(work: work, editions: editions)
                 } else {
                     self.state = .error(error: NSError(domain: "No works", code: 0, userInfo: nil))

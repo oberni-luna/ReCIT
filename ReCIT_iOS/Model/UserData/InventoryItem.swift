@@ -47,7 +47,7 @@ public final class InventoryItem{
             _id: itemDTO._id,
             _rev: itemDTO._rev,
             transaction: TransactionType(rawValue: itemDTO.transaction) ?? .inventorying,
-            visibility: itemDTO.visibility?.compactMap { VisibilityAttributes(rawValue: $0) ?? .private } ?? [],
+            visibility: itemDTO.visibility?.compactMap { VisibilityAttributes(rawValue: $0) } ?? [],
             ownerId: itemDTO.owner,
             created: Date(timeIntervalSince1970: itemDTO.created / 1000),
             updated: updatedDate,

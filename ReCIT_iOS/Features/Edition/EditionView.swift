@@ -14,6 +14,11 @@ struct EditionView: View {
     @Environment(\.dismiss) private var dismiss
     
     let edition: Edition
+    @Binding var path: NavigationPath
+
+    var inMyInventory: Bool {
+        edition.items.first(where: { item in item.owner?.id == userModel.myUser?.id }) != nil
+    }
 
     @State private var errorMessage: String?
     @State private var addingItem: Bool = false
@@ -35,6 +40,25 @@ struct EditionView: View {
                     .padding(.horizontal, .medium)
                 }
 
+                if !inMyInventory {
+                    addButton
+                        .padding(.horizontal, .medium)
+                }
+
+                ScrollView(.horizontal) {
+                    HStack(spacing: .small) {
+                        ForEach(edition.works) { work in
+                            Button {
+                                path.append(EntityDestination.work(uri: work.uri))
+                            } label: {
+                                Text(work.title)
+                            }
+                            .frame(maxWidth: 150)
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                    .padding(.horizontal, .medium)
+                }
             }
         }
     }
@@ -50,7 +74,7 @@ struct EditionView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(.small)
+            .controlSize(.large)
         }
     }
 
@@ -68,7 +92,7 @@ struct EditionView: View {
                 modelContext: modelContext,
                 entityUri: edition.uri,
                 transaction: .inventorying,
-                visibility: [.private],
+                visibility: [.friends],
                 forUser: user
             )
             dismiss()

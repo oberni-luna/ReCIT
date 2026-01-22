@@ -9,7 +9,7 @@ import Foundation
 
 class APIService {
     private let logQuery: Bool = false
-    private let logResponses: Bool = true
+    private let logResponses: Bool = false
 
     private let session: URLSession
     private let env: Env
@@ -38,7 +38,7 @@ class APIService {
 
             guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
 
-            guard response.statusCode >= 200 && response.statusCode < 300 else { throw NetworkError.badStatus }
+            guard response.statusCode >= 200 && response.statusCode < 300 else { throw NetworkError.badStatus(message: response.debugDescription) }
 
             guard let decodedResponse = try? JSONDecoder().decode(U.self, from: responseData) else { throw NetworkError.failedToDecodeResponse }
 
@@ -47,8 +47,8 @@ class APIService {
             print("There was an error creating the URL")
         } catch NetworkError.badResponse {
             print("Did not get a valid response")
-        } catch NetworkError.badStatus {
-            print("Did not get a 2xx status code from the response")
+        } catch NetworkError.badStatus(let message) {
+            print("Did not get a 2xx status code from the response \(message)")
         } catch NetworkError.failedToDecodeResponse {
             print("Failed to decode response into the given type")
         } catch {
@@ -79,7 +79,7 @@ class APIService {
             }
 
             guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
-            guard response.statusCode >= 200 && response.statusCode < 300 else { throw NetworkError.badStatus }
+            guard response.statusCode >= 200 && response.statusCode < 300 else { throw NetworkError.badStatus(message: response.statusCode.description) }
             let decodedResponse = try JSONDecoder().decode(T.self, from: data)
             return decodedResponse
         } catch NetworkError.badUrl {

@@ -51,7 +51,7 @@ public final class EntityList {
             name: listDTO.name,
             created: Date(timeIntervalSince1970: listDTO.created),
             updated: updatedDate,
-            visibility: listDTO.visibility.compactMap { VisibilityAttributes(rawValue: $0) ?? .private },
+            visibility: listDTO.visibility.compactMap { VisibilityAttributes(rawValue: $0) },
             elements: [],
             type: EntityListType(rawValue: listDTO.type) ?? .work
         )

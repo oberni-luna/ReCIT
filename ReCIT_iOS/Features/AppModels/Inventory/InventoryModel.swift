@@ -78,12 +78,13 @@ class InventoryModel: ObservableObject {
         let payload = NewItemDTO(
             entity: entityUri,
             details: "",
+            notes: "",
             transaction: transaction.rawValue,
             visibility: visibility.map { $0.rawValue },
             shelves: []
         )
 
-        guard let itemDTO: ItemDTO = try await apiService.post(toEndpoint: "/api/items?action=add", payload: payload) else {
+        guard let itemDTO: ItemDTO = try await apiService.post(toEndpoint: "/api/items", payload: payload) else {
             throw NetworkError.badResponse
         }
 
@@ -91,6 +92,19 @@ class InventoryModel: ObservableObject {
         modelContext.insert(newItem)
         try modelContext.save()
         return newItem
+    }
+
+    func removeItem( _ item: InventoryItem, modelContext: ModelContext) async throws {
+        let payload:[String:[String]] = ["ids":[item._id]]
+
+        guard let ok: [String: Bool] = try await apiService.post(toEndpoint: "/api/items?action=delete-by-ids", payload: payload) else {
+            throw NetworkError.badResponse
+        }
+
+        if let ok: Bool = ok["ok"], ok == true {
+            modelContext.delete(item)
+            try modelContext.save()
+        }
     }
 
     func searchEntity(query: String, lang: String? = "fr", limit: Int = 20, offset: Int = 0) async throws -> [SearchResult] {
@@ -125,7 +139,7 @@ class InventoryModel: ObservableObject {
         return try? await getOrFetchWorks(modelContext: modelContext, uris: authorWorkDTO.map(\.uri) )
     }
 
-    func getWorkEdition(modelContext: ModelContext, work: Work) async throws -> [Edition]? {
+    func getWorkEditions(modelContext: ModelContext, work: Work) async throws -> [Edition]? {
         let endpoint = "/api/entities?action=reverse-claims&property=wdt:P629&value=\(work.uri)&refresh=false"
         let response: WorkEditionsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
 
@@ -147,7 +161,17 @@ class InventoryModel: ObservableObject {
 
     func getOrFetchWorks(modelContext: ModelContext, uris: [String]) async throws -> [Work]? {
 
-        guard let worksDto = try await fetchEntities(modelContext: modelContext, uri: uris) else {
+        var works: [Work] = []
+        var urisToFetch: [String] = []
+        for uri in uris {
+            if let work = try? getLocalWork(modelContext: modelContext, uri: uri) {
+                works.append(work)
+            } else {
+                urisToFetch.append(uri)
+            }
+        }
+
+        guard let worksDto = try await fetchEntities(modelContext: modelContext, uri: urisToFetch) else {
             return nil
         }
 

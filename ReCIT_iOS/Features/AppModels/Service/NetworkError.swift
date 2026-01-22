@@ -11,7 +11,7 @@ enum NetworkError: Error {
     case badUrl
     case invalidRequest
     case badResponse
-    case badStatus
+    case badStatus(message: String)
     case failedToDecodeResponse
 }
 

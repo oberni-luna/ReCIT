@@ -10,10 +10,12 @@ import SwiftUI
 struct CellThumbnail: View {
     let imageUrl: String?
     let cornerRadius: DesignSystem.CornerRadius
+    let size: CGFloat
 
-    init(imageUrl: String?, cornerRadius: DesignSystem.CornerRadius = .medium) {
+    init(imageUrl: String?, cornerRadius: DesignSystem.CornerRadius = .medium, size:CGFloat = 48) {
         self.imageUrl = imageUrl
         self.cornerRadius = cornerRadius
+        self.size = size
     }
 
     var body: some View {
@@ -30,7 +32,7 @@ struct CellThumbnail: View {
                 Color.surfaceDisable
             }
         }
-        .frame(width: 48, height: 48)
+        .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         .shadow(color: .black.opacity(0.1), radius: 2)
     }

@@ -26,12 +26,12 @@ struct NewListFormView: View {
                         }
                     }
                 }
-                
+
                 Section {
                     TextField("Name", text: $name)
                     TextEditor(text: $description)
                 }
-                
+
                 Section {
                     AsyncButton(action: {
                         do {
@@ -47,10 +47,11 @@ struct NewListFormView: View {
                             print(error)
                         }
                     },
-                                actionOptions: [.showProgressView],
-                                label: {
+                    actionOptions: [.showProgressView],
+                    label: {
                         Text("Submit")
                     })
+                    .buttonStyle(.glassProminent)
                 }
             }
             .navigationTitle("Create new list")

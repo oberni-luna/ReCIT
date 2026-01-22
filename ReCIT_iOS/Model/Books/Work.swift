@@ -14,6 +14,7 @@ public class Work: Identifiable {
     var lastrevid: Int
 
     var title: String
+    var subtitle: String?
     var originalLang: String?
     var image: String?
     var publicationDate: Date?
@@ -21,7 +22,7 @@ public class Work: Identifiable {
     @Relationship(inverse: \Author.works) var authors: [Author] = []
     @Relationship(inverse: \Edition.works) var editions: [Edition] = []
 
-    init (uri: String, lastrevid: Int, title: String, originalLang: String? = nil, image: String? = nil, publicationDate: Date? = nil, authors: [Author] = [], editions: [Edition] = []) {
+    init (uri: String, lastrevid: Int, title: String, originalLang: String? = nil, image: String? = nil, publicationDate: Date? = nil, authors: [Author] = [], editions: [Edition] = [], subtitle: String? = nil) {
         self.uri = uri
         self.lastrevid = lastrevid
         self.title = title
@@ -30,20 +31,24 @@ public class Work: Identifiable {
         self.publicationDate = publicationDate
         self.authors = authors
         self.editions = editions
+        self.subtitle = subtitle
     }
 
     convenience init (entityDTO: EntityResultDTO, authors: [Author]) {
         let imageUrl: String? = if let img = entityDTO.image?["url"] { "\(Constant.imageBaseUrl)\(img)" } else { nil }
 
+        let publicationDateString: String? = entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.getStringValue()
+
         self.init(
             uri: entityDTO.uri,
             lastrevid: entityDTO.lastrevid ?? 0,
-            title: entityDTO.labels["fr"] ?? entityDTO.labels["en"] ?? "",
+            title: entityDTO.labels["fr"] ?? entityDTO.labels["en"] ?? entityDTO.labels.values.first ?? "Unknown",
             originalLang: entityDTO.originalLang, 
             image: imageUrl,
-            publicationDate: entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.parseToDate() ??
-                entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.parseToDate(dateFormat: "YYYY-MM"),
-            authors: authors
+            publicationDate: publicationDateString?.parseToDate() ??
+            publicationDateString?.parseToDate(dateFormat: "YYYY-MM"),
+            authors: authors,
+            subtitle: entityDTO.descriptions?["fr"] ?? entityDTO.descriptions?["en"]
         )
     }
 

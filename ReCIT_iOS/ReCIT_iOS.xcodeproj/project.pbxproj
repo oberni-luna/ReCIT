@@ -31,6 +31,7 @@
 		098A621E2E54CCC70032185B /* CardButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61F22E54CCC70032185B /* CardButtonStyle.swift */; };
 		098A62222E54D30D0032185B /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A62212E54D30D0032185B /* Constant.swift */; };
 		09ACF44E2E5E07EB00D59BC0 /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09ACF44D2E5E07EB00D59BC0 /* Env.swift */; };
+		09F415792F203469000D3E4D /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 09F415782F203469000D3E4D /* AsyncAlgorithms */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,6 +92,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		094239B92F22B1EE007BD21B /* Domain */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Domain;
+			sourceTree = "<group>";
+		};
 		094FD1AE2E4A38D60023705A /* Tests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Tests;
@@ -126,6 +132,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				09F415792F203469000D3E4D /* AsyncAlgorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,6 +156,7 @@
 		094FD1932E4A38D40023705A = {
 			isa = PBXGroup;
 			children = (
+				094239B92F22B1EE007BD21B /* Domain */,
 				098A641E2E573D140032185B /* Components */,
 				098A61E32E54CA160032185B /* ReCIT.swift */,
 				09ACF44D2E5E07EB00D59BC0 /* Env.swift */,
@@ -248,12 +256,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				094239B92F22B1EE007BD21B /* Domain */,
 				098A641E2E573D140032185B /* Components */,
 				09ACF4122E5CA38300D59BC0 /* Features */,
 				09FCBD0B2EBE58F600A33F35 /* Model */,
 			);
 			name = ReCIT_iOS;
 			packageProductDependencies = (
+				09F415782F203469000D3E4D /* AsyncAlgorithms */,
 			);
 			productName = ReCIT_iOS;
 			productReference = 094FD19C2E4A38D40023705A /* ReCIT_iOS.app */;
@@ -337,6 +347,9 @@
 			);
 			mainGroup = 094FD1932E4A38D40023705A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 094FD19D2E4A38D40023705A /* Products */;
 			projectDirPath = "";
@@ -738,6 +751,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		09F415782F203469000D3E4D /* AsyncAlgorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
+			productName = AsyncAlgorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 094FD1942E4A38D40023705A /* Project object */;
 }

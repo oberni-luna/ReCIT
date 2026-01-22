@@ -7,11 +7,11 @@
 import SwiftData
 import Foundation
 import Combine
+import AsyncAlgorithms
 
 class InventoryModel: ObservableObject {
     private static let unkownAuthorId: String = "unknown"
     private let apiService: APIService
-    @Published var myUser: User?
 
     init(fetchDataService: APIService = .init(env: .production)) {
         self.apiService = fetchDataService
@@ -121,66 +121,21 @@ class InventoryModel: ObservableObject {
         .sorted { $0.score > $1.score } ?? []
     }
 
+    func getAuthorWorks(modelContext: ModelContext, author: Author) async throws -> [Work]? {
+        let endpoint = "/api/entities?action=author-works&uri=\(author.uri)&refresh=false"
+        let response: AuthorWorksDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
 
-    func searchWorkEditions(workUri: String) {
-        //    https://inventaire.io/api/entities?action=reverse-claims&property=wdt:P629&value=inv:b783fb2ed94e3267444fc38708890cfd&refresh=false
-
-//        {"uris":["isbn:9782915173802"]}
-//        https://inventaire.io/api/entities?action=by-uris&uris=isbn:9782368467701|isbn:9782368463291|isbn:9782368465394&autocreate=true
+        guard let authorWorkDTO = response?.works else {return nil}
+        return try? await getOrFetchWorks(modelContext: modelContext, uris: authorWorkDTO.map(\.uri) )
     }
 
-    func searchAuthorWorks(authorUri: String) {
-//        https://inventaire.io/api/entities?action=author-works&uri=wd:Q47091793&refresh=false
+    func getWorkEdition(modelContext: ModelContext, work: Work) async throws -> [Edition]? {
+        let endpoint = "/api/entities?action=reverse-claims&property=wdt:P629&value=\(work.uri)&refresh=false"
+        let response: WorkEditionsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
 
-//        {
-//            "series": [
-//                {
-//                    "uri": "wd:Q93132238",
-//                    "score": 110
-//                }
-//            ],
-//            "works": [
-//                {
-//                    "uri": "wd:Q93132243",
-//                    "date": "2017-03-01",
-//                    "serie": "wd:Q93132238",
-//                    "score": 46
-//                },
-//                {
-//                    "uri": "wd:Q93132249",
-//                    "score": 31
-//                },
-//                {
-//                    "uri": "wd:Q93132245",
-//                    "date": "2020",
-//                    "serie": "wd:Q93132238",
-//                    "score": 30
-//                },
-//                {
-//                    "uri": "wd:Q93132244",
-//                    "date": "2018",
-//                    "serie": "wd:Q93132238",
-//                    "score": 29
-//                },
-//                {
-//                    "uri": "inv:07290adaec17bf3f57847accdb196f67",
-//                    "score": 25
-//                },
-//                {
-//                    "uri": "inv:ca64a84ce0844d9109d0c11fc20e4efc",
-//                    "score": 13
-//                },
-//                {
-//                    "uri": "inv:108f2010fdf8994bdc604ba198376e0a",
-//                    "score": 11
-//                },
-//                {
-//                    "uri": "inv:399a754013f1f364e6c06eb766797c05",
-//                    "score": 1
-//                }
-//            ],
-//            "articles": []
-//        }
+        guard let editionUris = response?.uris else {return nil}
+
+        return try? await getOrFetchEditions(modelContext: modelContext, uris: editionUris )
     }
 
     private func absoluteImageUrl(_ path: String?) -> String? {
@@ -191,18 +146,66 @@ class InventoryModel: ObservableObject {
         return "\(apiService.baseUrl())\(path)"
     }
 
-    private func getOrFetchAuthor(modelContext: ModelContext, uri: String) async throws -> Author? {
+    func getOrFetchWorks(modelContext: ModelContext, uris: [String]) async throws -> [Work]? {
+
+        guard let worksDto = try await fetchEntities(modelContext: modelContext, uri: uris) else {
+            return nil
+        }
+
+        return  worksDto.compactMap { workDto in
+            Work(entityDTO: workDto, authors: [])
+        }
+    }
+
+    func getOrFetchWork(modelContext: ModelContext, uri: String) async throws -> Work? {
+        if let work = try? getLocalWork(modelContext: modelContext, uri: uri) {
+            return work
+        }
+
+        guard let worksDto = try await fetchEntities(modelContext: modelContext, uri: [uri]) else {
+            return nil
+        }
+
+        guard let workDto = worksDto.first else {
+            return nil
+        }
+
+        return Work(entityDTO: workDto, authors: [])
+    }
+
+    func getOrFetchAuthor(modelContext: ModelContext, uri: String) async throws -> Author? {
         if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri) {
             return author
         }
 
-        let authorUrl: String = "/api/entities?uris=\(uri)&action=by-uris&attributes=info&attributes=labels&attributes=descriptions&attributes=image&attributes=claims"
-        let authorsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: authorUrl)
-
-        guard let authorDto = authorsDto?.entities.values.first else {
+        guard let authorsDto = try await fetchEntities(modelContext: modelContext, uri: [uri]) else {
             return nil
         }
+
+        guard let authorDto = authorsDto.first else {
+            return nil
+        }
+
         return Author(entityDTO: authorDto)
+    }
+
+    func getOrFetchEditions(modelContext: ModelContext, uris: [String]) async throws -> [Edition]? {
+
+        guard let editionsDto = try await fetchEntities(modelContext: modelContext, uri: uris) else {
+            return nil
+        }
+
+        return  editionsDto.compactMap { editionDto in
+            Edition(entityDto: editionDto, baseUrl: apiService.baseUrl())
+        }
+    }
+
+    private func fetchEntities(modelContext: ModelContext, uri: [String]) async throws -> [EntityResultDTO]? {
+
+        let entityUrl: String = "/api/entities?action=by-uris&uris=\(uri.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
+        let resultsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: entityUrl)
+
+        return resultsDto.map { Array($0.entities.values) }
     }
 
     private func getLocalWork(modelContext: ModelContext, uri: String) throws -> Work? {

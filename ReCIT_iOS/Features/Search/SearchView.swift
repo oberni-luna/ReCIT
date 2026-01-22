@@ -18,6 +18,7 @@ struct SearchView: View {
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
     @State private var addingItemId: String?
+    @State private var searchTask: Task<Void, Never>? = nil
 
     @Binding var path: NavigationPath
 
@@ -46,22 +47,25 @@ struct SearchView: View {
                 }
                 
                 ForEach(results) { result in
-                    HStack(alignment: .top, spacing: 12) {
-                        Button {
-                            path.append(result)
-                        } label: {
-                            SearchResultCell(result: result)
-                        }
-                        .buttonStyle(.plain)
+                    Button {
+                        path.append(result)
+                    } label: {
+                        SearchResultCell(result: result)
                     }
+                    .buttonStyle(.plain)
                     .padding(.vertical, 4)
                 }
             }
         }
         .navigationTitle("Search")
         .searchable(text: $searchText, prompt: "Rechercher une édition")
-        .task(id: searchText) {
-            await fetchSearchResults()
+        .onChange(of: searchText) { prev, next in
+            searchTask?.cancel()
+            searchTask = Task { @MainActor in
+                try? await Task.sleep(for: .seconds(0.5))
+                guard !Task.isCancelled else { return }
+                await fetchSearchResults()
+            }
         }
     }
 
@@ -77,22 +81,23 @@ struct SearchView: View {
 
     @MainActor
     private func fetchSearchResults() async {
+        isLoading = true
+        errorMessage = nil
+
         let trimmedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmedQuery.count >= 2 else {
+        guard trimmedQuery.count >= 3 else {
             results = []
             errorMessage = nil
+            isLoading = false
             return
         }
 
-        isLoading = true
-        errorMessage = nil
-        defer {
-            isLoading = false
-        }
         do {
             results = try await inventoryModel.searchEntity(query: trimmedQuery)
+            isLoading = false
         } catch {
             errorMessage = "Impossible de récupérer les résultats."
+            isLoading = false
         }
     }
 }

@@ -16,7 +16,7 @@ class EntityModel: ObservableObject {
         self.apiService = fetchDataService
     }
 
-    func getEdition(modelContext: ModelContext, uri: String) throws -> Edition? {
+    func getLocalEdition(modelContext: ModelContext, uri: String) throws -> Edition? {
         let predicate = #Predicate<Edition> { object in
             object.uri == uri
         }

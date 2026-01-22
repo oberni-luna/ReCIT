@@ -43,4 +43,15 @@ public class Edition: Identifiable {
             series: entitySnapshotDTO.`entity:series`
         )
     }
+
+    convenience init(entityDto: EntityResultDTO, baseUrl: String) {
+        self.init(
+            uri: entityDto.uri,
+            title: entityDto.labels["fromclaims"] ?? "Unknown",
+            subtitle: entityDto.descriptions?["fromclaims"],
+            lang: entityDto.originalLang,
+            authorNames: [],
+            image: "\(baseUrl)\(entityDto.image?["url"] ?? "")"
+        )
+    }
 }

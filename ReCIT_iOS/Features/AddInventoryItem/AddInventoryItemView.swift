@@ -27,13 +27,14 @@ struct AddInventoryItemView: View {
                     }
                 }
                 .navigationDestination(for: SearchResult.self) { result in
-                    SearchResultDetailView(result: result)
-                }
-                .navigationDestination(for: Author.self) { author in
-                    Text("Author view for \(author.name)")
-                }
-                .navigationDestination(for: Work.self) { work in
-                    Text("Work view for \(work.title)")
+                    switch result.type {
+                    case .humans:
+                        AuthorResultDetailView(result: result, path: $path)
+                    case .works:
+                        WorkResultDetailView(result: result, path: $path)
+                    default:
+                        SearchResultDetailView(result: result)
+                    }
                 }
                 .navigationDestination(for: Edition.self) { edition in
                     EditionView(edition: edition)

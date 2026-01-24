@@ -57,6 +57,12 @@ struct InventoryItemDetailView: View {
                         .padding(.horizontal, .medium)
                 }
 
+                if let details = item.details, !details.isEmpty {
+                    Text(details)
+                        .font(.subheadline)
+                        .padding(.horizontal, .medium)
+                }
+
                 if let edition = item.edition {
                     ScrollView(.horizontal) {
                         HStack(spacing: .small) {
@@ -75,6 +81,7 @@ struct InventoryItemDetailView: View {
                 }
             }
         }
+        .navigationTitle("Livre")
     }
 
     @ViewBuilder

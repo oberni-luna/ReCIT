@@ -13,12 +13,10 @@ struct EditionHeaderView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: .xSmall) {
-            if let url = URL(string: edition.image ?? "") {
-                imageView
+            imageView
                     .frame(maxHeight: 256)
                     .shadow(color:.black.opacity(0.1), radius: 10)
                     .padding(.bottom, .sMedium)
-            }
 
             Text(edition.title)
                 .font(.largeTitle)

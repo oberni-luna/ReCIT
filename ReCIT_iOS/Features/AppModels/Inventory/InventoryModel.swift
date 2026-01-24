@@ -28,20 +28,22 @@ class InventoryModel: ObservableObject {
         let result: InventoryResultDTO? = try await apiService.fetchData(fromEndpoint: "/api/items?action=inventory-view&user=\(forUser._id)")
         if let result {
             // synchroniser l'auteur et les oeuvres
-            for author in result.worksTree.author.keys {
-                guard let authorWorks = result.worksTree.author[author] else { continue }
-                guard let workDTOs = try? await fetchEntities(modelContext: modelContext, uri: authorWorks) else { continue }
+            for authorUri: String in result.worksTree.author.keys {
+                guard let authorWorkUris: [String] = result.worksTree.author[authorUri] else { continue }
+                guard let workDTOs = try? await fetchEntities(modelContext: modelContext, uri: authorWorkUris) else { continue }
 
-                if author == InventoryModel.unkownAuthorId {
+                if authorUri == InventoryModel.unkownAuthorId {
                     for work in workDTOs {
                         modelContext.insert(Work(entityDTO: work, authors: []))
                     }
                 } else {
-                    guard let authorModel = try await getOrFetchAuthor(modelContext: modelContext, uri: author) else { continue }
+                    guard let authors: [Author] = try await getOrFetchAuthors(modelContext: modelContext, uris: [authorUri]) else { continue }
                     for work in workDTOs {
-                        authorModel.works.append(Work(entityDTO: work, authors: [authorModel]))
+                        _ = authors.map { author in
+                            author.works.append(Work(entityDTO: work, authors: authors))
+                            modelContext.insert(author)
+                        }
                     }
-                    modelContext.insert(authorModel)
                 }
             }
 
@@ -136,7 +138,17 @@ class InventoryModel: ObservableObject {
         let response: AuthorWorksDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
 
         guard let authorWorkDTO = response?.works else {return nil}
-        return try? await getOrFetchWorks(modelContext: modelContext, uris: authorWorkDTO.map(\.uri) )
+        guard let works:[Work] = try? await getOrFetchWorks(modelContext: modelContext, uris: authorWorkDTO.map(\.uri)) else {
+            return nil
+        }
+
+        for work in works {
+            work.authors.append(author)
+            modelContext.insert(work)
+        }
+
+        try modelContext.save()
+        return works
     }
 
     func getWorkEditions(modelContext: ModelContext, work: Work) async throws -> [Edition]? {
@@ -145,7 +157,17 @@ class InventoryModel: ObservableObject {
 
         guard let editionUris = response?.uris else {return nil}
 
-        return try? await getOrFetchEditions(modelContext: modelContext, uris: editionUris )
+        guard let editions = try? await getOrFetchEditions(modelContext: modelContext, uris: editionUris ) else {
+            return nil
+        }
+
+        for edition in editions {
+            edition.works.append(work)
+            modelContext.insert(edition)
+        }
+
+        try modelContext.save()
+        return editions
     }
 
     private func absoluteImageUrl(_ path: String?) -> String? {
@@ -175,41 +197,43 @@ class InventoryModel: ObservableObject {
             return nil
         }
 
-        return  worksDto.compactMap { workDto in
-            Work(entityDTO: workDto, authors: [])
+        for workDto in worksDto {
+            let authorUris: [String] = workDto.claims[WikidataProperty.author.rawValue]?
+                .compactMap { $0.getStringValue() } ?? []
+            let authors = try? await getOrFetchAuthors(modelContext: modelContext, uris: authorUris)
+
+            let work = Work(entityDTO: workDto, authors: authors ?? [])
+            modelContext.insert(work)
+            works.append(work)
         }
+        return  works
     }
 
     func getOrFetchWork(modelContext: ModelContext, uri: String) async throws -> Work? {
-        if let work = try? getLocalWork(modelContext: modelContext, uri: uri) {
-            return work
-        }
-
-        guard let worksDto = try await fetchEntities(modelContext: modelContext, uri: [uri]) else {
-            return nil
-        }
-
-        guard let workDto = worksDto.first else {
-            return nil
-        }
-
-        return Work(entityDTO: workDto, authors: [])
+        return try await getOrFetchWorks(modelContext: modelContext, uris: [uri])?.first
     }
 
-    func getOrFetchAuthor(modelContext: ModelContext, uri: String) async throws -> Author? {
-        if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri) {
-            return author
+    func getOrFetchAuthors(modelContext: ModelContext, uris: [String]) async throws -> [Author]? {
+
+        var authors: [Author] = []
+        var urisToFetch: [String] = []
+        for uri in uris {
+            if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri) {
+                authors.append(author)
+            } else {
+                urisToFetch.append(uri)
+            }
         }
 
-        guard let authorsDto = try await fetchEntities(modelContext: modelContext, uri: [uri]) else {
-            return nil
+        guard let authorsDto = try await fetchEntities(modelContext: modelContext, uri: urisToFetch) else {
+            return authors
         }
 
-        guard let authorDto = authorsDto.first else {
-            return nil
-        }
+        authors.append(contentsOf: authorsDto.compactMap { authorDto in
+            Author(entityDTO: authorDto)
+        })
 
-        return Author(entityDTO: authorDto)
+        return authors
     }
 
     func getOrFetchEditions(modelContext: ModelContext, uris: [String]) async throws -> [Edition]? {

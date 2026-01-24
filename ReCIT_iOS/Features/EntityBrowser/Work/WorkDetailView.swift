@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WorkResultDetailView: View {
+struct WorkDetailView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -70,6 +70,7 @@ struct WorkResultDetailView: View {
                     Text("Editions de \(work.title)")
                 }
             }
+            .navigationTitle("Oeuvre")
         case .error(error: let error):
             Text("Error \(error.localizedDescription) !!")
         }

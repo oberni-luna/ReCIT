@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AuthorResultDetailView: View {
+struct AuthorDetailView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -76,6 +76,7 @@ struct AuthorResultDetailView: View {
                     Text("Oeuvres de \(author.name)")
                 }
             }
+            .navigationTitle("Auteur")
         case .error(error: let error):
             Text("Error \(error.localizedDescription) !!")
         }
@@ -84,7 +85,7 @@ struct AuthorResultDetailView: View {
     @MainActor
     private func fetchAuthor() async {
         do {
-            if let author = try await inventoryModel.getOrFetchAuthor(modelContext: modelContext, uri: authorUri) {
+            if let author = try await inventoryModel.getOrFetchAuthors(modelContext: modelContext, uris: [authorUri])?.first {
                 self.state = .loadingWorks(author: author)
             } else {
                 self.state = .error(error: NSError(domain: "No author", code: 0, userInfo: nil))

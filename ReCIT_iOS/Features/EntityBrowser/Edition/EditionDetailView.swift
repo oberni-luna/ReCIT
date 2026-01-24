@@ -7,7 +7,7 @@
 import SwiftData
 import SwiftUI
 
-struct EditionView: View {
+struct EditionDetailView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel
     @EnvironmentObject private var userModel: UserModel
     @Environment(\.modelContext) private var modelContext
@@ -55,12 +55,23 @@ struct EditionView: View {
                             }
                             .frame(maxWidth: 150)
                             .buttonStyle(.bordered)
+
+                            ForEach(work.authors) { author in
+                                Button {
+                                    path.append(EntityDestination.author(uri: author.uri))
+                                } label: {
+                                    Text(author.name)
+                                }
+                                .frame(maxWidth: 150)
+                                .buttonStyle(.bordered)
+                            }
                         }
                     }
                     .padding(.horizontal, .medium)
                 }
             }
         }
+        .navigationTitle("Edition")
     }
 
     @ViewBuilder

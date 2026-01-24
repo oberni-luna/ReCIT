@@ -29,9 +29,9 @@ struct AddInventoryItemView: View {
                 .navigationDestination(for: SearchResult.self) { result in
                     switch result.type {
                     case .humans:
-                        AuthorResultDetailView(authorUri: result.uri, path: $path)
+                        AuthorDetailView(authorUri: result.uri, path: $path)
                     case .works:
-                        WorkResultDetailView(workUri: result.uri, path: $path)
+                        WorkDetailView(workUri: result.uri, path: $path)
                     default:
                         SearchResultDetailView(result: result)
                     }
@@ -39,13 +39,13 @@ struct AddInventoryItemView: View {
                 .navigationDestination(for: EntityDestination.self) { destination in
                     switch destination {
                     case .author(let uri):
-                        AuthorResultDetailView(authorUri: uri, path: $path)
+                        AuthorDetailView(authorUri: uri, path: $path)
                     case .work(let uri):
-                        WorkResultDetailView(workUri: uri, path: $path)
+                        WorkDetailView(workUri: uri, path: $path)
                     }
                 }
                 .navigationDestination(for: Edition.self) { edition in
-                    EditionView(edition: edition, path: $path)
+                    EditionDetailView(edition: edition, path: $path)
                 }
         }
     }

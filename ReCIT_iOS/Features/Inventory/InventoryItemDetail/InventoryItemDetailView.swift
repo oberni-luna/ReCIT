@@ -49,8 +49,21 @@ struct InventoryItemDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: .medium) {
                 if let edition = item.edition {
-                    EditionHeaderView(edition: edition)
+                    EditionHeaderView(edition: edition, entityDestination: $browseEntityDestination)
                         .padding(.horizontal, .medium)
+
+                    EditionAuthorsView(edition: edition, entityDestination: $browseEntityDestination)
+
+                    VStack(spacing: .small) {
+                        ForEach(edition.works) { work in
+                            Button {
+                                browseEntityDestination = EntityDestination.work(uri: work.uri)
+                            } label: {
+                                Text("Other edition for \(work.title)")
+                            }
+                        }
+                    }
+                    .padding(.horizontal, .medium)
                 }
                 if let owner = item.owner {
                     UserCellView(user: owner, description: "Owner")
@@ -82,22 +95,6 @@ struct InventoryItemDetailView: View {
             }
         }
         .navigationTitle("Livre")
-    }
-
-    @ViewBuilder
-    var addToListButton: some View {
-        if let invEntity = item.edition {
-            Menu("Add to a list") {
-                ForEach(entityLists) { entityList in
-                    Button(entityList.name) {
-                        Task {
-                            try await listModel.addEntitiesToList(listId: entityList._id, entityUris: [invEntity.uri])
-                        }
-                    }
-                }
-            }
-            .buttonStyle(.bordered)
-        }
     }
 }
 

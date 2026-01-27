@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-public class Edition: Identifiable {
+public class Edition: Identifiable, Entity {
     @Attribute(.unique) var uri: String
 
     var title: String
@@ -19,9 +19,14 @@ public class Edition: Identifiable {
     var image: String?
     var series: String?
     var works: [Work] = []
+    var extract: WpExtract?
 
     @Relationship(deleteRule: .nullify, inverse: \InventoryItem.edition) var items: [InventoryItem] = []
-    
+
+    var authors: [Author] {
+        works.flatMap(\.authors)
+    }
+
     init(uri: String, title: String, subtitle: String? = nil, lang: String?, authorNames: [String], image: String? = nil, series: String? = nil, items: [InventoryItem] = []) {
         self.uri = uri
         self.title = title

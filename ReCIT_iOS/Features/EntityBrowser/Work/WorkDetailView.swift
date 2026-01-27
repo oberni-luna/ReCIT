@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct WorkDetailView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel
@@ -25,54 +26,62 @@ struct WorkDetailView: View {
     @Binding var path: NavigationPath
 
     var body: some View {
-        switch state {
-        case .loadingWork:
-            Text("Loading work...")
-                .onAppear {
-                    Task {
-                        await fetchWork()
-                    }
-                }
-        case .loadingEditions(work: let work):
-            Text("Loading editions for \(work.title)")
-                .onAppear {
-                    Task {
-                        await fetchEditions()
-                    }
-                }
-        case .loaded(work: let work, editions: let editions):
-            List {
-                Section {
-                    VStack(alignment: .leading, spacing: .small) {
-                        if let image = work.image {
-                            CellThumbnail(imageUrl: image, cornerRadius: .minimal, size: 72)
-                        }
-                        Text(work.title)
-                            .font(.headline)
-                        if let subtitle = work.subtitle {
-                            Text(subtitle)
-                                .font(.subheadline)
+        Group {
+            switch state {
+            case .loadingWork:
+                ProgressView()
+                    .onAppear {
+                        Task {
+                            await fetchWork()
                         }
                     }
+            case .loadingEditions(work: let work):
+                List {
+                    Section {
+                        EntitySummaryView(entityUri: work.uri)
+                    } header: {
+                        WorkHeaderView(work: work)
+                    }
                 }
+            case .loaded(work: let work, editions: let editions):
+                List {
+                    Section {
+                        EntitySummaryView(entityUri: work.uri)
+                    } header: {
+                        WorkHeaderView(work: work)
+                    }
 
-                Section {
-                    ForEach(editions) { edition in
-                        let result:SearchResult = SearchResult(id: edition.uri, uri: edition.uri, title: edition.title, description: edition.subtitle, imageUrl: edition.image, score: 0, type: .works)
-                        Button {
-                            path.append(edition)
-                        } label: {
-                            SearchResultCell(result: result)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                } header: {
-                    Text("Editions de \(work.title)")
+                    editionsSection(work: work, editions: editions)
                 }
+            case .error(error: let error):
+                Text("Error \(error.localizedDescription) !!")
             }
-            .navigationTitle("Oeuvre")
-        case .error(error: let error):
-            Text("Error \(error.localizedDescription) !!")
+        }
+        .onAppear {
+            Task {
+                await fetchWork()
+                await fetchEditions()
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Oeuvre")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    func editionsSection(work: Work, editions: [Edition]) -> some View {
+        Section {
+            ForEach(editions) { edition in
+                let result:SearchResult = SearchResult(id: edition.uri, uri: edition.uri, title: edition.title, description: edition.subtitle, imageUrl: edition.image, score: 0, type: .works)
+                Button {
+                    path.append(edition)
+                } label: {
+                    SearchResultCell(result: result)
+                }
+                .buttonStyle(.plain)
+            }
+        } header: {
+            Text("Editions de \(work.title)")
         }
     }
 
@@ -106,6 +115,10 @@ struct WorkDetailView: View {
             self.state = .error(error: error)
         }
     }
+
+    
+
+    
 }
 #Preview {
 //    WorkResultDetailView()

@@ -43,7 +43,7 @@ struct CommunityView: View {
                 }
             }
             .navigationDestination(for: Edition.self) { edition in
-                EditionDetailView(edition: edition, path: $path)
+                EditionDetailView(editionUri: edition.uri, path: $path)
             }
             .navigationTitle("👫 In the community")
             .listStyle(.plain)

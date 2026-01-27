@@ -16,23 +16,13 @@ struct EntityBrowserView: View {
     var body: some View {
         NavigationStack(path: $path) {
             Group {
-                switch startingPoint {
-                case .author(let uri):
-                    AuthorDetailView(authorUri: uri, path: $path)
-                case .work(let uri):
-                    WorkDetailView(workUri: uri, path: $path)
-                }
+                startingPoint.viewForDestination($path)
             }
             .navigationDestination(for: EntityDestination.self) { destination in
-                switch destination {
-                case .author(let uri):
-                    AuthorDetailView(authorUri: uri, path: $path)
-                case .work(let uri):
-                    WorkDetailView(workUri: uri, path: $path)
-                }
+                destination.viewForDestination($path)
             }
             .navigationDestination(for: Edition.self) { edition in
-                EditionDetailView(edition: edition, path: $path)
+                EditionDetailView(editionUri: edition.uri, path: $path)
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -44,7 +34,17 @@ struct EntityBrowserView: View {
         }
     }
 
-
+    @ViewBuilder
+    func viewForDestination(destination: EntityDestination) -> some View {
+        switch destination {
+        case .author(let uri):
+            AuthorDetailView(authorUri: uri, path: $path)
+        case .work(let uri):
+            WorkDetailView(workUri: uri, path: $path)
+        case .edition(let uri):
+            EditionDetailView(editionUri: uri, path: $path)
+        }
+    }
 }
 
 #Preview {

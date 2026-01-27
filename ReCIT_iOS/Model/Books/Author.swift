@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-public class Author: Identifiable {
+public class Author: Identifiable, Entity {
     @Attribute(.unique) var uri: String
     var lastrevid: Int
 
@@ -20,6 +20,7 @@ public class Author: Identifiable {
     var image: String?
 
     var works: [Work] = []
+    var extract: WpExtract?
 
     init(uri: String, lastrevid: Int, name: String, dateOfBirth: Date? = nil, dateOfDeath: Date? = nil, image: String? = nil, subtitle: String? = nil) {
         self.uri = uri

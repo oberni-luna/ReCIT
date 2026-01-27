@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		090719A32F2505CB000D8913 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 090719A22F2505CB000D8913 /* CodeScanner */; };
 		098A61E42E54CA160032185B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 098A61E02E54CA160032185B /* Assets.xcassets */; };
 		098A61E72E54CA160032185B /* ReCIT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61E32E54CA160032185B /* ReCIT.swift */; };
 		098A62092E54CCC70032185B /* Exo2-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 098A61F92E54CCC70032185B /* Exo2-Bold.ttf */; };
@@ -132,6 +133,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				090719A32F2505CB000D8913 /* CodeScanner in Frameworks */,
 				09F415792F203469000D3E4D /* AsyncAlgorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -153,6 +155,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		090719A12F2505CB000D8913 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		094FD1932E4A38D40023705A = {
 			isa = PBXGroup;
 			children = (
@@ -166,6 +175,7 @@
 				098A62082E54CCC70032185B /* DesignSystem */,
 				094FD1AE2E4A38D60023705A /* Tests */,
 				094FD1B82E4A38D60023705A /* UITests */,
+				090719A12F2505CB000D8913 /* Frameworks */,
 				094FD19D2E4A38D40023705A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -264,6 +274,7 @@
 			name = ReCIT_iOS;
 			packageProductDependencies = (
 				09F415782F203469000D3E4D /* AsyncAlgorithms */,
+				090719A22F2505CB000D8913 /* CodeScanner */,
 			);
 			productName = ReCIT_iOS;
 			productReference = 094FD19C2E4A38D40023705A /* ReCIT_iOS.app */;
@@ -349,6 +360,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+				090719A02F25052D000D8913 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 094FD19D2E4A38D40023705A /* Products */;
@@ -576,9 +588,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = EPSKWEH82C;
+				DEVELOPMENT_TEAM = VH79XGK7M2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "\"We use camera to scan barcodes\"";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -607,9 +620,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = EPSKWEH82C;
+				DEVELOPMENT_TEAM = VH79XGK7M2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "\"We use camera to scan barcodes\"";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -753,6 +767,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		090719A02F25052D000D8913 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.2;
+			};
+		};
 		09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
@@ -764,6 +786,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		090719A22F2505CB000D8913 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 090719A02F25052D000D8913 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
+		};
 		09F415782F203469000D3E4D /* AsyncAlgorithms */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;

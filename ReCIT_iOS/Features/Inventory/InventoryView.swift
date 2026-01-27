@@ -15,6 +15,7 @@ struct InventoryView: View {
     @State private var searchText: String = ""
     @State private var path: NavigationPath = .init()
     @State private var isAddItemPresented: Bool = false
+    @State private var isScanItemPresented: Bool = false
 
     let user: User
 
@@ -57,16 +58,26 @@ struct InventoryView: View {
             }
             .navigationTitle("📚 Inventory")
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("add", systemImage: "plus") {
+                ToolbarItemGroup(placement: .confirmationAction) {
+                    Button("Scan", systemImage: "barcode.viewfinder") {
+                        isScanItemPresented = true
+                    }
+                    Button("Search", systemImage: "plus") {
                         isAddItemPresented = true
                     }
+                } label: {
+                    Image(systemName: "plus")
+                        .imageScale(.large)
                 }
             }
+            .controlGroupStyle(.palette)
             .listStyle(.plain)
             .searchable(text: $searchText)
             .sheet(isPresented: $isAddItemPresented) {
-                AddInventoryItemView()
+                AddInventoryItemSearchView()
+            }
+            .sheet(isPresented: $isScanItemPresented) {
+                AddInventoryItemScanView()
             }
         }
     }

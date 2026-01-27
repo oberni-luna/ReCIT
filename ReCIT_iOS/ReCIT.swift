@@ -17,7 +17,8 @@ struct ReCIT: App {
             Edition.self,
             EntityList.self,
             Author.self,
-            Work.self
+            Work.self,
+            WpExtract.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {

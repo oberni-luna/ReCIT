@@ -20,7 +20,9 @@ struct SearchView: View {
     @State private var addingItemId: String?
     @State private var searchTask: Task<Void, Never>? = nil
 
-    @Binding var path: NavigationPath
+    let onNavigate: (SearchResult) -> Void
+
+    @State private var isSearchPresented: Bool = true
 
     var body: some View {
         List {
@@ -48,7 +50,8 @@ struct SearchView: View {
                 
                 ForEach(results) { result in
                     Button {
-                        path.append(result)
+                        onNavigate(result)
+//                        path.append(result)
                     } label: {
                         SearchResultCell(result: result)
                     }
@@ -58,7 +61,7 @@ struct SearchView: View {
             }
         }
         .navigationTitle("Search")
-        .searchable(text: $searchText, prompt: "Rechercher une édition")
+        .searchable(text: $searchText, isPresented: $isSearchPresented, prompt: "Rechercher une édition")
         .onChange(of: searchText) { prev, next in
             searchTask?.cancel()
             searchTask = Task { @MainActor in

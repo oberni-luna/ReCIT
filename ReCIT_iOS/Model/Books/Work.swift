@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-public class Work: Identifiable {
+public class Work: Identifiable, Entity {
     @Attribute(.unique) var uri: String
     var lastrevid: Int
 
@@ -18,6 +18,7 @@ public class Work: Identifiable {
     var originalLang: String?
     var image: String?
     var publicationDate: Date?
+    var extract: WpExtract?
 
     @Relationship(inverse: \Author.works) var authors: [Author] = []
     @Relationship(inverse: \Edition.works) var editions: [Edition] = []

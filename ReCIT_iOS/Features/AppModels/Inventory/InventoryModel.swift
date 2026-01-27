@@ -259,6 +259,47 @@ class InventoryModel: ObservableObject {
         return editions
     }
 
+    func getOrFetchExtract(forUri uri: String, modelContext: ModelContext) async throws -> WpExtract? {
+        if let extract = try getLocalExtract(modelContext: modelContext, uri: uri), !extract.content.isEmpty {
+            return extract
+        } else {
+            if let extractDto: ExtractDTO = try await fetchExtract(for: uri) {
+                let extract = WpExtract(uri: uri, content: extractDto.extract, url: extractDto.url)
+                modelContext.insert(extract)
+                try modelContext.save()
+
+                return extract
+            } else {
+                return nil
+            }
+        }
+    }
+
+    func getLocalExtract(modelContext: ModelContext, uri: String) throws -> WpExtract? {
+        let predicate = #Predicate<WpExtract> { object in
+            object.uri == uri
+        }
+        let descriptor = FetchDescriptor(predicate: predicate)
+        return try modelContext.fetch(descriptor).first
+    }
+
+    func fetchExtract(for uri: String) async throws -> ExtractDTO? {
+        guard let summariesDTO: SummariesDTO = try? await apiService.fetchData(fromEndpoint: "/api/data?action=summaries&uri=\(uri)&langs=fr&refresh=false") else {
+            return nil
+        }
+        guard let summary: SummaryDTO = summariesDTO.summaries.first(where: { $0.key == "frwiki" }) else {
+            return nil
+        }
+        guard let sitelink: SitelinkDTO = summary.sitelink else {
+            return nil
+        }
+        guard let extractDto: ExtractDTO = try? await apiService.fetchData(fromEndpoint: "/api/data?action=wp-extract&lang=fr&title=\(sitelink.title)") else {
+            return nil
+        }
+
+        return extractDto
+    }
+
     func getLocalEdition(modelContext: ModelContext, uri: String) throws -> Edition? {
         let predicate = #Predicate<Edition> { object in
             object.uri == uri

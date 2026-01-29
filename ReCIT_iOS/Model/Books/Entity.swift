@@ -7,7 +7,10 @@
 
 import Foundation
 
-protocol Entity {
-    var uri: String {get set}
+protocol Entity: Identifiable {
+    var uri: String {get}
     var extract: WpExtract? {get set}
+    var image: String? {get}
+    var title: String {get}
+    var subtitle: String? {get}
 }

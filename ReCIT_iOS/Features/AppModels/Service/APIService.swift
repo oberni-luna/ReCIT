@@ -57,23 +57,23 @@ class APIService {
         return nil
     }
 
-    func fetchData<T: Codable>(fromEndpoint: String) async throws -> T? {
+    func fetchData<T: Codable>(fromEndpoint: String, debug: Bool = false) async throws -> T? {
         guard let downloadedData: T = await self.downloadData(fromEndpoint: fromEndpoint) else {return nil}
         return downloadedData
     }
 
-    private func downloadData<T: Codable>(fromEndpoint: String) async -> T? {
+    private func downloadData<T: Codable>(fromEndpoint: String, debug: Bool = false) async -> T? {
         do {
             guard let url = URL(string: "\(env.apiBaseUrl)\(fromEndpoint)") else { throw NetworkError.badUrl }
 
-            if logQuery {
+            if debug {
                 print("******** Query ********")
                 print(url)
             }
 
             let (data, response) = try await URLSession.shared.data(from: url)
 
-            if logResponses {
+            if debug {
                 print(" Reponse :")
                 print("\(String(bytes: data, encoding: .utf8) ?? "No data")")
             }

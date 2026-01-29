@@ -21,7 +21,7 @@ class ListModel: ObservableObject {
     func syncLists(forUser: User, modelContext: ModelContext) async throws {
 
         try modelContext.delete(model: EntityList.self)
-        let listsDTO: ListsDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/lists?action=by-creators&users=\(forUser._id)&with-elements=false")
+        let listsDTO: ListsDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/lists?action=by-creators&users=\(forUser._id)&with-elements=true", debug: true)
         if let listsDTO {
             for listDTO in listsDTO.lists {
                 let list = EntityList(listDTO: listDTO, baseUrl: fetchDataService.baseUrl())

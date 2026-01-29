@@ -16,6 +16,7 @@ struct ReCIT: App {
             User.self,
             Edition.self,
             EntityList.self,
+            EntityListItem.self,
             Author.self,
             Work.self,
             WpExtract.self

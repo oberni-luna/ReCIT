@@ -22,6 +22,8 @@ public class Author: Identifiable, Entity {
     var works: [Work] = []
     var extract: WpExtract?
 
+    var title: String { name }
+
     init(uri: String, lastrevid: Int, name: String, dateOfBirth: Date? = nil, dateOfDeath: Date? = nil, image: String? = nil, subtitle: String? = nil) {
         self.uri = uri
         self.lastrevid = lastrevid

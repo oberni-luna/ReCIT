@@ -21,6 +21,7 @@ struct ListDTO: Codable {
     let updated: Double?
     let visibility: [String]
     let type: String
+    let elements: [ListElementDTO]
 }
 
 struct ListElementDTO: Codable {

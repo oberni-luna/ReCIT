@@ -24,7 +24,7 @@ public final class EntityList {
     var created: Date
     var updated: Date?
     var visibility: [VisibilityAttributes]
-    var elements: [EntityListItem]
+    @Relationship(deleteRule: .cascade) var elements: [EntityListItem]
     var type: EntityListType
 
     init(_id: String, _rev: String, name: String, created: Date, updated: Date? = nil, visibility: [VisibilityAttributes], elements: [EntityListItem] = [], type: EntityListType) {
@@ -40,7 +40,7 @@ public final class EntityList {
 
     convenience init(listDTO: ListDTO, baseUrl: String) {
         let updatedDate: Date? = if let updated = listDTO.updated {
-            Date(timeIntervalSince1970: updated)
+            Date(timeIntervalSince1970: updated / 1000)
         } else {
             nil
         }
@@ -52,7 +52,9 @@ public final class EntityList {
             created: Date(timeIntervalSince1970: listDTO.created),
             updated: updatedDate,
             visibility: listDTO.visibility.compactMap { VisibilityAttributes(rawValue: $0) },
-            elements: [],
+            elements: listDTO.elements.compactMap {
+                .init(listElementDTO: $0, listType: EntityListType(rawValue: listDTO.type) ?? .work, baseUrl: baseUrl)
+            },
             type: EntityListType(rawValue: listDTO.type) ?? .work
         )
     }
@@ -62,15 +64,35 @@ public final class EntityList {
 public final class EntityListItem {
     @Attribute(.unique) var _id: String
     var comment: String?
-    var uri: String?
+    var uri: String
     var ordinal: String
-    var item: InventoryItem
+    var updated: Date?
+    var created: Date
+    var entityType: EntityListType
 
-    init(_id: String, comment: String? = nil, uri: String? = nil, ordinal: String, item: InventoryItem) {
+    init(_id: String, comment: String? = nil, uri: String, ordinal: String, updated: Date? = nil, created: Date, itemType: EntityListType) {
         self._id = _id
         self.comment = comment
         self.uri = uri
         self.ordinal = ordinal
-        self.item = item
+        self.updated = updated
+        self.created = created
+        self.entityType = itemType
+    }
+
+    convenience init(listElementDTO: ListElementDTO, listType: EntityListType, baseUrl: String) {
+        let updatedDate: Date? = if let updated = listElementDTO.updated {
+            Date(timeIntervalSince1970: updated / 1000)
+        } else {
+            nil
+        }
+        self.init(
+            _id: listElementDTO._id,
+            uri: listElementDTO.uri,
+            ordinal: listElementDTO.ordinal,
+            updated: updatedDate,
+            created: Date(timeIntervalSince1970: listElementDTO.created / 1000),
+            itemType: listType
+        )
     }
 }

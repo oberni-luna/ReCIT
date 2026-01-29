@@ -30,7 +30,7 @@ struct EntityListView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 ForEach(filteredLists) { list in
                     NavigationLink(value: list) {
@@ -42,7 +42,11 @@ struct EntityListView: View {
                 }
             }
             .navigationDestination(for: EntityList.self) { list in
-                Text("Detail for list \(list.name)")
+                EntityListDetail(state: .loadingItems(list: list), path: $path)
+                    .navigationTitle(list.name)
+            }
+            .navigationDestination(for: EntityDestination.self) { destination in
+                destination.viewForDestination($path)
             }
             .navigationTitle("📋 Lists")
             .toolbar {

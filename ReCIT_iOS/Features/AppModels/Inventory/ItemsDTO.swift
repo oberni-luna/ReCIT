@@ -35,4 +35,6 @@ struct EntitySnapshotDTO: Codable {
     let `entity:image`: String?
     let `entity:series`: String?
     let `entity:ordinal`: String?
+    let `entity:worksUris`: [String]?
+    let `entity:authorsUris`: [String]?
 }

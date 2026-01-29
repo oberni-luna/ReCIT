@@ -10,7 +10,7 @@ struct EditionHeaderView: View {
     @Environment(\.colorScheme) var colorScheme
 
     let edition: Edition
-    @Binding var entityDestination: EntityDestination?
+//    @Binding var entityDestination: EntityDestination?
 
     var body: some View {
         VStack(alignment: .leading, spacing: .xSmall) {
@@ -28,42 +28,6 @@ struct EditionHeaderView: View {
                     .font(.subheadline)
                     .foregroundStyle(.textDefault)
             }
-
-//            ScrollView(.horizontal) {
-//                HStack(spacing: .sMedium) {
-//                    ForEach(edition.authors) { author in
-//                        Button {
-//                            entityDestination = EntityDestination.author(uri: author.uri)
-//                        } label: {
-//                            HStack(alignment: .center, spacing: .xSmall){
-//                                Group {
-//                                    CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: 36)
-//                                        .padding(.vertical, .small)
-//                                        .padding(.leading, .small)
-//
-//                                    Text(author.name)
-//                                        .font(.headline)
-//                                        .multilineTextAlignment(.leading)
-//
-//                                    Spacer()
-//
-//                                    Image(.chevronRight)
-//                                        .padding(.trailing, .small)
-//                                }
-//                            }
-//                            .foregroundStyle(.textDefault)
-//                            .frame(maxWidth: 200)
-//                            .background(.thickMaterial)
-//                            .cornerRadius(.rounded)
-//                        }
-//                    }
-//                }
-//            }
-
-            EntitySummaryView(
-                entityUri: edition.uri,
-                otherEntityUri: edition.works.count == 1 ? edition.works.first?.uri : nil
-            )
         }
         .background(alignment: .bottom) {
             imageView

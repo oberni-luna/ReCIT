@@ -49,11 +49,7 @@ struct EditionDetailView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: .medium) {
                         EditionHeaderView(
-                            edition: edition,
-                            entityDestination: Binding<EntityDestination?>(
-                                get: { nil },
-                                set: { destination in path.append(destination) }
-                            )
+                            edition: edition
                         )
                         .padding(.horizontal, .medium)
 
@@ -61,6 +57,12 @@ struct EditionDetailView: View {
                             get: { nil },
                             set: { destination in path.append(destination) }
                         ))
+
+                        EntitySummaryView(
+                            entityUri: edition.uri,
+                            otherEntityUri: edition.works.count == 1 ? (edition.works.first.map { $0.uri }) : nil
+                        )
+                        .padding(.horizontal, .medium)
 
                         ScrollView(.horizontal) {
                             HStack(spacing: .small) {

@@ -15,14 +15,12 @@
 		098A620B2E54CCC70032185B /* Exo2-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 098A61FA2E54CCC70032185B /* Exo2-Medium.ttf */; };
 		098A620C2E54CCC70032185B /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A62002E54CCC70032185B /* Spacing.swift */; };
 		098A620D2E54CCC70032185B /* CornerRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61FE2E54CCC70032185B /* CornerRadius.swift */; };
-		098A620E2E54CCC70032185B /* ImageTagView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A62072E54CCC70032185B /* ImageTagView.swift */; };
 		098A620F2E54CCC70032185B /* ActionButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61F32E54CCC70032185B /* ActionButtonStyle.swift */; };
 		098A62112E54CCC70032185B /* TagToggleStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61EE2E54CCC70032185B /* TagToggleStyle.swift */; };
 		098A62122E54CCC70032185B /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61FD2E54CCC70032185B /* Color.swift */; };
 		098A62132E54CCC70032185B /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A62062E54CCC70032185B /* Haptics.swift */; };
 		098A62142E54CCC70032185B /* TextStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A62012E54CCC70032185B /* TextStyle.swift */; };
 		098A62152E54CCC70032185B /* IconButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61F52E54CCC70032185B /* IconButtonStyle.swift */; };
-		098A62162E54CCC70032185B /* Gradiant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61FF2E54CCC70032185B /* Gradiant.swift */; };
 		098A62172E54CCC70032185B /* RadioToggleStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61EF2E54CCC70032185B /* RadioToggleStyle.swift */; };
 		098A62182E54CCC70032185B /* ButtonPressedEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61F42E54CCC70032185B /* ButtonPressedEffect.swift */; };
 		098A62192E54CCC70032185B /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61F62E54CCC70032185B /* PrimaryButton.swift */; };
@@ -71,33 +69,26 @@
 		098A61FB2E54CCC70032185B /* Poppins-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-Bold.ttf"; sourceTree = "<group>"; };
 		098A61FD2E54CCC70032185B /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		098A61FE2E54CCC70032185B /* CornerRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerRadius.swift; sourceTree = "<group>"; };
-		098A61FF2E54CCC70032185B /* Gradiant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gradiant.swift; sourceTree = "<group>"; };
 		098A62002E54CCC70032185B /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
 		098A62012E54CCC70032185B /* TextStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextStyle.swift; sourceTree = "<group>"; };
 		098A62032E54CCC70032185B /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		098A62052E54CCC70032185B /* TagView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagView.swift; sourceTree = "<group>"; };
 		098A62062E54CCC70032185B /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
-		098A62072E54CCC70032185B /* ImageTagView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageTagView.swift; sourceTree = "<group>"; };
 		098A62212E54D30D0032185B /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		09ACF44D2E5E07EB00D59BC0 /* Env.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		09F414562F194709000D3E4D /* Exceptions for "Components" folder in "ReCIT_iOS" target */ = {
+		0907207B2F2B8946000D8913 /* Exceptions for "Features" folder in "ReCIT_iOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CachedAsyncImage.swift,
+				Components/CachedAsyncImage.swift,
 			);
 			target = 094FD19B2E4A38D40023705A /* ReCIT_iOS */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		094239B92F22B1EE007BD21B /* Domain */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Domain;
-			sourceTree = "<group>";
-		};
 		094FD1AE2E4A38D60023705A /* Tests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Tests;
@@ -108,16 +99,11 @@
 			path = UITests;
 			sourceTree = "<group>";
 		};
-		098A641E2E573D140032185B /* Components */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				09F414562F194709000D3E4D /* Exceptions for "Components" folder in "ReCIT_iOS" target */,
-			);
-			path = Components;
-			sourceTree = "<group>";
-		};
 		09ACF4122E5CA38300D59BC0 /* Features */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0907207B2F2B8946000D8913 /* Exceptions for "Features" folder in "ReCIT_iOS" target */,
+			);
 			path = Features;
 			sourceTree = "<group>";
 		};
@@ -165,8 +151,6 @@
 		094FD1932E4A38D40023705A = {
 			isa = PBXGroup;
 			children = (
-				094239B92F22B1EE007BD21B /* Domain */,
-				098A641E2E573D140032185B /* Components */,
 				098A61E32E54CA160032185B /* ReCIT.swift */,
 				09ACF44D2E5E07EB00D59BC0 /* Env.swift */,
 				098A61E02E54CA160032185B /* Assets.xcassets */,
@@ -227,7 +211,6 @@
 			children = (
 				098A61FD2E54CCC70032185B /* Color.swift */,
 				098A61FE2E54CCC70032185B /* CornerRadius.swift */,
-				098A61FF2E54CCC70032185B /* Gradiant.swift */,
 				098A62002E54CCC70032185B /* Spacing.swift */,
 				098A62012E54CCC70032185B /* TextStyle.swift */,
 			);
@@ -245,7 +228,6 @@
 				098A62032E54CCC70032185B /* DesignSystem.swift */,
 				098A62052E54CCC70032185B /* TagView.swift */,
 				098A62062E54CCC70032185B /* Haptics.swift */,
-				098A62072E54CCC70032185B /* ImageTagView.swift */,
 			);
 			path = DesignSystem;
 			sourceTree = "<group>";
@@ -266,8 +248,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				094239B92F22B1EE007BD21B /* Domain */,
-				098A641E2E573D140032185B /* Components */,
 				09ACF4122E5CA38300D59BC0 /* Features */,
 				09FCBD0B2EBE58F600A33F35 /* Model */,
 			);
@@ -409,7 +389,6 @@
 			files = (
 				098A620C2E54CCC70032185B /* Spacing.swift in Sources */,
 				098A620D2E54CCC70032185B /* CornerRadius.swift in Sources */,
-				098A620E2E54CCC70032185B /* ImageTagView.swift in Sources */,
 				098A620F2E54CCC70032185B /* ActionButtonStyle.swift in Sources */,
 				098A62112E54CCC70032185B /* TagToggleStyle.swift in Sources */,
 				098A62122E54CCC70032185B /* Color.swift in Sources */,
@@ -417,7 +396,6 @@
 				098A62222E54D30D0032185B /* Constant.swift in Sources */,
 				098A62142E54CCC70032185B /* TextStyle.swift in Sources */,
 				098A62152E54CCC70032185B /* IconButtonStyle.swift in Sources */,
-				098A62162E54CCC70032185B /* Gradiant.swift in Sources */,
 				09ACF44E2E5E07EB00D59BC0 /* Env.swift in Sources */,
 				098A62172E54CCC70032185B /* RadioToggleStyle.swift in Sources */,
 				098A62182E54CCC70032185B /* ButtonPressedEffect.swift in Sources */,

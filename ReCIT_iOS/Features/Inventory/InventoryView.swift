@@ -13,7 +13,7 @@ struct InventoryView: View {
     @Query(sort: \InventoryItem.edition?.title) var allItems: [InventoryItem]
 
     @State private var searchText: String = ""
-    @State private var path: NavigationPath = .init()
+    @State var path: NavigationPath = .init()
     @State private var isAddItemPresented: Bool = false
     @State private var isScanItemPresented: Bool = false
 
@@ -45,16 +45,22 @@ struct InventoryView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 ForEach(filteredItems) { item in
-                    NavigationLink(value: item) {
+                    Button {
+                        path.append(item)
+                    } label : {
                         InventoryCell(item: item)
                     }
+                    .buttonStyle(.plain)
                 }
             }
             .navigationDestination(for: InventoryItem.self) { item in
-                InventoryItemDetailView(item: item)
+                InventoryItemDetailView(item: item, path: $path)
+            }
+            .navigationDestination(for: EntityDestination.self) { destination in
+                destination.viewForDestination($path)
             }
             .navigationTitle("📚 Inventory")
             .toolbar {

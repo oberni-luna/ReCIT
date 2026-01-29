@@ -22,7 +22,6 @@ struct EditionAuthorsView: View {
                     Group {
                         CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: 36)
                             .padding(.vertical, .small)
-                            .padding(.leading, .small)
 
                         Text(author.name)
                             .font(.headline)
@@ -35,12 +34,11 @@ struct EditionAuthorsView: View {
                     }
                 }
                 .foregroundStyle(.textDefault)
-                .background(.thickMaterial)
+                .padding(.horizontal, .medium)
             }
         } else {
             ScrollView(.horizontal) {
                 HStack(spacing: .sMedium) {
-
                     ForEach(edition.authors) { author in
                         Button {
                             entityDestination = EntityDestination.author(uri: author.uri)
@@ -68,6 +66,7 @@ struct EditionAuthorsView: View {
                         }
                     }
                 }
+                .padding(.horizontal, .medium)
             }
         }
     }

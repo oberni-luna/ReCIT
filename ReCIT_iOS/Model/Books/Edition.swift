@@ -24,7 +24,7 @@ public class Edition: Identifiable, Entity {
     @Relationship(deleteRule: .nullify, inverse: \InventoryItem.edition) var items: [InventoryItem] = []
 
     var authors: [Author] {
-        works.flatMap(\.authors)
+        Array(Set(works.flatMap(\.authors)))
     }
 
     init(uri: String, title: String, subtitle: String? = nil, lang: String?, authorNames: [String], image: String? = nil, series: String? = nil, items: [InventoryItem] = []) {

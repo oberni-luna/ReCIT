@@ -18,6 +18,7 @@ struct InventoryItemDetailView: View {
     @State private var browseEntityDestination: EntityDestination?
 
     let item: InventoryItem
+    @Binding var path: NavigationPath
 
     var body: some View {
         itemContentView
@@ -39,8 +40,11 @@ struct InventoryItemDetailView: View {
                 }
                 Button("Annuler", role: .cancel) { }
             }
-            .sheet(item: $browseEntityDestination) { destination in
-                EntityBrowserView(startingPoint: destination)
+            .onChange(of: browseEntityDestination) { _, destination in
+                if let destination {
+                    path.append(destination)
+                    browseEntityDestination = nil
+                }
             }
     }
 
@@ -49,20 +53,20 @@ struct InventoryItemDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: .medium) {
                 if let edition = item.edition {
-                    EditionHeaderView(edition: edition, entityDestination: $browseEntityDestination)
-                        .padding(.horizontal, .medium)
+                    EditionHeaderView(
+                        edition: edition
+                    )
+                    .padding(.horizontal, .medium)
 
-                    EditionAuthorsView(edition: edition, entityDestination: $browseEntityDestination)
+                    EditionAuthorsView(
+                        edition: edition,
+                        entityDestination: $browseEntityDestination
+                    )
 
-                    VStack(spacing: .small) {
-                        ForEach(edition.works) { work in
-                            Button {
-                                browseEntityDestination = EntityDestination.work(uri: work.uri)
-                            } label: {
-                                Text("Other edition for \(work.title)")
-                            }
-                        }
-                    }
+                    EntitySummaryView(
+                        entityUri: edition.uri,
+                        otherEntityUri: edition.works.count == 1 ? edition.works.first?.uri : nil
+                    )
                     .padding(.horizontal, .medium)
                 }
                 if let owner = item.owner {
@@ -77,24 +81,22 @@ struct InventoryItemDetailView: View {
                 }
 
                 if let edition = item.edition {
-                    ScrollView(.horizontal) {
-                        HStack(spacing: .small) {
-                            ForEach(edition.works) { work in
-                                Button {
-                                    browseEntityDestination = .work(uri: work.uri)
-                                } label: {
-                                    Text(work.title)
-                                }
-                                .frame(maxWidth: 150)
-                                .buttonStyle(.bordered)
+                    VStack(spacing: .small) {
+                        ForEach(edition.works) { work in
+                            Button {
+                                browseEntityDestination = EntityDestination.work(uri: work.uri)
+                            } label: {
+                                Text("Other edition for \(work.title)")
                             }
+                            .buttonStyle(.plain)
                         }
-                        .padding(.horizontal, .medium)
                     }
+                    .padding(.horizontal, .medium)
                 }
             }
         }
         .navigationTitle("Livre")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

@@ -24,18 +24,6 @@ enum EntityDestination: Hashable, Identifiable {
         }
     }
 
-    @ViewBuilder
-    func viewForDestination(_ path: Binding<NavigationPath>) -> some View {
-        switch self {
-        case .author(let uri):
-            AuthorDetailView(authorUri: uri, path: path)
-        case .work(let uri):
-            WorkDetailView(workUri: uri, path: path)
-        case .edition(let uri):
-            EditionDetailView(editionUri: uri, path: path)
-        }
-    }
-
     static func destinationForSearchResult(_ result: SearchResult) -> EntityDestination? {
         switch result.type {
         case .works:
@@ -45,5 +33,18 @@ enum EntityDestination: Hashable, Identifiable {
         default:
             return nil
         }
+    }
+}
+extension EntityDestination {
+    @ViewBuilder
+    func viewForDestination(_ path: Binding<NavigationPath>) -> some View {
+      switch self {
+      case .author(let uri):
+          AuthorDetailView(authorUri: uri, path: path)
+      case .work(let uri):
+          WorkDetailView(workUri: uri, path: path)
+      case .edition(let uri):
+          EditionDetailView(editionUri: uri, path: path)
+      }
     }
 }

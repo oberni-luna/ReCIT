@@ -114,7 +114,14 @@ struct EditionDetailView: View {
         if !edition.items.filter({$0.owner?.id != userModel.myUser?.id}).isEmpty {
             Section("Dans l'inventaire de") {
                 ForEach(edition.items) { item in
-                    UserItemCellView(item: item)
+                    Button {
+                        if let owner = item.owner {
+                            nextEntityDestination = NavigationDestination.user(user: owner)
+                        }
+                    } label: {
+                        UserItemCellView(item: item)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }

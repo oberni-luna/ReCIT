@@ -12,6 +12,8 @@ enum NavigationDestination: Hashable, Identifiable {
     case author(uri: String)
     case work(uri: String)
     case edition(uri: String)
+    case user(user: User)
+    case item(item: InventoryItem)
 
     var id: String {
         switch self {
@@ -21,6 +23,10 @@ enum NavigationDestination: Hashable, Identifiable {
             return "work:\(uri)"
         case .edition(let uri):
             return "edition:\(uri)"
+        case .user(let user):
+            return "user:\(user._id)"
+        case .item(let item):
+            return "item:\(item._id)"
         }
     }
 
@@ -45,6 +51,10 @@ extension NavigationDestination {
           WorkDetailView(workUri: uri, path: path)
       case .edition(let uri):
           EditionDetailView(editionUri: uri, path: path)
+      case .user(let user):
+          UserDetailView(user:user, path: path)
+      case .item(let item):
+          InventoryItemDetailView(item: item, path: path)
       }
     }
 }

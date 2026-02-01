@@ -51,11 +51,16 @@ struct InventoryItemDetailView: View {
     @ViewBuilder
     var itemContentView: some View {
         List {
-            if let edition = item.edition {
+            if let edition = item.edition, let owner = item.owner {
                 headerSection(edition: edition)
 
                 Section {
-                    UserItemCellView(item: item)
+                    Button {
+                        browseEntityDestination = NavigationDestination.user(user: owner)
+                    } label: {
+                        UserItemCellView(item: item)
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 Section {

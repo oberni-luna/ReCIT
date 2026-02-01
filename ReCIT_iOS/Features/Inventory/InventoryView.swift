@@ -49,7 +49,7 @@ struct InventoryView: View {
             List {
                 ForEach(filteredItems) { item in
                     Button {
-                        path.append(item)
+                        path.append(NavigationDestination.item(item: item))
                     } label : {
                         InventoryCell(item: item)
                     }

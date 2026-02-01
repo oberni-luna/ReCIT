@@ -12,7 +12,7 @@ struct UserItemCellView: View {
 
     var body: some View {
         if let owner = item.owner {
-            Group {
+            VStack(alignment: .leading, spacing: .small) {
                 HStack(alignment: .center, spacing: .small) {
                     CellThumbnail(imageUrl: owner.avatarURLValue, cornerRadius: .full)
                     VStack(alignment: .leading, spacing: .small) {

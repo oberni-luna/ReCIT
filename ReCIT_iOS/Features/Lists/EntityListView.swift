@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct EntityListView: View {
+    @Environment(\.modelContext) var modelContext
+    @EnvironmentObject var listModel: ListModel
     @Query(sort: \EntityList.name) var allLists: [EntityList]
 
     @State private var searchText: String = ""
@@ -38,11 +40,19 @@ struct EntityListView: View {
                             Text(list.name)
                                 .font(.headline)
                         }
+                        .swipeActions {
+                            Button("Delete", systemImage: "trash") {
+                                Task {
+                                    try? await listModel.deleteList(modelContext: modelContext, list: list)
+                                }
+                            }
+                            .tint(.red)
+                        }
                     }
                 }
             }
             .navigationDestination(for: EntityList.self) { list in
-                EntityListDetail(state: .loadingItems(list: list), path: $path)
+                EntityListDetail(list: list, path: $path)
                     .navigationTitle(list.name)
             }
             .navigationDestination(for: EntityDestination.self) { destination in
@@ -56,10 +66,10 @@ struct EntityListView: View {
                     }
                 }
             }
-            .listStyle(.plain)
+//            .listStyle(.plain)
             .searchable(text: $searchText)
             .sheet(isPresented: $showNewListModal) {
-                NewListFormView()
+                ListFormView()
             }
         }
     }

@@ -50,53 +50,53 @@ struct InventoryItemDetailView: View {
 
     @ViewBuilder
     var itemContentView: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: .medium) {
-                if let edition = item.edition {
-                    EditionHeaderView(
-                        edition: edition
-                    )
-                    .padding(.horizontal, .medium)
+        List {
+            if let edition = item.edition {
+                headerSection(edition: edition)
 
-                    EditionAuthorsView(
-                        edition: edition,
-                        entityDestination: $browseEntityDestination
-                    )
-
-                    EntitySummaryView(
-                        entityUri: edition.uri,
-                        otherEntityUri: edition.works.count == 1 ? edition.works.first?.uri : nil
-                    )
-                    .padding(.horizontal, .medium)
-                }
-                if let owner = item.owner {
-                    UserCellView(user: owner, description: "Owner")
-                        .padding(.horizontal, .medium)
+                Section {
+                    UserItemCellView(item: item)
                 }
 
-                if let details = item.details, !details.isEmpty {
-                    Text(details)
-                        .font(.subheadline)
-                        .padding(.horizontal, .medium)
-                }
+                Section {
+                    ForEach(edition.works) { work in
+                        Button {
+                            browseEntityDestination = EntityDestination.work(uri: work.uri)
+                        } label: {
+                            VStack(alignment: .leading, spacing: .small) {
+                                Text("Other edition for")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
 
-                if let edition = item.edition {
-                    VStack(spacing: .small) {
-                        ForEach(edition.works) { work in
-                            Button {
-                                browseEntityDestination = EntityDestination.work(uri: work.uri)
-                            } label: {
-                                Text("Other edition for \(work.title)")
+                                Text(work.title)
+                                    .font(.headline)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .buttonStyle(.plain)
                     }
-                    .padding(.horizontal, .medium)
                 }
             }
         }
         .navigationTitle("Livre")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    func headerSection(edition: Edition) -> some View {
+        Section {
+            EntitySummaryView(entityUri: edition.uri, otherEntityUri: edition.works.first?.uri)
+
+            EntityAuthorsView(
+                authors: edition.authors,
+                entityDestination: $browseEntityDestination
+            )
+        } header: {
+            EntityHeaderView(
+                title: edition.title,
+                subtitle: edition.subtitle,
+                imageUrl: edition.image
+            )
+        }
     }
 }
 

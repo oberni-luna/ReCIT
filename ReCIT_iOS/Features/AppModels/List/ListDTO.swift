@@ -17,11 +17,12 @@ struct ListDTO: Codable {
     let _id: String
     let _rev: String
     let name: String
+    let description: String
     let created: Double
     let updated: Double?
     let visibility: [String]
     let type: String
-    let elements: [ListElementDTO]
+    let elements: [ListElementDTO]?
 }
 
 struct ListElementDTO: Codable {
@@ -48,14 +49,18 @@ struct AddToListResponseDTO: Codable {
 
 // MARK: Create list
 struct NewListDTO: Codable {
+    let id: String?
     let name: String
     let description: String
     let visibility: [String]
-    let type: String
+    let type: String?
 }
 
 struct NewListResponseDTO: Codable {
     let list: ListDTO
 }
 
-
+struct DeleteListResponseDTO: Codable {
+    let ok: Bool
+    let lists: [ListDTO]
+}

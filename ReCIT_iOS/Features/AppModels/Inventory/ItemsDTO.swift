@@ -23,7 +23,7 @@ struct ItemDTO: Codable {
     let owner: String
     let created: Double
     let updated: Double?
-    let busy: Bool
+    let busy: Bool?
     let snapshot: EntitySnapshotDTO
 }
 

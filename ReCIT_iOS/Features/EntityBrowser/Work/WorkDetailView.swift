@@ -21,38 +21,21 @@ struct WorkDetailView: View {
     }
 
     @State private var state: ViewState = .loadingWork
+    @State private var nextEntityDestination: EntityDestination?
 
     let workUri: String
     @Binding var path: NavigationPath
 
     var body: some View {
-        Group {
+        List {
             switch state {
             case .loadingWork:
                 ProgressView()
-                    .onAppear {
-                        Task {
-                            await fetchWork()
-                        }
-                    }
             case .loadingEditions(work: let work):
-                List {
-                    Section {
-                        EntitySummaryView(entityUri: work.uri)
-                    } header: {
-                        WorkHeaderView(work: work)
-                    }
-                }
+                headerSection(work: work)
             case .loaded(work: let work, editions: let editions):
-                List {
-                    Section {
-                        EntitySummaryView(entityUri: work.uri)
-                    } header: {
-                        WorkHeaderView(work: work)
-                    }
-
-                    editionsSection(work: work, editions: editions)
-                }
+                headerSection(work: work)
+                editionsSection(work: work, editions: editions)
             case .error(error: let error):
                 Text("Error \(error.localizedDescription) !!")
             }
@@ -63,9 +46,33 @@ struct WorkDetailView: View {
                 await fetchEditions()
             }
         }
+        .onChange(of: nextEntityDestination) { _, destination in
+            if let destination {
+                path.append(destination)
+                nextEntityDestination = nil
+            }
+        }
         .listStyle(.insetGrouped)
         .navigationTitle("Oeuvre")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    func headerSection(work: Work) -> some View {
+        Section {
+            EntitySummaryView(entityUri: work.uri)
+
+            EntityAuthorsView(
+                authors: work.authors,
+                entityDestination: $nextEntityDestination
+            )
+        } header: {
+            EntityHeaderView(
+                title: work.title,
+                subtitle: work.subtitle,
+                imageUrl: work.image
+            )
+        }
     }
 
     @ViewBuilder
@@ -74,7 +81,7 @@ struct WorkDetailView: View {
             ForEach(editions) { edition in
                 let result:SearchResult = SearchResult(id: edition.uri, uri: edition.uri, title: edition.title, description: edition.subtitle, imageUrl: edition.image, score: 0, type: .works)
                 Button {
-                    path.append(edition)
+                    path.append(EntityDestination.edition(uri: edition.uri))
                 } label: {
                     SearchResultCell(result: result)
                 }

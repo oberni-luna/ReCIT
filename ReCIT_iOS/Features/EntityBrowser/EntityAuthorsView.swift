@@ -7,21 +7,20 @@
 
 import SwiftUI
 
-struct EditionAuthorsView: View {
+struct EntityAuthorsView: View {
     @Environment(\.colorScheme) var colorScheme
 
-    let edition: Edition
+    let authors: [Author]
     @Binding var entityDestination: EntityDestination?
 
     var body: some View {
-        if edition.authors.count == 1, let author = edition.authors.first {
+        if authors.count == 1, let author = authors.first {
             Button {
                 entityDestination = EntityDestination.author(uri: author.uri)
             } label: {
-                HStack(alignment: .center, spacing: .xSmall){
+                HStack(alignment: .center, spacing: .small){
                     Group {
-                        CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: 36)
-                            .padding(.vertical, .small)
+                        CellThumbnail(imageUrl: author.image, cornerRadius: .full)
 
                         Text(author.name)
                             .font(.headline)
@@ -30,43 +29,36 @@ struct EditionAuthorsView: View {
                         Spacer()
 
                         Image(.chevronRight)
-                            .padding(.trailing, .small)
                     }
                 }
                 .foregroundStyle(.textDefault)
-                .padding(.horizontal, .medium)
             }
         } else {
             ScrollView(.horizontal) {
                 HStack(spacing: .sMedium) {
-                    ForEach(edition.authors) { author in
+                    ForEach(authors) { author in
                         Button {
                             entityDestination = EntityDestination.author(uri: author.uri)
                         } label: {
-                            HStack(alignment: .center, spacing: .xSmall){
+                            HStack(alignment: .center, spacing: .small){
                                 Group {
                                     CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: 36)
-                                        .padding(.vertical, .small)
-                                        .padding(.leading, .small)
 
                                     Text(author.name)
                                         .font(.headline)
+                                        .lineLimit(2, reservesSpace: true)
                                         .multilineTextAlignment(.leading)
-
-                                    Spacer()
+                                        .fixedSize(horizontal: false, vertical: true)
 
                                     Image(.chevronRight)
                                         .padding(.trailing, .small)
                                 }
                             }
-                            .foregroundStyle(.textDefault)
-                            .frame(maxWidth: 200)
-                            .background(.thickMaterial)
-                            .cornerRadius(.rounded)
                         }
+                        .frame(maxWidth: 200)
+                        .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, .medium)
             }
         }
     }

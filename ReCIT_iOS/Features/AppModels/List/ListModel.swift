@@ -31,10 +31,33 @@ class ListModel: ObservableObject {
         }
     }
 
+    func deleteList(modelContext: ModelContext, list: EntityList) async throws {
+        let _: DeleteListResponseDTO? = try await fetchDataService.send(
+            toEndpoint: "/api/lists?action=delete",
+            method: "POST",
+            payload: ["ids": list._id]
+        )
+        modelContext.delete(list)
+        try modelContext.save()
+    }
+
+    func createOrUpdateList(modelContext: ModelContext, list: EntityList) async throws {
+        if list._id.isEmpty {
+            try await self.createList(modelContext: modelContext, name: list.name, description: list.explanation, type: list.type.rawValue, visibility: list.visibility.map(\.rawValue))
+        } else {
+            let _ : NewListResponseDTO? = try await fetchDataService.send(
+                toEndpoint: "/api/lists",
+                method: "PUT",
+                payload: NewListDTO(id: nil, name: list.name, description: list.explanation, visibility: list.visibility.map(\.rawValue), type: list.type.rawValue)
+            )
+            try modelContext.save()
+        }
+    }
+
     func createList(modelContext: ModelContext, name: String, description: String, type: String, visibility: [String]) async throws {
-        let newList: NewListResponseDTO? = try await fetchDataService.post(
+        let newList: NewListResponseDTO? = try await fetchDataService.send(
             toEndpoint: "/api/lists?action=create",
-            payload: NewListDTO(name: name, description: description, visibility: visibility, type: type)
+            payload: NewListDTO(id: nil, name: name, description: description, visibility: visibility, type: type)
         )
 
         if let newList {
@@ -45,7 +68,7 @@ class ListModel: ObservableObject {
 
     func addEntitiesToList(listId: String, entityUris: [String]) async throws {
         let addToListDTO: AddToListDTO = .init(id: listId, uris: entityUris)
-        let addToListResponse: AddToListResponseDTO? = try await fetchDataService.post(
+        let _: AddToListResponseDTO? = try await fetchDataService.send(
             toEndpoint: "/api/lists?action=add-elements",
             payload: addToListDTO
         )

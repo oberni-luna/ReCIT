@@ -1,51 +1,35 @@
 //
-//  EntityHeaderView.swift
+//  WorkHeaderView.swift
 //  ReCIT_iOS
 //
 //  Created by Olivier Berni on 24/01/2026.
 //
 
 import SwiftUI
+import SwiftData
 
-struct EntityHeaderView<Content: View>: View {
-    @Environment(\.colorScheme) var colorScheme
+struct EntityHeaderView: View {
+    @EnvironmentObject private var inventoryModel: InventoryModel
+    @Environment(\.modelContext) private var modelContext
 
+    let title: String
+    let subtitle: String?
     let imageUrl: String?
-    let content: () -> Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: .xSmall) {
-            imageView
-                .frame(maxWidth:.infinity, maxHeight: 256)
-                .shadow(color:.black.opacity(0.1), radius: 10)
-                .padding(.bottom, .sMedium)
+        EntityImageView(imageUrl: imageUrl) {
+            VStack(alignment: .leading, spacing: .small) {
+                Text(title)
+                    .font(.largeTitle)
+                    .bold()
+                    .foregroundStyle(.textDefault)
 
-            content()
-        }
-        .background(alignment: .bottom) {
-            imageView
-                .aspectRatio(contentMode: .fill)
-                .ignoresSafeArea(.all)
-                .blur(radius: 80)
-                .opacity(colorScheme == .dark ? 0.2 : 0.2)
-                .accessibilityHidden(true)
-        }
-    }
-
-    @ViewBuilder
-    var imageView: some View {
-        if let url = URL(string: imageUrl ?? "") {
-            AsyncImage(url: url) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .cornerRadius(.minimal)
-            } placeholder: {
-                ProgressView()
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.textSecondary)
+                }
             }
-        } else {
-            EmptyView()
         }
     }
 }
-

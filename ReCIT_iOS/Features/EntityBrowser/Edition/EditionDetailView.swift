@@ -22,6 +22,7 @@ struct EditionDetailView: View {
 
     let editionUri: String
     @State var viewState: ViewState = .loadingEdition
+    @State private var nextEntityDestination: EntityDestination?
     @Binding var path: NavigationPath
 
     var inMyInventory: Bool {
@@ -37,85 +38,92 @@ struct EditionDetailView: View {
     @State private var addingItem: Bool = false
 
     var body: some View {
-        Group {
+        List {
             switch viewState {
-            case .noResult:
-                Text("Cette edition n'existe pas sur inventaire.io")
-            case .error(error: let error):
-                Text("Error loading edition \(error.localizedDescription)")
             case .loadingEdition:
-                Text("loading edition")
+                ProgressView()
             case .loaded(edition: let edition):
-                ScrollView {
-                    VStack(alignment: .leading, spacing: .medium) {
-                        EditionHeaderView(
-                            edition: edition
-                        )
-                        .padding(.horizontal, .medium)
+                headerSection(edition: edition)
+                userInventorySection(edition: edition)
 
-                        EditionAuthorsView(edition: edition, entityDestination: Binding<EntityDestination?>(
-                            get: { nil },
-                            set: { destination in path.append(destination) }
-                        ))
-
-                        EntitySummaryView(
-                            entityUri: edition.uri,
-                            otherEntityUri: edition.works.count == 1 ? (edition.works.first.map { $0.uri }) : nil
-                        )
-                        .padding(.horizontal, .medium)
-
-                        ScrollView(.horizontal) {
-                            HStack(spacing: .small) {
-                                ForEach(edition.items) { item in
-                                    if let owner = item.owner {
-                                        UserCellView(user: owner, description: "Dans l'inventaire de")
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, .medium)
-                        }
-
-                        if !inMyInventory {
-                            addButton(edition: edition)
-                                .padding(.horizontal, .medium)
-                        }
-
-                        ScrollView(.horizontal) {
-                            HStack(spacing: .small) {
-                                ForEach(edition.works) { work in
-                                    Button {
-                                        path.append(EntityDestination.work(uri: work.uri))
-                                    } label: {
-                                        Text(work.title)
-                                    }
-                                    .frame(maxWidth: 150)
-                                    .buttonStyle(.bordered)
-
-                                    ForEach(work.authors) { author in
-                                        Button {
-                                            path.append(EntityDestination.author(uri: author.uri))
-                                        } label: {
-                                            Text(author.name)
-                                        }
-                                        .frame(maxWidth: 150)
-                                        .buttonStyle(.bordered)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, .medium)
-                        }
+                if !inMyInventory {
+                    Section {
+                        addToInventoryButton(edition: edition)
                     }
                 }
+            case .error(error: let error):
+                Text("Error loading edition \(error.localizedDescription)")
+            case .noResult:
+                Text("Cette edition n'existe pas sur inventaire.io")
             }
         }
         .navigationTitle("Edition")
+        .toolbar {
+            toolbarContent
+        }
         .onAppear {
             Task { await loadEdition() }
+        }
+        .onChange(of: nextEntityDestination) { _, destination in
+            if let destination {
+                path.append(destination)
+                nextEntityDestination = nil
+            }
+        }
+    }
+
+    @ToolbarContentBuilder
+    var toolbarContent : some ToolbarContent {
+        ToolbarItemGroup(placement: .confirmationAction) {
+            switch viewState {
+            case .loaded(let edition):
+                Button("Add to inventory", systemImage: "plus") {
+                    Task {
+                        await addToInventory(edition: edition)
+                    }
+                }
+            case .loadingEdition, .error, .noResult:
+                EmptyView()
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .imageScale(.large)
         }
     }
 
     @ViewBuilder
-    func addButton(edition: Edition) -> some View {
+    func headerSection(edition: Edition) -> some View {
+        Section {
+            EntitySummaryView(entityUri: edition.uri, otherEntityUri: edition.works.first?.uri)
+
+            EntityAuthorsView(
+                authors: edition.authors,
+                entityDestination: $nextEntityDestination
+            )
+        } header: {
+            EntityHeaderView(
+                title: edition.title,
+                subtitle: edition.subtitle,
+                imageUrl: edition.image
+            )
+        }
+    }
+
+    @ViewBuilder
+    func userInventorySection(edition: Edition) -> some View {
+        if !edition.items.isEmpty {
+            Section("Dans l'inventaire de") {
+                ForEach(edition.items) { item in
+//                    if item.owner?.id != userModel.myUser?.id {
+                        UserItemCellView(item: item)
+//                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    func addToInventoryButton(edition: Edition) -> some View {
         if addingItem {
             ProgressView()
         } else {
@@ -159,7 +167,6 @@ struct EditionDetailView: View {
                 visibility: [.friends],
                 forUser: user
             )
-            dismiss()
         } catch {
             errorMessage = "Impossible d'ajouter ce livre à votre inventaire."
         }

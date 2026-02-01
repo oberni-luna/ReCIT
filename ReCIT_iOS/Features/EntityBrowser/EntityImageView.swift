@@ -1,33 +1,27 @@
 //
-//  EditionHeaderView.swift
+//  EntityHeaderView.swift
 //  ReCIT_iOS
 //
-//  Created by Olivier Berni on 16/01/2026.
+//  Created by Olivier Berni on 24/01/2026.
 //
+
 import SwiftUI
 
-struct EditionHeaderView: View {
+struct EntityImageView<Content: View>: View {
     @Environment(\.colorScheme) var colorScheme
 
-    let edition: Edition
-//    @Binding var entityDestination: EntityDestination?
+    let imageUrl: String?
+    let content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: .xSmall) {
             imageView
-                    .frame(maxHeight: 256)
-                    .shadow(color:.black.opacity(0.1), radius: 10)
-                    .padding(.bottom, .sMedium)
+                .frame(maxWidth:.infinity)
+                .frame(height: 256)
+                .shadow(color:.black.opacity(0.1), radius: 10)
+                .padding(.bottom, .sMedium)
 
-            Text(edition.title)
-                .font(.largeTitle)
-                .foregroundStyle(.textDefault)
-                .bold()
-            if let subtitle = edition.subtitle {
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.textDefault)
-            }
+            content()
         }
         .background(alignment: .bottom) {
             imageView
@@ -41,7 +35,7 @@ struct EditionHeaderView: View {
 
     @ViewBuilder
     var imageView: some View {
-        if let url = URL(string: edition.image ?? "") {
+        if let url = URL(string: imageUrl ?? "") {
             AsyncImage(url: url) { image in
                 image
                     .resizable()

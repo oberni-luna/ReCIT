@@ -23,7 +23,7 @@ class APIService {
         return env.apiBaseUrl
     }
 
-    func post<T: Codable, U: Codable>(toEndpoint: String, payload: T) async throws -> U? {
+    func send<T: Codable, U: Codable>(toEndpoint: String, method: String = "POST", payload: T) async throws -> U? {
         do {
             guard let url = URL(string: "\(env.apiBaseUrl)\(toEndpoint)") else { throw NetworkError.badUrl }
             var request = URLRequest(url: url)
@@ -40,7 +40,9 @@ class APIService {
 
             guard response.statusCode >= 200 && response.statusCode < 300 else { throw NetworkError.badStatus(message: response.debugDescription) }
 
-            guard let decodedResponse = try? JSONDecoder().decode(U.self, from: responseData) else { throw NetworkError.failedToDecodeResponse }
+            guard let decodedResponse = try? JSONDecoder().decode(U.self, from: responseData) else {
+                throw NetworkError.failedToDecodeResponse
+            }
 
             return decodedResponse
         } catch NetworkError.badUrl {
@@ -52,7 +54,7 @@ class APIService {
         } catch NetworkError.failedToDecodeResponse {
             print("Failed to decode response into the given type")
         } catch {
-            print("An error occured downloading the data")
+            print("An error occured downloading the data:\n\(error.localizedDescription)")
         }
         return nil
     }

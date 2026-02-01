@@ -86,7 +86,7 @@ class InventoryModel: ObservableObject {
             shelves: []
         )
 
-        guard let itemDTO: ItemDTO = try await apiService.post(toEndpoint: "/api/items", payload: payload) else {
+        guard let itemDTO: ItemDTO = try await apiService.send(toEndpoint: "/api/items", payload: payload) else {
             throw NetworkError.badResponse
         }
 
@@ -99,7 +99,7 @@ class InventoryModel: ObservableObject {
     func removeItem( _ item: InventoryItem, modelContext: ModelContext) async throws {
         let payload:[String:[String]] = ["ids":[item._id]]
 
-        guard let ok: [String: Bool] = try await apiService.post(toEndpoint: "/api/items?action=delete-by-ids", payload: payload) else {
+        guard let ok: [String: Bool] = try await apiService.send(toEndpoint: "/api/items?action=delete-by-ids", payload: payload) else {
             throw NetworkError.badResponse
         }
 

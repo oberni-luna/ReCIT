@@ -18,12 +18,12 @@ public final class InventoryItem{
     var ownerId: String
     var created: Date
     var updated: Date?
-    var busy: Bool
+    var busy: Bool?
     var details: String?
     var edition: Edition?
     var owner: User?
 
-    init(_id: String, _rev: String, transaction: TransactionType, visibility: [VisibilityAttributes], ownerId: String, created: Date, updated: Date?, busy: Bool, details: String? = nil, edition: Edition) {
+    init(_id: String, _rev: String, transaction: TransactionType, visibility: [VisibilityAttributes], ownerId: String, created: Date, updated: Date?, busy: Bool?, details: String? = nil, edition: Edition) {
         self._id = _id
         self._rev = _rev
         self.transaction = transaction

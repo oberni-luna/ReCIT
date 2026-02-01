@@ -13,16 +13,39 @@ struct EntityListDetail: View {
     @Environment(\.dismiss) private var dismiss
 
     enum ViewState {
-        case loadingItems(list: EntityList)
+        case loadingItems
         case loaded(items: [any Entity])
         case error(error: Error)
         case empty
     }
 
-    @State var state: ViewState
+    let list: EntityList
     @Binding var path: NavigationPath
 
+    @State var state: ViewState = .loadingItems
+    @State private var presentEditForm: Bool = false
+
+    @ViewBuilder
     var body: some View {
+        List {
+            Section {
+                itemView
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("edit", systemImage: "pencil") {
+                    presentEditForm = true
+                }
+            }
+        }
+        .sheet(isPresented: $presentEditForm) {
+            ListFormView(list: list)
+        }
+    }
+
+    @ViewBuilder
+    var itemView: some View {
         switch state {
         case .empty:
             Text("This list is empty")
@@ -36,17 +59,15 @@ struct EntityListDetail: View {
                     }
                 }
         case .loaded(items: let items):
-            List {
-                ForEach(items, id: \.uri) { item in
-                    Button {
-                        if let entityDestination = item.entityDestination {
-                            path.append(entityDestination)
-                        }
-                    } label : {
-                        EntityCellView(entity: item)
+            ForEach(items, id: \.uri) { item in
+                Button {
+                    if let entityDestination = item.entityDestination {
+                        path.append(entityDestination)
                     }
-                    .buttonStyle(.plain)
+                } label : {
+                    EntityCellView(entity: item)
                 }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -55,7 +76,7 @@ struct EntityListDetail: View {
     private func fetchItemEntities() async {
         do {
             switch state {
-            case .loadingItems(list: let list):
+            case .loadingItems:
                 if let items: [any Entity] = switch list.type {
                 case .author:
                     try await inventoryModel.getOrFetchAuthors(modelContext: modelContext, uris: list.elements.map(\.uri))
@@ -64,7 +85,7 @@ struct EntityListDetail: View {
                 case .publisher:
                     []
                 } {
-                    self.state = .loaded(items: items)
+                    self.state = items.isEmpty ? .empty : .loaded(items: items)
                 } else {
                     self.state = .empty
                 }

@@ -12,7 +12,7 @@ struct CellThumbnail: View {
     let cornerRadius: DesignSystem.CornerRadius
     let size: CGFloat
 
-    init(imageUrl: String?, cornerRadius: DesignSystem.CornerRadius = .medium, size:CGFloat = 48) {
+    init(imageUrl: String?, cornerRadius: DesignSystem.CornerRadius = .medium, size:CGFloat = 36) {
         self.imageUrl = imageUrl
         self.cornerRadius = cornerRadius
         self.size = size

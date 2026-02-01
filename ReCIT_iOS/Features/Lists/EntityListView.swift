@@ -55,7 +55,7 @@ struct EntityListView: View {
                 EntityListDetail(list: list, path: $path)
                     .navigationTitle(list.name)
             }
-            .navigationDestination(for: EntityDestination.self) { destination in
+            .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }
             .navigationTitle("📋 Lists")

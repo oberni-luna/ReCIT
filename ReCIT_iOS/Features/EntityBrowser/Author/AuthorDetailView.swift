@@ -10,8 +10,7 @@ import SwiftUI
 struct AuthorDetailView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-
+    
     enum ViewState {
         case loadingAuthor
         case loadingWorks(author: Author)
@@ -65,7 +64,7 @@ struct AuthorDetailView: View {
                         if !work.title.isEmpty {
                             let result:SearchResult = SearchResult(id: work.uri, uri: work.uri, title: work.title, description: work.subtitle, imageUrl: work.image, score: 0, type: .works)
                             Button {
-                                path.append(EntityDestination.work(uri: work.uri))
+                                path.append(NavigationDestination.work(uri: work.uri))
                             } label: {
                                 SearchResultCell(result: result)
                             }

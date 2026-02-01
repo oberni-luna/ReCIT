@@ -11,14 +11,14 @@ struct EntityBrowserView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var path: NavigationPath = .init()
 
-    let startingPoint: EntityDestination
+    let startingPoint: NavigationDestination
 
     var body: some View {
         NavigationStack(path: $path) {
             Group {
                 startingPoint.viewForDestination($path)
             }
-            .navigationDestination(for: EntityDestination.self) { destination in
+            .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }
             .toolbar {

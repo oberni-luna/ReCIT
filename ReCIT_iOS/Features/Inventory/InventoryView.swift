@@ -56,10 +56,7 @@ struct InventoryView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .navigationDestination(for: InventoryItem.self) { item in
-                InventoryItemDetailView(item: item, path: $path)
-            }
-            .navigationDestination(for: EntityDestination.self) { destination in
+            .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }
             .navigationTitle("📚 Inventory")

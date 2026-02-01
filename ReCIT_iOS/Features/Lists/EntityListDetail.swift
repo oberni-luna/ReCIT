@@ -99,7 +99,7 @@ struct EntityListDetail: View {
 }
 
 private extension Entity {
-    var entityDestination: EntityDestination? {
+    var entityDestination: NavigationDestination? {
         switch self {
         case is Author:
             return .author(uri: self.uri)

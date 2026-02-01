@@ -25,7 +25,7 @@ struct AddInventoryItemScanView: View {
                 completion: handleScan
             )
             .ignoresSafeArea(.all)
-            .navigationDestination(for: EntityDestination.self) { destination in
+            .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }
         }
@@ -40,7 +40,7 @@ struct AddInventoryItemScanView: View {
             guard details.count == 13 else { return }
 
             let editionUri = "isbn:\(details)"
-            path.append(EntityDestination.edition(uri: editionUri))
+            path.append(NavigationDestination.edition(uri: editionUri))
 
         case .failure(let error):
             print("Scanning failed: \(error.localizedDescription)")

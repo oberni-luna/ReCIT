@@ -21,7 +21,7 @@ struct WorkDetailView: View {
     }
 
     @State private var state: ViewState = .loadingWork
-    @State private var nextEntityDestination: EntityDestination?
+    @State private var nextEntityDestination: NavigationDestination?
 
     let workUri: String
     @Binding var path: NavigationPath
@@ -81,7 +81,7 @@ struct WorkDetailView: View {
             ForEach(editions) { edition in
                 let result:SearchResult = SearchResult(id: edition.uri, uri: edition.uri, title: edition.title, description: edition.subtitle, imageUrl: edition.image, score: 0, type: .works)
                 Button {
-                    path.append(EntityDestination.edition(uri: edition.uri))
+                    path.append(NavigationDestination.edition(uri: edition.uri))
                 } label: {
                     SearchResultCell(result: result)
                 }

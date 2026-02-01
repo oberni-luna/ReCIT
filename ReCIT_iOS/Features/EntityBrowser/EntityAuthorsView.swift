@@ -11,12 +11,12 @@ struct EntityAuthorsView: View {
     @Environment(\.colorScheme) var colorScheme
 
     let authors: [Author]
-    @Binding var entityDestination: EntityDestination?
+    @Binding var entityDestination: NavigationDestination?
 
     var body: some View {
         if authors.count == 1, let author = authors.first {
             Button {
-                entityDestination = EntityDestination.author(uri: author.uri)
+                entityDestination = NavigationDestination.author(uri: author.uri)
             } label: {
                 HStack(alignment: .center, spacing: .small){
                     Group {
@@ -38,7 +38,7 @@ struct EntityAuthorsView: View {
                 HStack(spacing: .sMedium) {
                     ForEach(authors) { author in
                         Button {
-                            entityDestination = EntityDestination.author(uri: author.uri)
+                            entityDestination = NavigationDestination.author(uri: author.uri)
                         } label: {
                             HStack(alignment: .center, spacing: .small){
                                 Group {

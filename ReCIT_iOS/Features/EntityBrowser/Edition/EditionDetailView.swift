@@ -22,7 +22,7 @@ struct EditionDetailView: View {
 
     let editionUri: String
     @State var viewState: ViewState = .loadingEdition
-    @State private var nextEntityDestination: EntityDestination?
+    @State private var nextEntityDestination: NavigationDestination?
     @Binding var path: NavigationPath
 
     var inMyInventory: Bool {
@@ -111,12 +111,10 @@ struct EditionDetailView: View {
 
     @ViewBuilder
     func userInventorySection(edition: Edition) -> some View {
-        if !edition.items.isEmpty {
+        if !edition.items.filter({$0.owner?.id != userModel.myUser?.id}).isEmpty {
             Section("Dans l'inventaire de") {
                 ForEach(edition.items) { item in
-//                    if item.owner?.id != userModel.myUser?.id {
-                        UserItemCellView(item: item)
-//                    }
+                    UserItemCellView(item: item)
                 }
             }
         }

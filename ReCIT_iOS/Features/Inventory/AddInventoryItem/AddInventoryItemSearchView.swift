@@ -19,7 +19,7 @@ struct AddInventoryItemSearchView: View {
     var body: some View {
         NavigationStack(path: $path) {
             SearchView(onNavigate: { result in
-                if let destination = EntityDestination.destinationForSearchResult(result) {
+                if let destination = NavigationDestination.destinationForSearchResult(result) {
                     path.append(destination)
                 }
             })
@@ -30,7 +30,7 @@ struct AddInventoryItemSearchView: View {
                     }
                 }
             }
-            .navigationDestination(for: EntityDestination.self) { destination in
+            .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }
         }

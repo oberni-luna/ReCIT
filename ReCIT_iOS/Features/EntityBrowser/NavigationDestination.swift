@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-enum EntityDestination: Hashable, Identifiable {
+enum NavigationDestination: Hashable, Identifiable {
     case author(uri: String)
     case work(uri: String)
     case edition(uri: String)
@@ -24,7 +24,7 @@ enum EntityDestination: Hashable, Identifiable {
         }
     }
 
-    static func destinationForSearchResult(_ result: SearchResult) -> EntityDestination? {
+    static func destinationForSearchResult(_ result: SearchResult) -> NavigationDestination? {
         switch result.type {
         case .works:
             return .work(uri: result.uri)
@@ -35,7 +35,7 @@ enum EntityDestination: Hashable, Identifiable {
         }
     }
 }
-extension EntityDestination {
+extension NavigationDestination {
     @ViewBuilder
     func viewForDestination(_ path: Binding<NavigationPath>) -> some View {
       switch self {

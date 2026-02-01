@@ -15,7 +15,7 @@ struct InventoryItemDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showDeleteConfirmation = false
-    @State private var browseEntityDestination: EntityDestination?
+    @State private var browseEntityDestination: NavigationDestination?
 
     let item: InventoryItem
     @Binding var path: NavigationPath
@@ -61,7 +61,7 @@ struct InventoryItemDetailView: View {
                 Section {
                     ForEach(edition.works) { work in
                         Button {
-                            browseEntityDestination = EntityDestination.work(uri: work.uri)
+                            browseEntityDestination = NavigationDestination.work(uri: work.uri)
                         } label: {
                             VStack(alignment: .leading, spacing: .small) {
                                 Text("Other edition for")

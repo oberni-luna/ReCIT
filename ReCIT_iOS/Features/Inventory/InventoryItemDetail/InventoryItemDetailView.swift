@@ -11,7 +11,6 @@ struct InventoryItemDetailView: View {
     @EnvironmentObject private var userModel: UserModel
     @EnvironmentObject var inventoryModel: InventoryModel
     @EnvironmentObject var listModel: ListModel
-    @Query(sort: \EntityList.name) var entityLists: [EntityList]
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -25,24 +24,14 @@ struct InventoryItemDetailView: View {
         item.owner?._id == userModel.myUser?._id
     }
 
+    var hasDetails: Bool {
+        item.details.isEmpty == false
+    }
+
     var body: some View {
         itemContentView
             .toolbar {
-                ToolbarItem(placement: .destructiveAction) {
-                    if isMyItem {
-                        Button(role: .destructive) {
-                            showDeleteConfirmation = true
-                        } label: {
-                            Label("Supprimer", systemImage: "trash")
-                        }
-                    } else {
-                        Button {
-                            //
-                        } label: {
-                            Label("Envoyer une demander", systemImage: "questionmark.message")
-                        }
-                    }
-                }
+                toolbarContent()
             }
             .confirmationDialog("Supprimer cet item de votre inventaire ?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
                 Button("Supprimer", role: .destructive) {
@@ -52,6 +41,19 @@ struct InventoryItemDetailView: View {
                     dismiss()
                 }
                 Button("Annuler", role: .cancel) { }
+            }
+            .selectListToAdd(
+                showAddToListDialog: $showAddToListDialog,
+                onListSelected: { list in
+                    Task {
+                        try await listModel.addEntitiesToList(
+                            listId: list._id,
+                            entityUris: item.workUris
+                        )
+                    }
+                })
+            .sheet(isPresented: $showItemDetailsForm) {
+                InventoryItemDetailsFormView(item: item)
             }
             .onChange(of: browseEntityDestination) { _, destination in
                 if let destination {
@@ -102,8 +104,8 @@ struct InventoryItemDetailView: View {
     @ViewBuilder
     var myItemSection: some View {
         Section {
-            if let details = item.details, !details.isEmpty {
-                Text(details)
+            if !item.details.isEmpty {
+                Text(item.details)
                     .font(.body)
                     .foregroundStyle(.textDefault)
                     .withLabel(label: "Ce que j'en pense")
@@ -144,5 +146,43 @@ struct InventoryItemDetailView: View {
         }
     }
 
+    @State private var showAddToListDialog: Bool = false
+    @State private var showItemDetailsForm: Bool = false
+    @ToolbarContentBuilder
+    func toolbarContent() -> some ToolbarContent {
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Menu {
+                if !isMyItem {
+                    Button {
+                        //
+                    } label: {
+                        Label("Envoyer une demander", systemImage: "questionmark.message")
+                    }
+                }
+
+                Button {
+                    showAddToListDialog = true
+                } label: {
+                    Label("Add to a list", systemImage: "list.bullet")
+                }
+
+                if isMyItem {
+                    Button {
+                        showItemDetailsForm = true
+                    } label: {
+                        Label(hasDetails ? "Changer mon commentaire" : "Écrire un commentaire", systemImage: "pencil")
+                    }
+
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
+                    } label: {
+                        Label("Supprimer", systemImage: "trash")
+                    }
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+            }
+        }
+    }
 }
 

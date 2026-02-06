@@ -35,7 +35,7 @@ struct UserItemCellView: View {
                         Text("Depuis \(item.created.formatted(date: .abbreviated, time: .omitted))")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                        
+
                         TransactionTypeLabel(transactionType: item.transaction)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
@@ -46,8 +46,8 @@ struct UserItemCellView: View {
 
                 Image(.chevronRight)
             }
-            if let details = item.details, !details.isEmpty {
-                Text(details)
+            if !item.details.isEmpty {
+                Text(item.details)
                     .font(.subheadline)
                     .foregroundStyle(.textDefault)
             }

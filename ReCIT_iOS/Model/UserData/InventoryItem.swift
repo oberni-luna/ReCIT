@@ -19,11 +19,27 @@ public final class InventoryItem{
     var created: Date
     var updated: Date?
     var busy: Bool?
-    var details: String?
+    var details: String
     var edition: Edition?
     var owner: User?
 
-    init(_id: String, _rev: String, transaction: TransactionType, visibility: [VisibilityAttributes], ownerId: String, created: Date, updated: Date?, busy: Bool?, details: String? = nil, edition: Edition) {
+    var authors: [Author] {
+        if let edition, edition.works.flatMap(\.authors).isEmpty == false {
+            Array(Set(edition.works.flatMap(\.authors)))
+        } else {
+            []
+        }
+    }
+
+    var workUris: [String] {
+        if let edition, edition.works.isEmpty == false {
+            Array(Set(edition.works.map(\.uri)))
+        } else {
+            []
+        }
+    }
+
+    init(_id: String, _rev: String, transaction: TransactionType, visibility: [VisibilityAttributes], ownerId: String, created: Date, updated: Date?, busy: Bool?, details: String = "", edition: Edition) {
         self._id = _id
         self._rev = _rev
         self.transaction = transaction
@@ -52,7 +68,7 @@ public final class InventoryItem{
             created: Date(timeIntervalSince1970: itemDTO.created / 1000),
             updated: updatedDate,
             busy: itemDTO.busy,
-            details: itemDTO.details,
+            details: itemDTO.details ?? "",
             edition: Edition(uri: itemDTO.entity, entitySnapshotDTO: itemDTO.snapshot, apiService: apiService, works: [])
         )
         self.owner = forUser

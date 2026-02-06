@@ -10,6 +10,7 @@ import SwiftUI
 struct EditionDetailView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel
     @EnvironmentObject private var userModel: UserModel
+    @EnvironmentObject var listModel: ListModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -23,6 +24,8 @@ struct EditionDetailView: View {
     let editionUri: String
     @State var viewState: ViewState = .loadingEdition
     @State private var nextEntityDestination: NavigationDestination?
+    @State private var showAddToListDialog: Bool = false
+    
     @Binding var path: NavigationPath
 
     var inMyInventory: Bool {
@@ -38,19 +41,26 @@ struct EditionDetailView: View {
     @State private var addingItem: Bool = false
 
     var body: some View {
-        List {
+        VStack {
             switch viewState {
             case .loadingEdition:
                 ProgressView()
             case .loaded(edition: let edition):
-                headerSection(edition: edition)
-                userInventorySection(edition: edition)
-
-                if !inMyInventory {
-                    Section {
-                        addToInventoryButton(edition: edition)
-                    }
+                List {
+                    headerSection(edition: edition)
+                    userInventorySection(edition: edition)
+                    myInventorySection(edition: edition)
                 }
+                .selectListToAdd(
+                    showAddToListDialog: $showAddToListDialog,
+                    onListSelected: { list in
+                        Task {
+                            try await listModel.addEntitiesToList(
+                                listId: list._id,
+                                entityUris: edition.workUris
+                            )
+                        }
+                    })
             case .error(error: let error):
                 Text("Error loading edition \(error.localizedDescription)")
             case .noResult:
@@ -77,11 +87,20 @@ struct EditionDetailView: View {
         ToolbarItemGroup(placement: .confirmationAction) {
             switch viewState {
             case .loaded(let edition):
-                Button("Add to inventory", systemImage: "plus") {
-                    Task {
-                        await addToInventory(edition: edition)
+                if !inMyInventory {
+                    Button("Add to inventory", systemImage: "plus") {
+                        Task {
+                            await addToInventory(edition: edition)
+                        }
                     }
                 }
+                
+                Button {
+                    showAddToListDialog = true
+                } label: {
+                    Label("Add to a list", systemImage: "list.bullet")
+                }
+
             case .loadingEdition, .error, .noResult:
                 EmptyView()
             }
@@ -116,7 +135,7 @@ struct EditionDetailView: View {
     func userInventorySection(edition: Edition) -> some View {
         if !edition.items.filter({$0.owner?.id != userModel.myUser?.id}).isEmpty {
             Section("Dans l'inventaire de") {
-                ForEach(edition.items) { item in
+                ForEach(edition.items.filter({$0.owner?.id != userModel.myUser?.id})) { item in
                     Button {
                         if let owner = item.owner {
                             nextEntityDestination = NavigationDestination.user(user: owner)
@@ -131,17 +150,16 @@ struct EditionDetailView: View {
     }
 
     @ViewBuilder
-    func addToInventoryButton(edition: Edition) -> some View {
-        if addingItem {
-            ProgressView()
-        } else {
-            Button("Ajouter") {
-                Task {
-                    await addToInventory(edition: edition)
+    func myInventorySection(edition: Edition) -> some View {
+        if let item = edition.items.filter({$0.owner?.id == userModel.myUser?.id}).first {
+            Section("Dans mon inventaire") {
+                Button {
+                    nextEntityDestination = NavigationDestination.item(item: item)
+                } label: {
+                    UserItemCellView(item: item)
                 }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
         }
     }
 

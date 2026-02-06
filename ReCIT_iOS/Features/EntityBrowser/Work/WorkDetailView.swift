@@ -10,6 +10,7 @@ import SwiftData
 
 struct WorkDetailView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel
+    @EnvironmentObject var listModel: ListModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -20,15 +21,16 @@ struct WorkDetailView: View {
         case error(error: Error)
     }
 
-    @State private var state: ViewState = .loadingWork
+    @State private var viewState: ViewState = .loadingWork
     @State private var nextEntityDestination: NavigationDestination?
+    @State private var showAddToListDialog: Bool = false
 
     let workUri: String
     @Binding var path: NavigationPath
 
     var body: some View {
         List {
-            switch state {
+            switch viewState {
             case .loadingWork:
                 ProgressView()
             case .loadingEditions(work: let work):
@@ -40,6 +42,16 @@ struct WorkDetailView: View {
                 Text("Error \(error.localizedDescription) !!")
             }
         }
+        .selectListToAdd(
+            showAddToListDialog: $showAddToListDialog,
+            onListSelected: { list in
+                Task {
+                    try await listModel.addEntitiesToList(
+                        listId: list._id,
+                        entityUris: [workUri]
+                    )
+                }
+            })
         .onAppear {
             Task {
                 await fetchWork()
@@ -55,6 +67,23 @@ struct WorkDetailView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Oeuvre")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            toolbarContent
+        }
+    }
+
+    @ToolbarContentBuilder
+    var toolbarContent : some ToolbarContent {
+        ToolbarItemGroup(placement: .confirmationAction) {
+            Button {
+                showAddToListDialog = true
+            } label: {
+                Label("Add to a list", systemImage: "list.bullet")
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .imageScale(.large)
+        }
     }
 
     @ViewBuilder
@@ -96,30 +125,30 @@ struct WorkDetailView: View {
     private func fetchWork() async {
         do {
             if let work = try await inventoryModel.getOrFetchWork(modelContext: modelContext, uri: workUri) {
-                self.state = .loadingEditions(work: work)
+                self.viewState = .loadingEditions(work: work)
             } else {
-                self.state = .error(error: NSError(domain: "No work", code: 0, userInfo: nil))
+                self.viewState = .error(error: NSError(domain: "No work", code: 0, userInfo: nil))
             }
         } catch(let error) {
-            self.state = .error(error: error)
+            self.viewState = .error(error: error)
         }
     }
 
     @MainActor
     private func fetchEditions() async {
         do {
-            switch state {
+            switch viewState {
             case .loadingEditions(work: let work):
                 if let editions = try await inventoryModel.getWorkEditions(modelContext: modelContext, work: work) {
-                    self.state = .loaded(work: work, editions: editions)
+                    self.viewState = .loaded(work: work, editions: editions)
                 } else {
-                    self.state = .error(error: NSError(domain: "No works", code: 0, userInfo: nil))
+                    self.viewState = .error(error: NSError(domain: "No works", code: 0, userInfo: nil))
                 }
             default:
-                print(self.state)
+                print(self.viewState)
             }
         } catch(let error) {
-            self.state = .error(error: error)
+            self.viewState = .error(error: error)
         }
     }
 

@@ -12,9 +12,8 @@ struct InventoryCell: View {
 
     var body: some View {
         if let edition = item.edition {
-            HStack(spacing: .sMedium) {
-                CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal)
-                    .frame(width: 48, height: 48)
+            HStack(alignment: .top, spacing: .sMedium) {
+                CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: 56)
 
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Text(edition.title)
@@ -26,6 +25,9 @@ struct InventoryCell: View {
                     }
 
                     Text(edition.authorNames.joined(separator: ", "))
+                        .font(.caption)
+
+                    TransactionTypeLabel(transactionType: item.transaction)
                         .font(.caption)
 
 #if DEBUG

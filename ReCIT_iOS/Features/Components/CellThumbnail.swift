@@ -20,7 +20,8 @@ struct CellThumbnail: View {
 
     var body: some View {
         Group {
-            if let imageUrl, let url = URL(string: imageUrl) {
+            if let urlString = imageUrl?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+                let url = URL(string: urlString) {
                 AsyncImage(url: url) { image in
                     image
                         .resizable()

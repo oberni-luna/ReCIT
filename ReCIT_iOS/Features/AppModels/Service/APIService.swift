@@ -23,7 +23,8 @@ class APIService {
         return env.apiBaseUrl
     }
 
-
+//    https://commons.wikimedia.org/wiki/Special:FilePath/Mathieu%20Bablet%202023.jpg?width=56
+//    "https://commons.wikimedia.org/wiki/Special:FilePath/Mathieu Bablet 2023.jpg"
     func absoluteImageUrl(_ path: String?) -> String? {
         guard let path else { return nil }
         if path.hasPrefix("http") {
@@ -31,7 +32,7 @@ class APIService {
         } else if path.hasPrefix("/img") {
             return "\(self.baseUrl())\(path)"
         } else {
-            return "https://commons.wikimedia.org/wiki/Special:FilePath/\(path)?width=200"
+            return "https://commons.wikimedia.org/wiki/Special:FilePath/\(path)?width=512"
         }
     }
 

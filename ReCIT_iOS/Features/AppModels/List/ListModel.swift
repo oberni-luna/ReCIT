@@ -19,7 +19,6 @@ class ListModel: ObservableObject {
     }
 
     func syncLists(forUser: User, modelContext: ModelContext) async throws {
-
         try modelContext.delete(model: EntityList.self)
         let listsDTO: ListsDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/lists?action=by-creators&users=\(forUser._id)&with-elements=true", debug: true)
         if let listsDTO {
@@ -71,7 +70,8 @@ class ListModel: ObservableObject {
         let addToListDTO: AddToListDTO = .init(id: listId, uris: entityUris)
         let _: AddToListResponseDTO? = try await fetchDataService.send(
             toEndpoint: "/api/lists?action=add-elements",
-            payload: addToListDTO
+            payload: addToListDTO,
+            debug: true
         )
     }
 

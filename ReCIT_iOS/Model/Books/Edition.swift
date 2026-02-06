@@ -27,6 +27,14 @@ public class Edition: Identifiable, Entity {
         Array(Set(works.flatMap(\.authors)))
     }
 
+    var workUris: [String] {
+        if self.works.isEmpty == false {
+            Array(Set(self.works.map(\.uri)))
+        } else {
+            []
+        }
+    }
+
     init(uri: String, title: String, subtitle: String? = nil, lang: String?, authorNames: [String], image: String? = nil, series: String? = nil, items: [InventoryItem] = []) {
         self.uri = uri
         self.title = title

@@ -63,7 +63,7 @@ struct WorkDetailView: View {
             EntitySummaryView(entityUri: work.uri)
 
             EntityAuthorsView(
-                authors: work.authors,
+                authors: work.authors.sorted(by: { $0.name < $1.name }),
                 entityDestination: $nextEntityDestination
             )
         } header: {

@@ -8,6 +8,7 @@ import SwiftData
 import SwiftUI
 
 struct InventoryItemDetailView: View {
+    @EnvironmentObject private var userModel: UserModel
     @EnvironmentObject var inventoryModel: InventoryModel
     @EnvironmentObject var listModel: ListModel
     @Query(sort: \EntityList.name) var entityLists: [EntityList]
@@ -17,17 +18,29 @@ struct InventoryItemDetailView: View {
     @State private var showDeleteConfirmation = false
     @State private var browseEntityDestination: NavigationDestination?
 
-    let item: InventoryItem
+    @Bindable var item: InventoryItem
     @Binding var path: NavigationPath
+
+    var isMyItem: Bool {
+        item.owner?._id == userModel.myUser?._id
+    }
 
     var body: some View {
         itemContentView
             .toolbar {
                 ToolbarItem(placement: .destructiveAction) {
-                    Button(role: .destructive) {
-                        showDeleteConfirmation = true
-                    } label: {
-                        Label("Supprimer", systemImage: "trash")
+                    if isMyItem {
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            Label("Supprimer", systemImage: "trash")
+                        }
+                    } else {
+                        Button {
+                            //
+                        } label: {
+                            Label("Envoyer une demander", systemImage: "questionmark.message")
+                        }
                     }
                 }
             }
@@ -54,13 +67,17 @@ struct InventoryItemDetailView: View {
             if let edition = item.edition, let owner = item.owner {
                 headerSection(edition: edition)
 
-                Section {
-                    Button {
-                        browseEntityDestination = NavigationDestination.user(user: owner)
-                    } label: {
-                        UserItemCellView(item: item)
+                if isMyItem {
+                    myItemSection
+                } else {
+                    Section {
+                        Button {
+                            browseEntityDestination = NavigationDestination.user(user: owner)
+                        } label: {
+                            UserItemCellView(item: item)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
 
                 Section {
@@ -68,14 +85,10 @@ struct InventoryItemDetailView: View {
                         Button {
                             browseEntityDestination = NavigationDestination.work(uri: work.uri)
                         } label: {
-                            VStack(alignment: .leading, spacing: .small) {
-                                Text("Other edition for")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-
-                                Text(work.title)
-                                    .font(.headline)
-                            }
+                            Text(work.title)
+                                .font(.headline)
+                                .lineLimit(1)
+                                .withLabel(label: "Other edition for")
                         }
                         .buttonStyle(.plain)
                     }
@@ -87,12 +100,39 @@ struct InventoryItemDetailView: View {
     }
 
     @ViewBuilder
+    var myItemSection: some View {
+        Section {
+            if let details = item.details, !details.isEmpty {
+                Text(details)
+                    .font(.body)
+                    .foregroundStyle(.textDefault)
+                    .withLabel(label: "Ce que j'en pense")
+            }
+            
+            Picker("Transaction mode", selection: $item.transaction) {
+                ForEach(TransactionType.allCases, id: \.self) { type in
+                    TransactionTypeLabel(transactionType: type)
+                }
+            }
+            .onChange(of: item.transaction) { _, transactionMode in
+                Task {
+                    try? await inventoryModel.updateItemsTransaction(modelContext: modelContext, items: [item])
+                }
+            }
+
+            Text("Created \(item.created.formatted(date: .abbreviated, time: .omitted))")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
     func headerSection(edition: Edition) -> some View {
         Section {
             EntitySummaryView(entityUri: edition.uri, otherEntityUri: edition.works.first?.uri)
 
             EntityAuthorsView(
-                authors: edition.authors,
+                authors: edition.authors.sorted(by: { $0.name < $1.name }),
                 entityDestination: $browseEntityDestination
             )
         } header: {
@@ -103,5 +143,6 @@ struct InventoryItemDetailView: View {
             )
         }
     }
+
 }
 

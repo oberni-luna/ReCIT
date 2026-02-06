@@ -6,7 +6,9 @@
 //
 
 
-enum TransactionType: String, Codable {
+enum TransactionType: String, Codable, CaseIterable, Identifiable {
+    var id: Self {self}
+    
     case lending = "lending"
     case inventorying = "inventorying"
     case selling = "selling"

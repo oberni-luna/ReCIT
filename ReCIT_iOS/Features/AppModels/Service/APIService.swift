@@ -23,18 +23,38 @@ class APIService {
         return env.apiBaseUrl
     }
 
-    func send<T: Codable, U: Codable>(toEndpoint: String, method: String = "POST", payload: T) async throws -> U? {
+
+    func absoluteImageUrl(_ path: String?) -> String? {
+        guard let path else { return nil }
+        if path.hasPrefix("http") {
+            return path
+        } else if path.hasPrefix("/img") {
+            return "\(self.baseUrl())\(path)"
+        } else {
+            return "https://commons.wikimedia.org/wiki/Special:FilePath/\(path)?width=200"
+        }
+    }
+
+    func send<T: Codable, U: Codable>(toEndpoint: String, method: String = "POST", payload: T, debug: Bool = false) async throws -> U? {
         do {
             guard let url = URL(string: "\(env.apiBaseUrl)\(toEndpoint)") else { throw NetworkError.badUrl }
             var request = URLRequest(url: url)
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-            request.httpMethod = "POST"
+            request.httpMethod = method
             let encoder = JSONEncoder()
             let data = try encoder.encode(payload)
             request.httpBody = data
-            
+            if debug {
+                print("******** Query ********")
+                print(url)
+            }
+
             let (responseData, response) = try await URLSession.shared.data(for: request)
+            if debug {
+                print(" Reponse :")
+                print("\(String(bytes: responseData, encoding: .utf8) ?? "No data")")
+            }
 
             guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
 

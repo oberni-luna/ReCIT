@@ -36,29 +36,23 @@ struct EntitySummaryView: View {
             case .loading:
                 ProgressView()
             case .loaded(data: let data):
-                VStack(alignment: .leading, spacing: .xSmall) {
-                    Text("Résumé")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .bold()
-
-                    Text(data.content)
-                        .font(.subheadline)
-                        .foregroundStyle(.textDefault)
-                        .lineLimit(3)
-                }
-                .onTapGesture {
-                    showMore = true
-                }
-                .sheet(isPresented: $showMore) {
-                    ScrollView {
-                        Text(data.content)
-                            .font(.body)
-                            .foregroundStyle(.textDefault)
-                            .padding(.all, .large)
+                Text(data.content)
+                    .font(.subheadline)
+                    .foregroundStyle(.textDefault)
+                    .lineLimit(3)
+                    .withLabel(label: "Résumé")
+                    .onTapGesture {
+                        showMore = true
                     }
-                    .presentationDetents([.medium, .large])
-                }
+                    .sheet(isPresented: $showMore) {
+                        ScrollView {
+                            Text(data.content)
+                                .font(.body)
+                                .foregroundStyle(.textDefault)
+                                .padding(.all, .large)
+                        }
+                        .presentationDetents([.medium, .large])
+                    }
             case .error(error: let error):
                 Text("Error loading summary \(error.localizedDescription)")
             case .empty:

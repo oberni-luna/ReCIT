@@ -94,10 +94,13 @@ struct EditionDetailView: View {
     @ViewBuilder
     func headerSection(edition: Edition) -> some View {
         Section {
-            EntitySummaryView(entityUri: edition.uri, otherEntityUri: edition.works.first?.uri)
+            EntitySummaryView(
+                entityUri: edition.uri,
+                otherEntityUri: edition.works.first?.uri
+            )
 
             EntityAuthorsView(
-                authors: edition.authors,
+                authors: edition.authors.sorted(by: { $0.name < $1.name }),
                 entityDestination: $nextEntityDestination
             )
         } header: {

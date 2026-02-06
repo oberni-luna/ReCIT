@@ -37,26 +37,26 @@ public class Edition: Identifiable, Entity {
         self.series = series
     }
 
-    convenience init(uri: String, entitySnapshotDTO: EntitySnapshotDTO, baseUrl: String, works: [Work] = [], items: [InventoryItem] = []) {
+    convenience init(uri: String, entitySnapshotDTO: EntitySnapshotDTO, apiService: APIService, works: [Work] = [], items: [InventoryItem] = []) {
         self.init(
             uri: uri,
             title: entitySnapshotDTO.`entity:title`,
             subtitle: entitySnapshotDTO.`entity:subtitle`,
             lang: entitySnapshotDTO.`entity:lang`,
             authorNames: entitySnapshotDTO.`entity:authors`?.components(separatedBy: ",") ?? [],
-            image: entitySnapshotDTO.`entity:image` != nil ? "\(baseUrl)\(entitySnapshotDTO.`entity:image` ?? "")" : nil,
+            image: apiService.absoluteImageUrl(entitySnapshotDTO.`entity:image`),
             series: entitySnapshotDTO.`entity:series`
         )
     }
 
-    convenience init(entityDto: EntityResultDTO, baseUrl: String) {
+    convenience init(entityDto: EntityResultDTO, apiService: APIService) {
         self.init(
             uri: entityDto.uri,
             title: entityDto.labels["fromclaims"] ?? "Unknown",
             subtitle: entityDto.descriptions?["fromclaims"],
             lang: entityDto.originalLang,
             authorNames: [],
-            image: "\(baseUrl)\(entityDto.image?["url"] ?? "")"
+            image: apiService.absoluteImageUrl(entityDto.image?["url"] ?? "")
         )
     }
 }

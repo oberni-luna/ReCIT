@@ -36,7 +36,7 @@ public final class InventoryItem{
         self.details = details
     }
 
-    convenience init(itemDTO: ItemDTO, forUser: User, baseUrl: String) {
+    convenience init(itemDTO: ItemDTO, forUser: User, apiService: APIService) {
         let updatedDate: Date? = if let updated = itemDTO.updated {
             Date(timeIntervalSince1970: updated / 1000)
         } else {
@@ -53,7 +53,7 @@ public final class InventoryItem{
             updated: updatedDate,
             busy: itemDTO.busy,
             details: itemDTO.details,
-            edition: Edition(uri: itemDTO.entity, entitySnapshotDTO: itemDTO.snapshot, baseUrl: baseUrl, works: [])
+            edition: Edition(uri: itemDTO.entity, entitySnapshotDTO: itemDTO.snapshot, apiService: apiService, works: [])
         )
         self.owner = forUser
     }

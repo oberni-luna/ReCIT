@@ -34,13 +34,13 @@ class InventoryModel: ObservableObject {
 
                 if authorUri == InventoryModel.unkownAuthorId {
                     for work in workDTOs {
-                        modelContext.insert(Work(entityDTO: work, authors: []))
+                        modelContext.insert(Work(entityDTO: work, authors: [], apiService: apiService))
                     }
                 } else {
                     guard let authors: [Author] = try await getOrFetchAuthors(modelContext: modelContext, uris: [authorUri]) else { continue }
                     for work in workDTOs {
                         _ = authors.map { author in
-                            author.works.append(Work(entityDTO: work, authors: authors))
+                            author.works.append(Work(entityDTO: work, authors: authors, apiService: apiService))
                             modelContext.insert(author)
                         }
                     }
@@ -63,7 +63,7 @@ class InventoryModel: ObservableObject {
                         }
                         modelContext.insert(myItem)
                     } else {
-                        let myItem = InventoryItem(itemDTO: itemDTO, forUser: forUser, baseUrl: apiService.baseUrl())
+                        let myItem = InventoryItem(itemDTO: itemDTO, forUser: forUser, apiService: apiService)
                         myItem.edition?.works.append(relatedWork)
                         modelContext.insert(myItem)
                     }
@@ -90,7 +90,7 @@ class InventoryModel: ObservableObject {
             throw NetworkError.badResponse
         }
 
-        let newItem = InventoryItem(itemDTO: itemDTO, forUser: forUser, baseUrl: apiService.baseUrl())
+        let newItem = InventoryItem(itemDTO: itemDTO, forUser: forUser, apiService: apiService)
         modelContext.insert(newItem)
         try modelContext.save()
         return newItem
@@ -125,7 +125,7 @@ class InventoryModel: ObservableObject {
                 uri: result.uri,
                 title: result.label,
                 description: result.description,
-                imageUrl: absoluteImageUrl(result.image),
+                imageUrl: apiService.absoluteImageUrl(result.image),
                 score: result.score ?? 0,
                 type: SearchResultType(rawValue: result.type) ?? .unknown
             )
@@ -170,17 +170,6 @@ class InventoryModel: ObservableObject {
         return editions
     }
 
-    private func absoluteImageUrl(_ path: String?) -> String? {
-        guard let path else { return nil }
-        if path.hasPrefix("http") {
-            return path
-        } else if path.hasPrefix("/img") {
-            return "\(apiService.baseUrl())\(path)"
-        } else {
-            return "https://commons.wikimedia.org/wiki/Special:FilePath/\(path)?width=200"
-        }
-    }
-
     func getOrFetchWorks(modelContext: ModelContext, uris: [String]) async throws -> [Work]? {
 
         var works: [Work] = []
@@ -202,7 +191,7 @@ class InventoryModel: ObservableObject {
                 .compactMap { $0.getStringValue() } ?? []
             let authors = try? await getOrFetchAuthors(modelContext: modelContext, uris: authorUris)
 
-            let work = Work(entityDTO: workDto, authors: authors ?? [])
+            let work = Work(entityDTO: workDto, authors: authors ?? [], apiService: apiService)
             modelContext.insert(work)
             works.append(work)
         }
@@ -230,7 +219,7 @@ class InventoryModel: ObservableObject {
         }
 
         authors.append(contentsOf: authorsDto.compactMap { authorDto in
-            Author(entityDTO: authorDto)
+            Author(entityDTO: authorDto, apiService: apiService)
         })
 
         return authors
@@ -253,7 +242,7 @@ class InventoryModel: ObservableObject {
         }
 
         editions.append(contentsOf: editionsDto.compactMap { editionDto in
-            Edition(entityDto: editionDto, baseUrl: apiService.baseUrl())
+            Edition(entityDto: editionDto, apiService: apiService)
         })
 
         return editions
@@ -320,6 +309,40 @@ class InventoryModel: ObservableObject {
 
             return results
         }
+
+    func updateItemsTransaction(modelContext: ModelContext, items: [InventoryItem]) async throws -> Void {
+        let response: UpdateItemsResponseDTO? = try await updateItems(ids: items.map(\._id), attribute: "transaction", value: items.first?.transaction.rawValue ?? "")
+
+        if response?.ok == true {
+            try modelContext.save()
+        } else {
+            throw NSError(domain: "Failed to update items", code: 0, userInfo: nil)
+        }
+    }
+
+    func updateItemsDetails(modelContext: ModelContext, items: [InventoryItem]) async throws -> Void {
+        let response: UpdateItemsResponseDTO? = try await updateItems(ids: items.map(\._id), attribute: "details", value: items.first?.details ?? "")
+
+        if response?.ok == true {
+            try modelContext.save()
+        } else {
+            throw NSError(domain: "Failed to update items", code: 0, userInfo: nil)
+        }
+    }
+
+    func updateItems(ids: [String], attribute: String, value: String?) async throws -> UpdateItemsResponseDTO? {
+
+        return try await apiService.send(
+            toEndpoint: "/api/items?action=bulk-update",
+            method: "PUT",
+            payload: UpdateItemsDTO(
+                ids: ids,
+                attribute: attribute,
+                value: value ?? ""
+            ),
+            debug: true
+        )
+    }
 
     private func getLocalWork(modelContext: ModelContext, uri: String) throws -> Work? {
         let predicate = #Predicate<Work> { object in

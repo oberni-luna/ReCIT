@@ -39,6 +39,10 @@ struct EntityListView: View {
                         VStack(alignment: .leading) {
                             Text(list.name)
                                 .font(.headline)
+
+                            Text(list.explanation)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                         }
                         .swipeActions {
                             Button("Delete", systemImage: "trash") {

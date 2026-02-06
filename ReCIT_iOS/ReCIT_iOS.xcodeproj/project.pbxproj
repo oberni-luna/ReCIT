@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		090719A32F2505CB000D8913 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 090719A22F2505CB000D8913 /* CodeScanner */; };
+		0907272D2F353F8C000D8913 /* WithLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0907272C2F353F8C000D8913 /* WithLabel.swift */; };
 		098A61E42E54CA160032185B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 098A61E02E54CA160032185B /* Assets.xcassets */; };
 		098A61E72E54CA160032185B /* ReCIT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61E32E54CA160032185B /* ReCIT.swift */; };
 		098A62092E54CCC70032185B /* Exo2-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 098A61F92E54CCC70032185B /* Exo2-Bold.ttf */; };
@@ -51,6 +52,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0907272C2F353F8C000D8913 /* WithLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithLabel.swift; sourceTree = "<group>"; };
 		094FD19C2E4A38D40023705A /* ReCIT_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReCIT_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		094FD1AB2E4A38D60023705A /* ReCIT_iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReCIT_iOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		094FD1B52E4A38D60023705A /* ReCIT_iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReCIT_iOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +91,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		090727302F35457D000D8913 /* LabelStyles */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = LabelStyles;
+			sourceTree = "<group>";
+		};
 		094FD1AE2E4A38D60023705A /* Tests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Tests;
@@ -220,6 +227,8 @@
 		098A62082E54CCC70032185B /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				090727302F35457D000D8913 /* LabelStyles */,
+				0907272C2F353F8C000D8913 /* WithLabel.swift */,
 				098A62212E54D30D0032185B /* Constant.swift */,
 				098A61F02E54CCC70032185B /* ToggleStyles */,
 				098A61F82E54CCC70032185B /* ButtonStyles */,
@@ -248,6 +257,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				090727302F35457D000D8913 /* LabelStyles */,
 				09ACF4122E5CA38300D59BC0 /* Features */,
 				09FCBD0B2EBE58F600A33F35 /* Model */,
 			);
@@ -403,6 +413,7 @@
 				098A621B2E54CCC70032185B /* ScaleButtonStyle.swift in Sources */,
 				098A621C2E54CCC70032185B /* TagView.swift in Sources */,
 				098A621D2E54CCC70032185B /* DesignSystem.swift in Sources */,
+				0907272D2F353F8C000D8913 /* WithLabel.swift in Sources */,
 				098A621E2E54CCC70032185B /* CardButtonStyle.swift in Sources */,
 				098A61E72E54CA160032185B /* ReCIT.swift in Sources */,
 			);

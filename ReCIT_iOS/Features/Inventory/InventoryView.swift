@@ -1,5 +1,5 @@
 //
-//  MyInventoryView.swift
+//  InventoryView.swift
 //  ReCIT_iOS
 //
 //  Created by Olivier Berni on 26/08/2025.
@@ -24,7 +24,7 @@ struct InventoryView: View {
         let userId = user._id
         _allItems = Query(filter: #Predicate<InventoryItem> { item in
             item.ownerId == userId
-        }, sort: [SortDescriptor(\InventoryItem.edition?.title)])
+        }, sort: [SortDescriptor(\InventoryItem.created, order: .reverse)])
     }
 
     var filteredItems: [InventoryItem] {

@@ -8,32 +8,48 @@
 import SwiftUI
 
 struct UserItemCellView: View {
-    let item: InventoryItem
+    @EnvironmentObject private var userModel: UserModel
+    @EnvironmentObject private var inventoryModel: InventoryModel
+
+    @Bindable var item: InventoryItem
 
     var body: some View {
         if let owner = item.owner {
-            VStack(alignment: .leading, spacing: .small) {
-                HStack(alignment: .center, spacing: .small) {
-                    CellThumbnail(imageUrl: owner.avatarURLValue, cornerRadius: .full)
-                    VStack(alignment: .leading, spacing: .small) {
-                        Text(owner.username)
-                            .font(.headline)
-                            .foregroundStyle(.textDefault)
+            othersItemCellView(owner: owner)
+        }
+    }
 
+    
+
+    @ViewBuilder
+    func othersItemCellView(owner: User) -> some View {
+        VStack(alignment: .leading, spacing: .small) {
+            HStack(alignment: .center, spacing: .small) {
+                CellThumbnail(imageUrl: owner.avatarURLValue, cornerRadius: .full)
+                VStack(alignment: .leading, spacing: .small) {
+                    Text(owner.username)
+                        .font(.headline)
+                        .foregroundStyle(.textDefault)
+
+                    HStack(alignment: .firstTextBaseline, spacing: .small) {
                         Text("Depuis \(item.created.formatted(date: .abbreviated, time: .omitted))")
-                            .font(.caption)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        
+                        TransactionTypeLabel(transactionType: item.transaction)
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-
-                    Spacer()
-
-                    Image(.chevronRight)
                 }
 
-                if let details = item.details, !details.isEmpty {
-                    Text(details)
-                        .font(.subheadline)
-                }
+                Spacer()
+
+                Image(.chevronRight)
+            }
+            if let details = item.details, !details.isEmpty {
+                Text(details)
+                    .font(.subheadline)
+                    .foregroundStyle(.textDefault)
             }
         }
     }

@@ -34,8 +34,8 @@ public class Author: Identifiable, Entity {
         self.subtitle = subtitle
     }
 
-    convenience init (entityDTO: EntityResultDTO) {
-        let imageUrl: String? = if let img = entityDTO.image?["url"] { "\(Constant.imageBaseUrl)\(img)" } else { nil }
+    convenience init (entityDTO: EntityResultDTO, apiService: APIService) {
+        let imageUrl: String? = apiService.absoluteImageUrl(entityDTO.image?["url"])
 
         let dateOfBirthString: String? = entityDTO.claims[WikidataProperty.dateOfBirth.rawValue]?.first?.getStringValue()
         let dateOfDeathString: String? = entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.getStringValue()
@@ -52,6 +52,7 @@ public class Author: Identifiable, Entity {
     }
 
     enum Constant {
+//        https://inventaire.io/img/remote/192x192/1170121628?href=https%3A%2F%2Fcommons.wikimedia.org%2Fwiki%2FSpecial%3AFilePath%2FFIBD2022Ceremonie%252007b.jpg%3Fwidth%3D1024
         static let imageBaseUrl: String = "https://commons.wikimedia.org/wiki/Special:FilePath/"
     }
 }

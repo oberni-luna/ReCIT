@@ -46,7 +46,7 @@ struct EntityAuthorsView: View {
 
                                     Text(author.name)
                                         .font(.headline)
-                                        .lineLimit(2, reservesSpace: true)
+                                        .lineLimit(2)
                                         .multilineTextAlignment(.leading)
                                         .fixedSize(horizontal: false, vertical: true)
 

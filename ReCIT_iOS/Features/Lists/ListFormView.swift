@@ -41,6 +41,7 @@ struct ListFormView: View {
                             .foregroundStyle(.secondary)
                             .bold()
                         TextEditor(text: $list.explanation)
+                            .frame(minHeight: 48)
                     }
                 }
                 .listRowSeparator(.visible)

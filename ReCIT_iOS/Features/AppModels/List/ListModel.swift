@@ -48,7 +48,8 @@ class ListModel: ObservableObject {
             let _ : NewListResponseDTO? = try await fetchDataService.send(
                 toEndpoint: "/api/lists",
                 method: "PUT",
-                payload: NewListDTO(id: nil, name: list.name, description: list.explanation, visibility: list.visibility.map(\.rawValue), type: list.type.rawValue)
+                payload: NewListDTO(id: list._id, name: list.name, description: list.explanation, visibility: list.visibility.map(\.rawValue), type: nil),
+                debug: true
             )
             try modelContext.save()
         }

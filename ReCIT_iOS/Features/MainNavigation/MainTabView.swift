@@ -114,11 +114,7 @@ private extension MainTabView {
         case .community:
             CommunityView()
         case .inventory:
-            if let user = userModel.myUser {
-                InventoryView(user: user)
-            } else {
-                EmptyView()
-            }
+            MyInventoryView()
         case .transactions:
             Text("Transactions View")
                 .navigationTitle("Transactions")

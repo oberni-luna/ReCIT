@@ -36,7 +36,7 @@ public class Work: Identifiable, Entity {
     }
 
     convenience init (entityDTO: EntityResultDTO, authors: [Author], apiService: APIService) {
-        let imageUrl: String? = apiService.absoluteImageUrl(entityDTO.image?["url"])
+        let imageUrl: String? = apiService.absoluteImageUrl(entityDTO.image?.url)
 
         let publicationDateString: String? = entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.getStringValue()
 

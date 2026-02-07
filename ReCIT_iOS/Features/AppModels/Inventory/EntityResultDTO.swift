@@ -18,8 +18,19 @@ struct EntityResultDTO: Codable {
     let originalLang: String?
     let labels: [String: String]
     let descriptions: [String: String]?
-    let image: [String: String]?
+    let image: EntityImageDTO?
     let claims: [String: [ClaimValue]]
+}
+
+struct EntityImageDTO: Codable {
+    let url: String
+    let file: String?
+    let credit: EntityImageCreditDTO?
+}
+
+struct EntityImageCreditDTO: Codable {
+    let text: String
+    let url: String
 }
 
 enum ClaimValue: Codable {

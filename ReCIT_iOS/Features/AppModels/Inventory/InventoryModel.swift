@@ -214,7 +214,7 @@ class InventoryModel: ObservableObject {
             }
         }
 
-        guard let authorsDto = try await fetchEntities(modelContext: modelContext, uri: urisToFetch) else {
+        guard let authorsDto = try await fetchEntities(modelContext: modelContext, uri: urisToFetch, debug: true) else {
             return authors
         }
 
@@ -297,12 +297,12 @@ class InventoryModel: ObservableObject {
         return try modelContext.fetch(descriptor).first
     }
 
-    private func fetchEntities(modelContext: ModelContext, uri: [String]) async throws -> [EntityResultDTO]? {
+    private func fetchEntities(modelContext: ModelContext, uri: [String], debug: Bool = false) async throws -> [EntityResultDTO]? {
             var results: [EntityResultDTO] = []
 
             for uriBatch in uri.splitInSubArrays(of: 50) {
                 let entityUrl: String = "/api/entities?action=by-uris&uris=\(uriBatch.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
-                let resultsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: entityUrl)
+                let resultsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: entityUrl, debug: debug)
 
                 results.append(contentsOf: resultsDto.map { Array($0.entities.values) } ?? [])
             }

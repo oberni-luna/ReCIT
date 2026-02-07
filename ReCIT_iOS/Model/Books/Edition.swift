@@ -64,7 +64,7 @@ public class Edition: Identifiable, Entity {
             subtitle: entityDto.descriptions?["fromclaims"],
             lang: entityDto.originalLang,
             authorNames: [],
-            image: apiService.absoluteImageUrl(entityDto.image?["url"] ?? "")
+            image: apiService.absoluteImageUrl(entityDto.image?.url ?? "")
         )
     }
 }

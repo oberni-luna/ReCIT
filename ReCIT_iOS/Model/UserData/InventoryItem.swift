@@ -74,3 +74,38 @@ public final class InventoryItem{
         self.owner = forUser
     }
 }
+
+extension InventoryItem {
+    /// The characteristics by which the app can sort earthquake data.
+    enum FilterParameter: String, CaseIterable, Identifiable {
+        case userInventory, othersInventory
+        var id: Self { self }
+        var name: String { rawValue.capitalized }
+    }
+
+    /// A filter that checks for a date and text in the quake's location name.
+    static func predicate(
+        user: User,
+        filterParameter: FilterParameter,
+        searchText: String
+    ) -> Predicate<InventoryItem> {
+
+        let userId: String = user._id
+        let cleanSearchText: String = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        switch filterParameter {
+        case .othersInventory:
+            return #Predicate<InventoryItem> { item in
+                (searchText.isEmpty || item.edition?.title.contains(cleanSearchText) == true)
+                &&
+                (item.ownerId != userId)
+            }
+        case .userInventory:
+            return #Predicate<InventoryItem> { item in
+                (searchText.isEmpty || item.edition?.title.contains(cleanSearchText) == true)
+                &&
+                (item.ownerId == userId)
+            }
+        }
+    }
+}

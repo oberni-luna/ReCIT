@@ -9,9 +9,12 @@ import SwiftUI
 import SwiftData
 
 struct SearchView: View {
+    @EnvironmentObject private var userModel: UserModel
     @EnvironmentObject private var inventoryModel: InventoryModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+
+    @Query var latestItems: [InventoryItem]
 
     @State private var searchText: String = ""
     @State private var results: [SearchResult] = []
@@ -40,22 +43,14 @@ struct SearchView: View {
                 if results.isEmpty {
                     Group {
                         if searchText.isEmpty {
-                            inspirationnalView
+                            inspirationnalViewContent
                         } else {
                             emptyView
                         }
                     }
                     .padding(.vertical, 4)
-                }
-                
-                ForEach(results) { result in
-                    Button {
-                        onNavigate(result)
-                    } label: {
-                        SearchResultCell(result: result)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.vertical, 4)
+                } else {
+                    resultListContent
                 }
             }
         }
@@ -77,8 +72,28 @@ struct SearchView: View {
     }
 
     @ViewBuilder
-    var inspirationnalView: some View {
-        Text("You can search for anything, really!")
+    var resultListContent: some View {
+        ForEach(results) { result in
+            Button {
+                onNavigate(result)
+            } label: {
+                SearchResultCell(result: result)
+            }
+            .buttonStyle(.plain)
+            .padding(.vertical, 4)
+        }
+    }
+
+    @ViewBuilder
+    var inspirationnalViewContent: some View {
+        if let user = userModel.myUser {
+            InventoryListContent(
+                user: user,
+                searchText: "",
+                filterParameter: .othersInventory,
+                sortParameter: .alphabetical
+            )
+        }
     }
 
     @MainActor

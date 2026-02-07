@@ -18,6 +18,7 @@ struct MainTabView: View {
         case transactions
         case lists
         case settings
+        case search
 
         // Use for dev in order to hide tab on progress for exemple
         var isHidden: Bool {
@@ -31,6 +32,8 @@ struct MainTabView: View {
             case .settings:
                 false
             case .lists:
+                false
+            case .search:
                 false
             }
         }
@@ -47,6 +50,8 @@ struct MainTabView: View {
                 "gearshape"
             case .lists:
                 "list.bullet"
+            case .search:
+                "magnifyingglass"
             }
         }
 
@@ -62,6 +67,17 @@ struct MainTabView: View {
                 "Settings"
             case .lists:
                 "Lists"
+            case .search:
+                "Search"
+            }
+        }
+
+        var role: TabRole? {
+            switch self {
+            case .search:
+                return .search
+            default:
+                return .none
             }
         }
     }
@@ -74,7 +90,7 @@ struct MainTabView: View {
                 if !tabConfig.isHidden {
                     let symbolVariant: SymbolVariants = (selectedTab == tabConfig ? .fill : .none)
 
-                    Tab(value: tabConfig) {
+                    Tab(value: tabConfig, role: tabConfig.role) {
                         view(for: tabConfig)
                     } label: {
                         Label {
@@ -114,6 +130,9 @@ private extension MainTabView {
         case .lists:
             EntityListView()
                 .navigationTitle("Listes")
+        case .search:
+            AddInventoryItemSearchView()
+                .navigationTitle("Search")
         }
     }
 }

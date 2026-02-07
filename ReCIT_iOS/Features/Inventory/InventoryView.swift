@@ -60,28 +60,9 @@ struct InventoryView: View {
                 destination.viewForDestination($path)
             }
             .navigationTitle("📚 Inventory")
-            .toolbar {
-                ToolbarItemGroup(placement: .confirmationAction) {
-                    Button("Scan", systemImage: "barcode.viewfinder") {
-                        isScanItemPresented = true
-                    }
-                    Button("Search", systemImage: "plus") {
-                        isAddItemPresented = true
-                    }
-                } label: {
-                    Image(systemName: "plus")
-                        .imageScale(.large)
-                }
-            }
             .controlGroupStyle(.palette)
             .listStyle(.plain)
             .searchable(text: $searchText)
-            .sheet(isPresented: $isAddItemPresented) {
-                AddInventoryItemSearchView()
-            }
-            .sheet(isPresented: $isScanItemPresented) {
-                AddInventoryItemScanView()
-            }
         }
     }
 }

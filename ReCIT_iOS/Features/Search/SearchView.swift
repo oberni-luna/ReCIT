@@ -51,7 +51,6 @@ struct SearchView: View {
                 ForEach(results) { result in
                     Button {
                         onNavigate(result)
-//                        path.append(result)
                     } label: {
                         SearchResultCell(result: result)
                     }

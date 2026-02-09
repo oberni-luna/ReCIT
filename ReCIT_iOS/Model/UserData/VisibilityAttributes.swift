@@ -8,7 +8,6 @@
 
 enum VisibilityAttributes: String, Codable {
     case `public` = "public"
-//    case `private` = "private"
     case friends = "friends"
     case groups = "groups"
 }

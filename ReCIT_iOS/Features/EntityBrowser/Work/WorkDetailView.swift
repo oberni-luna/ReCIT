@@ -151,11 +151,5 @@ struct WorkDetailView: View {
             self.viewState = .error(error: error)
         }
     }
-
-    
-
-    
 }
-#Preview {
-//    WorkResultDetailView()
-}
+

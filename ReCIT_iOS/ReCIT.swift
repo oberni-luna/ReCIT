@@ -19,7 +19,9 @@ struct ReCIT: App {
             EntityListItem.self,
             Author.self,
             Work.self,
-            WpExtract.self
+            WpExtract.self,
+            UserTransaction.self,
+            TransactionMessage.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {

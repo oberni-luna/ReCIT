@@ -109,15 +109,15 @@ class InventoryModel: ObservableObject {
         }
     }
 
-    func searchEntity(query: String, lang: String? = "fr", limit: Int = 20, offset: Int = 0) async throws -> [SearchResult] {
+    func searchEntity(query: String, lang: String? = "fr", limit: Int = 15, offset: Int = 0) async throws -> [SearchResult] {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedQuery.isEmpty == false else { return [] }
 
-        let encodedQuery = trimmedQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? trimmedQuery
         let language = lang ?? "fr"
 
-        let endpoint = "/api/search?types=humans|works&search=\(encodedQuery)&lang=\(language)&limit=\(limit)&offset=\(offset)&exact=false"
-        let response: SearchResultsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
+        let endpoint = "/api/search?types=humans|works&search=\(trimmedQuery)&lang=\(language)&limit=\(limit)&offset=\(offset)&exact=false"
+
+        let response: SearchResultsDTO? = try await apiService.fetchData(fromEndpoint: endpoint, debug: true)
 
         return response?.results.map { result in
             SearchResult(

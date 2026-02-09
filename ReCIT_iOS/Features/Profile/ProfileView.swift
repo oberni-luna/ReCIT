@@ -17,22 +17,34 @@ struct ProfileView: View {
     @Query var users: [User]
 
     var body: some View {
-        Group {
-            if authModel.isAuthenticated {
-                connectedView
-            } else {
-                anonymousView
+        NavigationStack {
+            Group {
+                if authModel.isAuthenticated, let user = userModel.myUser {
+                    connectedView(user: user)
+                } else {
+                    anonymousView
+                }
             }
+            .navigationTitle("Profile")
         }
-        .navigationTitle("Profile")
     }
 
     @ViewBuilder
-    var connectedView: some View {
-        VStack {
-            if authModel.isAuthenticated, let user = users.first {
-                Text("Utilisateur: \(user.username)")
-                
+    func connectedView(user: User) -> some View {
+        List {
+            Section {
+                UserCellView(user: user)
+            }
+
+            Section {
+                Text("Transactions")
+
+                Text("Friends")
+
+                Text("Groups")
+            }
+
+            Section {
                 AsyncButton(action: {
                     Task {
                         try? await userModel.logout(modelContext: modelContext)
@@ -41,11 +53,8 @@ struct ProfileView: View {
                 }, label: {
                     Text("Se déconnecter")
                 })
-                .buttonStyle(.borderedProminent)
             }
         }
-        .padding()
-
     }
 
     @ViewBuilder

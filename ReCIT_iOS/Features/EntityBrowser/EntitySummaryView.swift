@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EntitySummaryView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel

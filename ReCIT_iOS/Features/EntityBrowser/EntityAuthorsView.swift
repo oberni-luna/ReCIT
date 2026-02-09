@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EntityAuthorsView: View {
     @Environment(\.colorScheme) var colorScheme

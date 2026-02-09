@@ -7,8 +7,9 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 
-enum NavigationDestination: Hashable, Identifiable {
+enum NavigationDestination: Equatable, Hashable, Identifiable {
     case author(uri: String)
     case work(uri: String)
     case edition(uri: String)
@@ -41,6 +42,7 @@ enum NavigationDestination: Hashable, Identifiable {
         }
     }
 }
+
 extension NavigationDestination {
     @ViewBuilder
     func viewForDestination(_ path: Binding<NavigationPath>) -> some View {

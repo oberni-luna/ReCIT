@@ -31,13 +31,14 @@ class ListModel: ObservableObject {
     }
 
     func deleteList(modelContext: ModelContext, list: EntityList) async throws {
-        let _: DeleteListResponseDTO? = try await fetchDataService.send(
+        if let _: OkStatusDTO? = try await fetchDataService.send(
             toEndpoint: "/api/lists?action=delete",
             method: "POST",
             payload: ["ids": list._id]
-        )
-        modelContext.delete(list)
-        try modelContext.save()
+        ) {
+            modelContext.delete(list)
+            try modelContext.save()
+        }
     }
 
     func createOrUpdateList(modelContext: ModelContext, list: EntityList) async throws {
@@ -66,6 +67,7 @@ class ListModel: ObservableObject {
         }
     }
 
+    // TODO: add optionnal comment when adding an element to a list 
     func addEntitiesToList(listId: String, entityUris: [String]) async throws {
         let addToListDTO: AddToListDTO = .init(id: listId, uris: entityUris)
         let _: AddToListResponseDTO? = try await fetchDataService.send(
@@ -75,38 +77,8 @@ class ListModel: ObservableObject {
         )
     }
 
-//    Add elements to list
-//    /api/lists?action=add-elements
-//    {id: "049a5d616589c7d82d7e3ca3e0a1fd18", uris: ["wd:Q41663451"]}
+    // TODO: Implement remove item from list
 
-//    Comment on list element
-//    /api/lists?action=update-element
-//    { "id": "313e939fbdbc1b5b545f0ad4f9298570", "comment": "Romans philosophique très chouette !" }
+    // TODO: Implement update item in a list to add comment
 
-//    Search elements
-//    /api/search?types=works|series&search=l%27espace%20d%27&lang=fr&limit=10&offset=0&exact=false
-//    {
-//        "results": [
-//            {
-//                "id": "Q1198588",
-//                "type": "series",
-//                "uri": "wd:Q1198588",
-//                "label": "Odyssées de l'espace",
-//                "description": "série de science-fiction",
-//                "image": "/img/entities/be645f39a0898f9966f54994c06b48c13c28b5af",
-//                "claims": {},
-//                "_score": 4122.6904,
-//                "_popularity": 144
-//            },
-//            {
-//                "id": "Q41663451",
-//                "type": "works",
-//                "uri": "wd:Q41663451",
-//                "label": "L'Espace d'un an",
-//                "description": "roman de Becky Chambers",
-//                "image": "/img/entities/acdbf01907e8ecc8fc2846b434115f14320f4078",
-//                "claims": {},
-//                "_score": 2823.6528,
-//                "_popularity": 47
-//            },
 }

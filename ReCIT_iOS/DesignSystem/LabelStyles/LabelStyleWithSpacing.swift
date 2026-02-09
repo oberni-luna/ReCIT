@@ -5,6 +5,7 @@
 //  Created by Olivier Berni on 05/02/2026.
 //
 import SwiftUI
+import SwiftData
 
 struct LabelStyleWithSpacing: LabelStyle {
     var spacing: DesignSystem.Spacing = .zero

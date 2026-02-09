@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EntityCellView: View {
-    let entity: Entity
+    let entity: any Entity
 
     var body: some View {
         switch entity.self {

@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 
 struct InventoryItemDetailsFormView: View {
     @Environment(\.modelContext) var modelContext

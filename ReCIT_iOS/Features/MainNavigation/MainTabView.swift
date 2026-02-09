@@ -17,7 +17,7 @@ struct MainTabView: View {
         case inventory
         case transactions
         case lists
-        case settings
+        case profile
         case search
 
         // Use for dev in order to hide tab on progress for exemple
@@ -29,7 +29,7 @@ struct MainTabView: View {
                 false
             case .transactions:
                 true
-            case .settings:
+            case .profile:
                 false
             case .lists:
                 false
@@ -46,8 +46,8 @@ struct MainTabView: View {
                 "book"
             case .transactions:
                 "arrow.left.arrow.right"
-            case .settings:
-                "gearshape"
+            case .profile:
+                "person"
             case .lists:
                 "list.bullet"
             case .search:
@@ -63,7 +63,7 @@ struct MainTabView: View {
                 "Inventory"
             case .transactions:
                 "Transactions"
-            case .settings:
+            case .profile:
                 "Settings"
             case .lists:
                 "Lists"
@@ -119,7 +119,7 @@ private extension MainTabView {
             Text("Transactions View")
                 .navigationTitle("Transactions")
                 .navigationBarTitleDisplayMode(.inline)
-        case .settings:
+        case .profile:
             ProfileView()
                 .navigationTitle("Réglages")
                 .navigationBarTitleDisplayMode(.inline)

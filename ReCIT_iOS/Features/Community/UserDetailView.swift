@@ -16,15 +16,7 @@ struct UserDetailView: View {
     var body: some View {
         List {
             Section {
-                VStack(alignment: .leading, spacing: .small) {
-                    if let image = user.avatarURLValue {
-                        CellThumbnail(imageUrl: image, cornerRadius: .full, size: 72)
-                    }
-                    Text(user.username)
-                        .font(.headline)
-                    Text("Item count \(user.itemCount)")
-                        .font(.subheadline)
-                }
+                UserCellView(user: user)
             }
 
             Section {

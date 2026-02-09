@@ -14,8 +14,8 @@ extension RootView {
                 do {
                     print("## Sync my user ")
                     try await userModel.syncMyUser(modelContext: modelContext)
-                    print(" --> done \(userModel.myUser?.username)")
-                    
+                    print(" --> done \(userModel.myUser?.username ?? "<Empty>")")
+
                     if let myUser = userModel.myUser {
                         try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext)
 

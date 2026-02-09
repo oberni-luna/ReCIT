@@ -10,6 +10,7 @@ import SwiftUI
 struct InventoryListContent: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [InventoryItem]
+    let filterParameter: InventoryItem.FilterParameter
 
     init(
         user: User,
@@ -17,6 +18,7 @@ struct InventoryListContent: View {
         filterParameter: InventoryItem.FilterParameter = .userInventory,
         sortParameter: SortParameter = .recent
     ) {
+        self.filterParameter = filterParameter
         let predicate = InventoryItem.predicate(user: user, filterParameter: filterParameter, searchText: searchText)
 
         switch sortParameter {
@@ -26,13 +28,11 @@ struct InventoryListContent: View {
     }
 
     var body: some View {
-//        List {
-            ForEach(items) { item in
-                NavigationLink(value: NavigationDestination.item(item: item)) {
-                    InventoryCell(item: item)
-                }
+        ForEach(items) { item in
+            NavigationLink(value: NavigationDestination.item(item: item)) {
+                InventoryCell(item: item, filterParameter: filterParameter)
             }
-//        }
+        }
     }
 }
 

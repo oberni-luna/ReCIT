@@ -32,7 +32,7 @@ struct UserDetailView: View {
                     Button {
                         path.append(NavigationDestination.item(item: item))
                     } label: {
-                        InventoryCell(item: item)
+                        InventoryCell(item: item, filterParameter: .userInventory)
                     }
                     .buttonStyle(.plain)
                 }

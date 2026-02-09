@@ -9,6 +9,7 @@ import SwiftUI
 
 struct InventoryCell: View {
     let item: InventoryItem
+    let filterParameter: InventoryItem.FilterParameter
 
     var body: some View {
         if let edition = item.edition {
@@ -27,8 +28,16 @@ struct InventoryCell: View {
                     Text(edition.authorNames.joined(separator: ", "))
                         .font(.caption)
 
-                    TransactionTypeLabel(transactionType: item.transaction)
-                        .font(.caption)
+                    HStack(alignment: .firstTextBaseline, spacing: .small) {
+                        TransactionTypeLabel(transactionType: item.transaction)
+                            .font(.caption)
+
+                        if filterParameter == .othersInventory, let owner = item.owner {
+                            Text(.init("Appartient à **\(owner.username)**"))
+                                .font(.caption)
+                                .foregroundStyle(.textDefault)
+                        }
+                    }
 
 #if DEBUG
                     Text(edition.uri)

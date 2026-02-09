@@ -37,8 +37,8 @@ struct InventoryItemDetailView: View {
                 Button("Supprimer", role: .destructive) {
                     Task {
                         try? await inventoryModel.removeItem(item, modelContext: modelContext)
+                        dismiss()
                     }
-                    dismiss()
                 }
                 Button("Annuler", role: .cancel) { }
             }

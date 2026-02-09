@@ -7,22 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "C77A5772-347A-4EBF-8DB6-AAE9E11B9CAA"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Features/Components/CellThumbnail.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "23"
-            endingLineNumber = "23"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "602BA52D-9B35-4FEA-BFB0-77D15294F89D"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -34,78 +18,6 @@
             endingLineNumber = "217"
             landmarkName = "getOrFetchAuthors(modelContext:uris:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "602BA52D-9B35-4FEA-BFB0-77D15294F89D - 75172fc4c70153f4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for ReCIT_iOS.InventoryModel.getOrFetchAuthors(modelContext: SwiftData.ModelContext, uris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; Swift.Optional&lt;Swift.Array&lt;ReCIT_iOS.Author&gt;&gt;"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/Inventory/InventoryModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "217"
-                  endingLineNumber = "217">
-               </Location>
-               <Location
-                  uuid = "602BA52D-9B35-4FEA-BFB0-77D15294F89D - a495622e6f75e414"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(2) await resume partial function for ReCIT_iOS.InventoryModel.getOrFetchAuthors(modelContext: SwiftData.ModelContext, uris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; Swift.Optional&lt;Swift.Array&lt;ReCIT_iOS.Author&gt;&gt;"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/Inventory/InventoryModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "217"
-                  endingLineNumber = "217">
-               </Location>
-               <Location
-                  uuid = "602BA52D-9B35-4FEA-BFB0-77D15294F89D - 2f195f5a6a381ff2"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(3) suspend resume partial function for ReCIT_iOS.InventoryModel.getOrFetchAuthors(modelContext: SwiftData.ModelContext, uris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; Swift.Optional&lt;Swift.Array&lt;ReCIT_iOS.Author&gt;&gt;"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/Inventory/InventoryModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "217"
-                  endingLineNumber = "217">
-               </Location>
-               <Location
-                  uuid = "602BA52D-9B35-4FEA-BFB0-77D15294F89D - c24469abc4b79f3"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(4) suspend resume partial function for ReCIT_iOS.InventoryModel.getOrFetchAuthors(modelContext: SwiftData.ModelContext, uris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; Swift.Optional&lt;Swift.Array&lt;ReCIT_iOS.Author&gt;&gt;"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/Inventory/InventoryModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "217"
-                  endingLineNumber = "217">
-               </Location>
-               <Location
-                  uuid = "602BA52D-9B35-4FEA-BFB0-77D15294F89D - c24469abc4b79f3"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(4) suspend resume partial function for ReCIT_iOS.InventoryModel.getOrFetchAuthors(modelContext: SwiftData.ModelContext, uris: Swift.Array&lt;Swift.String&gt;) async throws -&gt; Swift.Optional&lt;Swift.Array&lt;ReCIT_iOS.Author&gt;&gt;"
-                  moduleName = "ReCIT_iOS.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/olivier/Sources/ReCIT/ReCIT_iOS/Features/AppModels/Inventory/InventoryModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "217"
-                  endingLineNumber = "217">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy

@@ -36,7 +36,5 @@ struct ScanView: View {
         case .failure(let error):
             print("Scanning failed: \(error.localizedDescription)")
         }
-
     }
 }
-

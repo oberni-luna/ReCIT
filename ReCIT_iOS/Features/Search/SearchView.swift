@@ -43,7 +43,7 @@ struct SearchView: View {
                 if results.isEmpty {
                     Group {
                         if searchText.isEmpty {
-                            inspirationnalViewContent
+                            inspirationnalViewSection
                         } else {
                             emptyView
                         }
@@ -85,14 +85,16 @@ struct SearchView: View {
     }
 
     @ViewBuilder
-    var inspirationnalViewContent: some View {
+    var inspirationnalViewSection: some View {
         if let user = userModel.myUser {
-            InventoryListContent(
-                user: user,
-                searchText: "",
-                filterParameter: .othersInventory,
-                sortParameter: .alphabetical
-            )
+            Section("Dans l'inventaire de tes amis") {
+                InventoryListContent(
+                    user: user,
+                    searchText: "",
+                    filterParameter: .othersInventory,
+                    sortParameter: .recent
+                )
+            }
         }
     }
 

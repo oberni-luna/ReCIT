@@ -12,6 +12,7 @@
 		098A61E72E54CA160032185B /* ReCIT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61E32E54CA160032185B /* ReCIT.swift */; };
 		09ACF44E2E5E07EB00D59BC0 /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09ACF44D2E5E07EB00D59BC0 /* Env.swift */; };
 		09F415792F203469000D3E4D /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 09F415782F203469000D3E4D /* AsyncAlgorithms */; };
+		507BE6B82F3B5592003AF5B3 /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 507BE6B72F3B5592003AF5B3 /* Nuke */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				507BE6B82F3B5592003AF5B3 /* Nuke in Frameworks */,
 				090719A32F2505CB000D8913 /* CodeScanner in Frameworks */,
 				09F415792F203469000D3E4D /* AsyncAlgorithms in Frameworks */,
 			);
@@ -152,6 +154,7 @@
 			packageProductDependencies = (
 				09F415782F203469000D3E4D /* AsyncAlgorithms */,
 				090719A22F2505CB000D8913 /* CodeScanner */,
+				507BE6B72F3B5592003AF5B3 /* Nuke */,
 			);
 			productName = ReCIT_iOS;
 			productReference = 094FD19C2E4A38D40023705A /* ReCIT_iOS.app */;
@@ -238,6 +241,7 @@
 			packageReferences = (
 				09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 				090719A02F25052D000D8913 /* XCRemoteSwiftPackageReference "CodeScanner" */,
+				507BE6B62F3B5592003AF5B3 /* XCRemoteSwiftPackageReference "Nuke" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 094FD19D2E4A38D40023705A /* Products */;
@@ -639,6 +643,14 @@
 				minimumVersion = 1.1.1;
 			};
 		};
+		507BE6B62F3B5592003AF5B3 /* XCRemoteSwiftPackageReference "Nuke" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Nuke.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -651,6 +663,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
 			productName = AsyncAlgorithms;
+		};
+		507BE6B72F3B5592003AF5B3 /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 507BE6B62F3B5592003AF5B3 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

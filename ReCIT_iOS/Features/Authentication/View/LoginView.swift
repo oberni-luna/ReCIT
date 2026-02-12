@@ -10,8 +10,8 @@ struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     let authModel: AuthModel
 
-    @State private var username = "OlivierB_test"
-    @State private var password = "Azerty123!" //"klbC:2n+7HIs"
+    @State private var username = ""
+    @State private var password = ""
     @State private var errorMessage: String?
 
     var body: some View {

@@ -7,7 +7,7 @@
 
 import SwiftUI
 import CodeScanner
-internal import AVFoundation
+import AVFoundation
 
 struct ScanView: View {
     @EnvironmentObject private var inventoryModel: InventoryModel

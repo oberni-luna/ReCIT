@@ -12,8 +12,17 @@ import AsyncAlgorithms
 class TransactionModel: ObservableObject {
     private let apiService: APIService
 
-    init(fetchDataService: APIService = .init(env: .production)) {
+    private var userModel: UserModel?
+    private var inventoryModel: InventoryModel?
+
+    init(fetchDataService: APIService = .init(env: .production), userModel: UserModel? = nil) {
         self.apiService = fetchDataService
+        self.userModel = userModel
+    }
+
+    func start(userModel: UserModel, inventoryModel: InventoryModel) {
+        self.userModel = userModel
+        self.inventoryModel = inventoryModel
     }
 
     // TODO: set a message as read
@@ -22,8 +31,83 @@ class TransactionModel: ObservableObject {
     }
 
     // TODO: fetch transactions and associated messages
-    func getOrFetchTransactions(modelContext: ModelContext) async throws -> [UserTransaction] {
-        return []
+    func syncTransactions(modelContext: ModelContext) async throws {
+        guard let user = userModel?.myUser else {
+            return
+        }
+
+        let transactions: TransactionsDTO? = try await apiService.fetchData(fromEndpoint: "/api/transactions")
+        guard let transactions else { return }
+
+        for transactionDTO in transactions.transactions {
+            guard let requester:User = try await self.getTransactionUser(
+                modelContext: modelContext,
+                transactionUserId: transactionDTO.requester,
+                user: user
+            ) else {
+                continue
+            }
+
+            guard let owner: User = try await self.getTransactionUser(
+                modelContext: modelContext,
+                transactionUserId: transactionDTO.owner,
+                user: user
+            ) else {
+                continue
+            }
+
+            guard let item: InventoryItem = try inventoryModel?.getOrFetchItem(modelContext: modelContext, itemId: transactionDTO.item) else {
+                continue
+            }
+
+            let messages = try await self.fetchTransactionMessagesDTO(transactionId: transactionDTO._id).map { messageDTO in
+                TransactionMessage(
+                    _id: messageDTO._id,
+                    user: [owner, requester].filter({messageDTO.user == $0._id}).first!,
+                    message: messageDTO.message,
+                    created: Date(timeIntervalSince1970: messageDTO.created)
+                )
+            }
+            .sorted { $0.created < $1.created }
+
+            modelContext.insert(UserTransaction(
+                _id: transactionDTO._id,
+                _rev: transactionDTO._rev,
+                item: item,
+                owner: owner,
+                requester: requester,
+                type: TransactionType(rawValue: transactionDTO.transaction) ?? .inventorying,
+                created: Date(timeIntervalSince1970: transactionDTO.created / 1000),
+                messages: messages,
+                state: .init(rawValue: transactionDTO.state) ?? .requested,
+                actions: transactionDTO.actions.map { action in
+                    UserTransaction.TransactionAction.init(
+                        action: UserTransaction.TransactionState(rawValue: action.action) ?? .requested,
+                        timestamp: Date(timeIntervalSince1970: action.timestamp / 1000)
+                    )
+                },
+                readStatus: UserTransaction.MessageReadStatus(owner: transactionDTO.read.owner, requester: transactionDTO.read.requester))
+            )
+        }
+
+        try modelContext.save()
+
+        return
+    }
+
+    private func getTransactionUser(modelContext: ModelContext, transactionUserId: String, user: User) async throws -> User? {
+        if transactionUserId == user._id {
+            return user
+        } else {
+            return try await userModel?.getOrFetchUsers(modelContext:modelContext, userIds: [transactionUserId]).first
+        }
+    }
+
+    private func fetchTransactionMessagesDTO(transactionId: String) async throws -> [TransactionMessageDTO] {
+
+        let transactionMessagesDTO: TransactionMessagesDTO? = try await apiService.fetchData(fromEndpoint: "/api/transactions?action=get-messages&transaction=\(transactionId)")
+        guard let transactionMessagesDTO else { return [] }
+        return transactionMessagesDTO.messages
     }
 
     func postRequest(itemId: String, message: String?) async throws {

@@ -17,6 +17,8 @@ extension RootView {
                     print(" --> done \(userModel.myUser?.username ?? "<Empty>")")
 
                     if let myUser = userModel.myUser {
+                        transactionModel.start(userModel: userModel, inventoryModel: inventoryModel)
+
                         try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext)
 
                         try await userModel.syncUserNetwork(modelContext: modelContext)
@@ -26,6 +28,8 @@ extension RootView {
                         }
 
                         try await listModel.syncLists(forUser: myUser, modelContext: modelContext)
+
+                        try await transactionModel.syncTransactions(modelContext: modelContext)
                     }
                 } catch {
                     print("⚠️⚠️⚠️⚠️⚠️ Error during user sync: \(error)")

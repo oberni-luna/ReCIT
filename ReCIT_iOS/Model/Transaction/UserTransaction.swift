@@ -36,7 +36,7 @@ public class UserTransaction: Identifiable, Equatable {
         self.readStatus = readStatus
     }
 
-    enum TransactionState: Codable {
+    enum TransactionState: String, Codable {
         case requested
         case accepted
         case confirmed

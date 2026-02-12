@@ -10,14 +10,16 @@ struct UserCellView: View {
     let user: User
 
     var body: some View {
-        VStack(alignment: .leading, spacing: .small) {
+        HStack(alignment: .top, spacing: .small) {
             if let image = user.avatarURLValue {
-                CellThumbnail(imageUrl: image, cornerRadius: .full, size: 72)
+                CellThumbnail(imageUrl: image, cornerRadius: .full, size: 48)
             }
-            Text(user.username)
-                .font(.headline)
-            Text("Item count \(user.itemCount)")
-                .font(.subheadline)
+            VStack(alignment: .leading, spacing: .xSmall) {
+                Text(user.username)
+                    .font(.headline)
+                Text("Item count \(user.itemCount)")
+                    .font(.subheadline)
+            }
         }
     }
 }

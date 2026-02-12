@@ -16,7 +16,7 @@ struct UserDetailView: View {
     var body: some View {
         List {
             Section {
-                UserCellView(user: user)
+                UserHeaderView(user: user)
             }
 
             Section {

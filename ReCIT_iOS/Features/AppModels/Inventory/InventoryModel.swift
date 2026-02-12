@@ -219,8 +219,11 @@ class InventoryModel: ObservableObject {
         }
 
         authors.append(contentsOf: authorsDto.compactMap { authorDto in
-            Author(entityDTO: authorDto, apiService: apiService)
+            let author = Author(entityDTO: authorDto, apiService: apiService)
+            modelContext.insert(author)
+            return author
         })
+        try modelContext.save()
 
         return authors
     }
@@ -287,6 +290,14 @@ class InventoryModel: ObservableObject {
         }
 
         return extractDto
+    }
+
+    func getOrFetchItem(modelContext: ModelContext, itemId: String) throws -> InventoryItem? {
+        if let item = try getLocalItem(modelContext: modelContext, id: itemId) {
+            return item
+        }
+//MARK 
+        return nil
     }
 
     func getLocalEdition(modelContext: ModelContext, uri: String) throws -> Edition? {
@@ -367,7 +378,4 @@ class InventoryModel: ObservableObject {
         let descriptor = FetchDescriptor(predicate: predicate)
         return try modelContext.fetch(descriptor).first
     }
-
-    
-
 }

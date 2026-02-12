@@ -1,5 +1,5 @@
 //
-//  UserCellView.swift
+//  UserItemCellView.swift
 //  ReCIT_iOS
 //
 //  Created by Olivier Berni on 16/01/2026.

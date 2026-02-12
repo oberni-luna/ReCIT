@@ -22,8 +22,6 @@ struct TransactionDTO: Codable {
     let created: Double
     let actions: [ActionDTO]
     let read: MessageReadStatusDTO
-
-//    let snapshot: TransactionSnapshotDTO?
 }
 
 struct MessageReadStatusDTO: Codable {

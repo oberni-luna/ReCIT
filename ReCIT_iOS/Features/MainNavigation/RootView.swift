@@ -14,6 +14,7 @@ struct RootView: View {
     @StateObject var userModel: UserModel = .init()
     @StateObject var listModel: ListModel = .init()
     @StateObject var inventoryModel: InventoryModel = .init()
+    @StateObject var transactionModel: TransactionModel = .init()
 
     @Environment(\.modelContext) var modelContext
 
@@ -25,6 +26,7 @@ struct RootView: View {
             .environmentObject(listModel)
             .environmentObject(inventoryModel)
             .environmentObject(authModel)
+            .environmentObject(transactionModel)
             .sheet(isPresented: $isLoginSheetPresented) {
                 LoginView(authModel: authModel)
             }

@@ -65,7 +65,7 @@ class TransactionModel: ObservableObject {
                     _id: messageDTO._id,
                     user: [owner, requester].filter({messageDTO.user == $0._id}).first!,
                     message: messageDTO.message,
-                    created: Date(timeIntervalSince1970: messageDTO.created)
+                    created: Date(timeIntervalSince1970: messageDTO.created / 1000)
                 )
             }
             .sorted { $0.created < $1.created }

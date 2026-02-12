@@ -8,7 +8,7 @@ import Foundation
 import SwiftData
 
 @Model
-public class UserTransaction: Identifiable, Equatable {
+public class UserTransaction: Identifiable, Equatable, Hashable {
     @Attribute(.unique) var _id: String
     var _rev: String
     var item: InventoryItem
@@ -36,11 +36,24 @@ public class UserTransaction: Identifiable, Equatable {
         self.readStatus = readStatus
     }
 
-    enum TransactionState: String, Codable {
+    enum TransactionState: String, Codable, Hashable {
         case requested
         case accepted
         case confirmed
         case returned
+
+        var systemImage: String {
+            switch self {
+            case .requested:
+                "questionmark.message.fill"
+            case .accepted:
+                "checkmark.message.fill"
+            case .confirmed:
+                "hand.thumbsup.circle.fill"
+            case .returned:
+                "checkmark.square.fill"
+            }
+        }
     }
 
     struct TransactionAction: Codable, Equatable {

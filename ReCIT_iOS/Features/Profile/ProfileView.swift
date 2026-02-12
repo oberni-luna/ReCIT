@@ -40,16 +40,12 @@ struct ProfileView: View {
                 UserHeaderView(user: user)
             }
 
-            Section("Transactions") {
+            Section("Current transactions") {
                 ForEach(transactions) { transaction in
                     NavigationLink(
                         value: NavigationDestination.transaction(transaction: transaction)
                     ) {
-                        VStack(alignment: .leading, spacing: .xSmall) {
-                            Text(transaction.item.edition?.title ?? "Unkown title")
-                            Text("\(transaction.created.formatted()) : \(transaction.owner.username) → \(transaction.requester.username)")
-                            Text(transaction.state.rawValue)
-                        }
+                        TransactionCellView(transaction: transaction)
                     }
                 }
             }

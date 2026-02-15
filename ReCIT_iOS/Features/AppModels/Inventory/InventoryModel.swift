@@ -279,17 +279,20 @@ class InventoryModel: ObservableObject {
         guard let summariesDTO: SummariesDTO = try? await apiService.fetchData(fromEndpoint: "/api/data?action=summaries&uri=\(uri)&langs=fr&refresh=false") else {
             return nil
         }
-        guard let summary: SummaryDTO = summariesDTO.summaries.first(where: { $0.key == "frwiki" }) else {
-            return nil
-        }
-        guard let sitelink: SitelinkDTO = summary.sitelink else {
-            return nil
-        }
-        guard let extractDto: ExtractDTO = try? await apiService.fetchData(fromEndpoint: "/api/data?action=wp-extract&lang=fr&title=\(sitelink.title)") else {
-            return nil
+
+        if let summary: SummaryDTO = summariesDTO.summaries.first(where: { $0.key == WikidataProperty.summary.rawValue && $0.lang == "fr" }) {
+            return ExtractDTO.init(extract: summary.text ?? "", url: summary.link)
+        } else if let summary: SummaryDTO = summariesDTO.summaries.first(where: { $0.key == "frwiki" }) {
+            guard let sitelink: SitelinkDTO = summary.sitelink else {
+                return nil
+            }
+            guard let extractDto: ExtractDTO = try? await apiService.fetchData(fromEndpoint: "/api/data?action=wp-extract&lang=fr&title=\(sitelink.title)") else {
+                return nil
+            }
+            return extractDto
         }
 
-        return extractDto
+        return nil
     }
 
     func getOrFetchItem(modelContext: ModelContext, itemId: String) throws -> InventoryItem? {

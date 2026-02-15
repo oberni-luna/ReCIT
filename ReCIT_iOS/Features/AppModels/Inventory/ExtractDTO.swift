@@ -22,6 +22,7 @@ struct SummaryDTO: Codable {
     let lang: String
     let link: String
     let sitelink: SitelinkDTO?
+    let text: String?
 }
 
 struct SitelinkDTO: Codable {

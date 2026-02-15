@@ -40,6 +40,7 @@ enum WikidataProperty: String {
     case image                   = "wdt:P18"   // image
     case educatedAt              = "wdt:P69"   // educated at
     case signature               = "wdt:P109"  // signature
+    case summary                 = "wdt:P268"  // summary
 
     var description: String {
         switch self {
@@ -71,6 +72,7 @@ enum WikidataProperty: String {
         case .image: return "image"
         case .educatedAt: return "educated at"
         case .signature: return "signature"
+        case .summary: return "summary"
         }
     }
 }

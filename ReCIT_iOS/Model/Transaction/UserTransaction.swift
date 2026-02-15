@@ -22,6 +22,21 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
 
     @Relationship(deleteRule: .cascade, inverse: \TransactionMessage.transaction) var messages: [TransactionMessage]
 
+    var isCurrent: Bool {
+        switch state {
+        case .returned, .declined:
+            return false
+        default:
+            return true
+        }
+    }
+
+    var lastActionDate: Date {
+        self.actions
+            .sorted(by: { $0.timestamp < $1.timestamp })
+            .last?.timestamp ?? created
+    }
+
     init(_id: String, _rev: String, item: InventoryItem, owner: User, requester: User, type: TransactionType, created: Date, messages: [TransactionMessage], state: TransactionState, actions: [TransactionAction], readStatus: MessageReadStatus) {
         self._id = _id
         self._rev = _rev
@@ -41,6 +56,7 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
         case accepted
         case confirmed
         case returned
+        case declined
 
         var systemImage: String {
             switch self {
@@ -52,6 +68,23 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
                 "hand.thumbsup.circle.fill"
             case .returned:
                 "checkmark.square.fill"
+            case .declined:
+                "hand.thumbsdown.fill"
+            }
+        }
+
+        var buttonLabel: String {
+            switch self {
+            case .requested:
+                "Demander"
+            case .accepted:
+                "Accepter"
+            case .confirmed:
+                "Confirmer"
+            case .returned:
+                "Terminer"
+            case .declined:
+                "Décliner"
             }
         }
     }

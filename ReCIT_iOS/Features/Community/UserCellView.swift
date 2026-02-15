@@ -11,9 +11,8 @@ struct UserCellView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: .small) {
-            if let image = user.avatarURLValue {
-                CellThumbnail(imageUrl: image, cornerRadius: .full, size: 48)
-            }
+            CellThumbnail(imageUrl: user.avatarURLValue, cornerRadius: .full, size: 48)
+
             VStack(alignment: .leading, spacing: .xSmall) {
                 Text(user.username)
                     .font(.headline)

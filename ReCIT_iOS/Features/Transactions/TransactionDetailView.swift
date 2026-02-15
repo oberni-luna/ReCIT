@@ -13,19 +13,41 @@ struct TransactionDetailView: View {
     
     let transaction: UserTransaction
 
+    @State private var showTransactionForm: Bool = false
+
     var body: some View {
         List {
             Section {
                 TransactionCellView(transaction: transaction)
             }
-            
-            if let user = userModel.myUser, transaction.messages.count >= 1 {
-                Section("Messages") {
-                    ForEach(transaction.getUIMessages(for: user).sorted { $0.timestamp < $1.timestamp }) { message in
-                        messageView(message: message)
+
+            if let user = userModel.myUser {
+                if transaction.messages.count >= 1 {
+                    Section("Messages") {
+                        ForEach(transaction.getUIMessages(for: user).sorted { $0.timestamp < $1.timestamp }) { message in
+                            messageView(message: message)
+                        }
                     }
                 }
+
+                Section {} footer: {
+                    Button {
+                        showTransactionForm = true
+                    } label: {
+                        if let _ = transaction.nextAvailableState(for: user) {
+                            Text("Répondre")
+                        } else {
+                            Text("Envoyer un message")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .frame(maxWidth: .infinity)
+                }
             }
+        }
+        .sheet(isPresented: $showTransactionForm) {
+            TransactionFormView(transaction: transaction)
         }
     }
 
@@ -34,25 +56,30 @@ struct TransactionDetailView: View {
         switch message.direction {
         case .action(let action):
             HStack(alignment: .top, spacing: .small) {
-                Label(.init(message.text), systemImage: action.systemImage)
-//                Text(.init(message.text))
-//                    .multilineTextAlignment(.center)
+                Image(systemName: action.systemImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24)
+                    .padding(.horizontal, .xSmall)
+                VStack(alignment: .leading, spacing: .small) {
+                    Text(.init(message.text))
+                    Text(message.timestamp.formatted(date: .abbreviated, time: .standard))
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                }
             }
-            .frame(maxWidth: .infinity)
         default:
             HStack(alignment: .top, spacing: .small) {
                 CellThumbnail(imageUrl: message.user.avatarURLValue, cornerRadius: .full, size: 32)
                 VStack(alignment: .leading, spacing: .xSmall) {
-                    HStack(alignment: .firstTextBaseline, spacing: .small) {
-                        Text(message.user.username)
-                            .bold()
+                    Text(message.user.username)
+                        .bold()
 
-                        Spacer()
-
-                        Text(message.timestamp.formatted(date: .abbreviated, time: .standard))
-                            .foregroundStyle(.secondary)
-                    }
                     Text(.init(message.text))
+
+                    Text(message.timestamp.formatted(date: .abbreviated, time: .standard))
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
                 }
             }
         }
@@ -120,6 +147,8 @@ extension UserTransaction {
                 "Vous avez confirmé la réception"
             case .returned:
                 "Vous avez retourné le livre"
+            case .declined:
+                "**\(self.owner.username)** a refusé cette demande"
             }
         } else {
             switch action.action {
@@ -131,6 +160,8 @@ extension UserTransaction {
                 "**\(self.owner.username)** a confirmé la réception"
             case .returned:
                 "Vous avez récupéré le livre"
+            case .declined:
+                "Vous avez refusé cette demande"
             }
         }
     }
@@ -144,6 +175,8 @@ extension UserTransaction {
         case .confirmed:
             self.requester
         case .returned:
+            self.owner
+        case .declined:
             self.owner
         }
     }

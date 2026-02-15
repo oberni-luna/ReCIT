@@ -41,17 +41,19 @@ struct ProfileView: View {
             }
 
             Section("Current transactions") {
-                ForEach(transactions) { transaction in
-                    NavigationLink(
-                        value: NavigationDestination.transaction(transaction: transaction)
-                    ) {
-                        TransactionCellView(transaction: transaction)
+                ForEach(transactions.sorted{ $0.lastActionDate > $1.lastActionDate } ) { transaction in
+                    if transaction.isCurrent {
+                        NavigationLink(
+                            value: NavigationDestination.transaction(transaction: transaction)
+                        ) {
+                            TransactionCellView(transaction: transaction)
+                        }
                     }
                 }
             }
 
             Section("Network") {
-                ForEach(userModel.getAllOtherUsers(modelContext: modelContext)) { otherUser in
+                ForEach(userModel.getAllOtherUsers(modelContext: modelContext).sorted(by: { $0.username < $1.username })) { otherUser in
                     NavigationLink(value: NavigationDestination.user(user: otherUser)) {
                         UserCellView(user: otherUser)
                     }

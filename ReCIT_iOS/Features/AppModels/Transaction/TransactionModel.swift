@@ -30,7 +30,7 @@ class TransactionModel: ObservableObject {
 
     }
 
-    // TODO: fetch transactions and associated messages
+    // fetch transactions and associated messages
     func syncTransactions(modelContext: ModelContext) async throws {
         guard let user = userModel?.myUser else {
             return
@@ -59,7 +59,9 @@ class TransactionModel: ObservableObject {
             guard let item: InventoryItem = try inventoryModel?.getOrFetchItem(modelContext: modelContext, itemId: transactionDTO.item) else {
                 continue
             }
-
+//TODO: update transaction only if _rev hasn't change
+//            let localTransaction: UserTransaction? = try getLocalTransaction(modelContext: modelContext, _id: transactionDTO._id)
+//            
             let messages = try await self.fetchTransactionMessagesDTO(transactionId: transactionDTO._id).map { messageDTO in
                 TransactionMessage(
                     _id: messageDTO._id,
@@ -122,4 +124,67 @@ class TransactionModel: ObservableObject {
         }
     }
 
+    func updateRequest(transaction: UserTransaction, newState: UserTransaction.TransactionState, message: String?) async throws {
+        let payload = [
+            "action": "update-state",
+            "state": newState.rawValue,
+            "transaction": transaction._id
+        ]
+
+        guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions", method: "PUT", payload: payload) else {
+            throw NetworkError.badResponse
+        }
+        
+        if let message, !message.isEmpty {
+            try await postMessage(transactionId: transaction._id, message: message)
+        }
+
+//        PUT api/transactions
+//        action:"update-state"
+//        state:"accepted"
+//        message:"Pourquoi je peux te le prêter oui 🙌"
+//        transaction:"7be9b3c3dcf825200eeecbbaa6b90d96"
+
+//        {
+//            "ok": true,
+//            "transaction": {
+//                "_id": "7be9b3c3dcf825200eeecbbaa6b90d96",
+//                "_rev": "4-c43fd86e11097e50fd9bedf661544929",
+
+    }
+
+
+    func postMessage(transactionId: String, message: String) async throws {
+        guard !message.isEmpty else { return }
+        
+        let messagePayload = [
+            "action": "message",
+            "message": message,
+            "transaction": transactionId
+        ]
+
+        guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions", payload: messagePayload) else {
+            throw NetworkError.badResponse
+        }
+//        POST api/transactions
+//        action:"message"
+//        message:"Pourquoi je peux te le prêter oui 🙌"
+//        transaction:"7be9b3c3dcf825200eeecbbaa6b90d96"
+
+
+//        {
+//            "ok": true,
+//            "id": "9db2d2c75976af2f3dd6f79cd6a0e1f4",
+//            "rev": "1-1d79a92e080179c7ed7f0302bbf5674f"
+//        }
+
+    }
+
+    private func getLocalTransaction(modelContext: ModelContext, _id: String) throws -> UserTransaction? {
+        let predicate = #Predicate<UserTransaction> { object in
+            object._id == _id
+        }
+        let descriptor = FetchDescriptor(predicate: predicate)
+        return try modelContext.fetch(descriptor).first
+    }
 }

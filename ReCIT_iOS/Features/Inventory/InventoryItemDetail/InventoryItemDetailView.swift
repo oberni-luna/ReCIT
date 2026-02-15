@@ -16,6 +16,7 @@ struct InventoryItemDetailView: View {
 
     @State private var showDeleteConfirmation = false
     @State private var browseEntityDestination: NavigationDestination?
+    @State private var transaction: UserTransaction?
 
     @Bindable var item: InventoryItem
     @Binding var path: NavigationPath
@@ -59,6 +60,28 @@ struct InventoryItemDetailView: View {
                 if let destination {
                     path.append(destination)
                     browseEntityDestination = nil
+                }
+            }
+            .sheet(isPresented: $showTransactionForm) {
+                if let transaction = self.transaction {
+                    TransactionFormView(transaction: transaction)
+                } else {
+                    if !isMyItem, let user = userModel.myUser, let owner = item.owner {
+                        TransactionFormView(transaction:
+                            UserTransaction.init(
+                                _id: "", _rev: "",
+                                item: item,
+                                owner: owner,
+                                requester: user,
+                                type: item.transaction,
+                                created: Date(),
+                                messages: [],
+                                state: .requested,
+                                actions: [],
+                                readStatus: .init(owner: false, requester: true)
+                            )
+                        )
+                    }
                 }
             }
     }
@@ -148,13 +171,15 @@ struct InventoryItemDetailView: View {
 
     @State private var showAddToListDialog: Bool = false
     @State private var showItemDetailsForm: Bool = false
+    @State private var showTransactionForm: Bool = false
+
     @ToolbarContentBuilder
     func toolbarContent() -> some ToolbarContent {
         ToolbarItem(placement: .navigationBarTrailing) {
             Menu {
                 if !isMyItem {
                     Button {
-                        //
+                        showTransactionForm = true
                     } label: {
                         Label("Envoyer une demander", systemImage: "questionmark.message")
                     }

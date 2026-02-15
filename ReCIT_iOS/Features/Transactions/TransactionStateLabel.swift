@@ -27,6 +27,8 @@ private extension UserTransaction.TransactionState {
             "Confirmé"
         case .returned:
             "Retourné"
+        case .declined:
+            "Décliné"
         }
     }
 }

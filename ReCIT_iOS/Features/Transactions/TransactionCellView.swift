@@ -16,6 +16,11 @@ struct TransactionCellView: View {
         transaction.requester._id == userModel.myUser?._id
     }
 
+    var isRead: Bool {
+        ( amIRequester && !transaction.readStatus.requester ) ||
+        ( !amIRequester && !transaction.readStatus.owner )
+    }
+
     var body: some View {
         if let edition = transaction.item.edition {
             HStack(alignment: .top, spacing: .sMedium) {
@@ -23,8 +28,15 @@ struct TransactionCellView: View {
 
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Group {
-                        Text(edition.title)
-                            .font(.headline)
+                        HStack(spacing: .small) {
+                            if !isRead {
+                                Circle()
+                                    .frame(width: 8, height: 8)
+                                    .foregroundStyle(.accent)
+                            }
+                            Text(edition.title)
+                                .font(.headline)
+                        }
                         Text(.init(transactionDescription))
                             .font(.subheadline)
                     }

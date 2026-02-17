@@ -9,9 +9,10 @@ import SwiftUI
 struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     let authModel: AuthModel
-
-    @State private var username = ""
-    @State private var password = ""
+    let onLogin: () -> Void
+    
+    @State private var username = "OlivierB_test"
+    @State private var password = "Azerty1234!"
     @State private var errorMessage: String?
 
     var body: some View {
@@ -30,15 +31,16 @@ struct LoginView: View {
                 Task {
                     do {
                         try await authModel.login(username: username, password: password)
-                        dismiss()
+                        onLogin()
                     } catch {
                         errorMessage = (error as? AuthService.AuthError)?.errorDescription ?? error.localizedDescription
                     }
                 }
-            }, label: {
+            }, actionOptions: [.showProgressView], label: {
                 Text("Se connecter")
             })
-            .padding()
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
         }
     }
 }

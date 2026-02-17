@@ -11,6 +11,7 @@ import SwiftData
 struct ProfileView: View {
     @EnvironmentObject var authModel: AuthModel
     @EnvironmentObject var userModel: UserModel
+    @EnvironmentObject var transactionModel: TransactionModel
     @Environment(\.modelContext) var modelContext
 
     @State var path: NavigationPath = .init()
@@ -63,7 +64,8 @@ struct ProfileView: View {
             Section {
                 AsyncButton(action: {
                     Task {
-                        try? await userModel.logout(modelContext: modelContext)
+                        try? transactionModel.deleteLocalTransactions(modelContext: modelContext)
+                        try? userModel.logout(modelContext: modelContext)
                         await authModel.logout()
                     }
                 }, label: {

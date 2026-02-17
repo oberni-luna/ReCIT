@@ -138,19 +138,6 @@ class TransactionModel: ObservableObject {
         if let message, !message.isEmpty {
             try await postMessage(transactionId: transaction._id, message: message)
         }
-
-//        PUT api/transactions
-//        action:"update-state"
-//        state:"accepted"
-//        message:"Pourquoi je peux te le prêter oui 🙌"
-//        transaction:"7be9b3c3dcf825200eeecbbaa6b90d96"
-
-//        {
-//            "ok": true,
-//            "transaction": {
-//                "_id": "7be9b3c3dcf825200eeecbbaa6b90d96",
-//                "_rev": "4-c43fd86e11097e50fd9bedf661544929",
-
     }
 
 
@@ -166,18 +153,6 @@ class TransactionModel: ObservableObject {
         guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions", payload: messagePayload) else {
             throw NetworkError.badResponse
         }
-//        POST api/transactions
-//        action:"message"
-//        message:"Pourquoi je peux te le prêter oui 🙌"
-//        transaction:"7be9b3c3dcf825200eeecbbaa6b90d96"
-
-
-//        {
-//            "ok": true,
-//            "id": "9db2d2c75976af2f3dd6f79cd6a0e1f4",
-//            "rev": "1-1d79a92e080179c7ed7f0302bbf5674f"
-//        }
-
     }
 
     private func getLocalTransaction(modelContext: ModelContext, _id: String) throws -> UserTransaction? {
@@ -186,5 +161,9 @@ class TransactionModel: ObservableObject {
         }
         let descriptor = FetchDescriptor(predicate: predicate)
         return try modelContext.fetch(descriptor).first
+    }
+
+    func deleteLocalTransactions(modelContext: ModelContext) throws {
+        try modelContext.delete(model: UserTransaction.self)
     }
 }

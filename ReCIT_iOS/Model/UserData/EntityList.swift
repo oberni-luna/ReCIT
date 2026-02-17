@@ -72,6 +72,7 @@ public final class EntityListItem {
     var updated: Date?
     var created: Date
     var entityType: EntityListType
+    var list: EntityList?
 
     init(_id: String, comment: String? = nil, uri: String, ordinal: String, updated: Date? = nil, created: Date, itemType: EntityListType) {
         self._id = _id

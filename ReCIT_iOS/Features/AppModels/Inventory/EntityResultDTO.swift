@@ -23,7 +23,7 @@ struct EntityResultDTO: Codable {
 }
 
 struct EntityImageDTO: Codable {
-    let url: String
+    let url: String?
     let file: String?
     let credit: EntityImageCreditDTO?
 }

@@ -91,7 +91,7 @@ class UserModel: ObservableObject {
         }
     }
 
-    func clearUserData(modelContext: ModelContext) async throws {
+    func clearUserData(modelContext: ModelContext) throws {
         if let myUser {
             do {
                 modelContext.delete(myUser)
@@ -102,9 +102,9 @@ class UserModel: ObservableObject {
         }
     }
 
-    func logout(modelContext: ModelContext) async throws {
+    func logout(modelContext: ModelContext) throws {
         do {
-            try await clearUserData(modelContext: modelContext)
+            try clearUserData(modelContext: modelContext)
         } catch {
             print("Failed to delete user related content")
         }

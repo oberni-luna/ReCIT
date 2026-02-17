@@ -10,7 +10,6 @@ import SwiftData
 
 struct RootView: View {
     @EnvironmentObject var authModel: AuthModel
-
     @StateObject var userModel: UserModel = .init()
     @StateObject var listModel: ListModel = .init()
     @StateObject var inventoryModel: InventoryModel = .init()
@@ -18,29 +17,28 @@ struct RootView: View {
 
     @Environment(\.modelContext) var modelContext
 
-    @State var isLoginSheetPresented: Bool = false
-
     var body: some View {
-        MainTabView(authModel: authModel)
-            .environmentObject(userModel)
-            .environmentObject(listModel)
-            .environmentObject(inventoryModel)
-            .environmentObject(authModel)
-            .environmentObject(transactionModel)
-            .sheet(isPresented: $isLoginSheetPresented) {
-                LoginView(authModel: authModel)
-            }
-            .onAppear {
-                isLoginSheetPresented = !authModel.isAuthenticated
+        if userModel.myUser == nil {
+            LoginView(authModel: authModel) {
                 refreshUserData()
             }
-            .onChange(of: authModel.isAuthenticated) {
-                isLoginSheetPresented = !authModel.isAuthenticated
-                refreshUserData()
-            }
-            .refreshable {
-                refreshUserData()
-            }
+        } else {
+            MainTabView(authModel: authModel)
+                .environmentObject(userModel)
+                .environmentObject(listModel)
+                .environmentObject(inventoryModel)
+                .environmentObject(authModel)
+                .environmentObject(transactionModel)
+                .onAppear {
+                    refreshUserData()
+                }
+                .onChange(of: authModel.isAuthenticated) {
+                    refreshUserData()
+                }
+                .refreshable {
+                    refreshUserData()
+                }
+        }
     }
 
     

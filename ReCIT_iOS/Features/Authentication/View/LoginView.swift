@@ -12,7 +12,7 @@ struct LoginView: View {
     let onLogin: () -> Void
     
     @State private var username = "OlivierB_test"
-    @State private var password = "Azerty1234!"
+    @State private var password = ""
     @State private var errorMessage: String?
 
     var body: some View {
@@ -27,6 +27,7 @@ struct LoginView: View {
             SecureField("Password", text: $password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
+
             AsyncButton(action: {
                 Task {
                     do {

@@ -92,8 +92,9 @@ class UserModel: ObservableObject {
     }
 
     func clearUserData(modelContext: ModelContext) throws {
-        if let myUser {
+        if let myUser  = self.myUser {
             do {
+                self.myUser = nil
                 modelContext.delete(myUser)
                 try modelContext.save()
             } catch {

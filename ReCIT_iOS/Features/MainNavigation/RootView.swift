@@ -29,12 +29,6 @@ struct RootView: View {
                 .environmentObject(inventoryModel)
                 .environmentObject(authModel)
                 .environmentObject(transactionModel)
-                .onAppear {
-                    refreshUserData()
-                }
-                .onChange(of: authModel.isAuthenticated) {
-                    refreshUserData()
-                }
                 .refreshable {
                     refreshUserData()
                 }

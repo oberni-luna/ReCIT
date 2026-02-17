@@ -10,6 +10,7 @@
 		090719A32F2505CB000D8913 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 090719A22F2505CB000D8913 /* CodeScanner */; };
 		098A61E42E54CA160032185B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 098A61E02E54CA160032185B /* Assets.xcassets */; };
 		098A61E72E54CA160032185B /* ReCIT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098A61E32E54CA160032185B /* ReCIT.swift */; };
+		09A2622E2F425FB70004A85C /* LBSnackBar in Frameworks */ = {isa = PBXBuildFile; productRef = 09A2622D2F425FB70004A85C /* LBSnackBar */; };
 		09ACF44E2E5E07EB00D59BC0 /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09ACF44D2E5E07EB00D59BC0 /* Env.swift */; };
 		09F415792F203469000D3E4D /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 09F415782F203469000D3E4D /* AsyncAlgorithms */; };
 		507BE6B82F3B5592003AF5B3 /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 507BE6B72F3B5592003AF5B3 /* Nuke */; };
@@ -75,6 +76,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				507BE6B82F3B5592003AF5B3 /* Nuke in Frameworks */,
+				09A2622E2F425FB70004A85C /* LBSnackBar in Frameworks */,
 				090719A32F2505CB000D8913 /* CodeScanner in Frameworks */,
 				09F415792F203469000D3E4D /* AsyncAlgorithms in Frameworks */,
 			);
@@ -155,6 +157,7 @@
 				09F415782F203469000D3E4D /* AsyncAlgorithms */,
 				090719A22F2505CB000D8913 /* CodeScanner */,
 				507BE6B72F3B5592003AF5B3 /* Nuke */,
+				09A2622D2F425FB70004A85C /* LBSnackBar */,
 			);
 			productName = ReCIT_iOS;
 			productReference = 094FD19C2E4A38D40023705A /* ReCIT_iOS.app */;
@@ -242,6 +245,7 @@
 				09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 				090719A02F25052D000D8913 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 				507BE6B62F3B5592003AF5B3 /* XCRemoteSwiftPackageReference "Nuke" */,
+				09A2622C2F425FB70004A85C /* XCRemoteSwiftPackageReference "LBSnackBar" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 094FD19D2E4A38D40023705A /* Products */;
@@ -635,6 +639,14 @@
 				minimumVersion = 2.5.2;
 			};
 		};
+		09A2622C2F425FB70004A85C /* XCRemoteSwiftPackageReference "LBSnackBar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/LunabeeStudio/LBSnackBar.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.12.0;
+			};
+		};
 		09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
@@ -658,6 +670,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 090719A02F25052D000D8913 /* XCRemoteSwiftPackageReference "CodeScanner" */;
 			productName = CodeScanner;
+		};
+		09A2622D2F425FB70004A85C /* LBSnackBar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 09A2622C2F425FB70004A85C /* XCRemoteSwiftPackageReference "LBSnackBar" */;
+			productName = LBSnackBar;
 		};
 		09F415782F203469000D3E4D /* AsyncAlgorithms */ = {
 			isa = XCSwiftPackageProductDependency;

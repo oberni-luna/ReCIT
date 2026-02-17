@@ -1,5 +1,5 @@
 {
-  "originHash" : "ebd8764eac2e2a083e5702ee3ec58fb99232131efb2513b3b1f24d5a219bb86f",
+  "originHash" : "1a1583e8fc7d1f67f17458c70fedf9620311a8e911905d65030c82d02ffdea1b",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "5e886430238944c7200fc9e10dbf2d9550dba865",
         "version" : "2.5.2"
+      }
+    },
+    {
+      "identity" : "lbsnackbar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LunabeeStudio/LBSnackBar.git",
+      "state" : {
+        "revision" : "3a40b9c1961e481caaead325715063b14617a31a",
+        "version" : "0.12.0"
       }
     },
     {

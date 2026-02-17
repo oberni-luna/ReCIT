@@ -6,6 +6,7 @@
 //
 import SwiftData
 import SwiftUI
+import LBSnackBar
 
 struct InventoryItemDetailView: View {
     @EnvironmentObject private var userModel: UserModel
@@ -13,6 +14,7 @@ struct InventoryItemDetailView: View {
     @EnvironmentObject var listModel: ListModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.snackBar) private var snackBar
 
     @State private var showDeleteConfirmation = false
     @State private var browseEntityDestination: NavigationDestination?
@@ -37,8 +39,18 @@ struct InventoryItemDetailView: View {
             .confirmationDialog("Supprimer cet item de votre inventaire ?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
                 Button("Supprimer", role: .destructive) {
                     Task {
-                        try? await inventoryModel.removeItem(item, modelContext: modelContext)
-                        dismiss()
+                        do {
+                            try await inventoryModel.removeItem(item, modelContext: modelContext)
+                            snackBar.show {
+                                SnackBarView(
+                                    title: "Supprimé !", onDismiss: {dismiss()})
+                            }
+                            dismiss()
+                        } catch {
+                            snackBar.show {
+                                SnackBarView(title: "Une erreur s'est produite", subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
+                            }
+                        }
                     }
                 }
                 Button("Annuler", role: .cancel) { }
@@ -47,10 +59,20 @@ struct InventoryItemDetailView: View {
                 showAddToListDialog: $showAddToListDialog,
                 onListSelected: { list in
                     Task {
-                        try await listModel.addEntitiesToList(
-                            listId: list._id,
-                            entityUris: item.workUris
-                        )
+                        do {
+                            try await listModel.addEntitiesToList(
+                                listId: list._id,
+                                entityUris: item.workUris
+                            )
+                            snackBar.show {
+                                SnackBarView(
+                                    title: "\(item.edition?.title ?? "Ce livre ")", subtitle: "a bien été ajouté à la liste", onDismiss: {dismiss()})
+                            }
+                        } catch {
+                            snackBar.show {
+                                SnackBarView(title: "Une erreur s'est produite", subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
+                            }
+                        }
                     }
                 })
             .sheet(isPresented: $showItemDetailsForm) {

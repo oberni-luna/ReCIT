@@ -8,11 +8,13 @@
 import Foundation
 import SwiftUI
 import SwiftData
+import LBSnackBar
 
 struct InventoryItemDetailsFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var InventoryModel: InventoryModel
+    @Environment(\.snackBar) private var snackBar
 
     @Bindable var item: InventoryItem
 
@@ -31,9 +33,14 @@ struct InventoryItemDetailsFormView: View {
                     AsyncButton(action: {
                         do {
                             try await InventoryModel.updateItemsDetails(modelContext: modelContext, items: [item])
+                            snackBar.show {
+                                SnackBarView(title: "Description enregistrée", onDismiss: {dismiss()})
+                            }
                             dismiss()
                         } catch {
-                            print(error)
+                            snackBar.show {
+                                SnackBarView(title: "Une erreur s'est produite", subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
+                            }
                         }
                     },
                                 actionOptions: [.showProgressView],

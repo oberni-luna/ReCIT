@@ -37,7 +37,7 @@ struct EntityImageView<Content: View>: View {
     @ViewBuilder
     var imageView: some View {
         if let url = URL(string: imageUrl ?? "") {
-            AsyncImage(url: url) { image in
+            CachedAsyncImage(url: url) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)

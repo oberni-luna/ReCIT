@@ -84,6 +84,7 @@ extension InventoryItem {
     }
 
     /// A filter that checks for a date and text in the quake's location name.
+    // TODO: faire marcher le search ici mais `.lowercase` ne compile pas
     static func predicate(
         user: User,
         filterParameter: FilterParameter,

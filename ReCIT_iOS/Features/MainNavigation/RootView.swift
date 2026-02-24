@@ -18,10 +18,8 @@ struct RootView: View {
     @Environment(\.modelContext) var modelContext
 
     var body: some View {
-        if userModel.myUser == nil {
-            LoginView(authModel: authModel) {
-                refreshUserData()
-            }
+        if !authModel.isAuthenticated {
+            LoginView(authModel: authModel) {}
         } else {
             MainTabView(authModel: authModel)
                 .environmentObject(userModel)
@@ -32,12 +30,9 @@ struct RootView: View {
                 .refreshable {
                     refreshUserData()
                 }
+                .onAppear {
+                    refreshUserData()
+                }
         }
     }
-
-    
 }
-
-//#Preview {
-//    RootView()
-//}

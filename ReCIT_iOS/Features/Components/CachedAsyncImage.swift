@@ -93,7 +93,7 @@ private actor ImageLoader {
 
     init() {
         var configuration: ImagePipeline.Configuration = .withDataCache(
-            name: "com.fitnesspark.imagecache",
+            name: "recit.imagecache",
             sizeLimit: 1024 * 1024 * 200 // 200 MB disk cache
         )
 

@@ -41,9 +41,11 @@ struct EntityImageView<Content: View>: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
+                    .frame(height: 256)
                     .cornerRadius(.minimal)
             } placeholder: {
-                ProgressView()
+                Color.clear
+                    .cornerRadius(.minimal)
             }
         } else {
             EmptyView()

@@ -92,6 +92,7 @@ public final class EntityListItem {
         }
         self.init(
             _id: listElementDTO._id,
+            comment: listElementDTO.comment,
             uri: listElementDTO.uri,
             ordinal: listElementDTO.ordinal,
             updated: updatedDate,

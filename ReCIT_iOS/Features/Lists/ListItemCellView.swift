@@ -8,7 +8,8 @@
 import SwiftUI
 import SwiftData
 
-struct EntityCellView: View {
+struct ListItemCellView: View {
+    let listItem: EntityListItem
     let entity: any Entity
 
     var body: some View {
@@ -45,6 +46,11 @@ struct EntityCellView: View {
                 .font(.headline)
             if let description = entity.subtitle, !description.isEmpty {
                 Text(description)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            if let comment = listItem.comment, !comment.isEmpty {
+                Text(comment)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

@@ -48,24 +48,46 @@ struct ListFormView: View {
                 .listSectionSeparator(.hidden)
 
                 Section {} footer: {
-                    AsyncButton(action: {
-                        do {
-                            try await listModel.createOrUpdateList(
-                                modelContext: modelContext,
-                                list: list
-                            )
-                            dismiss()
-                        } catch {
-                            print(error)
-                        }
-                    },
-                    actionOptions: [.showProgressView],
-                    label: {
-                        Text("Submit")
-                            .frame(maxWidth: .infinity)
-                    })
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    VStack {
+                        AsyncButton(action: {
+                            do {
+                                try await listModel.createOrUpdateList(
+                                    modelContext: modelContext,
+                                    list: list
+                                )
+                                dismiss()
+                            } catch {
+                                print(error)
+                            }
+                        },
+                                    actionOptions: [.showProgressView],
+                                    label: {
+                            Text("Submit")
+                                .frame(maxWidth: .infinity)
+                        })
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+
+                        AsyncButton(action: {
+                            do {
+                                try await listModel.deleteList(
+                                    modelContext: modelContext,
+                                    list: list
+                                )
+                                dismiss()
+                            } catch {
+                                print(error)
+                            }
+                        },
+                                    actionOptions: [.showProgressView],
+                                    label: {
+                            Text("Delete list")
+                                .frame(maxWidth: .infinity)
+                        })
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color(.red))
+                        .controlSize(.large)
+                    }
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)

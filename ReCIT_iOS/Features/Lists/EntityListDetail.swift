@@ -14,7 +14,7 @@ struct EntityListDetail: View {
 
     enum ViewState {
         case loadingItems
-        case loaded(items: [any Entity])
+        case loaded(items: [EntityListItem : any Entity])
         case error(error: Error)
         case empty
     }
@@ -59,15 +59,17 @@ struct EntityListDetail: View {
                     }
                 }
         case .loaded(items: let items):
-            ForEach(items, id: \.uri) { item in
-                Button {
-                    if let entityDestination = item.entityDestination {
-                        path.append(entityDestination)
+            ForEach(Array(items.keys), id: \._id) { key in
+                if let item = items[key] {
+                    Button {
+                        if let entityDestination = item.entityDestination {
+                            path.append(entityDestination)
+                        }
+                    } label : {
+                        ListItemCellView(listItem: key, entity: item)
                     }
-                } label : {
-                    EntityCellView(entity: item)
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
     }
@@ -77,7 +79,7 @@ struct EntityListDetail: View {
         do {
             switch state {
             case .loadingItems:
-                if let items: [any Entity] = switch list.type {
+                if let entities: [any Entity] = switch list.type {
                 case .author:
                     try await inventoryModel.getOrFetchAuthors(modelContext: modelContext, uris: list.elements.map(\.uri))
                 case .work:
@@ -85,6 +87,9 @@ struct EntityListDetail: View {
                 case .publisher:
                     []
                 } {
+                    let items:[EntityListItem : any Entity] =
+                    Dictionary(uniqueKeysWithValues: zip(list.elements, entities))
+
                     self.state = items.isEmpty ? .empty : .loaded(items: items)
                 } else {
                     self.state = .empty
@@ -114,3 +119,4 @@ private extension Entity {
 #Preview {
 //    EntityListDetail()
 }
+

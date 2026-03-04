@@ -1,0 +1,732 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "action.add" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ajouter" } }
+      }
+    },
+    "action.add_to_inventory" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add to inventory" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ajouter à l'inventaire" } }
+      }
+    },
+    "action.add_to_list" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add to a list" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ajouter à une liste" } }
+      }
+    },
+    "action.cancel" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Annuler" } }
+      }
+    },
+    "action.close" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Close" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fermer" } }
+      }
+    },
+    "action.delete" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Supprimer" } }
+      }
+    },
+    "action.edit" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Modifier" } }
+      }
+    },
+    "action.reply" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reply" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Répondre" } }
+      }
+    },
+    "action.scan" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Scanner" } }
+      }
+    },
+    "action.send_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Send a message" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Envoyer un message" } }
+      }
+    },
+    "action.send_request" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Send a request" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Envoyer une demande" } }
+      }
+    },
+    "action.submit" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Submit" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Envoyer" } }
+      }
+    },
+    "author.birth_date %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Born on %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Né le %@" } }
+      }
+    },
+    "author.loading" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Loading author..." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Chargement de l'auteur..." } }
+      }
+    },
+    "author.loading_works %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Loading works for %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Chargement des œuvres de %@" } }
+      }
+    },
+    "author.works.header %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Works by %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Œuvres de %@" } }
+      }
+    },
+    "edition.add_to_inventory" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add to inventory" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ajouter à l'inventaire" } }
+      }
+    },
+    "edition.error.add_failed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unable to add this book to your inventory." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Impossible d'ajouter ce livre à votre inventaire." } }
+      }
+    },
+    "edition.error.no_user" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No connected user!" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pas d'utilisateur connecté !" } }
+      }
+    },
+    "edition.my_inventory" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "In my inventory" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Dans mon inventaire" } }
+      }
+    },
+    "edition.no_result" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This edition does not exist on inventaire.io" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Cette édition n'existe pas sur inventaire.io" } }
+      }
+    },
+    "edition.others_inventory" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "In the inventory of" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Dans l'inventaire de" } }
+      }
+    },
+    "entity.summary.label" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Summary" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Résumé" } }
+      }
+    },
+    "error.generic" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "An error occurred" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Une erreur s'est produite" } }
+      }
+    },
+    "error.with_message %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Error: %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Erreur : %@" } }
+      }
+    },
+    "inventory.item.added_to_list" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "has been added to the list" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "a bien été ajouté à la liste" } }
+      }
+    },
+    "inventory.item.change_notes" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit my note" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Changer mon commentaire" } }
+      }
+    },
+    "inventory.item.created_date %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Created %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Créé le %@" } }
+      }
+    },
+    "inventory.item.delete_confirm" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove this item from your inventory?" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Supprimer cet item de votre inventaire ?" } }
+      }
+    },
+    "inventory.item.deleted" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Deleted!" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Supprimé !" } }
+      }
+    },
+    "inventory.item.details.saved" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Description saved" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Description enregistrée" } }
+      }
+    },
+    "inventory.item.my_notes" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "My notes" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ce que j'en pense" } }
+      }
+    },
+    "inventory.item.other_edition_for" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Other edition for" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Autre édition de" } }
+      }
+    },
+    "inventory.item.since_date %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Since %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Depuis le %@" } }
+      }
+    },
+    "inventory.item.this_book" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This book" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ce livre" } }
+      }
+    },
+    "inventory.item.transaction_mode" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Transaction mode" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Mode de transaction" } }
+      }
+    },
+    "inventory.item.write_notes" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Write a note" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Écrire un commentaire" } }
+      }
+    },
+    "inventory.owned_by %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Owned by **%@**" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Appartient à **%@**" } }
+      }
+    },
+    "list.empty" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This list is empty" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Cette liste est vide" } }
+      }
+    },
+    "list.error.loading %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Error loading list: %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Erreur lors du chargement de la liste : %@" } }
+      }
+    },
+    "list.form.create_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Create new list" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Créer une liste" } }
+      }
+    },
+    "list.form.delete" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete list" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Supprimer la liste" } }
+      }
+    },
+    "list.form.description" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Description" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Description" } }
+      }
+    },
+    "list.form.edit_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit list" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Modifier la liste" } }
+      }
+    },
+    "list.form.name" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Name" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Nom" } }
+      }
+    },
+    "list.form.type" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Type" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Type" } }
+      }
+    },
+    "list.item.comment" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Comment" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Commentaire" } }
+      }
+    },
+    "list.loading" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Loading items..." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Chargement des éléments..." } }
+      }
+    },
+    "login.button.create_account" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Create an account" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Créer un compte" } }
+      }
+    },
+    "login.button.signin" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Se connecter" } }
+      }
+    },
+    "login.password" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Password" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Mot de passe" } }
+      }
+    },
+    "login.subtitle" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in to your inventaire.io account" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Connectez-vous à votre compte inventaire.io" } }
+      }
+    },
+    "login.title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Login" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Connexion" } }
+      }
+    },
+    "login.username" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Username" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Nom d'utilisateur" } }
+      }
+    },
+    "nav.author" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Author" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Auteur" } }
+      }
+    },
+    "nav.book" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Book" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Livre" } }
+      }
+    },
+    "nav.community" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "👫 In the community" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "👫 Dans la communauté" } }
+      }
+    },
+    "nav.edition" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edition" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Édition" } }
+      }
+    },
+    "nav.inventory" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "📚 Inventory" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "📚 Inventaire" } }
+      }
+    },
+    "nav.lists" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "📋 Lists" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "📋 Listes" } }
+      }
+    },
+    "nav.profile" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Profile" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Profil" } }
+      }
+    },
+    "nav.search" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Recherche" } }
+      }
+    },
+    "nav.settings" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Réglages" } }
+      }
+    },
+    "nav.transactions" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Transactions" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Transactions" } }
+      }
+    },
+    "nav.transactions_placeholder" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Transactions View" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vue Transactions" } }
+      }
+    },
+    "nav.user" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "User" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Utilisateur" } }
+      }
+    },
+    "nav.work" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Work" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Œuvre" } }
+      }
+    },
+    "nav.works" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "📋 Works" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "📋 Œuvres" } }
+      }
+    },
+    "profile.anonymous" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You are not logged in." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous n'êtes pas connecté." } }
+      }
+    },
+    "profile.current_transactions" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Current transactions" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Transactions en cours" } }
+      }
+    },
+    "profile.logout" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign out" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Se déconnecter" } }
+      }
+    },
+    "profile.network" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Network" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Réseau" } }
+      }
+    },
+    "search.empty" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No search results" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aucun résultat" } }
+      }
+    },
+    "search.error" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unable to fetch results." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Impossible de récupérer les résultats." } }
+      }
+    },
+    "search.friends_inventory" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "In your friends' inventory" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Dans l'inventaire de tes amis" } }
+      }
+    },
+    "search.placeholder" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search for an edition" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Rechercher une édition" } }
+      }
+    },
+    "select_list.message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Select the list you want to add this item to." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Sélectionnez la liste à laquelle vous voulez ajouter cet élément." } }
+      }
+    },
+    "select_list.title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pick list" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Choisir une liste" } }
+      }
+    },
+    "tab.community" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Community" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Communauté" } }
+      }
+    },
+    "tab.inventory" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Inventory" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Inventaire" } }
+      }
+    },
+    "tab.lists" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Lists" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Listes" } }
+      }
+    },
+    "tab.profile" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Réglages" } }
+      }
+    },
+    "tab.search" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Recherche" } }
+      }
+    },
+    "tab.transactions" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Transactions" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Transactions" } }
+      }
+    },
+    "transaction.action.accept" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Accept" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Accepter" } }
+      }
+    },
+    "transaction.action.confirm" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Confirm" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Confirmer" } }
+      }
+    },
+    "transaction.action.complete" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Complete" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Terminer" } }
+      }
+    },
+    "transaction.action.decline" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Decline" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Décliner" } }
+      }
+    },
+    "transaction.action.owner.accepted" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You accepted the request" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous avez accepté la demande" } }
+      }
+    },
+    "transaction.action.owner.confirmed %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "**%@** confirmed the receipt" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "**%@** a confirmé la réception" } }
+      }
+    },
+    "transaction.action.owner.declined" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You declined this request" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous avez refusé cette demande" } }
+      }
+    },
+    "transaction.action.owner.requested %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "**%@** sent you a request" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "**%@** vous a fait une demande" } }
+      }
+    },
+    "transaction.action.owner.returned" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You picked up the book" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous avez récupéré le livre" } }
+      }
+    },
+    "transaction.action.request" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Request" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Demander" } }
+      }
+    },
+    "transaction.action.requester.accepted %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "**%@** accepted the request" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "**%@** a accepté la demande" } }
+      }
+    },
+    "transaction.action.requester.confirmed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You confirmed the receipt" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous avez confirmé la réception" } }
+      }
+    },
+    "transaction.action.requester.declined %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "**%@** declined this request" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "**%@** a refusé cette demande" } }
+      }
+    },
+    "transaction.action.requester.requested %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You made a borrow request to **%@**" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous avez fait une demande d'emprunt à **%@**" } }
+      }
+    },
+    "transaction.action.requester.returned" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You returned the book" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous avez retourné le livre" } }
+      }
+    },
+    "transaction.desc.inventoried" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Inventoried" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Inventorié" } }
+      }
+    },
+    "transaction.desc.owner.giving %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "**%@** wants to take it" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "**%@** souhaite le récupérer" } }
+      }
+    },
+    "transaction.desc.owner.lending %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "**%@** wants to borrow it" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "**%@** souhaite l'emprunter" } }
+      }
+    },
+    "transaction.desc.owner.selling %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "**%@** wants to buy it" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "**%@** souhaite l'acheter" } }
+      }
+    },
+    "transaction.desc.requester.giving %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You want to take it from **%@**" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous souhaitez le récupérer de **%@**" } }
+      }
+    },
+    "transaction.desc.requester.lending %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You want to borrow it from **%@**" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous souhaitez l'emprunter à **%@**" } }
+      }
+    },
+    "transaction.desc.requester.selling %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You want to buy it from **%@**" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous souhaitez l'acheter à **%@**" } }
+      }
+    },
+    "transaction.form.type" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Type" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Type" } }
+      }
+    },
+    "transaction.form.your_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your message" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Votre message" } }
+      }
+    },
+    "transaction.messages.header" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Messages" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Messages" } }
+      }
+    },
+    "transaction.state.accepted" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Accepted" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Accepté" } }
+      }
+    },
+    "transaction.state.confirmed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Confirmed" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Confirmé" } }
+      }
+    },
+    "transaction.state.declined" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Declined" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Décliné" } }
+      }
+    },
+    "transaction.state.requested" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Requested" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Demande" } }
+      }
+    },
+    "transaction.state.returned" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Returned" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Retourné" } }
+      }
+    },
+    "transaction.type.giving" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "To give" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "À donner" } }
+      }
+    },
+    "transaction.type.inventorying" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Inventoried" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Inventorié" } }
+      }
+    },
+    "transaction.type.lending" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "To lend" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "À prêter" } }
+      }
+    },
+    "transaction.type.selling" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "For sale" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "À vendre" } }
+      }
+    },
+    "user.inventory.header %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@'s inventory" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Inventaire de %@" } }
+      }
+    },
+    "user.item_count %lld" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%lld items" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "%lld éléments" } }
+      }
+    },
+    "work.editions.header %@" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Editions of %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Éditions de %@" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

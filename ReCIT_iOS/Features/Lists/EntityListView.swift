@@ -45,7 +45,7 @@ struct EntityListView: View {
                                 .foregroundStyle(.secondary)
                         }
                         .swipeActions {
-                            Button("Delete", systemImage: "trash") {
+                            Button("action.delete", systemImage: "trash") {
                                 Task {
                                     try? await listModel.deleteList(modelContext: modelContext, list: list)
                                 }
@@ -62,10 +62,10 @@ struct EntityListView: View {
             .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }
-            .navigationTitle("📋 Lists")
+            .navigationTitle("nav.lists")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("add", systemImage: "plus") {
+                    Button("action.add", systemImage: "plus") {
                         showNewListModal = true
                     }
                 }

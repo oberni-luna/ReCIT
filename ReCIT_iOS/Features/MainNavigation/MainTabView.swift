@@ -58,17 +58,17 @@ struct MainTabView: View {
         var title: String {
             switch self {
             case .community:
-                "Community"
+                String(localized: "tab.community")
             case .inventory:
-                "Inventory"
+                String(localized: "tab.inventory")
             case .transactions:
-                "Transactions"
+                String(localized: "tab.transactions")
             case .profile:
-                "Settings"
+                String(localized: "tab.profile")
             case .lists:
-                "Lists"
+                String(localized: "tab.lists")
             case .search:
-                "Search"
+                String(localized: "tab.search")
             }
         }
 
@@ -116,19 +116,19 @@ private extension MainTabView {
         case .inventory:
             MyInventoryView()
         case .transactions:
-            Text("Transactions View")
-                .navigationTitle("Transactions")
+            Text("nav.transactions_placeholder")
+                .navigationTitle("nav.transactions")
                 .navigationBarTitleDisplayMode(.inline)
         case .profile:
             ProfileView()
-                .navigationTitle("Réglages")
+                .navigationTitle("nav.settings")
                 .navigationBarTitleDisplayMode(.inline)
         case .lists:
             EntityListView()
-                .navigationTitle("Listes")
+                .navigationTitle("nav.lists")
         case .search:
             AddInventoryItemSearchView()
-                .navigationTitle("Search")
+                .navigationTitle("nav.search")
         }
     }
 }

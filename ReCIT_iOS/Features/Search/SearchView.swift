@@ -54,8 +54,8 @@ struct SearchView: View {
                 }
             }
         }
-        .navigationTitle("Search")
-        .searchable(text: $searchText, isPresented: $isSearchPresented, prompt: "Rechercher une édition")
+        .navigationTitle("nav.search")
+        .searchable(text: $searchText, isPresented: $isSearchPresented, prompt: "search.placeholder")
         .onChange(of: searchText) { prev, next in
             searchTask?.cancel()
             searchTask = Task { @MainActor in
@@ -68,7 +68,7 @@ struct SearchView: View {
 
     @ViewBuilder
     var emptyView: some View {
-        Text("No search results")
+        Text("search.empty")
     }
 
     @ViewBuilder
@@ -87,7 +87,7 @@ struct SearchView: View {
     @ViewBuilder
     var inspirationnalViewSection: some View {
         if let user = userModel.myUser {
-            Section("Dans l'inventaire de tes amis") {
+            Section("search.friends_inventory") {
                 InventoryListContent(
                     user: user,
                     searchText: "",
@@ -115,7 +115,7 @@ struct SearchView: View {
             results = try await inventoryModel.searchEntity(query: trimmedQuery)
             isLoading = false
         } catch {
-            errorMessage = "Impossible de récupérer les résultats."
+            errorMessage = String(localized: "search.error")
             isLoading = false
         }
     }

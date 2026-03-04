@@ -36,24 +36,24 @@ struct InventoryItemDetailView: View {
             .toolbar {
                 toolbarContent()
             }
-            .confirmationDialog("Supprimer cet item de votre inventaire ?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
-                Button("Supprimer", role: .destructive) {
+            .confirmationDialog("inventory.item.delete_confirm", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+                Button("action.delete", role: .destructive) {
                     Task {
                         do {
                             try await inventoryModel.removeItem(item, modelContext: modelContext)
                             snackBar.show {
                                 SnackBarView(
-                                    title: "Supprimé !", onDismiss: {dismiss()})
+                                    title: String(localized: "inventory.item.deleted"), onDismiss: {dismiss()})
                             }
                             dismiss()
                         } catch {
                             snackBar.show {
-                                SnackBarView(title: "Une erreur s'est produite", subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
+                                SnackBarView(title: String(localized: "error.generic"), subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
                             }
                         }
                     }
                 }
-                Button("Annuler", role: .cancel) { }
+                Button("action.cancel", role: .cancel) { }
             }
             .selectListToAdd(
                 showAddToListDialog: $showAddToListDialog,
@@ -64,11 +64,11 @@ struct InventoryItemDetailView: View {
                             
                             snackBar.show {
                                 SnackBarView(
-                                    title: "\(item.edition?.title ?? "Ce livre ")", subtitle: "a bien été ajouté à la liste", onDismiss: {dismiss()})
+                                    title: item.edition?.title ?? String(localized: "inventory.item.this_book"), subtitle: String(localized: "inventory.item.added_to_list"), onDismiss: {dismiss()})
                             }
                         } catch {
                             snackBar.show {
-                                SnackBarView(title: "Une erreur s'est produite", subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
+                                SnackBarView(title: String(localized: "error.generic"), subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
                             }
                         }
                     }
@@ -133,14 +133,14 @@ struct InventoryItemDetailView: View {
                             Text(work.title)
                                 .font(.headline)
                                 .lineLimit(1)
-                                .withLabel(label: "Other edition for")
+                                .withLabel(label: String(localized: "inventory.item.other_edition_for"))
                         }
                         .buttonStyle(.plain)
                     }
                 }
             }
         }
-        .navigationTitle("Livre")
+        .navigationTitle("nav.book")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -151,10 +151,10 @@ struct InventoryItemDetailView: View {
                 Text(item.details)
                     .font(.body)
                     .foregroundStyle(.textDefault)
-                    .withLabel(label: "Ce que j'en pense")
+                    .withLabel(label: String(localized: "inventory.item.my_notes"))
             }
             
-            Picker("Transaction mode", selection: $item.transaction) {
+            Picker("inventory.item.transaction_mode", selection: $item.transaction) {
                 ForEach(TransactionType.allCases, id: \.self) { type in
                     TransactionTypeLabel(transactionType: type)
                 }
@@ -165,7 +165,7 @@ struct InventoryItemDetailView: View {
                 }
             }
 
-            Text("Created \(item.created.formatted(date: .abbreviated, time: .omitted))")
+            Text("inventory.item.created_date \(item.created.formatted(date: .abbreviated, time: .omitted))")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -201,27 +201,27 @@ struct InventoryItemDetailView: View {
                     Button {
                         showTransactionForm = true
                     } label: {
-                        Label("Envoyer une demander", systemImage: "questionmark.message")
+                        Label("action.send_request", systemImage: "questionmark.message")
                     }
                 }
 
                 Button {
                     showAddToListDialog = true
                 } label: {
-                    Label("Add to a list", systemImage: "list.bullet")
+                    Label("action.add_to_list", systemImage: "list.bullet")
                 }
 
                 if isMyItem {
                     Button {
                         showItemDetailsForm = true
                     } label: {
-                        Label(hasDetails ? "Changer mon commentaire" : "Écrire un commentaire", systemImage: "pencil")
+                        Label(hasDetails ? String(localized: "inventory.item.change_notes") : String(localized: "inventory.item.write_notes"), systemImage: "pencil")
                     }
 
                     Button(role: .destructive) {
                         showDeleteConfirmation = true
                     } label: {
-                        Label("Supprimer", systemImage: "trash")
+                        Label("action.delete", systemImage: "trash")
                     }
                 }
             } label: {

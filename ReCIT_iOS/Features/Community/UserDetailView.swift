@@ -29,10 +29,10 @@ struct UserDetailView: View {
                     .buttonStyle(.plain)
                 }
             } header: {
-                Text("Inventaire de \(user.username)")
+                Text("user.inventory.header \(user.username)")
             }
         }
-        .navigationTitle("Utilisateur")
+        .navigationTitle("nav.user")
     }
 }
 

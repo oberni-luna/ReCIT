@@ -54,24 +54,24 @@ struct TransactionCellView: View {
         if amIRequester {
             switch transaction.type {
             case .lending:
-                "Vous souhaitez l'emprunter à **\(transaction.owner.username)**"
+                String(localized: "transaction.desc.requester.lending \(transaction.owner.username)")
             case .inventorying:
-                "Inventorié"
+                String(localized: "transaction.desc.inventoried")
             case .selling:
-                "Vous souhaitez l'acheter à **\(transaction.owner.username)**"
+                String(localized: "transaction.desc.requester.selling \(transaction.owner.username)")
             case .giving:
-                "Vous souhaitez le récupérer de **\(transaction.owner.username)**"
+                String(localized: "transaction.desc.requester.giving \(transaction.owner.username)")
             }
         } else {
             switch transaction.type {
             case .lending:
-                "**\(transaction.requester.username)** souhaite l'emprunter"
+                String(localized: "transaction.desc.owner.lending \(transaction.requester.username)")
             case .inventorying:
-                "Inventorié"
+                String(localized: "transaction.desc.inventoried")
             case .selling:
-                "**\(transaction.requester.username)** souhaite l'acheter"
+                String(localized: "transaction.desc.owner.selling \(transaction.requester.username)")
             case .giving:
-                "**\(transaction.requester.username)** souhaite le récupérer"
+                String(localized: "transaction.desc.owner.giving \(transaction.requester.username)")
             }
         }
     }

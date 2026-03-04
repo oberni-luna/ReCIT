@@ -32,7 +32,7 @@ struct ListItemFormView: View {
             Form {
                 Section {
                     VStack(alignment: .leading, spacing: .xSmall) {
-                        Text("Comment")
+                        Text("list.item.comment")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .bold()
@@ -61,7 +61,7 @@ struct ListItemFormView: View {
                         },
                                     actionOptions: [.showProgressView],
                                     label: {
-                            Text("Submit")
+                            Text("action.submit")
                                 .frame(maxWidth: .infinity)
                         })
                         .buttonStyle(.borderedProminent)
@@ -75,7 +75,7 @@ struct ListItemFormView: View {
             .navigationTitle(list.name)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer", systemImage: "xmark") {
+                    Button("action.close", systemImage: "xmark") {
                         dismiss()
                     }
                 }

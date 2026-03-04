@@ -20,15 +20,15 @@ private extension UserTransaction.TransactionState {
     var label: String {
         switch self {
         case .requested:
-            "Demande"
+            String(localized: "transaction.state.requested")
         case .accepted:
-            "Accepté"
+            String(localized: "transaction.state.accepted")
         case .confirmed:
-            "Confirmé"
+            String(localized: "transaction.state.confirmed")
         case .returned:
-            "Retourné"
+            String(localized: "transaction.state.returned")
         case .declined:
-            "Décliné"
+            String(localized: "transaction.state.declined")
         }
     }
 }

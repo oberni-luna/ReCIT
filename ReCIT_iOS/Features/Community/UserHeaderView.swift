@@ -16,7 +16,7 @@ struct UserHeaderView: View {
             }
             Text(user.username)
                 .font(.headline)
-            Text("Item count \(user.itemCount)")
+            Text("user.item_count \(user.itemCount)")
                 .font(.subheadline)
         }
     }

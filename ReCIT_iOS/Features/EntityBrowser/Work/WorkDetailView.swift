@@ -46,7 +46,7 @@ struct WorkDetailView: View {
                         }
                     )
             case .error(error: let error):
-                Text("Error \(error.localizedDescription) !!")
+                Text("error.with_message \(error.localizedDescription)")
             }
         }
         .onAppear {
@@ -70,7 +70,7 @@ struct WorkDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("Oeuvre")
+        .navigationTitle("nav.work")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             toolbarContent
@@ -83,7 +83,7 @@ struct WorkDetailView: View {
             Button {
                 showAddToListDialog = true
             } label: {
-                Label("Add to a list", systemImage: "list.bullet")
+                Label("action.add_to_list", systemImage: "list.bullet")
             }
         } label: {
             Image(systemName: "ellipsis")
@@ -122,7 +122,7 @@ struct WorkDetailView: View {
                 .buttonStyle(.plain)
             }
         } header: {
-            Text("Editions de \(work.title)")
+            Text("work.editions.header \(work.title)")
         }
     }
 

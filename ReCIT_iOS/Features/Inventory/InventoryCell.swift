@@ -33,7 +33,7 @@ struct InventoryCell: View {
                             .font(.caption)
 
                         if filterParameter == .othersInventory, let owner = item.owner {
-                            Text(.init("Appartient à **\(owner.username)**"))
+                            Text(.init(String(localized: "inventory.owned_by \(owner.username)")))
                                 .font(.caption)
                                 .foregroundStyle(.textDefault)
                         }

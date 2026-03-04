@@ -19,7 +19,7 @@ struct ListFormView: View {
             Form {
                 if list._id.isEmpty {
                     Section {
-                        Picker("Type", selection: $list.type) {
+                        Picker("list.form.type", selection: $list.type) {
                             ForEach(EntityListType.allCases, id: \.self) { type in
                                 Text(type.rawValue).tag(type)
                             }
@@ -29,14 +29,14 @@ struct ListFormView: View {
 
                 Section {
                     VStack(alignment: .leading, spacing: .xSmall) {
-                        Text("Name")
+                        Text("list.form.name")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .bold()
-                        TextField("Name", text: $list.name)
+                        TextField("list.form.name", text: $list.name)
                     }
                     VStack(alignment: .leading, spacing: .xSmall) {
-                        Text("Descrition")
+                        Text("list.form.description")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .bold()
@@ -62,7 +62,7 @@ struct ListFormView: View {
                         },
                                     actionOptions: [.showProgressView],
                                     label: {
-                            Text("Submit")
+                            Text("action.submit")
                                 .frame(maxWidth: .infinity)
                         })
                         .buttonStyle(.borderedProminent)
@@ -81,7 +81,7 @@ struct ListFormView: View {
                         },
                                     actionOptions: [.showProgressView],
                                     label: {
-                            Text("Delete list")
+                            Text("list.form.delete")
                                 .frame(maxWidth: .infinity)
                         })
                         .buttonStyle(.borderedProminent)
@@ -92,10 +92,10 @@ struct ListFormView: View {
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
             }
-            .navigationTitle(list._id.isEmpty ? "Create new list" : "Edit list")
+            .navigationTitle(list._id.isEmpty ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer", systemImage: "xmark") {
+                    Button("action.close", systemImage: "xmark") {
                         dismiss()
                     }
                 }

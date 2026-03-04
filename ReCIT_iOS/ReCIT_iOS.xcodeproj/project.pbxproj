@@ -14,6 +14,7 @@
 		09ACF44E2E5E07EB00D59BC0 /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09ACF44D2E5E07EB00D59BC0 /* Env.swift */; };
 		09F415792F203469000D3E4D /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 09F415782F203469000D3E4D /* AsyncAlgorithms */; };
 		507BE6B82F3B5592003AF5B3 /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 507BE6B72F3B5592003AF5B3 /* Nuke */; };
+		AA00111300000000000000AA /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA00111100000000000000AA /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,7 @@
 		098A61E02E54CA160032185B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		098A61E32E54CA160032185B /* ReCIT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReCIT.swift; sourceTree = "<group>"; };
 		09ACF44D2E5E07EB00D59BC0 /* Env.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
+		AA00111100000000000000AA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -117,6 +119,7 @@
 				098A61E32E54CA160032185B /* ReCIT.swift */,
 				09ACF44D2E5E07EB00D59BC0 /* Env.swift */,
 				098A61E02E54CA160032185B /* Assets.xcassets */,
+				AA00111100000000000000AA /* Localizable.xcstrings */,
 				09A2B7C32F4F8B890004A85C /* AppModels */,
 				09FCBD0B2EBE58F600A33F35 /* Model */,
 				09ACF4122E5CA38300D59BC0 /* Features */,
@@ -244,6 +247,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				fr,
 				Base,
 			);
 			mainGroup = 094FD1932E4A38D40023705A;
@@ -272,6 +276,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				098A61E42E54CA160032185B /* Assets.xcassets in Resources */,
+				AA00111300000000000000AA /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

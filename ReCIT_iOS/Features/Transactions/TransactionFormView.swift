@@ -21,7 +21,7 @@ struct TransactionFormView: View {
             Form {
                 if transaction._id.isEmpty {
                     Section {
-                        Picker("Transaction", selection: $transaction.type) {
+                        Picker("transaction.form.type", selection: $transaction.type) {
                             ForEach(TransactionType.allCases, id: \.self) { type in
                                 Text(type.rawValue).tag(type)
                             }
@@ -31,7 +31,7 @@ struct TransactionFormView: View {
 
                 Section {
                     VStack(alignment: .leading, spacing: .xSmall) {
-                        Text("Your message")
+                        Text("transaction.form.your_message")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .bold()
@@ -87,7 +87,7 @@ struct TransactionFormView: View {
                             },
                             actionOptions: [.showProgressView],
                             label: {
-                                Text("Envoyer un message")
+                                Text("action.send_message")
                                     .frame(maxWidth: .infinity)
                             })
                             .buttonStyle(.borderedProminent)
@@ -100,7 +100,7 @@ struct TransactionFormView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer", systemImage: "xmark") {
+                    Button("action.close", systemImage: "xmark") {
                         dismiss()
                     }
                 }

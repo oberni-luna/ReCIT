@@ -28,11 +28,11 @@ struct LoginView: View {
                     .frame(width: 120)
 
                 VStack(spacing: .xSmall) {
-                    Text("Connexion")
+                    Text("login.title")
                         .textStyle(.title80)
                         .foregroundStyle(.textDefault)
 
-                    Text("Connectez-vous à votre compte inventaire.io")
+                    Text("login.subtitle")
                         .textStyle(.content300)
                         .foregroundStyle(.textSecondary)
                         .multilineTextAlignment(.center)
@@ -44,7 +44,7 @@ struct LoginView: View {
             // MARK: - Fields
             VStack(spacing: .medium) {
                 VStack(alignment: .leading, spacing: .xSmall) {
-                    Text("Nom d'utilisateur")
+                    Text("login.username")
                         .textStyle(.content200Bold)
                         .foregroundStyle(.textSecondary)
                     TextField("", text: $username)
@@ -58,7 +58,7 @@ struct LoginView: View {
                 }
 
                 VStack(alignment: .leading, spacing: .xSmall) {
-                    Text("Mot de passe")
+                    Text("login.password")
                         .textStyle(.content200Bold)
                         .foregroundStyle(.textSecondary)
                     SecureField("", text: $password)
@@ -91,7 +91,7 @@ struct LoginView: View {
                         }
                     }
                 }, actionOptions: [.showProgressView], label: {
-                    Text("Se connecter")
+                    Text("login.button.signin")
                         .frame(maxWidth: .infinity)
                 })
                 .buttonStyle(PrimaryButtonStyle())
@@ -99,7 +99,7 @@ struct LoginView: View {
                 Button {
                     openURL(URL(string: "https://inventaire.io")!)
                 } label: {
-                    Text("Créer un compte")
+                    Text("login.button.create_account")
                 }
                 .buttonStyle(ActionButtonStyle(.primary))
             }

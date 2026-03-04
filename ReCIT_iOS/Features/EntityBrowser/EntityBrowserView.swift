@@ -24,7 +24,7 @@ struct EntityBrowserView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer", systemImage: "xmark") {
+                    Button("action.close", systemImage: "xmark") {
                         dismiss()
                     }
                 }

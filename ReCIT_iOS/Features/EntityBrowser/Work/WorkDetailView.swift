@@ -24,6 +24,7 @@ struct WorkDetailView: View {
     @State private var viewState: ViewState = .loadingWork
     @State private var nextEntityDestination: NavigationDestination?
     @State private var showAddToListDialog: Bool = false
+    @State private var addToListItemForm: EntityList? = nil
 
     let workUri: String
     @Binding var path: NavigationPath
@@ -38,20 +39,16 @@ struct WorkDetailView: View {
             case .loaded(work: let work, editions: let editions):
                 headerSection(work: work)
                 editionsSection(work: work, editions: editions)
+                    .selectListToAdd(
+                        showAddToListDialog: $showAddToListDialog,
+                        onListSelected: { list in
+                            addToListItemForm = list
+                        }
+                    )
             case .error(error: let error):
                 Text("Error \(error.localizedDescription) !!")
             }
         }
-        .selectListToAdd(
-            showAddToListDialog: $showAddToListDialog,
-            onListSelected: { list in
-                Task {
-                    try await listModel.addEntitiesToList(
-                        listId: list._id,
-                        entityUris: [workUri]
-                    )
-                }
-            })
         .onAppear {
             Task {
                 await fetchWork()
@@ -62,6 +59,14 @@ struct WorkDetailView: View {
             if let destination {
                 path.append(destination)
                 nextEntityDestination = nil
+            }
+        }
+        .sheet(item: $addToListItemForm) { list in
+            switch viewState {
+            case .loaded(let work, _ ):
+                ListItemFormView(entity: work, list: list)
+            default:
+                EmptyView()
             }
         }
         .listStyle(.insetGrouped)

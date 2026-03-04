@@ -66,7 +66,7 @@ public final class EntityList {
 @Model
 public final class EntityListItem {
     @Attribute(.unique) var _id: String
-    var comment: String?
+    var comment: String
     var uri: String
     var ordinal: String
     var updated: Date?
@@ -74,7 +74,7 @@ public final class EntityListItem {
     var entityType: EntityListType
     var list: EntityList?
 
-    init(_id: String, comment: String? = nil, uri: String, ordinal: String, updated: Date? = nil, created: Date, itemType: EntityListType) {
+    init(_id: String, comment: String = "", uri: String, ordinal: String, updated: Date? = nil, created: Date, itemType: EntityListType, list: EntityList? = nil) {
         self._id = _id
         self.comment = comment
         self.uri = uri
@@ -82,6 +82,7 @@ public final class EntityListItem {
         self.updated = updated
         self.created = created
         self.entityType = itemType
+        self.list = list
     }
 
     convenience init(listElementDTO: ListElementDTO, listType: EntityListType, baseUrl: String) {
@@ -92,7 +93,7 @@ public final class EntityListItem {
         }
         self.init(
             _id: listElementDTO._id,
-            comment: listElementDTO.comment,
+            comment: listElementDTO.comment ?? "",
             uri: listElementDTO.uri,
             ordinal: listElementDTO.ordinal,
             updated: updatedDate,

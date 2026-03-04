@@ -42,15 +42,17 @@ struct ListItemCellView: View {
     @ViewBuilder
     var textsCell: some View {
         VStack(alignment: .leading, spacing: 4) {
+
+            if !listItem.comment.isEmpty {
+                Text(listItem.comment)
+            }
+
             Text(entity.title)
-                .font(.headline)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
             if let description = entity.subtitle, !description.isEmpty {
                 Text(description)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            if let comment = listItem.comment, !comment.isEmpty {
-                Text(comment)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

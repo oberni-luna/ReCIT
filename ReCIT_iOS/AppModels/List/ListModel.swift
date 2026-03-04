@@ -68,17 +68,53 @@ class ListModel: ObservableObject {
     }
 
     // TODO: add optionnal comment when adding an element to a list 
-    func addEntitiesToList(listId: String, entityUris: [String]) async throws {
-        let addToListDTO: AddToListDTO = .init(id: listId, uris: entityUris)
-        let _: AddToListResponseDTO? = try await fetchDataService.send(
+    func addEntitiesToList(modelContext: ModelContext, list: EntityList, entityUris: [String], comment: String? = nil) async throws {
+        let addToListDTO: AddToListDTO = .init(id: list._id, uris: entityUris)
+        if let addToListResponseDTO : AddToListResponseDTO = try await fetchDataService.send(
             toEndpoint: "/api/lists?action=add-elements",
             payload: addToListDTO,
             debug: true
-        )
+        ) {
+            for element in addToListResponseDTO.createdElements {
+                if let comment, comment.isEmpty == false {
+                    let _:ListElementDTO? = try await updateElementInList(elementId: element._id, comment: comment)
+                }
+
+                let entityListItem: EntityListItem = .init(listElementDTO: element, listType: list.type, baseUrl: fetchDataService.baseUrl())
+                modelContext.insert(entityListItem)
+            }
+            try modelContext.save()
+        }
     }
 
     // TODO: Implement remove item from list
+//    {id: "97e848f4af0a5ffe2886648ee2bc648b", uris: ["inv:fd0bbd368cb02d614a3b29857f960fbe"]}
+    func deleteElementsInList(modelContext: ModelContext,listId: String, elementIds: [String]) async throws {
+        let payload: DeleteListElementsDTO = .init(id: listId, uris: elementIds)
+
+        if let listResponseDTO : [String: ListDTO] = try await fetchDataService.send(
+            toEndpoint: "/api/lists?action=remove-elements",
+            payload: payload,
+            debug: true
+        ),
+        let listDTO = listResponseDTO["list"] {
+            let list = EntityList(listDTO: listDTO, baseUrl: fetchDataService.baseUrl())
+            modelContext.insert(list)
+        }
+        try modelContext.save()
+    }
 
     // TODO: Implement update item in a list to add comment
+    // TODO: add optionnal comment when adding an element to a list
+    func updateElementInList(elementId: String, comment: String) async throws -> ListElementDTO? {
+        let updateListElementDTO: UpdateListElementDTO = .init(id: elementId, comment: comment)
+        let elementDto: ListElementDTO? = try await fetchDataService.send(
+            toEndpoint: "/api/lists?action=update-element",
+            payload: updateListElementDTO,
+            debug: true
+        )
+
+        return elementDto
+    }
 
 }

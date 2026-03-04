@@ -36,6 +36,17 @@ struct ListElementDTO: Codable {
     let comment: String?
 }
 
+struct UpdateListElementDTO: Codable {
+    let id: String
+    let comment: String
+}
+
+struct DeleteListElementsDTO: Codable {
+    let id: String
+    let uris: [String]
+}
+
+
 // MARK: Add to list
 struct AddToListDTO: Codable {
     let id: String

@@ -60,10 +60,8 @@ struct InventoryItemDetailView: View {
                 onListSelected: { list in
                     Task {
                         do {
-                            try await listModel.addEntitiesToList(
-                                listId: list._id,
-                                entityUris: item.workUris
-                            )
+                            try await listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: item.workUris)
+                            
                             snackBar.show {
                                 SnackBarView(
                                     title: "\(item.edition?.title ?? "Ce livre ")", subtitle: "a bien été ajouté à la liste", onDismiss: {dismiss()})

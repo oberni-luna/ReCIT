@@ -53,6 +53,11 @@
 			path = UITests;
 			sourceTree = "<group>";
 		};
+		09A2B7C32F4F8B890004A85C /* AppModels */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AppModels;
+			sourceTree = "<group>";
+		};
 		09ACF4122E5CA38300D59BC0 /* Features */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Features;
@@ -112,6 +117,7 @@
 				098A61E32E54CA160032185B /* ReCIT.swift */,
 				09ACF44D2E5E07EB00D59BC0 /* Env.swift */,
 				098A61E02E54CA160032185B /* Assets.xcassets */,
+				09A2B7C32F4F8B890004A85C /* AppModels */,
 				09FCBD0B2EBE58F600A33F35 /* Model */,
 				09ACF4122E5CA38300D59BC0 /* Features */,
 				507BE3F92F3B508F003AF5B3 /* DesignSystem */,
@@ -148,6 +154,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				09A2B7C32F4F8B890004A85C /* AppModels */,
 				09ACF4122E5CA38300D59BC0 /* Features */,
 				09FCBD0B2EBE58F600A33F35 /* Model */,
 				507BE3F92F3B508F003AF5B3 /* DesignSystem */,

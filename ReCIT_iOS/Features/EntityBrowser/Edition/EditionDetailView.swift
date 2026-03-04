@@ -39,6 +39,7 @@ struct EditionDetailView: View {
 
     @State private var errorMessage: String?
     @State private var addingItem: Bool = false
+    @State private var addToListItemForm: EntityList? = nil
 
     var body: some View {
         VStack {
@@ -54,13 +55,24 @@ struct EditionDetailView: View {
                 .selectListToAdd(
                     showAddToListDialog: $showAddToListDialog,
                     onListSelected: { list in
-                        Task {
-                            try await listModel.addEntitiesToList(
-                                listId: list._id,
-                                entityUris: edition.workUris
-                            )
+                        if edition.workUris.count > 1 {
+                            Task {
+                                try await listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: edition.workUris)
+                            }
+                        } else if let _ = edition.works.first {
+                            addToListItemForm = list
                         }
                     })
+                .selectListToAdd(
+                    showAddToListDialog: $showAddToListDialog,
+                    onListSelected: { list in
+                        addToListItemForm = list
+                    })
+                .sheet(item: $addToListItemForm) { list in
+                    if let work = edition.works.first {
+                        ListItemFormView(entity: work, list: list)
+                    }
+                }
             case .error(error: let error):
                 Text("Error loading edition \(error.localizedDescription)")
             case .noResult:

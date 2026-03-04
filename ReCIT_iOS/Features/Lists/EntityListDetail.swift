@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct EntityListDetail: View {
+    @EnvironmentObject private var listModel: ListModel
     @EnvironmentObject private var inventoryModel: InventoryModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -19,7 +20,7 @@ struct EntityListDetail: View {
         case empty
     }
 
-    let list: EntityList
+    @State var list: EntityList
     @Binding var path: NavigationPath
 
     @State var state: ViewState = .loadingItems
@@ -69,8 +70,30 @@ struct EntityListDetail: View {
                         ListItemCellView(listItem: key, entity: item)
                     }
                     .buttonStyle(.plain)
+                    .swipeActions(edge: .trailing) {
+                        Button("Delete", systemImage: "trash") {
+                            Task {
+                                await deleteItem(listItem: key)
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    @MainActor
+    private func deleteItem(listItem: EntityListItem) async {
+        do {
+            try await listModel.deleteElementsInList(modelContext: modelContext, listId: list._id, elementIds: [listItem.uri])
+
+            self.state = switch state {
+            case .loaded(let items):
+                    .loaded(items: items.filter { $0.key != listItem } )
+            default: state
+            }
+        } catch {
+            
         }
     }
 

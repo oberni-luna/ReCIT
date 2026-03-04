@@ -24,7 +24,7 @@ struct InventoryItemDetailsFormView: View {
                 Section {
                     TextEditor(text: $item.details)
                         .frame(minHeight: 128)
-                        .withLabel(label: "Ce que j'en pense")
+                        .withLabel(label: String(localized: "inventory.item.my_notes"))
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
@@ -34,18 +34,18 @@ struct InventoryItemDetailsFormView: View {
                         do {
                             try await InventoryModel.updateItemsDetails(modelContext: modelContext, items: [item])
                             snackBar.show {
-                                SnackBarView(title: "Description enregistrée", onDismiss: {dismiss()})
+                                SnackBarView(title: String(localized: "inventory.item.details.saved"), onDismiss: {dismiss()})
                             }
                             dismiss()
                         } catch {
                             snackBar.show {
-                                SnackBarView(title: "Une erreur s'est produite", subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
+                                SnackBarView(title: String(localized: "error.generic"), subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
                             }
                         }
                     },
                                 actionOptions: [.showProgressView],
                                 label: {
-                        Text("Submit")
+                        Text("action.submit")
                             .frame(maxWidth: .infinity)
                     })
                     .buttonStyle(.borderedProminent)
@@ -57,7 +57,7 @@ struct InventoryItemDetailsFormView: View {
             .navigationTitle(item.edition?.title ?? "")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer", systemImage: "xmark") {
+                    Button("action.close", systemImage: "xmark") {
                         dismiss()
                     }
                 }

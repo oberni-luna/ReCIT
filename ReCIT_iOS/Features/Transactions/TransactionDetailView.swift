@@ -23,7 +23,7 @@ struct TransactionDetailView: View {
 
             if let user = userModel.myUser {
                 if transaction.messages.count >= 1 {
-                    Section("Messages") {
+                    Section("transaction.messages.header") {
                         ForEach(transaction.getUIMessages(for: user).sorted { $0.timestamp < $1.timestamp }) { message in
                             messageView(message: message)
                         }
@@ -35,9 +35,9 @@ struct TransactionDetailView: View {
                         showTransactionForm = true
                     } label: {
                         if let _ = transaction.nextAvailableState(for: user) {
-                            Text("Répondre")
+                            Text("action.reply")
                         } else {
-                            Text("Envoyer un message")
+                            Text("action.send_message")
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -140,28 +140,28 @@ extension UserTransaction {
         return if amIRequester {
             switch action.action {
             case .requested:
-                "Vous avez fait une demande d'emprunt à **\(self.owner.username)**"
+                String(localized: "transaction.action.requester.requested \(self.owner.username)")
             case .accepted:
-                "**\(self.owner.username)** a accepté la demande"
+                String(localized: "transaction.action.requester.accepted \(self.owner.username)")
             case .confirmed:
-                "Vous avez confirmé la réception"
+                String(localized: "transaction.action.requester.confirmed")
             case .returned:
-                "Vous avez retourné le livre"
+                String(localized: "transaction.action.requester.returned")
             case .declined:
-                "**\(self.owner.username)** a refusé cette demande"
+                String(localized: "transaction.action.requester.declined \(self.owner.username)")
             }
         } else {
             switch action.action {
             case .requested:
-                "**\(self.requester.username)** vous a fait une demande"
+                String(localized: "transaction.action.owner.requested \(self.requester.username)")
             case .accepted:
-                "Vous avez accepté la demande"
+                String(localized: "transaction.action.owner.accepted")
             case .confirmed:
-                "**\(self.owner.username)** a confirmé la réception"
+                String(localized: "transaction.action.owner.confirmed \(self.owner.username)")
             case .returned:
-                "Vous avez récupéré le livre"
+                String(localized: "transaction.action.owner.returned")
             case .declined:
-                "Vous avez refusé cette demande"
+                String(localized: "transaction.action.owner.declined")
             }
         }
     }

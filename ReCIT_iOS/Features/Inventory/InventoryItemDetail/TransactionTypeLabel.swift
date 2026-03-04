@@ -20,13 +20,13 @@ private extension TransactionType {
     var label: String {
         switch self {
         case .lending:
-            "À prêter"
+            String(localized: "transaction.type.lending")
         case .inventorying:
-            "Inventorié"
+            String(localized: "transaction.type.inventorying")
         case .selling:
-            "À vendre"
+            String(localized: "transaction.type.selling")
         case .giving:
-            "À donner"
+            String(localized: "transaction.type.giving")
         }
     }
 

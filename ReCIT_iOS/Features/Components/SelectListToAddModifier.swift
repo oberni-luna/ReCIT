@@ -30,7 +30,7 @@ struct SelectListToAddModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .alert("Pick list", isPresented: $showAddToListDialog) {
+            .alert("select_list.title", isPresented: $showAddToListDialog) {
             Group {
                 ForEach(entityLists) { entityList in
                     Button(entityList.name, role:.confirm) {
@@ -39,9 +39,9 @@ struct SelectListToAddModifier: ViewModifier {
                     }
                 }
             }
-            Button("Annuler", role: .cancel){ }
+            Button("action.cancel", role: .cancel){ }
         } message: {
-            Text("Select the list you want to add this item to.")
+            Text("select_list.message")
         }
     }
 }

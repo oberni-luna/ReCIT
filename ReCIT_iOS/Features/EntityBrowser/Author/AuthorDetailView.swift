@@ -26,14 +26,14 @@ struct AuthorDetailView: View {
     var body: some View {
         switch state {
         case .loadingAuthor:
-            Text("Loading author...")
+            Text("author.loading")
                 .onAppear {
                     Task {
                         await fetchAuthor()
                     }
                 }
         case .loadingWorks(author: let author):
-            Text("Loading works for \(author.name)")
+            Text("author.loading_works \(author.name)")
                 .onAppear {
                     Task {
                         await fetchWorks()
@@ -53,7 +53,7 @@ struct AuthorDetailView: View {
                                 .font(.subheadline)
                         }
                         if let dob = author.dateOfBirth {
-                            Text("Né le \(dob.formatted(date:.long, time:.omitted))")
+                            Text("author.birth_date \(dob.formatted(date:.long, time:.omitted))")
                                 .font(.subheadline)
                         }
                     }
@@ -72,12 +72,12 @@ struct AuthorDetailView: View {
                         }
                     }
                 } header: {
-                    Text("Oeuvres de \(author.name)")
+                    Text("author.works.header \(author.name)")
                 }
             }
-            .navigationTitle("Auteur")
+            .navigationTitle("nav.author")
         case .error(error: let error):
-            Text("Error \(error.localizedDescription) !!")
+            Text("error.with_message \(error.localizedDescription)")
         }
     }
 

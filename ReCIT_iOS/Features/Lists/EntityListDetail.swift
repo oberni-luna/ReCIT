@@ -35,7 +35,7 @@ struct EntityListDetail: View {
         }
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("edit", systemImage: "pencil") {
+                Button("action.edit", systemImage: "pencil") {
                     presentEditForm = true
                 }
             }
@@ -49,11 +49,11 @@ struct EntityListDetail: View {
     var itemView: some View {
         switch state {
         case .empty:
-            Text("This list is empty")
+            Text("list.empty")
         case .error(error: let error):
-            Text("Error loading list \(error.localizedDescription).")
+            Text("list.error.loading \(error.localizedDescription)")
         case .loadingItems:
-            Text("Loading items...")
+            Text("list.loading")
                 .onAppear {
                     Task {
                         await fetchItemEntities()
@@ -71,7 +71,7 @@ struct EntityListDetail: View {
                     }
                     .buttonStyle(.plain)
                     .swipeActions(edge: .trailing) {
-                        Button("Delete", systemImage: "trash") {
+                        Button("action.delete", systemImage: "trash") {
                             Task {
                                 await deleteItem(listItem: key)
                             }

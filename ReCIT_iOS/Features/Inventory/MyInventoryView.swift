@@ -30,7 +30,7 @@ struct MyInventoryView: View {
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     destination.viewForDestination($path)
                 }
-                .navigationTitle("📚 Inventory")
+                .navigationTitle("nav.inventory")
                 .controlGroupStyle(.palette)
                 .listStyle(.plain)
 // TODO: faire marcher le search avec un vrai predicate

@@ -32,7 +32,7 @@ struct UserItemCellView: View {
                         .foregroundStyle(.textDefault)
 
                     HStack(alignment: .firstTextBaseline, spacing: .small) {
-                        Text("Depuis \(item.created.formatted(date: .abbreviated, time: .omitted))")
+                        Text("inventory.item.since_date \(item.created.formatted(date: .abbreviated, time: .omitted))")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
 

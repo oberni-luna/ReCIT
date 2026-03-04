@@ -48,10 +48,10 @@ struct WorkListView: View {
             .navigationDestination(for: Work.self) { work in
 
             }
-            .navigationTitle("📋 Works")
+            .navigationTitle("nav.works")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("add", systemImage: "plus") {
+                    Button("action.add", systemImage: "plus") {
 //                        showNewListModal = true
                     }
                 }

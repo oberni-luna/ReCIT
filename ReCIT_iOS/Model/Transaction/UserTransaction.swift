@@ -76,15 +76,15 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
         var buttonLabel: String {
             switch self {
             case .requested:
-                "Demander"
+                String(localized: "transaction.action.request")
             case .accepted:
-                "Accepter"
+                String(localized: "transaction.action.accept")
             case .confirmed:
-                "Confirmer"
+                String(localized: "transaction.action.confirm")
             case .returned:
-                "Terminer"
+                String(localized: "transaction.action.complete")
             case .declined:
-                "Décliner"
+                String(localized: "transaction.action.decline")
             }
         }
     }

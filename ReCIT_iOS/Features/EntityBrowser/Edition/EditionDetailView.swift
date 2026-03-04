@@ -74,12 +74,12 @@ struct EditionDetailView: View {
                     }
                 }
             case .error(error: let error):
-                Text("Error loading edition \(error.localizedDescription)")
+                Text("error.with_message \(error.localizedDescription)")
             case .noResult:
-                Text("Cette edition n'existe pas sur inventaire.io")
+                Text("edition.no_result")
             }
         }
-        .navigationTitle("Edition")
+        .navigationTitle("nav.edition")
         .toolbar {
             toolbarContent
         }
@@ -100,7 +100,7 @@ struct EditionDetailView: View {
             switch viewState {
             case .loaded(let edition):
                 if !inMyInventory {
-                    Button("Add to inventory", systemImage: "plus") {
+                    Button("action.add_to_inventory", systemImage: "plus") {
                         Task {
                             await addToInventory(edition: edition)
                         }
@@ -110,7 +110,7 @@ struct EditionDetailView: View {
                 Button {
                     showAddToListDialog = true
                 } label: {
-                    Label("Add to a list", systemImage: "list.bullet")
+                    Label("action.add_to_list", systemImage: "list.bullet")
                 }
 
             case .loadingEdition, .error, .noResult:
@@ -146,7 +146,7 @@ struct EditionDetailView: View {
     @ViewBuilder
     func userInventorySection(edition: Edition) -> some View {
         if !edition.items.filter({$0.owner?.id != userModel.myUser?.id}).isEmpty {
-            Section("Dans l'inventaire de") {
+            Section("edition.others_inventory") {
                 ForEach(edition.items.filter({$0.owner?.id != userModel.myUser?.id})) { item in
                     Button {
                         if let owner = item.owner {
@@ -164,7 +164,7 @@ struct EditionDetailView: View {
     @ViewBuilder
     func myInventorySection(edition: Edition) -> some View {
         if let item = edition.items.filter({$0.owner?.id == userModel.myUser?.id}).first {
-            Section("Dans mon inventaire") {
+            Section("edition.my_inventory") {
                 Button {
                     nextEntityDestination = NavigationDestination.item(item: item)
                 } label: {
@@ -192,7 +192,7 @@ struct EditionDetailView: View {
     private func addToInventory(edition: Edition) async {
         errorMessage = nil
         guard let user = userModel.myUser else {
-            errorMessage = "Pas de user connecté !"
+            errorMessage = String(localized: "edition.error.no_user")
             return
         }
 
@@ -206,7 +206,7 @@ struct EditionDetailView: View {
                 forUser: user
             )
         } catch {
-            errorMessage = "Impossible d'ajouter ce livre à votre inventaire."
+            errorMessage = String(localized: "edition.error.add_failed")
         }
         addingItem = false
     }

@@ -45,7 +45,7 @@ struct CommunityView: View {
             .navigationDestination(for: Edition.self) { edition in
                 EditionDetailView(editionUri: edition.uri, path: $path)
             }
-            .navigationTitle("👫 In the community")
+            .navigationTitle("nav.community")
             .listStyle(.plain)
             .searchable(text: $searchText)
         }

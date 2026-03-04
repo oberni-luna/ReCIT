@@ -16,7 +16,7 @@ struct UserCellView: View {
             VStack(alignment: .leading, spacing: .xSmall) {
                 Text(user.username)
                     .font(.headline)
-                Text("Item count \(user.itemCount)")
+                Text("user.item_count \(user.itemCount)")
                     .font(.subheadline)
             }
         }

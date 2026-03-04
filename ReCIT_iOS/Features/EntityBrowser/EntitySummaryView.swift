@@ -41,7 +41,7 @@ struct EntitySummaryView: View {
                     .font(.subheadline)
                     .foregroundStyle(.textDefault)
                     .lineLimit(3)
-                    .withLabel(label: "Résumé")
+                    .withLabel(label: String(localized: "entity.summary.label"))
                     .onTapGesture {
                         showMore = true
                     }
@@ -55,7 +55,7 @@ struct EntitySummaryView: View {
                         .presentationDetents([.medium, .large])
                     }
             case .error(error: let error):
-                Text("Error loading summary \(error.localizedDescription)")
+                Text("error.with_message \(error.localizedDescription)")
             case .empty:
                 EmptyView()
             }

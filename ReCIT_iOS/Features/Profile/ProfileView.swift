@@ -30,7 +30,7 @@ struct ProfileView: View {
             .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }
-            .navigationTitle("Profile")
+            .navigationTitle("nav.profile")
         }
     }
 
@@ -41,7 +41,7 @@ struct ProfileView: View {
                 UserHeaderView(user: user)
             }
 
-            Section("Current transactions") {
+            Section("profile.current_transactions") {
                 ForEach(transactions.sorted{ $0.lastActionDate > $1.lastActionDate } ) { transaction in
                     if transaction.isCurrent {
                         NavigationLink(
@@ -53,7 +53,7 @@ struct ProfileView: View {
                 }
             }
 
-            Section("Network") {
+            Section("profile.network") {
                 ForEach(userModel.getAllOtherUsers(modelContext: modelContext).sorted(by: { $0.username < $1.username })) { otherUser in
                     NavigationLink(value: NavigationDestination.user(user: otherUser)) {
                         UserCellView(user: otherUser)
@@ -69,7 +69,7 @@ struct ProfileView: View {
                         await authModel.logout()
                     }
                 }, label: {
-                    Text("Se déconnecter")
+                    Text("profile.logout")
                 })
             }
         }
@@ -77,6 +77,6 @@ struct ProfileView: View {
 
     @ViewBuilder
     var anonymousView: some View {
-        Text("Vous n'êtes pas connecté.")
+        Text("profile.anonymous")
     }
 }

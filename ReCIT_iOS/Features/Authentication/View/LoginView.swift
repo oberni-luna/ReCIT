@@ -12,37 +12,14 @@ struct LoginView: View {
     let authModel: AuthModel
     let onLogin: () -> Void
 
-    @State private var username = ""
-    @State private var password = ""
+    @State private var username = "OlivierB_test"
+    @State private var password = "Azerty1234!"
     @State private var errorMessage: String?
 
     var body: some View {
-        VStack(spacing: .zero) {
-            Spacer()
-
-            // MARK: - Branding
-            VStack(spacing: .medium) {
-                Image("mainLogo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 120)
-
-                VStack(spacing: .xSmall) {
-                    Text("login.title")
-                        .textStyle(.title80)
-                        .foregroundStyle(.textDefault)
-
-                    Text("login.subtitle")
-                        .textStyle(.content300)
-                        .foregroundStyle(.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-            }
-
-            Spacer()
-
+        Form {
             // MARK: - Fields
-            VStack(spacing: .medium) {
+            Section {
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Text("login.username")
                         .textStyle(.content200Bold)
@@ -50,7 +27,7 @@ struct LoginView: View {
                     TextField("", text: $username)
                         .textStyle(.content300)
                         .foregroundStyle(.textDefault)
-                        .padding(.medium)
+                        .padding(.all, .medium)
                         .background(.surfaceSecondary)
                         .cornerRadius(.medium)
                         .autocorrectionDisabled()
@@ -64,7 +41,7 @@ struct LoginView: View {
                     SecureField("", text: $password)
                         .textStyle(.content300)
                         .foregroundStyle(.textDefault)
-                        .padding(.medium)
+                        .padding(.all, .medium)
                         .background(.surfaceSecondary)
                         .cornerRadius(.medium)
                 }
@@ -75,37 +52,52 @@ struct LoginView: View {
                         .foregroundStyle(.textError)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-            }
+            } header: {
+                // MARK: - Branding
+                VStack(spacing: .medium) {
+                    Image("mainLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 120)
 
-            Spacer()
+                    VStack(spacing: .xSmall) {
+                        Text("login.title")
+                            .textStyle(.title80)
+                            .foregroundStyle(.textDefault)
 
-            // MARK: - Actions
-            VStack(spacing: .small) {
-                AsyncButton(action: {
-                    Task {
-                        do {
-                            try await authModel.login(username: username, password: password)
-                            onLogin()
-                        } catch {
-                            errorMessage = (error as? AuthService.AuthError)?.errorDescription ?? error.localizedDescription
-                        }
+                        Text("login.subtitle")
+                            .textStyle(.content300)
+                            .foregroundStyle(.textSecondary)
+                            .multilineTextAlignment(.center)
                     }
-                }, actionOptions: [.showProgressView], label: {
-                    Text("login.button.signin")
-                        .frame(maxWidth: .infinity)
-                })
-                .buttonStyle(PrimaryButtonStyle())
-
-                Button {
-                    openURL(URL(string: "https://inventaire.io")!)
-                } label: {
-                    Text("login.button.create_account")
                 }
-                .buttonStyle(ActionButtonStyle(.primary))
-            }
+            } footer: {
+                // MARK: - Actions
+                VStack(spacing: .small) {
+                    AsyncButton(action: {
+                        Task {
+                            do {
+                                try await authModel.login(username: username, password: password)
+                                onLogin()
+                            } catch {
+                                errorMessage = (error as? AuthService.AuthError)?.errorDescription ?? error.localizedDescription
+                            }
+                        }
+                    }, actionOptions: [.showProgressView], label: {
+                        Text("login.button.signin")
+                            .frame(maxWidth: .infinity)
+                    })
+                    .buttonStyle(PrimaryButtonStyle())
 
-            Spacer()
+                    Button {
+                        openURL(URL(string: "https://inventaire.io/signup")!)
+                    } label: {
+                        Text("login.button.create_account")
+                    }
+                    .buttonStyle(ActionButtonStyle(.primary))
+                }
+            }
         }
-        .padding(.horizontal, .large)
+        .defaultScrollAnchor(.center)
     }
 }

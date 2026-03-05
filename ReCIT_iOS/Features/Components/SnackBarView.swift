@@ -18,6 +18,14 @@ public struct SnackBarView: View {
         self.onDismiss = onDismiss
     }
 
+    public static func error(_ error: Error, onDismiss: (() -> Void)? = nil) -> SnackBarView {
+        SnackBarView(
+            title: String(localized: "error.generic"),
+            subtitle: error.localizedDescription,
+            onDismiss: onDismiss
+        )
+    }
+
     public var body: some View {
         HStack(spacing: .small) {
             VStack(alignment: .leading, spacing: .xSmall) {

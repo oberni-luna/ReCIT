@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import LBSnackBar
 
 struct ListFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
+    @Environment(\.snackBar) private var snackBar
     @EnvironmentObject var listModel: ListModel
 
     @Bindable var list: EntityList = .init(_id: "", _rev: "", name: "", explanation: "", created: Date(), visibility: [], type: .work)
@@ -57,7 +59,7 @@ struct ListFormView: View {
                                 )
                                 dismiss()
                             } catch {
-                                print(error)
+                                snackBar.show { SnackBarView.error(error) }
                             }
                         },
                                     actionOptions: [.showProgressView],
@@ -76,7 +78,7 @@ struct ListFormView: View {
                                 )
                                 dismiss()
                             } catch {
-                                print(error)
+                                snackBar.show { SnackBarView.error(error) }
                             }
                         },
                                     actionOptions: [.showProgressView],

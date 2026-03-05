@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import LBSnackBar
 
 struct TransactionFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
+    @Environment(\.snackBar) private var snackBar
     @EnvironmentObject var userModel: UserModel
     @EnvironmentObject var transactionModel: TransactionModel
 
@@ -61,7 +63,7 @@ struct TransactionFormView: View {
                                             try await transactionModel.syncTransactions(modelContext: modelContext)
                                             dismiss()
                                         } catch {
-                                            print(error)
+                                            snackBar.show { SnackBarView.error(error) }
                                         }
                                     },
                                                 actionOptions: [.showProgressView],
@@ -81,7 +83,7 @@ struct TransactionFormView: View {
 
                                     try await transactionModel.syncTransactions(modelContext: modelContext)
                                 } catch {
-                                    print(error)
+                                    snackBar.show { SnackBarView.error(error) }
                                 }
                                 dismiss()
                             },

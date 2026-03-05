@@ -81,7 +81,7 @@ class APIService {
     }
 
     func fetchData<T: Codable>(fromEndpoint: String, debug: Bool = false) async throws -> T? {
-        guard let downloadedData: T = await self.downloadData(fromEndpoint: fromEndpoint) else {return nil}
+        guard let downloadedData: T = await self.downloadData(fromEndpoint: fromEndpoint, debug: debug) else {return nil}
         return downloadedData
     }
 

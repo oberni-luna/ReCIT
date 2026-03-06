@@ -140,6 +140,7 @@ struct InventoryItemDetailView: View {
                 }
             }
         }
+        .applyBackground()
         .navigationTitle("nav.book")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -149,25 +150,30 @@ struct InventoryItemDetailView: View {
         Section {
             if !item.details.isEmpty {
                 Text(item.details)
-                    .font(.body)
-                    .foregroundStyle(.textDefault)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundDefault)
                     .withLabel(label: String(localized: "inventory.item.my_notes"))
             }
-            
-            Picker("inventory.item.transaction_mode", selection: $item.transaction) {
-                ForEach(TransactionType.allCases, id: \.self) { type in
-                    TransactionTypeLabel(transactionType: type)
-                }
-            }
-            .onChange(of: item.transaction) { _, transactionMode in
-                Task {
-                    try? await inventoryModel.updateItemsTransaction(modelContext: modelContext, items: [item])
-                }
-            }
 
-            Text("inventory.item.created_date \(item.created.formatted(date: .abbreviated, time: .omitted))")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            HStack {
+                Text("inventory.item.created_date \(item.created.formatted(date: .abbreviated, time: .omitted))")
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundSecondary)
+
+                Spacer()
+
+                Picker("inventory.item.transaction_mode", selection: $item.transaction) {
+                    ForEach(TransactionType.allCases, id: \.self) { type in
+                        TransactionTypeLabel(transactionType: type)
+                    }
+                }
+                .labelsHidden()  
+                .onChange(of: item.transaction) { _, transactionMode in
+                    Task {
+                        try? await inventoryModel.updateItemsTransaction(modelContext: modelContext, items: [item])
+                    }
+                }
+            }
         }
     }
 

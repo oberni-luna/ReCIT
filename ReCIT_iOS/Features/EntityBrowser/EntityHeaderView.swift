@@ -20,14 +20,13 @@ struct EntityHeaderView: View {
         EntityImageView(imageUrl: imageUrl) {
             VStack(alignment: .leading, spacing: .small) {
                 Text(title)
-                    .font(.largeTitle)
-                    .bold()
-                    .foregroundStyle(.textDefault)
+                    .textStyle(.title200)
+                    .foregroundStyle(.foregroundDefault)
 
                 if let subtitle {
                     Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.textSecondary)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundSecondary)
                 }
             }
         }

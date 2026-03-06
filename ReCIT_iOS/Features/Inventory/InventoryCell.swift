@@ -17,25 +17,30 @@ struct InventoryCell: View {
                 CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: 56)
 
                 VStack(alignment: .leading, spacing: .xSmall) {
-                    Text(edition.title)
-                        .font(.headline)
+                    Group {
+                        Text(edition.title)
+                            .textStyle(.content400Bold)
 
-                    if let subtitle = edition.subtitle {
-                        Text(subtitle)
-                            .font(.subheadline)
+                        if let subtitle = edition.subtitle {
+                            Text(subtitle)
+                                .textStyle(.content300)
+                        }
+
+                        Text(edition.authorNames.joined(separator: ", "))
+                            .textStyle(.footnote200)
+
                     }
-
-                    Text(edition.authorNames.joined(separator: ", "))
-                        .font(.caption)
-
+                    .foregroundStyle(.foregroundDefault)
+                    
                     HStack(alignment: .firstTextBaseline, spacing: .small) {
                         TransactionTypeLabel(transactionType: item.transaction)
-                            .font(.caption)
+                            .textStyle(.footnote200Bold)
+                            .foregroundStyle(.foregroundDefault)
 
                         if filterParameter == .othersInventory, let owner = item.owner {
                             Text(.init(String(localized: "inventory.owned_by \(owner.username)")))
-                                .font(.caption)
-                                .foregroundStyle(.textDefault)
+                                .textStyle(.footnote200Bold)
+                                .foregroundStyle(.foregroundDefault)
                         }
                     }
 

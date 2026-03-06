@@ -70,11 +70,11 @@ struct EntityListView: View {
                     }
                 }
             }
-//            .listStyle(.plain)
             .searchable(text: $searchText)
             .sheet(isPresented: $showNewListModal) {
                 ListFormView()
             }
+            .applyBackground()
         }
     }
 }

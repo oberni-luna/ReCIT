@@ -38,8 +38,8 @@ struct EntitySummaryView: View {
                 ProgressView()
             case .loaded(data: let data):
                 Text(data.content)
-                    .font(.subheadline)
-                    .foregroundStyle(.textDefault)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundDefault)
                     .lineLimit(3)
                     .withLabel(label: String(localized: "entity.summary.label"))
                     .onTapGesture {
@@ -48,8 +48,8 @@ struct EntitySummaryView: View {
                     .sheet(isPresented: $showMore) {
                         ScrollView {
                             Text(data.content)
-                                .font(.body)
-                                .foregroundStyle(.textDefault)
+                                .textStyle(.content300)
+                                .foregroundStyle(.foregroundDefault)
                                 .padding(.all, .large)
                         }
                         .presentationDetents([.medium, .large])

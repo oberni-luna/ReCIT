@@ -19,20 +19,18 @@ struct EntityAuthorsView: View {
             Button {
                 entityDestination = NavigationDestination.author(uri: author.uri)
             } label: {
-                HStack(alignment: .center, spacing: .small){
-                    Group {
-                        CellThumbnail(imageUrl: author.image, cornerRadius: .full)
+                NavigationLink(value: UUID()) {
+                    HStack(alignment: .center, spacing: .small){
+                        Group {
+                            CellThumbnail(imageUrl: author.image, cornerRadius: .full)
 
-                        Text(author.name)
-                            .font(.headline)
-                            .multilineTextAlignment(.leading)
-
-                        Spacer()
-
-                        Image(.chevronRight)
+                            Text(author.name)
+                                .textStyle(.content400Bold)
+                                .multilineTextAlignment(.leading)
+                        }
                     }
+                    .foregroundStyle(.foregroundDefault)
                 }
-                .foregroundStyle(.textDefault)
             }
         } else {
             ScrollView(.horizontal) {
@@ -46,7 +44,7 @@ struct EntityAuthorsView: View {
                                     CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: 36)
 
                                     Text(author.name)
-                                        .font(.headline)
+                                        .textStyle(.content400Bold)
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
                                         .fixedSize(horizontal: false, vertical: true)

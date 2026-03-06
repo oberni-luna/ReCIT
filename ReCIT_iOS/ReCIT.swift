@@ -43,6 +43,7 @@ struct ReCIT: App {
             RootView()
                 .environmentObject(authModel)
                 .modelContainer(sharedModelContainer)
+                .tint(.foregroundTinted)
         }
     }
 }

@@ -51,9 +51,9 @@ struct PrimaryButtonStyle: ButtonStyle {
     private var textStyle: DesignSystem.TextStyle {
         switch style {
         case .default:
-                .content300Bold
+                .action300
         case .small:
-                .content200Bold
+                .action200
         }
     }
 
@@ -62,8 +62,8 @@ struct PrimaryButtonStyle: ButtonStyle {
             .defaultPressedEffect(isPressed: configuration.isPressed)
             .padding(.vertical, verticalPadding)
             .padding(.horizontal, horizontalPadding)
-            .background(isEnabled ? .surfaceTintPrimary : .surfaceDisable)
-            .foregroundStyle(.textOnTint)
+            .background(isEnabled ? .backgroundTinted : .backgroundDisable)
+            .foregroundStyle(.foregroundTinted)
             .cornerRadius(.medium)
             .textStyle(textStyle)
     }

@@ -29,16 +29,16 @@ struct UserItemCellView: View {
                 VStack(alignment: .leading, spacing: .small) {
                     Text(owner.username)
                         .font(.headline)
-                        .foregroundStyle(.textDefault)
+                        .foregroundStyle(.foregroundDefault)
 
                     HStack(alignment: .firstTextBaseline, spacing: .small) {
                         Text("inventory.item.since_date \(item.created.formatted(date: .abbreviated, time: .omitted))")
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.foregroundSecondary)
 
                         TransactionTypeLabel(transactionType: item.transaction)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
                     }
                 }
 
@@ -49,7 +49,7 @@ struct UserItemCellView: View {
             if !item.details.isEmpty {
                 Text(item.details)
                     .font(.subheadline)
-                    .foregroundStyle(.textDefault)
+                    .foregroundStyle(.foregroundDefault)
             }
         }
     }

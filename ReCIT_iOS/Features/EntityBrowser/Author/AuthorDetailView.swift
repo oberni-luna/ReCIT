@@ -75,6 +75,7 @@ struct AuthorDetailView: View {
                     Text("author.works.header \(author.name)")
                 }
             }
+            .applyBackground()
             .navigationTitle("nav.author")
         case .error(error: let error):
             Text("error.with_message \(error.localizedDescription)")

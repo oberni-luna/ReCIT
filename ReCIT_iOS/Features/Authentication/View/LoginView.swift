@@ -22,34 +22,35 @@ struct LoginView: View {
             Section {
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Text("login.username")
-                        .textStyle(.content200Bold)
-                        .foregroundStyle(.textSecondary)
+                        .textStyle(.footnote200Bold)
+                        .foregroundStyle(.foregroundSecondary)
+
                     TextField("", text: $username)
                         .textStyle(.content300)
-                        .foregroundStyle(.textDefault)
                         .padding(.all, .medium)
-                        .background(.surfaceSecondary)
+                        .background(.backgroundSecondary)
                         .cornerRadius(.medium)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
+                        .foregroundStyle(.foregroundDefault)
                 }
 
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Text("login.password")
-                        .textStyle(.content200Bold)
-                        .foregroundStyle(.textSecondary)
+                        .textStyle(.footnote200Bold)
+                        .foregroundStyle(.foregroundSecondary)
                     SecureField("", text: $password)
                         .textStyle(.content300)
-                        .foregroundStyle(.textDefault)
+                        .foregroundStyle(.foregroundDefault)
                         .padding(.all, .medium)
-                        .background(.surfaceSecondary)
+                        .background(.backgroundSecondary)
                         .cornerRadius(.medium)
                 }
 
                 if let errorMessage {
                     Text(errorMessage)
-                        .textStyle(.content200)
-                        .foregroundStyle(.textError)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundError)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } header: {
@@ -62,12 +63,12 @@ struct LoginView: View {
 
                     VStack(spacing: .xSmall) {
                         Text("login.title")
-                            .textStyle(.title80)
-                            .foregroundStyle(.textDefault)
+                            .textStyle(.title50)
+                            .foregroundStyle(.foregroundDefault)
 
                         Text("login.subtitle")
                             .textStyle(.content300)
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(.foregroundSecondary)
                             .multilineTextAlignment(.center)
                     }
                 }
@@ -94,7 +95,7 @@ struct LoginView: View {
                     } label: {
                         Text("login.button.create_account")
                     }
-                    .buttonStyle(ActionButtonStyle(.primary))
+                    .buttonStyle(PrimaryButtonStyle())
                 }
             }
         }

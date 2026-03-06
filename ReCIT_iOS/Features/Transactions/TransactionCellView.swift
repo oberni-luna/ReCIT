@@ -32,7 +32,7 @@ struct TransactionCellView: View {
                             if !isRead {
                                 Circle()
                                     .frame(width: 8, height: 8)
-                                    .foregroundStyle(.accent)
+                                    .foregroundStyle(.foregroundTinted)
                             }
                             Text(edition.title)
                                 .font(.headline)
@@ -40,7 +40,7 @@ struct TransactionCellView: View {
                         Text(.init(transactionDescription))
                             .font(.subheadline)
                     }
-                    .foregroundStyle(.textDefault)
+                    .foregroundStyle(.foregroundDefault)
 
                     TransactionStateLabel(state: transaction.state)
                         .font(.subheadline)

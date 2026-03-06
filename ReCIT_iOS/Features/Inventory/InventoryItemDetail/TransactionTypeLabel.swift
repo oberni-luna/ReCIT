@@ -11,8 +11,19 @@ struct TransactionTypeLabel: View {
     let transactionType: TransactionType
 
     var body: some View {
-        Label(transactionType.label, systemImage: transactionType.systemImage)
-            .labelStyle(LabelStyleWithSpacing(spacing: .xSmall))
+        HStack(spacing: .xSmall) {
+            transactionType.image
+                .resizable()
+                .frame(width: 16, height: 16)
+
+            Text(transactionType.label)
+                .textStyle(.action200)
+        }
+        .padding(.horizontal, .small)
+        .padding(.vertical, .xSmall)
+        .cornerRadius(.minimal)
+        .background(.backgroundTinted)
+        .foregroundStyle(.foregroundTinted)
     }
 }
 
@@ -40,6 +51,19 @@ private extension TransactionType {
             "banknote"
         case .giving:
             "gift"
+        }
+    }
+
+    var image: Image {
+        switch self {
+        case .lending:
+            Image(.lending)
+        case .inventorying:
+            Image(.inventorying)
+        case .selling:
+            Image(.selling)
+        case .giving:
+            Image(.giving)
         }
     }
 }

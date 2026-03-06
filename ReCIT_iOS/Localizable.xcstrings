@@ -907,13 +907,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "👫 In the community"
+            "value" : "In the community"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "👫 Dans la communauté"
+            "value" : "Dans la communauté"
           }
         }
       }
@@ -939,13 +939,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "📚 Inventory"
+            "value" : "Inventory"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "📚 Inventaire"
+            "value" : "Inventaire"
           }
         }
       }
@@ -955,13 +955,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "📋 Lists"
+            "value" : "Lists"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "📋 Listes"
+            "value" : "Listes"
           }
         }
       }
@@ -1083,13 +1083,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "📋 Works"
+            "value" : "Works"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "📋 Œuvres"
+            "state" : "needs_review",
+            "value" : "Œuvres"
           }
         }
       }

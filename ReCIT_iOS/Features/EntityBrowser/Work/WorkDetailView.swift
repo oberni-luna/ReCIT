@@ -70,6 +70,7 @@ struct WorkDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .applyBackground()
         .navigationTitle("nav.work")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

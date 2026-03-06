@@ -30,7 +30,7 @@ struct CellThumbnail: View {
                     ProgressView()
                 }
             } else {
-                Color.surfaceDisable
+                DesignSystem.Color.backgroundDisable.color
             }
         }
         .frame(width: size, height: size)

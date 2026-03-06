@@ -19,6 +19,7 @@ public extension DesignSystem {
         case footnote200Bold
         case action300
         case action200
+        case caption200
 
         var customFont: CustomFont? {
             switch self {
@@ -32,6 +33,8 @@ public extension DesignSystem {
                 return .AlegreyaRegular
             case .action200, .action300:
                 return .OpenSansSemiBold
+            case .caption200:
+                return .OpenSansRegular
             }
         }
 
@@ -40,21 +43,23 @@ public extension DesignSystem {
             case .title200: 32
             case .title50: 18
             case .content400Bold: 18
-            case .content300: 15
+            case .content300: 17
             case .footnote200, .footnote200Bold: 12
-            case .action200: 12
+            case .action200, .caption200: 12
             case .action300: 17
             }
         }
 
         var weight: UIFont.Weight {
             switch self {
-            case .title200, .title50, .content400Bold, .footnote200Bold:
-                return .bold
+            case .title200, .title50:
+                return .black
             case .content300, .footnote200:
                 return .medium
-            case .action300, .action200:
+            case .action300, .action200, .content400Bold, .footnote200Bold:
                 return .bold
+            case .caption200:
+                return .regular
             }
         }
 
@@ -70,6 +75,8 @@ public extension DesignSystem {
                 return .footnote
             case .action200, .action300:
                 return .body
+            case .caption200:
+                return .caption1
             }
         }
 
@@ -133,5 +140,5 @@ extension DesignSystem.TextStyle: CaseIterable {}
                 .textStyle($0)
         }
     }
-    .foregroundStyle(.textDefault)
+    .foregroundStyle(.foregroundDefault)
 }

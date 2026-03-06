@@ -31,11 +31,11 @@ public struct SnackBarView: View {
             VStack(alignment: .leading, spacing: .xSmall) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.textDefault)
+                    .foregroundStyle(.foregroundDefault)
                 if let subtitle {
                     Text(subtitle)
                         .font(.subheadline)
-                        .foregroundColor(.textDefault)
+                        .foregroundStyle(.foregroundDefault)
                 }
             }
             Spacer()

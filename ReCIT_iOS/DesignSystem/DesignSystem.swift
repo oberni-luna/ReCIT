@@ -11,7 +11,7 @@ public enum DesignSystem: Sendable {
     @MainActor
     public static func start() {
         setupFonts()
-//        setupNavigationBar()
+        setupNavigationBar()
         setupAlertTintColor()
     }
 
@@ -26,13 +26,10 @@ public enum DesignSystem: Sendable {
     private static func setupNavigationBar() {
         let defaultAppearance: UINavigationBarAppearance = DesignSystem.getDefaultAppearance()
 
-        let clearBackgroundAppearance: UINavigationBarAppearance = DesignSystem.getDefaultAppearance()
-        clearBackgroundAppearance.backgroundEffect = nil
-
         UINavigationBar.appearance().standardAppearance = defaultAppearance
-        UINavigationBar.appearance().scrollEdgeAppearance = clearBackgroundAppearance
-        UINavigationBar.appearance().compactScrollEdgeAppearance = clearBackgroundAppearance
-        UINavigationBar.appearance().compactAppearance = clearBackgroundAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = defaultAppearance
+        UINavigationBar.appearance().compactScrollEdgeAppearance = defaultAppearance
+        UINavigationBar.appearance().compactAppearance = defaultAppearance
     }
 
     @MainActor
@@ -42,17 +39,14 @@ public enum DesignSystem: Sendable {
         appearance.backButtonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.clear] // Hide back button text
 
         // Apply color and font for normal and large titles
-        appearance.titleTextAttributes = [.font: TextStyle.title50.uiFont, .foregroundColor: UIColor(Color.textDefault.color)]
-        appearance.largeTitleTextAttributes = [.font: TextStyle.title200.uiFont, .foregroundColor: UIColor(Color.textDefault.color)]
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
-        appearance.backgroundEffect = .init(style: .systemMaterial)
+        appearance.titleTextAttributes = [.font: TextStyle.title50.uiFont, .foregroundColor: UIColor(Color.foregroundDefault.color)]
+        appearance.largeTitleTextAttributes = [.font: TextStyle.title200.uiFont, .foregroundColor: UIColor(Color.foregroundDefault.color)]
 
         return appearance
     }
 
     @MainActor
     private static func setupAlertTintColor() {
-        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor(Color.surfaceTintPrimary.color)
+        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor(Color.foregroundTinted.color)
     }
 }

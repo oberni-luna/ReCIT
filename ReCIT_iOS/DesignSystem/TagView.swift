@@ -15,12 +15,11 @@ struct TagView: View {
     var body: some View {
         Text(text)
             .textStyle(.footnote200)
-            .foregroundStyle(.textSecondary)
+            .foregroundStyle(.foregroundSecondary)
             .padding(.all, .small)
             .lineLimit(1)
             .background {
                 RoundedRectangle(cornerRadius: .medium)
-                    .strokeBorder(.borderTertiary, lineWidth: Constant.borderWidth)
             }
     }
 }

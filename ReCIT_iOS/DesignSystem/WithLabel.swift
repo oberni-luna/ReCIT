@@ -20,9 +20,8 @@ struct WithLabel: ViewModifier {
         VStack(alignment: .leading, spacing: .xSmall) {
             if let label {
                 Text(label)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .bold()
+                    .textStyle(.caption200)
+                    .foregroundStyle(.foregroundSecondary)
             }
 
             content

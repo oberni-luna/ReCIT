@@ -17,7 +17,7 @@ struct ScaleButtonStyle: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 1.2 : 1.0)
-            .shadow(color: .shadow, radius: configuration.isPressed ? 8 : 0, y: configuration.isPressed ? 2 : 0)
+            .shadow(color: .black.opacity(0.1), radius: configuration.isPressed ? 8 : 0, y: configuration.isPressed ? 2 : 0)
             .onChange(of: configuration.isPressed) { _, isPressed in
                 guard !isPressed else { return }
                 Haptics.Impact.light.play()

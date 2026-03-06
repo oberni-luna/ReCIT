@@ -45,5 +45,5 @@ extension DesignSystem.CornerRadius: CaseIterable {}
                 .cornerRadius(cornerRadius)
         }
     }
-    .foregroundStyle(.textDefault)
+    .foregroundStyle(.foregroundDefault)
 }

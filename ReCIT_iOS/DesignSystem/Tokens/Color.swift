@@ -11,6 +11,7 @@ import SwiftUI
 public extension DesignSystem {
 
     enum Color {
+        
         case textDefault
         case textSecondary
         case textTertiary

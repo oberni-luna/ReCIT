@@ -12,52 +12,49 @@ public extension DesignSystem {
     enum TextStyle {
 
         case title200
-        case title100
-        case title80
         case title50
-        case content400
         case content400Bold
-        case title30
         case content300
-        case content300Bold
-        case content200
-        case content200Bold
         case footnote200
-        case footnote100
         case footnote200Bold
+        case action300
+        case action200
 
         var customFont: CustomFont? {
             switch self {
-            case .title200, .title100, .title80, .title50, .title30:
-                return .poppinsBold
-            case .content200, .content300, .content400, .footnote200, .footnote100:
-                return .exo2Medium
-            case .content200Bold, .content300Bold, .content400Bold, .footnote200Bold:
-                return .exo2Bold
+            case .title200, .title50:
+                return .OpenSansExtraBold
+            case .content300:
+                return .AlegreyaMedium
+            case .content400Bold, .footnote200Bold:
+                return .AlegreyaBold
+            case .footnote200:
+                return .AlegreyaRegular
+            case .action200, .action300:
+                return .OpenSansSemiBold
             }
         }
 
         var size: CGFloat {
             switch self {
-            case .title200: 40
-            case .title100: 30
-            case .title80: 22
+            case .title200: 32
             case .title50: 18
-            case .title30: 15
-            case .content400, .content400Bold: 17
-            case .content300, .content300Bold: 15
-            case .content200, .content200Bold: 14
+            case .content400Bold: 18
+            case .content300: 15
             case .footnote200, .footnote200Bold: 12
-            case .footnote100: 10
+            case .action200: 12
+            case .action300: 17
             }
         }
 
         var weight: UIFont.Weight {
             switch self {
-            case .title200, .title100, .title80, .title50, .title30, .content200Bold, .content300Bold, .content400Bold, .footnote200Bold:
+            case .title200, .title50, .content400Bold, .footnote200Bold:
                 return .bold
-            case .content200, .content300, .content400, .footnote200, .footnote100:
+            case .content300, .footnote200:
                 return .medium
+            case .action300, .action200:
+                return .bold
             }
         }
 
@@ -65,14 +62,14 @@ public extension DesignSystem {
             switch self {
             case .title200:
                 return .largeTitle
-            case .title100:
-                return .title1
-            case .title80, .title50, .title30:
+            case .title50:
                 return .title2
-            case .content200, .content300, .content400, .content400Bold, .content200Bold, .content300Bold:
+            case .content300, .content400Bold:
                 return .body
-            case .footnote200Bold, .footnote200, .footnote100:
+            case .footnote200Bold, .footnote200:
                 return .footnote
+            case .action200, .action300:
+                return .body
             }
         }
 
@@ -92,23 +89,28 @@ public extension DesignSystem {
 
 extension DesignSystem.TextStyle {
     enum CustomFont: CaseIterable {
-        case poppinsBold
-        case exo2Medium
-        case exo2Bold
+        case AlegreyaBold, AlegreyaMedium, AlegreyaRegular
+        case OpenSansExtraBold, OpenSansSemiBold, OpenSansRegular
 
         var registrationName: String {
             switch self {
-            case .poppinsBold: "Poppins-Bold"
-            case .exo2Medium: "Exo2-Medium"
-            case .exo2Bold: "Exo2-Bold"
+            case .AlegreyaBold: "Alegreya-Bold"
+            case .AlegreyaMedium: "Alegreya-Medium"
+            case .AlegreyaRegular: "Alegreya-Regular"
+            case .OpenSansExtraBold: "OpenSans-ExtraBold"
+            case .OpenSansSemiBold: "OpenSans-SemiBold"
+            case .OpenSansRegular: "OpenSans-Regular"
             }
         }
 
         var fontName: String {
             switch self {
-            case .poppinsBold: "Poppins-Bold"
-            case .exo2Medium: "Exo2-Medium"
-            case .exo2Bold: "Exo2-Bold"
+            case .AlegreyaBold: "Alegreya-Bold"
+            case .AlegreyaMedium: "Alegreya-Medium"
+            case .AlegreyaRegular: "Alegreya-Regular"
+            case .OpenSansExtraBold: "OpenSans-ExtraBold"
+            case .OpenSansSemiBold: "OpenSans-SemiBold"
+            case .OpenSansRegular: "OpenSans-Regular"
             }
         }
 

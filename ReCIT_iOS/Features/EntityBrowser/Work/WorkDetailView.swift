@@ -70,7 +70,7 @@ struct WorkDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .applyBackground()
+        .applyListBackground()
         .navigationTitle("nav.work")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -124,6 +124,8 @@ struct WorkDetailView: View {
             }
         } header: {
             Text("work.editions.header \(work.title)")
+                .textStyle(.action200)
+                .foregroundStyle(.foregroundSecondary)
         }
     }
 

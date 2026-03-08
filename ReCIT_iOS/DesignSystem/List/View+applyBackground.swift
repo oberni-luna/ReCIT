@@ -7,7 +7,7 @@
 import SwiftUI
 
 extension View {
-    func applyBackground() -> some View {
+    func applyListBackground() -> some View {
         self
             .scrollContentBackground(.hidden)
             .background(.backgroundSecondary)

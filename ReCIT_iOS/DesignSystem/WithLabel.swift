@@ -19,7 +19,7 @@ struct WithLabel: ViewModifier {
     func body(content: Content) -> some View {
         VStack(alignment: .leading, spacing: .xSmall) {
             if let label {
-                Text(label)
+                Text(.init(label))
                     .textStyle(.caption200)
                     .foregroundStyle(.foregroundSecondary)
             }

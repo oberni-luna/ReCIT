@@ -12,7 +12,7 @@ struct TransactionStateLabel: View {
 
     var body: some View {
         Label(state.label, systemImage: state.systemImage)
-            .labelStyle(LabelStyleWithSpacing(spacing: .xSmall))
+//            .labelStyle(LabelStyleWithSpacing(spacing: .xSmall))
     }
 }
 

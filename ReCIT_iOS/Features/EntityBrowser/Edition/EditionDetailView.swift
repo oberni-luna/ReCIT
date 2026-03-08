@@ -52,7 +52,7 @@ struct EditionDetailView: View {
                     userInventorySection(edition: edition)
                     myInventorySection(edition: edition)
                 }
-                .applyBackground()
+                .applyListBackground()
                 .selectListToAdd(
                     showAddToListDialog: $showAddToListDialog,
                     onListSelected: { list in

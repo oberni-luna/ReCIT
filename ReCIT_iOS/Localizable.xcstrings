@@ -679,6 +679,7 @@
       }
     },
     "list.form.description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -743,6 +744,7 @@
       }
     },
     "list.item.comment" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1722,6 +1724,7 @@
       }
     },
     "transaction.form.your_message" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

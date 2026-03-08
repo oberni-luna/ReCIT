@@ -30,6 +30,8 @@ struct UserDetailView: View {
                 }
             } header: {
                 Text("user.inventory.header \(user.username)")
+                    .textStyle(.action200)
+                    .foregroundStyle(.foregroundSecondary)
             }
         }
         .navigationTitle("nav.user")

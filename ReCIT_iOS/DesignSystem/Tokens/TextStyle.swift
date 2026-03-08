@@ -14,6 +14,7 @@ public extension DesignSystem {
         case title200
         case title50
         case content400Bold
+        case content400
         case content300
         case footnote200
         case footnote200Bold
@@ -25,7 +26,7 @@ public extension DesignSystem {
             switch self {
             case .title200, .title50:
                 return .OpenSansExtraBold
-            case .content300:
+            case .content300, .content400:
                 return .AlegreyaMedium
             case .content400Bold, .footnote200Bold:
                 return .AlegreyaBold
@@ -42,7 +43,7 @@ public extension DesignSystem {
             switch self {
             case .title200: 32
             case .title50: 18
-            case .content400Bold: 18
+            case .content400Bold, .content400: 18
             case .content300: 17
             case .footnote200, .footnote200Bold: 12
             case .action200, .caption200: 12
@@ -54,7 +55,7 @@ public extension DesignSystem {
             switch self {
             case .title200, .title50:
                 return .black
-            case .content300, .footnote200:
+            case .content300, .content400, .footnote200:
                 return .medium
             case .action300, .action200, .content400Bold, .footnote200Bold:
                 return .bold
@@ -69,7 +70,7 @@ public extension DesignSystem {
                 return .largeTitle
             case .title50:
                 return .title2
-            case .content300, .content400Bold:
+            case .content300, .content400Bold, .content400:
                 return .body
             case .footnote200Bold, .footnote200:
                 return .footnote

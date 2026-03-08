@@ -43,6 +43,7 @@ struct EntityListDetail: View {
         .sheet(isPresented: $presentEditForm) {
             ListFormView(list: list)
         }
+        .applyListBackground()
     }
 
     @ViewBuilder
@@ -50,8 +51,10 @@ struct EntityListDetail: View {
         switch state {
         case .empty:
             Text("list.empty")
+                .textStyle(.content300)
         case .error(error: let error):
             Text("list.error.loading \(error.localizedDescription)")
+                .textStyle(.content300)
         case .loadingItems:
             Text("list.loading")
                 .onAppear {

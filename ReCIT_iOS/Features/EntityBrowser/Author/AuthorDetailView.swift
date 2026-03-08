@@ -47,14 +47,17 @@ struct AuthorDetailView: View {
                             CellThumbnail(imageUrl: image, cornerRadius: .full, size: 72)
                         }
                         Text(author.name)
-                            .font(.headline)
+                            .textStyle(.content400Bold)
+                            .foregroundStyle(.foregroundDefault)
                         if let subtitle = author.subtitle {
                             Text(subtitle)
-                                .font(.subheadline)
+                                .textStyle(.content300)
+                                .foregroundStyle(.foregroundDefault)
                         }
                         if let dob = author.dateOfBirth {
                             Text("author.birth_date \(dob.formatted(date:.long, time:.omitted))")
-                                .font(.subheadline)
+                                .textStyle(.content300)
+                                .foregroundStyle(.foregroundDefault)
                         }
                     }
                 }
@@ -73,9 +76,11 @@ struct AuthorDetailView: View {
                     }
                 } header: {
                     Text("author.works.header \(author.name)")
+                        .textStyle(.action200)
+                        .foregroundStyle(.foregroundSecondary)
                 }
             }
-            .applyBackground()
+            .applyListBackground()
             .navigationTitle("nav.author")
         case .error(error: let error):
             Text("error.with_message \(error.localizedDescription)")

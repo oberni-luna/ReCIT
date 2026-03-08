@@ -41,11 +41,13 @@ struct SearchResultCell: View {
     var textsCell: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(result.title)
-                .font(.headline)
+                .textStyle(.content400Bold)
+                .foregroundStyle(.foregroundDefault)
+
             if let description = result.description, !description.isEmpty {
                 Text(description)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundSecondary)
             }
         }
     }

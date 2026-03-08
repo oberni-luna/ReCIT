@@ -48,7 +48,7 @@ struct EntitySummaryView: View {
                     .sheet(isPresented: $showMore) {
                         ScrollView {
                             Text(data.content)
-                                .textStyle(.content300)
+                                .textStyle(.content400)
                                 .foregroundStyle(.foregroundDefault)
                                 .padding(.all, .large)
                         }

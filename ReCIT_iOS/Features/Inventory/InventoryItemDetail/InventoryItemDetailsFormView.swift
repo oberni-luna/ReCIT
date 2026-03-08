@@ -48,12 +48,12 @@ struct InventoryItemDetailsFormView: View {
                         Text("action.submit")
                             .frame(maxWidth: .infinity)
                     })
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    .buttonStyle(.primary())
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
             }
+            .applyListBackground()
             .navigationTitle(item.edition?.title ?? "")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

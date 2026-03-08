@@ -43,7 +43,7 @@ struct ProfileView: View {
                 UserHeaderView(user: user)
             }
 
-            Section("profile.current_transactions") {
+            Section {
                 ForEach(transactions.sorted{ $0.lastActionDate > $1.lastActionDate } ) { transaction in
                     if transaction.isCurrent {
                         NavigationLink(
@@ -53,14 +53,22 @@ struct ProfileView: View {
                         }
                     }
                 }
+            } header : {
+                Text("profile.current_transactions")
+                    .textStyle(.action200)
+                    .foregroundStyle(.foregroundSecondary)
             }
 
-            Section("profile.network") {
+            Section {
                 ForEach(userModel.getAllOtherUsers(modelContext: modelContext).sorted(by: { $0.username < $1.username })) { otherUser in
                     NavigationLink(value: NavigationDestination.user(user: otherUser)) {
                         UserCellView(user: otherUser)
                     }
                 }
+            } header : {
+                Text("profile.network")
+                    .textStyle(.action200)
+                    .foregroundStyle(.foregroundSecondary)
             }
 
             Section {
@@ -76,6 +84,8 @@ struct ProfileView: View {
                     }
                 }, label: {
                     Text("profile.logout")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundError)
                 })
             }
         }

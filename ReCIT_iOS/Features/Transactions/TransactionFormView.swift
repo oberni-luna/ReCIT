@@ -33,12 +33,9 @@ struct TransactionFormView: View {
 
                 Section {
                     VStack(alignment: .leading, spacing: .xSmall) {
-                        Text("transaction.form.your_message")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .bold()
                         TextEditor(text: $message)
                             .frame(minHeight: 48)
+                            .withLabel(label: "transaction.form.your_message")
                     }
                 }
                 .listRowSeparator(.visible)
@@ -71,8 +68,7 @@ struct TransactionFormView: View {
                                         Text(nextAction.buttonLabel)
                                             .frame(maxWidth: .infinity)
                                     })
-                                    .buttonStyle(.borderedProminent)
-                                    .controlSize(.large)
+                                    .buttonStyle(.primary())
                                 }
                             }
                             .frame(maxWidth: .infinity)
@@ -92,14 +88,14 @@ struct TransactionFormView: View {
                                 Text("action.send_message")
                                     .frame(maxWidth: .infinity)
                             })
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.large)
+                            .buttonStyle(.primary())
                         }
                     }
                     .listRowSeparator(.visible)
                     .listSectionSeparator(.hidden)
                 }
             }
+            .applyListBackground()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.close", systemImage: "xmark") {

@@ -131,7 +131,7 @@ struct InventoryItemDetailView: View {
                             browseEntityDestination = NavigationDestination.work(uri: work.uri)
                         } label: {
                             Text(work.title)
-                                .font(.headline)
+                                .textStyle(.content400Bold)
                                 .lineLimit(1)
                                 .withLabel(label: String(localized: "inventory.item.other_edition_for"))
                         }
@@ -140,7 +140,7 @@ struct InventoryItemDetailView: View {
                 }
             }
         }
-        .applyBackground()
+        .applyListBackground()
         .navigationTitle("nav.book")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -167,7 +167,7 @@ struct InventoryItemDetailView: View {
                         TransactionTypeLabel(transactionType: type)
                     }
                 }
-                .labelsHidden()  
+                .labelsHidden()
                 .onChange(of: item.transaction) { _, transactionMode in
                     Task {
                         try? await inventoryModel.updateItemsTransaction(modelContext: modelContext, items: [item])
@@ -208,6 +208,8 @@ struct InventoryItemDetailView: View {
                         showTransactionForm = true
                     } label: {
                         Label("action.send_request", systemImage: "questionmark.message")
+                            .foregroundStyle(.foregroundDefault)
+                            .textStyle(.action300)
                     }
                 }
 
@@ -215,6 +217,8 @@ struct InventoryItemDetailView: View {
                     showAddToListDialog = true
                 } label: {
                     Label("action.add_to_list", systemImage: "list.bullet")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundDefault)
                 }
 
                 if isMyItem {
@@ -222,12 +226,16 @@ struct InventoryItemDetailView: View {
                         showItemDetailsForm = true
                     } label: {
                         Label(hasDetails ? String(localized: "inventory.item.change_notes") : String(localized: "inventory.item.write_notes"), systemImage: "pencil")
+                            .textStyle(.action300)
+                            .foregroundStyle(.foregroundDefault)
                     }
 
-                    Button(role: .destructive) {
+                    Button {
                         showDeleteConfirmation = true
                     } label: {
                         Label("action.delete", systemImage: "trash")
+                            .textStyle(.action300)
+                            .foregroundStyle(.foregroundError)
                     }
                 }
             } label: {

@@ -88,14 +88,14 @@ struct LoginView: View {
                         Text("login.button.signin")
                             .frame(maxWidth: .infinity)
                     })
-                    .buttonStyle(PrimaryButtonStyle())
+                    .buttonStyle(LargeButtonStyle())
 
                     Button {
                         openURL(URL(string: "https://inventaire.io/signup")!)
                     } label: {
                         Text("login.button.create_account")
                     }
-                    .buttonStyle(PrimaryButtonStyle())
+                    .buttonStyle(LargeButtonStyle())
                 }
             }
         }

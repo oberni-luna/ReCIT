@@ -15,9 +15,11 @@ struct UserHeaderView: View {
                 CellThumbnail(imageUrl: image, cornerRadius: .full, size: 72)
             }
             Text(user.username)
-                .font(.headline)
+                .textStyle(.content400Bold)
+                .foregroundStyle(.foregroundDefault)
             Text("user.item_count \(user.itemCount)")
-                .font(.subheadline)
+                .textStyle(.content300)
+                .foregroundStyle(.foregroundDefault)
         }
     }
 }

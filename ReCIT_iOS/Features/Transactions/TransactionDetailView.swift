@@ -40,8 +40,7 @@ struct TransactionDetailView: View {
                             Text("action.send_message")
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    .buttonStyle(.primary())
                     .frame(maxWidth: .infinity)
                 }
             }
@@ -63,9 +62,12 @@ struct TransactionDetailView: View {
                     .padding(.horizontal, .xSmall)
                 VStack(alignment: .leading, spacing: .small) {
                     Text(.init(message.text))
+                        .foregroundStyle(.foregroundDefault)
+                        .textStyle(.content300)
+
                     Text(message.timestamp.formatted(date: .abbreviated, time: .standard))
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
+                        .foregroundStyle(.foregroundSecondary)
+                        .textStyle(.content300)
                 }
             }
         default:
@@ -73,13 +75,16 @@ struct TransactionDetailView: View {
                 CellThumbnail(imageUrl: message.user.avatarURLValue, cornerRadius: .full, size: 32)
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Text(message.user.username)
-                        .bold()
+                        .textStyle(.content400Bold)
+                        .foregroundStyle(.foregroundDefault)
 
                     Text(.init(message.text))
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundDefault)
 
                     Text(message.timestamp.formatted(date: .abbreviated, time: .standard))
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
+                        .foregroundStyle(.foregroundSecondary)
+                        .textStyle(.content300)
                 }
             }
         }

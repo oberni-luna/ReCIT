@@ -45,16 +45,18 @@ struct ListItemCellView: View {
 
             if !listItem.comment.isEmpty {
                 Text(listItem.comment)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundDefault)
             }
 
             Text(entity.title)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .textStyle(.content300)
+                .foregroundStyle(.foregroundDefault)
 
             if let description = entity.subtitle, !description.isEmpty {
                 Text(description)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundSecondary)
             }
         }
     }

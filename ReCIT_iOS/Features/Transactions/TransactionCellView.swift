@@ -35,16 +35,17 @@ struct TransactionCellView: View {
                                     .foregroundStyle(.foregroundTinted)
                             }
                             Text(edition.title)
-                                .font(.headline)
+                                .textStyle(.content400Bold)
                         }
                         Text(.init(transactionDescription))
-                            .font(.subheadline)
+                            .textStyle(.content300)
+                            .foregroundStyle(.foregroundDefault)
                     }
                     .foregroundStyle(.foregroundDefault)
 
                     TransactionStateLabel(state: transaction.state)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundSecondary)
                 }
             }
         }

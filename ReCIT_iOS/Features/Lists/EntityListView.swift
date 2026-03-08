@@ -38,10 +38,10 @@ struct EntityListView: View {
                     NavigationLink(value: list) {
                         VStack(alignment: .leading) {
                             Text(list.name)
-                                .font(.headline)
+                                .textStyle(.content400Bold)
 
                             Text(list.explanation)
-                                .font(.subheadline)
+                                .textStyle(.content300)
                                 .foregroundStyle(.secondary)
                         }
                         .swipeActions {
@@ -74,7 +74,7 @@ struct EntityListView: View {
             .sheet(isPresented: $showNewListModal) {
                 ListFormView()
             }
-            .applyBackground()
+            .applyListBackground()
         }
     }
 }

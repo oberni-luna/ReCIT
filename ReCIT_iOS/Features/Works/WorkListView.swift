@@ -37,9 +37,9 @@ struct WorkListView: View {
 
                             VStack(alignment: .leading) {
                                 Text(work.title)
-                                    .font(.headline)
+                                    .textStyle(.content400Bold)
                                 Text(work.authors.map(\.name).joined(separator: ", "))
-                                    .font(.caption)
+                                    .textStyle(.footnote200)
                             }
                         }
                     }

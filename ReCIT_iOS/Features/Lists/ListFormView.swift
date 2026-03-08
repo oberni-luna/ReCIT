@@ -26,25 +26,21 @@ struct ListFormView: View {
                                 Text(type.rawValue).tag(type)
                             }
                         }
+                        .foregroundStyle(.foregroundDefault)
                     }
                 }
 
                 Section {
-                    VStack(alignment: .leading, spacing: .xSmall) {
-                        Text("list.form.name")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .bold()
-                        TextField("list.form.name", text: $list.name)
-                    }
-                    VStack(alignment: .leading, spacing: .xSmall) {
-                        Text("list.form.description")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .bold()
-                        TextEditor(text: $list.explanation)
-                            .frame(minHeight: 48)
-                    }
+                    TextField("list.form.name", text: $list.name)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundDefault)
+                        .withLabel(label: "list.form.name")
+
+                    TextEditor(text: $list.explanation)
+                        .frame(minHeight: 48)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundDefault)
+                        .withLabel(label: "list.form.description")
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
@@ -67,8 +63,7 @@ struct ListFormView: View {
                             Text("action.submit")
                                 .frame(maxWidth: .infinity)
                         })
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
+                        .buttonStyle(.primary())
 
                         AsyncButton(action: {
                             do {
@@ -86,14 +81,13 @@ struct ListFormView: View {
                             Text("list.form.delete")
                                 .frame(maxWidth: .infinity)
                         })
-                        .buttonStyle(.borderedProminent)
-                        .tint(Color(.red))
-                        .controlSize(.large)
+                        .buttonStyle(.destructive())
                     }
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
             }
+            .applyListBackground()
             .navigationTitle(list._id.isEmpty ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

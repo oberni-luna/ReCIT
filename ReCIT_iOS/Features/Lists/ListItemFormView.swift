@@ -32,12 +32,9 @@ struct ListItemFormView: View {
             Form {
                 Section {
                     VStack(alignment: .leading, spacing: .xSmall) {
-                        Text("list.item.comment")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .bold()
                         TextEditor(text: $listItem.comment)
                             .frame(minHeight: 48)
+                            .withLabel(label: "list.item.comment")
                     }
                 } header: {
                     EntityHeaderView(
@@ -64,14 +61,13 @@ struct ListItemFormView: View {
                             Text("action.submit")
                                 .frame(maxWidth: .infinity)
                         })
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
-
+                        .buttonStyle(.primary())
                     }
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
             }
+            .applyListBackground()
             .navigationTitle(list.name)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

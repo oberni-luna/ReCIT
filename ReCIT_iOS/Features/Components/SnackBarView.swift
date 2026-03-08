@@ -30,11 +30,11 @@ public struct SnackBarView: View {
         HStack(spacing: .small) {
             VStack(alignment: .leading, spacing: .xSmall) {
                 Text(title)
-                    .font(.headline)
+                    .textStyle(.action300)
                     .foregroundStyle(.foregroundDefault)
                 if let subtitle {
                     Text(subtitle)
-                        .font(.subheadline)
+                        .textStyle(.action200)
                         .foregroundStyle(.foregroundDefault)
                 }
             }

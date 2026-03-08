@@ -36,7 +36,7 @@ struct CommunityView: View {
 
                             VStack(alignment: .leading) {
                                 Text(edition.title)
-                                    .font(.headline)
+                                    .textStyle(.content400Bold)
                             }
                         }
                     }

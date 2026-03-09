@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import LBSnackBar
 
 struct ListItemFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var listModel: ListModel
+    @Environment(\.snackBar) private var snackBar
 
     @Bindable var listItem: EntityListItem
     let list: EntityList
@@ -53,7 +55,9 @@ struct ListItemFormView: View {
                                 try await listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: [entity.uri], comment: listItem.comment)
                                 dismiss()
                             } catch {
-                                print(error)
+                                snackBar.show {
+                                    SnackBarView(title: String(localized: "error.generic"), subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
+                                }
                             }
                         },
                                     actionOptions: [.showProgressView],

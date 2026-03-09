@@ -23,7 +23,7 @@ struct ListItemCellView: View {
 
     @ViewBuilder
     var workCell: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             CellThumbnail(imageUrl: entity.image)
 
             textsCell
@@ -32,7 +32,7 @@ struct ListItemCellView: View {
 
     @ViewBuilder
     var authorCell: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             CellThumbnail(imageUrl: entity.image, cornerRadius: .full)
 
             textsCell
@@ -42,13 +42,6 @@ struct ListItemCellView: View {
     @ViewBuilder
     var textsCell: some View {
         VStack(alignment: .leading, spacing: 4) {
-
-            if !listItem.comment.isEmpty {
-                Text(listItem.comment)
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundDefault)
-            }
-
             Text(entity.title)
                 .textStyle(.content300)
                 .foregroundStyle(.foregroundDefault)
@@ -57,6 +50,12 @@ struct ListItemCellView: View {
                 Text(description)
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundSecondary)
+            }
+
+            if !listItem.comment.isEmpty {
+                Text(listItem.comment)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundDefault)
             }
         }
     }

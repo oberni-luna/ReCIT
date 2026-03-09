@@ -19,6 +19,7 @@ struct InventoryItemDetailView: View {
     @State private var showDeleteConfirmation = false
     @State private var browseEntityDestination: NavigationDestination?
     @State private var transaction: UserTransaction?
+    @State private var addToListItemForm: EntityList? = nil
 
     @Bindable var item: InventoryItem
     @Binding var path: NavigationPath
@@ -58,21 +59,13 @@ struct InventoryItemDetailView: View {
             .selectListToAdd(
                 showAddToListDialog: $showAddToListDialog,
                 onListSelected: { list in
-                    Task {
-                        do {
-                            try await listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: item.workUris)
-                            
-                            snackBar.show {
-                                SnackBarView(
-                                    title: item.edition?.title ?? String(localized: "inventory.item.this_book"), subtitle: String(localized: "inventory.item.added_to_list"), onDismiss: {dismiss()})
-                            }
-                        } catch {
-                            snackBar.show {
-                                SnackBarView(title: String(localized: "error.generic"), subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
-                            }
-                        }
-                    }
+                    addToListItemForm = list
                 })
+            .sheet(item: $addToListItemForm) { list in
+                if let work = item.edition?.works.first {
+                    ListItemFormView(entity: work, list: list)
+                }
+            }
             .sheet(isPresented: $showItemDetailsForm) {
                 InventoryItemDetailsFormView(item: item)
             }
@@ -130,10 +123,12 @@ struct InventoryItemDetailView: View {
                         Button {
                             browseEntityDestination = NavigationDestination.work(uri: work.uri)
                         } label: {
-                            Text(work.title)
-                                .textStyle(.content400Bold)
-                                .lineLimit(1)
-                                .withLabel(label: String(localized: "inventory.item.other_edition_for"))
+                            NavigationLink(value: UUID()) {
+                                Text(work.title)
+                                    .textStyle(.content400Bold)
+                                    .lineLimit(1)
+                                    .withLabel(label: String(localized: "inventory.item.other_edition_for"))
+                            }
                         }
                         .buttonStyle(.plain)
                     }

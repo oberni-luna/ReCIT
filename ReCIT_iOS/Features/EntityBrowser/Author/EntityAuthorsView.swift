@@ -39,18 +39,17 @@ struct EntityAuthorsView: View {
                         Button {
                             entityDestination = NavigationDestination.author(uri: author.uri)
                         } label: {
-                            HStack(alignment: .center, spacing: .small){
-                                Group {
-                                    CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: 36)
-
-                                    Text(author.name)
-                                        .textStyle(.content400Bold)
-                                        .lineLimit(2)
-                                        .multilineTextAlignment(.leading)
-                                        .fixedSize(horizontal: false, vertical: true)
-
-                                    Image(.chevronRight)
-                                        .padding(.trailing, .small)
+                            NavigationLink(value: UUID()) {
+                                HStack(alignment: .center, spacing: .small){
+                                    Group {
+                                        CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: 36)
+                                        
+                                        Text(author.name)
+                                            .textStyle(.content400Bold)
+                                            .lineLimit(2)
+                                            .multilineTextAlignment(.leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
                                 }
                             }
                         }

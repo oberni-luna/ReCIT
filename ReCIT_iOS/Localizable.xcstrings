@@ -811,6 +811,7 @@
       }
     },
     "login.password" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -859,6 +860,7 @@
       }
     },
     "login.username" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

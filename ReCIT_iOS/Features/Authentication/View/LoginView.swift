@@ -20,32 +20,24 @@ struct LoginView: View {
         Form {
             // MARK: - Fields
             Section {
-                VStack(alignment: .leading, spacing: .xSmall) {
-                    Text("login.username")
-                        .textStyle(.footnote200Bold)
-                        .foregroundStyle(.foregroundSecondary)
 
-                    TextField("", text: $username)
-                        .textStyle(.content300)
-                        .padding(.all, .medium)
-                        .background(.backgroundSecondary)
-                        .cornerRadius(.medium)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                        .foregroundStyle(.foregroundDefault)
-                }
+                TextField("", text: $username)
+                    .textStyle(.content300)
+                    .padding(.all, .medium)
+                    .background(.backgroundSecondary)
+                    .cornerRadius(.medium)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .foregroundStyle(.foregroundDefault)
+                    .withLabel(label: "login.username")
 
-                VStack(alignment: .leading, spacing: .xSmall) {
-                    Text("login.password")
-                        .textStyle(.footnote200Bold)
-                        .foregroundStyle(.foregroundSecondary)
-                    SecureField("", text: $password)
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundDefault)
-                        .padding(.all, .medium)
-                        .background(.backgroundSecondary)
-                        .cornerRadius(.medium)
-                }
+                SecureField("", text: $password)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundDefault)
+                    .padding(.all, .medium)
+                    .background(.backgroundSecondary)
+                    .cornerRadius(.medium)
+                    .withLabel(label: "login.password")
 
                 if let errorMessage {
                     Text(errorMessage)
@@ -59,7 +51,8 @@ struct LoginView: View {
                     Image("mainLogo")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 120)
+                        .frame(height: 128)
+                        .cornerRadius(.roundedLarge)
 
                     VStack(spacing: .xSmall) {
                         Text("login.title")
@@ -72,9 +65,15 @@ struct LoginView: View {
                             .multilineTextAlignment(.center)
                     }
                 }
+                .padding(.horizontal, .large)
+                .padding(.top, .large)
+                .frame(maxWidth: .infinity)
+
             } footer: {
                 // MARK: - Actions
-                VStack(spacing: .small) {
+                VStack(spacing: .sMedium) {
+                    Spacer(minLength: 16)
+
                     AsyncButton(action: {
                         Task {
                             do {
@@ -86,19 +85,20 @@ struct LoginView: View {
                         }
                     }, actionOptions: [.showProgressView], label: {
                         Text("login.button.signin")
-                            .frame(maxWidth: .infinity)
                     })
-                    .buttonStyle(LargeButtonStyle())
+                    .buttonStyle(.primary())
 
                     Button {
                         openURL(URL(string: "https://inventaire.io/signup")!)
                     } label: {
                         Text("login.button.create_account")
                     }
-                    .buttonStyle(LargeButtonStyle())
+                    .buttonStyle(.secondary())
                 }
+                .frame(maxWidth: .infinity)
             }
         }
         .defaultScrollAnchor(.center)
+        .applyListBackground()
     }
 }

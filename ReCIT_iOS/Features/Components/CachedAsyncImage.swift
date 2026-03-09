@@ -17,6 +17,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
     private let imageAppearanceDuration: TimeInterval = 0.1
 
     @State private var loadedImage: Image?
+    @State private var loadFailed = false
 
     init(
         url: URL?,
@@ -30,7 +31,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
 
     var body: some View {
         ZStack {
-            if loadedImage == nil {
+            if loadedImage == nil && !loadFailed {
                 placeholder()
                     .transition(
                         .asymmetric(
@@ -49,6 +50,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
             GeometryReader { proxy in
                 Color.clear
                     .task(id: url) {
+                        loadFailed = false
                         guard let url = url else { return }
                         let targetSize: CGSize = proxy.size
                         do {
@@ -59,6 +61,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
                             loadedImage = Image(uiImage: uiImage)
                         } catch {
                             loadedImage = nil
+                            loadFailed = true
                         }
                     }
             }

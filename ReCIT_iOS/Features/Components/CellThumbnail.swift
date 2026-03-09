@@ -19,9 +19,9 @@ struct CellThumbnail: View {
     }
 
     var body: some View {
-        Group {
-            if let urlString = imageUrl?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-                let url = URL(string: urlString) {
+        ZStack {
+            DesignSystem.Color.backgroundDisable.color
+            if let imageUrl, let url = URL(string: imageUrl) {
                 CachedAsyncImage(url: url) { image in
                     image
                         .resizable()
@@ -29,8 +29,6 @@ struct CellThumbnail: View {
                 } placeholder: {
                     ProgressView()
                 }
-            } else {
-                DesignSystem.Color.backgroundDisable.color
             }
         }
         .frame(width: size, height: size)

@@ -69,7 +69,9 @@ struct AuthorDetailView: View {
                             Button {
                                 path.append(NavigationDestination.work(uri: work.uri))
                             } label: {
-                                SearchResultCell(result: result)
+                                NavigationLink(value: UUID()) {
+                                    SearchResultCell(result: result)
+                                }
                             }
                             .buttonStyle(.plain)
                         }

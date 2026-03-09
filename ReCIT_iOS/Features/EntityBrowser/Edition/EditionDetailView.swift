@@ -154,7 +154,9 @@ struct EditionDetailView: View {
                             nextEntityDestination = NavigationDestination.user(user: owner)
                         }
                     } label: {
-                        UserItemCellView(item: item)
+                        NavigationLink(value: UUID()) {
+                            UserItemCellView(item: item)
+                        }
                     }
                     .buttonStyle(.plain)
                 }

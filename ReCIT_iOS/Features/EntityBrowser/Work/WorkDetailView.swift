@@ -118,7 +118,9 @@ struct WorkDetailView: View {
                 Button {
                     path.append(NavigationDestination.edition(uri: edition.uri))
                 } label: {
-                    SearchResultCell(result: result)
+                    NavigationLink(value: UUID()) {
+                        SearchResultCell(result: result)
+                    }
                 }
                 .buttonStyle(.plain)
             }

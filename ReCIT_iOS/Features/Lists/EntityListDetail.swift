@@ -70,7 +70,9 @@ struct EntityListDetail: View {
                             path.append(entityDestination)
                         }
                     } label : {
-                        ListItemCellView(listItem: key, entity: item)
+                        NavigationLink(value: UUID()) {
+                            ListItemCellView(listItem: key, entity: item)
+                        }
                     }
                     .buttonStyle(.plain)
                     .swipeActions(edge: .trailing) {

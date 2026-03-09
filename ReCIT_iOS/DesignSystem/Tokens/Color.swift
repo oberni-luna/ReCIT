@@ -65,7 +65,7 @@ public extension DesignSystem {
             case .backgroundTinted:
                     .init(light:.init("color/green/100"), dark:.init("color/green/900"))
             case .backgroundTintedInverse:
-                    .init(light:.init("color/green/900"), dark:.init("color/green/200"))
+                    .init(light:.init("color/green/800"), dark:.init("color/green/200"))
             case .backgroundError:
                     .init(light:.init("color/red/100"), dark:.init("color/gray/700"))
 

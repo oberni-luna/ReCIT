@@ -41,10 +41,6 @@ struct UserItemCellView: View {
                             .foregroundStyle(.foregroundSecondary)
                     }
                 }
-
-                Spacer()
-
-                Image(.chevronRight)
             }
             if !item.details.isEmpty {
                 Text(item.details)

@@ -112,7 +112,9 @@ struct InventoryItemDetailView: View {
                         Button {
                             browseEntityDestination = NavigationDestination.user(user: owner)
                         } label: {
-                            UserItemCellView(item: item)
+                            NavigationLink(value: UUID()) {
+                                UserItemCellView(item: item)
+                            }
                         }
                         .buttonStyle(.plain)
                     }

@@ -407,6 +407,7 @@
       }
     },
     "inventory.item.added_to_list" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -551,6 +552,7 @@
       }
     },
     "inventory.item.this_book" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

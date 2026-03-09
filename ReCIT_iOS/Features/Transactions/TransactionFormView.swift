@@ -21,6 +21,12 @@ struct TransactionFormView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section { } header: {
+                    Text(.transactionFormHeader(transaction.item.edition?.title ?? "", transaction.owner.username))
+                        .textStyle(.title50)
+                        .foregroundStyle(.foregroundDefault)
+                }
+                
                 if transaction._id.isEmpty {
                     Section {
                         Picker("transaction.form.type", selection: $transaction.type) {

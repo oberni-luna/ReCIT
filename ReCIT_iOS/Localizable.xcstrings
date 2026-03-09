@@ -1709,6 +1709,23 @@
         }
       }
     },
+    "transaction.form.header %@ %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Request %@ \\nto %@ "
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demande pour %@ à %@"
+          }
+        }
+      }
+    },
     "transaction.form.type" : {
       "localizations" : {
         "en" : {

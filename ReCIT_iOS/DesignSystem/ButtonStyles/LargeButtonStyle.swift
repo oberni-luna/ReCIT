@@ -49,7 +49,7 @@ struct LargeButtonStyle: ButtonStyle {
         case .primary:
             .backgroundTintedInverse
         case .secondary:
-            .backgroundTinted
+            .clear
         case .destructive:
             .backgroundError
         }

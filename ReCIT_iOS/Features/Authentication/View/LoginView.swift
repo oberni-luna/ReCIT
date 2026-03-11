@@ -38,13 +38,34 @@ struct LoginView: View {
                     .background(.backgroundSecondary)
                     .cornerRadius(.medium)
                     .withLabel(label: "login.password")
+                    .listRowSeparator(.hidden)
 
                 if let errorMessage {
                     Text(errorMessage)
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundError)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .listRowSeparator(.hidden)
                 }
+
+                HStack {
+                    AsyncButton(action: {
+                        Task {
+                            do {
+                                try await authModel.login(username: username, password: password)
+                                onLogin()
+                            } catch {
+                                errorMessage = (error as? AuthService.AuthError)?.errorDescription ?? error.localizedDescription
+                            }
+                        }
+                    }, actionOptions: [.showProgressView], label: {
+                        Text("login.button.signin")
+                    })
+                    .buttonStyle(.primary())
+                }
+                .frame(maxWidth: .infinity)
+                .listRowSeparator(.hidden)
+
             } header: {
                 // MARK: - Branding
                 VStack(spacing: .medium) {
@@ -69,24 +90,15 @@ struct LoginView: View {
                 .padding(.top, .large)
                 .frame(maxWidth: .infinity)
 
-            } footer: {
+            }
+
+            Section {
                 // MARK: - Actions
                 VStack(spacing: .sMedium) {
-                    Spacer(minLength: 16)
-
-                    AsyncButton(action: {
-                        Task {
-                            do {
-                                try await authModel.login(username: username, password: password)
-                                onLogin()
-                            } catch {
-                                errorMessage = (error as? AuthService.AuthError)?.errorDescription ?? error.localizedDescription
-                            }
-                        }
-                    }, actionOptions: [.showProgressView], label: {
-                        Text("login.button.signin")
-                    })
-                    .buttonStyle(.primary())
+                    Text("login.noaccount.explanation")
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundDefault)
+                        .multilineTextAlignment(.center)
 
                     Button {
                         openURL(URL(string: "https://inventaire.io/signup")!)

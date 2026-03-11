@@ -810,6 +810,23 @@
         }
       }
     },
+    "login.noaccount.explanation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You need an account on inventaire.io to use this App."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous devez avoir créé un compte sur inventaire.io pour utiliser cette App"
+          }
+        }
+      }
+    },
     "login.password" : {
       "extractionState" : "stale",
       "localizations" : {

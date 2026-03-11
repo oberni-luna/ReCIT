@@ -20,6 +20,7 @@ public final class InventoryItem{
     var updated: Date?
     var busy: Bool?
     var details: String
+    var searchIndex: String = ""
     var edition: Edition?
     var owner: User?
 
@@ -72,6 +73,12 @@ public final class InventoryItem{
             edition: Edition(uri: itemDTO.entity, entitySnapshotDTO: itemDTO.snapshot, apiService: apiService, works: [])
         )
         self.owner = forUser
+        self.searchIndex = InventoryItem.buildSearchIndex(
+            ownerUsername: forUser.username,
+            authorNames: itemDTO.snapshot.`entity:authors`?.components(separatedBy: ",") ?? [],
+            title: itemDTO.snapshot.`entity:title`,
+            subtitle: itemDTO.snapshot.`entity:subtitle`
+        )
     }
 }
 
@@ -83,8 +90,20 @@ extension InventoryItem {
         var name: String { rawValue.capitalized }
     }
 
-    /// A filter that checks for a date and text in the quake's location name.
-    // TODO: faire marcher le search ici mais `.lowercase` ne compile pas
+    /// Builds a lowercase search index string from item metadata.
+    static func buildSearchIndex(
+        ownerUsername: String,
+        authorNames: [String],
+        title: String,
+        subtitle: String?
+    ) -> String {
+        let joined: String = ([ownerUsername] + authorNames + [title] + [subtitle].compactMap { $0 })
+            .joined(separator: " ")
+            .lowercased()
+        return joined.applyingTransform(.stripDiacritics, reverse: false) ?? joined
+    }
+
+    /// A filter that checks text in the item's pre-computed search index.
     static func predicate(
         user: User,
         filterParameter: FilterParameter,
@@ -97,13 +116,13 @@ extension InventoryItem {
         switch filterParameter {
         case .othersInventory:
             return #Predicate<InventoryItem> { item in
-                (searchText.isEmpty || item.edition?.title.contains(cleanSearchText) == true)
+                (searchText.isEmpty || item.searchIndex.localizedStandardContains(cleanSearchText))
                 &&
                 (item.ownerId != userId)
             }
         case .userInventory:
             return #Predicate<InventoryItem> { item in
-                (searchText.isEmpty || item.edition?.title.contains(cleanSearchText) == true)
+                (searchText.isEmpty || item.searchIndex.localizedStandardContains(cleanSearchText))
                 &&
                 (item.ownerId == userId)
             }

@@ -18,7 +18,8 @@ struct SearchView: View {
 
     @State private var searchText: String = ""
     @State private var results: [SearchResult] = []
-    @State private var isLoading: Bool = false
+    @State private var isLoadingRemote: Bool = false
+    @State private var isLoadingLocal: Bool = false
     @State private var errorMessage: String?
     @State private var addingItemId: String?
     @State private var searchTask: Task<Void, Never>? = nil
@@ -33,24 +34,21 @@ struct SearchView: View {
                 Text(errorMessage)
                     .foregroundStyle(.red)
             }
-            if isLoading {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
-            } else {
-                if results.isEmpty {
-                    Group {
-                        if searchText.isEmpty {
-                            inspirationnalViewSection
-                        } else {
-                            emptyView
-                        }
+            if results.isEmpty {
+                Group {
+                    if searchText.isEmpty {
+                        inspirationnalViewSection
+                    } else if isLoadingLocal || isLoadingRemote {
+                        loadingResultsCell
+                    } else {
+                        emptyView
                     }
-                    .padding(.vertical, 4)
-                } else {
-                    resultListContent
+                }
+                .padding(.vertical, 4)
+            } else {
+                resultListContent
+                if isLoadingRemote {
+                    loadingMoreResultsCell
                 }
             }
         }
@@ -59,16 +57,45 @@ struct SearchView: View {
         .onChange(of: searchText) { prev, next in
             searchTask?.cancel()
             searchTask = Task { @MainActor in
-                try? await Task.sleep(for: .seconds(0.5))
+                isLoadingLocal = true
+                try? await Task.sleep(for: .seconds(0.3))
                 guard !Task.isCancelled else { return }
                 await fetchSearchResults()
             }
         }
     }
 
+    var loadingResultsCell: some View {
+        HStack(spacing: 12) {
+            ProgressView()
+                .frame(width: 36)
+                .foregroundStyle(.foregroundTinted)
+
+            Text("searching...")
+                .textStyle(.action300)
+        }
+    }
+
+    var loadingMoreResultsCell: some View {
+        HStack(spacing: 12) {
+            ProgressView()
+                .frame(width: 36)
+                .foregroundStyle(.foregroundTinted)
+
+            Text("loading more results...")
+                .textStyle(.action300)
+        }
+    }
+
     @ViewBuilder
     var emptyView: some View {
-        Text("search.empty")
+        VStack(spacing: .medium) {
+            Text("🥲")
+                .textStyle(.title200)
+            Text("search.empty")
+                .textStyle(.action300)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
@@ -77,7 +104,9 @@ struct SearchView: View {
             Button {
                 onNavigate(result)
             } label: {
-                SearchResultCell(result: result)
+                NavigationLink(value: UUID()){
+                    SearchResultCell(result: result)
+                }
             }
             .buttonStyle(.plain)
             .padding(.vertical, 4)
@@ -100,23 +129,33 @@ struct SearchView: View {
 
     @MainActor
     private func fetchSearchResults() async {
-        isLoading = true
         errorMessage = nil
+        isLoadingLocal = true
+        
+        let trimmedQuery: String = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let trimmedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let localResults: [SearchResult] = inventoryModel.searchLocalInventory(query: trimmedQuery, modelContext: modelContext)
+        results = localResults
+
         guard trimmedQuery.count >= 3 else {
-            results = []
-            errorMessage = nil
-            isLoading = false
+            isLoadingLocal = false
             return
         }
-
+        
+        isLoadingRemote = true
         do {
-            results = try await inventoryModel.searchEntity(query: trimmedQuery)
-            isLoading = false
+            let remoteResults: [SearchResult] = try await inventoryModel.searchEntity(query: trimmedQuery)
+
+            let remoteUris: Set<String> = .init(remoteResults.map(\.uri))
+            let uniqueLocalResults: [SearchResult] = localResults.filter { !remoteUris.contains($0.uri) }
+
+            results = uniqueLocalResults + remoteResults
+            isLoadingLocal = false
+            isLoadingRemote = false
         } catch {
             errorMessage = String(localized: "search.error")
-            isLoading = false
+            isLoadingLocal = false
+            isLoadingRemote = false
         }
     }
 }

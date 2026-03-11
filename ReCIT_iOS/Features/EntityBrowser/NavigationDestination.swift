@@ -40,6 +40,12 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return .work(uri: result.uri)
         case .humans:
             return .author(uri: result.uri)
+        case .inventoryItem:
+            if let item = result.localItem {
+                return .item(item: item)
+            } else {
+                return nil
+            }
         default:
             return nil
         }

@@ -33,8 +33,7 @@ struct MyInventoryView: View {
                 .navigationTitle("nav.inventory")
                 .controlGroupStyle(.palette)
                 .listStyle(.plain)
-// TODO: faire marcher le search avec un vrai predicate
-//                .searchable(text: $searchText)
+                .searchable(text: $searchText)
             }
         }
     }

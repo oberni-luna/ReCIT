@@ -61,6 +61,12 @@ class InventoryModel: ObservableObject {
                         if myItem.edition?.works.filter({ $0.uri == relatedWork.uri }).count == 0 {
                             myItem.edition?.works.append(relatedWork)
                         }
+                        myItem.searchIndex = InventoryItem.buildSearchIndex(
+                            ownerUsername: forUser.username,
+                            authorNames: itemDTO.snapshot.`entity:authors`?.components(separatedBy: ",") ?? [],
+                            title: itemDTO.snapshot.`entity:title`,
+                            subtitle: itemDTO.snapshot.`entity:subtitle`
+                        )
                         modelContext.insert(myItem)
                     } else {
                         let myItem = InventoryItem(itemDTO: itemDTO, forUser: forUser, apiService: apiService)
@@ -106,6 +112,31 @@ class InventoryModel: ObservableObject {
         if let ok: Bool = ok["ok"], ok == true {
             modelContext.delete(item)
             try modelContext.save()
+        }
+    }
+
+    func searchLocalInventory(query: String, modelContext: ModelContext) -> [SearchResult] {
+        let cleanQuery: String = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        let predicate: Predicate<InventoryItem> = #Predicate { item in
+            item.searchIndex.localizedStandardContains(cleanQuery)
+        }
+        let items: [InventoryItem] = (try? modelContext.fetch(.init(predicate: predicate))) ?? []
+
+        var seenUris: Set<String> = []
+        return items.compactMap { item in
+            guard let edition = item.edition else { return nil }
+            guard seenUris.insert(edition.uri).inserted else { return nil }
+            return .init(
+                id: edition.uri,
+                uri: edition.uri,
+                title: edition.title,
+                description: edition.authorNames.joined(separator: ", "),
+                imageUrl: edition.image,
+                score: 0,
+                type: .inventoryItem,
+                localItem: item
+            )
         }
     }
 

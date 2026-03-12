@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct EntitySummaryView: View {
-    @EnvironmentObject private var inventoryModel: InventoryModel
+    @EnvironmentObject private var entityModel: EntityModel
     @EnvironmentObject private var userModel: UserModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -70,11 +70,11 @@ struct EntitySummaryView: View {
     @MainActor
     private func fetchExtract() async {
         do {
-            if let extract = try await inventoryModel.getOrFetchExtract(forUri: entityUri, modelContext: modelContext) {
+            if let extract = try await entityModel.getOrFetchExtract(forUri: entityUri, modelContext: modelContext) {
                 viewState = .loaded(data: extract)
             } else {
                 if let entityUri = otherEntityUri,
-                   let extract = try await inventoryModel.getOrFetchExtract(forUri: entityUri, modelContext: modelContext) {
+                   let extract = try await entityModel.getOrFetchExtract(forUri: entityUri, modelContext: modelContext) {
                     viewState = .loaded(data: extract)
                 } else {
                     viewState = .empty

@@ -5,7 +5,14 @@
 
     },
     "🥲" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🥲"
+          }
+        }
+      }
     },
     "action.add" : {
       "localizations" : {
@@ -281,7 +288,24 @@
         }
       }
     },
+    "edition.added_to_inventory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added to your inventory"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouté à votre inventaire"
+          }
+        }
+      }
+    },
     "edition.error.add_failed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -782,7 +806,14 @@
       }
     },
     "loading more results..." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "je regarde plus loin…"
+          }
+        }
+      }
     },
     "login.button.create_account" : {
       "localizations" : {
@@ -1188,7 +1219,14 @@
       }
     },
     "Scan" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanner"
+          }
+        }
+      }
     },
     "search.empty" : {
       "localizations" : {
@@ -1255,7 +1293,14 @@
       }
     },
     "searching..." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "je cherche…"
+          }
+        }
+      }
     },
     "select_list.message" : {
       "localizations" : {

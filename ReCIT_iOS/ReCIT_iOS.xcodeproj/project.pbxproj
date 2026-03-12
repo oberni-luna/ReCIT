@@ -41,6 +41,7 @@
 		098A61E02E54CA160032185B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		098A61E32E54CA160032185B /* ReCIT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReCIT.swift; sourceTree = "<group>"; };
 		09ACF44D2E5E07EB00D59BC0 /* Env.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
+		09D083922F63413800B4ABE8 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 		AA00111100000000000000AA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -116,6 +117,7 @@
 		094FD1932E4A38D40023705A = {
 			isa = PBXGroup;
 			children = (
+				09D083922F63413800B4ABE8 /* CLAUDE.md */,
 				098A61E32E54CA160032185B /* ReCIT.swift */,
 				09ACF44D2E5E07EB00D59BC0 /* Env.swift */,
 				098A61E02E54CA160032185B /* Assets.xcassets */,

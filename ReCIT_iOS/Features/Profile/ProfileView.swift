@@ -73,14 +73,13 @@ struct ProfileView: View {
 
             Section {
                 AsyncButton(action: {
-                    Task {
-                        do {
-                            try transactionModel.deleteLocalTransactions(modelContext: modelContext)
-                            try userModel.logout(modelContext: modelContext)
-                        } catch {
-                            snackBar.show { SnackBarView.error(error) }
-                        }
-                        await authModel.logout()
+                    await authModel.logout()
+                    await Task.yield()
+                    do {
+                        try transactionModel.deleteLocalTransactions(modelContext: modelContext)
+                        try userModel.logout(modelContext: modelContext)
+                    } catch {
+                        snackBar.show { SnackBarView.error(error) }
                     }
                 }, label: {
                     Text("profile.logout")

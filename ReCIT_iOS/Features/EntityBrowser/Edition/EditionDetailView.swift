@@ -6,13 +6,16 @@
 //
 import SwiftData
 import SwiftUI
+import LBSnackBar
 
 struct EditionDetailView: View {
+    @EnvironmentObject private var entityModel: EntityModel
     @EnvironmentObject private var inventoryModel: InventoryModel
     @EnvironmentObject private var userModel: UserModel
     @EnvironmentObject var listModel: ListModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.snackBar) private var snackBar
 
     enum ViewState {
         case loadingEdition
@@ -37,8 +40,6 @@ struct EditionDetailView: View {
         }
     }
 
-    @State private var errorMessage: String?
-    @State private var addingItem: Bool = false
     @State private var addToListItemForm: EntityList? = nil
 
     var body: some View {
@@ -181,7 +182,7 @@ struct EditionDetailView: View {
     @MainActor
     private func loadEdition() async {
         do {
-            if let editions = try await inventoryModel.getOrFetchEditions(modelContext: modelContext, uris: [editionUri]), let edition = editions.first {
+            if let editions = try await entityModel.getOrFetchEditions(modelContext: modelContext, uris: [editionUri]), let edition = editions.first {
                 viewState = .loaded(edition: edition)
             } else {
                 viewState = .noResult
@@ -193,13 +194,11 @@ struct EditionDetailView: View {
 
     @MainActor
     private func addToInventory(edition: Edition) async {
-        errorMessage = nil
         guard let user = userModel.myUser else {
-            errorMessage = String(localized: "edition.error.no_user")
+            snackBar.show { SnackBarView(title: String(localized: "edition.error.no_user"), onDismiss: nil) }
             return
         }
 
-        addingItem = true
         do {
             _ = try await inventoryModel.postNewItem(
                 modelContext: modelContext,
@@ -208,10 +207,10 @@ struct EditionDetailView: View {
                 visibility: [.friends],
                 forUser: user
             )
+            snackBar.show { SnackBarView(title: String(localized: "edition.added_to_inventory"), onDismiss: nil) }
         } catch {
-            errorMessage = String(localized: "edition.error.add_failed")
+            snackBar.show { SnackBarView.error(error) }
         }
-        addingItem = false
     }
 }
 

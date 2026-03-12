@@ -12,6 +12,8 @@ struct RootView: View {
     @EnvironmentObject var authModel: AuthModel
     @StateObject var userModel: UserModel = .init()
     @StateObject var listModel: ListModel = .init()
+    @StateObject var entityModel: EntityModel = .init()
+    @StateObject var searchModel: SearchModel = .init()
     @StateObject var inventoryModel: InventoryModel = .init()
     @StateObject var transactionModel: TransactionModel = .init()
 
@@ -24,6 +26,8 @@ struct RootView: View {
             MainTabView(authModel: authModel)
                 .environmentObject(userModel)
                 .environmentObject(listModel)
+                .environmentObject(entityModel)
+                .environmentObject(searchModel)
                 .environmentObject(inventoryModel)
                 .environmentObject(authModel)
                 .environmentObject(transactionModel)

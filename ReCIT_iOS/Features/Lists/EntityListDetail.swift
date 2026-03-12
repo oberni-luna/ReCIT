@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EntityListDetail: View {
     @EnvironmentObject private var listModel: ListModel
-    @EnvironmentObject private var inventoryModel: InventoryModel
+    @EnvironmentObject private var entityModel: EntityModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -109,9 +109,9 @@ struct EntityListDetail: View {
             case .loadingItems:
                 if let entities: [any Entity] = switch list.type {
                 case .author:
-                    try await inventoryModel.getOrFetchAuthors(modelContext: modelContext, uris: list.elements.map(\.uri))
+                    try await entityModel.getOrFetchAuthors(modelContext: modelContext, uris: list.elements.map(\.uri))
                 case .work:
-                    try await inventoryModel.getOrFetchWorks(modelContext: modelContext, uris: list.elements.map(\.uri))
+                    try await entityModel.getOrFetchWorks(modelContext: modelContext, uris: list.elements.map(\.uri))
                 case .publisher:
                     []
                 } {

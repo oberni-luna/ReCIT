@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct WorkDetailView: View {
-    @EnvironmentObject private var inventoryModel: InventoryModel
+    @EnvironmentObject private var entityModel: EntityModel
     @EnvironmentObject var listModel: ListModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -134,7 +134,7 @@ struct WorkDetailView: View {
     @MainActor
     private func fetchWork() async {
         do {
-            if let work = try await inventoryModel.getOrFetchWork(modelContext: modelContext, uri: workUri) {
+            if let work = try await entityModel.getOrFetchWork(modelContext: modelContext, uri: workUri) {
                 self.viewState = .loadingEditions(work: work)
             } else {
                 self.viewState = .error(error: NSError(domain: "No work", code: 0, userInfo: nil))
@@ -149,7 +149,7 @@ struct WorkDetailView: View {
         do {
             switch viewState {
             case .loadingEditions(work: let work):
-                if let editions = try await inventoryModel.getWorkEditions(modelContext: modelContext, work: work) {
+                if let editions = try await entityModel.getWorkEditions(modelContext: modelContext, work: work) {
                     self.viewState = .loaded(work: work, editions: editions)
                 } else {
                     self.viewState = .error(error: NSError(domain: "No works", code: 0, userInfo: nil))

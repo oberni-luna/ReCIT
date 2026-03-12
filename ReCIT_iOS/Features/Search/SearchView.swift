@@ -10,7 +10,7 @@ import SwiftData
 
 struct SearchView: View {
     @EnvironmentObject private var userModel: UserModel
-    @EnvironmentObject private var inventoryModel: InventoryModel
+    @EnvironmentObject private var searchModel: SearchModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -134,7 +134,7 @@ struct SearchView: View {
         
         let trimmedQuery: String = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let localResults: [SearchResult] = inventoryModel.searchLocalInventory(query: trimmedQuery, modelContext: modelContext)
+        let localResults: [SearchResult] = searchModel.searchLocalInventory(query: trimmedQuery, modelContext: modelContext)
         results = localResults
 
         guard trimmedQuery.count >= 3 else {
@@ -144,7 +144,7 @@ struct SearchView: View {
         
         isLoadingRemote = true
         do {
-            let remoteResults: [SearchResult] = try await inventoryModel.searchEntity(query: trimmedQuery)
+            let remoteResults: [SearchResult] = try await searchModel.searchEntity(query: trimmedQuery)
 
             let remoteUris: Set<String> = .init(remoteResults.map(\.uri))
             let uniqueLocalResults: [SearchResult] = localResults.filter { !remoteUris.contains($0.uri) }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AuthorDetailView: View {
-    @EnvironmentObject private var inventoryModel: InventoryModel
+    @EnvironmentObject private var entityModel: EntityModel
     @Environment(\.modelContext) private var modelContext
     
     enum ViewState {
@@ -92,7 +92,7 @@ struct AuthorDetailView: View {
     @MainActor
     private func fetchAuthor() async {
         do {
-            if let author = try await inventoryModel.getOrFetchAuthors(modelContext: modelContext, uris: [authorUri])?.first {
+            if let author = try await entityModel.getOrFetchAuthors(modelContext: modelContext, uris: [authorUri])?.first {
                 self.state = .loadingWorks(author: author)
             } else {
                 self.state = .error(error: NSError(domain: "No author", code: 0, userInfo: nil))
@@ -107,7 +107,7 @@ struct AuthorDetailView: View {
         do {
             switch state {
             case .loadingWorks(let author):
-                if let works = try await inventoryModel.getAuthorWorks(modelContext: modelContext, author: author) {
+                if let works = try await entityModel.getAuthorWorks(modelContext: modelContext, author: author) {
                     self.state = .loaded(author: author, works: works)
                 } else {
                     self.state = .error(error: NSError(domain: "No works", code: 0, userInfo: nil))

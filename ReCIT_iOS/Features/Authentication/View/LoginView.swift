@@ -95,7 +95,13 @@ struct LoginView: View {
             Section {
                 // MARK: - Actions
                 VStack(spacing: .sMedium) {
-                    Text("login.noaccount.explanation")
+                    Image(.inventaireIo)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 64, height: 64)
+                        .cornerRadius(.medium)
+
+                    Text(.init("login.noaccount.explanation"))
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundDefault)
                         .multilineTextAlignment(.center)

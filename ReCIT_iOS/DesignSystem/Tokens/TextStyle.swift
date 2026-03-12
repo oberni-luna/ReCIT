@@ -43,7 +43,7 @@ public extension DesignSystem {
             switch self {
             case .title200: 32
             case .title50: 18
-            case .content400Bold, .content400: 18
+            case .content400Bold, .content400: 19
             case .content300: 17
             case .footnote200, .footnote200Bold: 12
             case .action200, .caption200: 12

@@ -24,6 +24,7 @@ struct TransactionTypeLabel: View {
         .cornerRadius(.minimal)
         .background(.backgroundTinted)
         .foregroundStyle(.foregroundTinted)
+        .cornerRadius(.minimal)
     }
 }
 

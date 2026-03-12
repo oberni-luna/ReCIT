@@ -36,9 +36,8 @@ struct UserItemCellView: View {
                             .textStyle(.content300)
                             .foregroundStyle(.foregroundSecondary)
 
-                        TransactionTypeLabel(transactionType: item.transaction)
-                            .textStyle(.action200)
-                            .foregroundStyle(.foregroundSecondary)
+                        item.transaction.label
+                            .labelStyle(.tag)
                     }
                 }
             }

@@ -43,9 +43,11 @@ struct TransactionCellView: View {
                     }
                     .foregroundStyle(.foregroundDefault)
 
-                    TransactionStateLabel(state: transaction.state)
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundSecondary)
+                    HStack(spacing: .xSmall) {
+                        TransactionStateLabel(state: transaction.state)
+                            .textStyle(.content300)
+                            .foregroundStyle(.foregroundSecondary)
+                    }
                 }
             }
         }

@@ -161,7 +161,7 @@ struct InventoryItemDetailView: View {
 
                 Picker("inventory.item.transaction_mode", selection: $item.transaction) {
                     ForEach(TransactionType.allCases, id: \.self) { type in
-                        TransactionTypeLabel(transactionType: type)
+                        type.label
                     }
                 }
                 .labelsHidden()

@@ -11,13 +11,13 @@ struct TransactionStateLabel: View {
     let state: UserTransaction.TransactionState
 
     var body: some View {
-        Label(state.label, systemImage: state.systemImage)
-//            .labelStyle(LabelStyleWithSpacing(spacing: .xSmall))
+        Label(state.name, systemImage: state.systemImage)
+            .labelStyle(.secondaryTag)
     }
 }
 
 private extension UserTransaction.TransactionState {
-    var label: String {
+    var name: String {
         switch self {
         case .requested:
             String(localized: "transaction.state.requested")

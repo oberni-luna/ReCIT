@@ -60,6 +60,8 @@ struct TransactionDetailView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 24)
                     .padding(.horizontal, .xSmall)
+                    .foregroundStyle(.foregroundTinted)
+
                 VStack(alignment: .leading, spacing: .small) {
                     Text(.init(message.text))
                         .foregroundStyle(.foregroundDefault)

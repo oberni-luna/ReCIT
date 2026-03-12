@@ -33,9 +33,8 @@ struct InventoryCell: View {
                     .foregroundStyle(.foregroundDefault)
                     
                     HStack(alignment: .firstTextBaseline, spacing: .small) {
-                        TransactionTypeLabel(transactionType: item.transaction)
-                            .textStyle(.footnote200Bold)
-                            .foregroundStyle(.foregroundDefault)
+                        item.transaction.label
+                            .labelStyle(.tag)
 
                         if filterParameter == .othersInventory, let owner = item.owner {
                             Text(.init(String(localized: "inventory.owned_by \(owner.username)")))

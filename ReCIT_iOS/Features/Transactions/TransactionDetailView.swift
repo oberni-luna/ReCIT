@@ -54,13 +54,15 @@ struct TransactionDetailView: View {
     func messageView(message: UserTransaction.TransactionUIMessage) -> some View {
         switch message.direction {
         case .action(let action):
-            HStack(alignment: .top, spacing: .small) {
+            HStack(alignment: .top, spacing: .sMedium) {
                 Image(systemName: action.systemImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 24)
-                    .padding(.horizontal, .xSmall)
+                    .frame(width: 24, height: 24)
                     .foregroundStyle(.foregroundTinted)
+                    .padding(.all, .small)
+                    .background(.backgroundTinted)
+                    .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: .small) {
                     Text(.init(message.text))
@@ -73,8 +75,8 @@ struct TransactionDetailView: View {
                 }
             }
         default:
-            HStack(alignment: .top, spacing: .small) {
-                CellThumbnail(imageUrl: message.user.avatarURLValue, cornerRadius: .full, size: 32)
+            HStack(alignment: .top, spacing: .sMedium) {
+                CellThumbnail(imageUrl: message.user.avatarURLValue, cornerRadius: .full, size: 40)
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Text(message.user.username)
                         .textStyle(.content400Bold)

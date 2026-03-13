@@ -18,7 +18,11 @@ struct ProfileView: View {
 
     @State var path: NavigationPath = .init()
     @Query var users: [User]
-    @Query(sort: \UserTransaction.created, order: .reverse) var transactions: [UserTransaction]
+    @Query(sort: \UserTransaction.created, order: .reverse) var allTransactions: [UserTransaction]
+
+    var currentTransactions: [UserTransaction] {
+        allTransactions.filter(\.isCurrent)
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -44,14 +48,18 @@ struct ProfileView: View {
             }
 
             Section {
-                ForEach(transactions.sorted{ $0.lastActionDate > $1.lastActionDate } ) { transaction in
-                    if transaction.isCurrent {
-                        NavigationLink(
-                            value: NavigationDestination.transaction(transaction: transaction)
-                        ) {
-                            TransactionCellView(transaction: transaction)
-                        }
+                ForEach(currentTransactions.sorted { $0.lastActionDate > $1.lastActionDate }) { transaction in
+                    NavigationLink(
+                        value: NavigationDestination.transaction(transaction: transaction)
+                    ) {
+                        TransactionCellView(transaction: transaction)
                     }
+                }
+
+                NavigationLink(value: NavigationDestination.allTransactions) {
+                    Text("transactions.see_all")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundTinted)
                 }
             } header : {
                 Text("profile.current_transactions")

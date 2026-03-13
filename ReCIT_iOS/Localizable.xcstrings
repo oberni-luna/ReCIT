@@ -1154,6 +1154,9 @@
         }
       }
     },
+    "Other results" : {
+
+    },
     "profile.anonymous" : {
       "localizations" : {
         "en" : {
@@ -1988,6 +1991,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "À vendre"
+          }
+        }
+      }
+    },
+    "transactions.all" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All transactions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les transactions"
+          }
+        }
+      }
+    },
+    "transactions.past" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Past transactions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transactions finies"
+          }
+        }
+      }
+    },
+    "transactions.see_all" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All transactions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les transactions"
           }
         }
       }

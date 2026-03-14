@@ -117,22 +117,47 @@ class EntityModel: ObservableObject {
     func getOrFetchEditions(modelContext: ModelContext, uris: [String]) async throws -> [Edition]? {
         var editions: [Edition] = []
         var urisToFetch: [String] = []
+        var editionsNeedingWorks: [Edition] = []
+
         for uri in uris {
             if let edition = try? getLocalEdition(modelContext: modelContext, uri: uri) {
                 editions.append(edition)
+                if edition.works.isEmpty {
+                    editionsNeedingWorks.append(edition)
+                }
             } else {
                 urisToFetch.append(uri)
             }
         }
 
-        guard let editionsDto = try await fetchEntities(modelContext: modelContext, uris: urisToFetch) else {
-            return editions
+        // Fetch new editions from the API and resolve their works and authors
+        if let editionsDto = try await fetchEntities(modelContext: modelContext, uris: urisToFetch) {
+            for editionDto in editionsDto {
+                let edition: Edition = .init(entityDto: editionDto, apiService: apiService)
+                edition.works = try await resolveEditionWorks(
+                    from: editionDto,
+                    modelContext: modelContext
+                )
+                modelContext.insert(edition)
+                editions.append(edition)
+            }
         }
 
-        editions.append(contentsOf: editionsDto.compactMap { editionDto in
-            Edition(entityDto: editionDto, apiService: apiService)
-        })
+        // Resolve works for local editions that don't have any yet
+        if !editionsNeedingWorks.isEmpty {
+            let urisToRefetch: [String] = editionsNeedingWorks.map(\.uri)
+            if let editionDtos = try await fetchEntities(modelContext: modelContext, uris: urisToRefetch) {
+                for editionDto in editionDtos {
+                    guard let edition = editionsNeedingWorks.first(where: { $0.uri == editionDto.uri }) else { continue }
+                    edition.works = try await resolveEditionWorks(
+                        from: editionDto,
+                        modelContext: modelContext
+                    )
+                }
+            }
+        }
 
+        try modelContext.save()
         return editions
     }
 
@@ -191,6 +216,19 @@ class EntityModel: ObservableObject {
     }
 
     // MARK: - Private helpers
+
+    /// Extracts work URIs from an edition DTO's claims and fetches the associated works and their authors.
+    private func resolveEditionWorks(
+        from editionDto: EntityResultDTO,
+        modelContext: ModelContext
+    ) async throws -> [Work] {
+        let workUris: [String] = editionDto.claims[WikidataProperty.editionOf.rawValue]?
+            .compactMap { $0.getStringValue() } ?? []
+
+        guard !workUris.isEmpty else { return [] }
+
+        return (try? await getOrFetchWorks(modelContext: modelContext, uris: workUris)) ?? []
+    }
 
     func fetchEntities(modelContext: ModelContext, uris: [String], debug: Bool = false) async throws -> [EntityResultDTO]? {
         var results: [EntityResultDTO] = []

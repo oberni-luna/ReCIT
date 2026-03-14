@@ -17,16 +17,22 @@ struct SearchView: View {
     @Query var latestItems: [InventoryItem]
 
     @State private var searchText: String = ""
-    @State private var results: [SearchResult] = []
+    @State private var remoteResults: [SearchResult] = []
     @State private var isLoadingRemote: Bool = false
-    @State private var isLoadingLocal: Bool = false
     @State private var errorMessage: String?
-    @State private var addingItemId: String?
     @State private var searchTask: Task<Void, Never>? = nil
 
     let onNavigate: (SearchResult) -> Void
 
     @State private var isSearchPresented: Bool = true
+
+    private var trimmedQuery: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var isRemoteSectionVisible: Bool {
+        return trimmedQuery.count >= 3
+    }
 
     var body: some View {
         List {
@@ -34,46 +40,27 @@ struct SearchView: View {
                 Text(errorMessage)
                     .foregroundStyle(.red)
             }
-            if results.isEmpty {
-                Group {
-                    if searchText.isEmpty {
-                        inspirationnalViewSection
-                    } else if isLoadingLocal || isLoadingRemote {
-                        loadingResultsCell
-                    } else {
-                        emptyView
-                    }
-                }
-                .padding(.vertical, 4)
-            } else {
-                resultListContent
-                if isLoadingRemote {
-                    loadingMoreResultsCell
-                }
+            friendsInventorySection
+
+            if isRemoteSectionVisible {
+                remoteResultsSection
             }
         }
         .navigationTitle("nav.search")
         .searchable(text: $searchText, isPresented: $isSearchPresented, prompt: "search.placeholder")
-        .onChange(of: searchText) { prev, next in
+        .onChange(of: searchText) { _, next in
             searchTask?.cancel()
+            guard !next.isEmpty else {
+                remoteResults = []
+                return
+            }
             searchTask = Task { @MainActor in
-                isLoadingLocal = true
                 try? await Task.sleep(for: .seconds(0.3))
                 guard !Task.isCancelled else { return }
                 await fetchSearchResults()
             }
         }
-    }
-
-    var loadingResultsCell: some View {
-        HStack(spacing: 12) {
-            ProgressView()
-                .frame(width: 36)
-                .foregroundStyle(.foregroundTinted)
-
-            Text("searching...")
-                .textStyle(.action300)
-        }
+        .applyListBackground()
     }
 
     var loadingMoreResultsCell: some View {
@@ -88,38 +75,12 @@ struct SearchView: View {
     }
 
     @ViewBuilder
-    var emptyView: some View {
-        VStack(spacing: .medium) {
-            Text("🥲")
-                .textStyle(.title200)
-            Text("search.empty")
-                .textStyle(.action300)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    @ViewBuilder
-    var resultListContent: some View {
-        ForEach(results) { result in
-            Button {
-                onNavigate(result)
-            } label: {
-                NavigationLink(value: UUID()){
-                    SearchResultCell(result: result)
-                }
-            }
-            .buttonStyle(.plain)
-            .padding(.vertical, 4)
-        }
-    }
-
-    @ViewBuilder
-    var inspirationnalViewSection: some View {
+    var friendsInventorySection: some View {
         if let user = userModel.myUser {
             Section("search.friends_inventory") {
                 InventoryListContent(
                     user: user,
-                    searchText: "",
+                    searchText: searchText,
                     filterParameter: .othersInventory,
                     sortParameter: .recent
                 )
@@ -127,35 +88,51 @@ struct SearchView: View {
         }
     }
 
+    @ViewBuilder
+    var remoteResultsSection: some View {
+        Section(.init("search.remote_results")) {
+            if isLoadingRemote {
+                loadingMoreResultsCell
+            } else if !remoteResults.isEmpty {
+                ForEach(remoteResults) { result in
+                    Button {
+                        onNavigate(result)
+                    } label: {
+                        NavigationLink(value: UUID()) {
+                            SearchResultCell(result: result)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.vertical, 4)
+                }
+            } else {
+                emptyRemoteResultsCell
+            }
+        }
+    }
+
+    @ViewBuilder
+    var emptyRemoteResultsCell: some View {
+        VStack {
+            Text("search.remote.empty".capitalized)
+                .foregroundStyle(.secondary)
+                .textStyle(.action200)
+        }
+    }
+
     @MainActor
     private func fetchSearchResults() async {
         errorMessage = nil
-        isLoadingLocal = true
-        
-        let trimmedQuery: String = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let localResults: [SearchResult] = searchModel.searchLocalInventory(query: trimmedQuery, modelContext: modelContext)
-        results = localResults
-
-        guard trimmedQuery.count >= 3 else {
-            isLoadingLocal = false
-            return
-        }
-        
-        isLoadingRemote = true
-        do {
-            let remoteResults: [SearchResult] = try await searchModel.searchEntity(query: trimmedQuery)
-
-            let remoteUris: Set<String> = .init(remoteResults.map(\.uri))
-            let uniqueLocalResults: [SearchResult] = localResults.filter { !remoteUris.contains($0.uri) }
-
-            results = uniqueLocalResults + remoteResults
-            isLoadingLocal = false
-            isLoadingRemote = false
-        } catch {
-            errorMessage = String(localized: "search.error")
-            isLoadingLocal = false
-            isLoadingRemote = false
+        if isRemoteSectionVisible {
+            isLoadingRemote = true
+            do {
+                remoteResults = try await searchModel.searchEntity(query: trimmedQuery)
+                isLoadingRemote = false
+            } catch {
+                errorMessage = String(localized: "search.error")
+                isLoadingRemote = false
+            }
         }
     }
 }

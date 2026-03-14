@@ -5,6 +5,7 @@
 
     },
     "🥲" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -433,6 +434,23 @@
         }
       }
     },
+    "inventory.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oh, this is empty here"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oh, c’est vide ici "
+          }
+        }
+      }
+    },
     "inventory.item.added_to_list" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -642,6 +660,12 @@
           }
         }
       }
+    },
+    "Key" : {
+      "extractionState" : "manual"
+    },
+    "Key 1" : {
+      "extractionState" : "manual"
     },
     "list.empty" : {
       "localizations" : {
@@ -1154,9 +1178,6 @@
         }
       }
     },
-    "Other results" : {
-
-    },
     "profile.anonymous" : {
       "localizations" : {
         "en" : {
@@ -1231,22 +1252,6 @@
         }
       }
     },
-    "search.empty" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No search results"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun résultat"
-          }
-        }
-      }
-    },
     "search.error" : {
       "localizations" : {
         "en" : {
@@ -1295,12 +1300,36 @@
         }
       }
     },
-    "searching..." : {
+    "search.remote_results" : {
+      "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On [inventaire.io](https://inventaire.io)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Sur [inventaire.io](https://inventaire.io)"
+          }
+        }
+      }
+    },
+    "search.remote.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No search results"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "je cherche…"
+            "value" : "Pas de résultat "
           }
         }
       }

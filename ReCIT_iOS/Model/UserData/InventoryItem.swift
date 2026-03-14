@@ -113,18 +113,28 @@ extension InventoryItem {
         let userId: String = user._id
         let cleanSearchText: String = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
+        // The isEmpty check must live outside #Predicate — SwiftData cannot
+        // translate String.isEmpty on a captured variable into SQL, which
+        // causes the query to silently return no results when text is non-empty.
+        guard !cleanSearchText.isEmpty else {
+            switch filterParameter {
+            case .othersInventory:
+                return #Predicate { item in item.ownerId != userId }
+            case .userInventory:
+                return #Predicate { item in item.ownerId == userId }
+            }
+        }
+
         switch filterParameter {
         case .othersInventory:
-            return #Predicate<InventoryItem> { item in
-                (searchText.isEmpty || item.searchIndex.localizedStandardContains(cleanSearchText))
-                &&
-                (item.ownerId != userId)
+            return #Predicate { item in
+                item.searchIndex.localizedStandardContains(cleanSearchText)
+                && item.ownerId != userId
             }
         case .userInventory:
-            return #Predicate<InventoryItem> { item in
-                (searchText.isEmpty || item.searchIndex.localizedStandardContains(cleanSearchText))
-                &&
-                (item.ownerId == userId)
+            return #Predicate { item in
+                item.searchIndex.localizedStandardContains(cleanSearchText)
+                && item.ownerId == userId
             }
         }
     }

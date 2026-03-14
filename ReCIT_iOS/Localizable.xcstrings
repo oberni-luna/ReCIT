@@ -1210,6 +1210,23 @@
         }
       }
     },
+    "profile.current_transactions.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No current transaction at this time"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de transaction en cours."
+          }
+        }
+      }
+    },
     "profile.logout" : {
       "localizations" : {
         "en" : {

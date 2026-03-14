@@ -42,12 +42,6 @@ struct InventoryCell: View {
                                 .foregroundStyle(.foregroundDefault)
                         }
                     }
-
-#if DEBUG
-                    Text(edition.uri)
-                        .font(.caption)
-                        .foregroundStyle(Color.secondary)
-#endif
                 }
             }
         }

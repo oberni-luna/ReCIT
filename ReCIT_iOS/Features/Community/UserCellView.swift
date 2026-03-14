@@ -13,7 +13,7 @@ struct UserCellView: View {
         HStack(alignment: .top, spacing: .small) {
             CellThumbnail(imageUrl: user.avatarURLValue, cornerRadius: .full, size: 48)
 
-            VStack(alignment: .leading, spacing: .xSmall) {
+            VStack(alignment: .leading, spacing: .sMedium) {
                 Text(user.username)
                     .textStyle(.content400Bold)
                 Text("user.item_count \(user.itemCount)")

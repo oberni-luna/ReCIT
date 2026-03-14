@@ -48,12 +48,16 @@ struct ProfileView: View {
             }
 
             Section {
-                ForEach(currentTransactions.sorted { $0.lastActionDate > $1.lastActionDate }) { transaction in
-                    NavigationLink(
-                        value: NavigationDestination.transaction(transaction: transaction)
-                    ) {
-                        TransactionCellView(transaction: transaction)
+                if !currentTransactions.isEmpty {
+                    ForEach(currentTransactions.sorted { $0.lastActionDate > $1.lastActionDate }) { transaction in
+                        NavigationLink(
+                            value: NavigationDestination.transaction(transaction: transaction)
+                        ) {
+                            TransactionCellView(transaction: transaction)
+                        }
                     }
+                } else {
+                    Text("profile.current_transactions.empty")
                 }
 
                 NavigationLink(value: NavigationDestination.allTransactions) {
@@ -80,20 +84,24 @@ struct ProfileView: View {
             }
 
             Section {
-                AsyncButton(action: {
-                    await authModel.logout()
-                    await Task.yield()
-                    do {
-                        try transactionModel.deleteLocalTransactions(modelContext: modelContext)
-                        try userModel.logout(modelContext: modelContext)
-                    } catch {
-                        snackBar.show { SnackBarView.error(error) }
+                AsyncButton(
+                    action: {
+                        await authModel.logout()
+                        await Task.yield()
+                        do {
+                            try transactionModel.deleteLocalTransactions(modelContext: modelContext)
+                            try userModel.logout(modelContext: modelContext)
+                        } catch {
+                            snackBar.show { SnackBarView.error(error) }
+                        }
+                    },
+                    actionOptions: [.showProgressView],
+                    label: {
+                        Text("profile.logout")
+                            .textStyle(.action300)
+                            .foregroundStyle(.foregroundError)
                     }
-                }, label: {
-                    Text("profile.logout")
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundError)
-                })
+                )
             }
         }
         .applyListBackground()

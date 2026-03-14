@@ -45,6 +45,7 @@ struct TransactionDetailView: View {
                 }
             }
         }
+        .applyListBackground()
         .sheet(isPresented: $showTransactionForm) {
             TransactionFormView(transaction: transaction)
         }

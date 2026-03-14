@@ -53,6 +53,7 @@ struct AllTransactionsView: View {
                 }
             }
         }
+        .applyListBackground()
         .navigationTitle("transactions.all")
     }
 }

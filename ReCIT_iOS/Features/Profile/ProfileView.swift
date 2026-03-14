@@ -96,6 +96,7 @@ struct ProfileView: View {
                 })
             }
         }
+        .applyListBackground()
     }
 
     @ViewBuilder

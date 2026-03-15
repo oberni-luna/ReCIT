@@ -40,6 +40,10 @@ class TransactionModel: ObservableObject {
         guard let transactions else { return }
 
         for transactionDTO in transactions.transactions {
+            try modelContext.delete(model: UserTransaction.self, where: #Predicate { transaction in
+                transaction._id == transactionDTO._id
+            })
+
             guard let requester:User = try await self.getTransactionUser(
                 modelContext: modelContext,
                 transactionUserId: transactionDTO.requester,
@@ -71,7 +75,7 @@ class TransactionModel: ObservableObject {
                 )
             }
             .sorted { $0.created < $1.created }
-
+            
             modelContext.insert(UserTransaction(
                 _id: transactionDTO._id,
                 _rev: transactionDTO._rev,
@@ -113,6 +117,8 @@ class TransactionModel: ObservableObject {
     }
 
     func postRequest(itemId: String, message: String?) async throws {
+        guard message?.isEmpty == false else { throw TransactionError.emptyMessage }
+
         let payload = [
             "action": "request",
             "item": itemId,
@@ -142,8 +148,8 @@ class TransactionModel: ObservableObject {
 
 
     func postMessage(transactionId: String, message: String) async throws {
-        guard !message.isEmpty else { return }
-        
+        guard !message.isEmpty else { throw TransactionError.emptyMessage }
+
         let messagePayload = [
             "action": "message",
             "message": message,
@@ -165,5 +171,16 @@ class TransactionModel: ObservableObject {
 
     func deleteLocalTransactions(modelContext: ModelContext) throws {
         try modelContext.delete(model: UserTransaction.self)
+    }
+}
+
+enum TransactionError: LocalizedError {
+    case emptyMessage
+
+    var errorDescription: String? {
+        switch self {
+        case .emptyMessage:
+            String(localized: "error.empty_message")
+        }
     }
 }

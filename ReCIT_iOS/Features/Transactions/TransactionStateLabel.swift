@@ -29,6 +29,8 @@ private extension UserTransaction.TransactionState {
             String(localized: "transaction.state.returned")
         case .declined:
             String(localized: "transaction.state.declined")
+        case .cancelled:
+            String(localized: "transaction.state.cancelled")
         }
     }
 }

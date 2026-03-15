@@ -60,13 +60,15 @@ struct TransactionFormView: View {
                                                     itemId: transaction.item._id,
                                                     message: message
                                                 )
-                                            case .accepted, .confirmed, .returned, .declined:
+                                            case .accepted, .confirmed, .returned, .declined, .cancelled:
                                                 try await transactionModel.updateRequest(transaction: transaction, newState: nextAction, message: message)
                                             }
                                             try await transactionModel.syncTransactions(modelContext: modelContext)
                                             dismiss()
                                         } catch {
-                                            snackBar.show { SnackBarView.error(error) }
+                                            snackBar.show {
+                                                SnackBarView.error(error)
+                                            }
                                         }
                                     },
                                                 actionOptions: [.showProgressView],

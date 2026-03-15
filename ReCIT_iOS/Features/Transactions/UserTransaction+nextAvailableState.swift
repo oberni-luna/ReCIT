@@ -19,14 +19,14 @@ extension UserTransaction {
         }
         switch self.state {
         case .requested:
-            return amIRequester ? nil : [.accepted, .declined]
+            return amIRequester ? [.cancelled] : [.accepted, .declined]
         case .accepted:
-            return amIRequester ? [.confirmed] : nil
+            return amIRequester ? [.confirmed, .cancelled] : [.cancelled]
         case .confirmed:
             return amIRequester ? nil : [.returned]
         case .returned:
             return nil
-        case .declined:
+        case .declined, .cancelled:
             return nil
         }
     }

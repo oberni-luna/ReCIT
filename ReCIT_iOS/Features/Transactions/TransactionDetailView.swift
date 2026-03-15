@@ -159,6 +159,8 @@ extension UserTransaction {
                 String(localized: "transaction.action.requester.returned")
             case .declined:
                 String(localized: "transaction.action.requester.declined \(self.owner.username)")
+            case .cancelled:
+                String(localized: "transaction.action.cancelled")
             }
         } else {
             switch action.action {
@@ -172,6 +174,8 @@ extension UserTransaction {
                 String(localized: "transaction.action.owner.returned")
             case .declined:
                 String(localized: "transaction.action.owner.declined")
+            case .cancelled:
+                String(localized: "transaction.action.cancelled")
             }
         }
     }
@@ -188,6 +192,8 @@ extension UserTransaction {
             self.owner
         case .declined:
             self.owner
+        case .cancelled:
+            self.requester
         }
     }
 }

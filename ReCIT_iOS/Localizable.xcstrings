@@ -402,6 +402,22 @@
         }
       }
     },
+    "error.empty_message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Message can't be empty"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le message ne peut pas être vide"
+          }
+        }
+      }
+    },
     "error.generic" : {
       "localizations" : {
         "en" : {
@@ -660,12 +676,6 @@
           }
         }
       }
-    },
-    "Key" : {
-      "extractionState" : "manual"
-    },
-    "Key 1" : {
-      "extractionState" : "manual"
     },
     "list.empty" : {
       "localizations" : {
@@ -1495,6 +1505,40 @@
         }
       }
     },
+    "transaction.action.cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "transaction.action.cancelled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelled transaction"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Transaction annulée"
+          }
+        }
+      }
+    },
     "transaction.action.complete" : {
       "localizations" : {
         "en" : {
@@ -1909,6 +1953,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Accepté"
+          }
+        }
+      }
+    },
+    "transaction.state.cancelled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelled"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Annulée"
           }
         }
       }

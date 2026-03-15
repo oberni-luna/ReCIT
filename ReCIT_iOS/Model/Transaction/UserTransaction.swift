@@ -24,7 +24,7 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
 
     var isCurrent: Bool {
         switch state {
-        case .returned, .declined:
+        case .returned, .declined, .cancelled:
             return false
         default:
             return true
@@ -57,6 +57,7 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
         case confirmed
         case returned
         case declined
+        case cancelled
 
         var systemImage: String {
             switch self {
@@ -70,6 +71,8 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
                 "checkmark.square.fill"
             case .declined:
                 "hand.thumbsdown.fill"
+            case .cancelled:
+                "trash"
             }
         }
 
@@ -85,6 +88,8 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
                 String(localized: "transaction.action.complete")
             case .declined:
                 String(localized: "transaction.action.decline")
+            case .cancelled:
+                String(localized: "transaction.action.cancel")
             }
         }
     }

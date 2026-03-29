@@ -10,15 +10,14 @@ import SwiftData
 import LBSnackBar
 
 struct ProfileView: View {
-    @EnvironmentObject var authModel: AuthModel
-    @EnvironmentObject var userModel: UserModel
-    @EnvironmentObject var transactionModel: TransactionModel
-    @Environment(\.modelContext) var modelContext
+    @EnvironmentObject private var authModel: AuthModel
+    @EnvironmentObject private var userModel: UserModel
+    @EnvironmentObject private var transactionModel: TransactionModel
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
 
-    @State var path: NavigationPath = .init()
-    @Query var users: [User]
-    @Query(sort: \UserTransaction.created, order: .reverse) var allTransactions: [UserTransaction]
+    @State private var path: NavigationPath = .init()
+    @Query private var allTransactions: [UserTransaction]
 
     var currentTransactions: [UserTransaction] {
         allTransactions.filter(\.isCurrent)

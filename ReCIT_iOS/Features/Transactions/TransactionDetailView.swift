@@ -12,6 +12,7 @@ struct TransactionDetailView: View {
     @EnvironmentObject private var userModel: UserModel
     
     let transaction: UserTransaction
+    @Binding var path: NavigationPath
 
     @State private var showTransactionForm: Bool = false
     @State private var nextTransactionState: UserTransaction.TransactionState? = nil
@@ -19,7 +20,14 @@ struct TransactionDetailView: View {
     var body: some View {
         List {
             Section {
-                TransactionCellView(transaction: transaction)
+                Button {
+                    path.append(NavigationDestination.item(item: transaction.item))
+                } label: {
+                    NavigationLink(value: UUID()) {
+                        TransactionCellView(transaction: transaction)
+                    }
+                }
+                .buttonStyle(.plain)
             }
 
             if let user = userModel.myUser {

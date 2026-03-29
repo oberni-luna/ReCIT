@@ -70,7 +70,7 @@ extension NavigationDestination {
       case .item(let item):
           InventoryItemDetailView(item: item, path: path)
       case .transaction(let transaction):
-          TransactionDetailView(transaction: transaction)
+          TransactionDetailView(transaction: transaction, path: path)
       case .allTransactions:
           AllTransactionsView()
       }

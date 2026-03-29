@@ -17,6 +17,7 @@ struct TransactionFormView: View {
 
     @Bindable var transaction: UserTransaction
     @State var message: String = ""
+    let futurState: UserTransaction.TransactionState?
 
     var body: some View {
         NavigationStack {
@@ -47,38 +48,34 @@ struct TransactionFormView: View {
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
 
-                if let user = userModel.myUser {
+                if let _ = userModel.myUser {
                     Section {} footer: {
-                        if let nextActions = transaction.nextAvailableState(for: user) {
-                            HStack {
-                                ForEach(nextActions, id: \.self) { nextAction in
-                                    AsyncButton(action: {
-                                        do {
-                                            switch nextAction {
-                                            case .requested:
-                                                try await transactionModel.postRequest(
-                                                    itemId: transaction.item._id,
-                                                    message: message
-                                                )
-                                            case .accepted, .confirmed, .returned, .declined, .cancelled:
-                                                try await transactionModel.updateRequest(transaction: transaction, newState: nextAction, message: message)
-                                            }
-                                            try await transactionModel.syncTransactions(modelContext: modelContext)
-                                            dismiss()
-                                        } catch {
-                                            snackBar.show {
-                                                SnackBarView.error(error)
-                                            }
-                                        }
-                                    },
-                                                actionOptions: [.showProgressView],
-                                                label: {
-                                        Text(nextAction.buttonLabel)
-                                            .frame(maxWidth: .infinity)
-                                    })
-                                    .buttonStyle(.primary())
+                        if let futurState = futurState {
+                            AsyncButton(action: {
+                                do {
+                                    switch futurState {
+                                    case .requested:
+                                        try await transactionModel.postRequest(
+                                            itemId: transaction.item._id,
+                                            message: message
+                                        )
+                                    case .accepted, .confirmed, .returned, .declined, .cancelled:
+                                        try await transactionModel.updateRequest(transaction: transaction, newState: futurState, message: message)
+                                    }
+                                    try await transactionModel.syncTransactions(modelContext: modelContext)
+                                    dismiss()
+                                } catch {
+                                    snackBar.show {
+                                        SnackBarView.error(error)
+                                    }
                                 }
-                            }
+                            },
+                                        actionOptions: [.showProgressView],
+                                        label: {
+                                Text(futurState.buttonLabel)
+                                    .frame(maxWidth: .infinity)
+                            })
+                            .buttonStyle(.primary())
                             .frame(maxWidth: .infinity)
                         } else {
                             AsyncButton(action: {

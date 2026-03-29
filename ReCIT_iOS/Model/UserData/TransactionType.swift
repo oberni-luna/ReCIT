@@ -13,4 +13,14 @@ enum TransactionType: String, Codable, CaseIterable, Identifiable {
     case inventorying = "inventorying"
     case selling = "selling"
     case giving = "giving"
+
+    var isOpenToTransaction: Bool {
+        switch self {
+        case .lending, .giving, .selling:
+            return true
+        case .inventorying:
+            return false
+        }
+    }
+
 }

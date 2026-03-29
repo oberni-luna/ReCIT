@@ -128,6 +128,7 @@
       }
     },
     "action.reply" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1511,13 +1512,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cancel"
+            "value" : "Cancel request"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Annuler"
+            "state" : "translated",
+            "value" : "Annuler la demande"
           }
         }
       }

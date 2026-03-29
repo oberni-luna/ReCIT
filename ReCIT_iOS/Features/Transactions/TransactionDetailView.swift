@@ -14,6 +14,7 @@ struct TransactionDetailView: View {
     let transaction: UserTransaction
 
     @State private var showTransactionForm: Bool = false
+    @State private var nextTransactionState: UserTransaction.TransactionState? = nil
 
     var body: some View {
         List {
@@ -31,23 +32,35 @@ struct TransactionDetailView: View {
                 }
 
                 Section {} footer: {
-                    Button {
-                        showTransactionForm = true
-                    } label: {
-                        if let _ = transaction.nextAvailableState(for: user) {
-                            Text("action.reply")
-                        } else {
-                            Text("action.send_message")
+                    VStack {
+                        if let nextActions = transaction.nextAvailableState(for: user) {
+                            HStack {
+                                ForEach(nextActions, id: \.self) { nextAction in
+                                    Button {
+                                        nextTransactionState = nextAction
+                                        showTransactionForm = true
+                                    } label: {
+                                        Text(nextAction.buttonLabel)
+                                    }
+                                    .buttonStyle(.primary())
+                                }
+                            }
+                            Button {
+                                nextTransactionState = nil
+                                showTransactionForm = true
+                            } label: {
+                                Text("action.send_message")
+                            }
+                            .buttonStyle(.primary())
                         }
                     }
-                    .buttonStyle(.primary())
                     .frame(maxWidth: .infinity)
                 }
             }
         }
         .applyListBackground()
         .sheet(isPresented: $showTransactionForm) {
-            TransactionFormView(transaction: transaction)
+            TransactionFormView(transaction: transaction, futurState: nextTransactionState)
         }
     }
 

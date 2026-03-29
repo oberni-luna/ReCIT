@@ -77,7 +77,7 @@ struct InventoryItemDetailView: View {
             }
             .sheet(isPresented: $showTransactionForm) {
                 if let transaction = self.transaction {
-                    TransactionFormView(transaction: transaction)
+                    TransactionDetailView(transaction: transaction)
                 } else {
                     if !isMyItem, let user = userModel.myUser, let owner = item.owner {
                         TransactionFormView(transaction:
@@ -92,7 +92,8 @@ struct InventoryItemDetailView: View {
                                 state: .requested,
                                 actions: [],
                                 readStatus: .init(owner: false, requester: true)
-                            )
+                            ),
+                            futurState: .requested
                         )
                     }
                 }

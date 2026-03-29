@@ -6,31 +6,26 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EntityListDetail: View {
-    @EnvironmentObject private var listModel: ListModel
-    @EnvironmentObject private var entityModel: EntityModel
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-
-    enum ViewState {
-        case loadingItems
-        case loaded(items: [EntityListItem : any Entity])
-        case error(error: Error)
-        case empty
-    }
-
-    @State var list: EntityList
+    let list: EntityList
     @Binding var path: NavigationPath
 
-    @State var state: ViewState = .loadingItems
     @State private var presentEditForm: Bool = false
 
-    @ViewBuilder
     var body: some View {
         List {
             Section {
-                itemView
+                switch list.type {
+                case .author:
+                    AuthorListItems(list: list, path: $path)
+                case .work:
+                    WorkListItems(list: list, path: $path)
+                case .publisher:
+                    Text("list.empty")
+                        .textStyle(.content300)
+                }
             }
         }
         .toolbar {
@@ -45,106 +40,190 @@ struct EntityListDetail: View {
         }
         .applyListBackground()
     }
+}
 
-    @ViewBuilder
-    var itemView: some View {
-        switch state {
-        case .empty:
-            Text("list.empty")
-                .textStyle(.content300)
-        case .error(error: let error):
-            Text("list.error.loading \(error.localizedDescription)")
-                .textStyle(.content300)
-        case .loadingItems:
-            Text("list.loading")
-                .onAppear {
-                    Task {
-                        await fetchItemEntities()
-                    }
-                }
-        case .loaded(items: let items):
-            ForEach(Array(items.keys), id: \._id) { key in
-                if let item = items[key] {
+// MARK: - Author items
+
+private struct AuthorListItems: View {
+    @EnvironmentObject private var entityModel: EntityModel
+    @EnvironmentObject private var listModel: ListModel
+    @Environment(\.modelContext) private var modelContext
+
+    let list: EntityList
+    @Binding var path: NavigationPath
+
+    @Query private var authors: [Author]
+    @State private var isLoading: Bool = true
+    @State private var fetchError: Error?
+
+    init(list: EntityList, path: Binding<NavigationPath>) {
+        self.list = list
+        self._path = path
+        let uris: [String] = list.elements.map(\.uri)
+        _authors = Query(filter: #Predicate<Author> { author in
+            uris.contains(author.uri)
+        })
+    }
+
+    /// Authors ordered by their position in the list, joined with their list item.
+    private var orderedItems: [(EntityListItem, Author)] {
+        list.elements.compactMap { item in
+            guard let author = authors.first(where: { $0.uri == item.uri }) else { return nil }
+            return (item, author)
+        }
+    }
+
+    var body: some View {
+        Group {
+            if isLoading && orderedItems.isEmpty {
+                Text("list.loading")
+            } else if let error = fetchError, orderedItems.isEmpty {
+                Text("list.error.loading \(error.localizedDescription)")
+                    .textStyle(.content300)
+            } else if orderedItems.isEmpty {
+                Text("list.empty")
+                    .textStyle(.content300)
+            } else {
+                ForEach(orderedItems, id: \.0._id) { item, author in
                     Button {
-                        if let entityDestination = item.entityDestination {
-                            path.append(entityDestination)
-                        }
-                    } label : {
+                        path.append(NavigationDestination.author(uri: author.uri))
+                    } label: {
                         NavigationLink(value: UUID()) {
-                            ListItemCellView(listItem: key, entity: item)
+                            ListItemCellView(listItem: item, entity: author)
                         }
                     }
                     .buttonStyle(.plain)
                     .swipeActions(edge: .trailing) {
                         Button("action.delete", systemImage: "trash") {
                             Task {
-                                await deleteItem(listItem: key)
+                                await deleteItem(listItem: item)
                             }
                         }
                     }
                 }
             }
         }
+        .task {
+            await fetchAuthors()
+        }
+    }
+
+    @MainActor
+    private func fetchAuthors() async {
+        defer { isLoading = false }
+        do {
+            _ = try await entityModel.getOrFetchAuthors(
+                modelContext: modelContext,
+                uris: list.elements.map(\.uri)
+            )
+        } catch {
+            fetchError = error
+        }
     }
 
     @MainActor
     private func deleteItem(listItem: EntityListItem) async {
         do {
-            try await listModel.deleteElementsInList(modelContext: modelContext, listId: list._id, elementIds: [listItem.uri])
+            try await listModel.deleteElementsInList(
+                modelContext: modelContext,
+                listId: list._id,
+                elementIds: [listItem.uri]
+            )
+        } catch {}
+    }
+}
 
-            self.state = switch state {
-            case .loaded(let items):
-                    .loaded(items: items.filter { $0.key != listItem } )
-            default: state
+// MARK: - Work items
+
+private struct WorkListItems: View {
+    @EnvironmentObject private var entityModel: EntityModel
+    @EnvironmentObject private var listModel: ListModel
+    @Environment(\.modelContext) private var modelContext
+
+    let list: EntityList
+    @Binding var path: NavigationPath
+
+    @Query private var works: [Work]
+    @State private var isLoading: Bool = true
+    @State private var fetchError: Error?
+
+    init(list: EntityList, path: Binding<NavigationPath>) {
+        self.list = list
+        self._path = path
+        let uris: [String] = list.elements.map(\.uri)
+        _works = Query(filter: #Predicate<Work> { work in
+            uris.contains(work.uri)
+        })
+    }
+
+    /// Works ordered by their position in the list, joined with their list item.
+    private var orderedItems: [(EntityListItem, Work)] {
+        list.elements.compactMap { item in
+            guard let work = works.first(where: { $0.uri == item.uri }) else { return nil }
+            return (item, work)
+        }
+    }
+
+    var body: some View {
+        Group {
+            if isLoading && orderedItems.isEmpty {
+                Text("list.loading")
+            } else if let error = fetchError, orderedItems.isEmpty {
+                Text("list.error.loading \(error.localizedDescription)")
+                    .textStyle(.content300)
+            } else if orderedItems.isEmpty {
+                Text("list.empty")
+                    .textStyle(.content300)
+            } else {
+                ForEach(orderedItems, id: \.0._id) { item, work in
+                    Button {
+                        path.append(NavigationDestination.work(uri: work.uri))
+                    } label: {
+                        NavigationLink(value: UUID()) {
+                            ListItemCellView(listItem: item, entity: work)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .swipeActions(edge: .trailing) {
+                        Button("action.delete", systemImage: "trash") {
+                            Task {
+                                await deleteItem(listItem: item)
+                            }
+                        }
+                    }
+                }
             }
-        } catch {
-            
+        }
+        .task {
+            await fetchWorks()
         }
     }
 
     @MainActor
-    private func fetchItemEntities() async {
+    private func fetchWorks() async {
+        defer { isLoading = false }
         do {
-            switch state {
-            case .loadingItems:
-                if let entities: [any Entity] = switch list.type {
-                case .author:
-                    try await entityModel.getOrFetchAuthors(modelContext: modelContext, uris: list.elements.map(\.uri))
-                case .work:
-                    try await entityModel.getOrFetchWorks(modelContext: modelContext, uris: list.elements.map(\.uri))
-                case .publisher:
-                    []
-                } {
-                    let items:[EntityListItem : any Entity] =
-                    Dictionary(uniqueKeysWithValues: zip(list.elements, entities))
-
-                    self.state = items.isEmpty ? .empty : .loaded(items: items)
-                } else {
-                    self.state = .empty
-                }
-            default:
-                print(self.state)
-            }
-        } catch(let error) {
-            self.state = .error(error: error)
+            _ = try await entityModel.getOrFetchWorks(
+                modelContext: modelContext,
+                uris: list.elements.map(\.uri)
+            )
+        } catch {
+            fetchError = error
         }
     }
-}
 
-private extension Entity {
-    var entityDestination: NavigationDestination? {
-        switch self {
-        case is Author:
-            return .author(uri: self.uri)
-        case is Work:
-            return .work(uri: self.uri)
-        default:
-            return nil
-        }
+    @MainActor
+    private func deleteItem(listItem: EntityListItem) async {
+        do {
+            try await listModel.deleteElementsInList(
+                modelContext: modelContext,
+                listId: list._id,
+                elementIds: [listItem.uri]
+            )
+        } catch {}
     }
 }
 
 #Preview {
 //    EntityListDetail()
 }
-

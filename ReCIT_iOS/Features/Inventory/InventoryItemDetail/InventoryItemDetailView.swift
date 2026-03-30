@@ -151,6 +151,9 @@ struct InventoryItemDetailView: View {
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundDefault)
                     .withLabel(label: String(localized: "inventory.item.my_notes"))
+                    .onTapGesture {
+                        showItemDetailsForm = true
+                    }
             }
 
             HStack {

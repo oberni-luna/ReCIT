@@ -4,7 +4,9 @@
       "WebFetch(domain:github.com)",
       "Bash(python3 /tmp/extract_keys.py)",
       "Bash(python3:*)",
-      "Bash(tee /tmp/xcstrings_keys.txt)"
+      "Bash(tee /tmp/xcstrings_keys.txt)",
+      "Bash(curl -s \"https://codeberg.org/inventaire/inventaire/raw/branch/main/CHANGELOG.md\")",
+      "WebFetch(domain:codeberg.org)"
     ]
   }
 }

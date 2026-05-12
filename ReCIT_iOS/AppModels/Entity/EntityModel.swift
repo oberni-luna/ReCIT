@@ -44,7 +44,7 @@ class EntityModel: ObservableObject {
     }
 
     func getAuthorWorks(modelContext: ModelContext, author: Author) async throws -> [Work]? {
-        let endpoint: String = "/api/entities?action=author-works&uri=\(author.uri)&refresh=false"
+        let endpoint: String = "/api/entities/author-works?uri=\(author.uri)&refresh=false"
         let response: AuthorWorksDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
 
         guard let authorWorkDTO = response?.works else { return nil }
@@ -95,7 +95,7 @@ class EntityModel: ObservableObject {
     }
 
     func getWorkEditions(modelContext: ModelContext, work: Work) async throws -> [Edition]? {
-        let endpoint: String = "/api/entities?action=reverse-claims&property=wdt:P629&value=\(work.uri)&refresh=false"
+        let endpoint: String = "/api/entities/reverse-claims?property=wdt:P629&value=\(work.uri)&refresh=false"
         let response: WorkEditionsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
 
         guard let editionUris = response?.uris else { return nil }
@@ -196,7 +196,7 @@ class EntityModel: ObservableObject {
 
     func fetchExtract(for uri: String) async throws -> ExtractDTO? {
         guard let summariesDTO: SummariesDTO = try? await apiService.fetchData(
-            fromEndpoint: "/api/data?action=summaries&uri=\(uri)&langs=fr&refresh=false"
+            fromEndpoint: "/api/data/summaries?uri=\(uri)&langs=fr&refresh=false"
         ) else {
             return nil
         }
@@ -208,7 +208,7 @@ class EntityModel: ObservableObject {
         } else if let summary: SummaryDTO = summariesDTO.summaries.first(where: { $0.key == "frwiki" }) {
             guard let sitelink: SitelinkDTO = summary.sitelink else { return nil }
             return try? await apiService.fetchData(
-                fromEndpoint: "/api/data?action=wp-extract&lang=fr&title=\(sitelink.title)"
+                fromEndpoint: "/api/data/wp-extract?lang=fr&title=\(sitelink.title)"
             )
         }
 
@@ -234,7 +234,7 @@ class EntityModel: ObservableObject {
         var results: [EntityResultDTO] = []
 
         for uriBatch in uris.splitInSubArrays(of: 50) {
-            let entityUrl: String = "/api/entities?action=by-uris&uris=\(uriBatch.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
+            let entityUrl: String = "/api/entities/by-uris?uris=\(uriBatch.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
             let resultsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: entityUrl, debug: debug)
             results.append(contentsOf: resultsDto.map { Array($0.entities.values) } ?? [])
         }

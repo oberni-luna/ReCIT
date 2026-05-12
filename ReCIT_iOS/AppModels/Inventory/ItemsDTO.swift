@@ -13,6 +13,10 @@ struct ItemsDTO: Codable {
     let offset: Int
 }
 
+struct PostItemResponseDTO: Codable {
+    let item: ItemDTO
+}
+
 struct ItemDTO: Codable {
     let _id: String
     let _rev: String

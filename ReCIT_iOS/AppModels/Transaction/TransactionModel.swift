@@ -111,7 +111,7 @@ class TransactionModel: ObservableObject {
 
     private func fetchTransactionMessagesDTO(transactionId: String) async throws -> [TransactionMessageDTO] {
 
-        let transactionMessagesDTO: TransactionMessagesDTO? = try await apiService.fetchData(fromEndpoint: "/api/transactions?action=get-messages&transaction=\(transactionId)")
+        let transactionMessagesDTO: TransactionMessagesDTO? = try await apiService.fetchData(fromEndpoint: "/api/transactions/messages?id=\(transactionId)")
         guard let transactionMessagesDTO else { return [] }
         return transactionMessagesDTO.messages
     }
@@ -132,12 +132,11 @@ class TransactionModel: ObservableObject {
 
     func updateRequest(transaction: UserTransaction, newState: UserTransaction.TransactionState, message: String?) async throws {
         let payload = [
-            "action": "update-state",
             "state": newState.rawValue,
-            "transaction": transaction._id
+            "id": transaction._id
         ]
 
-        guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions", method: "PUT", payload: payload) else {
+        guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions/update-state", method: "PUT", payload: payload) else {
             throw NetworkError.badResponse
         }
         
@@ -151,12 +150,11 @@ class TransactionModel: ObservableObject {
         guard !message.isEmpty else { throw TransactionError.emptyMessage }
 
         let messagePayload = [
-            "action": "message",
             "message": message,
-            "transaction": transactionId
+            "id": transactionId
         ]
 
-        guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions", payload: messagePayload) else {
+        guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions/messages", payload: messagePayload) else {
             throw NetworkError.badResponse
         }
     }

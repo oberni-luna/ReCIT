@@ -33,7 +33,7 @@ class InventoryModel: ObservableObject {
         }
         print("     -> syncing... ")
 
-        let result: InventoryResultDTO? = try await apiService.fetchData(fromEndpoint: "/api/items?action=inventory-view&user=\(forUser._id)")
+        let result: InventoryResultDTO? = try await apiService.fetchData(fromEndpoint: "/api/items/inventory-view?user=\(forUser._id)")
         guard let result else { return }
 
         // Sync authors and works
@@ -61,7 +61,7 @@ class InventoryModel: ObservableObject {
             guard let relatedWork = try? entityModel?.getLocalWork(modelContext: modelContext, uri: workUri) else { continue }
 
             guard let ids: String = result.workUriItemsMap[workUri]?.joined(separator: "|") else { continue }
-            let itemsUrl: String = "/api/items?ids=\(ids)&action=by-ids"
+            let itemsUrl: String = "/api/items/by-ids?ids=\(ids)"
 
             guard let itemsDTO: ItemsDTO = try await apiService.fetchData(fromEndpoint: itemsUrl) else { continue }
 
@@ -107,11 +107,11 @@ class InventoryModel: ObservableObject {
             shelves: []
         )
 
-        guard let itemDTO: ItemDTO = try await apiService.send(toEndpoint: "/api/items", payload: payload) else {
+        guard let response: PostItemResponseDTO = try await apiService.send(toEndpoint: "/api/items", payload: payload) else {
             throw NetworkError.badResponse
         }
 
-        let newItem: InventoryItem = .init(itemDTO: itemDTO, forUser: forUser, apiService: apiService)
+        let newItem: InventoryItem = .init(itemDTO: response.item, forUser: forUser, apiService: apiService)
         modelContext.insert(newItem)
         try modelContext.save()
         return newItem
@@ -120,7 +120,7 @@ class InventoryModel: ObservableObject {
     func removeItem(_ item: InventoryItem, modelContext: ModelContext) async throws {
         let payload: [String: [String]] = ["ids": [item._id]]
 
-        guard let ok: [String: Bool] = try await apiService.send(toEndpoint: "/api/items?action=delete-by-ids", payload: payload) else {
+        guard let ok: [String: Bool] = try await apiService.send(toEndpoint: "/api/items/delete", payload: payload) else {
             throw NetworkError.badResponse
         }
 
@@ -166,7 +166,7 @@ class InventoryModel: ObservableObject {
 
     func updateItems(ids: [String], attribute: String, value: String?) async throws -> UpdateItemsResponseDTO? {
         try await apiService.send(
-            toEndpoint: "/api/items?action=bulk-update",
+            toEndpoint: "/api/items/bulk-update",
             method: "PUT",
             payload: UpdateItemsDTO(
                 ids: ids,

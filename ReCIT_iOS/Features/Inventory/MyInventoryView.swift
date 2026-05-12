@@ -20,6 +20,7 @@ struct MyInventoryView: View {
         NavigationStack(path: $path) {
             if let user = userModel.myUser {
                 List {
+                    Section(header: Text("nav.inventory")) { }
                     InventoryListContent(
                         user: user,
                         searchText: searchText,

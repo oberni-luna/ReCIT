@@ -50,7 +50,7 @@ class UserModel: ObservableObject {
         let ids = userIds.joined(separator: "|")
         guard ids.isEmpty == false else { return [] }
 
-        let usersDTO: UsersDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/users?action=by-ids&ids=\(ids)")
+        let usersDTO: UsersDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/users/by-ids?ids=\(ids)")
 
         guard let usersDTO = usersDTO?.users, !usersDTO.isEmpty else { return [] }
 

@@ -152,7 +152,7 @@ final class AuthService {
         guard !jar.isEmpty else { throw AuthError.noSessionCookies }
 
         // HTTPCookie est NSSecureCoding -> sérialisation via NSKeyedArchiver
-        let data = try NSKeyedArchiver.archivedData(withRootObject: jar, requiringSecureCoding: true)
+        let data = try NSKeyedArchiver.archivedData(withRootObject: jar, requiringSecureCoding: false)
         let status = Keychain.saveOrUpdate(key: cfg.keychainKey, data: data)
         guard status == errSecSuccess else { throw AuthError.keychainError(status: status) }
     }
@@ -160,7 +160,9 @@ final class AuthService {
     private func restoreCookiesFromKeychain() {
         guard let data = Keychain.load(key: cfg.keychainKey) else { return }
         do {
-            if let cookies = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSArray.self, HTTPCookie.self], from: data) as? [HTTPCookie] {
+            let unarchiver: NSKeyedUnarchiver = try .init(forReadingFrom: data)
+            unarchiver.requiresSecureCoding = false
+            if let cookies = unarchiver.decodeObject(forKey: NSKeyedArchiveRootObjectKey) as? [HTTPCookie] {
                 // Replace existing cookies with restored ones (for same names/domains)
                 for cookie in cookies {
                     cookieStorage.setCookie(cookie)

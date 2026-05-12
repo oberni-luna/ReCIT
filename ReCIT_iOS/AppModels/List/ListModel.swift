@@ -20,7 +20,7 @@ class ListModel: ObservableObject {
 
     func syncLists(forUser: User, modelContext: ModelContext) async throws {
         try modelContext.delete(model: EntityList.self)
-        let listsDTO: ListsDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/lists?action=by-creators&users=\(forUser._id)&with-elements=true", debug: true)
+        let listsDTO: ListsDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(forUser._id)&with-elements=true", debug: true)
         if let listsDTO {
             for listDTO in listsDTO.lists {
                 let list = EntityList(listDTO: listDTO, baseUrl: fetchDataService.baseUrl())
@@ -32,7 +32,7 @@ class ListModel: ObservableObject {
 
     func deleteList(modelContext: ModelContext, list: EntityList) async throws {
         if let _: OkStatusDTO? = try await fetchDataService.send(
-            toEndpoint: "/api/lists?action=delete",
+            toEndpoint: "/api/lists/delete",
             method: "POST",
             payload: ["ids": list._id]
         ) {
@@ -57,7 +57,7 @@ class ListModel: ObservableObject {
 
     func createList(modelContext: ModelContext, name: String, description: String, type: String, visibility: [String]) async throws {
         let newList: NewListResponseDTO? = try await fetchDataService.send(
-            toEndpoint: "/api/lists?action=create",
+            toEndpoint: "/api/lists",
             payload: NewListDTO(id: nil, name: name, description: description, visibility: visibility, type: type)
         )
 
@@ -71,7 +71,8 @@ class ListModel: ObservableObject {
     func addEntitiesToList(modelContext: ModelContext, list: EntityList, entityUris: [String], comment: String? = nil) async throws {
         let addToListDTO: AddToListDTO = .init(id: list._id, uris: entityUris)
         if let addToListResponseDTO : AddToListResponseDTO = try await fetchDataService.send(
-            toEndpoint: "/api/lists?action=add-elements",
+            toEndpoint: "/api/lists/add-elements",
+            method: "PUT",
             payload: addToListDTO,
             debug: true
         ) {
@@ -93,7 +94,8 @@ class ListModel: ObservableObject {
         let payload: DeleteListElementsDTO = .init(id: listId, uris: elementIds)
 
         if let listResponseDTO : [String: ListDTO] = try await fetchDataService.send(
-            toEndpoint: "/api/lists?action=remove-elements",
+            toEndpoint: "/api/lists/remove-elements",
+            method: "PUT",
             payload: payload,
             debug: true
         ),
@@ -109,7 +111,8 @@ class ListModel: ObservableObject {
     func updateElementInList(elementId: String, comment: String) async throws -> ListElementDTO? {
         let updateListElementDTO: UpdateListElementDTO = .init(id: elementId, comment: comment)
         let elementDto: ListElementDTO? = try await fetchDataService.send(
-            toEndpoint: "/api/lists?action=update-element",
+            toEndpoint: "/api/lists/update-element",
+            method: "PUT",
             payload: updateListElementDTO,
             debug: true
         )

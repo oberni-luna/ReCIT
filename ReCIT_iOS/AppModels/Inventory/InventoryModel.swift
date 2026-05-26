@@ -100,14 +100,14 @@ class InventoryModel: ObservableObject {
     ) async throws -> InventoryItem {
         let payload: NewItemDTO = .init(
             entity: entityUri,
-            details: "",
-            notes: "",
+            details: nil,
+            notes: nil,
             transaction: transaction.rawValue,
             visibility: visibility.map { $0.rawValue },
             shelves: []
         )
 
-        guard let response: PostItemResponseDTO = try await apiService.send(toEndpoint: "/api/items", payload: payload) else {
+        guard let response: PostItemResponseDTO = try await apiService.send(toEndpoint: "/api/items", payload: payload, debug: true) else {
             throw NetworkError.badResponse
         }
 

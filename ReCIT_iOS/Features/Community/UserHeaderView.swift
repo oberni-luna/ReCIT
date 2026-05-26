@@ -12,7 +12,7 @@ struct UserHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: .small) {
             if let image = user.avatarURLValue {
-                CellThumbnail(imageUrl: image, cornerRadius: .full, size: 72)
+                CellThumbnail(imageUrl: image, cornerRadius: .full, size: .large)
             }
             Text(user.username)
                 .textStyle(.content400Bold)

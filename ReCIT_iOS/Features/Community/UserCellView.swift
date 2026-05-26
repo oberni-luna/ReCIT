@@ -10,10 +10,10 @@ struct UserCellView: View {
     let user: User
 
     var body: some View {
-        HStack(alignment: .top, spacing: .small) {
-            CellThumbnail(imageUrl: user.avatarURLValue, cornerRadius: .full, size: 48)
+        HStack(alignment: .top, spacing: .sMedium) {
+            CellThumbnail(imageUrl: user.avatarURLValue, cornerRadius: .full, size: .medium)
 
-            VStack(alignment: .leading, spacing: .sMedium) {
+            VStack(alignment: .leading, spacing: .xSmall) {
                 Text(user.username)
                     .textStyle(.content400Bold)
                 Text("user.item_count \(user.itemCount)")

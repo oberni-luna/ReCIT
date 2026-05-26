@@ -7,15 +7,28 @@
 
 import SwiftUI
 
+enum ThumbnailSize {
+    case xsmall, small, medium, large
+
+    var sizeInPt: CGFloat {
+        switch self {
+        case .xsmall: return 24
+        case .small: return 36
+        case .medium: return 48
+        case .large: return 64
+        }
+    }
+}
+
 struct CellThumbnail: View {
     let imageUrl: String?
     let cornerRadius: DesignSystem.CornerRadius
     let size: CGFloat
 
-    init(imageUrl: String?, cornerRadius: DesignSystem.CornerRadius = .medium, size:CGFloat = 36) {
+    init(imageUrl: String?, cornerRadius: DesignSystem.CornerRadius = .medium, size:ThumbnailSize = .small) {
         self.imageUrl = imageUrl
         self.cornerRadius = cornerRadius
-        self.size = size
+        self.size = size.sizeInPt
     }
 
     var body: some View {

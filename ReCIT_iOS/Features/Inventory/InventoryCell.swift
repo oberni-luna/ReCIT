@@ -14,7 +14,7 @@ struct InventoryCell: View {
     var body: some View {
         if let edition = item.edition {
             HStack(alignment: .top, spacing: .sMedium) {
-                CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: 56)
+                CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: .medium)
 
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Group {

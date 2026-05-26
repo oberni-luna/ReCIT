@@ -44,7 +44,7 @@ struct AuthorDetailView: View {
                 Section {
                     VStack(alignment: .leading, spacing: .small) {
                         if let image = author.image {
-                            CellThumbnail(imageUrl: image, cornerRadius: .full, size: 72)
+                            CellThumbnail(imageUrl: image, cornerRadius: .full, size: .large)
                         }
                         Text(author.name)
                             .textStyle(.content400Bold)

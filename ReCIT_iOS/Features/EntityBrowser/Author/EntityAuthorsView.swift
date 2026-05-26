@@ -42,7 +42,7 @@ struct EntityAuthorsView: View {
                             NavigationLink(value: UUID()) {
                                 HStack(alignment: .center, spacing: .small){
                                     Group {
-                                        CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: 36)
+                                        CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: .small)
                                         
                                         Text(author.name)
                                             .textStyle(.content400Bold)

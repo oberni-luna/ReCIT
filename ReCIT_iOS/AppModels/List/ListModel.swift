@@ -82,7 +82,7 @@ class ListModel: ObservableObject {
                 }
 
                 let entityListItem: EntityListItem = .init(listElementDTO: element, listType: list.type, baseUrl: fetchDataService.baseUrl())
-                modelContext.insert(entityListItem)
+                list.elements.append(entityListItem)
             }
             try modelContext.save()
         }
@@ -90,20 +90,28 @@ class ListModel: ObservableObject {
 
     // TODO: Implement remove item from list
 //    {id: "97e848f4af0a5ffe2886648ee2bc648b", uris: ["inv:fd0bbd368cb02d614a3b29857f960fbe"]}
-    func deleteElementsInList(modelContext: ModelContext,listId: String, elementIds: [String]) async throws {
+    func deleteElementsInList(modelContext: ModelContext, listId: String, elementIds: [String]) async throws {
         let payload: DeleteListElementsDTO = .init(id: listId, uris: elementIds)
 
-        if let listResponseDTO : [String: ListDTO] = try await fetchDataService.send(
+        if let listResponseDTO: [String: ListDTO] = try await fetchDataService.send(
             toEndpoint: "/api/lists/remove-elements",
             method: "PUT",
             payload: payload,
             debug: true
         ),
-        let listDTO = listResponseDTO["list"] {
-            let list = EntityList(listDTO: listDTO, baseUrl: fetchDataService.baseUrl())
-            modelContext.insert(list)
+        listResponseDTO["list"] != nil {
+            let descriptor: FetchDescriptor<EntityListItem> = .init(
+                predicate: #Predicate<EntityListItem> { item in
+                    item.list?._id == listId && elementIds.contains(item.uri)
+                }
+            )
+            if let items = try? modelContext.fetch(descriptor) {
+                for item in items {
+                    modelContext.delete(item)
+                }
+            }
+            try modelContext.save()
         }
-        try modelContext.save()
     }
 
     // TODO: Implement update item in a list to add comment

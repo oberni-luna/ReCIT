@@ -1,0 +1,17 @@
+{
+  "locale": "en-US",
+  "app_info": {
+    "name": "Inventaire.io",
+    "subtitle": "Share books with your friends",
+    "privacyPolicyUrl": "https://inventaire.io/",
+    "privacyChoicesUrl": null
+  },
+  "version": {
+    "promotionalText": "Borrow, lend and organize books with your community of readers. Inventaire.io turns your friends into one big living library.",
+    "description": "Welcome to Inventaire.io — the app that turns your friends into a living library!\n\nWith Inventaire.io you can:\n• Build your book inventory in seconds\n• Explore the libraries of your friends and the groups you belong to\n• Borrow, lend and share your favorite reads\n• Search for any book in a snap\n\nOur mission: spread reading around you and give books back their power to bring people together.\n\nInventaire.io is the official mobile client of the free and collaborative inventaire.io project. Join a kind community of passionate readers!",
+    "keywords": "books,reading,library,borrow,lend,inventory,share,friends,readers,comics",
+    "supportUrl": "https://inventaire.io/",
+    "marketingUrl": "https://inventaire.io/",
+    "whatsNew": null
+  }
+}

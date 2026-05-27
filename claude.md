@@ -1,147 +1,169 @@
-# Agent guide for Swift and SwiftUI
+# CLAUDE.md
 
-This repository contains an Xcode project written with Swift and SwiftUI. Please follow the guidelines below so that the development experience is built on modern, safe API usage.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project overview
 
-## Role
+**RECITs** — iOS app (SwiftUI + SwiftData) that tracks personal books and lets users give, lend, or sell them to friends. Status: pre-1.0, headed for production. App data is sourced from and synced to the third-party [`inventaire.io`](https://inventaire.io) backend (a CouchDB-backed open-data book inventory), so most server entities carry CouchDB-style `_id` / `_rev` string identifiers.
 
-You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and related frameworks. Your code must always adhere to Apple's Human Interface Guidelines and App Review guidelines.
+Key features: physical-book inventory, search across editions/works/authors, curated book lists, transactions (give/lend/sell), and a community/friends view.
 
+## Repository layout
 
-## Core instructions
-
-- Target iOS 26.0 or later. (Yes, it definitely exists.)
-- Swift 6.2 or later, using modern Swift concurrency.
-- SwiftUI backed up by `@Observable` classes for shared data.
-- Do not introduce third-party frameworks without asking first.
-- Avoid UIKit unless requested.
-
-
-## Swift instructions
-
-- Always mark `@Observable` classes with `@MainActor`.
-- Assume strict Swift concurrency rules are being applied.
-- Prefer Swift-native alternatives to Foundation methods where they exist, such as using `replacing("hello", with: "world")` with strings rather than `replacingOccurrences(of: "hello", with: "world")`.
-- Prefer modern Foundation API, for example `URL.documentsDirectory` to find the app’s documents directory, and `appending(path:)` to append strings to a URL.
-- Never use C-style number formatting such as `Text(String(format: "%.2f", abs(myNumber)))`; always use `Text(abs(change), format: .number.precision(.fractionLength(2)))` instead.
-- Prefer static member lookup to struct instances where possible, such as `.circle` rather than `Circle()`, and `.borderedProminent` rather than `BorderedProminentButtonStyle()`.
-- Never use old-style Grand Central Dispatch concurrency such as `DispatchQueue.main.async()`. If behavior like this is needed, always use modern Swift concurrency.
-- Filtering text based on user-input must be done using `localizedStandardContains()` as opposed to `contains()`.
-- Avoid force unwraps and force `try` unless it is unrecoverable.
-
-
-## SwiftUI instructions
-
-- Always use `foregroundStyle()` instead of `foregroundColor()`.
-- Always use `clipShape(.rect(cornerRadius:))` instead of `cornerRadius()`.
-- Always use the `Tab` API instead of `tabItem()`.
-- Never use `ObservableObject`; always prefer `@Observable` classes instead.
-- Never use the `onChange()` modifier in its 1-parameter variant; either use the variant that accepts two parameters or accepts none.
-- Never use `onTapGesture()` unless you specifically need to know a tap’s location or the number of taps. All other usages should use `Button`.
-- Never use `Task.sleep(nanoseconds:)`; always use `Task.sleep(for:)` instead.
-- Never use `UIScreen.main.bounds` to read the size of the available space.
-- Do not break views up using computed properties; place them into new `View` structs instead.
-- Do not force specific font sizes; prefer using Dynamic Type instead.
-- Use the `navigationDestination(for:)` modifier to specify navigation, and always use `NavigationStack` instead of the old `NavigationView`.
-- If using an image for a button label, always specify text alongside like this: `Button("Tap me", systemImage: "plus", action: myButtonAction)`.
-- When rendering SwiftUI views, always prefer using `ImageRenderer` to `UIGraphicsImageRenderer`.
-- Don’t apply the `fontWeight()` modifier unless there is good reason. If you want to make some text bold, always use `bold()` instead of `fontWeight(.bold)`.
-- Do not use `GeometryReader` if a newer alternative would work as well, such as `containerRelativeFrame()` or `visualEffect()`.
-- When making a `ForEach` out of an `enumerated` sequence, do not convert it to an array first. So, prefer `ForEach(x.enumerated(), id: \.element.id)` instead of `ForEach(Array(x.enumerated()), id: \.element.id)`.
-- When hiding scroll view indicators, use the `.scrollIndicators(.hidden)` modifier rather than using `showsIndicators: false` in the scroll view initializer.
-- Place view logic into view models or similar, so it can be tested.
-- Avoid `AnyView` unless it is absolutely required.
-- Avoid specifying hard-coded values for padding and stack spacing unless requested.
-- Avoid using UIKit colors in SwiftUI code.
-
-
-## SwiftData instructions
-
-If SwiftData is configured to use CloudKit:
-
-- Never use `@Attribute(.unique)`.
-- Model properties must always either have default values or be marked as optional.
-- All relationships must be marked optional.
-
-
-## Project structure
-
-- Use a consistent project structure, with folder layout determined by app features.
-- Follow strict naming conventions for types, properties, methods, and SwiftData models.
-- Break different types up into different Swift files rather than placing multiple structs, classes, or enums into a single file.
-- Add code comments and documentation comments as needed.
-- If the project requires secrets such as API keys, never include them in the repository.
-
-
-## Code style and linting
-
-- Never let trailing whitespace empty lines in the code.
-- If there is a swiftlint file in the repository, always follow its rules.
-- When creating function of constructors with many parameters, format them like this:
-
-```swift
-func myFunction(
-    firstParameter: String,
-    secondParameter: Int,
-    thirdParameter: Bool
-) {
-    // function body
-}
-
-let myObject = MyClass(
-    firstParameter: "Hello",
-    secondParameter: 42,
-    thirdParameter: true
-)
+```
+ReCIT_iOS/                       # Xcode project root (also where you `cd` to build)
+├── ReCIT_iOS.xcodeproj          # only project — no workspace
+├── ReCIT.swift                  # @main App, builds the shared SwiftData ModelContainer
+├── Env.swift                    # API base URL + keychain key per env (currently both → inventaire.io)
+├── App/                         # (reserved, currently empty)
+├── AppModels/                   # Reference-type "models" injected via env (network + cache layer)
+│   ├── Service/                 # APIService + NetworkError (URLSession wrapper, JSON in/out)
+│   ├── Entity/                  # EntityModel — author/work get-or-fetch + SwiftData insert
+│   ├── List/                    # ListModel + ListDTO — book-list CRUD against /api/lists/*
+│   ├── Inventory/, Search/, Transaction/, User/, Common/
+│   └── …                        # one *Model.swift + paired *DTO.swift per domain
+├── Model/                       # SwiftData @Model types + Codable DTOs + value types
+│   ├── UserData/                # EntityList, EntityListItem, InventoryItem, User, UserGroup, …
+│   ├── Books/                   # Author, Work, Edition, Entity protocol, WpExtract (Wikipedia)
+│   ├── SearchResult/, Transaction/, Utils/
+├── Features/                    # One folder per screen/flow (the bulk of the SwiftUI code)
+│   ├── MainNavigation/          # RootView, MainTabView — top-level entry + tab host
+│   ├── Authentication/          # AuthModel/AuthService/LoginView (session cookies in Keychain)
+│   ├── EntityBrowser/           # NavigationDestination enum + Author/Work/Edition detail screens
+│   ├── Lists/, Inventory/, Transactions/, Search/, Community/, Profile/, Works/
+│   └── Components/              # Cross-feature widgets (AsyncButton, CachedAsyncImage, SnackBar…)
+├── DesignSystem/                # Tokens (Color/Spacing/CornerRadius/TextStyle), fonts, button + label styles
+├── Assets.xcassets, Localizable.xcstrings
+├── Tests/, UITests/             # Swift Testing (@Suite/@Test) + XCUITest targets
+└── CLAUDE.md                    # **duplicate** of this file — keep them in sync or delete the inner one
 ```
 
-- Always explicitly specify the type of a variable or constant when it is being declared, even if it can be inferred, but not for guard/if-let statements. For example:
+## Build, run, test
 
-```swift
-let myString: String = "Hello, world!"
-var myNumber: Int = 42
+All `xcodebuild` invocations expect you to run from the repo root (or pass `-project ReCIT_iOS/ReCIT_iOS.xcodeproj`). There is no Fastlane, no SwiftLint config, and no Makefile — Xcode/SPM is the whole toolchain.
 
-guard let myOptionalString else { return }
-if let myOptionalNumber {
-    // use myOptionalNumber
-}
+```sh
+# List schemes / targets / configs
+xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj -list
+
+# Build the app for the simulator
+xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
+  -scheme ReCIT_iOS \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  build
+
+# Run the full test target (ReCIT_iOSTests — Swift Testing)
+xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
+  -scheme ReCIT_iOSTests \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  test
+
+# Run a single test (Swift Testing identifier = TypeName/methodName)
+xcodebuild test \
+  -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
+  -scheme ReCIT_iOSTests \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -only-testing:ReCIT_iOSTests/InventoryIntegrationTests/inventoryScenario
 ```
 
-- On if let/guard let statements, if the name of the let property have the same name as the optional being unwrapped, use this syntax:
+**Heads-up on the test target:** `Tests/ReCIT_iOSTests.swift` is an *integration* suite that logs into the real `inventaire.io` production server with hard-coded credentials (`OlivierB_test`) and mutates that account's data. It is documented as "Run manually; not suitable for CI." Do not add it to automated pipelines without first stubbing the network or moving the credentials out of the repo.
 
-```swift
-var myProperty: String?
+## Architecture (the parts that span files)
 
-guard let myProperty else { return }
-if let myProperty {
-    // use myProperty
-}
-```
+### App entry & dependency injection
 
-- Prefer the `.init()` syntax when creating instances of types (except for sugar like arrays, dictionaries, and sets). For example:
+`ReCIT.swift` (the `@main`) does three things:
 
-```swift
-let person: Person = .init(name: "Alice", age: 30)
-let numbers: [Int] = []
-let settings: [String: Any] = [:]
-let uniqueValues: Set<String> = []
-```
+1. Builds a single `ModelContainer` covering every SwiftData `@Model`: `InventoryItem`, `User`, `Edition`, `EntityList`, `EntityListItem`, `Author`, `Work`, `WpExtract`, `UserTransaction`, `TransactionMessage`. Persistence is on-disk, **not** CloudKit.
+2. Creates the long-lived `AuthModel` and attaches it to the scene via `.environmentObject`.
+3. Calls `DesignSystem.start()` to register custom fonts (Alegreya, OpenSans) and configure `UINavigationBar` appearance.
 
-- When using SwiftUI environments, you don't need to explicitly specify the type. For example, prefer this:
+`RootView` then instantiates the rest of the shared app models (`UserModel`, `ListModel`, `EntityModel`, `SearchModel`, `InventoryModel`, `TransactionModel`) as `@StateObject` and re-injects them as `EnvironmentObject` into `MainTabView`. Any new shared model belongs in `AppModels/<Domain>/` and must be added in **both** places (`@StateObject` + `.environmentObject`).
 
-```swift
-@Environment(\.dismiss) var dismiss // no type needed
-@Environment(\.colorScheme) var colorScheme // no type needed
-```
+Note: the codebase currently mixes Combine `ObservableObject` (used by all `AppModels` reference types) with the project guidance to prefer `@Observable`. Treat new shared models as `@Observable @MainActor`; only touch the legacy ones if you're explicitly converting them.
 
-- When a function or a computed property only have one line, you can omit the `return` keyword. For example, prefer this:
+### Networking
 
-```swift
-var fullName: String {
-    firstName + " " + lastName // no return needed
-}
+Everything that talks to `inventaire.io` goes through `AppModels/Service/APIService.swift`. It exposes generic `send<T,U>(toEndpoint:method:payload:)` and `fetchData<T>(fromEndpoint:)` over `URLSession.shared`, with errors funnelled through `NetworkError`. `APIService.absoluteImageUrl(_:)` resolves three image-URL shapes (absolute, `/img/...` on inventaire, and Wikimedia `Special:FilePath`).
 
-func greet() -> String {
-    "Hello, \(name)!" // no return needed
-}
-```
+Authentication is cookie-based: `AuthService` performs `/api/auth?action=login`, captures the `inventaire:session*` cookies from `HTTPCookieStorage.shared`, and persists them to the Keychain under `Env.keychainKey` so subsequent `URLSession.shared` requests stay authenticated.
+
+### Server entities ↔ SwiftData
+
+The pattern repeated across `AppModels/*/<Domain>Model.swift` is:
+
+1. Hit an `inventaire.io` endpoint → decode a DTO (`*DTO.swift` in the same folder).
+2. Map the DTO to a SwiftData `@Model` via a `convenience init(<dto>:baseUrl:)` defined on the model itself (see `EntityList(listDTO:baseUrl:)`).
+3. `modelContext.insert(...)` and `try modelContext.save()`.
+
+Because the server already owns identity, every persisted model exposes `_id: String` (server doc id) and `_rev: String` (CouchDB revision). `_id` is marked `@Attribute(.unique)`. Treat the local store as a cache of server state, not the source of truth — see `ListModel.syncLists` which deletes all `EntityList`s and re-inserts on refresh.
+
+### Navigation
+
+There is no per-feature `NavigationStack`. `MainTabView` owns each tab's `NavigationPath`, and `Features/EntityBrowser/NavigationDestination.swift` is the single enum dispatching to detail screens. To add a new destination:
+
+1. Add a case to `NavigationDestination` (and a stable `id` string).
+2. Add a `case` to `viewForDestination(_:)` returning the detail view.
+3. Push by appending `NavigationDestination.<case>(...)` onto the path.
+
+`path: Binding<NavigationPath>` is threaded through every detail view so deep links can stack further pushes.
+
+### Lists feature note
+
+`EntityList` owns `@Relationship(deleteRule: .cascade) var elements: [EntityListItem]` with `EntityListItem.list: EntityList?` as the inverse. When mutating list contents (`ListModel.addEntitiesToList` / `deleteElementsInList`), the SwiftData side and the server side are kept in lockstep — the server is called first, and SwiftData is only mutated on success.
+
+### Design system
+
+`DesignSystem/Tokens/` defines `Color`, `Spacing`, `CornerRadius`, `TextStyle`. UI code should consume these via the provided modifiers (`.textStyle(.content300)`, `.foregroundStyle(.foregroundDefault)`, `.buttonStyle(.primary())`, `.applyListBackground()`) rather than literal `Color` / `Font` / `padding(8)` values. Fonts are loaded at launch from `DesignSystem/Fonts/` — adding a font means dropping the `.ttf` in that folder *and* adding a case to `TextStyle.CustomFont`.
+
+## Swift / SwiftUI conventions
+
+Target: **iOS 26.0+**, **Swift 6.2+**, strict concurrency, SwiftUI-only (no UIKit unless asked). Do not add third-party SPM packages without confirming first — current deps are `LBSnackBar`, `Nuke`, `CodeScanner`, `swift-async-algorithms`, `swift-collections`.
+
+### Swift
+
+- `@Observable` classes are always `@MainActor`.
+- Prefer Swift-native string/collection APIs over Foundation equivalents (`replacing(_:with:)` over `replacingOccurrences`, `URL.documentsDirectory` + `appending(path:)`, etc.).
+- Filter user-typed text with `localizedStandardContains()`, never `contains()`.
+- No C-style format strings — use `Text(value, format: .number.precision(.fractionLength(2)))`.
+- Prefer static member lookup (`.circle`, `.borderedProminent`) over initializing the struct.
+- Modern concurrency only — no `DispatchQueue.main.async`, no `Task.sleep(nanoseconds:)` (use `Task.sleep(for:)`).
+- Avoid `try!` / `!` outside truly unrecoverable code paths.
+
+### SwiftUI
+
+- `foregroundStyle()` over `foregroundColor()`; `clipShape(.rect(cornerRadius:))` over `cornerRadius()`.
+- `Tab` API over `tabItem()`; `NavigationStack` + `navigationDestination(for:)` — never `NavigationView`.
+- `@Observable` only — no new `ObservableObject` types (the existing `AppModels` are legacy).
+- Two-arg `onChange(_:_:)` or zero-arg variant; never the deprecated single-arg form.
+- `Button` over `onTapGesture()` unless tap location / count is genuinely needed.
+- Buttons with an image must also carry text: `Button("Tap me", systemImage: "plus", action: …)`.
+- Split sub-views into new `View` structs, not computed properties.
+- No `UIScreen.main.bounds`; no `GeometryReader` if `containerRelativeFrame()` / `visualEffect()` will do.
+- Iterate enumerated sequences directly: `ForEach(x.enumerated(), id: \.element.id)` — don't wrap in `Array(...)`.
+- Hide scroll indicators with `.scrollIndicators(.hidden)`, not the initializer flag.
+- `.bold()` instead of `.fontWeight(.bold)`; don't force font sizes — use Dynamic Type.
+- Avoid `AnyView`. Avoid hard-coded padding / spacing values unless asked.
+- Use `ImageRenderer` (not `UIGraphicsImageRenderer`) for SwiftUI → image.
+- No UIKit colors in SwiftUI code.
+
+### SwiftData
+
+This project does **not** use CloudKit, so the standard SwiftData rules apply: `@Attribute(.unique)` is fine, properties don't have to be optional, and relationships don't have to be optional. Keep each `@Model` in its own file under `Model/`.
+
+### Code style
+
+- Always declare the type on `let` / `var` (not on `if let` / `guard let`).
+- On `if let` / `guard let`, when the new binding has the same name as the optional, use the shorthand: `guard let myProperty else { ... }`.
+- Prefer `.init(...)` over explicit type names when initializing (except array / dictionary / set literals).
+- Omit `return` in single-expression functions and computed properties.
+- No type annotation on SwiftUI environments (`@Environment(\.dismiss) var dismiss`).
+- Multi-parameter function signatures and `.init(...)` calls go vertical, one argument per line, closing paren on its own line.
+- No trailing whitespace on blank lines.
+- One type per file; new code lives under the matching `Features/<Feature>/` or `Model/<Subdomain>/` folder.
+
+## Things that look weird but are intentional
+
+- **`AppModels/` vs `Model/`** — `Model/` is SwiftData + DTOs + value types (data). `AppModels/` is the reference-type service layer (`*Model.swift` classes that wrap `APIService` + `ModelContext`). The split is consistent across every domain.
+- **Both `Env.development` and `Env.production` point at `https://inventaire.io`** — there is no staging server; `Env` exists mainly to switch the Keychain namespace between dev and prod builds.
+- **`/Users/olivier/Sources/ReCIT/ReCIT_iOS/CLAUDE.md` mirrors this file** — when you edit guidance, update both (or delete the inner one).

@@ -1,0 +1,17 @@
+{
+  "locale": "fr-FR",
+  "app_info": {
+    "name": "Inventaire.io",
+    "subtitle": "La bibliothèque entre ami·es",
+    "privacyPolicyUrl": "https://inventaire.io/",
+    "privacyChoicesUrl": null
+  },
+  "version": {
+    "promotionalText": "Emprunte, prête et organise tes livres avec ta communauté de lecteur·rices. Inventaire.io transforme tes proches en une grande bibliothèque vivante.",
+    "description": "Bienvenue sur Inventaire.io, l'app qui transforme tes ami·es en une grande bibliothèque vivante !\n\nAvec Inventaire.io, tu peux :\n• Constituer l'inventaire de tes livres en quelques secondes\n• Découvrir les bibliothèques de tes ami·es et des groupes auxquels tu appartiens\n• Emprunter, prêter et faire circuler tes livres préférés\n• Rechercher facilement n'importe quel ouvrage\n\nNotre mission : faire vivre la lecture autour de toi et redonner aux livres leur pouvoir de rassembler.\n\nInventaire.io est le client mobile officiel du projet libre et collaboratif inventaire.io. Rejoins une communauté bienveillante de lecteur·rices passionné·es !",
+    "keywords": "livres,lecture,bibliothèque,emprunt,prêt,inventaire,partage,ami·es,romans,BD",
+    "supportUrl": "https://inventaire.io/",
+    "marketingUrl": "https://inventaire.io/",
+    "whatsNew": null
+  }
+}

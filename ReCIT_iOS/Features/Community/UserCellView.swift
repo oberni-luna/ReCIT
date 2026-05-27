@@ -22,4 +22,3 @@ struct UserCellView: View {
         }
     }
 }
-

@@ -1,0 +1,277 @@
+{
+  "app_id": "6773353876",
+  "app_info": {
+    "attributes": {
+      "appStoreAgeRating": "FOUR_PLUS",
+      "appStoreState": "PREPARE_FOR_SUBMISSION",
+      "australiaAgeRating": null,
+      "brazilAgeRating": "L",
+      "brazilAgeRatingV2": "SELF_RATED_L",
+      "franceAgeRating": null,
+      "kidsAgeBand": null,
+      "koreaAgeRating": null,
+      "state": "PREPARE_FOR_SUBMISSION"
+    },
+    "id": "ceae7727-fb78-42fe-8b12-4113b1b0c357",
+    "links": {
+      "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357"
+    },
+    "relationships": {
+      "ageRatingDeclaration": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/ageRatingDeclaration",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/ageRatingDeclaration"
+        }
+      },
+      "appInfoLocalizations": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/appInfoLocalizations",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/appInfoLocalizations"
+        }
+      },
+      "primaryCategory": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/primaryCategory",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/primaryCategory"
+        }
+      },
+      "primarySubcategoryOne": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/primarySubcategoryOne",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/primarySubcategoryOne"
+        }
+      },
+      "primarySubcategoryTwo": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/primarySubcategoryTwo",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/primarySubcategoryTwo"
+        }
+      },
+      "secondaryCategory": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/secondaryCategory",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/secondaryCategory"
+        }
+      },
+      "secondarySubcategoryOne": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/secondarySubcategoryOne",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/secondarySubcategoryOne"
+        }
+      },
+      "secondarySubcategoryTwo": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/secondarySubcategoryTwo",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/secondarySubcategoryTwo"
+        }
+      },
+      "territoryAgeRatings": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/territoryAgeRatings",
+          "self": "https://api.appstoreconnect.apple.com/v1/appInfos/ceae7727-fb78-42fe-8b12-4113b1b0c357/relationships/territoryAgeRatings"
+        }
+      }
+    },
+    "type": "appInfos"
+  },
+  "app_info_localizations": [
+    {
+      "attributes": {
+        "locale": "en-US",
+        "name": "Inventaire.io",
+        "privacyChoicesUrl": null,
+        "privacyPolicyText": null,
+        "privacyPolicyUrl": "https://inventaire.io/",
+        "subtitle": "Share books with your friends"
+      },
+      "id": "ff614c4e-0ee2-4051-a350-05124e0046ea",
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/appInfoLocalizations/ff614c4e-0ee2-4051-a350-05124e0046ea"
+      },
+      "type": "appInfoLocalizations"
+    },
+    {
+      "attributes": {
+        "locale": "fr-FR",
+        "name": "Inventaire.io",
+        "privacyChoicesUrl": null,
+        "privacyPolicyText": null,
+        "privacyPolicyUrl": "https://inventaire.io/",
+        "subtitle": "La biblioth\u00e8que entre ami\u00b7es"
+      },
+      "id": "62041f60-2958-443e-ba2b-caccf2be3e13",
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/appInfoLocalizations/62041f60-2958-443e-ba2b-caccf2be3e13"
+      },
+      "type": "appInfoLocalizations"
+    }
+  ],
+  "app_store_version": {
+    "attributes": {
+      "appStoreState": "PREPARE_FOR_SUBMISSION",
+      "appVersionState": "PREPARE_FOR_SUBMISSION",
+      "copyright": null,
+      "createdDate": "2026-05-26T07:21:11-07:00",
+      "downloadable": true,
+      "earliestReleaseDate": null,
+      "platform": "IOS",
+      "releaseType": "AFTER_APPROVAL",
+      "reviewType": "APP_STORE",
+      "usesIdfa": null,
+      "versionString": "1.0"
+    },
+    "id": "2d065686-0341-4152-bf7e-bde9995ded09",
+    "links": {
+      "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09"
+    },
+    "relationships": {
+      "alternativeDistributionPackage": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/alternativeDistributionPackage",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/alternativeDistributionPackage"
+        }
+      },
+      "appClipDefaultExperience": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/appClipDefaultExperience",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/appClipDefaultExperience"
+        }
+      },
+      "appStoreReviewDetail": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/appStoreReviewDetail",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/appStoreReviewDetail"
+        }
+      },
+      "appStoreVersionExperiments": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/appStoreVersionExperiments",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/appStoreVersionExperiments"
+        }
+      },
+      "appStoreVersionExperimentsV2": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/appStoreVersionExperimentsV2",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/appStoreVersionExperimentsV2"
+        }
+      },
+      "appStoreVersionLocalizations": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/appStoreVersionLocalizations",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/appStoreVersionLocalizations"
+        }
+      },
+      "appStoreVersionPhasedRelease": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/appStoreVersionPhasedRelease",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/appStoreVersionPhasedRelease"
+        }
+      },
+      "appStoreVersionSubmission": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/appStoreVersionSubmission",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/appStoreVersionSubmission"
+        }
+      },
+      "build": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/build",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/build"
+        }
+      },
+      "customerReviews": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/customerReviews",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/customerReviews"
+        }
+      },
+      "gameCenterAppVersion": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/gameCenterAppVersion",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/gameCenterAppVersion"
+        }
+      },
+      "routingAppCoverage": {
+        "links": {
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/routingAppCoverage",
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/2d065686-0341-4152-bf7e-bde9995ded09/relationships/routingAppCoverage"
+        }
+      }
+    },
+    "type": "appStoreVersions"
+  },
+  "app_store_version_localizations": [
+    {
+      "attributes": {
+        "description": "Welcome to Inventaire.io \u2014 the app that turns your friends into a living library!\n\nWith Inventaire.io you can:\n\u2022 Build your book inventory in seconds\n\u2022 Explore the libraries of your friends and the groups you belong to\n\u2022 Borrow, lend and share your favorite reads\n\u2022 Search for any book in a snap\n\nOur mission: spread reading around you and give books back their power to bring people together.\n\nInventaire.io is the official mobile client of the free and collaborative inventaire.io project. Join a kind community of passionate readers!",
+        "keywords": "books,reading,library,borrow,lend,inventory,share,friends,readers,comics",
+        "locale": "en-US",
+        "marketingUrl": "https://inventaire.io/",
+        "promotionalText": "Borrow, lend and organize books with your community of readers. Inventaire.io turns your friends into one big living library.",
+        "supportUrl": "https://inventaire.io/",
+        "whatsNew": null
+      },
+      "id": "c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f",
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f"
+      },
+      "relationships": {
+        "appPreviewSets": {
+          "links": {
+            "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/appPreviewSets",
+            "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/relationships/appPreviewSets"
+          }
+        },
+        "appScreenshotSets": {
+          "links": {
+            "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/appScreenshotSets",
+            "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/relationships/appScreenshotSets"
+          }
+        },
+        "searchKeywords": {
+          "links": {
+            "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/searchKeywords",
+            "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/relationships/searchKeywords"
+          }
+        }
+      },
+      "type": "appStoreVersionLocalizations"
+    },
+    {
+      "attributes": {
+        "description": "Bienvenue sur Inventaire.io, l'app qui transforme tes ami\u00b7es en une grande biblioth\u00e8que vivante !\n\nAvec Inventaire.io, tu peux :\n\u2022 Constituer l'inventaire de tes livres en quelques secondes\n\u2022 D\u00e9couvrir les biblioth\u00e8ques de tes ami\u00b7es et des groupes auxquels tu appartiens\n\u2022 Emprunter, pr\u00eater et faire circuler tes livres pr\u00e9f\u00e9r\u00e9s\n\u2022 Rechercher facilement n'importe quel ouvrage\n\nNotre mission : faire vivre la lecture autour de toi et redonner aux livres leur pouvoir de rassembler.\n\nInventaire.io est le client mobile officiel du projet libre et collaboratif inventaire.io. Rejoins une communaut\u00e9 bienveillante de lecteur\u00b7rices passionn\u00e9\u00b7es !",
+        "keywords": "livres,lecture,biblioth\u00e8que,emprunt,pr\u00eat,inventaire,partage,ami\u00b7es,romans,BD",
+        "locale": "fr-FR",
+        "marketingUrl": "https://inventaire.io/",
+        "promotionalText": "Emprunte, pr\u00eate et organise tes livres avec ta communaut\u00e9 de lecteur\u00b7rices. Inventaire.io transforme tes proches en une grande biblioth\u00e8que vivante.",
+        "supportUrl": "https://inventaire.io/",
+        "whatsNew": null
+      },
+      "id": "7a75a2e4-e652-425e-b71d-01b81784feef",
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef"
+      },
+      "relationships": {
+        "appPreviewSets": {
+          "links": {
+            "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/appPreviewSets",
+            "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/relationships/appPreviewSets"
+          }
+        },
+        "appScreenshotSets": {
+          "links": {
+            "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/appScreenshotSets",
+            "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/relationships/appScreenshotSets"
+          }
+        },
+        "searchKeywords": {
+          "links": {
+            "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/searchKeywords",
+            "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/relationships/searchKeywords"
+          }
+        }
+      },
+      "type": "appStoreVersionLocalizations"
+    }
+  ]
+}

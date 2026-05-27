@@ -695,6 +695,7 @@
       }
     },
     "list.error.loading %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -825,6 +826,7 @@
       }
     },
     "list.loading" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

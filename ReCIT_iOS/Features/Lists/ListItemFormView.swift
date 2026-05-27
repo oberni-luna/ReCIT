@@ -25,7 +25,7 @@ struct ListItemFormView: View {
         if let listItem {
             self.listItem = listItem
         } else {
-            self.listItem = .init(_id: "", uri: entity.uri, ordinal: "", created: Date(), itemType: .work, list: list)
+            self.listItem = .init(_id: "", uri: entity.uri, ordinal: "", created: Date(), itemType: .work)
         }
     }
 

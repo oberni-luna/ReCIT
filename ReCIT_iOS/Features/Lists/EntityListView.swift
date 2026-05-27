@@ -35,7 +35,7 @@ struct EntityListView: View {
         NavigationStack(path: $path) {
             List {
                 ForEach(filteredLists) { list in
-                    NavigationLink(value: list) {
+                    NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
                         VStack(alignment: .leading) {
                             Text(list.name)
                                 .textStyle(.content400Bold)
@@ -54,10 +54,6 @@ struct EntityListView: View {
                         }
                     }
                 }
-            }
-            .navigationDestination(for: EntityList.self) { list in
-                EntityListDetail(list: list, path: $path)
-                    .navigationTitle(list.name)
             }
             .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)

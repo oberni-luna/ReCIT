@@ -9,34 +9,53 @@ import SwiftUI
 import SwiftData
 
 struct EntityListDetail: View {
-    let list: EntityList
+    let listId: String
     @Binding var path: NavigationPath
 
+    @Query private var matchingLists: [EntityList]
     @State private var presentEditForm: Bool = false
 
+    init(listId: String, path: Binding<NavigationPath>) {
+        self.listId = listId
+        self._path = path
+        _matchingLists = Query(filter: #Predicate<EntityList> { $0._id == listId })
+    }
+
+    private var list: EntityList? { matchingLists.first }
+
     var body: some View {
-        List {
-            Section {
-                switch list.type {
-                case .author:
-                    AuthorListItems(list: list, path: $path)
-                case .work:
-                    WorkListItems(list: list, path: $path)
-                case .publisher:
-                    Text("list.empty")
-                        .textStyle(.content300)
+        Group {
+            if let list {
+                List {
+                    Section {
+                        switch list.type {
+                        case .author:
+                            AuthorListItems(listId: listId, path: $path)
+                        case .work:
+                            WorkListItems(listId: listId, path: $path)
+                        case .publisher:
+                            Text("list.empty")
+                                .textStyle(.content300)
+                        }
+                    }
                 }
-            }
-        }
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("action.edit", systemImage: "pencil") {
-                    presentEditForm = true
+                .navigationTitle(list.name)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("action.edit", systemImage: "pencil") {
+                            presentEditForm = true
+                        }
+                    }
                 }
+                .sheet(isPresented: $presentEditForm) {
+                    ListFormView(list: list)
+                }
+            } else {
+                ContentUnavailableView(
+                    "list.empty",
+                    systemImage: "list.bullet.rectangle"
+                )
             }
-        }
-        .sheet(isPresented: $presentEditForm) {
-            ListFormView(list: list)
         }
         .applyListBackground()
     }
@@ -46,90 +65,84 @@ struct EntityListDetail: View {
 
 private struct AuthorListItems: View {
     @EnvironmentObject private var entityModel: EntityModel
-    @EnvironmentObject private var listModel: ListModel
     @Environment(\.modelContext) private var modelContext
 
-    let list: EntityList
+    let listId: String
     @Binding var path: NavigationPath
 
-    @Query private var authors: [Author]
-    @State private var isLoading: Bool = true
-    @State private var fetchError: Error?
+    @Query private var items: [EntityListItem]
 
-    init(list: EntityList, path: Binding<NavigationPath>) {
-        self.list = list
+    init(listId: String, path: Binding<NavigationPath>) {
+        self.listId = listId
         self._path = path
-        let uris: [String] = list.elements.map(\.uri)
-        _authors = Query(filter: #Predicate<Author> { author in
-            uris.contains(author.uri)
-        })
-    }
-
-    /// Authors ordered by their position in the list, joined with their list item.
-    private var orderedItems: [(EntityListItem, Author)] {
-        list.elements.compactMap { item in
-            guard let author = authors.first(where: { $0.uri == item.uri }) else { return nil }
-            return (item, author)
-        }
+        _items = Query(
+            filter: #Predicate<EntityListItem> { item in
+                item.list?._id == listId
+            },
+            sort: \EntityListItem.ordinal
+        )
     }
 
     var body: some View {
         Group {
-            if isLoading && orderedItems.isEmpty {
-                Text("list.loading")
-            } else if let error = fetchError, orderedItems.isEmpty {
-                Text("list.error.loading \(error.localizedDescription)")
-                    .textStyle(.content300)
-            } else if orderedItems.isEmpty {
+            if items.isEmpty {
                 Text("list.empty")
                     .textStyle(.content300)
             } else {
-                ForEach(orderedItems, id: \.0._id) { item, author in
-                    Button {
-                        path.append(NavigationDestination.author(uri: author.uri))
-                    } label: {
-                        NavigationLink(value: UUID()) {
-                            ListItemCellView(listItem: item, entity: author)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .swipeActions(edge: .trailing) {
-                        Button("action.delete", systemImage: "trash") {
-                            Task {
-                                await deleteItem(listItem: item)
-                            }
-                        }
+                ForEach(items, id: \._id) { item in
+                    AuthorListItemRow(listItem: item, listId: listId, path: $path)
+                }
+            }
+        }
+        .task(id: items.map(\.uri)) {
+            _ = try? await entityModel.getOrFetchAuthors(
+                modelContext: modelContext,
+                uris: items.map(\.uri)
+            )
+        }
+    }
+}
+
+private struct AuthorListItemRow: View {
+    @EnvironmentObject private var listModel: ListModel
+    @Environment(\.modelContext) private var modelContext
+
+    let listItem: EntityListItem
+    let listId: String
+    @Binding var path: NavigationPath
+
+    @Query private var authors: [Author]
+
+    init(listItem: EntityListItem, listId: String, path: Binding<NavigationPath>) {
+        self.listItem = listItem
+        self.listId = listId
+        self._path = path
+        let uri: String = listItem.uri
+        _authors = Query(filter: #Predicate<Author> { $0.uri == uri })
+    }
+
+    var body: some View {
+        if let author = authors.first {
+            Button {
+                path.append(NavigationDestination.author(uri: author.uri))
+            } label: {
+                NavigationLink(value: UUID()) {
+                    ListItemCellView(listItem: listItem, entity: author)
+                }
+            }
+            .buttonStyle(.plain)
+            .swipeActions(edge: .trailing) {
+                Button("action.delete", systemImage: "trash") {
+                    Task {
+                        try? await listModel.deleteElementsInList(
+                            modelContext: modelContext,
+                            listId: listId,
+                            elementIds: [listItem.uri]
+                        )
                     }
                 }
             }
         }
-        .task {
-            await fetchAuthors()
-        }
-    }
-
-    @MainActor
-    private func fetchAuthors() async {
-        defer { isLoading = false }
-        do {
-            _ = try await entityModel.getOrFetchAuthors(
-                modelContext: modelContext,
-                uris: list.elements.map(\.uri)
-            )
-        } catch {
-            fetchError = error
-        }
-    }
-
-    @MainActor
-    private func deleteItem(listItem: EntityListItem) async {
-        do {
-            try await listModel.deleteElementsInList(
-                modelContext: modelContext,
-                listId: list._id,
-                elementIds: [listItem.uri]
-            )
-        } catch {}
     }
 }
 
@@ -137,90 +150,84 @@ private struct AuthorListItems: View {
 
 private struct WorkListItems: View {
     @EnvironmentObject private var entityModel: EntityModel
-    @EnvironmentObject private var listModel: ListModel
     @Environment(\.modelContext) private var modelContext
 
-    let list: EntityList
+    let listId: String
     @Binding var path: NavigationPath
 
-    @Query private var works: [Work]
-    @State private var isLoading: Bool = true
-    @State private var fetchError: Error?
+    @Query private var items: [EntityListItem]
 
-    init(list: EntityList, path: Binding<NavigationPath>) {
-        self.list = list
+    init(listId: String, path: Binding<NavigationPath>) {
+        self.listId = listId
         self._path = path
-        let uris: [String] = list.elements.map(\.uri)
-        _works = Query(filter: #Predicate<Work> { work in
-            uris.contains(work.uri)
-        })
-    }
-
-    /// Works ordered by their position in the list, joined with their list item.
-    private var orderedItems: [(EntityListItem, Work)] {
-        list.elements.compactMap { item in
-            guard let work = works.first(where: { $0.uri == item.uri }) else { return nil }
-            return (item, work)
-        }
+        _items = Query(
+            filter: #Predicate<EntityListItem> { item in
+                item.list?._id == listId
+            },
+            sort: \EntityListItem.ordinal
+        )
     }
 
     var body: some View {
         Group {
-            if isLoading && orderedItems.isEmpty {
-                Text("list.loading")
-            } else if let error = fetchError, orderedItems.isEmpty {
-                Text("list.error.loading \(error.localizedDescription)")
-                    .textStyle(.content300)
-            } else if orderedItems.isEmpty {
+            if items.isEmpty {
                 Text("list.empty")
                     .textStyle(.content300)
             } else {
-                ForEach(orderedItems, id: \.0._id) { item, work in
-                    Button {
-                        path.append(NavigationDestination.work(uri: work.uri))
-                    } label: {
-                        NavigationLink(value: UUID()) {
-                            ListItemCellView(listItem: item, entity: work)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .swipeActions(edge: .trailing) {
-                        Button("action.delete", systemImage: "trash") {
-                            Task {
-                                await deleteItem(listItem: item)
-                            }
-                        }
+                ForEach(items, id: \._id) { item in
+                    WorkListItemRow(listItem: item, listId: listId, path: $path)
+                }
+            }
+        }
+        .task(id: items.map(\.uri)) {
+            _ = try? await entityModel.getOrFetchWorks(
+                modelContext: modelContext,
+                uris: items.map(\.uri)
+            )
+        }
+    }
+}
+
+private struct WorkListItemRow: View {
+    @EnvironmentObject private var listModel: ListModel
+    @Environment(\.modelContext) private var modelContext
+
+    let listItem: EntityListItem
+    let listId: String
+    @Binding var path: NavigationPath
+
+    @Query private var works: [Work]
+
+    init(listItem: EntityListItem, listId: String, path: Binding<NavigationPath>) {
+        self.listItem = listItem
+        self.listId = listId
+        self._path = path
+        let uri: String = listItem.uri
+        _works = Query(filter: #Predicate<Work> { $0.uri == uri })
+    }
+
+    var body: some View {
+        if let work = works.first {
+            Button {
+                path.append(NavigationDestination.work(uri: work.uri))
+            } label: {
+                NavigationLink(value: UUID()) {
+                    ListItemCellView(listItem: listItem, entity: work)
+                }
+            }
+            .buttonStyle(.plain)
+            .swipeActions(edge: .trailing) {
+                Button("action.delete", systemImage: "trash") {
+                    Task {
+                        try? await listModel.deleteElementsInList(
+                            modelContext: modelContext,
+                            listId: listId,
+                            elementIds: [listItem.uri]
+                        )
                     }
                 }
             }
         }
-        .task {
-            await fetchWorks()
-        }
-    }
-
-    @MainActor
-    private func fetchWorks() async {
-        defer { isLoading = false }
-        do {
-            _ = try await entityModel.getOrFetchWorks(
-                modelContext: modelContext,
-                uris: list.elements.map(\.uri)
-            )
-        } catch {
-            fetchError = error
-        }
-    }
-
-    @MainActor
-    private func deleteItem(listItem: EntityListItem) async {
-        do {
-            try await listModel.deleteElementsInList(
-                modelContext: modelContext,
-                listId: list._id,
-                elementIds: [listItem.uri]
-            )
-        } catch {}
     }
 }
 

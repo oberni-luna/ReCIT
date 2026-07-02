@@ -20,7 +20,7 @@ public extension View {
 }
 
 struct SelectListToAddModifier: ViewModifier {
-    @EnvironmentObject var listModel: ListModel
+    @Environment(ListModel.self) var listModel
     @Query(sort: \EntityList.name) var entityLists: [EntityList]
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss

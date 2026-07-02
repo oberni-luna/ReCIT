@@ -9,8 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct WorkDetailView: View {
-    @EnvironmentObject private var entityModel: EntityModel
-    @EnvironmentObject var listModel: ListModel
+    @Environment(EntityModel.self) private var entityModel
+    @Environment(ListModel.self) var listModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 

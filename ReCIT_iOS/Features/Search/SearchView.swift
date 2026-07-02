@@ -9,8 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct SearchView: View {
-    @EnvironmentObject private var userModel: UserModel
-    @EnvironmentObject private var searchModel: SearchModel
+    @Environment(UserModel.self) private var userModel
+    @Environment(SearchModel.self) private var searchModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 

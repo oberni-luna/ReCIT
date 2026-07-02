@@ -435,6 +435,24 @@
         }
       }
     },
+    "error.network.bad_response" : {
+
+    },
+    "error.network.bad_status" : {
+
+    },
+    "error.network.bad_url" : {
+
+    },
+    "error.network.decode_failed" : {
+
+    },
+    "error.network.encode_failed" : {
+
+    },
+    "error.network.invalid_request" : {
+
+    },
     "error.with_message %@" : {
       "localizations" : {
         "en" : {

@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct EntityHeaderView: View {
-    @EnvironmentObject private var inventoryModel: InventoryModel
+    @Environment(InventoryModel.self) private var inventoryModel
     @Environment(\.modelContext) private var modelContext
 
     let title: String

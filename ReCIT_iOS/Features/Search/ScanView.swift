@@ -10,7 +10,7 @@ import CodeScanner
 import AVFoundation
 
 struct ScanView: View {
-    @EnvironmentObject private var inventoryModel: InventoryModel
+    @Environment(InventoryModel.self) private var inventoryModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 

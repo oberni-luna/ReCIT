@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct MainTabView: View {
-    @EnvironmentObject private var userModel: UserModel
+    @Environment(UserModel.self) private var userModel
     let authModel: AuthModel
     
     enum TabConfig: String, Hashable, CaseIterable {

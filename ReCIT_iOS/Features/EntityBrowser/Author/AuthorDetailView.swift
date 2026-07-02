@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AuthorDetailView: View {
-    @EnvironmentObject private var entityModel: EntityModel
+    @Environment(EntityModel.self) private var entityModel
     @Environment(\.modelContext) private var modelContext
     
     enum ViewState {

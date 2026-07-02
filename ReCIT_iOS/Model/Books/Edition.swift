@@ -45,7 +45,7 @@ public class Edition: Identifiable, Entity {
         self.series = series
     }
 
-    convenience init(uri: String, entitySnapshotDTO: EntitySnapshotDTO, apiService: APIService, works: [Work] = [], items: [InventoryItem] = []) {
+    convenience init(uri: String, entitySnapshotDTO: EntitySnapshotDTO, apiService: APIServicing, works: [Work] = [], items: [InventoryItem] = []) {
         self.init(
             uri: uri,
             title: entitySnapshotDTO.`entity:title`,
@@ -57,7 +57,7 @@ public class Edition: Identifiable, Entity {
         )
     }
 
-    convenience init(entityDto: EntityResultDTO, apiService: APIService) {
+    convenience init(entityDto: EntityResultDTO, apiService: APIServicing) {
         self.init(
             uri: entityDto.uri,
             title: entityDto.labels["fromclaims"] ?? "Unknown",

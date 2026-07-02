@@ -6,22 +6,23 @@
 //
 
 import Foundation
-import Combine
 import SwiftData
 
-class UserModel: ObservableObject {
+@MainActor
+@Observable
+final class UserModel {
 
-    private let fetchDataService: APIService
-    @Published var myUser: User?
+    private let apiService: APIServicing
+    var myUser: User?
 
-    init(fetchDataService: APIService = .init(env: .production)) {
-        self.fetchDataService = fetchDataService
+    init(apiService: APIServicing) {
+        self.apiService = apiService
     }
 
     func syncMyUser(modelContext: ModelContext) async throws {
-        let userDTO: UserDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/user")
+        let userDTO: UserDTO? = try await apiService.fetchData(fromEndpoint: "/api/user")
         if let userDTO {
-            let mySyncedUser = User(userDTO: userDTO, baseUrl: fetchDataService.baseUrl())
+            let mySyncedUser = User(userDTO: userDTO, baseUrl: apiService.baseUrl())
             let user = try getLocalUser(modelContext: modelContext, _id: mySyncedUser._id)
 
             if let user {
@@ -50,13 +51,13 @@ class UserModel: ObservableObject {
         let ids = userIds.joined(separator: "|")
         guard ids.isEmpty == false else { return [] }
 
-        let usersDTO: UsersDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/users/by-ids?ids=\(ids)")
+        let usersDTO: UsersDTO? = try await apiService.fetchData(fromEndpoint: "/api/users/by-ids?ids=\(ids)")
 
         guard let usersDTO = usersDTO?.users, !usersDTO.isEmpty else { return [] }
 
         var users: [User] = []
         for userDTO in usersDTO {
-            let otherUser = User(userDTO: userDTO.value, baseUrl: fetchDataService.baseUrl())
+            let otherUser = User(userDTO: userDTO.value, baseUrl: apiService.baseUrl())
             if let user = try getLocalUser(modelContext: modelContext, _id: otherUser._id) {
                 user.update(with: otherUser)
                 users.append(user)
@@ -73,7 +74,7 @@ class UserModel: ObservableObject {
     func syncUserNetwork(modelContext: ModelContext) async throws {
         guard let myUser else { return }
 
-        let userNetwork: UserNetworkDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/relations")
+        let userNetwork: UserNetworkDTO? = try await apiService.fetchData(fromEndpoint: "/api/relations")
         guard let userNetwork else { return }
         
         let userIds = Array(Set(userNetwork.network).filter { $0 != myUser._id })
@@ -92,23 +93,14 @@ class UserModel: ObservableObject {
     }
 
     func clearUserData(modelContext: ModelContext) throws {
-        if let myUser  = self.myUser {
-            do {
-                self.myUser = nil
-                modelContext.delete(myUser)
-                try modelContext.save()
-            } catch {
-                print("Failed to delete user related content")
-            }
-        }
+        guard let myUser else { return }
+        self.myUser = nil
+        modelContext.delete(myUser)
+        try modelContext.save()
     }
 
     func logout(modelContext: ModelContext) throws {
-        do {
-            try clearUserData(modelContext: modelContext)
-        } catch {
-            print("Failed to delete user related content")
-        }
+        try clearUserData(modelContext: modelContext)
     }
 
 }

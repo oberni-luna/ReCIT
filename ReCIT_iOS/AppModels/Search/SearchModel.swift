@@ -7,13 +7,14 @@
 
 import SwiftData
 import Foundation
-import Combine
 
-class SearchModel: ObservableObject {
-    private let apiService: APIService
+@MainActor
+@Observable
+final class SearchModel {
+    private let apiService: APIServicing
 
-    init(fetchDataService: APIService = .init(env: .production)) {
-        self.apiService = fetchDataService
+    init(apiService: APIServicing) {
+        self.apiService = apiService
     }
 
     func searchLocalInventory(query: String, modelContext: ModelContext) -> [SearchResult] {

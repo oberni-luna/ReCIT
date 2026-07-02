@@ -9,9 +9,9 @@ import SwiftUI
 import LBSnackBar
 
 struct InventoryItemDetailView: View {
-    @EnvironmentObject private var userModel: UserModel
-    @EnvironmentObject var inventoryModel: InventoryModel
-    @EnvironmentObject var listModel: ListModel
+    @Environment(UserModel.self) private var userModel
+    @Environment(InventoryModel.self) var inventoryModel
+    @Environment(ListModel.self) var listModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.snackBar) private var snackBar

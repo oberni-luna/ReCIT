@@ -11,8 +11,8 @@ import LBSnackBar
 
 struct ProfileView: View {
     @EnvironmentObject private var authModel: AuthModel
-    @EnvironmentObject private var userModel: UserModel
-    @EnvironmentObject private var transactionModel: TransactionModel
+    @Environment(UserModel.self) private var userModel
+    @Environment(TransactionModel.self) private var transactionModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
 

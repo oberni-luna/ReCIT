@@ -7,13 +7,14 @@
 
 import SwiftData
 import Foundation
-import Combine
 
-class EntityModel: ObservableObject {
-    private let apiService: APIService
+@MainActor
+@Observable
+final class EntityModel {
+    private let apiService: APIServicing
 
-    init(fetchDataService: APIService = .init(env: .production)) {
-        self.apiService = fetchDataService
+    init(apiService: APIServicing) {
+        self.apiService = apiService
     }
 
     // MARK: - Authors

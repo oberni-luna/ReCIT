@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TransactionDetailView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var userModel: UserModel
+    @Environment(UserModel.self) private var userModel
     
     let transaction: UserTransaction
     @Binding var path: NavigationPath

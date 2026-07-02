@@ -10,7 +10,7 @@ import SwiftData
 
 struct EntityListView: View {
     @Environment(\.modelContext) var modelContext
-    @EnvironmentObject var listModel: ListModel
+    @Environment(ListModel.self) var listModel
     @Query(sort: \EntityList.name) var allLists: [EntityList]
 
     @State private var searchText: String = ""

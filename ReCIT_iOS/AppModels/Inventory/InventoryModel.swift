@@ -7,16 +7,17 @@
 
 import SwiftData
 import Foundation
-import Combine
 import AsyncAlgorithms
 
-class InventoryModel: ObservableObject {
+@MainActor
+@Observable
+final class InventoryModel {
     private static let unkownAuthorId: String = "unknown"
-    private let apiService: APIService
+    private let apiService: APIServicing
     private var entityModel: EntityModel?
 
-    init(fetchDataService: APIService = .init(env: .production)) {
-        self.apiService = fetchDataService
+    init(apiService: APIServicing) {
+        self.apiService = apiService
     }
 
     func start(entityModel: EntityModel) {

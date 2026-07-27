@@ -113,7 +113,7 @@ struct AuthorDetailView: View {
                     self.state = .error(error: NSError(domain: "No works", code: 0, userInfo: nil))
                 }
             default:
-                print(self.state)
+                self.state = .error(error: NSError(domain: "Wrong view state", code: 0, userInfo: nil))
             }
         } catch(let error) {
             self.state = .error(error: error)

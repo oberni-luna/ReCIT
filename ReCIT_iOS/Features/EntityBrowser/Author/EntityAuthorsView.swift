@@ -36,25 +36,20 @@ struct EntityAuthorsView: View {
             ScrollView(.horizontal) {
                 HStack(spacing: .sMedium) {
                     ForEach(authors) { author in
-                        Button {
-                            entityDestination = NavigationDestination.author(uri: author.uri)
-                        } label: {
-                            NavigationLink(value: UUID()) {
-                                HStack(alignment: .center, spacing: .small){
-                                    Group {
-                                        CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: .small)
-                                        
-                                        Text(author.name)
-                                            .textStyle(.content400Bold)
-                                            .lineLimit(2)
-                                            .multilineTextAlignment(.leading)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
+                        NavigationLink(value: NavigationDestination.author(uri: author.uri)) {
+                            HStack(alignment: .center, spacing: .small){
+                                Group {
+                                    CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: .small)
+
+                                    Text(author.name)
+                                        .textStyle(.content400Bold)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                             }
                         }
                         .frame(maxWidth: 200)
-                        .buttonStyle(.plain)
                     }
                 }
             }

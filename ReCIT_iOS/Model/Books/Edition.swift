@@ -67,4 +67,23 @@ public class Edition: Identifiable, Entity {
             image: apiService.absoluteImageUrl(entityDto.image?.url ?? "")
         )
     }
+
+    /// Updates the stored fields in place from a freshly fetched DTO.
+    /// Only non-empty remote values overwrite existing ones, so a sparse
+    /// server response never wipes data we already have. The `works`
+    /// relationship is handled by the caller.
+    func update(entityDto: EntityResultDTO, apiService: APIServicing) {
+        if let title = entityDto.labels["fromclaims"], !title.isEmpty {
+            self.title = title
+        }
+        if let subtitle = entityDto.descriptions?["fromclaims"] {
+            self.subtitle = subtitle
+        }
+        if let lang = entityDto.originalLang {
+            self.lang = lang
+        }
+        if let image = apiService.absoluteImageUrl(entityDto.image?.url ?? ""), !image.isEmpty {
+            self.image = image
+        }
+    }
 }

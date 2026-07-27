@@ -53,6 +53,31 @@ public class Work: Identifiable, Entity {
         )
     }
 
+    /// Updates the stored fields in place from a freshly fetched DTO.
+    /// Only non-empty remote values overwrite existing ones, so a sparse
+    /// server response never wipes data we already have. Relationships
+    /// (authors, editions) are handled by the caller.
+    func update(entityDTO: EntityResultDTO, apiService: APIServicing) {
+        let publicationDateString: String? = entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.getStringValue()
+
+        lastrevid = entityDTO.lastrevid ?? lastrevid
+        if let title = entityDTO.labels["fr"] ?? entityDTO.labels["en"] ?? entityDTO.labels.values.first, !title.isEmpty {
+            self.title = title
+        }
+        if let originalLang = entityDTO.originalLang {
+            self.originalLang = originalLang
+        }
+        if let image = apiService.absoluteImageUrl(entityDTO.image?.url), !image.isEmpty {
+            self.image = image
+        }
+        if let publicationDate = publicationDateString?.parseToDate() ?? publicationDateString?.parseToDate(dateFormat: "YYYY-MM") {
+            self.publicationDate = publicationDate
+        }
+        if let subtitle = entityDTO.descriptions?["fr"] ?? entityDTO.descriptions?["en"] {
+            self.subtitle = subtitle
+        }
+    }
+
     enum Constant {
         static let imageBaseUrl: String = "https://inventaire.io"
     }

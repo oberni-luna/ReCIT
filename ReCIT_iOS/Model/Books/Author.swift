@@ -51,6 +51,31 @@ public class Author: Identifiable, Entity {
         )
     }
 
+    /// Updates the stored fields in place from a freshly fetched DTO.
+    /// Only non-empty remote values overwrite existing ones, so a sparse
+    /// server response never wipes data we already have.
+    func update(entityDTO: EntityResultDTO, apiService: APIServicing) {
+        let dateOfBirthString: String? = entityDTO.claims[WikidataProperty.dateOfBirth.rawValue]?.first?.getStringValue()
+        let dateOfDeathString: String? = entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.getStringValue()
+
+        lastrevid = entityDTO.lastrevid ?? lastrevid
+        if let name = entityDTO.labels["fr"] ?? entityDTO.labels["en"], !name.isEmpty {
+            self.name = name
+        }
+        if let dateOfBirth = dateOfBirthString?.parseToDate() {
+            self.dateOfBirth = dateOfBirth
+        }
+        if let dateOfDeath = dateOfDeathString?.parseToDate() {
+            self.dateOfDeath = dateOfDeath
+        }
+        if let image = apiService.absoluteImageUrl(entityDTO.image?.url), !image.isEmpty {
+            self.image = image
+        }
+        if let subtitle = entityDTO.descriptions?["fr"] ?? entityDTO.descriptions?["en"] {
+            self.subtitle = subtitle
+        }
+    }
+
     enum Constant {
 //        https://inventaire.io/img/remote/192x192/1170121628?href=https%3A%2F%2Fcommons.wikimedia.org%2Fwiki%2FSpecial%3AFilePath%2FFIBD2022Ceremonie%252007b.jpg%3Fwidth%3D1024
         static let imageBaseUrl: String = "https://commons.wikimedia.org/wiki/Special:FilePath/"

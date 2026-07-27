@@ -17,6 +17,99 @@ final class EntityModel {
         self.apiService = apiService
     }
 
+    // MARK: - Cache-first access (no network)
+
+    /// Returns the cached author for `uri` if present, without hitting the network.
+    func localAuthor(modelContext: ModelContext, uri: String) -> Author? {
+        try? getLocalAuthor(modelContext: modelContext, uri: uri)
+    }
+
+    /// Returns the cached work for `uri` if present, without hitting the network.
+    func localWork(modelContext: ModelContext, uri: String) -> Work? {
+        try? getLocalWork(modelContext: modelContext, uri: uri)
+    }
+
+    /// Returns the cached edition for `uri` if present, without hitting the network.
+    func localEdition(modelContext: ModelContext, uri: String) -> Edition? {
+        try? getLocalEdition(modelContext: modelContext, uri: uri)
+    }
+
+    // MARK: - Background revalidation (upsert)
+
+    /// Fetches the author remotely and merges the fresh values into the cached
+    /// entity in place (inserting it if absent). Existing data is preserved when
+    /// the server responds with a sparse payload. If the remote call yields no
+    /// entity, the current cached value (if any) is returned unchanged.
+    func refreshAuthor(modelContext: ModelContext, uri: String) async throws -> Author? {
+        guard let authorDto = try await fetchEntities(modelContext: modelContext, uris: [uri])?.first else {
+            return try? getLocalAuthor(modelContext: modelContext, uri: uri)
+        }
+
+        if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri) {
+            author.update(entityDTO: authorDto, apiService: apiService)
+            try modelContext.save()
+            return author
+        }
+
+        let author: Author = .init(entityDTO: authorDto, apiService: apiService)
+        modelContext.insert(author)
+        try modelContext.save()
+        return author
+    }
+
+    /// Fetches the work remotely and merges the fresh values into the cached
+    /// entity in place (inserting it if absent), also resolving its authors.
+    /// If the remote call yields no entity, the current cached value is returned.
+    func refreshWork(modelContext: ModelContext, uri: String) async throws -> Work? {
+        guard let workDto = try await fetchEntities(modelContext: modelContext, uris: [uri])?.first else {
+            return try? getLocalWork(modelContext: modelContext, uri: uri)
+        }
+
+        let authorUris: [String] = workDto.claims[WikidataProperty.author.rawValue]?
+            .compactMap { $0.getStringValue() } ?? []
+        let authors: [Author] = (try? await getOrFetchAuthors(modelContext: modelContext, uris: authorUris)) ?? []
+
+        if let work = try? getLocalWork(modelContext: modelContext, uri: uri) {
+            work.update(entityDTO: workDto, apiService: apiService)
+            if !authors.isEmpty {
+                work.authors = authors
+            }
+            try modelContext.save()
+            return work
+        }
+
+        let work: Work = .init(entityDTO: workDto, authors: authors, apiService: apiService)
+        modelContext.insert(work)
+        try modelContext.save()
+        return work
+    }
+
+    /// Fetches the edition remotely and merges the fresh values into the cached
+    /// entity in place (inserting it if absent), also resolving its works.
+    /// If the remote call yields no entity, the current cached value is returned.
+    func refreshEdition(modelContext: ModelContext, uri: String) async throws -> Edition? {
+        guard let editionDto = try await fetchEntities(modelContext: modelContext, uris: [uri])?.first else {
+            return try? getLocalEdition(modelContext: modelContext, uri: uri)
+        }
+
+        let works: [Work] = try await resolveEditionWorks(from: editionDto, modelContext: modelContext)
+
+        if let edition = try? getLocalEdition(modelContext: modelContext, uri: uri) {
+            edition.update(entityDto: editionDto, apiService: apiService)
+            if !works.isEmpty {
+                edition.works = works
+            }
+            try modelContext.save()
+            return edition
+        }
+
+        let edition: Edition = .init(entityDto: editionDto, apiService: apiService)
+        edition.works = works
+        modelContext.insert(edition)
+        try modelContext.save()
+        return edition
+    }
+
     // MARK: - Authors
 
     func getOrFetchAuthors(modelContext: ModelContext, uris: [String]) async throws -> [Author]? {

@@ -13,7 +13,7 @@ private struct Probe: Codable, Equatable {
     let value: String
 }
 
-@Suite("APIService error handling")
+@Suite("APIService error handling", .serialized)
 struct APIServiceTests {
     private func makeService() -> APIService {
         .init(env: .production, session: MockURLProtocol.makeSession())

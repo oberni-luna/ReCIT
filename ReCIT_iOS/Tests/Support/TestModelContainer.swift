@@ -12,6 +12,14 @@ import SwiftData
 
 @MainActor
 enum TestStore {
+    /// Every container built for a test is retained for the lifetime of the test
+    /// process. Swift Testing runs suites in parallel in-process, and a container
+    /// that gets deallocated mid-test tears down its backing store on a background
+    /// queue — which, when stores are shared, can corrupt a store another parallel
+    /// test is still writing to (observed as an `EXC_BREAKPOINT` inside SwiftData).
+    /// Holding a strong reference keeps each store alive until the process exits.
+    private static var retainedContainers: [ModelContainer] = []
+
     static func makeContainer() throws -> ModelContainer {
         let schema: Schema = .init([
             InventoryItem.self,
@@ -25,8 +33,13 @@ enum TestStore {
             UserTransaction.self,
             TransactionMessage.self
         ])
-        let configuration: ModelConfiguration = .init(schema: schema, isStoredInMemoryOnly: true)
-        return try ModelContainer(for: schema, configurations: [configuration])
+        // A unique on-disk store per container fully isolates each test's data,
+        // so tearing one container down never touches another's store.
+        let url: URL = .temporaryDirectory.appending(path: "recit-tests-\(UUID().uuidString).store")
+        let configuration: ModelConfiguration = .init(schema: schema, url: url)
+        let container: ModelContainer = try .init(for: schema, configurations: [configuration])
+        retainedContainers.append(container)
+        return container
     }
 
     static func makeContext() throws -> ModelContext {

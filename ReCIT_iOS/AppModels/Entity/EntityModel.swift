@@ -184,10 +184,6 @@ final class EntityModel {
         return works
     }
 
-    func getOrFetchWork(modelContext: ModelContext, uri: String) async throws -> Work? {
-        try await getOrFetchWorks(modelContext: modelContext, uris: [uri])?.first
-    }
-
     func getWorkEditions(modelContext: ModelContext, work: Work) async throws -> [Edition]? {
         let endpoint: String = "/api/entities/reverse-claims?property=wdt:P629&value=\(work.uri)&refresh=false"
         let response: WorkEditionsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)

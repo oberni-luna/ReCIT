@@ -7,6 +7,7 @@
 
 import SwiftUI
 import LBSnackBar
+import SwiftData
 
 struct ListFormView: View {
     @Environment(\.modelContext) var modelContext

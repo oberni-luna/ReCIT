@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AddInventoryItemSearchView: View {
     @Environment(InventoryModel.self) private var inventoryModel

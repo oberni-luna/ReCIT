@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AuthorDetailView: View {
     @Environment(EntityModel.self) private var entityModel

@@ -8,6 +8,7 @@
 import SwiftUI
 import CodeScanner
 import AVFoundation
+import SwiftData
 
 struct ScanView: View {
     @Environment(InventoryModel.self) private var inventoryModel

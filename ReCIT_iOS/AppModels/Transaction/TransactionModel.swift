@@ -140,7 +140,7 @@ final class TransactionModel {
             "id": transaction._id
         ]
 
-        guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions/update-state", method: "PUT", payload: payload) else {
+        guard let _: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions/update-state", method: "PUT", payload: payload) else {
             throw NetworkError.badResponse
         }
         
@@ -158,7 +158,7 @@ final class TransactionModel {
             "id": transactionId
         ]
 
-        guard let okStatus: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions/messages", payload: messagePayload) else {
+        guard let _: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions/messages", payload: messagePayload) else {
             throw NetworkError.badResponse
         }
     }

@@ -12,8 +12,8 @@ struct LoginView: View {
     let authModel: AuthModel
     let onLogin: () -> Void
 
-    @State private var username = "OlivierB_test"
-    @State private var password = "Azerty1234!"
+    @State private var username = ""
+    @State private var password = ""
     @State private var errorMessage: String?
 
     var body: some View {

@@ -35,18 +35,30 @@ struct InventoryListContent: View {
             predicate = #Predicate { item in item.ownerId == userId }
         }
 
-        switch sortParameter {
-        case .recent:       _allItems = Query(filter: predicate, sort: \.created, order: .reverse)
-        case .alphabetical: _allItems = Query(filter: predicate, sort: \.edition?.title)
-        }
+        // Always sort the @Query on a stored property. SwiftData cannot stringify
+        // a keypath through an optional relationship (\.edition?.title), which traps
+        // in graph_keyPathToString and crashes. Alphabetical ordering is applied
+        // in-memory in `displayItems` instead.
+        _allItems = Query(filter: predicate, sort: \.created, order: .reverse)
     }
 
-    /// Items filtered in-memory by search text. SwiftUI re-evaluates this
-    /// whenever `searchText` or `allItems` changes.
+    /// Items filtered in-memory by search text, then ordered per `sortParameter`.
+    /// SwiftUI re-evaluates this whenever `searchText`, `sortParameter`, or
+    /// `allItems` changes.
     private var displayItems: [InventoryItem] {
         let clean: String = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !clean.isEmpty else { return allItems }
-        return allItems.filter { $0.searchIndex.localizedStandardContains(clean) }
+        let filtered: [InventoryItem] = clean.isEmpty
+            ? allItems
+            : allItems.filter { $0.searchIndex.localizedStandardContains(clean) }
+
+        switch sortParameter {
+        case .recent:
+            return filtered
+        case .alphabetical:
+            return filtered.sorted {
+                ($0.edition?.title ?? "").localizedStandardCompare($1.edition?.title ?? "") == .orderedAscending
+            }
+        }
     }
 
     var body: some View {

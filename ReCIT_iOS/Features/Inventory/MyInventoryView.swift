@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct MyInventoryView: View {
-    @EnvironmentObject private var userModel: UserModel
+    @Environment(UserModel.self) private var userModel
 
     @State var searchText: String = ""
     @State var path: NavigationPath = .init()

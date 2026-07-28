@@ -53,7 +53,7 @@ public final class InventoryItem{
         self.details = details
     }
 
-    convenience init(itemDTO: ItemDTO, forUser: User, apiService: APIService) {
+    convenience init(itemDTO: ItemDTO, forUser: User, apiService: APIServicing) {
         let updatedDate: Date? = if let updated = itemDTO.updated {
             Date(timeIntervalSince1970: updated / 1000)
         } else {

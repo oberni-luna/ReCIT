@@ -11,7 +11,7 @@ import LBSnackBar
 struct ListItemFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var listModel: ListModel
+    @Environment(ListModel.self) var listModel
     @Environment(\.snackBar) private var snackBar
 
     @Bindable var listItem: EntityListItem

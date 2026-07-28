@@ -5,26 +5,44 @@
 //  Created by Olivier Berni on 11/08/2025.
 //
 
+import Foundation
 import Testing
 @testable import ReCIT_iOS
 
 // MARK: - Integration Tests (live server)
-// Requires network access to https://inventaire.io
-// Uses a dedicated test account to avoid polluting real data.
-// Run manually; not suitable for CI.
+//
+// Hits the real https://inventaire.io backend and mutates a dedicated test
+// account, so it is DISABLED by default and never runs in CI.
+//
+// To run locally, set these environment variables in the test scheme:
+//   RECIT_RUN_INTEGRATION=1
+//   RECIT_TEST_USERNAME=<account>
+//   RECIT_TEST_PASSWORD=<password>
 
-@Suite("Inventory Integration Tests")
+enum IntegrationConfig {
+    static var isEnabled: Bool {
+        ProcessInfo.processInfo.environment["RECIT_RUN_INTEGRATION"] == "1"
+    }
+    static var username: String? {
+        ProcessInfo.processInfo.environment["RECIT_TEST_USERNAME"]
+    }
+    static var password: String? {
+        ProcessInfo.processInfo.environment["RECIT_TEST_PASSWORD"]
+    }
+}
+
+@Suite("Inventory Integration Tests", .enabled(if: IntegrationConfig.isEnabled))
 struct InventoryIntegrationTests {
     private let authService: AuthService = .init(config: .init())
     private let api: APIService = .init(env: .production)
 
-    private let testUsername: String = "OlivierB_test"
-    private let testPassword: String = "Azerty1234!"
-
     @Test("Full scenario: login → check 3 items → add book → edit details → check 4 items")
     func inventoryScenario() async throws {
+        let username: String = try #require(IntegrationConfig.username, "RECIT_TEST_USERNAME not set")
+        let password: String = try #require(IntegrationConfig.password, "RECIT_TEST_PASSWORD not set")
+
         // 1. Login
-        try await authService.login(username: testUsername, password: testPassword)
+        try await authService.login(username: username, password: password)
 
         // 2. Fetch authenticated user to get their ID
         let userDTO: UserDTO = try #require(

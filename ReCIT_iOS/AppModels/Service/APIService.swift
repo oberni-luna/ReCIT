@@ -1,30 +1,30 @@
 //
-//  File.swift
+//  APIService.swift
 //  ReCIT_iOS
 //
 //  Created by Olivier Berni on 26/08/2025.
 //
 
 import Foundation
+import OSLog
 
-class APIService {
-    private let logQuery: Bool = false
-    private let logResponses: Bool = false
+final class APIService: APIServicing {
+    private static let logger: Logger = .init(subsystem: "asso.recits", category: "network")
 
     private let session: URLSession
     private let env: Env
-    
+
     init(env: Env, session: URLSession = .shared) {
         self.env = env
         self.session = session
     }
 
     func baseUrl() -> String {
-        return env.apiBaseUrl
+        env.apiBaseUrl
     }
 
-//    https://commons.wikimedia.org/wiki/Special:FilePath/Mathieu%20Bablet%202023.jpg?width=56
-//    "https://commons.wikimedia.org/wiki/Special:FilePath/Mathieu Bablet 2023.jpg"
+    //    https://commons.wikimedia.org/wiki/Special:FilePath/Mathieu%20Bablet%202023.jpg?width=56
+    //    "https://commons.wikimedia.org/wiki/Special:FilePath/Mathieu Bablet 2023.jpg"
     func absoluteImageUrl(_ path: String?) -> String? {
         guard let path else { return nil }
         if path.hasPrefix("http") {
@@ -36,89 +36,90 @@ class APIService {
         }
     }
 
-    func send<T: Codable, U: Codable>(toEndpoint: String, method: String = "POST", payload: T, debug: Bool = false) async throws -> U? {
-        do {
-            guard let url = URL(string: "\(env.apiBaseUrl)\(toEndpoint)") else { throw NetworkError.badUrl }
-            var request = URLRequest(url: url)
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            request.httpMethod = method
-            let encoder = JSONEncoder()
-            let data = try encoder.encode(payload)
-            request.httpBody = data
-            if debug {
-                print("******** Query ********")
-                print(url)
-            }
-
-            let (responseData, response) = try await URLSession.shared.data(for: request)
-            if debug {
-                print(" Reponse :")
-                print("\(String(bytes: responseData, encoding: .utf8) ?? "No data")")
-            }
-
-            guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
-
-            guard response.statusCode >= 200 && response.statusCode < 300 else { throw NetworkError.badStatus(message: response.debugDescription) }
-
-            guard let decodedResponse = try? JSONDecoder().decode(U.self, from: responseData) else {
-                throw NetworkError.failedToDecodeResponse
-            }
-
-            return decodedResponse
-        } catch NetworkError.badUrl {
-            print("There was an error creating the URL")
-        } catch NetworkError.badResponse {
-            print("Did not get a valid response")
-        } catch NetworkError.badStatus(let message) {
-            print("Did not get a 2xx status code from the response \(message)")
-        } catch NetworkError.failedToDecodeResponse {
-            print("Failed to decode response into the given type")
-        } catch {
-            print("An error occured downloading the data:\n\(error.localizedDescription)")
-        }
-        return nil
-    }
-
-    func fetchData<T: Codable>(fromEndpoint: String, debug: Bool = false) async throws -> T? {
-        guard let downloadedData: T = await self.downloadData(fromEndpoint: fromEndpoint, debug: debug) else {return nil}
-        return downloadedData
-    }
-
-    private func downloadData<T: Codable>(fromEndpoint: String, debug: Bool = false) async -> T? {
-        do {
-            guard let url = URL(string: "\(env.apiBaseUrl)\(fromEndpoint)") else { throw NetworkError.badUrl }
-
-            if debug {
-                print("******** Query ********")
-                print(url)
-            }
-
-            let (data, response) = try await URLSession.shared.data(from: url)
-
-            if debug {
-                print(" Reponse :")
-                print("\(String(bytes: data, encoding: .utf8) ?? "No data")")
-            }
-
-            guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
-            guard response.statusCode >= 200 && response.statusCode < 300 else { throw NetworkError.badStatus(message: response.statusCode.description) }
-            let decodedResponse = try JSONDecoder().decode(T.self, from: data)
-            return decodedResponse
-        } catch NetworkError.badUrl {
-            print("There was an error creating the URL")
-        } catch NetworkError.badResponse {
-            print("Did not get a valid response")
-        } catch NetworkError.badStatus {
-            print("Did not get a 2xx status code from the response")
-        } catch NetworkError.failedToDecodeResponse {
-            print("Failed to decode response into the given type")
-        } catch {
-            print("An error occured downloading the data: \(error)")
+    func send<T: Codable, U: Codable>(
+        toEndpoint endpoint: String,
+        method: String = "POST",
+        payload: T,
+        debug: Bool = false
+    ) async throws -> U? {
+        guard let url = URL(string: "\(env.apiBaseUrl)\(endpoint)") else {
+            throw NetworkError.badUrl
         }
 
-        return nil
+        var request: URLRequest = .init(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            request.httpBody = try JSONEncoder().encode(payload)
+        } catch {
+            throw NetworkError.failedToEncodeRequest(underlying: error)
+        }
+
+        log(request: url, method: method, debug: debug)
+
+        let responseData: Data = try await perform(request: request, debug: debug)
+
+        do {
+            return try JSONDecoder().decode(U.self, from: responseData)
+        } catch {
+            Self.logger.error("Decoding failed for \(url, privacy: .public): \(error, privacy: .public)")
+            throw NetworkError.failedToDecodeResponse(underlying: error)
+        }
+    }
+
+    func fetchData<T: Codable>(
+        fromEndpoint endpoint: String,
+        debug: Bool = false
+    ) async throws -> T? {
+        guard let url = URL(string: "\(env.apiBaseUrl)\(endpoint)") else {
+            throw NetworkError.badUrl
+        }
+
+        log(request: url, method: "GET", debug: debug)
+
+        let request: URLRequest = .init(url: url)
+        let data: Data = try await perform(request: request, debug: debug)
+
+        do {
+            return try JSONDecoder().decode(T.self, from: data)
+        } catch {
+            Self.logger.error("Decoding failed for \(url, privacy: .public): \(error, privacy: .public)")
+            throw NetworkError.failedToDecodeResponse(underlying: error)
+        }
+    }
+
+    // MARK: - Private helpers
+
+    /// Performs the request using the injected session and validates the HTTP
+    /// status, surfacing typed `NetworkError`s instead of swallowing failures.
+    private func perform(request: URLRequest, debug: Bool) async throws -> Data {
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            throw NetworkError.transport(underlying: error)
+        }
+
+        if debug {
+            Self.logger.debug("Response: \(String(decoding: data, as: UTF8.self), privacy: .public)")
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.badResponse
+        }
+
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            let message: String = String(decoding: data, as: UTF8.self)
+            throw NetworkError.badStatus(code: httpResponse.statusCode, message: message)
+        }
+
+        return data
+    }
+
+    private func log(request url: URL, method: String, debug: Bool) {
+        guard debug else { return }
+        Self.logger.debug("\(method, privacy: .public) \(url, privacy: .public)")
     }
 }
-
-

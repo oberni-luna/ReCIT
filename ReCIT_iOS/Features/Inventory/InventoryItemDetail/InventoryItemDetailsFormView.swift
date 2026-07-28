@@ -13,7 +13,7 @@ import LBSnackBar
 struct InventoryItemDetailsFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var InventoryModel: InventoryModel
+    @Environment(InventoryModel.self) var inventoryModel
     @Environment(\.snackBar) private var snackBar
 
     @Bindable var item: InventoryItem
@@ -32,7 +32,7 @@ struct InventoryItemDetailsFormView: View {
                 Section {} footer: {
                     AsyncButton(action: {
                         do {
-                            try await InventoryModel.updateItemsDetails(modelContext: modelContext, items: [item])
+                            try await inventoryModel.updateItemsDetails(modelContext: modelContext, items: [item])
                             snackBar.show {
                                 SnackBarView(title: String(localized: "inventory.item.details.saved"), onDismiss: {dismiss()})
                             }

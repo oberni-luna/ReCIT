@@ -12,7 +12,7 @@ struct ListFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Environment(\.snackBar) private var snackBar
-    @EnvironmentObject var listModel: ListModel
+    @Environment(ListModel.self) var listModel
 
     @Bindable var list: EntityList = .init(_id: "", _rev: "", name: "", explanation: "", created: Date(), visibility: [], type: .work)
 

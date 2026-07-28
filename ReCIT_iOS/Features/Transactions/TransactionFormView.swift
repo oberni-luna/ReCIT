@@ -12,8 +12,8 @@ struct TransactionFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Environment(\.snackBar) private var snackBar
-    @EnvironmentObject var userModel: UserModel
-    @EnvironmentObject var transactionModel: TransactionModel
+    @Environment(UserModel.self) var userModel
+    @Environment(TransactionModel.self) var transactionModel
 
     @Bindable var transaction: UserTransaction
     @State var message: String = ""

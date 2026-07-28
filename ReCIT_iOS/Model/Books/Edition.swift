@@ -45,7 +45,7 @@ public class Edition: Identifiable, Entity {
         self.series = series
     }
 
-    convenience init(uri: String, entitySnapshotDTO: EntitySnapshotDTO, apiService: APIService, works: [Work] = [], items: [InventoryItem] = []) {
+    convenience init(uri: String, entitySnapshotDTO: EntitySnapshotDTO, apiService: APIServicing, works: [Work] = [], items: [InventoryItem] = []) {
         self.init(
             uri: uri,
             title: entitySnapshotDTO.`entity:title`,
@@ -57,7 +57,7 @@ public class Edition: Identifiable, Entity {
         )
     }
 
-    convenience init(entityDto: EntityResultDTO, apiService: APIService) {
+    convenience init(entityDto: EntityResultDTO, apiService: APIServicing) {
         self.init(
             uri: entityDto.uri,
             title: entityDto.labels["fromclaims"] ?? "Unknown",
@@ -66,5 +66,24 @@ public class Edition: Identifiable, Entity {
             authorNames: [],
             image: apiService.absoluteImageUrl(entityDto.image?.url ?? "")
         )
+    }
+
+    /// Updates the stored fields in place from a freshly fetched DTO.
+    /// Only non-empty remote values overwrite existing ones, so a sparse
+    /// server response never wipes data we already have. The `works`
+    /// relationship is handled by the caller.
+    func update(entityDto: EntityResultDTO, apiService: APIServicing) {
+        if let title = entityDto.labels["fromclaims"], !title.isEmpty {
+            self.title = title
+        }
+        if let subtitle = entityDto.descriptions?["fromclaims"] {
+            self.subtitle = subtitle
+        }
+        if let lang = entityDto.originalLang {
+            self.lang = lang
+        }
+        if let image = apiService.absoluteImageUrl(entityDto.image?.url ?? ""), !image.isEmpty {
+            self.image = image
+        }
     }
 }

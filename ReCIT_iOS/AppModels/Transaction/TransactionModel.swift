@@ -6,17 +6,18 @@
 //
 import SwiftData
 import Foundation
-import Combine
 import AsyncAlgorithms
 
-class TransactionModel: ObservableObject {
-    private let apiService: APIService
+@MainActor
+@Observable
+final class TransactionModel {
+    private let apiService: APIServicing
 
     private var userModel: UserModel?
     private var inventoryModel: InventoryModel?
 
-    init(fetchDataService: APIService = .init(env: .production), userModel: UserModel? = nil) {
-        self.apiService = fetchDataService
+    init(apiService: APIServicing, userModel: UserModel? = nil) {
+        self.apiService = apiService
         self.userModel = userModel
     }
 
@@ -66,10 +67,13 @@ class TransactionModel: ObservableObject {
 //TODO: update transaction only if _rev hasn't change
 //            let localTransaction: UserTransaction? = try getLocalTransaction(modelContext: modelContext, _id: transactionDTO._id)
 //            
-            let messages = try await self.fetchTransactionMessagesDTO(transactionId: transactionDTO._id).map { messageDTO in
-                TransactionMessage(
+            let messages = try await self.fetchTransactionMessagesDTO(transactionId: transactionDTO._id).compactMap { messageDTO -> TransactionMessage? in
+                guard let messageUser = [owner, requester].first(where: { messageDTO.user == $0._id }) else {
+                    return nil
+                }
+                return TransactionMessage(
                     _id: messageDTO._id,
-                    user: [owner, requester].filter({messageDTO.user == $0._id}).first!,
+                    user: messageUser,
                     message: messageDTO.message,
                     created: Date(timeIntervalSince1970: messageDTO.created / 1000)
                 )

@@ -9,8 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct EntitySummaryView: View {
-    @EnvironmentObject private var entityModel: EntityModel
-    @EnvironmentObject private var userModel: UserModel
+    @Environment(EntityModel.self) private var entityModel
+    @Environment(UserModel.self) private var userModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 

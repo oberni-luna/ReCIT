@@ -64,7 +64,7 @@ struct EntityListDetail: View {
 // MARK: - Author items
 
 private struct AuthorListItems: View {
-    @EnvironmentObject private var entityModel: EntityModel
+    @Environment(EntityModel.self) private var entityModel
     @Environment(\.modelContext) private var modelContext
 
     let listId: String
@@ -104,7 +104,7 @@ private struct AuthorListItems: View {
 }
 
 private struct AuthorListItemRow: View {
-    @EnvironmentObject private var listModel: ListModel
+    @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
 
     let listItem: EntityListItem
@@ -149,7 +149,7 @@ private struct AuthorListItemRow: View {
 // MARK: - Work items
 
 private struct WorkListItems: View {
-    @EnvironmentObject private var entityModel: EntityModel
+    @Environment(EntityModel.self) private var entityModel
     @Environment(\.modelContext) private var modelContext
 
     let listId: String
@@ -189,7 +189,7 @@ private struct WorkListItems: View {
 }
 
 private struct WorkListItemRow: View {
-    @EnvironmentObject private var listModel: ListModel
+    @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
 
     let listItem: EntityListItem

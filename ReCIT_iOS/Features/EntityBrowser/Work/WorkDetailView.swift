@@ -9,8 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct WorkDetailView: View {
-    @EnvironmentObject private var entityModel: EntityModel
-    @EnvironmentObject var listModel: ListModel
+    @Environment(EntityModel.self) private var entityModel
+    @Environment(ListModel.self) var listModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -49,11 +49,8 @@ struct WorkDetailView: View {
                 Text("error.with_message \(error.localizedDescription)")
             }
         }
-        .onAppear {
-            Task {
-                await fetchWork()
-                await fetchEditions()
-            }
+        .task {
+            await load()
         }
         .onChange(of: nextEntityDestination) { _, destination in
             if let destination {
@@ -131,34 +128,37 @@ struct WorkDetailView: View {
         }
     }
 
+    /// Shows cached data immediately (if any), then revalidates the work and its
+    /// editions in the background, updating the cache in place. When a cached copy
+    /// is already on screen, network failures are swallowed so the stale-but-useful
+    /// data keeps showing.
     @MainActor
-    private func fetchWork() async {
-        do {
-            if let work = try await entityModel.getOrFetchWork(modelContext: modelContext, uri: workUri) {
-                self.viewState = .loadingEditions(work: work)
-            } else {
-                self.viewState = .error(error: NSError(domain: "No work", code: 0, userInfo: nil))
-            }
-        } catch(let error) {
-            self.viewState = .error(error: error)
+    private func load() async {
+        let cached: Work? = entityModel.localWork(modelContext: modelContext, uri: workUri)
+        if let cached {
+            viewState = cached.editions.isEmpty
+                ? .loadingEditions(work: cached)
+                : .loaded(work: cached, editions: cached.editions)
         }
-    }
 
-    @MainActor
-    private func fetchEditions() async {
         do {
-            switch viewState {
-            case .loadingEditions(work: let work):
-                if let editions = try await entityModel.getWorkEditions(modelContext: modelContext, work: work) {
-                    self.viewState = .loaded(work: work, editions: editions)
-                } else {
-                    self.viewState = .error(error: NSError(domain: "No works", code: 0, userInfo: nil))
+            guard let work = try await entityModel.refreshWork(modelContext: modelContext, uri: workUri) else {
+                if cached == nil {
+                    viewState = .error(error: NSError(domain: "No work", code: 0, userInfo: nil))
                 }
-            default:
-                print(self.viewState)
+                return
             }
+
+            if cached == nil {
+                viewState = .loadingEditions(work: work)
+            }
+
+            let editions: [Edition] = try await entityModel.getWorkEditions(modelContext: modelContext, work: work) ?? work.editions
+            viewState = .loaded(work: work, editions: editions)
         } catch(let error) {
-            self.viewState = .error(error: error)
+            if cached == nil {
+                viewState = .error(error: error)
+            }
         }
     }
 }

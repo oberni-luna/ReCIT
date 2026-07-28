@@ -9,10 +9,10 @@ import SwiftUI
 import LBSnackBar
 
 struct EditionDetailView: View {
-    @EnvironmentObject private var entityModel: EntityModel
-    @EnvironmentObject private var inventoryModel: InventoryModel
-    @EnvironmentObject private var userModel: UserModel
-    @EnvironmentObject var listModel: ListModel
+    @Environment(EntityModel.self) private var entityModel
+    @Environment(InventoryModel.self) private var inventoryModel
+    @Environment(UserModel.self) private var userModel
+    @Environment(ListModel.self) var listModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.snackBar) private var snackBar
@@ -85,8 +85,8 @@ struct EditionDetailView: View {
         .toolbar {
             toolbarContent
         }
-        .onAppear {
-            Task { await loadEdition() }
+        .task {
+            await loadEdition()
         }
         .onChange(of: nextEntityDestination) { _, destination in
             if let destination {
@@ -179,16 +179,29 @@ struct EditionDetailView: View {
         }
     }
 
+    /// Shows the cached edition immediately (if any), then revalidates it in the
+    /// background, updating the cache in place. When a cached copy is already on
+    /// screen, network failures are swallowed so the stale-but-useful data keeps
+    /// showing.
     @MainActor
     private func loadEdition() async {
+        let cached: Edition? = entityModel.localEdition(modelContext: modelContext, uri: editionUri)
+        if let cached {
+            viewState = .loaded(edition: cached)
+        }
+
         do {
-            if let editions = try await entityModel.getOrFetchEditions(modelContext: modelContext, uris: [editionUri]), let edition = editions.first {
-                viewState = .loaded(edition: edition)
-            } else {
-                viewState = .noResult
+            guard let edition = try await entityModel.refreshEdition(modelContext: modelContext, uri: editionUri) else {
+                if cached == nil {
+                    viewState = .noResult
+                }
+                return
             }
+            viewState = .loaded(edition: edition)
         } catch {
-            viewState = .error(error: error)
+            if cached == nil {
+                viewState = .error(error: error)
+            }
         }
     }
 

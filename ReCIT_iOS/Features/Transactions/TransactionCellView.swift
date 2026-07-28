@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TransactionCellView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var userModel: UserModel
+    @Environment(UserModel.self) private var userModel
     
     let transaction: UserTransaction
     var amIRequester: Bool {

@@ -6,24 +6,24 @@
 //
 
 import Foundation
-import Combine
 import SwiftData
 
-class ListModel: ObservableObject {
+@MainActor
+@Observable
+final class ListModel {
 
-    private let fetchDataService: APIService
-    @Published var myUser: User?
+    private let apiService: APIServicing
 
-    init(fetchDataService: APIService = .init(env: .production)) {
-        self.fetchDataService = fetchDataService
+    init(apiService: APIServicing) {
+        self.apiService = apiService
     }
 
     func syncLists(forUser: User, modelContext: ModelContext) async throws {
         try modelContext.delete(model: EntityList.self)
-        let listsDTO: ListsDTO? = try await fetchDataService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(forUser._id)&with-elements=true", debug: true)
+        let listsDTO: ListsDTO? = try await apiService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(forUser._id)&with-elements=true", debug: true)
         if let listsDTO {
             for listDTO in listsDTO.lists {
-                let list = EntityList(listDTO: listDTO, baseUrl: fetchDataService.baseUrl())
+                let list = EntityList(listDTO: listDTO, baseUrl: apiService.baseUrl())
                 modelContext.insert(list)
             }
             try modelContext.save()
@@ -31,7 +31,7 @@ class ListModel: ObservableObject {
     }
 
     func deleteList(modelContext: ModelContext, list: EntityList) async throws {
-        if let _: OkStatusDTO? = try await fetchDataService.send(
+        if let _: OkStatusDTO? = try await apiService.send(
             toEndpoint: "/api/lists/delete",
             method: "POST",
             payload: ["ids": list._id]
@@ -45,7 +45,7 @@ class ListModel: ObservableObject {
         if list._id.isEmpty {
             try await self.createList(modelContext: modelContext, name: list.name, description: list.explanation, type: list.type.rawValue, visibility: list.visibility.map(\.rawValue))
         } else {
-            let _ : NewListResponseDTO? = try await fetchDataService.send(
+            let _ : NewListResponseDTO? = try await apiService.send(
                 toEndpoint: "/api/lists",
                 method: "PUT",
                 payload: NewListDTO(id: list._id, name: list.name, description: list.explanation, visibility: list.visibility.map(\.rawValue), type: nil),
@@ -56,13 +56,13 @@ class ListModel: ObservableObject {
     }
 
     func createList(modelContext: ModelContext, name: String, description: String, type: String, visibility: [String]) async throws {
-        let newList: NewListResponseDTO? = try await fetchDataService.send(
+        let newList: NewListResponseDTO? = try await apiService.send(
             toEndpoint: "/api/lists",
             payload: NewListDTO(id: nil, name: name, description: description, visibility: visibility, type: type)
         )
 
         if let newList {
-            modelContext.insert(EntityList(listDTO: newList.list, baseUrl: fetchDataService.baseUrl()))
+            modelContext.insert(EntityList(listDTO: newList.list, baseUrl: apiService.baseUrl()))
             try modelContext.save()
         }
     }
@@ -70,7 +70,7 @@ class ListModel: ObservableObject {
     // TODO: add optionnal comment when adding an element to a list 
     func addEntitiesToList(modelContext: ModelContext, list: EntityList, entityUris: [String], comment: String? = nil) async throws {
         let addToListDTO: AddToListDTO = .init(id: list._id, uris: entityUris)
-        if let addToListResponseDTO : AddToListResponseDTO = try await fetchDataService.send(
+        if let addToListResponseDTO : AddToListResponseDTO = try await apiService.send(
             toEndpoint: "/api/lists/add-elements",
             method: "PUT",
             payload: addToListDTO,
@@ -81,7 +81,7 @@ class ListModel: ObservableObject {
                     let _:ListElementDTO? = try await updateElementInList(elementId: element._id, comment: comment)
                 }
 
-                let entityListItem: EntityListItem = .init(listElementDTO: element, listType: list.type, baseUrl: fetchDataService.baseUrl())
+                let entityListItem: EntityListItem = .init(listElementDTO: element, listType: list.type, baseUrl: apiService.baseUrl())
                 list.elements.append(entityListItem)
             }
             try modelContext.save()
@@ -93,7 +93,7 @@ class ListModel: ObservableObject {
     func deleteElementsInList(modelContext: ModelContext, listId: String, elementIds: [String]) async throws {
         let payload: DeleteListElementsDTO = .init(id: listId, uris: elementIds)
 
-        if let listResponseDTO: [String: ListDTO] = try await fetchDataService.send(
+        if let listResponseDTO: [String: ListDTO] = try await apiService.send(
             toEndpoint: "/api/lists/remove-elements",
             method: "PUT",
             payload: payload,
@@ -118,7 +118,7 @@ class ListModel: ObservableObject {
     // TODO: add optionnal comment when adding an element to a list
     func updateElementInList(elementId: String, comment: String) async throws -> ListElementDTO? {
         let updateListElementDTO: UpdateListElementDTO = .init(id: elementId, comment: comment)
-        let elementDto: ListElementDTO? = try await fetchDataService.send(
+        let elementDto: ListElementDTO? = try await apiService.send(
             toEndpoint: "/api/lists/update-element",
             method: "PUT",
             payload: updateListElementDTO,

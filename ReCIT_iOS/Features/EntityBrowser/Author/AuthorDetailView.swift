@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AuthorDetailView: View {
-    @EnvironmentObject private var entityModel: EntityModel
+    @Environment(EntityModel.self) private var entityModel
     @Environment(\.modelContext) private var modelContext
     
     enum ViewState {
@@ -24,21 +24,19 @@ struct AuthorDetailView: View {
     @Binding var path: NavigationPath
 
     var body: some View {
+        content
+            .task {
+                await load()
+            }
+    }
+
+    @ViewBuilder
+    var content: some View {
         switch state {
         case .loadingAuthor:
             Text("author.loading")
-                .onAppear {
-                    Task {
-                        await fetchAuthor()
-                    }
-                }
         case .loadingWorks(author: let author):
             Text("author.loading_works \(author.name)")
-                .onAppear {
-                    Task {
-                        await fetchWorks()
-                    }
-                }
         case .loaded(author: let author, works: let works):
             List {
                 Section {
@@ -89,34 +87,37 @@ struct AuthorDetailView: View {
         }
     }
 
+    /// Shows cached data immediately (if any), then revalidates the author and
+    /// their works in the background, updating the cache in place. When a cached
+    /// copy is already on screen, network failures are swallowed so the
+    /// stale-but-useful data keeps showing.
     @MainActor
-    private func fetchAuthor() async {
-        do {
-            if let author = try await entityModel.getOrFetchAuthors(modelContext: modelContext, uris: [authorUri])?.first {
-                self.state = .loadingWorks(author: author)
-            } else {
-                self.state = .error(error: NSError(domain: "No author", code: 0, userInfo: nil))
-            }
-        } catch(let error) {
-            self.state = .error(error: error)
+    private func load() async {
+        let cached: Author? = entityModel.localAuthor(modelContext: modelContext, uri: authorUri)
+        if let cached {
+            state = cached.works.isEmpty
+                ? .loadingWorks(author: cached)
+                : .loaded(author: cached, works: cached.works)
         }
-    }
 
-    @MainActor
-    private func fetchWorks() async {
         do {
-            switch state {
-            case .loadingWorks(let author):
-                if let works = try await entityModel.getAuthorWorks(modelContext: modelContext, author: author) {
-                    self.state = .loaded(author: author, works: works)
-                } else {
-                    self.state = .error(error: NSError(domain: "No works", code: 0, userInfo: nil))
+            guard let author = try await entityModel.refreshAuthor(modelContext: modelContext, uri: authorUri) else {
+                if cached == nil {
+                    state = .error(error: NSError(domain: "No author", code: 0, userInfo: nil))
                 }
-            default:
-                print(self.state)
+                return
             }
+
+            if cached == nil {
+                state = .loadingWorks(author: author)
+            }
+
+            let works: [Work] = try await entityModel.getAuthorWorks(modelContext: modelContext, author: author) ?? author.works
+            state = .loaded(author: author, works: works)
         } catch(let error) {
-            self.state = .error(error: error)
+            if cached == nil {
+                state = .error(error: error)
+            }
         }
     }
 }

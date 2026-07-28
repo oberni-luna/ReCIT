@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct UserItemCellView: View {
-    @EnvironmentObject private var userModel: UserModel
-    @EnvironmentObject private var inventoryModel: InventoryModel
+    @Environment(UserModel.self) private var userModel
+    @Environment(InventoryModel.self) private var inventoryModel
 
     @Bindable var item: InventoryItem
 

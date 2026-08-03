@@ -169,10 +169,13 @@ struct InventoryItemDetailView: View {
                     }
                 }
                 .labelsHidden()
-                .onChange(of: item.transaction) { _, transactionMode in
-                    Task {
-                        try? await inventoryModel.updateItemsTransaction(modelContext: modelContext, items: [item])
-                    }
+                .onChange(of: item.transaction) { previous, newValue in
+                    inventoryModel.updateItemTransactionOptimistic(
+                        item: item,
+                        newValue: newValue,
+                        previous: previous,
+                        modelContext: modelContext
+                    )
                 }
             }
         }

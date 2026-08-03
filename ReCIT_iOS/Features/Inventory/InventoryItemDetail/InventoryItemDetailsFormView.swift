@@ -8,21 +8,25 @@
 import Foundation
 import SwiftUI
 import SwiftData
-import LBSnackBar
 
 struct InventoryItemDetailsFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Environment(InventoryModel.self) var inventoryModel
-    @Environment(\.snackBar) private var snackBar
 
-    @Bindable var item: InventoryItem
+    let item: InventoryItem
+    @State private var draft: String
+
+    init(item: InventoryItem) {
+        self.item = item
+        _draft = State(initialValue: item.details)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    TextEditor(text: $item.details)
+                    TextEditor(text: $draft)
                         .frame(minHeight: 128)
                         .withLabel(label: String(localized: "inventory.item.my_notes"))
                 }
@@ -30,21 +34,12 @@ struct InventoryItemDetailsFormView: View {
                 .listSectionSeparator(.hidden)
 
                 Section {} footer: {
-                    AsyncButton(action: {
-                        do {
-                            try await inventoryModel.updateItemsDetails(modelContext: modelContext, items: [item])
-                            snackBar.show {
-                                SnackBarView(title: String(localized: "inventory.item.details.saved"), onDismiss: {dismiss()})
-                            }
-                            dismiss()
-                        } catch {
-                            snackBar.show {
-                                SnackBarView(title: String(localized: "error.generic"), subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
-                            }
-                        }
-                    },
-                                actionOptions: [.showProgressView],
-                                label: {
+                    Button(action: {
+                        // Optimistic: persists locally now, pushes in the background,
+                        // reverts + surfaces an error via the shared reporter on failure.
+                        inventoryModel.updateItemDetailsOptimistic(item: item, details: draft, modelContext: modelContext)
+                        dismiss()
+                    }, label: {
                         Text("action.submit")
                             .frame(maxWidth: .infinity)
                     })

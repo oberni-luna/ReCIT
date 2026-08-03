@@ -61,7 +61,8 @@ struct TransactionModelTests {
         // GET reconcile (more specific match first), then POST.
         mock.stub("messages?id=", json: serverMessagesJSON(id: "m1", userId: "req", text: "Hello"))
         mock.stub("/api/transactions/messages", json: #"{"ok":true}"#)
-        let model: TransactionModel = .init(apiService: mock)
+        let reporter: AppErrorReporter = .init()
+        let model: TransactionModel = .init(apiService: mock, errorReporter: reporter)
 
         try model.postMessageOptimistic(transaction: transaction, message: "Hello", author: author, modelContext: context)
 
@@ -73,7 +74,7 @@ struct TransactionModelTests {
         // Reconciled: optimistic placeholder replaced by the server message.
         #expect(transaction.messages.count == 1)
         #expect(transaction.messages.first?._id == "m1")
-        #expect(model.lastFailure == nil)
+        #expect(reporter.lastFailure == nil)
     }
 
     @Test("postMessageOptimistic reverts the local message and surfaces an error on failure")
@@ -83,7 +84,8 @@ struct TransactionModelTests {
 
         let mock: MockAPIService = .init()
         mock.stub("/api/transactions/messages", error: NetworkError.badStatus(code: 500, message: nil))
-        let model: TransactionModel = .init(apiService: mock)
+        let reporter: AppErrorReporter = .init()
+        let model: TransactionModel = .init(apiService: mock, errorReporter: reporter)
 
         try model.postMessageOptimistic(transaction: transaction, message: "Hello", author: author, modelContext: context)
         #expect(transaction.messages.count == 1) // shown optimistically
@@ -91,7 +93,7 @@ struct TransactionModelTests {
         await model.inFlightTask?.value
 
         #expect(transaction.messages.isEmpty)     // reverted
-        #expect(model.lastFailure != nil)          // error surfaced
+        #expect(reporter.lastFailure != nil)       // error surfaced
     }
 
     @Test("postMessageOptimistic rejects an empty message synchronously")
@@ -116,7 +118,8 @@ struct TransactionModelTests {
         let mock: MockAPIService = .init()
         mock.stub("messages?id=", json: #"{"messages":[]}"#)
         mock.stub("/api/transactions/update-state", json: #"{"ok":true}"#)
-        let model: TransactionModel = .init(apiService: mock)
+        let reporter: AppErrorReporter = .init()
+        let model: TransactionModel = .init(apiService: mock, errorReporter: reporter)
 
         try model.updateStateOptimistic(transaction: transaction, newState: .accepted, message: nil, author: author, modelContext: context)
 
@@ -125,7 +128,7 @@ struct TransactionModelTests {
 
         await model.inFlightTask?.value
         #expect(transaction.state == .accepted)
-        #expect(model.lastFailure == nil)
+        #expect(reporter.lastFailure == nil)
     }
 
     @Test("updateStateOptimistic reverts state and actions on failure")
@@ -136,7 +139,8 @@ struct TransactionModelTests {
 
         let mock: MockAPIService = .init()
         mock.stub("/api/transactions/update-state", error: NetworkError.badStatus(code: 500, message: nil))
-        let model: TransactionModel = .init(apiService: mock)
+        let reporter: AppErrorReporter = .init()
+        let model: TransactionModel = .init(apiService: mock, errorReporter: reporter)
 
         try model.updateStateOptimistic(transaction: transaction, newState: .accepted, message: nil, author: author, modelContext: context)
         #expect(transaction.state == .accepted) // optimistic
@@ -145,6 +149,6 @@ struct TransactionModelTests {
 
         #expect(transaction.state == .requested)          // reverted
         #expect(transaction.actions.count == actionsBefore) // reverted
-        #expect(model.lastFailure != nil)
+        #expect(reporter.lastFailure != nil)
     }
 }

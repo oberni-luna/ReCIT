@@ -93,4 +93,45 @@ struct InventoryModelTests {
             )
         }
     }
+
+    @Test("updateItemDetailsOptimistic persists locally immediately and confirms")
+    func updateDetailsOptimistic() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let item: InventoryItem = Fixture.inventoryItem(id: "i1", edition: Fixture.edition(uri: "isbn:1"))
+        context.insert(item)
+        try context.save()
+
+        let mock: MockAPIService = .init()
+        mock.stub("/api/items/bulk-update", json: #"{"ok":true}"#)
+        let reporter: AppErrorReporter = .init()
+        let model: InventoryModel = .init(apiService: mock, errorReporter: reporter)
+
+        model.updateItemDetailsOptimistic(item: item, details: "new notes", modelContext: context)
+        #expect(item.details == "new notes") // instant
+
+        await model.inFlightTask?.value
+        #expect(item.details == "new notes")
+        #expect(reporter.lastFailure == nil)
+    }
+
+    @Test("updateItemDetailsOptimistic reverts to the previous value on failure")
+    func updateDetailsReverts() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let item: InventoryItem = Fixture.inventoryItem(id: "i1", edition: Fixture.edition(uri: "isbn:1"))
+        item.details = "old notes"
+        context.insert(item)
+        try context.save()
+
+        let mock: MockAPIService = .init()
+        mock.stub("/api/items/bulk-update", error: NetworkError.badStatus(code: 500, message: nil))
+        let reporter: AppErrorReporter = .init()
+        let model: InventoryModel = .init(apiService: mock, errorReporter: reporter)
+
+        model.updateItemDetailsOptimistic(item: item, details: "new notes", modelContext: context)
+        #expect(item.details == "new notes") // optimistic
+
+        await model.inFlightTask?.value
+        #expect(item.details == "old notes") // reverted
+        #expect(reporter.lastFailure != nil)
+    }
 }

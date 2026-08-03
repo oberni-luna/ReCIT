@@ -10,12 +10,26 @@ import SwiftUI
 struct TransactionDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(UserModel.self) private var userModel
-    
-    let transaction: UserTransaction
+
+    /// The live transaction, sourced from SwiftData by id so the view always
+    /// renders the current persisted instance and reacts to background changes.
+    @Query private var liveTransactions: [UserTransaction]
+    private let fallbackTransaction: UserTransaction
     @Binding var path: NavigationPath
 
     @State private var showTransactionForm: Bool = false
     @State private var nextTransactionState: UserTransaction.TransactionState? = nil
+
+    init(transaction: UserTransaction, path: Binding<NavigationPath>) {
+        self.fallbackTransaction = transaction
+        self._path = path
+        let id: String = transaction._id
+        _liveTransactions = Query(filter: #Predicate<UserTransaction> { $0._id == id })
+    }
+
+    private var transaction: UserTransaction {
+        liveTransactions.first ?? fallbackTransaction
+    }
 
     var body: some View {
         List {

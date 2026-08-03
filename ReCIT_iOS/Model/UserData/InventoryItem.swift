@@ -80,6 +80,26 @@ public final class InventoryItem{
             subtitle: itemDTO.snapshot.`entity:subtitle`
         )
     }
+
+    /// Merges a freshly fetched DTO into this item in place (identity preserved,
+    /// so any view bound to it stays reactive across a sync). The `edition`
+    /// relationship is left to the caller.
+    func update(from itemDTO: ItemDTO, forUser: User, apiService: APIServicing) {
+        _rev = itemDTO._rev
+        transaction = TransactionType(rawValue: itemDTO.transaction) ?? transaction
+        visibility = itemDTO.visibility?.compactMap { VisibilityAttributes(rawValue: $0) } ?? visibility
+        updated = itemDTO.updated.map { Date(timeIntervalSince1970: $0 / 1000) }
+        busy = itemDTO.busy
+        if let details = itemDTO.details {
+            self.details = details
+        }
+        searchIndex = InventoryItem.buildSearchIndex(
+            ownerUsername: forUser.username,
+            authorNames: itemDTO.snapshot.`entity:authors`?.components(separatedBy: ",") ?? [],
+            title: itemDTO.snapshot.`entity:title`,
+            subtitle: itemDTO.snapshot.`entity:subtitle`
+        )
+    }
 }
 
 extension InventoryItem {

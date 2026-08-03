@@ -10,38 +10,29 @@ import AsyncAlgorithms
 
 @MainActor
 @Observable
-final class TransactionModel {
+final class TransactionModel: OptimisticMutating {
     private let apiService: APIServicing
 
     private var userModel: UserModel?
     private var inventoryModel: InventoryModel?
 
-    /// Surfaces a background (optimistic) failure so a long-lived view can show a
-    /// SnackBar. Identifiable so observers can react to each new failure, even if
-    /// the wrapped error compares equal to a previous one.
-    struct SyncFailure: Identifiable {
-        let id: UUID = .init()
-        let error: Error
-    }
-
-    private(set) var lastFailure: SyncFailure?
+    /// Shared channel used to surface a background optimistic failure to the UI.
+    var errorReporter: AppErrorReporter?
 
     /// The most recent background reconcile/revert task spawned by an optimistic
     /// mutation. Exposed so tests can await completion; not observed by the UI.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
 
-    /// Marker prefix for locally-created placeholder messages that have not yet
-    /// been confirmed by the server. Reconcile and revert use it to find them.
-    private static let optimisticPrefix: String = "optimistic:"
-
-    init(apiService: APIServicing, userModel: UserModel? = nil) {
+    init(apiService: APIServicing, userModel: UserModel? = nil, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
         self.userModel = userModel
+        self.errorReporter = errorReporter
     }
 
-    func start(userModel: UserModel, inventoryModel: InventoryModel) {
+    func start(userModel: UserModel, inventoryModel: InventoryModel, errorReporter: AppErrorReporter) {
         self.userModel = userModel
         self.inventoryModel = inventoryModel
+        self.errorReporter = errorReporter
     }
 
     // TODO: set a message as read
@@ -135,7 +126,7 @@ final class TransactionModel {
         participants: [User],
         modelContext: ModelContext
     ) {
-        for optimistic in transaction.messages where optimistic._id.hasPrefix(Self.optimisticPrefix) {
+        for optimistic in transaction.messages where OptimisticID.isOptimistic(optimistic._id) {
             transaction.messages.removeAll { $0._id == optimistic._id }
             modelContext.delete(optimistic)
         }
@@ -222,25 +213,29 @@ final class TransactionModel {
         guard !message.isEmpty else { throw TransactionError.emptyMessage }
 
         let placeholder: TransactionMessage = .init(
-            _id: "\(Self.optimisticPrefix)\(UUID().uuidString)",
+            _id: OptimisticID.make(),
             user: author,
             message: message,
             created: .now
         )
-        modelContext.insert(placeholder)
-        transaction.messages.append(placeholder)
-        try modelContext.save()
 
-        inFlightTask = Task { [weak self] in
-            guard let self else { return }
-            do {
-                try await self.postMessage(transactionId: transaction._id, message: message)
-                try await self.reconcileMessages(transaction: transaction, modelContext: modelContext)
-            } catch {
-                self.remove(message: placeholder, from: transaction, modelContext: modelContext)
-                self.lastFailure = .init(error: error)
+        inFlightTask = optimistic(
+            modelContext,
+            apply: {
+                modelContext.insert(placeholder)
+                transaction.messages.append(placeholder)
+            },
+            revert: {
+                transaction.messages.removeAll { $0._id == placeholder._id }
+                modelContext.delete(placeholder)
+            },
+            request: { [weak self] in
+                try await self?.postMessage(transactionId: transaction._id, message: message)
+            },
+            reconcile: { [weak self] in
+                try await self?.reconcileMessages(transaction: transaction, modelContext: modelContext)
             }
-        }
+        )
     }
 
     /// Applies the new state (and optional message) to the local store immediately,
@@ -256,38 +251,36 @@ final class TransactionModel {
         let previousState: UserTransaction.TransactionState = transaction.state
         let previousActions: [UserTransaction.TransactionAction] = transaction.actions
 
-        transaction.state = newState
-        transaction.actions.append(.init(action: newState, timestamp: .now))
-
         var placeholder: TransactionMessage?
         if let message, !message.isEmpty {
-            let optimistic: TransactionMessage = .init(
-                _id: "\(Self.optimisticPrefix)\(UUID().uuidString)",
-                user: author,
-                message: message,
-                created: .now
-            )
-            modelContext.insert(optimistic)
-            transaction.messages.append(optimistic)
-            placeholder = optimistic
+            placeholder = .init(_id: OptimisticID.make(), user: author, message: message, created: .now)
         }
-        try modelContext.save()
 
-        inFlightTask = Task { [weak self] in
-            guard let self else { return }
-            do {
-                try await self.updateRequest(transaction: transaction, newState: newState, message: message)
-                try await self.reconcileMessages(transaction: transaction, modelContext: modelContext)
-            } catch {
+        inFlightTask = optimistic(
+            modelContext,
+            apply: {
+                transaction.state = newState
+                transaction.actions.append(.init(action: newState, timestamp: .now))
+                if let placeholder {
+                    modelContext.insert(placeholder)
+                    transaction.messages.append(placeholder)
+                }
+            },
+            revert: {
                 transaction.state = previousState
                 transaction.actions = previousActions
                 if let placeholder {
-                    self.remove(message: placeholder, from: transaction, modelContext: modelContext)
+                    transaction.messages.removeAll { $0._id == placeholder._id }
+                    modelContext.delete(placeholder)
                 }
-                try? modelContext.save()
-                self.lastFailure = .init(error: error)
+            },
+            request: { [weak self] in
+                try await self?.updateRequest(transaction: transaction, newState: newState, message: message)
+            },
+            reconcile: { [weak self] in
+                try await self?.reconcileMessages(transaction: transaction, modelContext: modelContext)
             }
-        }
+        )
     }
 
     /// Replaces optimistic placeholders with the server's canonical messages.
@@ -300,12 +293,6 @@ final class TransactionModel {
             modelContext: modelContext
         )
         try modelContext.save()
-    }
-
-    private func remove(message: TransactionMessage, from transaction: UserTransaction, modelContext: ModelContext) {
-        transaction.messages.removeAll { $0._id == message._id }
-        modelContext.delete(message)
-        try? modelContext.save()
     }
 
     private func getLocalTransaction(modelContext: ModelContext, _id: String) throws -> UserTransaction? {

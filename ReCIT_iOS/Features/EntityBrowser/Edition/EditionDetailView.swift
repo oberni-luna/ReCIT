@@ -58,9 +58,7 @@ struct EditionDetailView: View {
                     showAddToListDialog: $showAddToListDialog,
                     onListSelected: { list in
                         if edition.workUris.count > 1 {
-                            Task {
-                                try await listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: edition.workUris)
-                            }
+                            listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: edition.workUris)
                         } else if let _ = edition.works.first {
                             addToListItemForm = list
                         }

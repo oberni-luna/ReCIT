@@ -568,6 +568,7 @@
       }
     },
     "inventory.item.details.saved" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

@@ -11,7 +11,7 @@ import LBSnackBar
 
 struct MainTabView: View {
     @Environment(UserModel.self) private var userModel
-    @Environment(TransactionModel.self) private var transactionModel
+    @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.snackBar) private var snackBar
     let authModel: AuthModel
     
@@ -106,8 +106,8 @@ struct MainTabView: View {
                 }
             }
         }
-        .onChange(of: transactionModel.lastFailure?.id) { _, _ in
-            if let failure = transactionModel.lastFailure {
+        .onChange(of: errorReporter.lastFailure?.id) { _, _ in
+            if let failure = errorReporter.lastFailure {
                 snackBar.show { SnackBarView.error(failure.error) }
             }
         }

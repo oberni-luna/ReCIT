@@ -6,14 +6,12 @@
 //
 
 import SwiftUI
-import LBSnackBar
 import SwiftData
 
 struct ListItemFormView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Environment(ListModel.self) var listModel
-    @Environment(\.snackBar) private var snackBar
 
     @Bindable var listItem: EntityListItem
     let list: EntityList
@@ -51,18 +49,11 @@ struct ListItemFormView: View {
 
                 Section {} footer: {
                     VStack {
-                        AsyncButton(action: {
-                            do {
-                                try await listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: [entity.uri], comment: listItem.comment)
-                                dismiss()
-                            } catch {
-                                snackBar.show {
-                                    SnackBarView(title: String(localized: "error.generic"), subtitle: "\(error.localizedDescription)", onDismiss: {dismiss()})
-                                }
-                            }
-                        },
-                                    actionOptions: [.showProgressView],
-                                    label: {
+                        Button(action: {
+                            // Optimistic: the element appears in the list immediately.
+                            listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: [entity.uri], comment: listItem.comment)
+                            dismiss()
+                        }, label: {
                             Text("action.submit")
                                 .frame(maxWidth: .infinity)
                         })

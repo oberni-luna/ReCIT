@@ -61,6 +61,40 @@ public final class EntityList {
             type: EntityListType(rawValue: listDTO.type) ?? .work
         )
     }
+
+    /// Merges a freshly fetched DTO into this list in place, reconciling its
+    /// elements by `_id` (so the object identity — and any view bound to it —
+    /// survives a background sync).
+    func update(listDTO: ListDTO, baseUrl: String, modelContext: ModelContext) {
+        _rev = listDTO._rev
+        name = listDTO.name
+        explanation = listDTO.description
+        updated = listDTO.updated.map { Date(timeIntervalSince1970: $0 / 1000) }
+        visibility = listDTO.visibility.compactMap { VisibilityAttributes(rawValue: $0) }
+        type = EntityListType(rawValue: listDTO.type) ?? .work
+
+        let elementDTOs: [ListElementDTO] = listDTO.elements ?? []
+        let dtoByID: [String: ListElementDTO] = .init(elementDTOs.map { ($0._id, $0) }) { first, _ in first }
+
+        // Drop elements no longer present server-side.
+        for element in elements where dtoByID[element._id] == nil {
+            modelContext.delete(element)
+        }
+        elements.removeAll { dtoByID[$0._id] == nil }
+
+        // Update surviving elements and insert the new ones.
+        let existingIDs: Set<String> = Set(elements.map(\._id))
+        for element in elements {
+            guard let dto = dtoByID[element._id] else { continue }
+            element.comment = dto.comment ?? ""
+            element.ordinal = dto.ordinal
+        }
+        for dto in elementDTOs where !existingIDs.contains(dto._id) {
+            let item: EntityListItem = .init(listElementDTO: dto, listType: type, baseUrl: baseUrl)
+            modelContext.insert(item)
+            elements.append(item)
+        }
+    }
 }
 
 @Model

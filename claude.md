@@ -96,7 +96,17 @@ The pattern repeated across `AppModels/*/<Domain>Model.swift` is:
 2. Map the DTO to a SwiftData `@Model` via a `convenience init(<dto>:baseUrl:)` defined on the model itself (see `EntityList(listDTO:baseUrl:)`).
 3. `modelContext.insert(...)` and `try modelContext.save()`.
 
-Because the server already owns identity, every persisted model exposes `_id: String` (server doc id) and `_rev: String` (CouchDB revision). `_id` is marked `@Attribute(.unique)`. Treat the local store as a cache of server state, not the source of truth — see `ListModel.syncLists` which deletes all `EntityList`s and re-inserts on refresh.
+Because the server already owns identity, every persisted model exposes `_id: String` (server doc id) and `_rev: String` (CouchDB revision). `_id` is marked `@Attribute(.unique)`. Treat the local store as a cache of server state, not the source of truth.
+
+### Data architecture — reactive UI, background sync, optimistic writes (see `docs/adr/0001`)
+
+This is the standard for all new data flows. Three invariants:
+
+1. **UI is bound to SwiftData and reactive.** Views render from `@Query` (preferred) or a passed `@Model`; they never read a model method's return value for display. `*Model` methods return `Void`/`throws`.
+2. **Server → App is UPSERT-in-place, never delete+reinsert.** Update existing objects by `_id`, insert only the new ones. Object identity must survive a sync or open views go stale. Use `ModelContext.upsert(...)` (`AppModels/Common/RemoteUpsert.swift`); each `@Model` gets `init(dto:)` + `update(from dto:)` (idempotent, non-nil-guarded merge — a sparse payload must not wipe good local data).
+3. **App → Server is optimistic, via `OptimisticMutating.optimistic(_:apply:revert:request:reconcile:)`** (`AppModels/Common/OptimisticMutating.swift`): mutate+save locally first (instant UI), run the WS call in a model-owned background `Task`, `reconcile` on success / `revert` on failure. Failures surface through the shared `AppErrorReporter`, observed once in `MainTabView` → SnackBar. Optimistic placeholders use the `optimistic:` id prefix. Only user-initiated writes are optimistic; pure syncs just upsert.
+
+Reference implementations: `TransactionModel` (messages + state changes), `EntityModel` (entity refresh), `ListModel.syncLists` (upsert). Migration of the rest is incremental — see the ADR.
 
 ### Navigation
 

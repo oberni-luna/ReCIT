@@ -17,8 +17,8 @@ extension RootView {
                     print(" --> done \(userModel.myUser?.username ?? "<Empty>")")
 
                     if let myUser = userModel.myUser {
-                        inventoryModel.start(entityModel: entityModel)
-                        transactionModel.start(userModel: userModel, inventoryModel: inventoryModel)
+                        inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
+                        transactionModel.start(userModel: userModel, inventoryModel: inventoryModel, errorReporter: errorReporter)
 
                         try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext)
 

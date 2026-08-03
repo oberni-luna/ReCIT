@@ -11,17 +11,25 @@ import AsyncAlgorithms
 
 @MainActor
 @Observable
-final class InventoryModel {
+final class InventoryModel: OptimisticMutating {
     private static let unkownAuthorId: String = "unknown"
     private let apiService: APIServicing
     private var entityModel: EntityModel?
 
-    init(apiService: APIServicing) {
+    /// Shared channel used to surface a background optimistic failure to the UI.
+    var errorReporter: AppErrorReporter?
+
+    /// Most recent optimistic background task, exposed so tests can await it.
+    @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
+
+    init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
+        self.errorReporter = errorReporter
     }
 
-    func start(entityModel: EntityModel) {
+    func start(entityModel: EntityModel, errorReporter: AppErrorReporter) {
         self.entityModel = entityModel
+        self.errorReporter = errorReporter
     }
 
     // MARK: - Sync
@@ -68,16 +76,11 @@ final class InventoryModel {
 
             for itemDTO in itemsDTO.items {
                 if let myItem = try? getLocalItem(modelContext: modelContext, id: itemDTO._id) {
+                    // Upsert in place — keep identity so open item views stay reactive.
+                    myItem.update(from: itemDTO, forUser: forUser, apiService: apiService)
                     if myItem.edition?.works.filter({ $0.uri == relatedWork.uri }).count == 0 {
                         myItem.edition?.works.append(relatedWork)
                     }
-                    myItem.searchIndex = InventoryItem.buildSearchIndex(
-                        ownerUsername: forUser.username,
-                        authorNames: itemDTO.snapshot.`entity:authors`?.components(separatedBy: ",") ?? [],
-                        title: itemDTO.snapshot.`entity:title`,
-                        subtitle: itemDTO.snapshot.`entity:subtitle`
-                    )
-                    modelContext.insert(myItem)
                 } else {
                     let myItem: InventoryItem = .init(itemDTO: itemDTO, forUser: forUser, apiService: apiService)
                     myItem.edition?.works.append(relatedWork)
@@ -137,32 +140,42 @@ final class InventoryModel {
 
     // MARK: - Item updates
 
-    func updateItemsTransaction(modelContext: ModelContext, items: [InventoryItem]) async throws {
-        let response: UpdateItemsResponseDTO? = try await updateItems(
-            ids: items.map(\._id),
-            attribute: "transaction",
-            value: items.first?.transaction.rawValue ?? ""
+    /// Optimistically sets the item's transaction mode: persists locally at once,
+    /// pushes to the server in the background, and reverts to `previous` on failure.
+    func updateItemTransactionOptimistic(
+        item: InventoryItem,
+        newValue: TransactionType,
+        previous: TransactionType,
+        modelContext: ModelContext
+    ) {
+        inFlightTask = optimistic(
+            modelContext,
+            apply: { item.transaction = newValue },
+            revert: { item.transaction = previous },
+            request: { [weak self] in
+                let response: UpdateItemsResponseDTO? = try await self?.updateItems(ids: [item._id], attribute: "transaction", value: newValue.rawValue)
+                guard response?.ok == true else { throw NetworkError.badResponse }
+            }
         )
-
-        if response?.ok == true {
-            try modelContext.save()
-        } else {
-            throw NSError(domain: "Failed to update items", code: 0, userInfo: nil)
-        }
     }
 
-    func updateItemsDetails(modelContext: ModelContext, items: [InventoryItem]) async throws {
-        let response: UpdateItemsResponseDTO? = try await updateItems(
-            ids: items.map(\._id),
-            attribute: "details",
-            value: items.first?.details ?? ""
+    /// Optimistically sets the item's details/notes: persists locally at once,
+    /// pushes to the server in the background, and reverts on failure.
+    func updateItemDetailsOptimistic(
+        item: InventoryItem,
+        details: String,
+        modelContext: ModelContext
+    ) {
+        let previous: String = item.details
+        inFlightTask = optimistic(
+            modelContext,
+            apply: { item.details = details },
+            revert: { item.details = previous },
+            request: { [weak self] in
+                let response: UpdateItemsResponseDTO? = try await self?.updateItems(ids: [item._id], attribute: "details", value: details)
+                guard response?.ok == true else { throw NetworkError.badResponse }
+            }
         )
-
-        if response?.ok == true {
-            try modelContext.save()
-        } else {
-            throw NSError(domain: "Failed to update items", code: 0, userInfo: nil)
-        }
     }
 
     func updateItems(ids: [String], attribute: String, value: String?) async throws -> UpdateItemsResponseDTO? {

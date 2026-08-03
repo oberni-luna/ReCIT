@@ -16,18 +16,21 @@ struct RootView: View {
     @State var searchModel: SearchModel
     @State var inventoryModel: InventoryModel
     @State var transactionModel: TransactionModel
+    @State var errorReporter: AppErrorReporter
 
     @Environment(\.modelContext) var modelContext
 
     /// Composition root: a single `APIService` is shared by every app model so
     /// dependencies are wired in one place and a mock can be injected for tests.
     init(apiService: APIServicing = APIService(env: .production)) {
+        let errorReporter: AppErrorReporter = .init()
+        _errorReporter = State(initialValue: errorReporter)
         _userModel = State(initialValue: UserModel(apiService: apiService))
-        _listModel = State(initialValue: ListModel(apiService: apiService))
+        _listModel = State(initialValue: ListModel(apiService: apiService, errorReporter: errorReporter))
         _entityModel = State(initialValue: EntityModel(apiService: apiService))
         _searchModel = State(initialValue: SearchModel(apiService: apiService))
-        _inventoryModel = State(initialValue: InventoryModel(apiService: apiService))
-        _transactionModel = State(initialValue: TransactionModel(apiService: apiService))
+        _inventoryModel = State(initialValue: InventoryModel(apiService: apiService, errorReporter: errorReporter))
+        _transactionModel = State(initialValue: TransactionModel(apiService: apiService, errorReporter: errorReporter))
     }
 
     var body: some View {
@@ -41,6 +44,7 @@ struct RootView: View {
                 .environment(searchModel)
                 .environment(inventoryModel)
                 .environment(transactionModel)
+                .environment(errorReporter)
                 .environmentObject(authModel)
                 .refreshable {
                     refreshUserData()

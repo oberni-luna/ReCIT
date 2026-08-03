@@ -22,4 +22,13 @@ public class TransactionMessage: Identifiable, Equatable {
         self.created = created
         self.transaction = transaction
     }
+
+    convenience init(messageDTO: TransactionMessageDTO, user: User) {
+        self.init(
+            _id: messageDTO._id,
+            user: user,
+            message: messageDTO.message,
+            created: Date(timeIntervalSince1970: messageDTO.created / 1000)
+        )
+    }
 }

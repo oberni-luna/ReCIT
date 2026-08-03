@@ -49,21 +49,29 @@ struct TransactionFormView: View {
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
 
-                if let _ = userModel.myUser {
+                if let user = userModel.myUser {
                     Section {} footer: {
                         if let futurState = futurState {
                             AsyncButton(action: {
                                 do {
                                     switch futurState {
                                     case .requested:
+                                        // Brand-new request: no local transaction to mutate yet,
+                                        // so this stays server-first then syncs.
                                         try await transactionModel.postRequest(
                                             itemId: transaction.item._id,
                                             message: message
                                         )
+                                        try await transactionModel.syncTransactions(modelContext: modelContext)
                                     case .accepted, .confirmed, .returned, .declined, .cancelled:
-                                        try await transactionModel.updateRequest(transaction: transaction, newState: futurState, message: message)
+                                        try transactionModel.updateStateOptimistic(
+                                            transaction: transaction,
+                                            newState: futurState,
+                                            message: message,
+                                            author: user,
+                                            modelContext: modelContext
+                                        )
                                     }
-                                    try await transactionModel.syncTransactions(modelContext: modelContext)
                                     dismiss()
                                 } catch {
                                     snackBar.show {
@@ -81,13 +89,16 @@ struct TransactionFormView: View {
                         } else {
                             AsyncButton(action: {
                                 do {
-                                    try await transactionModel.postMessage(transactionId: transaction._id, message: message)
-
-                                    try await transactionModel.syncTransactions(modelContext: modelContext)
+                                    try transactionModel.postMessageOptimistic(
+                                        transaction: transaction,
+                                        message: message,
+                                        author: user,
+                                        modelContext: modelContext
+                                    )
+                                    dismiss()
                                 } catch {
                                     snackBar.show { SnackBarView.error(error) }
                                 }
-                                dismiss()
                             },
                             actionOptions: [.showProgressView],
                             label: {

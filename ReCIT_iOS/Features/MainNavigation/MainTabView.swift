@@ -7,9 +7,12 @@
 
 import Foundation
 import SwiftUI
+import LBSnackBar
 
 struct MainTabView: View {
     @Environment(UserModel.self) private var userModel
+    @Environment(TransactionModel.self) private var transactionModel
+    @Environment(\.snackBar) private var snackBar
     let authModel: AuthModel
     
     enum TabConfig: String, Hashable, CaseIterable {
@@ -101,6 +104,11 @@ struct MainTabView: View {
                         .environment(\.symbolVariants, symbolVariant)
                     }
                 }
+            }
+        }
+        .onChange(of: transactionModel.lastFailure?.id) { _, _ in
+            if let failure = transactionModel.lastFailure {
+                snackBar.show { SnackBarView.error(failure.error) }
             }
         }
     }

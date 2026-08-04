@@ -74,7 +74,7 @@ extension NavigationDestination {
       case .author(let uri):
           AuthorDetailView(authorUri: uri, path: path)
       case .work(let uri):
-          WorkDetailView(workUri: uri, path: path)
+          WorkEditionGatewayView(workUri: uri, path: path)
       case .book(let anchor):
           BookDetailView(anchor: anchor, path: path)
       case .user(let user):

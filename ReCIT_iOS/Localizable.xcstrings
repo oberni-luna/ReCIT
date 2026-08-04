@@ -178,6 +178,7 @@
       }
     },
     "action.send_request" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -372,6 +373,7 @@
       }
     },
     "edition.others_inventory" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -617,6 +619,7 @@
       }
     },
     "inventory.item.other_edition_for" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1023,13 +1026,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "New Book"
+            "value" : "Book"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouveau Livre"
+            "state" : "needs_review",
+            "value" : "Livre"
           }
         }
       }
@@ -1051,6 +1054,7 @@
       }
     },
     "nav.edition" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1225,9 +1229,6 @@
           }
         }
       }
-    },
-    "Old item view" : {
-
     },
     "profile.anonymous" : {
       "localizations" : {

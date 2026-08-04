@@ -143,10 +143,12 @@ Follow-up (not a blocker for Move 1): the "request to borrow" flow (`Transaction
 the old item screen exposed for *other people's* copies now has no entry point — relocate it
 into `BookDetailView`'s Communauté section.
 
-### Move 2 — Work as edition gateway (can follow later)
+### Move 2 — Work as edition gateway (done)
 
-- **P6** — Build `WorkEditionGatewayView`: load editions → 1 forwards to `.book(.edition)`
-  (path-replacing so Back skips it), >1 renders the picker.
-- **P7** — Point `.work(uri)` at the gateway; rewire push-sites (`AuthorDetailView`,
-  `EntityListDetail`, search-by-work) so nobody lands on a standalone work screen. Delete the old
-  `WorkDetailView`.
+- **P6 (done)** — `WorkEditionGatewayView` loads the work's editions, then: exactly one edition
+  → renders `BookDetailView` inline (so there is no separate work screen and Back returns to the
+  caller); more than one → `WorkEditionPicker` (work header + editions list). Rendering the book
+  inline achieves the intended "Back skips the gateway" UX without mutating the `NavigationPath`.
+- **P7 (done)** — `.work(uri)` now resolves to `WorkEditionGatewayView`; the old `WorkDetailView`
+  is deleted. Push-sites were left untouched — they already push `.work`, which the gateway sits
+  behind, so no caller needed rewiring.

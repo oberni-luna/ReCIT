@@ -139,9 +139,10 @@ Author detail is **out of scope** — an author is not a book; `.author` stays a
 - **P5 (done)** — Deleted `EditionDetailView` / `InventoryItemDetailView` and the `.edition` /
   `.item` cases; rerouted `CommunityView`'s `Edition.self` destination to `BookDetailView`.
 
-Follow-up (not a blocker for Move 1): the "request to borrow" flow (`TransactionFormView`) that
-the old item screen exposed for *other people's* copies now has no entry point — relocate it
-into `BookDetailView`'s Communauté section.
+Follow-up (done): the "request to borrow" flow (`TransactionFormView`) that the old item screen
+exposed for *other people's* copies is back, as a "Emprunter à" submenu in `BookDetailView`'s
+toolbar menu — it lists the first five distinct other owners and opens the request form for the
+chosen one.
 
 ### Move 2 — Work as edition gateway (done)
 

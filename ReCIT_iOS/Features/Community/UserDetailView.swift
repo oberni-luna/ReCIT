@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct UserDetailView: View {
+    @Environment(UserModel.self) private var userModel
+
     @State private var nextNavigationDestination: NavigationDestination?
+    @State private var borrowFromItem: InventoryItem?
 
     let user: User
     @Binding var path: NavigationPath
@@ -32,6 +35,18 @@ struct UserDetailView: View {
                             InventoryCell(item: item, filterParameter: .userInventory)
                         }
                         .buttonStyle(.plain)
+                        .contextMenu {
+                            if item.ownerId != userModel.myUser?._id {
+                                if item.transaction == .inventorying {
+                                    Button("community.owner_not_lending \(user.username)", systemImage: "hand.raised.slash") { }
+                                        .disabled(true)
+                                } else {
+                                    Button("action.borrow_from_user \(user.username)", systemImage: "hand.wave") {
+                                        borrowFromItem = item
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             } header: {
@@ -41,6 +56,26 @@ struct UserDetailView: View {
             }
         }
         .navigationTitle("nav.user")
+        .sheet(item: $borrowFromItem) { item in
+            if let owner = item.owner, let me = userModel.myUser {
+                TransactionFormView(
+                    transaction: .init(
+                        _id: "",
+                        _rev: "",
+                        item: item,
+                        owner: owner,
+                        requester: me,
+                        type: item.transaction,
+                        created: .now,
+                        messages: [],
+                        state: .requested,
+                        actions: [],
+                        readStatus: .init(owner: false, requester: true)
+                    ),
+                    transition: TransactionStateMachine.requestTransition
+                )
+            }
+        }
     }
 }
 

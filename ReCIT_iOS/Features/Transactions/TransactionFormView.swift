@@ -71,7 +71,7 @@ struct TransactionFormView: View {
                 if transaction._id.isEmpty {
                     Section {
                         Picker("transaction.form.type", selection: $transaction.type) {
-                            ForEach(TransactionType.allCases, id: \.self) { type in
+                            ForEach(TransactionType.allCases.filter { $0 != .inventorying }, id: \.self) { type in
                                 Text(type.rawValue).tag(type)
                             }
                         }

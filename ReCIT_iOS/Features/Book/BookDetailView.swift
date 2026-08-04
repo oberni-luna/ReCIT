@@ -27,6 +27,8 @@ struct BookDetailView: View {
     @State private var nextEntityDestination: NavigationDestination?
     @State private var showAddToListDialog: Bool = false
     @State private var addToListItemForm: EntityList?
+    @State private var borrowFromItem: InventoryItem?
+    @State private var showDeleteConfirmation: Bool = false
 
     @Binding var path: NavigationPath
 
@@ -80,9 +82,41 @@ struct BookDetailView: View {
                 Text("edition.no_result")
             }
         }
-        .navigationTitle("nav.book")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             toolbarContent
+        }
+        .sheet(item: $borrowFromItem) { item in
+            if let owner = item.owner, let me = userModel.myUser {
+                TransactionFormView(
+                    transaction: .init(
+                        _id: "",
+                        _rev: "",
+                        item: item,
+                        owner: owner,
+                        requester: me,
+                        type: item.transaction,
+                        created: .now,
+                        messages: [],
+                        state: .requested,
+                        actions: [],
+                        readStatus: .init(owner: false, requester: true)
+                    ),
+                    transition: TransactionStateMachine.requestTransition
+                )
+            }
+        }
+        .confirmationDialog(
+            "inventory.item.delete_confirm",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("inventory.item.remove_from_inventory", role: .destructive) {
+                Task {
+                    await deleteOwnedItem()
+                }
+            }
+            Button("action.cancel", role: .cancel) { }
         }
         .task {
             await viewModel.load(entityModel: entityModel, modelContext: modelContext)
@@ -97,30 +131,56 @@ struct BookDetailView: View {
 
     @ToolbarContentBuilder
     var toolbarContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .confirmationAction) {
-            switch viewModel.viewState {
-            case .loaded(let edition):
-                if iOwn(edition) == nil {
-                    Button("action.add_to_inventory", systemImage: "plus") {
-                        Task {
-                            await addToInventory(edition: edition)
+        ToolbarItem(placement: .confirmationAction) {
+            if case .loaded(let edition) = viewModel.viewState {
+                Menu {
+                    if iOwn(edition) == nil {
+                        Button("action.add_to_inventory", systemImage: "plus") {
+                            Task {
+                                await addToInventory(edition: edition)
+                            }
+                        }
+
+                        let lenders: [InventoryItem] = borrowableItems(edition)
+                        if !lenders.isEmpty {
+                            Menu("action.borrow_from", systemImage: "hand.wave") {
+                                ForEach(lenders) { item in
+                                    if let owner = item.owner {
+                                        Button(owner.username) {
+                                            borrowFromItem = item
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                }
 
-                Button {
-                    showAddToListDialog = true
+                    Button("action.add_to_list", systemImage: "list.bullet") {
+                        showAddToListDialog = true
+                    }
+
+                    if iOwn(edition) != nil {
+                        Button("inventory.item.remove_from_inventory", systemImage: "trash", role: .destructive) {
+                            showDeleteConfirmation = true
+                        }
+                        .tint(.foregroundError)
+                    }
                 } label: {
-                    Label("action.add_to_list", systemImage: "list.bullet")
+                    Label("action.more", systemImage: "ellipsis")
                 }
-
-            case .loading, .error, .noResult:
-                EmptyView()
             }
-        } label: {
-            Image(systemName: "ellipsis")
-                .imageScale(.large)
         }
+    }
+
+    /// The first five distinct other owners of this edition — the people I could
+    /// ask to borrow it from. (ADR 0002 follow-up: the request-to-borrow flow.)
+    private func borrowableItems(_ edition: Edition) -> [InventoryItem] {
+        var seenOwners: Set<String> = []
+        return edition.items
+            .filter { $0.ownerId != userModel.myUser?._id && $0.owner != nil && $0.transaction != .inventorying }
+            .filter { seenOwners.insert($0.ownerId).inserted }
+            .prefix(5)
+            .map { $0 }
     }
 
     @ViewBuilder
@@ -169,6 +229,7 @@ struct BookDetailView: View {
     @ViewBuilder
     func communitySection(edition: Edition) -> some View {
         let othersItems: [InventoryItem] = edition.items.filter { $0.ownerId != userModel.myUser?._id }
+        let canBorrow: Bool = iOwn(edition) == nil
         if !othersItems.isEmpty {
             Section("nav.community") {
                 ForEach(othersItems) { item in
@@ -182,6 +243,18 @@ struct BookDetailView: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .contextMenu {
+                        if canBorrow, let owner = item.owner {
+                            if item.transaction == .inventorying {
+                                Button("community.owner_not_lending \(owner.username)", systemImage: "hand.raised.slash") { }
+                                    .disabled(true)
+                            } else {
+                                Button("action.borrow_from_user \(owner.username)", systemImage: "hand.wave") {
+                                    borrowFromItem = item
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -194,6 +267,23 @@ struct BookDetailView: View {
     func myCopySection(edition: Edition) -> some View {
         if let item = iOwn(edition) {
             BookMyCopySection(item: item)
+        }
+    }
+
+    /// Removes my copy of the edition after confirmation. No dismiss — the book
+    /// screen stays; the "my copy" section drops and the add-to-inventory action
+    /// reappears reactively once the item is gone.
+    @MainActor
+    private func deleteOwnedItem() async {
+        guard case .loaded(let edition) = viewModel.viewState, let item = iOwn(edition) else { return }
+
+        do {
+            try await inventoryModel.removeItem(item, modelContext: modelContext)
+            snackBar.show {
+                SnackBarView(title: String(localized: "inventory.item.deleted"), onDismiss: nil)
+            }
+        } catch {
+            snackBar.show { SnackBarView.error(error) }
         }
     }
 

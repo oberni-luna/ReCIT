@@ -50,13 +50,11 @@ struct LoginView: View {
 
                 HStack {
                     AsyncButton(action: {
-                        Task {
-                            do {
-                                try await authModel.login(username: username, password: password)
-                                onLogin()
-                            } catch {
-                                errorMessage = (error as? AuthService.AuthError)?.errorDescription ?? error.localizedDescription
-                            }
+                        do {
+                            try await authModel.login(username: username, password: password)
+                            onLogin()
+                        } catch {
+                            errorMessage = (error as? AuthService.AuthError)?.errorDescription ?? error.localizedDescription
                         }
                     }, actionOptions: [.showProgressView], label: {
                         Text("login.button.signin")

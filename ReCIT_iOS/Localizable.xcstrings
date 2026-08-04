@@ -274,6 +274,39 @@
         }
       }
     },
+    "book.other_editions %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other editions of %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autres éditions de %@"
+          }
+        }
+      }
+    },
+    "book.other_editions_subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other editions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autres éditions"
+          }
+        }
+      }
+    },
     "edition.add_to_inventory" : {
       "extractionState" : "stale",
       "localizations" : {

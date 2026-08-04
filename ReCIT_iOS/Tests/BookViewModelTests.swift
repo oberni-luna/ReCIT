@@ -187,4 +187,57 @@ struct BookViewModelTests {
 
         #expect(fetched.map(\._id) == ["mine-ed1"])
     }
+
+    // MARK: - worksWithOtherEditions
+
+    /// Builds an edition whose single work also exists in `siblingUris` other
+    /// editions, all pre-cached so `getWorkEditions` needs no `by-uris` fetch.
+    private func makeWorkWithEditions(
+        context: ModelContext,
+        workUri: String,
+        editionUris: [String]
+    ) -> Work {
+        let work: Work = .init(uri: workUri, lastrevid: 0, title: "W")
+        context.insert(work)
+        for uri in editionUris {
+            let edition: Edition = Fixture.edition(uri: uri)
+            edition.works = [work]
+            context.insert(edition)
+        }
+        return work
+    }
+
+    @Test("worksWithOtherEditions lists a work that has sibling editions")
+    func otherEditionsPopulatedWhenSiblingsExist() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        _ = makeWorkWithEditions(context: context, workUri: "wd:W", editionUris: ["isbn:A", "isbn:B"])
+        try context.save()
+
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/by-uris", json: emptyEntities) // refreshEdition keeps the cached edition
+        mock.stub("/api/entities/reverse-claims", json: #"{"uris":["isbn:A","isbn:B"]}"#)
+        let entityModel: EntityModel = .init(apiService: mock)
+
+        let sut: BookViewModel = .init(anchor: .edition(uri: "isbn:A"))
+        await sut.load(entityModel: entityModel, modelContext: context)
+
+        #expect(sut.worksWithOtherEditions.map(\.uri) == ["wd:W"])
+    }
+
+    @Test("worksWithOtherEditions stays empty when the work has only this edition")
+    func otherEditionsEmptyWhenNoSiblings() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        _ = makeWorkWithEditions(context: context, workUri: "wd:W", editionUris: ["isbn:A"])
+        try context.save()
+
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/by-uris", json: emptyEntities)
+        mock.stub("/api/entities/reverse-claims", json: #"{"uris":["isbn:A"]}"#)
+        let entityModel: EntityModel = .init(apiService: mock)
+
+        let sut: BookViewModel = .init(anchor: .edition(uri: "isbn:A"))
+        await sut.load(entityModel: entityModel, modelContext: context)
+
+        #expect(sut.worksWithOtherEditions.isEmpty)
+    }
 }

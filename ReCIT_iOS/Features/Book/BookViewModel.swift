@@ -29,6 +29,12 @@ final class BookViewModel {
 
     private(set) var viewState: ViewState = .loading
 
+    /// The works this edition is based on that have *other* editions besides this
+    /// one — i.e. the ones worth offering an "other editions" link for. Populated
+    /// in the background after the edition loads; empty until then and whenever no
+    /// underlying work has siblings.
+    private(set) var worksWithOtherEditions: [Work] = []
+
     init(anchor: BookAnchor) {
         self.anchor = anchor
     }
@@ -56,19 +62,43 @@ final class BookViewModel {
             viewState = .loaded(edition: cached)
         }
 
+        var resolved: Edition? = cached
         do {
-            guard let edition = try await entityModel.refreshEdition(modelContext: modelContext, uri: editionUri) else {
-                if cached == nil {
-                    viewState = .noResult
-                }
-                return
+            if let edition = try await entityModel.refreshEdition(modelContext: modelContext, uri: editionUri) {
+                viewState = .loaded(edition: edition)
+                resolved = edition
+            } else if cached == nil {
+                viewState = .noResult
             }
-            viewState = .loaded(edition: edition)
         } catch {
             if cached == nil {
                 viewState = .error(error: error)
             }
         }
+
+        if let resolved {
+            await loadOtherEditions(for: resolved, entityModel: entityModel, modelContext: modelContext)
+        }
+    }
+
+    /// For each work the edition is based on, resolves whether that work has
+    /// editions beyond this one and records the ones that do. Runs after the
+    /// edition is on screen; mutating `worksWithOtherEditions` updates the view
+    /// reactively. Failures are swallowed — a missing link is better than a stuck
+    /// screen.
+    private func loadOtherEditions(
+        for edition: Edition,
+        entityModel: EntityModel,
+        modelContext: ModelContext
+    ) async {
+        var result: [Work] = []
+        for work in edition.works {
+            let editions: [Edition] = (try? await entityModel.getWorkEditions(modelContext: modelContext, work: work)) ?? []
+            if editions.count > 1 {
+                result.append(work)
+            }
+        }
+        worksWithOtherEditions = result
     }
 
     /// Predicate for the view's `@Query` of the current user's copies of an

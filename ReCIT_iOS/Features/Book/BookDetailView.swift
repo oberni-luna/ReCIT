@@ -50,7 +50,7 @@ struct BookDetailView: View {
             case .loaded(let edition):
                 List {
                     headerSection(edition: edition)
-                    worksSection(edition: edition)
+                    otherEditionsSection()
                     communitySection(edition: edition)
                     myCopySection(edition: edition)
                 }
@@ -144,27 +144,20 @@ struct BookDetailView: View {
         }
     }
 
-    /// The works this edition contains (1..N). A single-work edition still lists
-    /// its one work; an omnibus lists them all. Each links to the work. (ADR 0002)
+    /// A link to the other editions of each underlying work that actually has
+    /// some. A work with only this one edition contributes no row; when no
+    /// underlying work has siblings the section is absent entirely. Tapping opens
+    /// the work's edition gateway (the picker). (ADR 0002)
     @ViewBuilder
-    func worksSection(edition: Edition) -> some View {
-        if !edition.works.isEmpty {
-            Section("nav.works") {
-                ForEach(edition.works.sorted(by: { $0.title < $1.title })) { work in
-                    let result: SearchResult = .init(
-                        id: work.uri,
-                        uri: work.uri,
-                        title: work.title,
-                        description: work.subtitle,
-                        imageUrl: work.image,
-                        score: 0,
-                        type: .works
-                    )
+    func otherEditionsSection() -> some View {
+        if !viewModel.worksWithOtherEditions.isEmpty {
+            Section {
+                ForEach(viewModel.worksWithOtherEditions.sorted(by: { $0.title < $1.title })) { work in
                     Button {
                         nextEntityDestination = NavigationDestination.work(uri: work.uri)
                     } label: {
                         NavigationLink(value: UUID()) {
-                            SearchResultCell(result: result)
+                            OtherEditionsCell(work: work)
                         }
                     }
                     .buttonStyle(.plain)

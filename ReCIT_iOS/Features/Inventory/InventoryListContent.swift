@@ -66,7 +66,7 @@ struct InventoryListContent: View {
             emptyView
         } else {
             ForEach(displayItems) { item in
-                NavigationLink(value: NavigationDestination.item(item: item)) {
+                NavigationLink(value: NavigationDestination.book(anchor: .item(item))) {
                     InventoryCell(item: item, filterParameter: filterParameter)
                 }
             }

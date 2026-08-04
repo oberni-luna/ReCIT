@@ -12,9 +12,8 @@ import SwiftData
 enum NavigationDestination: Equatable, Hashable, Identifiable {
     case author(uri: String)
     case work(uri: String)
-    case edition(uri: String)
+    case book(anchor: BookAnchor)
     case user(user: User)
-    case item(item: InventoryItem)
     case transaction(transaction: UserTransaction)
     case allTransactions
     case entityList(id: String)
@@ -25,12 +24,10 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "author:\(uri)"
         case .work(let uri):
             return "work:\(uri)"
-        case .edition(let uri):
-            return "edition:\(uri)"
+        case .book(let anchor):
+            return "book:\(anchor.stableId)"
         case .user(let user):
             return "user:\(user._id)"
-        case .item(let item):
-            return "item:\(item._id)"
         case .transaction(let transaction):
             return "transaction:\(transaction._id)"
         case .allTransactions:
@@ -38,6 +35,18 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
         case .entityList(let id):
             return "entityList:\(id)"
         }
+    }
+
+    // Equatable / Hashable are defined on `id` rather than synthesized. Several
+    // cases carry SwiftData `@Model` payloads whose synthesized conformance does
+    // not compose cleanly into this enum under strict concurrency. `id` is the
+    // navigation identity, so this is also the correct notion of equality.
+    static func == (lhs: NavigationDestination, rhs: NavigationDestination) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 
     static func destinationForSearchResult(_ result: SearchResult) -> NavigationDestination? {
@@ -48,7 +57,7 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return .author(uri: result.uri)
         case .inventoryItem:
             if let item = result.localItem {
-                return .item(item: item)
+                return .book(anchor: .item(item))
             } else {
                 return nil
             }
@@ -66,12 +75,10 @@ extension NavigationDestination {
           AuthorDetailView(authorUri: uri, path: path)
       case .work(let uri):
           WorkDetailView(workUri: uri, path: path)
-      case .edition(let uri):
-          EditionDetailView(editionUri: uri, path: path)
+      case .book(let anchor):
+          BookDetailView(anchor: anchor, path: path)
       case .user(let user):
           UserDetailView(user:user, path: path)
-      case .item(let item):
-          InventoryItemDetailView(item: item, path: path)
       case .transaction(let transaction):
           TransactionDetailView(transaction: transaction, path: path)
       case .allTransactions:

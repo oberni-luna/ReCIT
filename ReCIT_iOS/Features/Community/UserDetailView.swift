@@ -27,7 +27,7 @@ struct UserDetailView: View {
                 } else {
                     ForEach(user.items) { item in
                         Button {
-                            path.append(NavigationDestination.item(item: item))
+                            path.append(NavigationDestination.book(anchor: .item(item)))
                         } label: {
                             InventoryCell(item: item, filterParameter: .userInventory)
                         }

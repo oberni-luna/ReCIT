@@ -1,90 +1,91 @@
 //
-//  EditionView.swift
+//  BookDetailView.swift
 //  ReCIT_iOS
 //
-//  Created by Olivier Berni on 12/12/2025.
+//  Created by Olivier Berni on 04/08/2026.
 //
-import SwiftData
+//  The unified book screen (ADR 0002, Move 1). Anchored on an Edition, it
+//  reaches parity with the old EditionDetailView: header, the works the edition
+//  contains, who owns it in the community, and my own copy. The ownership
+//  overlay is read-only here — folding in item editing (notes, transactions) is
+//  P3.
+//
+
 import SwiftUI
+import SwiftData
 import LBSnackBar
 
-struct EditionDetailView: View {
+struct BookDetailView: View {
     @Environment(EntityModel.self) private var entityModel
     @Environment(InventoryModel.self) private var inventoryModel
     @Environment(UserModel.self) private var userModel
-    @Environment(ListModel.self) var listModel
+    @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.snackBar) private var snackBar
 
-    enum ViewState {
-        case loadingEdition
-        case loaded(edition: Edition)
-        case error(error: Error)
-        case noResult
-    }
-
-    let editionUri: String
-    @State var viewState: ViewState = .loadingEdition
+    @State private var viewModel: BookViewModel
     @State private var nextEntityDestination: NavigationDestination?
     @State private var showAddToListDialog: Bool = false
-    
+    @State private var addToListItemForm: EntityList?
+
     @Binding var path: NavigationPath
 
-    var inMyInventory: Bool {
-        switch viewState {
-        case .loaded(edition: let edition):
-            edition.items.first(where: { item in item.owner?.id == userModel.myUser?.id }) != nil
-        default:
-            false
-        }
+    init(
+        anchor: BookAnchor,
+        path: Binding<NavigationPath>
+    ) {
+        _viewModel = State(initialValue: .init(anchor: anchor))
+        _path = path
     }
 
-    @State private var addToListItemForm: EntityList? = nil
+    private func iOwn(_ edition: Edition) -> InventoryItem? {
+        edition.items.first { $0.ownerId == userModel.myUser?._id }
+    }
 
     var body: some View {
         VStack {
-            switch viewState {
-            case .loadingEdition:
+            switch viewModel.viewState {
+            case .loading:
                 ProgressView()
-            case .loaded(edition: let edition):
+            case .loaded(let edition):
                 List {
                     headerSection(edition: edition)
-                    userInventorySection(edition: edition)
-                    myInventorySection(edition: edition)
+                    worksSection(edition: edition)
+                    communitySection(edition: edition)
+                    myCopySection(edition: edition)
                 }
                 .applyListBackground()
                 .selectListToAdd(
                     showAddToListDialog: $showAddToListDialog,
                     onListSelected: { list in
                         if edition.workUris.count > 1 {
-                            listModel.addEntitiesToList(modelContext: modelContext, list: list, entityUris: edition.workUris)
-                        } else if let _ = edition.works.first {
+                            listModel.addEntitiesToList(
+                                modelContext: modelContext,
+                                list: list,
+                                entityUris: edition.workUris
+                            )
+                        } else if edition.works.first != nil {
                             addToListItemForm = list
                         }
-                    })
-                .selectListToAdd(
-                    showAddToListDialog: $showAddToListDialog,
-                    onListSelected: { list in
-                        addToListItemForm = list
-                    })
+                    }
+                )
                 .sheet(item: $addToListItemForm) { list in
                     if let work = edition.works.first {
                         ListItemFormView(entity: work, list: list)
                     }
                 }
-            case .error(error: let error):
+            case .error(let error):
                 Text("error.with_message \(error.localizedDescription)")
             case .noResult:
                 Text("edition.no_result")
             }
         }
-        .navigationTitle("nav.edition")
+        .navigationTitle("nav.book")
         .toolbar {
             toolbarContent
         }
         .task {
-            await loadEdition()
+            await viewModel.load(entityModel: entityModel, modelContext: modelContext)
         }
         .onChange(of: nextEntityDestination) { _, destination in
             if let destination {
@@ -95,25 +96,25 @@ struct EditionDetailView: View {
     }
 
     @ToolbarContentBuilder
-    var toolbarContent : some ToolbarContent {
+    var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .confirmationAction) {
-            switch viewState {
+            switch viewModel.viewState {
             case .loaded(let edition):
-                if !inMyInventory {
+                if iOwn(edition) == nil {
                     Button("action.add_to_inventory", systemImage: "plus") {
                         Task {
                             await addToInventory(edition: edition)
                         }
                     }
                 }
-                
+
                 Button {
                     showAddToListDialog = true
                 } label: {
                     Label("action.add_to_list", systemImage: "list.bullet")
                 }
 
-            case .loadingEdition, .error, .noResult:
+            case .loading, .error, .noResult:
                 EmptyView()
             }
         } label: {
@@ -143,11 +144,41 @@ struct EditionDetailView: View {
         }
     }
 
+    /// The works this edition contains (1..N). A single-work edition still lists
+    /// its one work; an omnibus lists them all. Each links to the work. (ADR 0002)
     @ViewBuilder
-    func userInventorySection(edition: Edition) -> some View {
-        if !edition.items.filter({$0.owner?.id != userModel.myUser?.id}).isEmpty {
-            Section("edition.others_inventory") {
-                ForEach(edition.items.filter({$0.owner?.id != userModel.myUser?.id})) { item in
+    func worksSection(edition: Edition) -> some View {
+        if !edition.works.isEmpty {
+            Section("nav.works") {
+                ForEach(edition.works.sorted(by: { $0.title < $1.title })) { work in
+                    let result: SearchResult = .init(
+                        id: work.uri,
+                        uri: work.uri,
+                        title: work.title,
+                        description: work.subtitle,
+                        imageUrl: work.image,
+                        score: 0,
+                        type: .works
+                    )
+                    Button {
+                        nextEntityDestination = NavigationDestination.work(uri: work.uri)
+                    } label: {
+                        NavigationLink(value: UUID()) {
+                            SearchResultCell(result: result)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    func communitySection(edition: Edition) -> some View {
+        let othersItems: [InventoryItem] = edition.items.filter { $0.ownerId != userModel.myUser?._id }
+        if !othersItems.isEmpty {
+            Section("nav.community") {
+                ForEach(othersItems) { item in
                     Button {
                         if let owner = item.owner {
                             nextEntityDestination = NavigationDestination.user(user: owner)
@@ -163,43 +194,13 @@ struct EditionDetailView: View {
         }
     }
 
+    /// Ownership overlay — editable. Delegates to `BookMyCopySection`, which owns
+    /// the `@Bindable` item so the transaction picker and optimistic writes keep
+    /// working after the fold. (ADR 0002, P3)
     @ViewBuilder
-    func myInventorySection(edition: Edition) -> some View {
-        if let item = edition.items.filter({$0.owner?.id == userModel.myUser?.id}).first {
-            Section("edition.my_inventory") {
-                Button {
-                    nextEntityDestination = NavigationDestination.item(item: item)
-                } label: {
-                    UserItemCellView(item: item)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    /// Shows the cached edition immediately (if any), then revalidates it in the
-    /// background, updating the cache in place. When a cached copy is already on
-    /// screen, network failures are swallowed so the stale-but-useful data keeps
-    /// showing.
-    @MainActor
-    private func loadEdition() async {
-        let cached: Edition? = entityModel.localEdition(modelContext: modelContext, uri: editionUri)
-        if let cached {
-            viewState = .loaded(edition: cached)
-        }
-
-        do {
-            guard let edition = try await entityModel.refreshEdition(modelContext: modelContext, uri: editionUri) else {
-                if cached == nil {
-                    viewState = .noResult
-                }
-                return
-            }
-            viewState = .loaded(edition: edition)
-        } catch {
-            if cached == nil {
-                viewState = .error(error: error)
-            }
+    func myCopySection(edition: Edition) -> some View {
+        if let item = iOwn(edition) {
+            BookMyCopySection(item: item)
         }
     }
 
@@ -223,8 +224,4 @@ struct EditionDetailView: View {
             snackBar.show { SnackBarView.error(error) }
         }
     }
-}
-
-#Preview {
-    
 }

@@ -113,7 +113,7 @@ struct WorkDetailView: View {
             ForEach(editions) { edition in
                 let result:SearchResult = SearchResult(id: edition.uri, uri: edition.uri, title: edition.title, description: edition.subtitle, imageUrl: edition.image, score: 0, type: .works)
                 Button {
-                    path.append(NavigationDestination.edition(uri: edition.uri))
+                    path.append(NavigationDestination.book(anchor: .edition(uri: edition.uri)))
                 } label: {
                     NavigationLink(value: UUID()) {
                         SearchResultCell(result: result)

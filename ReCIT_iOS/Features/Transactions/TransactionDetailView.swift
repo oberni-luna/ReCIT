@@ -39,7 +39,7 @@ struct TransactionDetailView: View {
         List {
             Section {
                 Button {
-                    path.append(NavigationDestination.item(item: transaction.item))
+                    path.append(NavigationDestination.book(anchor: .item(transaction.item)))
                 } label: {
                     NavigationLink(value: UUID()) {
                         TransactionCellView(transaction: transaction)

@@ -52,7 +52,7 @@ struct CommunityView: View {
                 }
             }
             .navigationDestination(for: Edition.self) { edition in
-                EditionDetailView(editionUri: edition.uri, path: $path)
+                BookDetailView(anchor: .edition(uri: edition.uri), path: $path)
             }
             .navigationTitle("nav.community")
         }

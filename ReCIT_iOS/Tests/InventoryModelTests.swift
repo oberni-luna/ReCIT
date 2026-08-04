@@ -134,4 +134,45 @@ struct InventoryModelTests {
         #expect(item.details == "old notes") // reverted
         #expect(reporter.lastFailure != nil)
     }
+
+    @Test("updateItemTransactionOptimistic persists locally immediately and confirms")
+    func updateTransactionOptimistic() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let item: InventoryItem = Fixture.inventoryItem(id: "i1", edition: Fixture.edition(uri: "isbn:1"))
+        context.insert(item)
+        try context.save()
+
+        let mock: MockAPIService = .init()
+        mock.stub("/api/items/bulk-update", json: #"{"ok":true}"#)
+        let reporter: AppErrorReporter = .init()
+        let model: InventoryModel = .init(apiService: mock, errorReporter: reporter)
+
+        model.updateItemTransactionOptimistic(item: item, newValue: .giving, previous: .inventorying, modelContext: context)
+        #expect(item.transaction == .giving) // instant
+
+        await model.inFlightTask?.value
+        #expect(item.transaction == .giving)
+        #expect(reporter.lastFailure == nil)
+    }
+
+    @Test("updateItemTransactionOptimistic reverts to the previous mode on failure")
+    func updateTransactionReverts() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let item: InventoryItem = Fixture.inventoryItem(id: "i1", edition: Fixture.edition(uri: "isbn:1"))
+        item.transaction = .inventorying
+        context.insert(item)
+        try context.save()
+
+        let mock: MockAPIService = .init()
+        mock.stub("/api/items/bulk-update", error: NetworkError.badStatus(code: 500, message: nil))
+        let reporter: AppErrorReporter = .init()
+        let model: InventoryModel = .init(apiService: mock, errorReporter: reporter)
+
+        model.updateItemTransactionOptimistic(item: item, newValue: .giving, previous: .inventorying, modelContext: context)
+        #expect(item.transaction == .giving) // optimistic
+
+        await model.inFlightTask?.value
+        #expect(item.transaction == .inventorying) // reverted
+        #expect(reporter.lastFailure != nil)
+    }
 }

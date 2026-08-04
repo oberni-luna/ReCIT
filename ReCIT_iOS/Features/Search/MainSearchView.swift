@@ -41,7 +41,7 @@ struct AddInventoryItemSearchView: View {
             .sheet(isPresented: $showScanner) {
                 ScanView { result in
                     let editionUri = "isbn:\(result)"
-                    path.append(NavigationDestination.edition(uri: editionUri))
+                    path.append(NavigationDestination.book(anchor: .edition(uri: editionUri)))
                 }
             }
         }

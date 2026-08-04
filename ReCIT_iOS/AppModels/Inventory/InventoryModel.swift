@@ -36,7 +36,9 @@ final class InventoryModel: OptimisticMutating {
 
     func syncInventory(forUser: User, modelContext: ModelContext) async throws {
         print("## Sync inventory for user \(forUser.username)")
-        guard forUser.lastItemAdded > forUser.lastInventorySync else {
+        // Sync when never synced (lastInventorySync == nil) or when new items
+        // were added on the server since the last sync.
+        if let lastSync = forUser.lastInventorySync, forUser.lastItemAdded <= lastSync {
             print("     -> no need to refresh")
             return
         }

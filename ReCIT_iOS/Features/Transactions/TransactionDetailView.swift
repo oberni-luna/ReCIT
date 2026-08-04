@@ -4,12 +4,15 @@
 //
 //  Created by Olivier Berni on 07/02/2026.
 //
+import LBSnackBar
 import SwiftData
 import SwiftUI
 
 struct TransactionDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.snackBar) private var snackBar
     @Environment(UserModel.self) private var userModel
+    @Environment(TransactionModel.self) private var transactionModel
 
     /// The live transaction, sourced from SwiftData by id so the view always
     /// renders the current persisted instance and reacts to background changes.
@@ -17,8 +20,9 @@ struct TransactionDetailView: View {
     private let fallbackTransaction: UserTransaction
     @Binding var path: NavigationPath
 
-    @State private var showTransactionForm: Bool = false
-    @State private var nextTransactionState: UserTransaction.TransactionState? = nil
+    /// Presents the free-message form. State changes no longer use a form — they
+    /// run straight from the action bar.
+    @State private var showMessageForm: Bool = false
 
     init(transaction: UserTransaction, path: Binding<NavigationPath>) {
         self.fallbackTransaction = transaction
@@ -53,36 +57,42 @@ struct TransactionDetailView: View {
                     }
                 }
 
-                Section {} footer: {
-                    VStack {
-                        if let nextActions = transaction.nextAvailableState(for: user) {
-                            HStack {
-                                ForEach(nextActions, id: \.self) { nextAction in
-                                    Button {
-                                        nextTransactionState = nextAction
-                                        showTransactionForm = true
-                                    } label: {
-                                        Text(nextAction.buttonLabel)
-                                    }
-                                    .buttonStyle(.primary())
-                                }
+                if !transaction.state.isFinished {
+                    Section {} footer: {
+                        TransactionActionsBar(
+                            transaction: transaction,
+                            user: user,
+                            onEvent: { transition in
+                                await perform(transition: transition, author: user)
+                            },
+                            onMessage: {
+                                showMessageForm = true
                             }
-                            Button {
-                                nextTransactionState = nil
-                                showTransactionForm = true
-                            } label: {
-                                Text("action.send_message")
-                            }
-                            .buttonStyle(.primary())
-                        }
+                        )
                     }
-                    .frame(maxWidth: .infinity)
                 }
             }
         }
         .applyListBackground()
-        .sheet(isPresented: $showTransactionForm) {
-            TransactionFormView(transaction: transaction, futurState: nextTransactionState)
+        .sheet(isPresented: $showMessageForm) {
+            TransactionFormView(transaction: transaction, transition: nil)
+        }
+    }
+
+    /// Runs a state-machine transition through the model, surfacing any immediate
+    /// failure via the snackbar. Background (optimistic) failures surface on their
+    /// own through the shared error reporter.
+    private func perform(transition: TransactionTransition, author: User) async {
+        do {
+            try await transactionModel.perform(
+                event: transition.event,
+                on: transaction,
+                message: nil,
+                author: author,
+                modelContext: modelContext
+            )
+        } catch {
+            snackBar.show { SnackBarView.error(error) }
         }
     }
 

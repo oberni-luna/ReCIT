@@ -10,32 +10,60 @@ import Foundation
 extension RootView {
     func refreshUserData() {
         Task {
-            if authModel.isAuthenticated {
-                do {
-                    print("## Sync my user ")
-                    try await userModel.syncMyUser(modelContext: modelContext)
-                    print(" --> done \(userModel.myUser?.username ?? "<Empty>")")
+            guard authModel.isAuthenticated else { return }
+            do {
+                print("## Sync my user ")
+                try await userModel.syncMyUser(modelContext: modelContext)
+                print(" --> done \(userModel.myUser?.username ?? "<Empty>")")
+            } catch {
+                print("⚠️⚠️⚠️⚠️⚠️ Error during user sync: \(error)")
+                return
+            }
 
-                    if let myUser = userModel.myUser {
-                        inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
-                        transactionModel.start(userModel: userModel, inventoryModel: inventoryModel, errorReporter: errorReporter)
+            guard let myUser = userModel.myUser else { return }
+            inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
+            transactionModel.start(userModel: userModel, inventoryModel: inventoryModel, errorReporter: errorReporter)
 
-                        try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext)
+            // My inventory is gated per-user via `User.lastInventorySync`, not the
+            // SyncStatusStore, so it syncs outside the domain tracking below.
+            do {
+                try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext)
+            } catch {
+                print("⚠️⚠️⚠️⚠️⚠️ Error during inventory sync: \(error)")
+            }
 
-                        try await userModel.syncUserNetwork(modelContext: modelContext)
-
-                        for user in userModel.getAllOtherUsers(modelContext: modelContext) {
-                            try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
-                        }
-
-                        try await listModel.syncLists(forUser: myUser, modelContext: modelContext)
-
-                        try await transactionModel.syncTransactions(modelContext: modelContext)
-                    }
-                } catch {
-                    print("⚠️⚠️⚠️⚠️⚠️ Error during user sync: \(error)")
+            // Each domain drives its own first-sync marker so an unsynced screen
+            // shows a placeholder, and one domain failing doesn't block the others.
+            await sync(.community) {
+                try await userModel.syncUserNetwork(modelContext: modelContext)
+                for user in userModel.getAllOtherUsers(modelContext: modelContext) {
+                    try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
                 }
             }
+
+            await sync(.lists) {
+                try await listModel.syncLists(forUser: myUser, modelContext: modelContext)
+            }
+
+            await sync(.transactions) {
+                try await transactionModel.syncTransactions(modelContext: modelContext)
+            }
+        }
+    }
+
+    /// Runs one domain's sync while updating its `SyncStatusStore` phase, so a
+    /// screen can tell "not synced yet" from "synced and empty".
+    private func sync(
+        _ domain: SyncStatusStore.Domain,
+        _ operation: () async throws -> Void
+    ) async {
+        syncStatus.markStarted(domain)
+        do {
+            try await operation()
+            syncStatus.markCompleted(domain)
+        } catch {
+            print("⚠️⚠️⚠️⚠️⚠️ Error during \(domain.rawValue) sync: \(error)")
+            syncStatus.markFailed(domain)
         }
     }
 }

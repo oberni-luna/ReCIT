@@ -93,7 +93,7 @@ struct InventoryItemDetailView: View {
                                 actions: [],
                                 readStatus: .init(owner: false, requester: true)
                             ),
-                            futurState: .requested
+                            transition: TransactionStateMachine.requestTransition
                         )
                     }
                 }

@@ -164,7 +164,7 @@ final class TransactionModel: OptimisticMutating {
             "message": message ?? ""
         ]
 
-        guard let _: [String: TransactionDTO] = try await apiService.send(toEndpoint: "/api/transactions", payload: payload) else {
+        guard let _: PostTransactionResponseDTO = try await apiService.send(toEndpoint: "/api/transactions", payload: payload) else {
             throw NetworkError.badResponse
         }
     }
@@ -196,6 +196,46 @@ final class TransactionModel: OptimisticMutating {
         guard let _: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions/messages", payload: messagePayload) else {
             throw NetworkError.badResponse
         }
+    }
+
+    // MARK: - State machine entry point
+
+    /// The single entry point for a user-triggered transaction move. Validates the
+    /// event against the state machine (`TransactionStateMachine`), enforces the
+    /// message rule, then routes to the creation (`request`) or optimistic
+    /// state-change path. Throws `TransactionError.invalidTransition` if the event
+    /// isn't allowed for this user in the transaction's current state.
+    func perform(
+        event: TransactionEvent,
+        on transaction: UserTransaction,
+        message: String?,
+        author: User,
+        modelContext: ModelContext
+    ) async throws {
+        // A request creates a brand-new transaction: there is no local object to
+        // mutate yet, so it stays server-first then syncs.
+        if event == .request {
+            guard message?.isEmpty == false else { throw TransactionError.emptyMessage }
+            try await postRequest(itemId: transaction.item._id, message: message ?? "")
+            try await syncTransactions(modelContext: modelContext)
+            return
+        }
+
+        guard let transition = transaction.availableTransitions(for: author).first(where: { $0.event == event }) else {
+            throw TransactionError.invalidTransition
+        }
+
+        if transition.requiresMessage, message?.isEmpty != false {
+            throw TransactionError.emptyMessage
+        }
+
+        try updateStateOptimistic(
+            transaction: transaction,
+            newState: transition.to,
+            message: message?.isEmpty == false ? message : nil,
+            author: author,
+            modelContext: modelContext
+        )
     }
 
     // MARK: - Optimistic mutations
@@ -310,11 +350,14 @@ final class TransactionModel: OptimisticMutating {
 
 enum TransactionError: LocalizedError {
     case emptyMessage
+    case invalidTransition
 
     var errorDescription: String? {
         switch self {
         case .emptyMessage:
             String(localized: "error.empty_message")
+        case .invalidTransition:
+            String(localized: "error.invalid_transition")
         }
     }
 }

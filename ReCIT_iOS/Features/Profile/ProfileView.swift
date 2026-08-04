@@ -13,14 +13,21 @@ struct ProfileView: View {
     @EnvironmentObject private var authModel: AuthModel
     @Environment(UserModel.self) private var userModel
     @Environment(TransactionModel.self) private var transactionModel
+    @Environment(SyncStatusStore.self) private var syncStatus
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
 
     @State private var path: NavigationPath = .init()
     @Query private var allTransactions: [UserTransaction]
+    @Query(sort: \User.username) private var allUsers: [User]
 
     var currentTransactions: [UserTransaction] {
         allTransactions.filter(\.isCurrent)
+    }
+
+    /// Friends, sourced reactively from SwiftData (excludes the logged-in user).
+    var otherUsers: [User] {
+        allUsers.filter { $0._id != userModel.myUser?._id }
     }
 
     var body: some View {
@@ -47,22 +54,26 @@ struct ProfileView: View {
             }
 
             Section {
-                if !currentTransactions.isEmpty {
-                    ForEach(currentTransactions.sorted { $0.lastActionDate > $1.lastActionDate }) { transaction in
-                        NavigationLink(
-                            value: NavigationDestination.transaction(transaction: transaction)
-                        ) {
-                            TransactionCellView(transaction: transaction)
-                        }
-                    }
+                if syncStatus.shouldShowPlaceholder(.transactions) {
+                    SyncingInlineRow()
                 } else {
-                    Text("profile.current_transactions.empty")
-                }
+                    if !currentTransactions.isEmpty {
+                        ForEach(currentTransactions.sorted { $0.lastActionDate > $1.lastActionDate }) { transaction in
+                            NavigationLink(
+                                value: NavigationDestination.transaction(transaction: transaction)
+                            ) {
+                                TransactionCellView(transaction: transaction)
+                            }
+                        }
+                    } else {
+                        Text("profile.current_transactions.empty")
+                    }
 
-                NavigationLink(value: NavigationDestination.allTransactions) {
-                    Text("transactions.see_all")
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundTinted)
+                    NavigationLink(value: NavigationDestination.allTransactions) {
+                        Text("transactions.see_all")
+                            .textStyle(.action300)
+                            .foregroundStyle(.foregroundTinted)
+                    }
                 }
             } header : {
                 Text("profile.current_transactions")
@@ -71,9 +82,15 @@ struct ProfileView: View {
             }
 
             Section {
-                ForEach(userModel.getAllOtherUsers(modelContext: modelContext).sorted(by: { $0.username < $1.username })) { otherUser in
-                    NavigationLink(value: NavigationDestination.user(user: otherUser)) {
-                        UserCellView(user: otherUser)
+                if syncStatus.shouldShowPlaceholder(.community) {
+                    SyncingInlineRow()
+                } else if otherUsers.isEmpty {
+                    Text("profile.network.empty")
+                } else {
+                    ForEach(otherUsers) { otherUser in
+                        NavigationLink(value: NavigationDestination.user(user: otherUser)) {
+                            UserCellView(user: otherUser)
+                        }
                     }
                 }
             } header : {

@@ -23,7 +23,10 @@ public class User: Identifiable, Equatable {
     var avatarURLValue: String?
     var lastItemAdded: Double = 0
     var itemCount: Int = 0
-    var lastInventorySync: Double = 0
+    /// Timestamp (ms) of the last successful inventory sync, or `nil` if this
+    /// user's inventory has never been synced. Used to show a syncing placeholder
+    /// instead of an ambiguous empty inventory.
+    var lastInventorySync: Double?
     @Relationship(deleteRule: .cascade, inverse: \InventoryItem.owner) var items: [InventoryItem] = []
 
     init(_id: String, _rev: String, username: String, email: String?, position: Coordinates?, avatarURLValue: String?, itemCount: Int, lastItemAdded: Double = 0) {

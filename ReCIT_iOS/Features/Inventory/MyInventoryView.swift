@@ -19,22 +19,31 @@ struct MyInventoryView: View {
     var body: some View {
         NavigationStack(path: $path) {
             if let user = userModel.myUser {
-                List {
-                    Section(header: Text("nav.inventory")) { }
-                    InventoryListContent(
-                        user: user,
-                        searchText: searchText,
-                        filterParameter: .userInventory,
-                        sortParameter: .alphabetical
-                    )
+                Group {
+                    if user.lastInventorySync == nil {
+                        SyncingPlaceholderView()
+                    } else {
+                        List {
+                            Section(header: Text("nav.inventory")) { }
+                            InventoryListContent(
+                                user: user,
+                                searchText: searchText,
+                                filterParameter: .userInventory,
+                                sortParameter: .alphabetical
+                            )
+                        }
+                        .listStyle(.plain)
+                        .searchable(text: $searchText)
+                    }
                 }
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     destination.viewForDestination($path)
                 }
                 .navigationTitle("nav.inventory")
                 .controlGroupStyle(.palette)
-                .listStyle(.plain)
-                .searchable(text: $searchText)
+            } else {
+                SyncingPlaceholderView()
+                    .navigationTitle("nav.inventory")
             }
         }
     }

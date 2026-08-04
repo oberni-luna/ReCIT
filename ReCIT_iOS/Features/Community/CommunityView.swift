@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct CommunityView: View {
+    @Environment(SyncStatusStore.self) private var syncStatus
     @Query(sort: \Edition.title) var allItems: [Edition]
 
     @State private var searchText: String = ""
@@ -28,26 +29,32 @@ struct CommunityView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(filteredItems) { edition in
-                    NavigationLink(value: edition) {
-                        HStack(alignment: .top, spacing: 8) {
-                            CellThumbnail(imageUrl: edition.image)
+            Group {
+                if syncStatus.shouldShowPlaceholder(.community) {
+                    SyncingPlaceholderView()
+                } else {
+                    List {
+                        ForEach(filteredItems) { edition in
+                            NavigationLink(value: edition) {
+                                HStack(alignment: .top, spacing: 8) {
+                                    CellThumbnail(imageUrl: edition.image)
 
-                            VStack(alignment: .leading) {
-                                Text(edition.title)
-                                    .textStyle(.content400Bold)
+                                    VStack(alignment: .leading) {
+                                        Text(edition.title)
+                                            .textStyle(.content400Bold)
+                                    }
+                                }
                             }
                         }
                     }
+                    .listStyle(.plain)
+                    .searchable(text: $searchText)
                 }
             }
             .navigationDestination(for: Edition.self) { edition in
                 EditionDetailView(editionUri: edition.uri, path: $path)
             }
             .navigationTitle("nav.community")
-            .listStyle(.plain)
-            .searchable(text: $searchText)
         }
     }
 }

@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct AllTransactionsView: View {
+    @Environment(SyncStatusStore.self) private var syncStatus
     @Query(sort: \UserTransaction.created, order: .reverse) private var allTransactions: [UserTransaction]
 
     private var currentTransactions: [UserTransaction] {
@@ -24,36 +25,41 @@ struct AllTransactionsView: View {
     }
 
     var body: some View {
-        List {
-            if !currentTransactions.isEmpty {
-                Section {
-                    ForEach(currentTransactions) { transaction in
-                        NavigationLink(value: NavigationDestination.transaction(transaction: transaction)) {
-                            TransactionCellView(transaction: transaction)
+        if syncStatus.shouldShowPlaceholder(.transactions) {
+            SyncingPlaceholderView()
+                .navigationTitle("transactions.all")
+        } else {
+            List {
+                if !currentTransactions.isEmpty {
+                    Section {
+                        ForEach(currentTransactions) { transaction in
+                            NavigationLink(value: NavigationDestination.transaction(transaction: transaction)) {
+                                TransactionCellView(transaction: transaction)
+                            }
                         }
+                    } header: {
+                        Text("profile.current_transactions")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
                     }
-                } header: {
-                    Text("profile.current_transactions")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
                 }
-            }
 
-            if !pastTransactions.isEmpty {
-                Section {
-                    ForEach(pastTransactions) { transaction in
-                        NavigationLink(value: NavigationDestination.transaction(transaction: transaction)) {
-                            TransactionCellView(transaction: transaction)
+                if !pastTransactions.isEmpty {
+                    Section {
+                        ForEach(pastTransactions) { transaction in
+                            NavigationLink(value: NavigationDestination.transaction(transaction: transaction)) {
+                                TransactionCellView(transaction: transaction)
+                            }
                         }
+                    } header: {
+                        Text("transactions.past")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
                     }
-                } header: {
-                    Text("transactions.past")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
                 }
             }
+            .applyListBackground()
+            .navigationTitle("transactions.all")
         }
-        .applyListBackground()
-        .navigationTitle("transactions.all")
     }
 }

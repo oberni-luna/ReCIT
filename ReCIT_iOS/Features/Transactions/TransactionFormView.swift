@@ -18,7 +18,46 @@ struct TransactionFormView: View {
 
     @Bindable var transaction: UserTransaction
     @State var message: String = ""
-    let futurState: UserTransaction.TransactionState?
+    /// The transition to apply on submit, or `nil` to just send a message.
+    let transition: TransactionTransition?
+
+    private var isMessageRequired: Bool {
+        transition?.requiresMessage ?? false
+    }
+
+    private var isSubmitDisabled: Bool {
+        isMessageRequired && message.isEmpty
+    }
+
+    private var submitLabel: String {
+        transition?.event.label ?? String(localized: "action.send_message")
+    }
+
+    /// Applies the picked transition through the state machine, or sends a plain
+    /// message when there is no transition, surfacing any failure via the snackbar.
+    private func submit(user: User) async {
+        do {
+            if let transition {
+                try await transactionModel.perform(
+                    event: transition.event,
+                    on: transaction,
+                    message: message,
+                    author: user,
+                    modelContext: modelContext
+                )
+            } else {
+                try transactionModel.postMessageOptimistic(
+                    transaction: transaction,
+                    message: message,
+                    author: user,
+                    modelContext: modelContext
+                )
+            }
+            dismiss()
+        } catch {
+            snackBar.show { SnackBarView.error(error) }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -43,7 +82,7 @@ struct TransactionFormView: View {
                     VStack(alignment: .leading, spacing: .xSmall) {
                         TextEditor(text: $message)
                             .frame(minHeight: 48)
-                            .withLabel(label: "transaction.form.your_message")
+                            .withLabel(label: isMessageRequired ? "transaction.form.your_message_required" : "transaction.form.your_message")
                     }
                 }
                 .listRowSeparator(.visible)
@@ -51,62 +90,17 @@ struct TransactionFormView: View {
 
                 if let user = userModel.myUser {
                     Section {} footer: {
-                        if let futurState = futurState {
-                            AsyncButton(action: {
-                                do {
-                                    switch futurState {
-                                    case .requested:
-                                        // Brand-new request: no local transaction to mutate yet,
-                                        // so this stays server-first then syncs.
-                                        try await transactionModel.postRequest(
-                                            itemId: transaction.item._id,
-                                            message: message
-                                        )
-                                        try await transactionModel.syncTransactions(modelContext: modelContext)
-                                    case .accepted, .confirmed, .returned, .declined, .cancelled:
-                                        try transactionModel.updateStateOptimistic(
-                                            transaction: transaction,
-                                            newState: futurState,
-                                            message: message,
-                                            author: user,
-                                            modelContext: modelContext
-                                        )
-                                    }
-                                    dismiss()
-                                } catch {
-                                    snackBar.show {
-                                        SnackBarView.error(error)
-                                    }
-                                }
-                            },
-                                        actionOptions: [.showProgressView],
-                                        label: {
-                                Text(futurState.buttonLabel)
-                                    .frame(maxWidth: .infinity)
-                            })
-                            .buttonStyle(.primary())
-                            .frame(maxWidth: .infinity)
-                        } else {
-                            AsyncButton(action: {
-                                do {
-                                    try transactionModel.postMessageOptimistic(
-                                        transaction: transaction,
-                                        message: message,
-                                        author: user,
-                                        modelContext: modelContext
-                                    )
-                                    dismiss()
-                                } catch {
-                                    snackBar.show { SnackBarView.error(error) }
-                                }
-                            },
+                        AsyncButton(
+                            action: { await submit(user: user) },
                             actionOptions: [.showProgressView],
                             label: {
-                                Text("action.send_message")
+                                Text(submitLabel)
                                     .frame(maxWidth: .infinity)
-                            })
-                            .buttonStyle(.primary())
-                        }
+                            }
+                        )
+                        .buttonStyle(.primary())
+                        .frame(maxWidth: .infinity)
+                        .disabled(isSubmitDisabled)
                     }
                     .listRowSeparator(.visible)
                     .listSectionSeparator(.hidden)

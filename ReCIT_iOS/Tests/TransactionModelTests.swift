@@ -50,6 +50,110 @@ struct TransactionModelTests {
         """
     }
 
+    /// The `POST /api/transactions` body the server returns for a request action:
+    /// the created transaction wrapped in `transaction`, plus a top-level
+    /// `warnings` array. The array is what used to break decoding.
+    private func requestResponseJSON(withWarnings: Bool) -> String {
+        let warnings: String = withWarnings ? #","warnings":["some warning"]"# : ""
+        return """
+        {"transaction":{"_id":"t1","_rev":"1","item":"item-1","owner":"owner","requester":"req","transaction":"lending","state":"requested","created":1700000000000,"actions":[{"action":"request","timestamp":1700000000000}],"read":{"owner":true,"requester":false}}\(warnings)}
+        """
+    }
+
+    // MARK: - Post request
+
+    @Test("postRequest decodes a response carrying a top-level warnings array")
+    func postRequestDecodesResponseWithWarnings() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/transactions", json: requestResponseJSON(withWarnings: true))
+        let model: TransactionModel = .init(apiService: mock)
+
+        // Regression: `warnings` (an array) previously crashed the
+        // `[String: TransactionDTO]` decode with a typeMismatch.
+        try await model.postRequest(itemId: "item-1", message: "May I borrow this?")
+
+        #expect(mock.recordedRequests.contains { $0.endpoint == "/api/transactions" && $0.method == "POST" })
+    }
+
+    @Test("postRequest also decodes a response without any warnings")
+    func postRequestDecodesResponseWithoutWarnings() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/transactions", json: requestResponseJSON(withWarnings: false))
+        let model: TransactionModel = .init(apiService: mock)
+
+        try await model.postRequest(itemId: "item-1", message: "May I borrow this?")
+    }
+
+    @Test("postRequest rejects an empty message before hitting the network")
+    func postRequestRejectsEmpty() async throws {
+        let mock: MockAPIService = .init()
+        let model: TransactionModel = .init(apiService: mock)
+
+        await #expect(throws: TransactionError.self) {
+            try await model.postRequest(itemId: "item-1", message: "")
+        }
+        #expect(mock.recordedRequests.isEmpty)
+    }
+
+    // MARK: - State machine entry point
+
+    @Test("perform(request) posts through the state machine entry point")
+    func performRequest() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let (transaction, requester) = try makeTransaction(context: context)
+
+        let mock: MockAPIService = .init()
+        mock.stub("/api/transactions", json: requestResponseJSON(withWarnings: true))
+        let model: TransactionModel = .init(apiService: mock, errorReporter: AppErrorReporter())
+
+        try await model.perform(event: .request, on: transaction, message: "Please", author: requester, modelContext: context)
+
+        #expect(mock.recordedRequests.contains { $0.endpoint == "/api/transactions" && $0.method == "POST" })
+    }
+
+    @Test("perform(request) requires a message")
+    func performRequestRequiresMessage() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let (transaction, requester) = try makeTransaction(context: context)
+        let model: TransactionModel = .init(apiService: MockAPIService())
+
+        await #expect(throws: TransactionError.self) {
+            try await model.perform(event: .request, on: transaction, message: "", author: requester, modelContext: context)
+        }
+    }
+
+    @Test("perform(accept) applies the new state optimistically for the owner")
+    func performAcceptApplies() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let (transaction, _) = try makeTransaction(context: context)
+        let owner: User = transaction.owner
+
+        let mock: MockAPIService = .init()
+        mock.stub("messages?id=", json: #"{"messages":[]}"#)
+        mock.stub("/api/transactions/update-state", json: #"{"ok":true}"#)
+        let reporter: AppErrorReporter = .init()
+        let model: TransactionModel = .init(apiService: mock, errorReporter: reporter)
+
+        try await model.perform(event: .accept, on: transaction, message: nil, author: owner, modelContext: context)
+
+        #expect(transaction.state == .accepted) // optimistic, before the round-trip
+        await model.inFlightTask?.value
+        #expect(reporter.lastFailure == nil)
+    }
+
+    @Test("perform rejects an event the user can't trigger in the current state")
+    func performRejectsInvalidTransition() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let (transaction, requester) = try makeTransaction(context: context)
+        let model: TransactionModel = .init(apiService: MockAPIService())
+
+        // The requester cannot accept their own request.
+        await #expect(throws: TransactionError.self) {
+            try await model.perform(event: .accept, on: transaction, message: nil, author: requester, modelContext: context)
+        }
+        #expect(transaction.state == .requested)
+    }
+
     // MARK: - Post message
 
     @Test("postMessageOptimistic inserts the message locally before any network round-trip")

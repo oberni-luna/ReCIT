@@ -11,6 +11,13 @@ struct TransactionsDTO: Codable {
     let transactions: [TransactionDTO]
 }
 
+/// Response of `POST /api/transactions` (request action). The server wraps the
+/// created transaction in a `transaction` key and may append a top-level
+/// `warnings` array; unknown keys (including `warnings`) are ignored on decode.
+struct PostTransactionResponseDTO: Codable {
+    let transaction: TransactionDTO
+}
+
 struct TransactionDTO: Codable {
     let _id: String
     let _rev: String

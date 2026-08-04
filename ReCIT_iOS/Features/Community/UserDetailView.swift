@@ -20,13 +20,19 @@ struct UserDetailView: View {
             }
 
             Section {
-                ForEach(user.items) { item in
-                    Button {
-                        path.append(NavigationDestination.item(item: item))
-                    } label: {
-                        InventoryCell(item: item, filterParameter: .userInventory)
+                if user.lastInventorySync == nil {
+                    SyncingInlineRow()
+                } else if user.items.isEmpty {
+                    Text("inventory.empty")
+                } else {
+                    ForEach(user.items) { item in
+                        Button {
+                            path.append(NavigationDestination.item(item: item))
+                        } label: {
+                            InventoryCell(item: item, filterParameter: .userInventory)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             } header: {
                 Text("user.inventory.header \(user.username)")

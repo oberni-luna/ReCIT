@@ -23,12 +23,7 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
     @Relationship(deleteRule: .cascade, inverse: \TransactionMessage.transaction) var messages: [TransactionMessage]
 
     var isCurrent: Bool {
-        switch state {
-        case .returned, .declined, .cancelled:
-            return false
-        default:
-            return true
-        }
+        !state.isFinished
     }
 
     var lastActionDate: Date {
@@ -59,37 +54,14 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
         case declined
         case cancelled
 
-        var systemImage: String {
+        /// A transaction in one of these states is over: no further transition is
+        /// possible and users can no longer act on it.
+        var isFinished: Bool {
             switch self {
-            case .requested:
-                "questionmark.message.fill"
-            case .accepted:
-                "checkmark.message.fill"
-            case .confirmed:
-                "hand.thumbsup.circle.fill"
-            case .returned:
-                "checkmark.square.fill"
-            case .declined:
-                "hand.thumbsdown.fill"
-            case .cancelled:
-                "trash"
-            }
-        }
-
-        var buttonLabel: String {
-            switch self {
-            case .requested:
-                String(localized: "transaction.action.request")
-            case .accepted:
-                String(localized: "transaction.action.accept")
-            case .confirmed:
-                String(localized: "transaction.action.confirm")
-            case .returned:
-                String(localized: "transaction.action.complete")
-            case .declined:
-                String(localized: "transaction.action.decline")
-            case .cancelled:
-                String(localized: "transaction.action.cancel")
+            case .returned, .declined, .cancelled:
+                true
+            case .requested, .accepted, .confirmed:
+                false
             }
         }
     }

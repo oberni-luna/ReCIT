@@ -17,6 +17,7 @@ struct RootView: View {
     @State var inventoryModel: InventoryModel
     @State var transactionModel: TransactionModel
     @State var errorReporter: AppErrorReporter
+    @State var syncStatus: SyncStatusStore
 
     @Environment(\.modelContext) var modelContext
 
@@ -31,6 +32,7 @@ struct RootView: View {
         _searchModel = State(initialValue: SearchModel(apiService: apiService))
         _inventoryModel = State(initialValue: InventoryModel(apiService: apiService, errorReporter: errorReporter))
         _transactionModel = State(initialValue: TransactionModel(apiService: apiService, errorReporter: errorReporter))
+        _syncStatus = State(initialValue: SyncStatusStore())
     }
 
     var body: some View {
@@ -45,6 +47,7 @@ struct RootView: View {
                 .environment(inventoryModel)
                 .environment(transactionModel)
                 .environment(errorReporter)
+                .environment(syncStatus)
                 .environmentObject(authModel)
                 .refreshable {
                     refreshUserData()

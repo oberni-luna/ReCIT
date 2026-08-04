@@ -11,6 +11,7 @@ import SwiftData
 struct EntityListView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(ListModel.self) var listModel
+    @Environment(SyncStatusStore.self) private var syncStatus
     @Query(sort: \EntityList.name) var allLists: [EntityList]
 
     @State private var searchText: String = ""
@@ -33,24 +34,30 @@ struct EntityListView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            List {
-                ForEach(filteredLists) { list in
-                    NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
-                        VStack(alignment: .leading) {
-                            Text(list.name)
-                                .textStyle(.content400Bold)
+            Group {
+                if syncStatus.shouldShowPlaceholder(.lists) {
+                    SyncingPlaceholderView()
+                } else {
+                    List {
+                        ForEach(filteredLists) { list in
+                            NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
+                                VStack(alignment: .leading) {
+                                    Text(list.name)
+                                        .textStyle(.content400Bold)
 
-                            Text(list.explanation)
-                                .textStyle(.content300)
-                                .foregroundStyle(.secondary)
-                        }
-                        .swipeActions {
-                            Button("action.delete", systemImage: "trash") {
-                                Task {
-                                    try? await listModel.deleteList(modelContext: modelContext, list: list)
+                                    Text(list.explanation)
+                                        .textStyle(.content300)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .swipeActions {
+                                    Button("action.delete", systemImage: "trash") {
+                                        Task {
+                                            try? await listModel.deleteList(modelContext: modelContext, list: list)
+                                        }
+                                    }
+                                    .tint(.red)
                                 }
                             }
-                            .tint(.red)
                         }
                     }
                 }

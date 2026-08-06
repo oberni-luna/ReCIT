@@ -15,6 +15,7 @@ struct RootView: View {
     @State var entityModel: EntityModel
     @State var searchModel: SearchModel
     @State var inventoryModel: InventoryModel
+    @State var shelfModel: ShelfModel
     @State var transactionModel: TransactionModel
     @State var errorReporter: AppErrorReporter
     @State var syncStatus: SyncStatusStore
@@ -31,6 +32,7 @@ struct RootView: View {
         _entityModel = State(initialValue: EntityModel(apiService: apiService))
         _searchModel = State(initialValue: SearchModel(apiService: apiService))
         _inventoryModel = State(initialValue: InventoryModel(apiService: apiService, errorReporter: errorReporter))
+        _shelfModel = State(initialValue: ShelfModel(apiService: apiService, errorReporter: errorReporter))
         _transactionModel = State(initialValue: TransactionModel(apiService: apiService, errorReporter: errorReporter))
         _syncStatus = State(initialValue: SyncStatusStore())
     }
@@ -45,6 +47,7 @@ struct RootView: View {
                 .environment(entityModel)
                 .environment(searchModel)
                 .environment(inventoryModel)
+                .environment(shelfModel)
                 .environment(transactionModel)
                 .environment(errorReporter)
                 .environment(syncStatus)

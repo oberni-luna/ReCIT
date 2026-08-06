@@ -24,6 +24,14 @@ extension RootView {
             inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
             transactionModel.start(userModel: userModel, inventoryModel: inventoryModel, errorReporter: errorReporter)
 
+            // Shelves must sync BEFORE inventory so items can resolve their shelf
+            // membership into the Shelf ⇄ InventoryItem relation. See ADR 0003.
+            do {
+                try await shelfModel.syncShelves(forUser: myUser, modelContext: modelContext)
+            } catch {
+                print("⚠️⚠️⚠️⚠️⚠️ Error during shelves sync: \(error)")
+            }
+
             // My inventory is gated per-user via `User.lastInventorySync`, not the
             // SyncStatusStore, so it syncs outside the domain tracking below.
             do {

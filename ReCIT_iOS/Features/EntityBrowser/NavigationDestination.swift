@@ -17,6 +17,7 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case transaction(transaction: UserTransaction)
     case allTransactions
     case entityList(id: String)
+    case shelf(id: String)
 
     var id: String {
         switch self {
@@ -34,6 +35,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "allTransactions"
         case .entityList(let id):
             return "entityList:\(id)"
+        case .shelf(let id):
+            return "shelf:\(id)"
         }
     }
 
@@ -85,6 +88,8 @@ extension NavigationDestination {
           AllTransactionsView()
       case .entityList(let id):
           EntityListDetail(listId: id, path: path)
+      case .shelf(let id):
+          ShelfDetailView(shelfId: id, path: path)
       }
     }
 }

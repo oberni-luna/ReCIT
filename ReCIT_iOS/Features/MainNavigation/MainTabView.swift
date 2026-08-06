@@ -122,7 +122,7 @@ private extension MainTabView {
         case .community:
             CommunityView()
         case .inventory:
-            MyInventoryView()
+            ShelvesView()
         case .transactions:
             Text("nav.transactions_placeholder")
                 .navigationTitle("nav.transactions")

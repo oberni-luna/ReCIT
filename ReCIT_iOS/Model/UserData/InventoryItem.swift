@@ -24,6 +24,11 @@ public final class InventoryItem{
     var edition: Edition?
     var owner: User?
 
+    /// Shelves this item is filed on. Many-to-many; built at sync from the server
+    /// `shelves` id array. A book on several shelves appears on each. Empty = "sans
+    /// étagère". See ADR 0003.
+    @Relationship(inverse: \Shelf.items) var shelves: [Shelf] = []
+
     var authors: [Author] {
         if let edition, edition.works.flatMap(\.authors).isEmpty == false {
             Array(Set(edition.works.flatMap(\.authors)))

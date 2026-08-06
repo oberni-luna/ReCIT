@@ -77,14 +77,19 @@ final class InventoryModel: OptimisticMutating {
             guard let itemsDTO: ItemsDTO = try await apiService.fetchData(fromEndpoint: itemsUrl) else { continue }
 
             for itemDTO in itemsDTO.items {
+                // Resolve shelf membership into the many-to-many relation. Shelves are
+                // synced before inventory, so the local `Shelf` objects already exist.
+                let shelves: [Shelf] = getLocalShelves(modelContext: modelContext, ids: itemDTO.shelves ?? [])
                 if let myItem = try? getLocalItem(modelContext: modelContext, id: itemDTO._id) {
                     // Upsert in place — keep identity so open item views stay reactive.
                     myItem.update(from: itemDTO, forUser: forUser, apiService: apiService)
+                    myItem.shelves = shelves
                     if myItem.edition?.works.filter({ $0.uri == relatedWork.uri }).count == 0 {
                         myItem.edition?.works.append(relatedWork)
                     }
                 } else {
                     let myItem: InventoryItem = .init(itemDTO: itemDTO, forUser: forUser, apiService: apiService)
+                    myItem.shelves = shelves
                     myItem.edition?.works.append(relatedWork)
                     modelContext.insert(myItem)
                 }
@@ -201,5 +206,15 @@ final class InventoryModel: OptimisticMutating {
         }
         let descriptor: FetchDescriptor<InventoryItem> = .init(predicate: predicate)
         return try modelContext.fetch(descriptor).first
+    }
+
+    /// Resolves shelf ids (from an item's server `shelves` array) into local `Shelf`
+    /// objects. Returns an empty array when the item is on no shelf ("sans étagère").
+    private func getLocalShelves(modelContext: ModelContext, ids: [String]) -> [Shelf] {
+        guard !ids.isEmpty else { return [] }
+        let descriptor: FetchDescriptor<Shelf> = .init(
+            predicate: #Predicate { shelf in ids.contains(shelf._id) }
+        )
+        return (try? modelContext.fetch(descriptor)) ?? []
     }
 }

@@ -1,0 +1,172 @@
+//
+//  ShelfBooksLayout.swift
+//  ReCIT_iOS
+//
+//  Pure (SwiftUI-free) layout math for the books on a shelf. Given the ordered books'
+//  page counts and the shelf's usable width + zone height, it resolves the layout mode
+//  and all per-book geometry. `ShelfBooksView` is a thin renderer over this. Kept free
+//  of SwiftData/SwiftUI so it can be unit-tested in isolation. See ADR 0003.
+//
+
+import CoreGraphics
+import Foundation
+
+struct ShelfBooksLayout: Equatable {
+
+    enum Mode: Equatable {
+        /// A lone book, shown face-on with its cover.
+        case singleCover
+        /// Every book stands as a spine (the last one leaning). Also the empty case.
+        case allVertical
+        /// Left `verticalCount` books stand; the rest form a horizontal pile.
+        case mixed(verticalCount: Int)
+    }
+
+    let count: Int
+    let width: CGFloat
+    let zoneHeight: CGFloat
+    let mode: Mode
+
+    private let pages: [Int?]
+
+    static let spacing: CGFloat = 2
+    static let leanDegrees: Double = 10
+
+    init(pageCounts: [Int?], width: CGFloat, zoneHeight: CGFloat) {
+        self.pages = pageCounts
+        self.count = pageCounts.count
+        self.width = width
+        self.zoneHeight = zoneHeight
+        self.mode = Self.resolveMode(pages: pageCounts, width: width, zoneHeight: zoneHeight)
+    }
+
+    // MARK: - Derived ranges
+
+    /// Number of standing spines: all of them when `allVertical`, the split when `mixed`.
+    var verticalCount: Int {
+        switch mode {
+        case .allVertical: return count
+        case .mixed(let verticalCount): return verticalCount
+        case .singleCover: return 0
+        }
+    }
+
+    /// Books that form the horizontal pile (empty unless `mixed`).
+    var pileRange: Range<Int> {
+        if case .mixed(let verticalCount) = mode { return verticalCount..<count }
+        return count..<count
+    }
+
+    // MARK: - Vertical spine geometry
+
+    func spineSize(at index: Int) -> CGSize {
+        .init(width: Self.spineWidth(pages: pages[index]), height: Self.spineHeight(index: index, zoneHeight: zoneHeight))
+    }
+
+    /// Whether the book at `index` is the leaning one (the last of a >1 standing run).
+    func isLeaning(at index: Int) -> Bool {
+        switch mode {
+        case .allVertical: return count > 1 && index == count - 1
+        case .mixed(let verticalCount): return verticalCount > 1 && index == verticalCount - 1
+        case .singleCover: return false
+        }
+    }
+
+    /// Rightward nudge so the leaning book rests on the previous one's top corner.
+    func leanOffset(at index: Int) -> CGFloat {
+        let previousHeight: CGFloat = index > 0
+            ? Self.spineHeight(index: index - 1, zoneHeight: zoneHeight)
+            : Self.spineHeight(index: index, zoneHeight: zoneHeight)
+        return previousHeight * tan(Self.leanRadians)
+    }
+
+    // MARK: - Pile geometry
+
+    /// Scales the pile's summed thicknesses to fit the books zone.
+    var pileScale: CGFloat {
+        let total: CGFloat = pileRange.reduce(0) { $0 + Self.rawThickness(pages: pages[$1]) }
+        let available: CGFloat = zoneHeight * 0.96
+        return total > available ? available / total : 1
+    }
+
+    func pileBarSize(at index: Int, availableWidth: CGFloat) -> CGSize {
+        .init(
+            width: availableWidth * Self.vary(index + 2, 0.72, 0.98),
+            height: Self.rawThickness(pages: pages[index]) * pileScale
+        )
+    }
+
+    func pileJitter(at index: Int) -> CGFloat {
+        let pattern: [CGFloat] = [-3, 2, -1, 3, -2, 1, -3, 2, 0, -1]
+        return pattern[index % pattern.count]
+    }
+
+    // MARK: - Shared
+
+    /// Deterministic per-book seed for the watercolour shader / variance.
+    static func seed(_ index: Int) -> Double { Double(index) * 1.73 + 0.4 }
+
+    // MARK: - Pure core
+
+    private static var leanRadians: CGFloat { CGFloat(leanDegrees) * .pi / 180 }
+
+    /// Spine thickness from page count: 1pt / 15 pages, default 20pt, clamped 6–70.
+    static func spineWidth(pages: Int?) -> CGFloat {
+        let raw: CGFloat = pages.map { CGFloat($0) / 15.0 } ?? 20
+        return min(max(raw, 6), 70)
+    }
+
+    static func spineHeight(index: Int, zoneHeight: CGFloat) -> CGFloat {
+        zoneHeight * vary(index, 0.80, 1.0)
+    }
+
+    /// Lying-book thickness (same page basis as a spine, capped lower so piles fit).
+    static func rawThickness(pages: Int?) -> CGFloat {
+        let raw: CGFloat = pages.map { CGFloat($0) / 15.0 } ?? 20
+        return min(max(raw, 6), 40)
+    }
+
+    /// Deterministic pseudo-variance so sizes differ without randomness.
+    static func vary(_ index: Int, _ low: CGFloat, _ high: CGFloat) -> CGFloat {
+        let seq: [CGFloat] = [0.15, 0.72, 0.38, 0.9, 0.05, 0.55, 0.27, 0.83, 0.46, 0.66]
+        return low + (high - low) * seq[index % seq.count]
+    }
+
+    // MARK: - Mode resolution
+
+    private static func resolveMode(pages: [Int?], width: CGFloat, zoneHeight: CGFloat) -> Mode {
+        let count: Int = pages.count
+        if count == 1 { return .singleCover }
+        if count == 0 { return .allVertical }
+        if totalVerticalWidth(pages: pages, zoneHeight: zoneHeight) <= width {
+            return .allVertical
+        }
+        return .mixed(verticalCount: verticalCountForHalf(pages: pages, width: width))
+    }
+
+    /// Width the whole run needs standing vertically: spines + gaps + the horizontal
+    /// room the leaning last book takes.
+    static func totalVerticalWidth(pages: [Int?], zoneHeight: CGFloat) -> CGFloat {
+        let count: Int = pages.count
+        let sum: CGFloat = pages.reduce(0) { $0 + spineWidth(pages: $1) }
+        let gaps: CGFloat = spacing * CGFloat(max(count - 1, 0))
+        let leanExtra: CGFloat = count > 1
+            ? spineHeight(index: count - 1, zoneHeight: zoneHeight) * sin(leanRadians)
+            : 0
+        return sum + gaps + leanExtra
+    }
+
+    /// How many books fill (roughly) the left half before switching to the pile.
+    static func verticalCountForHalf(pages: [Int?], width: CGFloat) -> Int {
+        let half: CGFloat = width / 2
+        var accumulated: CGFloat = 0
+        var count: Int = 0
+        for page in pages {
+            let next: CGFloat = accumulated + spineWidth(pages: page) + (count > 0 ? spacing : 0)
+            if next > half && count >= 1 { break }
+            accumulated = next
+            count += 1
+        }
+        return max(min(count, pages.count - 1), 1)
+    }
+}

@@ -28,6 +28,7 @@ struct ItemDTO: Codable {
     let created: Double
     let updated: Double?
     let busy: Bool?
+    let shelves: [String]?
     let snapshot: EntitySnapshotDTO
 }
 

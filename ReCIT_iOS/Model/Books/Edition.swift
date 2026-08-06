@@ -21,6 +21,15 @@ public class Edition: Identifiable, Entity {
     var works: [Work] = []
     var extract: WpExtract?
 
+    /// Dominant colour of the cover (hex, e.g. "#7A2E2E"), extracted lazily from the
+    /// cover image and persisted so painted shelf spines render without recompute.
+    /// `nil` until first computed. See ADR 0003.
+    var dominantColorHex: String?
+
+    /// Number of pages (Wikidata P1104), fetched lazily to size the painted spine's
+    /// thickness. `nil` until fetched (and when the edition has no such claim).
+    var numberOfPages: Int?
+
     @Relationship(deleteRule: .nullify, inverse: \InventoryItem.edition) var items: [InventoryItem] = []
 
     var authors: [Author] {

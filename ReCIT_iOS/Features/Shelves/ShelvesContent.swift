@@ -2,11 +2,10 @@
 //  ShelvesContent.swift
 //  ReCIT_iOS
 //
-//  The synced state of the bookshelf: a 2-column grid of étagères (A→Z) over a list
-//  of all the user's books. Both are `@Query`-driven so they stay reactive across
-//  syncs. Focusing the search hides the shelves and shows the flat filtered list.
-//  Laid out in a ScrollView (not a List) so the painted shelf cells keep a stable,
-//  deterministic size. See ADR 0003.
+//  The synced state of the bookshelf: a horizontal, snapping carousel of étagères
+//  (A→Z) over a vertical list of all the user's books. Both are `@Query`-driven so
+//  they stay reactive across syncs. Focusing the search hides the shelves and shows
+//  the flat filtered list. See ADR 0003 / PRD 0001.
 //
 
 import SwiftUI
@@ -56,11 +55,11 @@ struct ShelvesContent: View {
             .listStyle(.plain)
         } else {
             GeometryReader { geo in
-                let cellWidth: CGFloat = (geo.size.width - horizontalPadding * 2 - gutter) / 2
+                let cardWidth: CGFloat = geo.size.width * 0.86
                 ScrollView {
                     sectionTitle("Étagères")
                         .padding(.top, .medium)
-                    shelvesGrid(cellWidth: cellWidth)
+                    shelvesCarousel(cardWidth: cardWidth)
 
                     sectionTitle("Tous les livres · \(myItems.count)")
                         .padding(.top, .large)
@@ -79,17 +78,21 @@ struct ShelvesContent: View {
             .padding(.bottom, .small)
     }
 
-    private func shelvesGrid(cellWidth: CGFloat) -> some View {
-        let columns: [GridItem] = [
-            GridItem(.fixed(cellWidth), spacing: gutter),
-            GridItem(.fixed(cellWidth), spacing: gutter)
-        ]
-        return LazyVGrid(columns: columns, alignment: .center, spacing: 24) {
-            ForEach(shelves) { shelf in
-                ShelfRowView(shelf: shelf, width: cellWidth, path: $path)
+    /// Horizontal, snapping carousel of shelf cards (~86% width, next card peeking).
+    /// Nested inside the page's vertical scroll; only this scrolls horizontally.
+    private func shelvesCarousel(cardWidth: CGFloat) -> some View {
+        ScrollView(.horizontal) {
+            LazyHStack(spacing: gutter) {
+                ForEach(shelves) { shelf in
+                    ShelfRowView(shelf: shelf, width: cardWidth, path: $path)
+                        .frame(width: cardWidth)
+                }
             }
+            .scrollTargetLayout()
+            .padding(.horizontal, horizontalPadding)
         }
-        .padding(.horizontal, horizontalPadding)
+        .scrollTargetBehavior(.viewAligned)
+        .scrollIndicators(.hidden)
     }
 
     private var allBooksList: some View {

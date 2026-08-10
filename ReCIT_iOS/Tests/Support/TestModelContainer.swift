@@ -25,6 +25,7 @@ enum TestStore {
             InventoryItem.self,
             User.self,
             Edition.self,
+            Shelf.self,
             EntityList.self,
             EntityListItem.self,
             Author.self,

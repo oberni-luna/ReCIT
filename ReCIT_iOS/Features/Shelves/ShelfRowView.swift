@@ -3,8 +3,9 @@
 //  ReCIT_iOS
 //
 //  One étagère: the watercolour wash, the books (spines or pile), the wooden plank,
-//  and the shelf name beneath. Tap opens the shelf's list; a horizontal swipe scrubs
-//  the books (zoom + haptic) and, on release, opens the book under the finger.
+//  and the shelf name beneath. Tap opens the shelf's list; a ~0.2s press then a slide
+//  scrubs the books (zoom + haptic) and, on release, opens the book under the finger.
+//  A plain swipe is left to the carousel scroll.
 //
 //  Sizing is driven entirely by the `width` passed in (the grid cell width) so the
 //  view returns a deterministic size — self-measuring here caused a UICollectionView
@@ -17,9 +18,11 @@ struct ShelfRowView: View {
     let shelf: Shelf
     let width: CGFloat
     @Binding var path: NavigationPath
+    /// Shared with the carousel so it can disable its scroll while a scrub is active.
+    @Binding var scrubbing: Bool
 
     @State private var scrubIndex: Int?
-    @State private var isScrubbing: Bool = false
+    @State private var editing: Bool = false
 
     /// Books shown on the shelf, newest first, capped so a huge shelf doesn't render
     /// hundreds of spines (the overflow is reachable via the shelf's list).
@@ -29,20 +32,36 @@ struct ShelfRowView: View {
 
     private var plankHeight: CGFloat { width * 129.0 / 820.0 }
     private var zoneHeight: CGFloat { width * 9.0 / 16.0 }
+    /// Width the books actually occupy (card minus the horizontal margin on each side).
+    private var booksWidth: CGFloat { max(width - ShelfBooksView.horizontalMargin * 2, 0) }
+    /// Minimal room above the books for a centre-zoomed spine (×1.5) to grow upward
+    /// without being clipped by the carousel's scroll bounds.
+    private var topRoom: CGFloat { zoneHeight * 0.25 }
+    /// How far the wash extends below the plank (kept small); the shelf name sits at
+    /// this same distance so the wash isn't cropped.
+    private let washBelow: CGFloat = 16
 
     var body: some View {
-        VStack(spacing: .xSmall) {
+        VStack(spacing: 0) {
             shelfStack
-            Text(shelf.name)
-                .textStyle(.footnote200)
-                .foregroundStyle(.foregroundDefault)
-                .lineLimit(1)
+                .padding(.top, topRoom)
+            HStack(spacing: .xSmall) {
+                Text(shelf.name)
+                    .textStyle(.footnote200)
+                    .foregroundStyle(.foregroundDefault)
+                    .lineLimit(1)
+                Button("Modifier l'étagère", systemImage: "pencil") { editing = true }
+                    .labelStyle(.iconOnly)
+                    .font(.footnote)
+                    .foregroundStyle(.foregroundSecondary)
+            }
+            .padding(.top, washBelow)
         }
         .frame(width: width)
-        .contentShape(Rectangle())
-        .onTapGesture { path.append(NavigationDestination.shelf(id: shelf._id)) }
-        .gesture(scrubGesture)
+        // Taps on the shelf open its list — handled solely by the scrub overlay, so a
+        // single handler (no card-level tap) avoids the double navigation push.
         .sensoryFeedback(.selection, trigger: scrubIndex)
+        .sheet(isPresented: $editing) { ShelfFormView(shelf: shelf) }
     }
 
     private var shelfStack: some View {
@@ -54,7 +73,7 @@ struct ShelfRowView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: width)
-                .offset(y: (width * 672.0 / 1024.0 - plankHeight) / 2)
+                .offset(y: washBelow)
                 .opacity(0.92)
                 .allowsHitTesting(false)
             VStack(spacing: 0) {
@@ -64,6 +83,9 @@ struct ShelfRowView: View {
                     zoneHeight: zoneHeight,
                     scrubIndex: scrubIndex
                 )
+                // Books always render in FRONT of the plank so they sit on top of the
+                // shelf (and a zoomed book stays above it, never behind/under).
+                .zIndex(1)
                 Image("ShelfPlank")
                     .resizable()
                     .scaledToFit()
@@ -72,45 +94,33 @@ struct ShelfRowView: View {
             }
         }
         .frame(width: width, height: zoneHeight + plankHeight)
-    }
-
-    private var scrubGesture: some Gesture {
-        DragGesture(minimumDistance: 10)
-            .onChanged { value in
-                guard width > 0, books.isEmpty == false else { return }
-
-                // Leaving the shelf area (in ANY direction) deselects and arms a no-op
-                // release, so the user can bail out of a scrub by sliding off the shelf.
-                let contentHeight: CGFloat = zoneHeight + plankHeight
-                let inBounds: Bool = value.location.x >= 0
-                    && value.location.x <= width
-                    && value.location.y >= 0
-                    && value.location.y <= contentHeight
-                guard inBounds else {
-                    scrubIndex = nil
-                    isScrubbing = false
-                    return
+        // Scrub overlay covers exactly the books zone (top band, inset by the margin).
+        .overlay(alignment: .top) {
+            ScrubGestureView(
+                onTap: { path.append(NavigationDestination.shelf(id: shelf._id)) },
+                onScrubBegan: { scrubbing = true },
+                onScrubChanged: { location in
+                    // Overlay spans the full card width; books start at the margin.
+                    scrubIndex = ScrubMapping.index(
+                        x: location.x - ShelfBooksView.horizontalMargin,
+                        y: location.y,
+                        width: booksWidth,
+                        height: zoneHeight,
+                        count: books.count
+                    )
+                },
+                onScrubEnded: { _, cancelled in
+                    defer {
+                        scrubbing = false
+                        scrubIndex = nil
+                    }
+                    guard cancelled == false,
+                          let index = scrubIndex,
+                          books.indices.contains(index) else { return }
+                    path.append(NavigationDestination.book(anchor: .item(books[index])))
                 }
-
-                // Only a horizontal-dominant drag starts the scrub (a vertical one is
-                // left to the scroll view); once scrubbing, keep tracking.
-                guard isScrubbing || abs(value.translation.width) > abs(value.translation.height) else { return }
-
-                isScrubbing = true
-                let clampedX: CGFloat = min(max(value.location.x, 0), width)
-                let slot: CGFloat = width / CGFloat(books.count)
-                let index: Int = min(Int(clampedX / slot), books.count - 1)
-                if index != scrubIndex { scrubIndex = index }
-            }
-            .onEnded { _ in
-                defer {
-                    scrubIndex = nil
-                    isScrubbing = false
-                }
-                guard isScrubbing,
-                      let index = scrubIndex,
-                      books.indices.contains(index) else { return }
-                path.append(NavigationDestination.book(anchor: .item(books[index])))
-            }
+            )
+            .frame(width: width, height: zoneHeight + plankHeight)
+        }
     }
 }

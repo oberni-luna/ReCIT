@@ -26,6 +26,28 @@ struct ShelfWithItemsDTO: Codable {
     let items: [String]?
 }
 
+// MARK: - Create
+
+/// Payload for `POST /api/shelves?action=create`. Empty `visibility` means private.
+struct NewShelfDTO: Codable {
+    let name: String
+    let description: String?
+    let visibility: [String]
+}
+
+/// Payload for `POST /api/shelves?action=update` — only the attributes being changed.
+struct UpdateShelfDTO: Codable {
+    let shelf: String
+    let name: String?
+    let description: String?
+    let visibility: [String]?
+}
+
+/// Shared response of create and update: `{ shelf }`.
+struct ShelfResponseDTO: Codable {
+    let shelf: ShelfDTO
+}
+
 struct ShelfDTO: Codable {
     let _id: String
     let _rev: String

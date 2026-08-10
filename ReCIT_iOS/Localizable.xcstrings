@@ -374,6 +374,12 @@
         }
       }
     },
+    "Créer" : {
+
+    },
+    "Description (optionnel)" : {
+
+    },
     "edition.add_to_inventory" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -489,6 +495,9 @@
         }
       }
     },
+    "Enregistrer" : {
+
+    },
     "entity.summary.label" : {
       "localizations" : {
         "en" : {
@@ -586,6 +595,9 @@
           }
         }
       }
+    },
+    "Fermer" : {
+
     },
     "inventory.empty" : {
       "extractionState" : "manual",
@@ -1122,6 +1134,9 @@
         }
       }
     },
+    "Modifier l'étagère" : {
+
+    },
     "nav.author" : {
       "localizations" : {
         "en" : {
@@ -1347,6 +1362,12 @@
           }
         }
       }
+    },
+    "Nom de l'étagère" : {
+
+    },
+    "Nouvelle étagère" : {
+
     },
     "profile.anonymous" : {
       "localizations" : {
@@ -2440,6 +2461,9 @@
           }
         }
       }
+    },
+    "Visibilité" : {
+
     },
     "work.editions.header %@" : {
       "localizations" : {

@@ -63,12 +63,12 @@ struct ShelfBooksLayout: Equatable {
         .init(width: Self.spineWidth(pages: pages[index]), height: Self.spineHeight(index: index, zoneHeight: zoneHeight))
     }
 
-    /// Whether the book at `index` is the leaning one (the last of a >1 standing run).
+    /// Whether the book at `index` is the leaning one — only in the all-vertical case
+    /// (a shelf with a horizontal pile never has a leaning book).
     func isLeaning(at index: Int) -> Bool {
         switch mode {
         case .allVertical: return count > 1 && index == count - 1
-        case .mixed(let verticalCount): return verticalCount > 1 && index == verticalCount - 1
-        case .singleCover: return false
+        case .mixed, .singleCover: return false
         }
     }
 

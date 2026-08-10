@@ -15,10 +15,16 @@ struct ShelfBooksView: View {
     let zoneHeight: CGFloat
     let scrubIndex: Int?
 
+    /// Horizontal inset so the outermost books sit on the plank rather than at the very
+    /// edge of the card. The books lay out within this reduced width, centred; the plank
+    /// stays full width.
+    static let horizontalMargin: CGFloat = 24
+    private var booksWidth: CGFloat { max(width - Self.horizontalMargin * 2, 0) }
+
     private var layout: ShelfBooksLayout {
         ShelfBooksLayout(
             pageCounts: books.map { $0.edition?.numberOfPages },
-            width: width,
+            width: booksWidth,
             zoneHeight: zoneHeight
         )
     }
@@ -33,22 +39,24 @@ struct ShelfBooksView: View {
             case .mixed(let verticalCount):
                 HStack(alignment: .bottom, spacing: 0) {
                     verticalRun(range: 0..<verticalCount)
-                        .frame(width: width / 2, alignment: .leading)
+                        .frame(width: booksWidth / 2, alignment: .leading)
                     pileRun(range: verticalCount..<books.count)
-                        .frame(width: width / 2, alignment: .trailing)
+                        .frame(width: booksWidth / 2, alignment: .trailing)
                 }
             }
         }
         .frame(width: width, height: zoneHeight, alignment: .bottom)
+        // Sit the books a touch into the plank for a more convincing 3D "on the shelf" look.
+        .offset(y: 4)
     }
 
     private func verticalRun(range: Range<Int>) -> some View {
         HStack(alignment: .bottom, spacing: ShelfBooksLayout.spacing) {
             ForEach(range, id: \.self) { index in
-                ShelfSpineView(item: books[index], size: layout.spineSize(at: index), seed: ShelfBooksLayout.seed(index))
+                ShelfSpineView(item: books[index], size: layout.spineSize(at: index))
                     .rotationEffect(layout.isLeaning(at: index) ? .degrees(-ShelfBooksLayout.leanDegrees) : .zero, anchor: .bottomTrailing)
                     .offset(x: layout.isLeaning(at: index) ? layout.leanOffset(at: index) : 0)
-                    .scaleEffect(scrubIndex == index ? 1.5 : 1, anchor: .bottom)
+                    .scaleEffect(scrubIndex == index ? 1.5 : 1, anchor: .center)
                     .zIndex(scrubIndex == index ? 1 : 0)
                     .animation(.spring(duration: 0.22), value: scrubIndex)
             }
@@ -71,12 +79,12 @@ struct ShelfBooksView: View {
         let item: InventoryItem = books[index]
         return PaintedBookView(
             edition: item.edition,
-            size: layout.pileBarSize(at: index, availableWidth: width / 2),
-            seed: ShelfBooksLayout.seed(index)
+            size: layout.pileBarSize(at: index, availableWidth: booksWidth / 2)
         ) { ink in
             Text(item.edition?.title ?? "")
                 .textStyle(.footnote200Bold)
                 .foregroundStyle(ink)
+                .shadow(color: .black.opacity(0.45), radius: 1, x: 0, y: 0.5)
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -107,7 +115,7 @@ struct ShelfBooksView: View {
         .frame(width: coverWidth, height: coverHeight)
         .clipShape(.rect(cornerRadius: 2))
         .shadow(color: .black.opacity(0.22), radius: 3, x: 1, y: 2)
-        .scaleEffect(scrubIndex == 0 ? 1.5 : 1, anchor: .bottom)
+        .scaleEffect(scrubIndex == 0 ? 1.5 : 1, anchor: .center)
         .animation(.spring(duration: 0.22), value: scrubIndex)
     }
 }

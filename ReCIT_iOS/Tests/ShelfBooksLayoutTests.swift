@@ -79,14 +79,16 @@ import Testing
         #expect(vertical.leanOffset(at: 2) > 0)
     }
 
-    @Test func mixedLeansTheLastVerticalBook() {
+    @Test func mixedHasNoLeaningBook() {
+        // A shelf with a pile must not lean any book.
         let l = ShelfBooksLayout(pageCounts: Array(repeating: 600, count: 20), width: 300, zoneHeight: 120)
-        guard case .mixed(let verticalCount) = l.mode else {
+        guard case .mixed = l.mode else {
             Issue.record("expected mixed")
             return
         }
-        #expect(l.isLeaning(at: verticalCount - 1))
-        #expect(!l.isLeaning(at: verticalCount)) // first pile book
+        for index in 0..<l.count {
+            #expect(!l.isLeaning(at: index))
+        }
     }
 
     // MARK: - Pile scaling

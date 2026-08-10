@@ -17,7 +17,7 @@ import SwiftData
 
 @MainActor
 @Observable
-final class ShelfModel {
+final class ShelfModel: OptimisticMutating {
 
     /// DEV: when true, shelf membership is faked by distributing the user's own items
     /// across their shelves, so the bookshelf UI can be validated independently of the
@@ -29,9 +29,92 @@ final class ShelfModel {
     /// Shared channel used to surface a background failure to the UI.
     var errorReporter: AppErrorReporter?
 
+    /// Most recent optimistic background task, exposed so tests can await it.
+    @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
+
     init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
         self.errorReporter = errorReporter
+    }
+
+    /// Optimistically creates a shelf: a placeholder appears at once (slotting into the
+    /// A→Z order), the `POST` runs in the background, and on success the placeholder is
+    /// swapped for the server's canonical shelf. On failure it's removed and the error
+    /// surfaced. Visibility defaults to private server-side. See ADR 0003 / 0004.
+    func createShelf(name: String, description: String, visibility: [String], ownerId: String, modelContext: ModelContext) {
+        let placeholder: Shelf = .init(
+            _id: OptimisticID.make(),
+            _rev: "",
+            name: name,
+            slug: "",
+            shelfDescription: description,
+            ownerId: ownerId,
+            visibility: visibility,
+            colorHex: nil,
+            created: .now,
+            updated: nil
+        )
+
+        inFlightTask = optimistic(
+            modelContext,
+            apply: { modelContext.insert(placeholder) },
+            revert: { modelContext.delete(placeholder) },
+            request: { [weak self] in
+                guard let self else { return }
+                let payload: NewShelfDTO = .init(name: name, description: description.isEmpty ? nil : description, visibility: visibility)
+                guard let response: ShelfResponseDTO = try await self.apiService.send(
+                    toEndpoint: "/api/shelves?action=create",
+                    method: "POST",
+                    payload: payload,
+                    debug: true
+                ) else {
+                    throw NetworkError.badResponse
+                }
+                // Reconcile: swap the placeholder for the server's canonical shelf.
+                modelContext.delete(placeholder)
+                modelContext.insert(Shelf(dto: response.shelf))
+            }
+        )
+    }
+
+    /// Optimistically updates a shelf's editable attributes (name, description,
+    /// visibility): applies locally at once, PUTs in the background, reverts on failure.
+    func updateShelf(_ shelf: Shelf, name: String, description: String, visibility: [String], modelContext: ModelContext) {
+        let previousName: String = shelf.name
+        let previousDescription: String = shelf.shelfDescription
+        let previousVisibility: [String] = shelf.visibility
+
+        inFlightTask = optimistic(
+            modelContext,
+            apply: {
+                shelf.name = name
+                shelf.shelfDescription = description
+                shelf.visibility = visibility
+            },
+            revert: {
+                shelf.name = previousName
+                shelf.shelfDescription = previousDescription
+                shelf.visibility = previousVisibility
+            },
+            request: { [weak self] in
+                guard let self else { return }
+                let payload: UpdateShelfDTO = .init(
+                    shelf: shelf._id,
+                    name: name,
+                    description: description,
+                    visibility: visibility
+                )
+                guard let response: ShelfResponseDTO = try await self.apiService.send(
+                    toEndpoint: "/api/shelves?action=update",
+                    method: "POST",
+                    payload: payload,
+                    debug: true
+                ) else {
+                    throw NetworkError.badResponse
+                }
+                shelf.update(from: response.shelf)
+            }
+        )
     }
 
     func syncShelves(forUser: User, modelContext: ModelContext) async throws {

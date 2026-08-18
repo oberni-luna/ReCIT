@@ -2,9 +2,9 @@
 //  ShelfBooksView.swift
 //  ReCIT_iOS
 //
-//  Thin SwiftUI renderer over `ShelfBooksLayout`: it maps books to page counts, asks the
-//  layout for the mode and geometry, and draws spines / a pile / a single cover
-//  accordingly. All layout math lives in the (testable) layout type. See ADR 0003.
+//  Thin SwiftUI renderer over `ShelfBooksLayout`: given the layout (built by the parent,
+//  which also uses it to hit-test taps) it draws spines / a pile / a single cover, growing
+//  the selected book. All layout math lives in the (testable) layout type. See ADR 0003.
 //
 
 import SwiftUI
@@ -12,22 +12,22 @@ import SwiftUI
 struct ShelfBooksView: View {
     let books: [InventoryItem]
     let width: CGFloat
-    let zoneHeight: CGFloat
-    let scrubIndex: Int?
+    let layout: ShelfBooksLayout
+    /// The book singled out by a tap, grown above the others.
+    let selectedIndex: Int?
 
     /// Horizontal inset so the outermost books sit on the plank rather than at the very
     /// edge of the card. The books lay out within this reduced width, centred; the plank
     /// stays full width.
     static let horizontalMargin: CGFloat = 24
-    private var booksWidth: CGFloat { max(width - Self.horizontalMargin * 2, 0) }
 
-    private var layout: ShelfBooksLayout {
-        ShelfBooksLayout(
-            pageCounts: books.map { $0.edition?.numberOfPages },
-            width: booksWidth,
-            zoneHeight: zoneHeight
-        )
+    /// Width the books lay out in — the card minus a margin on each side.
+    static func booksWidth(cardWidth: CGFloat) -> CGFloat {
+        max(cardWidth - horizontalMargin * 2, 0)
     }
+
+    private var booksWidth: CGFloat { layout.width }
+    private var zoneHeight: CGFloat { layout.zoneHeight }
 
     var body: some View {
         Group {
@@ -56,9 +56,9 @@ struct ShelfBooksView: View {
                 ShelfSpineView(item: books[index], size: layout.spineSize(at: index))
                     .rotationEffect(layout.isLeaning(at: index) ? .degrees(-ShelfBooksLayout.leanDegrees) : .zero, anchor: .bottomTrailing)
                     .offset(x: layout.isLeaning(at: index) ? layout.leanOffset(at: index) : 0)
-                    .scaleEffect(scrubIndex == index ? 1.5 : 1, anchor: .center)
-                    .zIndex(scrubIndex == index ? 1 : 0)
-                    .animation(.spring(duration: 0.22), value: scrubIndex)
+                    .scaleEffect(selectedIndex == index ? 1.5 : 1, anchor: .center)
+                    .zIndex(selectedIndex == index ? 1 : 0)
+                    .animation(.spring(duration: 0.22), value: selectedIndex)
             }
         }
     }
@@ -68,9 +68,9 @@ struct ShelfBooksView: View {
             ForEach(range, id: \.self) { index in
                 pileBar(index)
                     .offset(x: layout.pileJitter(at: index))
-                    .scaleEffect(scrubIndex == index ? 1.5 : 1)
-                    .zIndex(scrubIndex == index ? 1 : 0)
-                    .animation(.spring(duration: 0.22), value: scrubIndex)
+                    .scaleEffect(selectedIndex == index ? 1.5 : 1)
+                    .zIndex(selectedIndex == index ? 1 : 0)
+                    .animation(.spring(duration: 0.22), value: selectedIndex)
             }
         }
     }
@@ -79,7 +79,8 @@ struct ShelfBooksView: View {
         let item: InventoryItem = books[index]
         return PaintedBookView(
             edition: item.edition,
-            size: layout.pileBarSize(at: index, availableWidth: booksWidth / 2)
+            size: layout.pileBarSize(at: index, availableWidth: layout.pileColumnWidth),
+            orientation: .lying
         ) { ink in
             Text(item.edition?.title ?? "")
                 .textStyle(.footnote200Bold)
@@ -115,7 +116,7 @@ struct ShelfBooksView: View {
         .frame(width: coverWidth, height: coverHeight)
         .clipShape(.rect(cornerRadius: 2))
         .shadow(color: .black.opacity(0.22), radius: 3, x: 1, y: 2)
-        .scaleEffect(scrubIndex == 0 ? 1.5 : 1, anchor: .center)
-        .animation(.spring(duration: 0.22), value: scrubIndex)
+        .scaleEffect(selectedIndex == 0 ? 1.5 : 1, anchor: .center)
+        .animation(.spring(duration: 0.22), value: selectedIndex)
     }
 }

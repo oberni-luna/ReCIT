@@ -4,15 +4,27 @@
 //
 //  A book's spine, built from a sliver of its own cover: the leftmost strip stretched to
 //  the spine size, with the caller's title overlaid in a colour picked for legibility and
-//  a parchment placeholder until the cover loads. Used by standing spines and pile books.
+//  a parchment placeholder until the cover loads. Used by standing spines and pile books;
+//  a lying book gets the sliver turned a quarter turn so the cover runs along its length.
 //  See PRD 0002 / ADR 0003.
 //
 
 import SwiftUI
 
 struct PaintedBookView<Overlay: View>: View {
+
+    /// How the book sits on the shelf — it decides which way the cover sliver runs.
+    enum Orientation {
+        /// Standing spine-out: the cover's height runs along the book's height.
+        case standing
+        /// Lying flat in a pile: the cover's height runs along the book's length, and
+        /// the sliver is stretched vertically over its thickness.
+        case lying
+    }
+
     let edition: Edition?
     let size: CGSize
+    var orientation: Orientation = .standing
     @ViewBuilder var overlay: (Color) -> Overlay
 
     @State private var strip: SpineStripLoader.Strip?
@@ -22,10 +34,17 @@ struct PaintedBookView<Overlay: View>: View {
         return strip.titleIsDark ? .init(hex: "#2A2A2A") : .white
     }
 
+    private func paint(_ strip: SpineStripLoader.Strip) -> UIImage {
+        switch orientation {
+        case .standing: strip.image
+        case .lying: strip.lyingImage
+        }
+    }
+
     var body: some View {
         Group {
             if let strip {
-                Image(uiImage: strip.image)
+                Image(uiImage: paint(strip))
                     .resizable()
                     .interpolation(.medium)
             } else {

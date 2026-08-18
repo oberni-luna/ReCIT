@@ -2,9 +2,9 @@
 //  ShelfBooksLayoutTests.swift
 //  ReCIT_iOSTests
 //
-//  Unit tests for the pure shelf layout math. Network-free and deterministic (the
-//  variance is seeded), so they run in CI. Assert observable output (mode + geometry),
-//  not internals. See ADR 0003 / PRD 0001.
+//  Unit tests for the pure shelf layout math, including which book a tap lands nearest.
+//  Network-free and deterministic (the variance is seeded), so they run in CI. Assert
+//  observable output (mode + geometry), not internals. See ADR 0003 / PRD 0001.
 //
 
 import CoreGraphics
@@ -107,5 +107,81 @@ import Testing
         if case .mixed = l.mode {
             #expect(l.pileScale == 1)
         }
+    }
+
+    // MARK: - Nearest book to a tap
+
+    @Test func emptyShelfHasNoNearestBook() {
+        let l = ShelfBooksLayout(pageCounts: [], width: 300, zoneHeight: 120)
+        #expect(l.nearestIndex(to: .init(x: 150, y: 60)) == nil)
+    }
+
+    @Test func loneBookIsAlwaysTheNearest() {
+        let l = ShelfBooksLayout(pageCounts: [200], width: 300, zoneHeight: 120)
+        #expect(l.nearestIndex(to: .init(x: 0, y: 0)) == 0)
+        #expect(l.nearestIndex(to: .init(x: 300, y: 120)) == 0)
+    }
+
+    @Test func tapOnAStandingSpineFindsThatSpine() {
+        let l = ShelfBooksLayout(pageCounts: [200, 200, 200], width: 300, zoneHeight: 120)
+        guard l.mode == .allVertical else {
+            Issue.record("expected allVertical")
+            return
+        }
+        for index in 0..<l.count {
+            let frame = l.spineFrame(at: index)
+            #expect(l.nearestIndex(to: .init(x: frame.midX, y: frame.midY)) == index)
+        }
+    }
+
+    @Test func standingRunIsCentredInTheZone() {
+        let l = ShelfBooksLayout(pageCounts: [200, 200, 200], width: 300, zoneHeight: 120)
+        let leftGap = l.spineFrame(at: 0).minX
+        let rightGap = 300 - (l.standingRunStartX + l.standingRunWidth)
+        #expect(abs(leftGap - rightGap) < 0.001)
+    }
+
+    @Test func tapPastTheRunFallsBackToTheClosestSpine() {
+        let l = ShelfBooksLayout(pageCounts: [200, 200, 200], width: 300, zoneHeight: 120)
+        // Far left of the run, and far right past its end (e.g. a tap on the plank).
+        #expect(l.nearestIndex(to: .init(x: -50, y: 200)) == 0)
+        #expect(l.nearestIndex(to: .init(x: 400, y: 200)) == l.count - 1)
+    }
+
+    @Test func tapOnAPileBarFindsThatBar() {
+        let l = ShelfBooksLayout(pageCounts: Array(repeating: 600, count: 20), width: 300, zoneHeight: 120)
+        guard case .mixed = l.mode else {
+            Issue.record("expected mixed")
+            return
+        }
+        for index in l.pileRange {
+            let frame = l.pileBarFrame(at: index)
+            #expect(l.nearestIndex(to: .init(x: 250, y: frame.midY)) == index)
+        }
+    }
+
+    @Test func mixedShelfSplitsSpinesLeftAndPileRight() {
+        let l = ShelfBooksLayout(pageCounts: Array(repeating: 600, count: 20), width: 300, zoneHeight: 120)
+        guard case .mixed(let verticalCount) = l.mode else {
+            Issue.record("expected mixed")
+            return
+        }
+        // A tap in the left half never picks a pile book, and vice versa.
+        let left = l.nearestIndex(to: .init(x: 20, y: 60))
+        let right = l.nearestIndex(to: .init(x: 280, y: 60))
+        #expect(left.map { $0 < verticalCount } == true)
+        #expect(right.map { $0 >= verticalCount } == true)
+    }
+
+    @Test func pileIsBottomAlignedAndStacksDownwards() {
+        let zone: CGFloat = 120
+        let l = ShelfBooksLayout(pageCounts: Array(repeating: 600, count: 20), width: 300, zoneHeight: zone)
+        guard case .mixed = l.mode else {
+            Issue.record("expected mixed")
+            return
+        }
+        let last = l.pileRange.upperBound - 1
+        #expect(abs(l.pileBarFrame(at: last).maxY - zone) < 0.001)
+        #expect(l.pileBarFrame(at: l.pileRange.lowerBound).minY < l.pileBarFrame(at: last).minY)
     }
 }

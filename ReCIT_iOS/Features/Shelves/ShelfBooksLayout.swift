@@ -3,9 +3,10 @@
 //  ReCIT_iOS
 //
 //  Pure (SwiftUI-free) layout math for the books on a shelf. Given the ordered books'
-//  page counts and the shelf's usable width + zone height, it resolves the layout mode
-//  and all per-book geometry. `ShelfBooksView` is a thin renderer over this. Kept free
-//  of SwiftData/SwiftUI so it can be unit-tested in isolation. See ADR 0003.
+//  page counts and the shelf's usable width + zone height, it resolves the layout mode,
+//  all per-book geometry, and which book a tap lands nearest. `ShelfBooksView` is a thin
+//  renderer over this. Kept free of SwiftData/SwiftUI so it can be unit-tested in
+//  isolation. See ADR 0003.
 //
 
 import CoreGraphics
@@ -99,6 +100,116 @@ struct ShelfBooksLayout: Equatable {
     func pileJitter(at index: Int) -> CGFloat {
         let pattern: [CGFloat] = [-3, 2, -1, 3, -2, 1, -3, 2, 0, -1]
         return pattern[index % pattern.count]
+    }
+
+    // MARK: - Frames in the books zone
+
+    /// Overlap between two stacked pile bars (the pile's negative spacing).
+    static let pileOverlap: CGFloat = 1
+
+    /// Width the standing run occupies: spines plus the gaps between them.
+    var standingRunWidth: CGFloat {
+        let count: Int = verticalCount
+        guard count > 0 else { return 0 }
+        let spines: CGFloat = (0..<count).reduce(0) { $0 + Self.spineWidth(pages: pages[$1]) }
+        return spines + Self.spacing * CGFloat(count - 1)
+    }
+
+    /// Where the standing run starts: centred when every book stands, hard left when a
+    /// pile shares the zone (the run then owns the left half).
+    var standingRunStartX: CGFloat {
+        switch mode {
+        case .allVertical: return max((width - standingRunWidth) / 2, 0)
+        case .mixed, .singleCover: return 0
+        }
+    }
+
+    /// Width available to the pile — the right half of the zone.
+    var pileColumnWidth: CGFloat { width / 2 }
+
+    /// Frame of the standing spine at `index`, in the books zone's coordinates (origin
+    /// top-left, books sitting on the bottom edge).
+    func spineFrame(at index: Int) -> CGRect {
+        let leading: CGFloat = (0..<index).reduce(standingRunStartX) {
+            $0 + Self.spineWidth(pages: pages[$1]) + Self.spacing
+        }
+        let size: CGSize = spineSize(at: index)
+        let lean: CGFloat = isLeaning(at: index) ? leanOffset(at: index) : 0
+        return .init(
+            x: leading + lean,
+            y: zoneHeight - size.height,
+            width: size.width,
+            height: size.height
+        )
+    }
+
+    /// Frame of the pile bar at `index`, in the books zone's coordinates. The pile is
+    /// bottom-aligned in the right half, each bar overlapping the one below by 1pt.
+    func pileBarFrame(at index: Int) -> CGRect {
+        let heights: [CGFloat] = pileRange.map {
+            pileBarSize(at: $0, availableWidth: pileColumnWidth).height
+        }
+        let stacked: CGFloat = heights.reduce(0, +)
+            - Self.pileOverlap * CGFloat(max(heights.count - 1, 0))
+        let first: Int = pileRange.lowerBound
+        let above: CGFloat = (first..<index).reduce(0) {
+            $0 + heights[$1 - first] - Self.pileOverlap
+        }
+        let size: CGSize = pileBarSize(at: index, availableWidth: pileColumnWidth)
+        // The pile hugs the zone's right edge, and the bars are centred on each other.
+        let widest: CGFloat = pileRange.reduce(0) {
+            max($0, pileBarSize(at: $1, availableWidth: pileColumnWidth).width)
+        }
+        return .init(
+            x: width - widest + (widest - size.width) / 2,
+            y: zoneHeight - stacked + above,
+            width: size.width,
+            height: size.height
+        )
+    }
+
+    // MARK: - Hit testing
+
+    /// The book nearest `point` (books-zone coordinates). Never `nil` on a non-empty
+    /// shelf: a tap past the run, above the books or on the plank resolves to the
+    /// closest book rather than to nothing.
+    func nearestIndex(to point: CGPoint) -> Int? {
+        guard count > 0 else { return nil }
+        switch mode {
+        case .singleCover:
+            return 0
+        case .allVertical:
+            return nearestStandingIndex(x: point.x)
+        case .mixed:
+            // The zone splits down the middle: spines left, pile right. Within the pile
+            // the bars stack, so there it is the vertical position that picks the book.
+            return point.x < width / 2
+                ? nearestStandingIndex(x: point.x)
+                : nearestPileIndex(y: point.y)
+        }
+    }
+
+    private func nearestStandingIndex(x: CGFloat) -> Int? {
+        (0..<verticalCount).min {
+            let first: CGRect = spineFrame(at: $0)
+            let second: CGRect = spineFrame(at: $1)
+            return Self.gap(x, first.minX, first.maxX) < Self.gap(x, second.minX, second.maxX)
+        }
+    }
+
+    private func nearestPileIndex(y: CGFloat) -> Int? {
+        pileRange.min {
+            let first: CGRect = pileBarFrame(at: $0)
+            let second: CGRect = pileBarFrame(at: $1)
+            return Self.gap(y, first.minY, first.maxY) < Self.gap(y, second.minY, second.maxY)
+        }
+    }
+
+    /// Distance from `value` to the closed range `low...high` (0 when inside).
+    private static func gap(_ value: CGFloat, _ low: CGFloat, _ high: CGFloat) -> CGFloat {
+        if value < low { return low - value }
+        if value > high { return value - high }
+        return 0
     }
 
     // MARK: - Shared

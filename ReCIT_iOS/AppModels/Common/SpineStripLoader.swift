@@ -3,9 +3,10 @@
 //  ReCIT_iOS
 //
 //  Builds a book's painted spine from its own cover: crops the leftmost sliver of the
-//  cover and returns it as a small image (stretched to the spine by the view), plus a
-//  title colour (dark/light) chosen from the strip's average luminance. Results are held
-//  in an in-memory cache keyed by edition. Read-only, unauthenticated. See PRD 0002.
+//  cover and returns it as a small image (stretched to the spine by the view), plus the
+//  same sliver turned a quarter turn for books lying flat, plus a title colour
+//  (dark/light) chosen from the strip's average luminance. Results are held in an
+//  in-memory cache keyed by edition. Read-only, unauthenticated. See PRD 0002.
 //
 
 import Foundation
@@ -16,7 +17,11 @@ actor SpineStripLoader {
     static let shared: SpineStripLoader = .init()
 
     struct Strip {
+        /// The sliver upright: the cover's height runs along the spine's height.
         let image: UIImage
+        /// The same sliver turned a quarter turn, so on a book lying flat the cover's
+        /// height runs along the book's length and the sliver stretches vertically.
+        let lyingImage: UIImage
         /// True when the strip is bright enough that a dark title reads best.
         let titleIsDark: Bool
     }
@@ -44,6 +49,7 @@ actor SpineStripLoader {
         let luminance: Double = averageLuminance(of: cropped)
         let strip: Strip = .init(
             image: UIImage(cgImage: cropped),
+            lyingImage: UIImage(cgImage: Self.turnedQuarter(cropped) ?? cropped),
             titleIsDark: Self.titleIsDark(luminance: luminance)
         )
         cache[uri] = strip
@@ -60,6 +66,33 @@ actor SpineStripLoader {
 
     static func titleIsDark(luminance: Double) -> Bool {
         luminance > darkTitleThreshold
+    }
+
+    /// The strip rotated a quarter turn (width and height swapped), so a book lying flat
+    /// shows the cover along its length instead of banded across its thickness. Pixels
+    /// are redrawn rather than flagged with an orientation so the result is unambiguous.
+    static func turnedQuarter(_ image: CGImage) -> CGImage? {
+        let width: Int = max(image.height, 1)
+        let height: Int = max(image.width, 1)
+        guard let context: CGContext = .init(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            return nil
+        }
+        // Rotate a quarter turn about the origin, then slide the result back into frame.
+        context.translateBy(x: CGFloat(width), y: 0)
+        context.rotate(by: .pi / 2)
+        context.draw(
+            image,
+            in: CGRect(x: 0, y: 0, width: CGFloat(image.width), height: CGFloat(image.height))
+        )
+        return context.makeImage()
     }
 
     // MARK: - CoreImage

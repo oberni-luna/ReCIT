@@ -18,9 +18,9 @@ struct ShelvesContent: View {
 
     @Environment(\.isSearching) private var isSearching
 
-    /// True while a shelf's scrub is armed; disables the carousel scroll so the slide
-    /// doesn't move the cards.
-    @State private var isScrubbing: Bool = false
+    /// The one book grown across the whole carousel: tapping a book on another étagère
+    /// moves the selection, dropping the previous one back into place.
+    @State private var selection: ShelfBookSelection?
     /// Presents the create-shelf form (tapping the trailing carousel card).
     @State private var isCreatingShelf: Bool = false
 
@@ -90,7 +90,7 @@ struct ShelvesContent: View {
         ScrollView(.horizontal) {
             LazyHStack(spacing: gutter) {
                 ForEach(shelves) { shelf in
-                    ShelfRowView(shelf: shelf, width: cardWidth, path: $path, scrubbing: $isScrubbing)
+                    ShelfRowView(shelf: shelf, width: cardWidth, path: $path, selection: $selection)
                         .frame(width: cardWidth)
                 }
                 ShelfCreateCardView(width: cardWidth) { isCreatingShelf = true }
@@ -101,7 +101,6 @@ struct ShelvesContent: View {
         }
         .scrollTargetBehavior(.viewAligned)
         .scrollIndicators(.hidden)
-        .scrollDisabled(isScrubbing)
         .sheet(isPresented: $isCreatingShelf) {
             ShelfFormView()
         }

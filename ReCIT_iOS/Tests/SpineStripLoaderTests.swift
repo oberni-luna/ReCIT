@@ -2,8 +2,9 @@
 //  SpineStripLoaderTests.swift
 //  ReCIT_iOSTests
 //
-//  Unit tests for the pure parts of the spine-strip builder: crop geometry and the
-//  luminance → title-colour decision. Network-free. See PRD 0002.
+//  Unit tests for the pure parts of the spine-strip builder: crop geometry, the quarter
+//  turn used by books lying flat, and the luminance → title-colour decision.
+//  Network-free. See PRD 0002.
 //
 
 import CoreGraphics
@@ -25,6 +26,34 @@ import Testing
         let rect = SpineStripLoader.cropRect(imageWidth: 4, imageHeight: 120)
         #expect(rect.width == 4)
         #expect(rect.height == 120)
+    }
+
+    // MARK: - Quarter turn (books lying flat)
+
+    @Test func quarterTurnSwapsWidthAndHeight() throws {
+        let strip: CGImage = try #require(Self.opaqueImage(width: 10, height: 300))
+        let turned: CGImage = try #require(SpineStripLoader.turnedQuarter(strip))
+        #expect(turned.width == 300)
+        #expect(turned.height == 10)
+    }
+
+    // MARK: - Helpers
+
+    private static func opaqueImage(width: Int, height: Int) -> CGImage? {
+        guard let context: CGContext = .init(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            return nil
+        }
+        context.setFillColor(gray: 0.5, alpha: 1)
+        context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        return context.makeImage()
     }
 
     // MARK: - Title colour from luminance

@@ -89,6 +89,10 @@ a design interview:
 
 ### Interaction (no hover on iOS)
 
+> **Superseded by ADR 0005.** The scrub described below shipped (via a UIKit
+> recognizer, PRD 0002) and was then replaced by tap-to-select; a body tap no longer
+> opens the shelf list. Kept here as the original decision.
+
 - **Tap** anywhere on a shelf → `ShelfDetailView` (a standard `InventoryCell` list of the
   shelf's books). Tapping a spine does **not** open that book — it opens the shelf list.
 - **Tap + horizontal swipe** across the books → scrub: X maps to a book, each zooms + a haptic

@@ -2,6 +2,10 @@
 
 Shipped on 2026-08-06 from PRD `prd/0002-spine-strip-scrub-margin.md`.
 
+> The scrub described here was replaced on 2026-08-18 by tap-to-select — see
+> `docs/features/0003-shelf-tap-selection.md` / ADR 0005. The cover-strip spines and the
+> book margin still stand.
+
 ## What it does
 
 On the bookshelf, each spine is now built from the book's own cover (the leftmost sliver,

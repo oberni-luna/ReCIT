@@ -4,7 +4,10 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
-- **Dernière passe** : 2026-08-18 — tokens, styles de texte, styles d'ombre, page `Tokens`. Aucun composant.
+- **Dernière passe** : 2026-08-19 — le label papier de l'étagère (issue 0012) : style d'effet `Shadow/Light`,
+  variables `shadow/light`, `shelf/label/paper`, `shelf/label/ink`, appliquées aux deux variantes de `Shelf Card`.
+- **Passes précédentes** : 2026-08-18 — tokens, styles de texte, styles d'ombre, page `Tokens`, puis les 26 composants
+  et les 16 frames d'écran.
 - **Éditeur** : fichier `/design/` (les nœuds de design sont autorisés).
 
 ## Règle de source de vérité
@@ -69,14 +72,18 @@ cadre sans qu'aucun contrôle ne le voie.
 | Collection | id | Modes (id) | Variables |
 |---|---|---|---|
 | `Primitives` | `VariableCollectionId:4:2` | `Value` (`4:0`) | 30 |
-| `Color` | `VariableCollectionId:4:3` | `Light` (`4:1`), `Dark` (`4:2`) | 27 |
+| `Color` | `VariableCollectionId:4:3` | `Light` (`4:1`), `Dark` (`4:2`) | 30 |
 | `Spacing` | `VariableCollectionId:4:4` | `Value` (`4:3`) | 11 |
 | `Radius` | `VariableCollectionId:4:5` | `Value` (`4:4`) | 8 |
 | `Sizing` | `VariableCollectionId:4:6` | `Value` (`4:5`) | 4 |
 | `Typography` | `VariableCollectionId:4:7` | `Value` (`4:6`) | 10 |
 | `Opacity` | `VariableCollectionId:4:8` | `Value` (`4:7`) | 2 |
 
-**Total : 92 variables, 10 styles de texte, 6 styles d'effet.**
+**Total : 95 variables, 10 styles de texte, 7 styles d'effet.**
+
+Les trois dernières variables (`shadow/light`, `shelf/label/paper`, `shelf/label/ink`) et le septième style d'effet
+(`Shadow/Light`) datent de la passe du 2026-08-19 ; les résultats d'audit datés du 2026-08-18 plus bas comptent donc
+92 et 6, et n'ont pas été rejoués.
 
 Les modes clair/sombre ne vivent **pas** dans l'asset catalog : chaque `.colorset` porte une seule valeur, et la
 paire light/dark est assemblée en Swift par `Color(light:dark:)` dans `DesignSystem/Tokens/Color.swift`. C'est là
@@ -88,7 +95,7 @@ qu'il faut lire les deux modes.
 
 | Token | Hex | α | Consommé par |
 |---|---|---|---|
-| `color/gray/0` | `#FFFFFF` | 1 | `background/default` L |
+| `color/gray/0` | `#FFFFFF` | 1 | `background/default` L · `shelf/label/paper` **L et D** |
 | `color/gray/50` | `#F1F1F1` | 1 | `foreground/inverse` L · `foreground/default` D · `background/secondary` L |
 | `color/gray/200` | `#E8ECE6` | 1 | `background/inverse` D · `background/disable` L · `border/default` L · `background/tinted-inverse` D |
 | `color/gray/400` | `#AFAFAF` | 1 | `foreground/disable` L · `foreground/secondary` D · `foreground/placeholder` L |
@@ -97,7 +104,7 @@ qu'il faut lire les deux modes.
 | `color/gray/700` | `#2D2D2D` | 1 | `border/default` D · `background/error` D |
 | `color/gray/700 75%` | `#2D2D2D` | **0.50** | — inutilisé · **le nom ment** (voir D1) |
 | `color/gray/800` | `#2A2A2A` | 1 | `background/secondary` D |
-| `color/gray/900` | `#191919` | 1 | `foreground/default` L · `foreground/inverse` D · `background/inverse` L |
+| `color/gray/900` | `#191919` | 1 | `foreground/default` L · `foreground/inverse` D · `background/inverse` L · `shelf/label/ink` **L et D** |
 | `color/gray/1000` | `#000000` | 1 | `background/default` D |
 | `color/gray/1000 10%` | `#000000` | 0.10 | — inutilisé |
 | `color/green/100` | `#F2FAE9` | 1 | `foreground/tinted-inverse` L · `background/tinted` L |
@@ -129,6 +136,9 @@ en clair et en sombre, **volontairement**.
 | `shelf/ink-dark` | `#3A2E24` | `ShelfPalette.ink(onHex:)` — luminance > 0.58 |
 | `shelf/ink-cream` | `#F4EEE1` | `ShelfPalette.ink(onHex:)` — luminance ≤ 0.58 |
 | `shelf/ink-fallback` | `#4A3B2C` | `ShelfPalette.ink(onHex:)` — aucun hex de couverture |
+
+`ShelfPalette` porte aussi le papier et l'encre du label (`labelPaper`, `labelInk`) : eux ne sont pas des primitives —
+ils aliasent des gris existants — et vivent donc dans la table des sémantiques, plus bas.
 
 La couleur du dos peint elle-même n'est **pas** un token : `ShelfPalette.spineColor(_:)` la calcule depuis l'hex
 persisté de la couverture (saturation ×1.45 plafonnée à 0.92, luminosité bornée à [0.42, 0.82]). Elle n'a pas de
@@ -170,12 +180,32 @@ les deux paires sont égales par construction, pas par coïncidence. Si l'une do
 |---|---|---|
 | `shadow/soft` | noir 10 % | `Color.black.opacity(0.1)` |
 | `shadow/book` | noir 16 % | `Color.black.opacity(0.16)` |
+| `shadow/light` | noir 18 % | `DesignSystem.Shadow.light` |
 | `shadow/lying-book` | noir 22 % | `Color.black.opacity(0.22)` |
 | `shadow/spine` | noir 45 % | `Color.black.opacity(0.45)` |
 | `shelf/parchment` | → `shelf/parchment` | `ShelfPalette.parchment` |
 | `shelf/ink/dark` | → `shelf/ink-dark` | `ShelfPalette.ink(onHex:)` |
 | `shelf/ink/cream` | → `shelf/ink-cream` | `ShelfPalette.ink(onHex:)` |
 | `shelf/ink/fallback` | → `shelf/ink-fallback` | `ShelfPalette.ink(onHex:)` |
+| `shelf/label/paper` | → `color/gray/0` | `ShelfPalette.labelPaper` |
+| `shelf/label/ink` | → `color/gray/900` | `ShelfPalette.labelInk` |
+
+`shadow/light` est la **seule** ombre à porter un vrai symbole Swift : `DesignSystem.Shadow.light`, consommée par le
+modificateur `View.shadow(_:)` (`DesignSystem/Tokens/Shadow.swift`). Les cinq autres restent des littéraux
+`Color.black.opacity(…)` écrits dans le code des features ; leur reprise dans l'enum est suivie par l'**issue 0014**.
+Tant qu'elle n'est pas faite, la colonne « Symbole Swift » de ce tableau est la valeur littérale, pas un token.
+
+Comme les autres `shadow/*`, `shadow/light` porte sa propre alpha et **n'est donc pas un alias** : valeur brute,
+identique en clair et en sombre.
+
+`shelf/label/paper` et `shelf/label/ink` aliasent des primitives de gris (`color/gray/0`, `color/gray/900`) — mais
+elles **ne suivent pas** `background/default` / `foreground/default`, et c'est **volontaire, pas un oubli**. Ces deux
+rôles s'inversent en sombre, alors que l'illustration de l'étagère (`ShelfWash`, `ShelfPlank`) est un asset unique et
+universel, sans variante sombre : un label qui s'inverserait collerait du papier quasi noir sur un lavis crème. Les
+deux variables portent donc la **même valeur dans les deux modes**, dans une collection qui, elle, est mode-aware —
+c'est ce qu'il faut lire avant de « réparer » leur binding. Même raisonnement que `shadow/spine`, maintenu à 45 % au
+lieu d'être normalisé vers `shadow/soft`. Côté Swift, la règle est portée par `ShelfPalette`, pas par
+`DesignSystem.Color`, exactement pour la même raison : ces teintes dépeignent un objet physique, pas du chrome.
 
 `shadow/soft` consolide **trois** littéraux `0.1` séparés (`ScaleButtonStyle`, `CellThumbnail`, `EntityImageView`) —
 une valeur en dur qui revient trois fois est un token qui manque.
@@ -278,7 +308,7 @@ famille **bindées** aux variables `Typography`.
 `title200` sert aussi de `largeTitleTextAttributes` et `title50` de `titleTextAttributes` sur `UINavigationBar`
 (`DesignSystem.swift`). Les modifier change la barre de navigation.
 
-## Styles d'effet — 6 ombres
+## Styles d'effet — 7 ombres
 
 Couleur **bindée** à `shadow/*`, donc mode-aware. Le rayon SwiftUI est repris **tel quel** comme flou Figma.
 
@@ -290,6 +320,19 @@ Couleur **bindée** à `shadow/*`, donc mode-aware. Le rayon SwiftUI est repris 
 | `Shadow/Painted Book` | 0, 1.5 | 1.5 | `shadow/book` | `PaintedBookView.swift:57` |
 | `Shadow/Book Spine` | 0, 0.5 | 1 | `shadow/spine` | `ShelfSpineView.swift:24`, `ShelfBooksView.swift:80` |
 | `Shadow/Lying Book` | 1, 2 | 3 | `shadow/lying-book` | `ShelfBooksView.swift:110` |
+| `Shadow/Light` | 0, 2 | 3 | `shadow/light` | `.shadow(.light)` — `ShelfLabelView.swift:52`, `ShelfFocusBookCell.swift:66` |
+
+`Shadow/Light` est arrivée avec le label papier (issue 0012), et c'est la seule dont la source ne soit pas un
+littéral : les deux points d'appel passent par `DesignSystem.Shadow.light`, donc la valeur ne peut plus diverger entre
+le label et la couverture de la cellule de focus.
+
+**Le design a bougé, pas le code.** La feuille Figma portait jusque-là une ombre **brute** en (0, 1), flou 4, sur le
+label ; le code partage (0, 2), flou 3. Le code faisant foi, le style a été créé aux valeurs du code puis appliqué aux
+deux variantes de `Shelf Card` en remplacement de l'ombre littérale. Sa couleur est bindée à `shadow/light`, comme
+celle des six autres.
+
+`Shadow/Light` hérite de D9 — noir pur dans les deux modes, donc invisible sur un fond sombre. Acceptable ici et
+seulement ici : elle ne tombe jamais que sur l'illustration de l'étagère, claire dans les deux modes.
 
 `Shadow/Book Spine` est à 45 % — bien plus lourd que toute ombre d'interface, parce qu'il lit comme un **contact**
 et non comme une élévation. Ne pas le normaliser vers `shadow/soft`.
@@ -500,7 +543,7 @@ la palette de l'app, elle se recolore avec l'OS.
 | Composant | node id | Variantes | Propriétés | Source Swift |
 |---|---|---|---|---|
 | `Thumbnail` | `28:163` | Size ∈ {Small 36, Medium 48, Large 64} × Shape ∈ {Minimal 4, Medium 8, Round} | — | `Components/CellThumbnail.swift` |
-| `Section Header` | `28:164` | — | `Label#28:0` | 6 littéraux identiques dans le code |
+| `Section Header` | `28:164` | — | `Label#28:0` | `Shelves/ShelfSectionHeader.swift` depuis l'issue 0010 ; ailleurs, des en-têtes de `Section` littéraux identiques. **Aucune variante avec action** — voir D35 |
 | `Separator` | `47:193` | — | — | Le filet entre rangs d'un groupe encarté |
 | `Cell / Book` | `29:154` | — | `Title#29:0`, `Subtitle#29:1`, `Show subtitle#29:2`, `Authors#29:3`, `Owner#29:4`, `Show owner#29:5`, `Show divider#29:6` | `Inventory/InventoryCell.swift` |
 | `Cell / Entity` | `31:188` | Type ∈ {Work, Author, Item} | `Title#31:15`, `Subtitle#31:16`, `Show subtitle#31:17`, `Owner#31:18`, `Show owner#31:19` | `Search/SearchResultCell.swift` **et** `Book/OtherEditionsCell.swift` |
@@ -512,8 +555,8 @@ la palette de l'app, elle se recolore avec l'OS.
 | `User Header` | `32:170` | — | `Username#32:0`, `Item count#32:1`, `Show avatar#32:2` | `Community/UserHeaderView.swift` |
 | `Entity Header` | `32:179` | — | `Title#32:4`, `Subtitle#32:5`, `Show subtitle#32:6` | `EntityBrowser/EntityHeaderView.swift` + `EntityImageView.swift` |
 | `Syncing Placeholder` | `32:174` | — | `Message#32:3` | `Components/SyncingPlaceholderView.swift` |
-| `Shelf Card` | `34:210` | Paint ∈ {Placeholder, Illustrative} | `Name#34:2` | `Shelves/ShelfRowView.swift` |
-| `Shelf Create Card` | `34:211` | — | `Name#34:3` | `Shelves/ShelfEmptyStateView.swift` — le composant Figma porte encore l'ancien nom |
+| `Shelf Card` | `34:210` | Paint ∈ {Placeholder, Illustrative} | `Name#34:2` | `Shelves/ShelfRowView.swift` — la ligne de nom porte `shelf/label/paper` + `shelf/label/ink` et le style `Shadow/Light` depuis l'issue 0012, sur les **deux** variantes. `Paint=Placeholder` reste périmée par ailleurs : voir D34 |
+| `Shelf Create Card` | `34:211` | — | `Name#34:3` | `Shelves/ShelfEmptyStateView.swift` — le composant Figma porte encore l'ancien nom (renommage Swift à l'issue 0011). Vérifier aussi son glyphe « + » : le code l'a perdu à la même issue |
 | `Transaction Actions Bar` | `37:178` | — | `Show overflow#37:0` | `Transactions/TransactionActionsBar.swift` |
 | `Transaction Message` | `37:213` | Type ∈ {Action, User} | `Body`, `Timestamp`, `Author` (par variante) | `TransactionDetailView.messageView` |
 
@@ -683,9 +726,12 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D28 | `UserCellView` vs `UserHeaderView` | `UserCellView` ne pose **aucun** `foregroundStyle` et hérite de la couleur de label de la `List` ; `UserHeaderView` pose `foreground/default` explicitement sur les deux mêmes lignes | ouverte |
 | D29 | `ShelfEmptyStateView` (ex-`ShelfCreateCardView`) | Redéclarait `plankHeight`, `zoneHeight` et `topRoom` en propriétés calculées privées au lieu d'utiliser `ShelfCardMetrics` | résolue — issue 0011, la vue utilise `ShelfCardMetrics` |
 | D30 | `EntitySummaryView` | `.onTapGesture` là où un `Button` est requis par la convention du projet : il n'a besoin ni de la position ni du nombre de taps. Conséquence réelle : pas d'état pressé, pas d'action d'accessibilité. (`ShelfCreateCardView` avait le même défaut ; corrigé par l'issue 0011) | ouverte |
-| D31 | `ShelvesContent.sectionTitle` | Utilise `foregroundDefault` là où les cinq autres en-têtes de section utilisent `foregroundSecondary`, et ses libellés sont des littéraux français | ouverte |
+| D31 | `Features/Shelves/ShelfSectionHeader.swift` (ex-`ShelvesContent.sectionTitle`) | Le constat tient toujours, à l'adresse près : l'issue 0010 a remplacé la fonction par un type de vue, sans toucher aux deux points relevés. Le titre utilise `foregroundDefault` là où les autres en-têtes de section retombent sur le secondaire du système, et ses libellés restent des littéraux français passés en `String` — donc **non localisés** : `"Étagères"`, `"Tous les livres · N"` et `"Ajouter"`, ce dernier alors qu'une clé `action.add` traduite (« Add » / « Ajouter ») existe déjà au catalogue | ouverte — reformulée pour l'issue 0010 |
 | D32 | `ReCIT_iOS.xcodeproj` | `ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor` alors qu'**aucun asset `AccentColor` n'existe**. Le `.tint(.foregroundTinted)` de `ReCIT.swift:31` sauve le rendu, mais le réglage pointe dans le vide | ouverte |
 | D33 | `AllTransactionsView` | Ne fixe pas `navigationBarTitleDisplayMode`, donc iOS lui donne un grand titre. « Toutes les transactions » en `title200` (32 pt ExtraBold) passe à la ligne dans une barre de 96 pt | ouverte |
+| D34 | `Shelf Card`, variante `Paint=Placeholder` (`34:210`) | **Divergence côté Figma.** La passe 0012 n'a corrigé que ce qu'elle touchait : la variante reste périmée face au code livré. Sa `name row` n'a **aucun fill**, donc la pastille de papier ne s'y dessine pas, et elle affiche encore un **crayon** là où le code n'a plus qu'un chevron — le crayon a quitté la carte pour la barre de navigation du détail (issue 0008) | ouverte — demande une passe de design, pas une correction de code |
+| D35 | `Section Header` (`28:164`) vs `ShelfSectionHeader.swift` | Le composant Figma n'a ni action de fin de ligne ni variante pour en porter une, alors que l'en-tête « Étagères » a gagné un bouton **Ajouter** teinté (issue 0010). Le composant décrit donc un en-tête que l'écran Étagères n'utilise plus tel quel | ouverte — passe de design |
+| D36 | `Features/Shelves/ShelfLabelView.swift:43` | Le chevron du label est peint en `.foregroundSecondary` — un rôle qui **s'inverse** en sombre — et dimensionné par `.font(.footnote)` système, sur un papier délibérément mode-indépendant (`shelf/label/ink` / `shelf/label/paper`). En sombre, le chevron passe donc de `gray/600` à `gray/400` sur un papier resté blanc : le contraste baisse au lieu d'être stable, et c'est le seul élément du label à ne pas suivre la règle du reste | ouverte — relevée en documentant l'issue 0013 |
 
 Rappel de la passe tokens : **D6 reste la priorité** — `OpenSans-SemiBold` et `OpenSans-Regular` ne s'enregistrent
 pas au lancement, donc `action200`, `action300` et `caption200` retombent sur la police système sur l'appareil.

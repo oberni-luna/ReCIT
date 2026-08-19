@@ -26,10 +26,25 @@ final class BatchScanViewModel {
     /// in the way of the next book.
     private static let confirmationDuration: Duration = .milliseconds(900)
 
+    /// How long a notice the user cannot act on — an unknown edition, a book already filed —
+    /// stays up. Longer than the confirmation because there is a sentence to read, but
+    /// bounded all the same: the row is what stops the next scan, so a notice that never
+    /// cleared would strand the flow on a book nothing can be done about.
+    private static let noticeDuration: Duration = .seconds(3)
+
+    /// How long a lookup may run before the row gives up on it. The redacted row pulses
+    /// meanwhile, and on a bad connection a round-trip is unbounded; ten seconds is past any
+    /// answer worth waiting for and short enough that the shelf keeps moving.
+    private static let lookupTimeout: Duration = .seconds(10)
+
     private var machine: BatchScanStateMachine = .init()
 
     @ObservationIgnored private var lookupTask: Task<Void, Never>?
     @ObservationIgnored private var addTask: Task<Void, Never>?
+    /// Owns the clearing of a notice row, and nothing else. Kept apart from `lookupTask`
+    /// because a timed-out lookup outlives the lookup that produced it: the network call is
+    /// abandoned, but the row it left behind still has to be taken down.
+    @ObservationIgnored private var noticeTask: Task<Void, Never>?
 
     var state: BatchScanState {
         machine.state
@@ -42,6 +57,7 @@ final class BatchScanViewModel {
     func codeSeen(
         _ code: String,
         entityModel: EntityModel,
+        userModel: UserModel,
         modelContext: ModelContext
     ) {
         guard code.count == 13 else { return }
@@ -53,15 +69,32 @@ final class BatchScanViewModel {
 
         lookupTask?.cancel()
         lookupTask = Task { [weak self] in
-            await self?.lookUp(code: code, entityModel: entityModel, modelContext: modelContext)
+            await self?.lookUp(
+                code: code,
+                entityModel: entityModel,
+                userModel: userModel,
+                modelContext: modelContext
+            )
         }
     }
 
     private func lookUp(
         code: String,
         entityModel: EntityModel,
+        userModel: UserModel,
         modelContext: ModelContext
     ) async {
+        // A watchdog rather than a race between two child tasks: the edition is a SwiftData
+        // model and never leaves this actor. Firing it abandons the request — `showNotice`
+        // cancels the lookup — and anything the network says afterwards is refused by the
+        // machine, which is no longer waiting for this code.
+        let deadline: Task<Void, Never> = Task { [weak self] in
+            try? await Task.sleep(for: BatchScanViewModel.lookupTimeout)
+            guard !Task.isCancelled else { return }
+            self?.showNotice(.lookupTimedOut(code: code), haptic: .error)
+        }
+        defer { deadline.cancel() }
+
         do {
             // `isbn:` is the uri we can *ask* with; what comes back is keyed by inventaire's
             // own canonical id, and that is what the item has to be created from.
@@ -69,25 +102,35 @@ final class BatchScanViewModel {
                 modelContext: modelContext,
                 uri: "isbn:\(code)"
             ) else {
-                machine.apply(.lookupFailed(code: code))
+                showNotice(.lookupFailed(code: code), haptic: .error)
                 return
             }
 
-            machine.apply(.lookupResolved(scannedBook(from: edition, code: code)))
+            let book: ScannedBook = scannedBook(from: edition, code: code)
+
+            if isAlreadyOwned(book: book, userModel: userModel, modelContext: modelContext) {
+                // Not an error — a book the user simply has — so it gets its own haptic
+                // rather than the failure one.
+                showNotice(.lookupResolvedAlreadyOwned(book), haptic: .warning)
+                return
+            }
+
+            machine.apply(.lookupResolved(book))
         } catch {
-            // Telling the user *why* — unknown edition, timeout — is issue 0019. Here the row
-            // simply steps aside, with the code left gated so it is not re-offered on sight.
-            machine.apply(.lookupFailed(code: code))
+            showNotice(.lookupFailed(code: code), haptic: .error)
         }
     }
 
     // MARK: - Adding
 
-    /// Files the pending book, then confirms and clears itself.
+    /// Files the pending book, then confirms and clears itself. `onFailure` carries a failed
+    /// add out to the view: the scanner is a full-screen modal over the tab bar, and a book
+    /// the user believes was filed and was not is the one outcome this flow cannot afford.
     func addPendingBook(
         inventoryModel: InventoryModel,
         userModel: UserModel,
-        modelContext: ModelContext
+        modelContext: ModelContext,
+        onFailure: @escaping @MainActor (Error) -> Void
     ) {
         guard case .resolved(let book) = state, let user = userModel.myUser else { return }
         guard machine.apply(.addStarted) else { return }
@@ -112,8 +155,11 @@ final class BatchScanViewModel {
                 machine.apply(.cleared)
             } catch {
                 // Back to the offer: the book stays on screen and the action is tappable
-                // again. Surfacing the error to the user is issue 0019.
+                // again, with the failure said out loud so the user does not walk away
+                // believing it landed.
                 machine.apply(.addFailed)
+                Haptics.Notification.error.play()
+                onFailure(error)
             }
         }
     }
@@ -125,10 +171,55 @@ final class BatchScanViewModel {
     func cancelPending() {
         lookupTask?.cancel()
         addTask?.cancel()
+        noticeTask?.cancel()
         machine.apply(.cleared)
     }
 
     // MARK: - Private helpers
+
+    /// Puts up an outcome the user cannot act on, then takes it down again. The row is what
+    /// stops the next barcode being accepted, so every one of these has to end by itself —
+    /// there is no action on it for the user to end it with.
+    private func showNotice(_ event: BatchScanEvent, haptic: Haptics.Notification) {
+        guard machine.apply(event) else { return }
+
+        // Distinct from the recognition tick, so a shelf can be worked through by feel: a
+        // book that answered and a book that did not are told apart without looking up.
+        haptic.play()
+
+        lookupTask?.cancel()
+        noticeTask?.cancel()
+        noticeTask = Task { [weak self] in
+            try? await Task.sleep(for: BatchScanViewModel.noticeDuration)
+            guard !Task.isCancelled else { return }
+            self?.machine.apply(.cleared)
+        }
+    }
+
+    /// Whether the user already has a copy of the resolved edition.
+    ///
+    /// **Matched on the canonical uri the server answered with, never on the `isbn:` uri the
+    /// lookup asked with.** inventaire keys an edition by its own `inv:` id — the same fact
+    /// `EditionPagesLoader` documents — and an inventory item is created from, and stores,
+    /// that canonical uri. Matching on the requested uri would compare `isbn:…` against
+    /// `inv:…`, never fire, and quietly duplicate every book on a second pass over a shelf,
+    /// with nothing on screen to say so. `ScannedBook.uri` is that canonical uri by
+    /// construction. See PRD 0005.
+    private func isAlreadyOwned(
+        book: ScannedBook,
+        userModel: UserModel,
+        modelContext: ModelContext
+    ) -> Bool {
+        guard let ownerId = userModel.myUser?._id, book.uri.isEmpty == false else { return false }
+
+        let descriptor: FetchDescriptor<InventoryItem> = .init(
+            predicate: BookViewModel.ownedItemsPredicate(
+                editionUri: book.uri,
+                ownerId: ownerId
+            )
+        )
+        return ((try? modelContext.fetchCount(descriptor)) ?? 0) > 0
+    }
 
     /// Flattens the SwiftData edition into the value the row and the machine speak in.
     private func scannedBook(from edition: Edition, code: String) -> ScannedBook {

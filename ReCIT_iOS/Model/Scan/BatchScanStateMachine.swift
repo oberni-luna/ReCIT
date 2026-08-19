@@ -16,7 +16,10 @@
 //     memory slot, so a new book simply evicts the old one) or the code has been out of frame
 //     for `cooldown`. Every sighting pushes that deadline back, so a camera wobbling off the
 //     book and back does not count as the book having gone away. Without this the flow
-//     re-offers the book the user is still holding, forever.
+//     re-offers the book the user is still holding, forever. An outcome the user cannot act
+//     on — an unknown edition, a lookup that timed out, a book already in the inventory —
+//     counts as handled just as much as a filed book does, which is why the gate closes when
+//     the code is *accepted* rather than when it is added.
 //
 //  See PRD 0005.
 //
@@ -62,12 +65,18 @@ struct BatchScanStateMachine {
             state = .resolved(book: book)
             return true
 
-        case .lookupFailed(let code):
+        case .lookupResolvedAlreadyOwned(let book):
+            guard case .lookingUp(let pending) = state, pending == book.code else { return false }
+            state = .alreadyOwned(book: book)
+            return true
+
+        case .lookupFailed(let code), .lookupTimedOut(let code):
             guard case .lookingUp(let pending) = state, pending == code else { return false }
-            // The row goes away, but the code stays gated: a book that cannot be resolved is
-            // still handled, and must not be re-offered while it sits in view. Issue 0019
-            // replaces this with a `notFound` row without changing the gate's part.
-            state = .idle
+            // The row says so rather than stepping aside: silence would look exactly like a
+            // camera that failed to read, and the user would keep re-aiming at a book that
+            // cannot resolve. The code stays gated either way — a book that cannot be
+            // resolved is still handled, and must not be re-offered while it sits in view.
+            state = .notFound(code: code)
             return true
 
         case .addStarted:

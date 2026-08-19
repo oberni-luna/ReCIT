@@ -242,7 +242,7 @@ struct BatchScanStateMachineTests {
         #expect(machine.state == .lookingUp(code: firstCode))
     }
 
-    @Test("An unresolvable code stays gated, so it is not re-offered every frame")
+    @Test("An unresolvable code says so, and stays gated so it is not re-offered every frame")
     func lookupFailureCountsAsHandled() {
         let clock: TestClock = .init()
         var machine: BatchScanStateMachine = makeMachine(clock: clock)
@@ -251,15 +251,107 @@ struct BatchScanStateMachineTests {
 
         let failed: Bool = machine.apply(.lookupFailed(code: firstCode))
         #expect(failed == true)
-        #expect(machine.state == .idle)
+        // The row stands and names the code: saying nothing would look exactly like a scan
+        // the camera never made.
+        #expect(machine.state == .notFound(code: firstCode))
+        #expect(machine.state.showsRow == true)
+
+        machine.apply(.cleared)
 
         clock.advance(by: 0.4)
         let rescanned: Bool = machine.apply(.codeSeen(firstCode))
         #expect(rescanned == false)
     }
 
+    @Test("A book already in the inventory stays gated too")
+    func alreadyOwnedCountsAsHandled() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+        let scanned: ScannedBook = book(firstCode)
+
+        machine.apply(.codeSeen(firstCode))
+
+        let owned: Bool = machine.apply(.lookupResolvedAlreadyOwned(scanned))
+        #expect(owned == true)
+        #expect(machine.state == .alreadyOwned(book: scanned))
+        // The row still carries the book, so it can be drawn and opened.
+        #expect(machine.state.book == scanned)
+
+        machine.apply(.cleared)
+
+        clock.advance(by: 0.4)
+        let rescanned: Bool = machine.apply(.codeSeen(firstCode))
+        #expect(rescanned == false)
+    }
+
+    // MARK: - The lookup's deadline
+
+    @Test("A lookup that runs past its deadline lands in the unknown-edition state")
+    func timeoutLandsInNotFound() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+
+        let timedOut: Bool = machine.apply(.lookupTimedOut(code: firstCode))
+        #expect(timedOut == true)
+        // The same row as an edition inventaire does not have: from where the user stands,
+        // an answer that never comes and no answer at all are the same thing.
+        #expect(machine.state == .notFound(code: firstCode))
+    }
+
+    @Test("A timed-out code is not re-offered while the book is still in frame")
+    func timedOutCodeStaysGated() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupTimedOut(code: firstCode))
+        machine.apply(.cleared)
+
+        clock.advance(by: 0.4)
+        let rescanned: Bool = machine.apply(.codeSeen(firstCode))
+        #expect(rescanned == false)
+    }
+
+    @Test("A lookup landing after its own timeout is dropped")
+    func lookupResolvingAfterTimeoutIsDropped() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupTimedOut(code: firstCode))
+
+        // The abandoned request answers a minute later; the row has moved on.
+        let resolved: Bool = machine.apply(.lookupResolved(book(firstCode)))
+        #expect(resolved == false)
+        #expect(machine.state == .notFound(code: firstCode))
+    }
+
+    @Test("A notice the user cannot act on still holds the screen against the next book")
+    func noticeRowsBlockTheNextScan() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupFailed(code: firstCode))
+
+        clock.advance(by: 0.4)
+        let duringNotice: Bool = machine.apply(.codeSeen(secondCode))
+        #expect(duringNotice == false)
+        #expect(machine.state == .notFound(code: firstCode))
+
+        // Which is why the row has to clear itself — see `BatchScanViewModel`'s notice hold.
+        machine.apply(.cleared)
+        let afterNotice: Bool = machine.apply(.codeSeen(secondCode))
+        #expect(afterNotice == true)
+        #expect(machine.state == .lookingUp(code: secondCode))
+    }
+
     // MARK: - A failed add
 
+    /// The other half of a failed add — telling the user — is the view model's, and lands on
+    /// the snack bar; what the machine owes is a row that can be tapped again.
     @Test("A failed add leaves the book on screen and the action retryable")
     func failedAddIsRetryable() {
         let clock: TestClock = .init()
@@ -300,11 +392,20 @@ struct BatchScanStateMachineTests {
         #expect(clearedFromIdle == false)
         #expect(machine.state == .idle)
 
+        let timedOutFromIdle: Bool = machine.apply(.lookupTimedOut(code: firstCode))
+        #expect(timedOutFromIdle == false)
+        #expect(machine.state == .idle)
+
         machine.apply(.codeSeen(firstCode))
         let startedWhileLookingUp: Bool = machine.apply(.addStarted)
         let finishedWhileLookingUp: Bool = machine.apply(.addFinished)
         #expect(startedWhileLookingUp == false)
         #expect(finishedWhileLookingUp == false)
+        #expect(machine.state == .lookingUp(code: firstCode))
+
+        // An outcome for a code the row is no longer waiting for is not one of its own.
+        let ownedForAnotherCode: Bool = machine.apply(.lookupResolvedAlreadyOwned(book(secondCode)))
+        #expect(ownedForAnotherCode == false)
         #expect(machine.state == .lookingUp(code: firstCode))
     }
 }

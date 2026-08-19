@@ -12,6 +12,10 @@
 //  to redact: an empty string greys out to nothing, which is why `ScannedBook.placeholder`
 //  carries plausible strings that are never meant to be read.
 //
+//  What each outcome says is `ScanResultLabelView`'s; what can be done about it is this
+//  view's — the add is dropped outright for an unknown edition and disabled for a book
+//  already owned.
+//
 //  See PRD 0005.
 //
 
@@ -31,31 +35,18 @@ struct ScanResultRowView: View {
             Button {
                 onOpen(displayedBook)
             } label: {
-                VStack(alignment: .leading, spacing: .xSmall) {
-                    Text(displayedBook.title)
-                        .textStyle(.content400Bold)
-                        .foregroundStyle(ScanOverlayPalette.ink)
-                        .lineLimit(2)
-
-                    if case .added = state {
-                        Text("edition.added_to_inventory")
-                            .textStyle(.footnote200)
-                            .foregroundStyle(ScanOverlayPalette.tint)
-                            .lineLimit(1)
-                    } else {
-                        Text(displayedBook.authorsLine)
-                            .textStyle(.footnote200)
-                            .foregroundStyle(ScanOverlayPalette.ink)
-                            .lineLimit(1)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(.rect)
+                ScanResultLabelView(state: state)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(.rect)
             }
             .buttonStyle(.plain)
-            .disabled(isLookingUp)
+            .disabled(opensBook == false)
 
-            ScanAddButton(state: state, action: onAdd)
+            // An edition inventaire does not have is the one row with no action at all:
+            // there is nothing to file, and a disabled "+" would invite tapping at it.
+            if offersAdd {
+                ScanAddButton(state: state, action: onAdd)
+            }
         }
         .padding(.horizontal, .medium)
         .padding(.vertical, .small)
@@ -74,6 +65,20 @@ struct ScanResultRowView: View {
             true
         } else {
             false
+        }
+    }
+
+    /// There is a book screen to open whenever a canonical uri was resolved — including for a
+    /// book already owned, where looking it up is the obvious next thing to want.
+    private var opensBook: Bool {
+        displayedBook.uri.isEmpty == false
+    }
+
+    private var offersAdd: Bool {
+        if case .notFound = state {
+            false
+        } else {
+            true
         }
     }
 }

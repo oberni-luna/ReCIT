@@ -14,7 +14,15 @@ enum BatchScanEvent: Equatable {
     /// which is why the machine — not the caller — decides whether it counts.
     case codeSeen(String)
     case lookupResolved(ScannedBook)
+    /// The edition came back, but the user already has a copy of it. A separate event rather
+    /// than a flag on `lookupResolved`, because the ownership check is the caller's to make:
+    /// the machine knows nothing about the inventory.
+    case lookupResolvedAlreadyOwned(ScannedBook)
     case lookupFailed(code: String)
+    /// The lookup ran past its deadline. Kept apart from `lookupFailed` at the call site — a
+    /// network that never answers is not a database that has no answer — even though the row
+    /// says the same thing about both.
+    case lookupTimedOut(code: String)
     case addStarted
     case addFinished
     case addFailed

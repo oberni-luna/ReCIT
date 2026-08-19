@@ -42,11 +42,13 @@ struct ScanAddButton: View {
         }
     }
 
-    /// Disabled while there is nothing to file yet, and while the add is in flight — so the
-    /// same book cannot be filed twice by an impatient second tap.
+    /// Disabled while there is nothing to file yet, while the add is in flight — so the same
+    /// book cannot be filed twice by an impatient second tap — and for a book the inventory
+    /// already holds, which is the whole of what that state does. `notFound` never gets this
+    /// far: the row drops the action rather than disabling it.
     private var isDisabled: Bool {
         switch state {
-        case .idle, .lookingUp, .adding:
+        case .idle, .lookingUp, .notFound, .alreadyOwned, .adding:
             true
         case .resolved, .added:
             false

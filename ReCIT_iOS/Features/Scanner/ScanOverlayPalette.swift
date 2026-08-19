@@ -26,12 +26,23 @@ enum ScanOverlayPalette {
     /// `foreground/tinted`, dark value (#E7FFCE) — the action's glyph and the confirmation.
     static let tint: Color = .init("color/green/200")
 
+    /// `foreground/error`, dark value (#E14D4D) — the unknown-edition notice. It has to read
+    /// as *unlike* a book that resolved: an explanation in the same ink as a title is exactly
+    /// the ambiguity this state exists to remove.
+    static let alert: Color = .init("color/red/400")
+
     /// `background/tinted`, dark value (#344E41) — the action's disc.
     static let tintedSurface: Color = .init("color/green/900")
 
     /// The hole a cover sits in before its image arrives: a darker patch of the scrim rather
     /// than a design-system surface, which would be a pale card in light appearance.
     static let coverBacking: Color = .black.opacity(0.35)
+
+    /// The ground the feed is laid on, and all that is left of the screen when there is no
+    /// feed — while the permission prompt is up, or once it has been refused. Black rather
+    /// than a design-system surface, so the screen reads as the camera's absence instead of
+    /// turning into a pale card in light appearance.
+    static let ground: Color = .black
 
     /// Bottom-up veil the row sits on. Opaque enough at the bottom edge to carry light text
     /// over any image, fading out well above the row so it reads as a gradient rather than

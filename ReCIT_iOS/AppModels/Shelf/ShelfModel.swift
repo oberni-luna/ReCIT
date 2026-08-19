@@ -2,8 +2,9 @@
 //  ShelfModel.swift
 //  ReCIT_iOS
 //
-//  Syncs the current user's inventaire.io shelves into SwiftData. Read-only (v1):
-//  no create/update/delete.
+//  Syncs the current user's inventaire.io shelves into SwiftData, and owns the writes
+//  that go the other way: creating and renaming an étagère, and putting a book on one
+//  or taking it off. Deleting an étagère is not offered yet.
 //
 //  Two passes: (1) `by-owners` upserts shelf metadata; (2) `by-ids&with-items`
 //  rebuilds the `Shelf ⇄ InventoryItem` relation from server membership. The second
@@ -142,17 +143,66 @@ final class ShelfModel: OptimisticMutating {
         let itemId: String = item._id
         guard shelf.items.contains(where: { $0._id == itemId }) == false else { return }
 
+        membershipWrite(
+            modelContext,
+            action: "add-items",
+            shelf: shelf,
+            itemId: itemId,
+            apply: { shelf.items.append(item) },
+            revert: { shelf.items.removeAll { $0._id == itemId } }
+        )
+    }
+
+    /// Optimistically takes an item off an étagère: the book leaves the shelf on screen
+    /// before the network is touched, the write runs in a model-owned background task, and
+    /// the server's post-write membership is reconciled back in. On failure the book goes
+    /// back where it was and the error is surfaced.
+    ///
+    /// Membership only — the copy stays in the inventory, and the other étagères it sits
+    /// on are untouched, because only this shelf's side of the relation is edited. Items
+    /// the shelf doesn't hold are a no-op — the menu never offers them, this only guards
+    /// against a double tap. See ADR 0001 / PRD 0004.
+    func removeItem(_ item: InventoryItem, from shelf: Shelf, modelContext: ModelContext) {
+        let itemId: String = item._id
+        guard shelf.items.contains(where: { $0._id == itemId }) else { return }
+
+        membershipWrite(
+            modelContext,
+            action: "remove-items",
+            shelf: shelf,
+            itemId: itemId,
+            apply: { shelf.items.removeAll { $0._id == itemId } },
+            revert: { shelf.items.append(item) }
+        )
+    }
+
+    /// The half both membership actions share: `add-items` and `remove-items` take the
+    /// same payload and answer with the same shape, so only the local mutation and the
+    /// action name differ. Kept in one place so the two directions cannot drift apart —
+    /// above all on the gate, whose window is easy to get subtly wrong.
+    ///
+    /// The gate stays raised for the whole cycle, revert included (the runner performs it
+    /// after `request` has thrown): both wholesale writers of this relation would
+    /// otherwise replace the user's change with server state one round-trip behind.
+    private func membershipWrite(
+        _ modelContext: ModelContext,
+        action: String,
+        shelf: Shelf,
+        itemId: String,
+        apply: () -> Void,
+        revert: @escaping () -> Void
+    ) {
         Self.isMembershipWriteInFlight = true
 
         let cycle: Task<Void, Never> = optimistic(
             modelContext,
-            apply: { shelf.items.append(item) },
-            revert: { shelf.items.removeAll { $0._id == itemId } },
+            apply: apply,
+            revert: revert,
             request: { [weak self] in
                 guard let self else { return }
                 let payload: ShelfItemsDTO = .init(id: shelf._id, items: [itemId])
                 guard let response: ShelvesWithItemsResponseDTO = try await self.apiService.send(
-                    toEndpoint: "/api/shelves?action=add-items",
+                    toEndpoint: "/api/shelves?action=\(action)",
                     method: "POST",
                     payload: payload,
                     debug: true
@@ -160,13 +210,14 @@ final class ShelfModel: OptimisticMutating {
                     throw NetworkError.badResponse
                 }
                 // Reconcile: the response carries the étagère's membership after the write.
-                guard let itemIds = response.shelves[shelf._id]?.items else { return }
-                shelf.items = self.localItems(ids: itemIds, modelContext: modelContext)
+                // A shelf the write left empty may answer without an `items` key at all,
+                // which means an empty membership and not "no news" — so the shelf is
+                // emptied rather than left holding the book it just lost.
+                guard let dto = response.shelves[shelf._id] else { return }
+                shelf.items = self.localItems(ids: dto.items ?? [], modelContext: modelContext)
             }
         )
 
-        // Lower the gate only once the whole cycle has settled — including a revert, which
-        // the runner performs after `request` has thrown.
         inFlightTask = Task {
             await cycle.value
             Self.isMembershipWriteInFlight = false

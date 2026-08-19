@@ -6,10 +6,11 @@
 //  copy — not editions, so this is only ever built for the copy the current user owns;
 //  the caller resolves that and hands it over.
 //
-//  What to show is not decided here: `ShelfMenuOptions` filters and shapes the lists, and
-//  this only renders the shape it gets, so a shelf the book already sits on is never
-//  offered and an empty list produces no entry rather than a dead one. The étagères come
-//  from `@Query` so a shelf created elsewhere shows up without a refresh.
+//  What to show is not decided here: `ShelfMenuOptions` filters and shapes both lists, and
+//  this only renders the shapes it gets. They are complements over the user's étagères, so
+//  filing is offered for the ones the copy is not on, un-filing for the ones it is, and an
+//  empty list produces no entry rather than a dead one. The étagères come from `@Query` so
+//  a shelf created elsewhere shows up without a refresh.
 //  See PRD 0004.
 //
 
@@ -60,10 +61,37 @@ struct BookShelfMenu: View {
                 }
             }
         }
+
+        // Not destructive and not red: nothing is deleted, the copy stays in the inventory
+        // and on any other étagère, so the entry must not read like the one below it that
+        // does throw the book away. The icon says "off the shelf", not "trash".
+        switch options.remove {
+        case .empty:
+            EmptyView()
+        case .single(let entry):
+            Button("action.remove_from_shelf_named \(entry.name)", systemImage: "tray.and.arrow.up") {
+                remove(shelfId: entry.id)
+            }
+        case .submenu(let entries):
+            Menu("action.remove_from_shelf", systemImage: "tray.and.arrow.up") {
+                ForEach(entries) { entry in
+                    Button(entry.name) {
+                        remove(shelfId: entry.id)
+                    }
+                }
+            }
+        }
     }
 
     private func add(shelfId: String) {
         guard let shelf = shelves.first(where: { $0._id == shelfId }) else { return }
         shelfModel.addItem(item, to: shelf, modelContext: modelContext)
+    }
+
+    /// Both lists are drawn from `shelves`, so the étagère is always among them; a stale
+    /// membership pointing elsewhere is filtered out before it can be offered.
+    private func remove(shelfId: String) {
+        guard let shelf = shelves.first(where: { $0._id == shelfId }) else { return }
+        shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
     }
 }

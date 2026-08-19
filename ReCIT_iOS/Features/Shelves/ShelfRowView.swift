@@ -3,14 +3,15 @@
 //  ReCIT_iOS
 //
 //  One étagère: the watercolour wash, the books (spines or pile), the wooden plank,
-//  and the shelf name beneath.
+//  and a paper label stuck onto the plank's bottom edge carrying the shelf's name.
 //
 //  Gesture: pressing a book starts growing it; lift early and it peeks and settles back,
 //  which is how the gesture advertises itself to someone who only tapped. Hold and selection
 //  mode arms (haptic, and the screen blurs around this shelf), after which sliding anywhere
 //  moves the growth to the book nearest the finger and lifting opens it. Wander off the card
 //  and nothing is selected, so lifting there does nothing. The shelf's own list is reached by
-//  tapping its name.
+//  pressing its label — which, drawing above the plank, takes the narrow band it overlaps out
+//  of the press gesture. Accepted: books stand above the plank. See PRD 0003.
 //
 //  While a press is on, the pressed book is handed to `ShelfFocusModel` and drawn by
 //  `ShelfFocusOverlayView` over the whole app — the card leaves its own copy out. See ADR 0006.
@@ -38,7 +39,6 @@ struct ShelfRowView: View {
     /// When the finger landed — a short press is a tap, and gets a peek instead of a plain
     /// settle so the press-to-select gesture shows itself.
     @State private var pressStarted: ContinuousClock.Instant?
-    @State private var editing: Bool = false
 
     /// Size a book reaches once selection mode is on.
     private let fullGrowth: CGFloat = 2
@@ -55,26 +55,26 @@ struct ShelfRowView: View {
     private var books: [InventoryItem] { ShelfDrawnBooks.from(shelf.items) }
     private var layout: ShelfBooksLayout { .init(books: books, metrics: metrics) }
 
-    /// How far the wash extends below the plank (kept small); the shelf name sits at
-    /// this same distance so the wash isn't cropped.
+    /// How far the wash extends below the plank (kept small), so the wash isn't cropped.
     private let washBelow: CGFloat = 16
+    /// How far the label's *top* rides up over the plank's bottom edge. Anchored from the
+    /// top so a taller label simply extends further down and the inset still holds.
+    private let labelOverlap: CGFloat = 14
 
     var body: some View {
         VStack(spacing: 0) {
             shelfStack
                 .padding(.top, metrics.topRoom)
-            HStack(spacing: .xSmall) {
-                Button(shelf.name) { path.append(NavigationDestination.shelf(id: shelf._id)) }
-                    .textStyle(.footnote200)
-                    .foregroundStyle(.foregroundDefault)
-                    .lineLimit(1)
-                Button("Modifier l'étagère", systemImage: "pencil") { editing = true }
-                    .labelStyle(.iconOnly)
-                    .font(.footnote)
-                    .foregroundStyle(.foregroundSecondary)
+            // Inside the stack rather than an overlay: the stack then reserves the label's
+            // height at any Dynamic Type size, so planks stay aligned card to card and the
+            // carousel's scroll view cannot clip the label's lower half. Self-measuring
+            // shelf cards are what caused the collection-view update loop in ADR 0003.
+            NavigationLink(value: NavigationDestination.shelf(id: shelf._id)) {
+                ShelfLabelView(text: shelf.name, maxWidth: metrics.booksWidth)
             }
             .buttonStyle(.plain)
-            .padding(.top, washBelow)
+            .padding(.top, -labelOverlap)
+            .zIndex(1)
         }
         .frame(width: width)
         // A firmer tick for entering selection mode than for crossing a book.
@@ -82,7 +82,6 @@ struct ShelfRowView: View {
             armed ? .impact(weight: .medium) : nil
         }
         .sensoryFeedback(.selection, trigger: focus.isArmed ? grownIndex : nil)
-        .sheet(isPresented: $editing) { ShelfFormView(shelf: shelf) }
     }
 
     private var shelfStack: some View {

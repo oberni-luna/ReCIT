@@ -22,6 +22,14 @@ enum ShelfPalette {
     /// Warm paper tone shown on a spine before its cover colour is extracted.
     static let parchment: Color = .init(hex: "#E4DAC4")
 
+    /// The shelf label's paper, and the ink on it. Deliberately mode-independent, and
+    /// deliberately *not* `backgroundDefault` / `foregroundDefault`: those invert in dark
+    /// mode, and the shelf illustration is a single universal asset with no dark variant —
+    /// an inverting label would stick near-black paper onto a cream wash. Same reasoning
+    /// that keeps the spine's contact shadow at 45% instead of normalising it.
+    static let labelPaper: Color = .init("color/gray/0")
+    static let labelInk: Color = .init("color/gray/900")
+
     /// The painted spine colour: the persisted hex pushed toward a punchier saturation
     /// so books read vivid on the shelf, with brightness clamped for legibility.
     static func spineColor(_ hex: String?) -> Color {

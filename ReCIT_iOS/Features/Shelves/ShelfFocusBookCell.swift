@@ -63,7 +63,7 @@ struct ShelfFocusBookCell: View {
         }
         .frame(width: coverWidth)
         .clipShape(RoundedRectangle(cornerRadius: .minimal))
-        .shadow(color: .black.opacity(0.18), radius: 3, x: 0, y: 2)
+        .shadow(.light)
     }
 
     private var backdrop: some View {

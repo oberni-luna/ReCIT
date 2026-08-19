@@ -207,6 +207,54 @@
         }
       }
     },
+    "action.open_settings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir les Réglages"
+          }
+        }
+      }
+    },
+    "action.remove_from_shelf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from a shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer d’une étagère"
+          }
+        }
+      }
+    },
+    "action.remove_from_shelf_named %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer de %@"
+          }
+        }
+      }
+    },
     "action.reply" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1525,6 +1573,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scanner"
+          }
+        }
+      }
+    },
+    "scanner.permission.denied_message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera access is turned off for RECITs. Allow it in Settings and come back to scan your books."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'accès à l'appareil photo est désactivé pour RECITs. Autorisez-le dans les Réglages, puis revenez pour scanner vos livres."
+          }
+        }
+      }
+    },
+    "scanner.permission.restricted_message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera access is blocked on this device, by parental controls or a device restriction."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'accès à l'appareil photo est bloqué sur cet appareil, par le contrôle parental ou une restriction de l'appareil."
+          }
+        }
+      }
+    },
+    "scanner.permission.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The scanner needs the camera"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le scanner a besoin de l'appareil photo"
           }
         }
       }

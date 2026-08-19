@@ -43,6 +43,17 @@ struct UpdateShelfDTO: Codable {
     let visibility: [String]?
 }
 
+// MARK: - Membership
+
+/// Payload for `POST /api/shelves?action=add-items` (and `?action=remove-items`): the
+/// étagère and the item ids to file onto it or take off it. Both actions answer with the
+/// affected shelves keyed by id, each carrying its post-write `items` id array — i.e.
+/// `ShelvesWithItemsResponseDTO`, which is what the write reconciles from.
+struct ShelfItemsDTO: Codable {
+    let id: String
+    let items: [String]
+}
+
 /// Shared response of create and update: `{ shelf }`.
 struct ShelfResponseDTO: Codable {
     let shelf: ShelfDTO

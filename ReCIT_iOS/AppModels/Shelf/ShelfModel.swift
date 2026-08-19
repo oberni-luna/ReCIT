@@ -32,6 +32,18 @@ final class ShelfModel: OptimisticMutating {
     /// Most recent optimistic background task, exposed so tests can await it.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
 
+    /// Raised while an optimistic membership write is waiting on the server.
+    ///
+    /// The `Shelf ⇄ InventoryItem` relation has two independent *wholesale* writers —
+    /// `linkItems` below and `InventoryModel.syncInventory`'s per-item assignment — and
+    /// both replace it outright with server state that is one round-trip behind. A sync
+    /// landing in that window would visibly take the book back off the étagère the user
+    /// just put it on, so both writers stand down until the write settles. App-scoped
+    /// rather than instance-scoped because the two writers live in two different models.
+    /// One mutation at a time, which suits menu-driven single-book actions; bulk
+    /// membership writes would need a counter instead. See PRD 0004.
+    private(set) static var isMembershipWriteInFlight: Bool = false
+
     init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
         self.errorReporter = errorReporter
@@ -117,6 +129,50 @@ final class ShelfModel: OptimisticMutating {
         )
     }
 
+    /// Optimistically files an item onto an étagère: the relation is mutated and saved at
+    /// once, so the shelf card fills in before the network is touched, then the write runs
+    /// in a model-owned background task and the server's post-write membership is
+    /// reconciled back in. On failure the book comes off again and the error is surfaced.
+    ///
+    /// The relation declares its inverse, so appending on the shelf side moves the item
+    /// side too; a book may sit on several étagères at once. Already-filed items are a
+    /// no-op — the menu never offers them, this only guards against a double tap.
+    /// See ADR 0001 / PRD 0004.
+    func addItem(_ item: InventoryItem, to shelf: Shelf, modelContext: ModelContext) {
+        let itemId: String = item._id
+        guard shelf.items.contains(where: { $0._id == itemId }) == false else { return }
+
+        Self.isMembershipWriteInFlight = true
+
+        let cycle: Task<Void, Never> = optimistic(
+            modelContext,
+            apply: { shelf.items.append(item) },
+            revert: { shelf.items.removeAll { $0._id == itemId } },
+            request: { [weak self] in
+                guard let self else { return }
+                let payload: ShelfItemsDTO = .init(id: shelf._id, items: [itemId])
+                guard let response: ShelvesWithItemsResponseDTO = try await self.apiService.send(
+                    toEndpoint: "/api/shelves?action=add-items",
+                    method: "POST",
+                    payload: payload,
+                    debug: true
+                ) else {
+                    throw NetworkError.badResponse
+                }
+                // Reconcile: the response carries the étagère's membership after the write.
+                guard let itemIds = response.shelves[shelf._id]?.items else { return }
+                shelf.items = self.localItems(ids: itemIds, modelContext: modelContext)
+            }
+        )
+
+        // Lower the gate only once the whole cycle has settled — including a revert, which
+        // the runner performs after `request` has thrown.
+        inFlightTask = Task {
+            await cycle.value
+            Self.isMembershipWriteInFlight = false
+        }
+    }
+
     func syncShelves(forUser: User, modelContext: ModelContext) async throws {
         // 1. Shelf metadata (name, colour, …), upserted in place.
         let response: ShelvesResponseDTO? = try await apiService.fetchData(
@@ -135,7 +191,11 @@ final class ShelfModel: OptimisticMutating {
         )
         try modelContext.save()
 
-        // 2. Membership.
+        // 2. Membership. Stand down while a membership write is still unconfirmed: this
+        // pass assigns the relation wholesale from state the server has not applied the
+        // user's change to yet. See PRD 0004.
+        guard Self.isMembershipWriteInFlight == false else { return }
+
         if Self.useFakeMembership {
             applyFakeMembership(ownerId: forUser._id, modelContext: modelContext)
         } else {

@@ -79,11 +79,14 @@ final class InventoryModel: OptimisticMutating {
             for itemDTO in itemsDTO.items {
                 // Resolve shelf membership into the many-to-many relation. Shelves are
                 // synced before inventory, so the local `Shelf` objects already exist.
+                // Skipped while an optimistic membership write is unconfirmed: this
+                // assignment is wholesale and would undo it on screen (PRD 0004).
+                let assignsShelves: Bool = ShelfModel.isMembershipWriteInFlight == false
                 let shelves: [Shelf] = getLocalShelves(modelContext: modelContext, ids: itemDTO.shelves ?? [])
                 if let myItem = try? getLocalItem(modelContext: modelContext, id: itemDTO._id) {
                     // Upsert in place — keep identity so open item views stay reactive.
                     myItem.update(from: itemDTO, forUser: forUser, apiService: apiService)
-                    myItem.shelves = shelves
+                    if assignsShelves { myItem.shelves = shelves }
                     if myItem.edition?.works.filter({ $0.uri == relatedWork.uri }).count == 0 {
                         myItem.edition?.works.append(relatedWork)
                     }

@@ -159,6 +159,11 @@ struct BookDetailView: View {
                         showAddToListDialog = true
                     }
 
+                    // Étagères hold a specific copy, so filing is offered only on mine.
+                    if let myItem = iOwn(edition) {
+                        BookShelfMenu(item: myItem)
+                    }
+
                     if iOwn(edition) != nil {
                         Button("inventory.item.remove_from_inventory", systemImage: "trash", role: .destructive) {
                             showDeleteConfirmation = true

@@ -19,7 +19,8 @@ struct ShelvesContent: View {
     @Environment(\.isSearching) private var isSearching
     @Environment(ShelfFocusModel.self) private var focus
 
-    /// Presents the create-shelf form (tapping the trailing carousel card).
+    /// Presents the create-shelf form — from the section header's "Ajouter" action or from
+    /// the trailing carousel card, which is why the sheet hangs off the page, not the carousel.
     @State private var isCreatingShelf: Bool = false
 
     @Query private var shelves: [Shelf]
@@ -61,27 +62,25 @@ struct ShelvesContent: View {
             GeometryReader { geo in
                 let cardWidth: CGFloat = geo.size.width * 0.86
                 ScrollView {
-                    sectionTitle("Étagères")
-                        .padding(.top, .medium)
+                    ShelfSectionHeader(
+                        title: "Étagères",
+                        actionTitle: "Ajouter",
+                        action: { isCreatingShelf = true }
+                    )
+                    .padding(.top, .medium)
                     shelvesCarousel(cardWidth: cardWidth)
 
-                    sectionTitle("Tous les livres · \(myItems.count)")
+                    ShelfSectionHeader(title: "Tous les livres · \(myItems.count)")
                         .padding(.top, .large)
                     allBooksList
                 }
                 // Frozen while a shelf is being scrubbed, so the slide can't scroll the page.
                 .scrollDisabled(focus.isArmed)
+                .sheet(isPresented: $isCreatingShelf) {
+                    ShelfFormView()
+                }
             }
         }
-    }
-
-    private func sectionTitle(_ text: String) -> some View {
-        Text(text)
-            .textStyle(.action200)
-            .foregroundStyle(.foregroundDefault)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, .medium)
-            .padding(.bottom, .small)
     }
 
     /// Horizontal, snapping carousel of shelf cards (~86% width, next card peeking).
@@ -103,9 +102,6 @@ struct ShelvesContent: View {
         .scrollIndicators(.hidden)
         // Frozen while a scrub is on, so the slide moves the selection, not the cards.
         .scrollDisabled(focus.isArmed)
-        .sheet(isPresented: $isCreatingShelf) {
-            ShelfFormView()
-        }
     }
 
     private var allBooksList: some View {

@@ -254,7 +254,7 @@ tokens et non un seul.
 
 | Token | % | Source |
 |---|---|---|
-| `opacity/surface/plank` | 92 | `ShelfRowView.swift:97`, `ShelfCreateCardView.swift:29` |
+| `opacity/surface/plank` | 92 | `ShelfRowView.swift:97`, `ShelfEmptyStateView.swift:68` |
 | `opacity/surface/backdrop` | 20 | `EntityImageView.swift:32` — voir D2 |
 
 ## Styles de texte — 10
@@ -513,7 +513,7 @@ la palette de l'app, elle se recolore avec l'OS.
 | `Entity Header` | `32:179` | — | `Title#32:4`, `Subtitle#32:5`, `Show subtitle#32:6` | `EntityBrowser/EntityHeaderView.swift` + `EntityImageView.swift` |
 | `Syncing Placeholder` | `32:174` | — | `Message#32:3` | `Components/SyncingPlaceholderView.swift` |
 | `Shelf Card` | `34:210` | Paint ∈ {Placeholder, Illustrative} | `Name#34:2` | `Shelves/ShelfRowView.swift` |
-| `Shelf Create Card` | `34:211` | — | `Name#34:3` | `Shelves/ShelfCreateCardView.swift` |
+| `Shelf Create Card` | `34:211` | — | `Name#34:3` | `Shelves/ShelfEmptyStateView.swift` — le composant Figma porte encore l'ancien nom |
 | `Transaction Actions Bar` | `37:178` | — | `Show overflow#37:0` | `Transactions/TransactionActionsBar.swift` |
 | `Transaction Message` | `37:213` | Type ∈ {Action, User} | `Body`, `Timestamp`, `Author` (par variante) | `TransactionDetailView.messageView` |
 
@@ -681,8 +681,8 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D26 | `TransactionDetailView.messageView` | Les messages entrants et sortants rendent **à l'identique** : `getUIMessages` distingue soigneusement `.incoming` de `.outgoing`, mais la branche `default:` les traite d'un seul layout — ni côté, ni couleur, ni alignement | ouverte |
 | D27 | `TransactionDetailView` — horodatage | `.formatted(date: .abbreviated, time: .standard)` : `.standard` inclut les **secondes**, dans un fil de discussion | ouverte |
 | D28 | `UserCellView` vs `UserHeaderView` | `UserCellView` ne pose **aucun** `foregroundStyle` et hérite de la couleur de label de la `List` ; `UserHeaderView` pose `foreground/default` explicitement sur les deux mêmes lignes | ouverte |
-| D29 | `ShelfCreateCardView` | Redéclare `plankHeight`, `zoneHeight` et `topRoom` en propriétés calculées privées au lieu d'utiliser `ShelfCardMetrics`. Deux copies des trois mêmes formules — elles peuvent diverger | ouverte |
-| D30 | `ShelfCreateCardView`, `EntitySummaryView` | `.onTapGesture` là où un `Button` est requis par la convention du projet : aucun des deux n'a besoin de la position ni du nombre de taps. Conséquence réelle : pas d'état pressé, pas d'action d'accessibilité | ouverte |
+| D29 | `ShelfEmptyStateView` (ex-`ShelfCreateCardView`) | Redéclarait `plankHeight`, `zoneHeight` et `topRoom` en propriétés calculées privées au lieu d'utiliser `ShelfCardMetrics` | résolue — issue 0011, la vue utilise `ShelfCardMetrics` |
+| D30 | `EntitySummaryView` | `.onTapGesture` là où un `Button` est requis par la convention du projet : il n'a besoin ni de la position ni du nombre de taps. Conséquence réelle : pas d'état pressé, pas d'action d'accessibilité. (`ShelfCreateCardView` avait le même défaut ; corrigé par l'issue 0011) | ouverte |
 | D31 | `ShelvesContent.sectionTitle` | Utilise `foregroundDefault` là où les cinq autres en-têtes de section utilisent `foregroundSecondary`, et ses libellés sont des littéraux français | ouverte |
 | D32 | `ReCIT_iOS.xcodeproj` | `ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor` alors qu'**aucun asset `AccentColor` n'existe**. Le `.tint(.foregroundTinted)` de `ReCIT.swift:31` sauve le rendu, mais le réglage pointe dans le vide | ouverte |
 | D33 | `AllTransactionsView` | Ne fixe pas `navigationBarTitleDisplayMode`, donc iOS lui donne un grand titre. « Toutes les transactions » en `title200` (32 pt ExtraBold) passe à la ligne dans une barre de 96 pt | ouverte |

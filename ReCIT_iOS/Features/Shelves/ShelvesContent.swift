@@ -20,7 +20,7 @@ struct ShelvesContent: View {
     @Environment(ShelfFocusModel.self) private var focus
 
     /// Presents the create-shelf form — from the section header's "Ajouter" action or from
-    /// the trailing carousel card, which is why the sheet hangs off the page, not the carousel.
+    /// the empty-state card, which is why the sheet hangs off the page, not the carousel.
     @State private var isCreatingShelf: Bool = false
 
     @Query private var shelves: [Shelf]
@@ -68,7 +68,17 @@ struct ShelvesContent: View {
                         action: { isCreatingShelf = true }
                     )
                     .padding(.top, .medium)
-                    shelvesCarousel(cardWidth: cardWidth)
+                    // One or the other, never both: with no étagère there is nothing to
+                    // page through, so the empty shelf stands in place of the carousel.
+                    if shelves.isEmpty {
+                        ShelfEmptyStateView(width: cardWidth) { isCreatingShelf = true }
+                            // Parked where the carousel's first card would be, so the
+                            // first real étagère appears exactly here.
+                            .padding(.horizontal, horizontalPadding)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        shelvesCarousel(cardWidth: cardWidth)
+                    }
 
                     ShelfSectionHeader(title: "Tous les livres · \(myItems.count)")
                         .padding(.top, .large)
@@ -92,8 +102,6 @@ struct ShelvesContent: View {
                     ShelfRowView(shelf: shelf, width: cardWidth, path: $path)
                         .frame(width: cardWidth)
                 }
-                ShelfCreateCardView(width: cardWidth) { isCreatingShelf = true }
-                    .frame(width: cardWidth)
             }
             .scrollTargetLayout()
             .padding(.horizontal, horizontalPadding)

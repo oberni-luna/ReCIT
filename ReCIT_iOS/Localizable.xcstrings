@@ -63,6 +63,38 @@
         }
       }
     },
+    "action.add_to_shelf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to a shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à une étagère"
+          }
+        }
+      }
+    },
+    "action.add_to_shelf_named %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à %@"
+          }
+        }
+      }
+    },
     "action.borrow_from" : {
       "localizations" : {
         "en" : {
@@ -598,6 +630,23 @@
     },
     "Fermer" : {
 
+    },
+    "genre.enrichment.analysing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysing your library…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse de votre bibliothèque…"
+          }
+        }
+      }
     },
     "inventory.empty" : {
       "extractionState" : "manual",

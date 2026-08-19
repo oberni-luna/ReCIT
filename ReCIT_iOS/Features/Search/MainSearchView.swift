@@ -38,11 +38,11 @@ struct AddInventoryItemSearchView: View {
                         .imageScale(.large)
                 }
             }
-            .sheet(isPresented: $showScanner) {
-                ScanView { result in
-                    let editionUri = "isbn:\(result)"
-                    path.append(NavigationDestination.book(anchor: .edition(uri: editionUri)))
-                }
+            // The scanner is a mode, not a one-shot reader: it stays up, files book after
+            // book, and carries its own navigation stack. Presented modally so leaving it
+            // returns here rather than unwinding this screen's path. See PRD 0005.
+            .fullScreenCover(isPresented: $showScanner) {
+                BatchScanView()
             }
         }
     }

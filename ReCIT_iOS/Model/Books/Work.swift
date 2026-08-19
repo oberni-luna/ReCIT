@@ -20,6 +20,18 @@ public class Work: Identifiable, Entity {
     var publicationDate: Date?
     var extract: WpExtract?
 
+    /// Human-readable French genre labels resolved from the work's Wikidata
+    /// `wdt:P136` claim. Stored as labels rather than `wd:Q…` uris because the
+    /// only consumer is a language model designing a shelf taxonomy, which needs
+    /// words. Additive with a default so SwiftData migrates lightly.
+    var genres: [String] = []
+
+    /// When the genre backfill last resolved this work, `nil` if never. An empty
+    /// `genres` list is ambiguous on its own — Wikidata simply has no genre for
+    /// many French mid-list titles — so this marker is what stops a second run
+    /// re-fetching a work already known to have none.
+    var genresEnrichedAt: Date?
+
     @Relationship(inverse: \Author.works) var authors: [Author] = []
     @Relationship(inverse: \Edition.works) var editions: [Edition] = []
 
@@ -76,6 +88,14 @@ public class Work: Identifiable, Entity {
         if let subtitle = entityDTO.descriptions?["fr"] ?? entityDTO.descriptions?["en"] {
             self.subtitle = subtitle
         }
+    }
+
+    /// Records the outcome of a genre backfill pass, including the empty one:
+    /// "asked, and Wikidata had nothing" is a result worth persisting, not a
+    /// failure to retry on every run.
+    func applyEnrichedGenres(_ genres: [String]) {
+        self.genres = genres
+        genresEnrichedAt = .now
     }
 
     enum Constant {

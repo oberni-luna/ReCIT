@@ -17,6 +17,7 @@ struct RootView: View {
     @State var inventoryModel: InventoryModel
     @State var shelfModel: ShelfModel
     @State var transactionModel: TransactionModel
+    @State var genreEnrichmentModel: GenreEnrichmentModel
     @State var errorReporter: AppErrorReporter
     @State var syncStatus: SyncStatusStore
 
@@ -29,11 +30,13 @@ struct RootView: View {
         _errorReporter = State(initialValue: errorReporter)
         _userModel = State(initialValue: UserModel(apiService: apiService))
         _listModel = State(initialValue: ListModel(apiService: apiService, errorReporter: errorReporter))
-        _entityModel = State(initialValue: EntityModel(apiService: apiService))
+        let entityModel: EntityModel = .init(apiService: apiService)
+        _entityModel = State(initialValue: entityModel)
         _searchModel = State(initialValue: SearchModel(apiService: apiService))
         _inventoryModel = State(initialValue: InventoryModel(apiService: apiService, errorReporter: errorReporter))
         _shelfModel = State(initialValue: ShelfModel(apiService: apiService, errorReporter: errorReporter))
         _transactionModel = State(initialValue: TransactionModel(apiService: apiService, errorReporter: errorReporter))
+        _genreEnrichmentModel = State(initialValue: GenreEnrichmentModel(apiService: apiService, entityModel: entityModel, errorReporter: errorReporter))
         _syncStatus = State(initialValue: SyncStatusStore())
     }
 
@@ -49,6 +52,7 @@ struct RootView: View {
                 .environment(inventoryModel)
                 .environment(shelfModel)
                 .environment(transactionModel)
+                .environment(genreEnrichmentModel)
                 .environment(errorReporter)
                 .environment(syncStatus)
                 .environmentObject(authModel)

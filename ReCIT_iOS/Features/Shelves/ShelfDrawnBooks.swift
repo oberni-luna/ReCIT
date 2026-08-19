@@ -15,7 +15,7 @@ import Foundation
 
 enum ShelfDrawnBooks {
     /// Cap on how many books one étagère draws.
-    static let limit: Int = 18
+    static let limit: Int = 20
 
     static func from(_ items: [InventoryItem]) -> [InventoryItem] {
         Array(items.sorted { $0.created > $1.created }.prefix(limit))

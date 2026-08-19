@@ -1,45 +1,79 @@
-# Press-and-hold to pick a book, with the screen dimmed around the shelf
+# Press-and-hold to pick a book, with a focus overlay
 
-Shipped on 2026-08-18. See ADR `docs/adr/0006-shelf-press-selection-scrim.md`.
+Shipped on 2026-08-19. See ADR `docs/adr/0006-shelf-press-selection-scrim.md`.
 
 ## What it does
 
-Press a book on a shelf and it grows under your finger on a springy curve; let go early and it
-bounces back down, and even a quick tap makes it visibly swell and settle — that peek is how
-you find out the shelf responds to a press. A swipe still scrolls the carousel. Keep holding
-and, just as the book reaches full size, a blur blooms behind that shelf — its paper and the
-neighbouring étagères go soft, fading out with no edge, while its books and plank stay sharp.
-A haptic tick lands a moment later, as selection mode arms. From there, sliding anywhere moves
-the growth to the book nearest your finger, every other scroll is frozen, and lifting opens
-that book. Slide off the shelf and nothing is selected, so lifting there does nothing.
+Press a book on a shelf and it springs up under your finger, answering at once and arriving at
+twice its size as the hold completes. Let go early and it settles back just as fast as it had
+grown, so a quick tap reads as a nudge rather than a slow retreat; a swipe still scrolls the
+carousel untouched.
+
+Keep holding and, halfway through, the screen starts receding: blurred and washed out, nav bar
+and tab bar included, but never past halfway, so the rest of the étagère stays readable
+underneath. The book itself stays sharp above it all. A haptic tick lands as selection mode
+arms, and the book's cell fades in just above it — the cover at its own proportions, then title
+and author, all sitting on one bottom line — clear of the thumb resting on the shelf, on a
+backdrop that fades in and out vertically so it never draws a line across the shelf.
+
+From there, sliding anywhere moves the selection to the book nearest your finger, every other
+scroll is frozen, and lifting opens that book. Slide off the shelf and selection mode unwinds
+the same way it arrived, so lifting there does nothing; slide back on and it winds up again.
 
 ## Technical surface
 
-- Screens touched: the shelves carousel cards (`Features/Shelves`) and `MainTabView` (the
-  scrim has to cover the tab bar).
-- New: `ShelfPressRecognizer` (a `UIGestureRecognizer` subclass reporting touch-down, the
-  0.5s arm, moves and release), `ShelfPressGestureView` (its SwiftUI bridge),
-  `ShelfFocusModel` (`@Observable @MainActor`: the focused card's screen frame),
-  `ShelfFocusHaloView` (radially-masked `.ultraThinMaterial`, drawn as the background of the
-  books-and-plank stack), `ShelfCardMetrics` (every card size from its width) and
-  `ShelfDrawnBooks` (the capped, newest-first run).
-- Removed: `ShelfBookSelection` and the carousel-wide selection, plus the deselect-on-swipe
-  and deselect-on-tap-outside handlers — selection is transient again.
-- `ShelfBooksView` now takes `grownIndex` + an animated `growth` instead of a fixed ×1.5.
-- `ShelfBooksLayout` unchanged: `nearestIndex(to:)` and its tests carry over.
+- Screens touched: the shelves carousel cards (`Features/Shelves`) and `MainTabView`, which
+  hosts the overlay so it can reach over the nav bar and the tab bar.
+- **Gesture:** `ShelfPressRecognizer` (a `UIGestureRecognizer` subclass reporting touch-down,
+  the mid-hold beat, the arm, moves and release) and `ShelfPressGestureView`, its SwiftUI
+  bridge. The feature's only UIKit.
+- **Overlay:** `ShelfFocusModel` (what the press is doing), `ShelfFocusOverlayView` (veil,
+  redrawn book, cell) and `ShelfFocusBookCell` (the pared-down cell with its fading backdrop).
+- **Shared with the shelf**, so the redrawn book matches the original: `ShelfCardMetrics` (every
+  card size from its width), `ShelfDrawnBooks` (the capped, newest-first run), `ShelfBookTitle`,
+  `ShelfCoverView` and `ShelfBookOrientation`.
+- `ShelfBooksLayout` gains `bookFrame(at:)`, `coverFrame`, `tallestBookHeight` and
+  `topOfTallestBook(grownBy:)`; `ShelfBooksView` no longer grows or hides anything.
+- Fixed along the way: `PaintedBookView` kept the first cover strip it ever loaded — invisible
+  on a shelf, wrong in the overlay where one view is reused for every book the finger crosses.
+  Its strip is now keyed to the edition, and `SpineStripLoader` keeps a main-actor mirror of its
+  cache so the swap paints in the same frame instead of flashing a placeholder.
+- No SwiftData schema change.
 
 ## Notable decisions
 
-- The growth doubles as the progress indicator for the hold — no separate affordance.
-- A tap peeks to ×1.15 whatever its length (springs are retargeted, so the presented scale
-  can't be read back — a 250ms window on the press decides it instead).
-- Selection is confined to the étagère the press started on, matching the scrim's focus.
-- The blur sits inside the card rather than over the screen with the shelf cut out: any hole
-  shows its own edge (flat white inside, blurred content just outside), and that edge was the
-  artefact, not its shape.
-- The focused card paints above its neighbours, because a material only blurs what is drawn
-  beneath it.
-- The blur comes in at 90% of the hold, not at the arm — landing with the book's growth instead
-  of after it.
-- A quick tap on a shelf now opens nothing; the shelf's list is on its name, and the flat
-  list below is the fast path to a book.
+- Everything is veiled and only the pressed book is brought back sharp above it. Cutting the
+  shelf out of the veil was tried three ways and always showed its own edge; a blur kept inside
+  the card cannot escape the carousel's clipping.
+- The veil stops at half opacity, so the other books stay visible under the finger, and it
+  starts halfway through the hold — any earlier and a single tap flashes it.
+- The copy is drawn over the shelf's own book rather than replacing it, so it needs no fade of
+  its own, and no placeholder ever flashes while a cover loads.
+- The copy is mounted a frame before it is animated. Inserted in the same transaction as its
+  animation, SwiftUI draws it at the target value — the book jumped straight to ×2 and no curve
+  change could fix it.
+- Nothing animates from one book to the next: the cover and title swap outright, because
+  morphing one into another reads as a glitch while picking.
+- The cell rests above the grown book on a line fixed per shelf — the height the tallest book
+  reaches once grown — so it clears them all and never moves while the finger slides.
+- The exit lasts as long as the press did (capped at the hold, floored at 0.12s), so entering
+  and leaving stay symmetric.
+- Opening a book drops the overlay outright instead of animating it away, so nothing lingers
+  over the detail screen.
+- An overlay at the tab host, not a `fullScreenCover` or a second window: presenting would
+  cancel the tracked touch and kill the gesture mid-slide.
+
+## Tuning
+
+All the timing hangs off `ShelfPressRecognizer.holdDuration`; `focusProgress` decides where in
+the hold the veil starts. The look is in `ShelfRowView` (`fullGrowth`, `bounce`, `minimumExit`,
+`cellDuration`, `cellBounce`), `ShelfFocusOverlayView` (`veilStrength`, `wash`) and
+`ShelfFocusBookCell` (`peakOpacity`, `coverWidth`).
+
+## Tests
+
+`ShelfBooksLayoutTests` (28) covers the frames, the centred standing run, taps past the run, the
+mixed shelf's left/right split, per-bar pile hits, the pile's bottom alignment, the card metrics,
+the book frames the overlay redraws from, the shared baseline that lets the cell hold still, and
+the line the cell rests on. `SpineStripLoaderTests` (6) covers the crop, the quarter turn for
+lying books, and the title-colour threshold.

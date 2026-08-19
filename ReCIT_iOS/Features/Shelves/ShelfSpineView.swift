@@ -18,14 +18,12 @@ struct ShelfSpineView: View {
 
     var body: some View {
         PaintedBookView(edition: item.edition, size: size) { ink in
-            Text(item.edition?.title ?? "")
-                .textStyle(.footnote200Bold)
-                .foregroundStyle(ink)
-                .shadow(color: .black.opacity(0.45), radius: 1, x: 0, y: 0.5)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(width: max(size.height - 12, 10))
-                .rotationEffect(.degrees(-90))
+            ShelfBookTitle(
+                title: item.edition?.title ?? "",
+                ink: ink,
+                orientation: .standing,
+                size: size
+            )
         }
         .task(id: item.edition?.uri) { await resolvePages() }
     }

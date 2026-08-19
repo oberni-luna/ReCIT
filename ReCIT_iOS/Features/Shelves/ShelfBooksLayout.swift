@@ -168,8 +168,48 @@ struct ShelfBooksLayout: Equatable {
         )
     }
 
-    /// Height a lone face-on cover takes in the zone.
+    /// Height a lone face-on cover takes in the zone, and its width as a fraction of that.
     static let singleCoverHeightFraction: CGFloat = 0.98
+    static let singleCoverAspect: CGFloat = 0.66
+
+    /// A lone book's cover: centred, nearly filling the zone.
+    var coverFrame: CGRect {
+        let height: CGFloat = zoneHeight * Self.singleCoverHeightFraction
+        let coverWidth: CGFloat = height * Self.singleCoverAspect
+        return .init(
+            x: (width - coverWidth) / 2,
+            y: zoneHeight - height,
+            width: coverWidth,
+            height: height
+        )
+    }
+
+    /// The tallest book on the shelf. The focus overlay parks its cell above this, so the
+    /// cell holds still as the finger slides between books of different heights.
+    var tallestBookHeight: CGFloat {
+        (0..<count).reduce(0) { max($0, bookFrame(at: $1).height) }
+    }
+
+    /// How high the tallest book reaches once grown by `growth` about its centre — half the
+    /// growth goes up, half goes down. In the books zone's coordinates. The focus overlay
+    /// parks its cell on this line, so the cell clears every book on the shelf and never
+    /// moves as the finger slides between them.
+    func topOfTallestBook(grownBy growth: CGFloat) -> CGFloat {
+        zoneHeight - tallestBookHeight * (1 + growth) / 2
+    }
+
+    /// Where the book at `index` sits, whatever form this shelf gives it. In the books zone's
+    /// coordinates — the focus overlay redraws the pressed book there.
+    func bookFrame(at index: Int) -> CGRect {
+        switch mode {
+        case .singleCover:
+            return coverFrame
+        case .allVertical:
+            return spineFrame(at: index)
+        case .mixed(let verticalCount):
+            return index < verticalCount ? spineFrame(at: index) : pileBarFrame(at: index)
+        }
+    }
 
     // MARK: - Hit testing
 

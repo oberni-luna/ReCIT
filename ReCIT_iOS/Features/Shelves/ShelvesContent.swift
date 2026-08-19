@@ -17,14 +17,10 @@ struct ShelvesContent: View {
     @Binding var path: NavigationPath
 
     @Environment(\.isSearching) private var isSearching
+    @Environment(ShelfFocusModel.self) private var focus
 
     /// Presents the create-shelf form (tapping the trailing carousel card).
     @State private var isCreatingShelf: Bool = false
-
-    /// The étagère being pressed, if any. Every scroll freezes while it is set, so the slide
-    /// picks a book instead of moving the page, and that card draws above its neighbours so
-    /// its blur can reach them.
-    @State private var focusedShelfId: String?
 
     @Query private var shelves: [Shelf]
     @Query private var myItems: [InventoryItem]
@@ -74,7 +70,7 @@ struct ShelvesContent: View {
                     allBooksList
                 }
                 // Frozen while a shelf is being scrubbed, so the slide can't scroll the page.
-                .scrollDisabled(focusedShelfId != nil)
+                .scrollDisabled(focus.isArmed)
             }
         }
     }
@@ -94,10 +90,7 @@ struct ShelvesContent: View {
         ScrollView(.horizontal) {
             LazyHStack(spacing: gutter) {
                 ForEach(shelves) { shelf in
-                    ShelfRowView(shelf: shelf, width: cardWidth, path: $path, focusedShelfId: $focusedShelfId)
-                        // The focused card paints last: a material only blurs what is drawn
-                        // beneath it, so its neighbours have to come first.
-                        .zIndex(focusedShelfId == shelf._id ? 1 : 0)
+                    ShelfRowView(shelf: shelf, width: cardWidth, path: $path)
                         .frame(width: cardWidth)
                 }
                 ShelfCreateCardView(width: cardWidth) { isCreatingShelf = true }
@@ -109,7 +102,7 @@ struct ShelvesContent: View {
         .scrollTargetBehavior(.viewAligned)
         .scrollIndicators(.hidden)
         // Frozen while a scrub is on, so the slide moves the selection, not the cards.
-        .scrollDisabled(focusedShelfId != nil)
+        .scrollDisabled(focus.isArmed)
         .sheet(isPresented: $isCreatingShelf) {
             ShelfFormView()
         }

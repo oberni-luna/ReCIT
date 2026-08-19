@@ -15,13 +15,12 @@ import UIKit
 final class ShelfPressRecognizer: UIGestureRecognizer {
 
     /// How long the finger must stay down before selection mode arms.
-    static let holdDuration: TimeInterval = 0.3
+    static let holdDuration: TimeInterval = 0.5
     /// Travel allowed before arming; past it the touch belongs to the scroll view.
     static let slop: CGFloat = 10
-    /// How far through the hold the surroundings start to blur. The growth spring runs over
-    /// the whole hold, so at this point the book is all but full size and the focus lands
-    /// with it rather than after it.
-    static let focusProgress: Double = 0.9
+    /// How far through the hold the veil starts coming in. Halfway, not sooner: a single tap
+    /// would otherwise flash the whole screen for an instant.
+    static let focusProgress: Double = 0.5
 
     var onPressBegan: ((CGPoint) -> Void)?
     /// The hold is nearly through: bring the focus in ahead of arming.

@@ -86,6 +86,9 @@ struct MainTabView: View {
     }
 
     @State var selectedTab: TabConfig = .community
+    /// The book being pressed on the bookshelf, if any. Owned here because the focus overlay
+    /// it drives has to reach over the nav bar and the tab bar. See ADR 0006.
+    @State private var shelfFocus: ShelfFocusModel = .init()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -104,6 +107,12 @@ struct MainTabView: View {
                         .environment(\.symbolVariants, symbolVariant)
                     }
                 }
+            }
+        }
+        .environment(shelfFocus)
+        .overlay {
+            if shelfFocus.isPressing {
+                ShelfFocusOverlayView(focus: shelfFocus)
             }
         }
         .onChange(of: errorReporter.lastFailure?.id) { _, _ in

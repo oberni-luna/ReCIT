@@ -14,10 +14,9 @@ struct ShelfBooksView: View {
     let books: [InventoryItem]
     let metrics: ShelfCardMetrics
     let layout: ShelfBooksLayout
-    /// The book under the finger, drawn above the others at `growth`.
-    let grownIndex: Int?
-    /// How much that book has grown (1 = at rest). The parent animates it.
-    let growth: CGFloat
+    /// How far the books sit into the plank. The focus overlay applies it too, so its copy
+    /// lands exactly where the shelf's own book was.
+    static let booksOffset: CGFloat = 4
 
     private var width: CGFloat { metrics.width }
     private var booksWidth: CGFloat { layout.width }
@@ -41,7 +40,7 @@ struct ShelfBooksView: View {
         }
         .frame(width: width, height: zoneHeight, alignment: .bottom)
         // Sit the books a touch into the plank for a more convincing 3D "on the shelf" look.
-        .offset(y: 4)
+        .offset(y: Self.booksOffset)
     }
 
     private func verticalRun(range: Range<Int>) -> some View {
@@ -50,8 +49,6 @@ struct ShelfBooksView: View {
                 ShelfSpineView(item: books[index], size: layout.spineSize(at: index))
                     .rotationEffect(layout.isLeaning(at: index) ? .degrees(-ShelfBooksLayout.leanDegrees) : .zero, anchor: .bottomTrailing)
                     .offset(x: layout.isLeaning(at: index) ? layout.leanOffset(at: index) : 0)
-                    .scaleEffect(grownIndex == index ? growth : 1, anchor: .center)
-                    .zIndex(grownIndex == index ? 1 : 0)
             }
         }
     }
@@ -61,8 +58,6 @@ struct ShelfBooksView: View {
             ForEach(range, id: \.self) { index in
                 pileBar(index)
                     .offset(x: layout.pileJitter(at: index))
-                    .scaleEffect(grownIndex == index ? growth : 1)
-                    .zIndex(grownIndex == index ? 1 : 0)
             }
         }
     }
@@ -74,40 +69,17 @@ struct ShelfBooksView: View {
             size: layout.pileBarSize(at: index, availableWidth: layout.pileColumnWidth),
             orientation: .lying
         ) { ink in
-            Text(item.edition?.title ?? "")
-                .textStyle(.footnote200Bold)
-                .foregroundStyle(ink)
-                .shadow(color: .black.opacity(0.45), radius: 1, x: 0, y: 0.5)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 6)
+            ShelfBookTitle(
+                title: item.edition?.title ?? "",
+                ink: ink,
+                orientation: .lying,
+                size: layout.pileBarSize(at: index, availableWidth: layout.pileColumnWidth)
+            )
         }
     }
 
     /// A lone book is shown face-on with its real cover — prettier than a single spine.
     private var singleCover: some View {
-        let item: InventoryItem = books[0]
-        let coverHeight: CGFloat = zoneHeight * ShelfBooksLayout.singleCoverHeightFraction
-        let coverWidth: CGFloat = coverHeight * 0.66
-        let url: URL? = item.edition?.image.flatMap { URL(string: $0) }
-        return CachedAsyncImage(url: url) { image in
-            image
-                .resizable()
-                .scaledToFit()
-        } placeholder: {
-            ZStack {
-                RoundedRectangle(cornerRadius: 2).fill(ShelfPalette.parchment)
-                Text(item.edition?.title ?? "")
-                    .textStyle(.caption200)
-                    .foregroundStyle(.foregroundSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(4)
-            }
-        }
-        .frame(width: coverWidth, height: coverHeight)
-        .clipShape(.rect(cornerRadius: 2))
-        .shadow(color: .black.opacity(0.22), radius: 3, x: 1, y: 2)
-        .scaleEffect(grownIndex == 0 ? growth : 1, anchor: .center)
+        ShelfCoverView(item: books[0], size: layout.coverFrame.size)
     }
 }

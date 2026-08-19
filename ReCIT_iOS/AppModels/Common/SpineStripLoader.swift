@@ -31,6 +31,19 @@ actor SpineStripLoader {
     /// Luminance above which a dark title is preferred over a white one.
     static let darkTitleThreshold: Double = 0.6
 
+    /// Mirror of `cache` readable straight from the main actor, so a view swapping from one
+    /// book to another paints the new strip in the same frame. Without it the view has to
+    /// await the actor and shows a parchment placeholder in between.
+    @MainActor private static var mainCache: [String: Strip] = [:]
+
+    @MainActor static func cachedStrip(forEditionUri uri: String) -> Strip? {
+        mainCache[uri]
+    }
+
+    @MainActor static func remember(_ strip: Strip, forEditionUri uri: String) {
+        mainCache[uri] = strip
+    }
+
     private var cache: [String: Strip] = [:]
     private let context: CIContext = .init(options: [.cacheIntermediates: false])
 

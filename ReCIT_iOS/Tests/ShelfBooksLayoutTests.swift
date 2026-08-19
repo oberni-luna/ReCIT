@@ -212,4 +212,69 @@ import Testing
         #expect(!m.touchBox.contains(CGPoint(x: 200, y: m.cardHeight + 1))) // below the card
         #expect(!m.touchBox.contains(CGPoint(x: -1, y: 0)))                 // beside it
     }
+
+    // MARK: - Where a book sits (the focus overlay redraws it there)
+
+    @Test func loneCoverIsCentredAndStandsOnTheShelf() {
+        let l = ShelfBooksLayout(pageCounts: [200], width: 300, zoneHeight: 120)
+        let cover = l.coverFrame
+        #expect(abs(cover.midX - 150) < 0.001)  // centred in the zone
+        #expect(abs(cover.maxY - 120) < 0.001)  // sitting on the plank
+        #expect(cover.height > 100)             // nearly fills the zone
+        #expect(cover.width < cover.height)     // portrait
+    }
+
+    @Test func bookFrameFollowsTheShelfsOwnLayout() {
+        let lone = ShelfBooksLayout(pageCounts: [200], width: 300, zoneHeight: 120)
+        #expect(lone.bookFrame(at: 0) == lone.coverFrame)
+
+        let standing = ShelfBooksLayout(pageCounts: [200, 200, 200], width: 300, zoneHeight: 120)
+        #expect(standing.bookFrame(at: 1) == standing.spineFrame(at: 1))
+
+        let mixed = ShelfBooksLayout(pageCounts: Array(repeating: 600, count: 20), width: 300, zoneHeight: 120)
+        guard case .mixed(let verticalCount) = mixed.mode else {
+            Issue.record("expected mixed")
+            return
+        }
+        #expect(mixed.bookFrame(at: 0) == mixed.spineFrame(at: 0))
+        let piled = verticalCount + 1
+        #expect(mixed.bookFrame(at: piled) == mixed.pileBarFrame(at: piled))
+    }
+
+    @Test func everyBookStandsOnTheSameBaseline() {
+        // The focus overlay hangs the cell off this baseline, so it must not move as the
+        // finger slides from book to book.
+        let l = ShelfBooksLayout(pageCounts: [200, 400, 600], width: 300, zoneHeight: 120)
+        let baselines = (0..<l.count).map { l.bookFrame(at: $0).maxY }
+        #expect(baselines.allSatisfy { abs($0 - 120) < 0.001 })
+    }
+
+    @Test func tallestBookClearsEveryOtherOne() {
+        // The focus overlay parks its cell above this, so it must be the maximum, not the
+        // first or the last book's height.
+        let l = ShelfBooksLayout(pageCounts: [200, 400, 600], width: 300, zoneHeight: 120)
+        let heights = (0..<l.count).map { l.bookFrame(at: $0).height }
+        #expect(l.tallestBookHeight == heights.max())
+        #expect(heights.allSatisfy { $0 <= l.tallestBookHeight })
+    }
+
+    @Test func theCellLineClearsEveryGrownBook() {
+        let zone: CGFloat = 120
+        let l = ShelfBooksLayout(pageCounts: [200, 400, 600], width: 300, zoneHeight: zone)
+        let growth: CGFloat = 2
+        let line = l.topOfTallestBook(grownBy: growth)
+        // Every book, grown about its own centre, stays below the line.
+        for index in 0..<l.count {
+            let frame = l.bookFrame(at: index)
+            let grownTop = frame.midY - frame.height * growth / 2
+            #expect(grownTop >= line - 0.001)
+        }
+        // And the line sits exactly on the tallest one, not above it.
+        #expect(abs(line - (zone - l.tallestBookHeight * (1 + growth) / 2)) < 0.001)
+    }
+
+    @Test func emptyShelfHasNoTallestBook() {
+        let l = ShelfBooksLayout(pageCounts: [], width: 300, zoneHeight: 120)
+        #expect(l.tallestBookHeight == 0)
+    }
 }

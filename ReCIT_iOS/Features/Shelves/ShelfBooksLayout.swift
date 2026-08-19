@@ -168,6 +168,9 @@ struct ShelfBooksLayout: Equatable {
         )
     }
 
+    /// Height a lone face-on cover takes in the zone.
+    static let singleCoverHeightFraction: CGFloat = 0.98
+
     // MARK: - Hit testing
 
     /// The book nearest `point` (books-zone coordinates). Never `nil` on a non-empty

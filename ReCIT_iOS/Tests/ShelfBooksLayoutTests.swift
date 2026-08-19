@@ -184,4 +184,32 @@ import Testing
         #expect(abs(l.pileBarFrame(at: last).maxY - zone) < 0.001)
         #expect(l.pileBarFrame(at: l.pileRange.lowerBound).minY < l.pileBarFrame(at: last).minY)
     }
+
+    // MARK: - Card metrics
+
+    @Test func everyMetricScalesWithTheCardWidth() {
+        let small = ShelfCardMetrics(width: 200)
+        let big = ShelfCardMetrics(width: 400)
+        #expect(big.zoneHeight == small.zoneHeight * 2)
+        #expect(big.plankHeight == small.plankHeight * 2)
+        #expect(big.topRoom == small.topRoom * 2)
+        #expect(big.cardHeight == small.cardHeight * 2)
+    }
+
+    @Test func cardIsItsBooksZonePlusThePlank() {
+        let m = ShelfCardMetrics(width: 400)
+        #expect(m.cardHeight == m.zoneHeight + m.plankHeight)
+        #expect(m.zoneHeight > m.plankHeight) // the books band is the tall part
+        #expect(m.booksWidth == m.width - ShelfCardMetrics.horizontalMargin * 2)
+    }
+
+    @Test func touchBoxCoversThePlankAndTheRoomAbove() {
+        let m = ShelfCardMetrics(width: 400)
+        #expect(m.touchBox.contains(CGPoint(x: 200, y: 0)))                 // books
+        #expect(m.touchBox.contains(CGPoint(x: 200, y: m.cardHeight - 1)))  // plank
+        #expect(m.touchBox.contains(CGPoint(x: 200, y: -m.topRoom + 1)))    // a grown book
+        #expect(!m.touchBox.contains(CGPoint(x: 200, y: -m.topRoom - 1)))   // above it
+        #expect(!m.touchBox.contains(CGPoint(x: 200, y: m.cardHeight + 1))) // below the card
+        #expect(!m.touchBox.contains(CGPoint(x: -1, y: 0)))                 // beside it
+    }
 }

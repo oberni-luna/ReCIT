@@ -126,6 +126,8 @@ There is no per-feature `NavigationStack`. `MainTabView` owns each tab's `Naviga
 
 `DesignSystem/Tokens/` defines `Color`, `Spacing`, `CornerRadius`, `TextStyle`. UI code should consume these via the provided modifiers (`.textStyle(.content300)`, `.foregroundStyle(.foregroundDefault)`, `.buttonStyle(.primary())`, `.applyListBackground()`) rather than literal `Color` / `Font` / `padding(8)` values. Fonts are loaded at launch from `DesignSystem/Fonts/` — adding a font means dropping the `.ttf` in that folder *and* adding a case to `TextStyle.CustomFont`.
 
+The design system is mirrored into Figma (variables, text styles, shadow styles, a `Tokens` page). Read [docs/design-system/figma-library.md](docs/design-system/figma-library.md) **before** touching that file — it carries the `fileKey`, the node ids, the token tables with their Swift symbols, and the list of code/Figma divergences. Code is the source of truth; divergences get documented there, not silently fixed.
+
 ## Swift / SwiftUI conventions
 
 Target: **iOS 26.0+**, **Swift 6.2+**, strict concurrency, SwiftUI-only (no UIKit unless asked). Do not add third-party SPM packages without confirming first — current deps are `LBSnackBar`, `Nuke`, `CodeScanner`, `swift-async-algorithms`, `swift-collections`.
@@ -182,3 +184,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 
 - [0002 Cover-strip spines, reliable scrub, shelf margin](docs/features/0002-spine-strip-scrub-margin.md) — spines from cover art, UIKit scrub, 24pt book margin
 - [0003 Tap-to-select shelves, spines for lying books](docs/features/0003-shelf-tap-selection.md) — tap grows the nearest book, tap again opens it; quarter-turned cover for pile books (supersedes the scrub in 0002)
+- [0004 Press-and-hold book selection with a focus scrim](docs/features/0004-shelf-press-selection.md) — press grows a book, 0.5s hold arms selection mode (haptic + screen dimmed), slide picks, release opens (supersedes the tapping in 0003)

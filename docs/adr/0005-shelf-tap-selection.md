@@ -24,6 +24,10 @@ instead of a spine seen side-on.
 
 ## Decision
 
+> **The interaction below is superseded by ADR 0006**, which returns to a single
+> press-and-hold gesture (with a focus scrim). The geometric hit testing and the
+> quarter-turned cover sliver decided here still stand.
+
 **Interaction — two plain taps, no press-and-hold.**
 
 - A tap anywhere on the shelf card (books zone *or* plank) grows the book **nearest** the
@@ -35,7 +39,9 @@ instead of a spine seen side-on.
   is otherwise unreachable from the card.
 - Selection is held **once for the whole carousel** (`ShelfBookSelection { shelfId, index }`
   in `ShelvesContent`), so only one book ever stands out; tapping a book on another étagère
-  moves it. Navigating into a book clears it.
+  moves it. It clears on navigating into a book, on **any swipe** (either scroll view leaving
+  `.idle`, via `onScrollPhaseChange`) and on **a tap that lands on no étagère** (a handler on
+  the page's content, which a card's or a row's own tap never reaches).
 - `ScrubGestureView` and `ScrubMapping` are **deleted** — with no drag left, nothing fights
   the carousel scroll, so `scrollDisabled` and the `scrubbing` binding go too. The UIKit
   exception is gone; a location-carrying `onTapGesture` is enough (the tap *needs* its

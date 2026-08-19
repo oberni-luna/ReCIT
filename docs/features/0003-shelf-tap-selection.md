@@ -2,11 +2,15 @@
 
 Shipped on 2026-08-18. See ADR `docs/adr/0005-shelf-tap-selection.md`.
 
+> The tapping described here was replaced the same day by press-and-hold selection — see
+> `docs/features/0004-shelf-press-selection.md` / ADR 0006. The geometric hit testing and the
+> quarter-turned covers for lying books still stand.
+
 ## What it does
 
 On the bookshelf, a tap on a shelf grows the book nearest your finger and drops the previous
 one back into place; tapping that grown book again opens it. Only one book stands out across
-the whole carousel. The press-and-hold scrub is gone, and the shelf's list is now reached by
+the whole carousel, and it drops back as soon as you swipe or tap anywhere off an étagère. The press-and-hold scrub is gone, and the shelf's list is now reached by
 tapping the shelf's name. Books lying flat in a pile are painted with their cover turned a
 quarter turn, so they read as spines seen side-on instead of horizontal bands.
 

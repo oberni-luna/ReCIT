@@ -3,29 +3,23 @@
 //  ReCIT_iOS
 //
 //  Thin SwiftUI renderer over `ShelfBooksLayout`: given the layout (built by the parent,
-//  which also uses it to hit-test taps) it draws spines / a pile / a single cover, growing
-//  the selected book. All layout math lives in the (testable) layout type. See ADR 0003.
+//  which also uses it to find the book under the finger) it draws spines / a pile / a single
+//  cover, growing the pressed one. All layout math lives in the (testable) layout type.
+//  See ADR 0003 / ADR 0006.
 //
 
 import SwiftUI
 
 struct ShelfBooksView: View {
     let books: [InventoryItem]
-    let width: CGFloat
+    let metrics: ShelfCardMetrics
     let layout: ShelfBooksLayout
-    /// The book singled out by a tap, grown above the others.
-    let selectedIndex: Int?
+    /// The book under the finger, drawn above the others at `growth`.
+    let grownIndex: Int?
+    /// How much that book has grown (1 = at rest). The parent animates it.
+    let growth: CGFloat
 
-    /// Horizontal inset so the outermost books sit on the plank rather than at the very
-    /// edge of the card. The books lay out within this reduced width, centred; the plank
-    /// stays full width.
-    static let horizontalMargin: CGFloat = 24
-
-    /// Width the books lay out in — the card minus a margin on each side.
-    static func booksWidth(cardWidth: CGFloat) -> CGFloat {
-        max(cardWidth - horizontalMargin * 2, 0)
-    }
-
+    private var width: CGFloat { metrics.width }
     private var booksWidth: CGFloat { layout.width }
     private var zoneHeight: CGFloat { layout.zoneHeight }
 
@@ -56,9 +50,8 @@ struct ShelfBooksView: View {
                 ShelfSpineView(item: books[index], size: layout.spineSize(at: index))
                     .rotationEffect(layout.isLeaning(at: index) ? .degrees(-ShelfBooksLayout.leanDegrees) : .zero, anchor: .bottomTrailing)
                     .offset(x: layout.isLeaning(at: index) ? layout.leanOffset(at: index) : 0)
-                    .scaleEffect(selectedIndex == index ? 1.5 : 1, anchor: .center)
-                    .zIndex(selectedIndex == index ? 1 : 0)
-                    .animation(.spring(duration: 0.22), value: selectedIndex)
+                    .scaleEffect(grownIndex == index ? growth : 1, anchor: .center)
+                    .zIndex(grownIndex == index ? 1 : 0)
             }
         }
     }
@@ -68,9 +61,8 @@ struct ShelfBooksView: View {
             ForEach(range, id: \.self) { index in
                 pileBar(index)
                     .offset(x: layout.pileJitter(at: index))
-                    .scaleEffect(selectedIndex == index ? 1.5 : 1)
-                    .zIndex(selectedIndex == index ? 1 : 0)
-                    .animation(.spring(duration: 0.22), value: selectedIndex)
+                    .scaleEffect(grownIndex == index ? growth : 1)
+                    .zIndex(grownIndex == index ? 1 : 0)
             }
         }
     }
@@ -96,7 +88,7 @@ struct ShelfBooksView: View {
     /// A lone book is shown face-on with its real cover — prettier than a single spine.
     private var singleCover: some View {
         let item: InventoryItem = books[0]
-        let coverHeight: CGFloat = zoneHeight * 0.98
+        let coverHeight: CGFloat = zoneHeight * ShelfBooksLayout.singleCoverHeightFraction
         let coverWidth: CGFloat = coverHeight * 0.66
         let url: URL? = item.edition?.image.flatMap { URL(string: $0) }
         return CachedAsyncImage(url: url) { image in
@@ -116,7 +108,6 @@ struct ShelfBooksView: View {
         .frame(width: coverWidth, height: coverHeight)
         .clipShape(.rect(cornerRadius: 2))
         .shadow(color: .black.opacity(0.22), radius: 3, x: 1, y: 2)
-        .scaleEffect(selectedIndex == 0 ? 1.5 : 1, anchor: .center)
-        .animation(.spring(duration: 0.22), value: selectedIndex)
+        .scaleEffect(grownIndex == 0 ? growth : 1, anchor: .center)
     }
 }

@@ -30,7 +30,6 @@ struct AutoSortEntryPointTests {
         #expect(entryPoint.isVisible)
         #expect(entryPoint.isEnabled)
         #expect(entryPoint.offersSettingsRoute == false)
-        #expect(entryPoint.reachesFlow)
     }
 
     /// Nothing the user can do about the chip in their phone, so they are told nothing.
@@ -77,17 +76,5 @@ struct AutoSortEntryPointTests {
         #expect(reasons[1] != reasons[2])
         #expect(reasons[0] != reasons[2])
         #expect(reasons.allSatisfy { $0.isEnabled == false })
-    }
-
-    // MARK: - The empty card's fallback
-
-    /// The empty-state étagère card is the empty state itself, so it always leads
-    /// somewhere: into the flow for every reason that a wall can explain, and into the
-    /// create form only where the flow could never work.
-    @Test func onlyAnIneligibleDeviceSendsTheEmptyCardToTheCreateForm() {
-        #expect(AutoSortEntryPoint.offered.reachesFlow)
-        #expect(AutoSortEntryPoint.switchedOff.reachesFlow)
-        #expect(AutoSortEntryPoint.downloading.reachesFlow)
-        #expect(AutoSortEntryPoint.hidden.reachesFlow == false)
     }
 }

@@ -735,3 +735,48 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 
 Rappel de la passe tokens : **D6 reste la priorité** — `OpenSans-SemiBold` et `OpenSans-Regular` ne s'enregistrent
 pas au lancement, donc `action200`, `action300` et `caption200` retombent sur la police système sur l'appareil.
+
+---
+
+# Onboarding — propositions (passe du 2026-08-20)
+
+Section `Onboarding` (`73:2829`) sur la page `Screens`. Trois propositions pour la mise en route « inventaire vide →
+scanner par lot → rangement automatique ». **Exploration, pas une passe de réplication** : ces frames ne miroitent
+aucun écran Swift existant, sauf l'écran de rangement, qui approxime `Features/AutoSort/AutoSortPlanView.swift`.
+
+**La proposition C est retenue** (2026-08-20). A et B restent dans la section, marquées « écartée », comme trace des
+arbitrages — ne pas les supprimer sans supprimer aussi les panneaux qui les expliquent.
+
+## C · Deux plein-écrans — retenue
+
+| Frame | id | Rôle |
+|---|---|---|
+| `C1 · Bienvenue` | `80:2852` | Premier lancement, inventaire vide. CTA « Scanner mes livres », échappatoire « Plus tard » |
+| `C1 · Bienvenue · Sombre` | `87:3011` | Mode épinglé `Dark`, chrome en `Theme=Dark` |
+| `C1b · Après « Plus tard »` | `87:2880` | Où l'invitation retombe : le mot sur la planche, une seule ligne à cocher |
+| `C2 · Bilan du scan` | `80:2895` | À la fermeture du scanner. Titre = compte de la session, CTA « Ranger mes livres » |
+| `C2 · Bilan du scan · Sombre` | `87:3064` | idem, mode `Dark` |
+| `C2b · Rangement indisponible` | `87:2960` | Apple Intelligence désactivée : la raison est dite, CTA vers les Réglages |
+| `C3 · Rangement proposé` | `80:2708` | L'écran de `AutoSortPlanView`, inchangé — cible du CTA de C2 |
+| `Commun · Scanner par lot (existant)` | `81:2847` | Clone de `57:2401`, non modifié |
+| `Spec · C` | `81:2891` | Déclencheurs, flags, cas d'indisponibilité, ce qui reste à trancher |
+
+`C1b` et `C2b` n'ont pas de variante sombre : ce sont des états dérivés, à décliner au moment de l'implémentation.
+
+Les panneaux des propositions écartées : A `81:2863`, B `81:2877`. Frames de A `76:2241` `76:2253` `80:2596`,
+frames de B `76:2265` `76:2277` `80:2690`.
+
+## Ce que la construction a appris
+
+- **On ne peut pas déplacer un enfant d'instance** : `set_y` sur un sous-nœud d'instance renvoie
+  `This property cannot be overridden in an instance: relative-transform`. Le mot papier de `Shelf Empty Card` est
+  donc **masqué** (`visible = false`, override autorisé) et la liste à cocher est redessinée dans la frame, tokens
+  bindés (`shelf/label/paper`, `shelf/label/ink`, style `Shadow/Light`).
+- Les frames d'écran de ce fichier n'ont **pas d'auto-layout** : leurs enfants sont posés en absolu. Insérer un
+  encart veut dire décaler à la main tout ce qui est sous lui, chrome exclu.
+- `Shelf Card` (`Paint=Illustrative`) sert d'illustration d'accueil, **label masqué** : sans ça elle annonce
+  « Classiques français » sur un écran de bienvenue.
+- Une variante sombre s'obtient en clonant, en épinglant le mode `Dark` sur la frame, puis en passant les instances
+  de chrome en `Theme=Dark`. Tout le reste suit, parce que tout est bindé.
+- Le glyphe `xmark` n'existe pas dans `Icon` (`21:60`). Sans objet pour C, mais c'est ce qui a privé le bandeau de B
+  d'une croix de fermeture.

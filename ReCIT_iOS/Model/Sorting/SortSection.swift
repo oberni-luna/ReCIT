@@ -28,7 +28,11 @@ struct SortSection: Identifiable, Equatable, Sendable {
     /// ADR 0001's `optimistic:` convention, so a placeholder can never be mistaken
     /// for a server document — which matters the moment the write plan starts
     /// deciding what to create and what to merely fill.
-    enum ID: Hashable, Sendable {
+    ///
+    /// `Codable` because it travels: a drag carries the section a book came from
+    /// across the drop (`SortBookTransfer`), and the origin is half of what a move
+    /// records. Synthesised — the three cases are the whole encoding.
+    enum ID: Hashable, Codable, Sendable {
         /// An étagère that exists on the server, by its `Shelf._id`.
         case shelf(String)
         /// An étagère the user has drafted on this screen, by its client id.

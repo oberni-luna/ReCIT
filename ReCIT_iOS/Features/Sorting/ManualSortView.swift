@@ -12,10 +12,11 @@
 //  the freeze, and why it is a deliberate departure from ADR 0001, is written where it
 //  happens: `SortSessionModel.freeze`.
 //
-//  This slice is read-only. The handles are drawn but inert, the stack is always
-//  empty, and therefore the primary button is inert and the third one reads
-//  « Terminer ». Dragging (0038), the pills and recap (0039), the apply (0040), the
-//  inline create form (0041) and the AI proposal (0042) land on this same screen.
+//  Books are filed by dragging them from one section onto another; nothing is written.
+//  The session that holds the snapshot and the stack is **app-scoped**, so a draft
+//  survives leaving the screen — and, from slice 0040, so will the writes and the
+//  ledger of what landed. The pills and recap (0039), the apply (0040), the inline
+//  create form (0041) and the AI proposal (0042) land on this same screen.
 //
 //  It stands *alongside* the auto-sort review screen, which keeps working untouched
 //  until slice 0043 dismantles it.
@@ -33,9 +34,9 @@ struct ManualSortView: View {
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.modelContext) private var modelContext
 
-    @Binding var path: NavigationPath
+    @Environment(SortSessionModel.self) private var session
 
-    @State private var session: SortSessionModel = .init()
+    @Binding var path: NavigationPath
 
     var body: some View {
         Group {
@@ -63,7 +64,8 @@ struct ManualSortView: View {
         }
     }
 
-    /// « Terminer » leaves the screen. Nothing to undo — this slice writes nothing.
+    /// « Terminer » leaves the screen. Only reachable with an empty stack: while there
+    /// is something to discard the same button says « Annuler » and discards it.
     private func close() {
         if path.isEmpty == false {
             path.removeLast()

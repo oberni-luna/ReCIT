@@ -30,3 +30,23 @@ enum SortChange: Equatable, Sendable {
     /// A book leaves one section for another. `bookId` is the item's server `_id`.
     case moveBook(bookId: String, from: SortSection.ID, to: SortSection.ID)
 }
+
+extension SortChange {
+
+    /// One drop, as a change — or nothing at all when the book is dropped back on the
+    /// section it was dragged from.
+    ///
+    /// The no-op belongs here rather than in the session model because it is a rule
+    /// about the stack, and the stack is what the button labels are derived from: a
+    /// change that changes nothing would still make the apply button live and turn
+    /// « Terminer » into « Annuler », so the screen would be offering to discard work
+    /// that does not exist. Pure, so it is assertable without a view or a gesture.
+    static func move(
+        bookId: String,
+        from origin: SortSection.ID,
+        to destination: SortSection.ID
+    ) -> SortChange? {
+        guard origin != destination else { return nil }
+        return .moveBook(bookId: bookId, from: origin, to: destination)
+    }
+}

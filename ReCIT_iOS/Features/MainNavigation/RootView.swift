@@ -19,6 +19,7 @@ struct RootView: View {
     @State var transactionModel: TransactionModel
     @State var genreEnrichmentModel: GenreEnrichmentModel
     @State var autoSortModel: AutoSortModel
+    @State var sortSessionModel: SortSessionModel
     @State var errorReporter: AppErrorReporter
     @State var syncStatus: SyncStatusStore
     @State var onboardingStore: OnboardingStore
@@ -48,6 +49,10 @@ struct RootView: View {
                 errorReporter: errorReporter
             )
         )
+        // App-scoped rather than owned by the sorting screen: the writes it will run
+        // (PRD 0008) have to outlive the screen, and so does the draft the user built
+        // by dragging — leaving mid-session and coming back must find the stack.
+        _sortSessionModel = State(initialValue: SortSessionModel())
         _syncStatus = State(initialValue: SyncStatusStore())
         _onboardingStore = State(initialValue: OnboardingStore())
     }
@@ -66,6 +71,7 @@ struct RootView: View {
                 .environment(transactionModel)
                 .environment(genreEnrichmentModel)
                 .environment(autoSortModel)
+                .environment(sortSessionModel)
                 .environment(errorReporter)
                 .environment(syncStatus)
                 .environment(onboardingStore)

@@ -1474,6 +1474,23 @@
         }
       }
     },
+    "manual_sort.shelf.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This shelf is still empty. Drop a book here to fill it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette étagère est encore vide. Déposez un livre ici pour la remplir."
+          }
+        }
+      }
+    },
     "manual_sort.syncing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1504,6 +1521,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ranger mes livres"
+          }
+        }
+      }
+    },
+    "manual_sort.unshelved.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every one of your books is on a shelf."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous vos livres sont rangés."
           }
         }
       }

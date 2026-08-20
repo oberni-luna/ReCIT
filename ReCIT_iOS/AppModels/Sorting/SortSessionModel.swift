@@ -2,15 +2,18 @@
 //  SortSessionModel.swift
 //  ReCIT_iOS
 //
-//  The sorting screen's state: the opening sync, the frozen snapshot it produces, and
-//  the change stack laid on top of it. Everything the screen renders comes back out
-//  through `projection`, which is pure.
+//  The sorting session: the opening sync, the frozen snapshot it produces, and the
+//  ordered stack of changes laid on top of it. Everything the screen renders comes
+//  back out through `projection`, which is pure.
 //
-//  Owned by the view for now (`@State`), not injected app-wide. PRD 0008 makes the
-//  session app-scoped so a running apply and the ledger of what it wrote outlive the
-//  screen — but nothing is written in this slice, so there is nothing yet to outlive
-//  it, and an app-scoped model would only add a lifetime nobody needs. Slice 0040
-//  lifts it into `RootView` when the writes arrive.
+//  **App-scoped**, built in `RootView` and injected like every other model. Slice 0040
+//  writes from here, and those writes — plus the ledger that says what landed — have
+//  to outlive the screen: a user who navigates away mid-apply must find the account of
+//  it when they come back. The consequence lands one slice early, in this one: a stack
+//  built by dragging survives leaving the screen, which is exactly what the user
+//  expects of a draft they have not saved.
+//
+//  Being app-scoped makes `load` a *resume* as much as an open — see its note.
 //
 //  See PRD 0008.
 //
@@ -35,9 +38,15 @@ final class SortSessionModel {
 
     private(set) var snapshot: SortSnapshot = .empty
 
-    /// The ordered changes laid over the snapshot. Always empty in this slice —
-    /// slice 0038's drag gesture is what fills it.
+    /// The ordered changes laid over the snapshot. Ordered rather than merged, so the
+    /// coalescing the write plan does (slice 0040) — and any undo — stays a pure
+    /// function of the stack alone.
     private(set) var changes: [SortChange] = []
+
+    /// Guards against two appearances of the screen syncing over each other. Not a
+    /// phase: a load that is already running is not a state the screen renders
+    /// differently, it is a call that must not happen twice.
+    private var isLoading: Bool = false
 
     /// What the screen draws. Recomputed on every read rather than cached: it is a
     /// walk over a few hundred books, and a cache is one more thing that can
@@ -55,8 +64,14 @@ final class SortSessionModel {
     /// destructive button labelled « Terminer ».
     var hasPendingChanges: Bool { changes.isEmpty == false }
 
-    /// Reads the library, once. Syncs first so the user is not rearranging a stale
-    /// collection, then freezes.
+    /// Opens the session — or resumes the one already in hand.
+    ///
+    /// **A session with pending changes is resumed, never re-read.** The user left this
+    /// screen holding a draft of their library; coming back has to find it exactly as
+    /// they left it, and a fresh snapshot underneath a stack built against the old one
+    /// would move books out from under changes that named them. With nothing pending
+    /// there is nothing to protect, so the library is re-synced and re-frozen — which
+    /// is what keeps a second visit from sorting a stale collection.
     ///
     /// Sync failures are reported and swallowed: the store still holds the last known
     /// library, and refusing to open the screen because the network is down would be
@@ -68,7 +83,15 @@ final class SortSessionModel {
         errorReporter: AppErrorReporter?,
         modelContext: ModelContext
     ) async {
-        guard phase == .syncing else { return }
+        guard isLoading == false else { return }
+        guard changes.isEmpty else {
+            phase = .ready
+            return
+        }
+
+        isLoading = true
+        phase = .syncing
+        defer { isLoading = false }
 
         // Shelves before inventory: an item resolves its shelf membership against
         // `Shelf` objects that have to exist by then. See ADR 0003.
@@ -83,9 +106,26 @@ final class SortSessionModel {
         phase = .ready
     }
 
-    /// Throws the stack away. Not reachable in this slice — the stack is always
-    /// empty — but it is the other half of the derived button rule, and writing it
-    /// now is what lets slice 0038 change nothing here.
+    /// Records one drop: the book leaves the section it was dragged from for the one it
+    /// was dropped on.
+    ///
+    /// A book dropped back on the section it came from records **nothing**. A change
+    /// that changes nothing would still make the apply button live and turn
+    /// « Terminer » into « Annuler » — the screen would be claiming there is work to
+    /// discard when there is none. The rule itself lives on `SortChange.move`, which is
+    /// pure and therefore assertable; this method only appends what comes back.
+    func moveBook(
+        _ bookId: String,
+        from origin: SortSection.ID,
+        to destination: SortSection.ID
+    ) {
+        guard let change = SortChange.move(bookId: bookId, from: origin, to: destination) else { return }
+        changes.append(change)
+    }
+
+    /// Throws the stack away and hands the screen back its snapshot. The other half of
+    /// the derived button rule: with a non-empty stack the third button says
+    /// « Annuler » and this is what it does.
     func discardChanges() {
         changes = []
     }

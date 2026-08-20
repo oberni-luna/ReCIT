@@ -239,6 +239,170 @@ struct SortProjectionTests {
         #expect(projection.unshelved.books.map(\.id) == ["2"])
     }
 
+    // MARK: - Dragging a book from one section to another
+
+    @Test func aBookDraggedFromOneEtagereToAnotherLeavesOneAndJoinsTheOther() {
+        let snapshot: SortSnapshot = .init(
+            shelves: [
+                shelf("s1", "Romans classiques", ["1", "2"]),
+                shelf("s2", "Poésie", ["3"])
+            ],
+            books: [book("1"), book("2"), book("3")]
+        )
+
+        let projection: SortProjection = .init(
+            snapshot: snapshot,
+            changes: [.moveBook(bookId: "2", from: .shelf("s1"), to: .shelf("s2"))]
+        )
+
+        #expect(projection.sections[0].books.map(\.id) == ["1"])
+        // Snapshot order, not arrival order: order within an étagère is not part of
+        // the session's state, so the pile and every shelf read in one order.
+        #expect(projection.sections[1].books.map(\.id) == ["2", "3"])
+        #expect(projection.unshelved.books.isEmpty)
+        expectEveryBookAppearsExactlyOnce(projection, in: snapshot)
+    }
+
+    @Test func aBookDroppedIntoThePileLeavesItsEtagere() {
+        let snapshot: SortSnapshot = .init(
+            shelves: [shelf("s1", "Romans classiques", ["1", "2"])],
+            books: [book("1"), book("2")]
+        )
+
+        let projection: SortProjection = .init(
+            snapshot: snapshot,
+            changes: [.moveBook(bookId: "1", from: .shelf("s1"), to: .unshelved)]
+        )
+
+        #expect(projection.sections[0].books.map(\.id) == ["2"])
+        #expect(projection.unshelved.books.map(\.id) == ["1"])
+        expectEveryBookAppearsExactlyOnce(projection, in: snapshot)
+    }
+
+    @Test func aBookDraggedAcrossThreeSectionsEndsUpInExactlyOne() {
+        let snapshot: SortSnapshot = .init(
+            shelves: [
+                shelf("s1", "Romans classiques", ["1"]),
+                shelf("s2", "Poésie", []),
+                shelf("s3", "Bandes dessinées", [])
+            ],
+            books: [book("1")]
+        )
+
+        let projection: SortProjection = .init(
+            snapshot: snapshot,
+            changes: [
+                .moveBook(bookId: "1", from: .shelf("s1"), to: .shelf("s2")),
+                .moveBook(bookId: "1", from: .shelf("s2"), to: .unshelved),
+                .moveBook(bookId: "1", from: .unshelved, to: .shelf("s3"))
+            ]
+        )
+
+        #expect(projection.sections[0].books.isEmpty)
+        #expect(projection.sections[1].books.isEmpty)
+        #expect(projection.sections[2].books.map(\.id) == ["1"])
+        #expect(projection.unshelved.books.isEmpty)
+        expectEveryBookAppearsExactlyOnce(projection, in: snapshot)
+    }
+
+    /// A book put back where it came from records nothing, so the screen does not end
+    /// up claiming there is work to discard.
+    @Test func aBookDroppedBackOnTheSectionItCameFromRecordsNothing() {
+        #expect(SortChange.move(bookId: "1", from: .shelf("s1"), to: .shelf("s1")) == nil)
+        #expect(SortChange.move(bookId: "1", from: .unshelved, to: .unshelved) == nil)
+        #expect(
+            SortChange.move(bookId: "1", from: .unshelved, to: .shelf("s1"))
+                == .moveBook(bookId: "1", from: .unshelved, to: .shelf("s1"))
+        )
+    }
+
+    // MARK: - The counts, and what discarding restores
+
+    @Test func theCountInAHeaderFollowsTheMoves() {
+        let snapshot: SortSnapshot = .init(
+            shelves: [
+                shelf("s1", "Romans classiques", ["1", "2"]),
+                shelf("s2", "Poésie", [])
+            ],
+            books: [book("1"), book("2"), book("3")]
+        )
+
+        #expect(SortProjection(snapshot: snapshot).sections.map(\.bookCount) == [2, 0, 1])
+
+        let projection: SortProjection = .init(
+            snapshot: snapshot,
+            changes: [
+                .moveBook(bookId: "1", from: .shelf("s1"), to: .shelf("s2")),
+                .moveBook(bookId: "3", from: .unshelved, to: .shelf("s2"))
+            ]
+        )
+
+        #expect(projection.sections.map(\.bookCount) == [1, 2, 0])
+    }
+
+    /// « Annuler » throws the stack away, and the screen has to come back to the
+    /// library it opened on — not to something close to it.
+    @Test func discardingTheStackRestoresTheSnapshotExactly() {
+        let snapshot: SortSnapshot = .init(
+            shelves: [
+                shelf("s1", "Romans classiques", ["1", "2"]),
+                shelf("s2", "Poésie", ["3"])
+            ],
+            books: [book("1"), book("2"), book("3"), book("4")]
+        )
+        let changes: [SortChange] = [
+            .createShelf(draftId: SortDraftID.make(), name: "Bandes dessinées"),
+            .moveBook(bookId: "1", from: .shelf("s1"), to: .shelf("s2")),
+            .moveBook(bookId: "4", from: .unshelved, to: .shelf("s1"))
+        ]
+
+        let sorted: SortProjection = .init(snapshot: snapshot, changes: changes)
+        #expect(sorted != SortProjection(snapshot: snapshot))
+
+        #expect(SortProjection(snapshot: snapshot, changes: []) == SortProjection(snapshot: snapshot))
+    }
+
+    // MARK: - The invariant, over every stack dragging can build
+
+    /// Whatever sequence of drops the user makes, and in whatever order, the screen
+    /// shows each of their books once. Stated over the stacks this gesture makes
+    /// reachable rather than over one of them, because the rule is about the reduction
+    /// and not about a case.
+    @Test(
+        arguments: [
+            [],
+            [SortChange.moveBook(bookId: "1", from: .shelf("s1"), to: .shelf("s2"))],
+            [
+                SortChange.moveBook(bookId: "1", from: .shelf("s1"), to: .unshelved),
+                SortChange.moveBook(bookId: "3", from: .unshelved, to: .shelf("s1"))
+            ],
+            [
+                SortChange.moveBook(bookId: "2", from: .shelf("s1"), to: .shelf("s2")),
+                SortChange.moveBook(bookId: "2", from: .shelf("s2"), to: .unshelved),
+                SortChange.moveBook(bookId: "2", from: .unshelved, to: .shelf("s1"))
+            ],
+            [
+                SortChange.moveBook(bookId: "1", from: .shelf("s1"), to: .unshelved),
+                SortChange.moveBook(bookId: "2", from: .shelf("s1"), to: .unshelved),
+                SortChange.moveBook(bookId: "3", from: .unshelved, to: .shelf("s2"))
+            ]
+        ]
+    )
+    func everyBookSitsInExactlyOneSectionWhateverTheStack(changes: [SortChange]) {
+        let snapshot: SortSnapshot = .init(
+            shelves: [
+                shelf("s1", "Romans classiques", ["1", "2"]),
+                shelf("s2", "Poésie", [])
+            ],
+            books: [book("1"), book("2"), book("3")]
+        )
+
+        let projection: SortProjection = .init(snapshot: snapshot, changes: changes)
+
+        expectEveryBookAppearsExactlyOnce(projection, in: snapshot)
+        #expect(projection.sections.map(\.bookCount).reduce(0, +) == snapshot.books.count)
+    }
+
     @Test func aDraftIdIsNeverMistakenForAServerDocument() {
         #expect(SortDraftID.isDraft(SortDraftID.make()))
         #expect(SortDraftID.isDraft("d3fbdd9e0a8d2b1c") == false)

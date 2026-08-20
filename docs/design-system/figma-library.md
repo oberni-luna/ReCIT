@@ -4,10 +4,14 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
-- **Dernière passe** : 2026-08-19 — le label papier de l'étagère (issue 0012) : style d'effet `Shadow/Light`,
-  variables `shadow/light`, `shelf/label/paper`, `shelf/label/ink`, appliquées aux deux variantes de `Shelf Card`.
-- **Passes précédentes** : 2026-08-18 — tokens, styles de texte, styles d'ombre, page `Tokens`, puis les 26 composants
-  et les 16 frames d'écran.
+- **Dernière passe** : 2026-08-20 (issue 0036) — les cinq états jamais dessinés de la surface de tri : 9 frames dans
+  `Ranger mes livres`, 2 variantes d'`Icon` (`circle`, `exclamationmark.circle`), la propriété `Mark glyph#133:0` sur
+  `AutoSort / Shelf Header`.
+- **Passes précédentes** : 2026-08-20 — onboarding, « Ranger mes livres · Résultat », puis le tri manuel.
+  2026-08-19 — le label papier de l'étagère (issue 0012) : style d'effet `Shadow/Light`, variables `shadow/light`,
+  `shelf/label/paper`, `shelf/label/ink`, appliquées aux deux variantes de `Shelf Card`.
+  2026-08-18 — tokens, styles de texte, styles d'ombre, page `Tokens`, puis les 26 composants et les 16 frames
+  d'écran.
 - **Éditeur** : fichier `/design/` (les nœuds de design sont autorisés).
 
 ## Règle de source de vérité
@@ -536,7 +540,7 @@ la palette de l'app, elle se recolore avec l'OS.
 | `Chrome / Tab Bar` | `25:234` | Active ∈ {Inventaire, Listes, Réglages, Recherche} × Theme | — | 393 × 83. Teinte active **bindée** à `foreground/tinted` (`ReCIT.swift:31`) |
 | `Chrome / Nav Bar` | `26:162` | Style ∈ {Large, Inline, Inline + Back} × Theme | `Title#26:18`, `Action glyph#26:19`, `Show action#26:20` | Large 96, Inline 44. Titres **bindés** — l'app configure `UINavigationBarAppearance` |
 | `Chrome / Search Field` | `27:172` | State ∈ {Idle, Active} × Theme | `Placeholder#27:4` | 393 × 52. `Active` signifie aussi que le carrousel d'étagères a disparu |
-| `Icon` | `21:60` | Glyph ∈ 15 valeurs | — | À consommer par `INSTANCE_SWAP`, jamais une variante par icône |
+| `Icon` | `21:60` | Glyph ∈ 18 valeurs | — | À consommer par `INSTANCE_SWAP`, jamais une variante par icône |
 
 ### Composites de feature
 
@@ -694,6 +698,10 @@ pas un composant), 3 sur `Components`. Écrans : les 16 frames répliqués, plus
 `Onboarding` et les 2 frames de la section `Ranger mes livres`. La passe onboarding du même jour n'avait pas rejoué
 les compteurs.
 
+Mise à jour du 2026-08-20 (soir, issue 0036) : toujours **29 composants** — aucun composant nouveau, mais `Icon`
+(`21:60`) passe à **18 variantes** (`circle`, `exclamationmark.circle`) et `AutoSort / Shelf Header` (`100:228`)
+gagne la propriété `Mark glyph#133:0`. Écrans : **9 frames** de plus dans `Ranger mes livres`.
+
 ## Écrans morts relevés dans le code
 
 Aucune transition n'y mène ; seule leur propre `#Preview` les référence. **Candidats à la suppression.**
@@ -742,6 +750,8 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D37 | `Features/AutoSort/*` | Toute la feature est en **littéraux français** : « Ranger mes livres », « Créer ces étagères », « Terminer », « Relancer le rangement »… entrent dans `Localizable.xcstrings` comme **clés**, sans aucune localisation — la langue source étant l'anglais, un anglophone lit du français. Même défaut que D20 pour Étagères. Seul `action.open_settings`, dans `AutoSortUnavailableView`, est une vraie clé traduite | ouverte |
 | D38 | `Features/AutoSort/AutoSortApplyReport.swift` | Les pluriels sont concaténés dans l'interpolation (`"étagère\(n > 1 ? "s ont" : " a")"`). Ces phrases ne peuvent pas entrer au catalogue du tout, et la règle de pluriel devient du code au lieu d'être une donnée de traduction | ouverte |
 | D39 | `C3 · Rangement proposé` (`80:2708`) | **Divergence côté Figma.** Le frame d'onboarding est périmé face au code livré : il affiche un résumé « 5 étagères pour 24 livres » que le code n'a pas, un CTA « Créer les 5 étagères » là où le code dit « Créer ces étagères », aucun bouton **Annuler**, et des rangs `Cell / List` au lieu des livres de chaque étagère (le code liste les livres, précisément pour qu'un mauvais classement se voie) | ouverte — passe de design |
+| D40 | `Icon` (`21:60`), variante `Glyph=line.3.horizontal` | **Divergence côté Figma.** La variante avait été posée à (0, 0), superposée à `Glyph=book` : les deux se chevauchaient dans le jeu, invisible tant qu'on n'ouvre pas le composant | résolue — passe 0036, la variante a reçu sa case (0, 192) et le jeu a été redimensionné |
+| D41 | `Features/AutoSort/AutoSortApplyReport.swift` — branche `.allLanded` | `AutoSortApplyProgress` déclare explicitement qu'un registre **vide** vaut `.allLanded` (« there was nothing to create and nothing failed, which is a finished run »), mais le rapport rend alors « **0 étagère a été créée et remplie.** ». Latent aujourd'hui — l'écran n'est atteint qu'avec un plan non vide — et le devient moins avec la surface de tri, où appliquer une pile qui se coalesce à rien est un cas normal | ouverte |
 
 Rappel de la passe tokens : **D6 reste la priorité** — `OpenSans-SemiBold` et `OpenSans-Regular` ne s'enregistrent
 pas au lancement, donc `action200`, `action300` et `caption200` retombent sur la police système sur l'appareil.
@@ -822,11 +832,11 @@ Les quatre `▢` de tête sont des conteneurs assumés (`list group / …`), un 
 transaction, ni disponibilité, ni navigation. Le genre y est en `foreground/tinted` parce qu'il est la **raison** du
 classement — c'est ce qui permet de dire si c'est le genre ou la correspondance qui a fauté.
 
-`AutoSort / Shelf Header` ne porte **que la marque `landed`**. Les trois autres `ShelfOutcome` manquent, et pas par
-oubli : `applying` est un spinner (non maquetté, convention du fichier) et `pending` / `failed` demandent deux
-glyphes que `Icon` (`21:60`) n'a pas — `circle` et `exclamationmark.circle.fill`. Les ajouter d'abord, puis passer ce
-composant en axe de variantes `Mark`. La marque `landed` elle-même approxime `checkmark.circle.fill` par
-`checkmark.circle`, la seule version que le jeu porte.
+`AutoSort / Shelf Header` ne portait à cette passe **que la marque `landed`** : `applying` est un spinner (non
+maquetté, convention du fichier) et `pending` / `failed` demandaient deux glyphes absents d'`Icon` (`21:60`). La
+passe 0036 les a ajoutés et a ouvert la marque par une propriété `Mark glyph#133:0` (`INSTANCE_SWAP`) plutôt que par
+un axe de variantes — voir plus bas. Les trois marques approximent les symboles `.fill` du code par leur version au
+trait, seule forme que le jeu porte.
 
 ## Variante ajoutée à un composant existant
 
@@ -889,6 +899,9 @@ on range à la main, sans modèle.
 | `Tri manuel · Appliqué · Light` | `126:3672` |
 | `Spec · Tri manuel` | `117:3526` |
 
+Neuf frames de plus ont rejoint la section le soir même — le glissement, la cible de dépôt, la synchronisation
+d'ouverture, « À ranger » vide et l'échec partiel : voir [Les cinq états jamais dessinés](#passe-du-2026-08-20-issue-0036--les-cinq-états-jamais-dessinés).
+
 **Spec fonctionnelle : [docs/prd/0008-manual-shelf-sorting.md](../prd/0008-manual-shelf-sorting.md)** — le modèle de
 diff, les états, les cas limites et les questions ouvertes vivent là, pas ici.
 
@@ -940,6 +953,10 @@ raisonnement.
   de « Terminer » une vraie validation, et impose de savoir ce qu'un abandon annule.
 
 ### Non maquetté
+
+*(état à la passe du 2026-08-20 matin ; cinq de ces états ont été dessinés le soir même — voir « Les cinq états
+jamais dessinés » plus bas. Reste non maquetté : la feuille de création derrière le « + », la proposition en cours de
+génération, et l'état `.applying` d'une étagère.)*
 
 Le rang en cours de glissement (soulevé, ombre, emplacement d'accueil) · la section survolée comme cible de dépôt ·
 la feuille de création derrière le « + » · « À ranger » vide, où la section devrait disparaître · l'inventaire
@@ -1015,3 +1032,154 @@ troisième dit « Terminer ».
 
 Le mur d'indisponibilité d'Apple Intelligence disparaît de la maquette : il n'y a plus qu'un bouton, qui peut être
 absent ou inerte. Sur un appareil qui ne peut pas faire tourner le modèle, l'écran reste entièrement utilisable.
+
+
+### Passe du 2026-08-20 (issue 0036) — les cinq états jamais dessinés
+
+Cinq états de la surface de tri n'existaient dans aucune maquette, dont deux qui **sont** la sensation de la
+fonctionnalité : le rang pendant qu'on le glisse, et la section sous le doigt. Ils sont dessinés à côté des trois
+frames existants, dans la même section `Ranger mes livres` (`97:3755`).
+
+**Rien de tout ceci n'existe dans le code** — comme le reste du tri manuel, c'est une proposition de design. La spec
+fonctionnelle reste [docs/prd/0008-manual-shelf-sorting.md](../prd/0008-manual-shelf-sorting.md).
+
+#### Les frames
+
+| Frame | id | Mode | Ce qu'il tranche |
+|---|---|---|---|
+| `Tri manuel · Synchronisation · Light` | `134:3832` | Clair | L'aller-retour serveur d'ouverture **bloque tout l'écran**. Viewport 393 × 852 (et non un canevas : il n'y a rien à faire défiler), `Syncing Placeholder` sur toute la zone de contenu, et **le « + » de la barre de navigation est absent** tant que l'instantané n'existe pas |
+| `Tri manuel · Synchronisation · Dark` | `134:3899` | Sombre | idem |
+| `Tri manuel · Glissement · Light` | `135:3934` | Clair | Le rang soulevé, le trou qu'il laisse, et la section remplie survolée comme cible |
+| `Tri manuel · Glissement · Dark` | `136:4110` | Sombre | idem |
+| `Tri manuel · Dépôt sur étagère vide · Light` | `137:4286` | Clair | Le même geste au-dessus d'une étagère créée à la volée, **encore vide** : son encart porte une note, donc une hauteur à viser |
+| `Tri manuel · Tout rangé · Light` | `139:4469` | Clair | « À ranger » vide : **la section reste**, une note à la place des rangs, compte à « 0 livre » |
+| `Tri manuel · Tout rangé · Dark` | `140:4652` | Sombre | idem |
+| `Tri manuel · Échec partiel · Light` | `142:4835` | Clair | Le rapport en **trois** parties, plus une marque par étagère : posée, échec, en attente, rien |
+| `Tri manuel · Échec partiel · Dark` | `143:5022` | Sombre | idem |
+
+`Dépôt sur étagère vide` n'a **pas** de jumeau sombre, et c'est délibéré : la teinte de survol et l'ombre du rang
+soulevé sont déjà prouvées par le couple `Glissement`, ce frame n'ajoute qu'une variante de cible. Même raisonnement
+que `C1b` / `C2b` de la passe onboarding.
+
+Le panneau `Spec · Tri manuel` (`117:3526`) est étendu de six blocs — les cinq états, la décision sur « À ranger »
+vide, le vocabulaire des marques, les trois parties du rapport, et trois points à trancher. Sa liste « états non
+maquettés » a été réécrite au lieu d'être laissée périmée.
+
+#### Le rang soulevé, et le trou
+
+Le rang quitte le flux de la liste et se pose **en absolu sur le frame**, entre le contenu et le chrome : il prend
+`background/default`, `radius/medium`, l'ombre `Shadow/Pressed`, et se décale de 10 pt vers la droite. Sa place
+devient un conteneur nommé `emplacement libéré / <titre>`, à la hauteur exacte du rang, rempli en
+`background/disable`.
+
+**Le compte de l'en-tête ne bouge pas.** Rien n'est déposé tant que le doigt n'a pas lâché ; un compte qui changerait
+en vol mentirait sur ce qui est acquis.
+
+L'ombre **réutilise `Shadow/Pressed`** (0, 2, flou 8) faute d'ombre de lévitation dans le système. Le raccourci se
+défend — un glissement commence par un appui — et surtout : aucun symbole Swift ne porte d'élévation de ce genre, donc
+inventer un style d'effet ici aurait été inventer un token que le code ne réclame pas. À revoir le jour où il le
+réclamera.
+
+#### La cible de dépôt
+
+La section survolée passe **entière** en `background/tinted`, filets haut et bas en `border/tinted`, en-tête compris :
+c'est la **section** qui reçoit, pas une ligne. Le dépôt entre dans une étagère, jamais entre deux rangs — l'ordre à
+l'intérieur d'une étagère n'existe pas dans le modèle, donc un emplacement d'insertion inter-rangs promettrait quelque
+chose que l'écriture ne sait pas tenir.
+
+Sur une **étagère vide**, l'encart n'est jamais réduit à rien : il porte une note « Cette étagère est encore vide.
+Déposez un livre ici pour la remplir. » Sans elle, une étagère neuve serait une cible de dépôt de 0 pt de haut.
+
+#### « À ranger » vide — la décision
+
+La PRD laissait le choix ouvert. **La section reste**, avec une note à la place des rangs et un compte à « 0 livre ».
+Trois raisons :
+
+1. c'est la seule cible qui **sort** un livre d'une étagère — la faire disparaître supprimerait la moitié de la
+   symétrie que la poignée promet sur tous les rangs ;
+2. le dernier dépôt ferait s'évanouir une section entière sous le doigt, exactement le saut que le retour de survol
+   existe pour éviter ;
+3. un compte à zéro est la seule **preuve** que le travail est fini ; une section absente ne prouve rien, elle
+   ressemble à un bug.
+
+Le prix, assumé : une section qui ne contient rien reste à l'écran.
+
+Détail du même frame : les livres rangés à la main gardent leur **genre masqué** une fois sur l'étagère. Ils étaient
+sans étagère faute de genre connu, et c'est le doigt qui les a classés — la colonne de genres se lit donc comme la
+trace de ce que le modèle a su faire.
+
+#### Le rapport d'échec partiel
+
+Trois parties, jamais deux, exactement comme `AutoSortApplyProgress.Result.stopped` :
+
+| Sortie | Copie de la maquette |
+|---|---|
+| Créée **et remplie** | « Créée et remplie : Romans classiques. » |
+| Créée **sans ses livres** | « Échec sur Science-fiction et fantasy : l'étagère a été créée, mais ses livres n'y sont pas encore. » |
+| **Jamais créée** | « Non traitée : Bandes dessinées. » |
+
+La deuxième ne se replie pas sur « non créée » : rien n'est annulé, donc l'étagère est peut-être là, vide, et
+l'utilisateur irait la chercher. Le sens vient de `AutoSortApplyReport.swift` ; **la forme, non** — les phrases sont
+écrites pour se lire au singulier comme au pluriel, la règle de pluriel devant venir du catalogue et non d'une
+ternaire dans l'interpolation (D38, délibérément non reproduite).
+
+Après l'arrêt, **les pastilles redisent la vérité toutes seules**, sans cas particulier : `Romans classiques` a atterri
+→ plus de pastille ; `Science-fiction et fantasy` existe désormais mais son contenu diffère encore → `Modifiée` ;
+`Bandes dessinées` n'a pas été touchée → `Modifiée`. La pile n'est pas vide, donc le primaire reste actif et le
+troisième bouton dit toujours « Annuler ». Rien à ajouter au règlement des boutons.
+
+#### Ajouts au système
+
+| Ajout | id / clé | Défaut | Pourquoi ce défaut |
+|---|---|---|---|
+| Glyphe `circle` dans `Icon` | `132:235` | — | La marque `pending`. Le cercle de `checkmark.circle`, sans la coche : géométrie et bindings identiques par construction |
+| Glyphe `exclamationmark.circle` dans `Icon` | `132:239` | — | La marque `failed`. Le même cercle + barre et point importés en SVG, `stroke` bindé à `foreground/default` comme les 17 autres |
+| `Mark glyph` sur `AutoSort / Shelf Header` | `Mark glyph#133:0` (`INSTANCE_SWAP`) | **`21:55` = `checkmark.circle`** | Le défaut est la marque que l'écran de résultat porte déjà : les six instances posées sur `Résultat · Light` / `· Dark` n'ont pas bougé |
+
+`Icon` (`21:60`) passe donc à **18 variantes**, et le nombre de composants reste à **29** — aucun composant nouveau,
+seulement deux variantes et une propriété.
+
+**Pourquoi une propriété `INSTANCE_SWAP` et pas un axe de variantes `Mark`.** Passer `AutoSort / Shelf Header` en
+`COMPONENT_SET` demande `combineAsVariants`, qui **réattribue les clés de propriété** — et le composant est déjà
+consommé par une dizaine d'instances sur quatre frames livrés. `addComponentProperty`, lui, ne renomme rien. La
+teinte de la marque se pose ensuite en override sur le `stroke` du vecteur (`foreground/tinted`, `foreground/disable`,
+`foreground/error`) : les glyphes du jeu sont dessinés **au trait**, poser un `fill` boucherait le cercle.
+
+Une étagère sur laquelle il n'y a **rien** à faire ne porte aucune marque — c'est `Poésie` sur le frame d'échec.
+Une coche veut dire que la création **et** l'écriture d'appartenance ont abouti : créée sans ses livres est un échec,
+pas un demi-succès.
+
+#### Audit de factorisation — les 9 frames
+
+**0 dessin brut** (aucun `VECTOR` / `RECTANGLE` / `ELLIPSE` / `LINE` / `TEXT` hors instance) · **0 fill ou stroke en
+dur** (toutes les peintures sont bindées, y compris les overrides) · **0 texte sans style** · **0 conteneur au nom par
+défaut** · **mode épinglé sur 9 frames sur 9**.
+
+| Frame | Instances | Conteneurs nommés |
+|---|---|---|
+| `Synchronisation · Light` / `· Dark` | 5 | 0 |
+| `Glissement · Light` / `· Dark` | 24 | 10 |
+| `Dépôt sur étagère vide · Light` | 26 | 11 |
+| `Tout rangé · Light` / `· Dark` | 26 | 9 |
+| `Échec partiel · Light` / `· Dark` | 28 | 8 |
+
+Les conteneurs `Frame 1` / `Frame 2` hérités du clone ont été renommés `contenu défilant` et `pied de liste` sur les
+neuf frames — un conteneur au nom par défaut n'est pas un conteneur nommé. Les frames sources (`115:3276`,
+`120:3636`, `126:3672`) portent encore les anciens noms ; ils n'ont pas été touchés, cette passe ajoute **à côté**.
+
+La section `Ranger mes livres` passe à 8754 × 3247 pour les contenir. Aucun chevauchement avec `Onboarding`
+(`73:2829`) ni avec les frames de premier niveau de la page.
+
+#### Ce que la construction a appris
+
+- **`setProperties` sur une propriété `INSTANCE_SWAP` renomme le nœud échangé.** Le `mark` devient `Icon`, et un
+  `findOne(n => n.name === 'mark')` posé juste après renvoie `null`. Retrouver le sous-nœud par sa **position**
+  (`header.children[0]`), pas par son nom, puis le renommer si on tient au nom.
+- **Un frame cloné ne se réajuste pas.** Ajouter une section à un conteneur en auto-layout allonge le contenu mais
+  pas le canevas : la barre d'onglets se retrouve **au milieu** de la liste. Recalculer `tab.y`, `home.y` et la
+  hauteur du frame après chaque insertion.
+- **Un rang soulevé doit sortir du flux**, donc quitter le conteneur en auto-layout pour se poser en absolu sur le
+  frame — mais **avant** le chrome dans l'ordre des enfants, sinon il passe par-dessus la barre de navigation
+  translucide.
+- Une variante ajoutée à `Icon` atterrit à (0, 0) si on ne lui donne pas sa case ; `line.3.horizontal` y était depuis
+  la passe précédente, superposée à `book` (D40).

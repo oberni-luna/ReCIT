@@ -12,7 +12,10 @@
 //  background. Here the confirmation *is* the feature: in a batch rhythm an optimistic add
 //  that failed would be discovered twenty books later, with no way to tell which ones landed.
 //  So the loader spins until the item exists on inventaire, and only then does the row
-//  confirm and clear. See PRD 0005.
+//  confirm and clear. That is also what makes the session's tally trustworthy: the machine only
+//  ever counts a book the server has acknowledged.
+//
+//  See PRD 0005 and PRD 0007.
 //
 
 import Foundation
@@ -48,6 +51,13 @@ final class BatchScanViewModel {
 
     var state: BatchScanState {
         machine.state
+    }
+
+    /// How many books this session has filed, straight from the machine. No counter of its own:
+    /// the machine is the only type that knows which add events were real, and a second tally
+    /// kept here would be free to disagree with it.
+    var addedBookCount: Int {
+        machine.addedBookCount
     }
 
     // MARK: - Camera
@@ -173,6 +183,24 @@ final class BatchScanViewModel {
         addTask?.cancel()
         noticeTask?.cancel()
         machine.apply(.cleared)
+    }
+
+    // MARK: - Ending the session
+
+    /// How many étagères the user owns — the other half of the bilan's condition, and the only
+    /// thing about them this flow asks.
+    ///
+    /// Fetched rather than queried, unlike everywhere else. A `@Query` would hold every étagère
+    /// in the store for as long as the camera is up, and re-render the feed whenever one changed,
+    /// to answer a question asked exactly once: at the moment the session ends. Same shape as the
+    /// already-owned check further down, and for the same reason.
+    func ownedShelfCount(userModel: UserModel, modelContext: ModelContext) -> Int {
+        guard let ownerId = userModel.myUser?._id else { return 0 }
+
+        let descriptor: FetchDescriptor<Shelf> = .init(
+            predicate: #Predicate { $0.ownerId == ownerId }
+        )
+        return (try? modelContext.fetchCount(descriptor)) ?? 0
     }
 
     // MARK: - Private helpers

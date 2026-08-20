@@ -21,7 +21,13 @@
 //     counts as handled just as much as a filed book does, which is why the gate closes when
 //     the code is *accepted* rather than when it is added.
 //
-//  See PRD 0005.
+//  It also keeps the session's tally, which is what the bilan at the end of a session reports.
+//  The count belongs here rather than to the view model because this is the one type that
+//  already knows which add events are real: no snapshot of the store can tell three books added
+//  from three hundred already there, and a counter kept alongside the machine would be free to
+//  drift from what the machine actually accepted.
+//
+//  See PRD 0005 and PRD 0007.
 //
 
 import Foundation
@@ -33,6 +39,12 @@ struct BatchScanStateMachine {
     static let defaultCooldown: TimeInterval = 2
 
     private(set) var state: BatchScanState = .idle
+
+    /// How many books this session has filed. Only a completed add counts: a lookup that
+    /// failed, a book already owned, a barcode the gate refused and an add the server rejected
+    /// all leave it where it was, so the number the bilan reports is the number of books that
+    /// genuinely landed. It is never reset — a machine's lifetime *is* the session's.
+    private(set) var addedBookCount: Int = 0
 
     /// The code most recently accepted, and when it was last seen in frame. One slot: a
     /// different code taking it is exactly what "ignored until a different code is seen" means.
@@ -87,6 +99,9 @@ struct BatchScanStateMachine {
         case .addFinished:
             guard case .adding(let book) = state else { return false }
             state = .added(book: book)
+            // The one place the tally moves. The add waits for the server, so this event only
+            // ever arrives for a book inventaire has acknowledged.
+            addedBookCount += 1
             return true
 
         case .addFailed:

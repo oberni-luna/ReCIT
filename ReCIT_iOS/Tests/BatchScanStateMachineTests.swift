@@ -375,6 +375,117 @@ struct BatchScanStateMachineTests {
         #expect(machine.state == .added(book: scanned))
     }
 
+    // MARK: - The session's tally
+
+    /// The count is the bilan's whole claim, and the only number in the feature no query can
+    /// re-derive. It is asserted here rather than at the screen because this is the type that
+    /// decides which adds were real.
+    @Test("A session that has filed nothing counts nothing")
+    func tallyStartsAtZero() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        #expect(machine.addedBookCount == 0)
+
+        // Scanned and offered is not filed.
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupResolved(book(firstCode)))
+        #expect(machine.addedBookCount == 0)
+    }
+
+    @Test("Each filed book counts once, and the tally survives the row clearing")
+    func tallyCountsFiledBooks() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        fileOneBook(firstCode, in: &machine)
+        #expect(machine.addedBookCount == 1)
+
+        // Cleared, and the next book offered: the row starting again must not take the tally
+        // with it, or a session of twenty books would report the last one.
+        clock.advance(by: 0.2)
+        machine.apply(.codeSeen(secondCode))
+        #expect(machine.addedBookCount == 1)
+
+        machine.apply(.lookupResolved(book(secondCode)))
+        machine.apply(.addStarted)
+        machine.apply(.addFinished)
+        #expect(machine.addedBookCount == 2)
+
+        machine.apply(.cleared)
+        #expect(machine.addedBookCount == 2)
+    }
+
+    @Test("A failed add does not count, and the retry that lands does")
+    func failedAddDoesNotCount() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupResolved(book(firstCode)))
+        machine.apply(.addStarted)
+        machine.apply(.addFailed)
+        #expect(machine.addedBookCount == 0)
+
+        // The user taps again and the server takes it this time.
+        machine.apply(.addStarted)
+        machine.apply(.addFinished)
+        #expect(machine.addedBookCount == 1)
+    }
+
+    @Test("An outcome the user cannot act on does not count")
+    func unactionableOutcomesDoNotCount() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupFailed(code: firstCode))
+        machine.apply(.cleared)
+
+        clock.advance(by: cooldown + 1)
+        machine.apply(.codeSeen(secondCode))
+        machine.apply(.lookupResolvedAlreadyOwned(book(secondCode)))
+        machine.apply(.cleared)
+
+        #expect(machine.addedBookCount == 0)
+    }
+
+    /// The repeat gate is what stops a book still in frame being offered again; it must also stop
+    /// it being *counted* again, or a book held up for a few seconds would inflate the tally on
+    /// its own.
+    @Test("A barcode the repeat gate refuses does not count")
+    func gatedBarcodeDoesNotCount() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        fileOneBook(firstCode, in: &machine)
+        #expect(machine.addedBookCount == 1)
+
+        // Still in front of the lens, frame after frame. Nothing is accepted, so there is
+        // nothing to file and nothing to count.
+        for _ in 0..<10 {
+            clock.advance(by: cooldown * 0.5)
+            machine.apply(.codeSeen(firstCode))
+            machine.apply(.addStarted)
+            machine.apply(.addFinished)
+        }
+
+        #expect(machine.addedBookCount == 1)
+    }
+
+    @Test("An add event arriving out of order counts nothing")
+    func outOfOrderAddDoesNotCount() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.addFinished)
+        #expect(machine.addedBookCount == 0)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.addFinished)
+        #expect(machine.addedBookCount == 0)
+    }
+
     // MARK: - Out-of-order events
 
     @Test("Outcomes that do not match the current state are ignored")

@@ -9,10 +9,11 @@
 //  empty shelf's note come to disagree about whether the inventory is empty.
 //
 //  A namespace of decisions rather than a value built from one snapshot of state, and
-//  deliberately so: the bilan's decision (PRD 0007's second screen) needs inputs this one has
-//  no use for — what a scanning session just added, how many étagères the user owns — and
-//  arrives here as a second static method beside this one. A struct holding today's inputs
-//  would have to be rebuilt at every call site to take tomorrow's.
+//  deliberately so: the two decisions do not share a single input. The bilan's needs what a
+//  scanning session just added and how many étagères the user owns, neither of which the
+//  accueil's has any use for, and it waits on no sync — so it sits beside the accueil's as a
+//  second static method rather than inside a struct that would have to be rebuilt at every call
+//  site to carry both.
 //
 //  See PRD 0007.
 //
@@ -43,5 +44,31 @@ enum OnboardingGate {
         guard ownedBookCount == 0 else { return false }
 
         return !welcomeAnswered
+    }
+
+    /// Whether the bilan should be presented at the end of a scanning session.
+    ///
+    /// It waits on no sync, unlike the accueil: both of its inputs are facts about a session
+    /// that has just run in front of the user, and the étagère count is only ever read once
+    /// that session is over.
+    ///
+    /// Nothing here is persisted. "Has already arranged their books" is *derived* from owning
+    /// an étagère, which is exactly the state the whole sequence exists to produce — so a user
+    /// who created one by hand also stops being offered the arrangement. Accepted: they have
+    /// shown they know what an étagère is, and a persisted flag would instead have to be kept
+    /// in step with a fact the store already holds.
+    ///
+    /// - Parameters:
+    ///   - sessionAddedBookCount: how many books the session that is ending filed. Carried out
+    ///     of the scanner because no query can derive it: three books added among three hundred
+    ///     are invisible in any snapshot of the store.
+    ///   - ownedShelfCount: how many étagères the user owns.
+    static func presentsScanTally(
+        sessionAddedBookCount: Int,
+        ownedShelfCount: Int
+    ) -> Bool {
+        guard sessionAddedBookCount > 0 else { return false }
+
+        return ownedShelfCount == 0
     }
 }

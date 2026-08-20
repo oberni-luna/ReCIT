@@ -12,6 +12,9 @@
 //  One action. Offering three doors on a first launch makes the user choose before they know what
 //  any of them lead to, and the other two exist in the app anyway for whoever goes looking.
 //
+//  Nothing but copy is its own: the plank, the geometry and the pair of answers are
+//  `OnboardingScreenLayout`'s, shared with the bilan at the other end of the sequence.
+//
 //  The screen makes no network call and has no state of its own: whichever button is pressed, the
 //  accueil is answered and gone. Which of the two also opens the scanner is the cover's business,
 //  not this view's — see `OnboardingWelcomeModifier`.
@@ -25,41 +28,19 @@ struct OnboardingWelcomeView: View {
     let onScan: () -> Void
     let onLater: () -> Void
 
-    /// The illustration's share of the screen's width — the shelf card's own 86%, so the plank
-    /// stands where the first étagère will.
-    private let illustrationWidthShare: Int = 86
-
     var body: some View {
-        VStack(spacing: .large) {
-            Spacer()
-
+        OnboardingScreenLayout(
+            title: Text("onboarding.welcome.title"),
+            message: Text("onboarding.welcome.body")
+        ) {
             OnboardingPlankView()
-                .containerRelativeFrame(
-                    .horizontal,
-                    count: 100,
-                    span: illustrationWidthShare,
-                    spacing: .zero
-                )
-
-            VStack(spacing: .medium) {
-                Text("onboarding.welcome.title")
-                    .textStyle(.title200)
-                    .foregroundStyle(.foregroundDefault)
-
-                Text("onboarding.welcome.body")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundSecondary)
-            }
-            .multilineTextAlignment(.center)
-
-            Spacer()
-
-            OnboardingWelcomeActions(onScan: onScan, onLater: onLater)
+        } actions: {
+            OnboardingActions(
+                primaryTitle: "onboarding.welcome.scan",
+                onPrimary: onScan,
+                onLater: onLater
+            )
         }
-        .padding(.horizontal, .medium)
-        .padding(.bottom, .large)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.backgroundDefault)
     }
 }
 

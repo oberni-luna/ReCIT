@@ -2,13 +2,16 @@
 //  OnboardingPlankView.swift
 //  ReCIT_iOS
 //
-//  The accueil's illustration: the shelf the rest of the app paints — wash and plank, the same
+//  Onboarding's illustration: the shelf the rest of the app paints — wash and plank, the same
 //  two assets — carrying nothing at all.
 //
-//  Bare on purpose. The inventory is empty by construction when this screen appears, so invented
-//  spines would put an étagère on screen that resembles data the user does not have, in the one
-//  screen whose whole point is that they do not have it yet. The accueil promises with words; the
-//  bilan is what pays, with the user's own covers.
+//  Bare on purpose on the accueil. The inventory is empty by construction when that screen
+//  appears, so invented spines would put an étagère on screen that resembles data the user does
+//  not have, in the one screen whose whole point is that they do not have it yet. The accueil
+//  promises with words; the bilan is what pays, with the user's own covers.
+//
+//  The bilan borrows it bare for now, which is the one thing that is provisional here: those
+//  covers, and the way they settle onto the plank one by one, arrive with their own slice.
 //
 //  It borrows `ShelfEmptyStateView`'s composition rather than its type: that view is a card in the
 //  bookshelf, sized by the carousel and carrying a paper note, and neither belongs here. What is

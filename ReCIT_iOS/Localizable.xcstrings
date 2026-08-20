@@ -1565,6 +1565,94 @@
     "Nouvelle étagère" : {
 
     },
+    "onboarding.later" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus tard"
+          }
+        }
+      }
+    },
+    "onboarding.tally.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They are not on any shelf yet. RECITs can sort them for you — everything happens on your phone, your library goes nowhere."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ils ne sont sur aucune étagère. RECITs peut les répartir pour vous — tout se passe sur votre téléphone, votre liste ne part nulle part."
+          }
+        }
+      }
+    },
+    "onboarding.tally.sort" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort my books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ranger mes livres"
+          }
+        }
+      }
+    },
+    "onboarding.tally.title %lld" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld book added"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld books added"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld livre ajouté"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld livres ajoutés"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "onboarding.welcome.body" : {
       "localizations" : {
         "en" : {
@@ -1577,22 +1665,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scannez les codes-barres à la chaîne : la caméra reste ouverte et les livres s'ajoutent l'un après l'autre."
-          }
-        }
-      }
-    },
-    "onboarding.welcome.later" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Later"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus tard"
           }
         }
       }

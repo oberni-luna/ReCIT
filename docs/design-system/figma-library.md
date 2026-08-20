@@ -504,7 +504,7 @@ retoucher un seul nœud.
 | `Tokens` | `0:1` | 6 sections, 9 planches de tokens |
 | `Components` | `20:2` | Les 3 composants qui **miroitent le package** design system |
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
-| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification |
+| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification, puis les sections `Onboarding` (`73:2829`) et `Ranger mes livres` (`97:3755`) |
 
 La séparation entre `Components` et `Screens · Components` est intentionnelle : `Components` ne contient que ce qui
 existe dans `DesignSystem/` côté Swift (les deux `ButtonStyle`, le `LabelStyle` de tag). Tout le reste — le chrome iOS
@@ -687,6 +687,13 @@ Dernier résultat (2026-08-18) : 0 dessin brut, 0 fill en dur, 0 texte sans styl
 description, 0 variable en `ALL_SCOPES`. 4 pages, 92 variables, 10 styles de texte, 6 styles d'effet,
 **26 composants**, **16 frames d'écran**, 8 panneaux.
 
+Mise à jour du 2026-08-20 (passes « Résultat » puis « Tri manuel ») : **29 composants** sur `Screens · Components`
+(+`Bottom Action Bar`, et `Icon` passe à 16 variantes avec `line.3.horizontal`). Avant le tri manuel : **28 composants**
+(+3 : `AutoSort / Shelf Header`, `AutoSort / Book Row`, `AutoSort / Note` ; `Chrome / Nav Bar` gagne une variante,
+pas un composant), 3 sur `Components`. Écrans : les 16 frames répliqués, plus les frames d'exploration de la section
+`Onboarding` et les 2 frames de la section `Ranger mes livres`. La passe onboarding du même jour n'avait pas rejoué
+les compteurs.
+
 ## Écrans morts relevés dans le code
 
 Aucune transition n'y mène ; seule leur propre `#Preview` les référence. **Candidats à la suppression.**
@@ -732,6 +739,9 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D34 | `Shelf Card`, variante `Paint=Placeholder` (`34:210`) | **Divergence côté Figma.** La passe 0012 n'a corrigé que ce qu'elle touchait : la variante reste périmée face au code livré. Sa `name row` n'a **aucun fill**, donc la pastille de papier ne s'y dessine pas, et elle affiche encore un **crayon** là où le code n'a plus qu'un chevron — le crayon a quitté la carte pour la barre de navigation du détail (issue 0008) | ouverte — demande une passe de design, pas une correction de code |
 | D35 | `Section Header` (`28:164`) vs `ShelfSectionHeader.swift` | Le composant Figma n'a ni action de fin de ligne ni variante pour en porter une, alors que l'en-tête « Étagères » a gagné un bouton **Ajouter** teinté (issue 0010). Le composant décrit donc un en-tête que l'écran Étagères n'utilise plus tel quel | ouverte — passe de design |
 | D36 | `Features/Shelves/ShelfLabelView.swift:43` | Le chevron du label est peint en `.foregroundSecondary` — un rôle qui **s'inverse** en sombre — et dimensionné par `.font(.footnote)` système, sur un papier délibérément mode-indépendant (`shelf/label/ink` / `shelf/label/paper`). En sombre, le chevron passe donc de `gray/600` à `gray/400` sur un papier resté blanc : le contraste baisse au lieu d'être stable, et c'est le seul élément du label à ne pas suivre la règle du reste | ouverte — relevée en documentant l'issue 0013 |
+| D37 | `Features/AutoSort/*` | Toute la feature est en **littéraux français** : « Ranger mes livres », « Créer ces étagères », « Terminer », « Relancer le rangement »… entrent dans `Localizable.xcstrings` comme **clés**, sans aucune localisation — la langue source étant l'anglais, un anglophone lit du français. Même défaut que D20 pour Étagères. Seul `action.open_settings`, dans `AutoSortUnavailableView`, est une vraie clé traduite | ouverte |
+| D38 | `Features/AutoSort/AutoSortApplyReport.swift` | Les pluriels sont concaténés dans l'interpolation (`"étagère\(n > 1 ? "s ont" : " a")"`). Ces phrases ne peuvent pas entrer au catalogue du tout, et la règle de pluriel devient du code au lieu d'être une donnée de traduction | ouverte |
+| D39 | `C3 · Rangement proposé` (`80:2708`) | **Divergence côté Figma.** Le frame d'onboarding est périmé face au code livré : il affiche un résumé « 5 étagères pour 24 livres » que le code n'a pas, un CTA « Créer les 5 étagères » là où le code dit « Créer ces étagères », aucun bouton **Annuler**, et des rangs `Cell / List` au lieu des livres de chaque étagère (le code liste les livres, précisément pour qu'un mauvais classement se voie) | ouverte — passe de design |
 
 Rappel de la passe tokens : **D6 reste la priorité** — `OpenSans-SemiBold` et `OpenSans-Regular` ne s'enregistrent
 pas au lancement, donc `action200`, `action300` et `caption200` retombent sur la police système sur l'appareil.
@@ -780,3 +790,228 @@ frames de B `76:2265` `76:2277` `80:2690`.
   de chrome en `Theme=Dark`. Tout le reste suit, parce que tout est bindé.
 - Le glyphe `xmark` n'existe pas dans `Icon` (`21:60`). Sans objet pour C, mais c'est ce qui a privé le bandeau de B
   d'une croix de fermeture.
+
+
+---
+
+# Ranger mes livres — résultat (passe du 2026-08-20, `extract-screens`)
+
+Section `Ranger mes livres` (`97:3755`) sur la page `Screens`. **Une réplication**, pas une exploration : ces deux
+frames miroitent `Features/AutoSort/AutoSortPlanView.swift` dans sa phase `.applied`, résultat `allLanded` — la même
+liste que la revue, marques cochées, rapport au pied. Le code n'a pas d'écran de progression séparé : c'est ce qui
+fait qu'un échec partiel s'explique tout seul.
+
+## Table des écrans
+
+| Écran | Clair | Sombre | Panneau | Source Swift |
+|---|---|---|---|---|
+| **Ranger mes livres · Résultat** | `103:3008` | `105:3107` | `108:3181` | `AutoSort/AutoSortPlanView.swift` + `AutoSortBookRow.swift` + `AutoSortShelfMark.swift` + `AutoSortApplyReport.swift` |
+
+Audit de factorisation : **0 dessin brut**, 0 texte sans style, 25 instances par frame, mode épinglé sur chacun.
+Les quatre `▢` de tête sont des conteneurs assumés (`list group / …`), un par `Section` encartée.
+
+## Composants ajoutés — `Screens · Components`
+
+| Composant | node id | Variantes | Propriétés | Source Swift |
+|---|---|---|---|---|
+| `AutoSort / Shelf Header` | `100:228` | — | `Name#100:0`, `Count#100:1` | le `header:` du `Section` par étagère dans `AutoSortPlanView.planList` |
+| `AutoSort / Book Row` | `100:235` | — | `Title#100:2`, `Authors#100:3`, `Show authors#100:4`, `Genre#100:5`, `Show genre#100:6` | `AutoSort/AutoSortBookRow.swift` |
+| `AutoSort / Note` | `101:236` | Style ∈ {Content, Footnote} × Tone ∈ {Default, Secondary} | `Body#101:0` | les `Section { Text }` isolées : rapport, reste sans étagère, propositions écartées |
+
+`AutoSort / Book Row` est délibérément **distinct de `Cell / Book`** : rien n'est encore rangé, donc ni état de
+transaction, ni disponibilité, ni navigation. Le genre y est en `foreground/tinted` parce qu'il est la **raison** du
+classement — c'est ce qui permet de dire si c'est le genre ou la correspondance qui a fauté.
+
+`AutoSort / Shelf Header` ne porte **que la marque `landed`**. Les trois autres `ShelfOutcome` manquent, et pas par
+oubli : `applying` est un spinner (non maquetté, convention du fichier) et `pending` / `failed` demandent deux
+glyphes que `Icon` (`21:60`) n'a pas — `circle` et `exclamationmark.circle.fill`. Les ajouter d'abord, puis passer ce
+composant en axe de variantes `Mark`. La marque `landed` elle-même approxime `checkmark.circle.fill` par
+`checkmark.circle`, la seule version que le jeu porte.
+
+## Variante ajoutée à un composant existant
+
+`Chrome / Nav Bar` (`26:162`) gagne **`Style = Inline + Back + Text action`** (`102:224` clair, `102:235` sombre) et
+la propriété **`Action label#102:6`**. C'est la forme d'un `ToolbarItem(placement: .primaryAction) { Button("Terminer") }` :
+une action de fin de ligne en **texte** teinté, pas un glyphe. Le titre y est réduit à 197 pt (x = 98, centré sur le
+frame) pour ne pas passer sous le libellé. Les trois anciens `Style` et leurs clés de propriété sont inchangés — les
+instances déjà posées sur les 16 frames n'ont pas bougé.
+
+## Recette de composition
+
+Fond `background/secondary` (`.applyListBackground()`), puis, en absolu : en-tête d'étagère (31) · `list group` de 361
+à `radius/medium` contenant les `AutoSort / Book Row` (87) séparés par `Separator` · gap de 12 entre l'encart et
+l'en-tête suivant, de 20 entre deux encarts · notes encartées (47 sur une ligne, 70 sur deux) · chrome posé **en
+dernier**. Barre d'onglets sur `Inventaire` — l'entrée par la carte d'étagère vide ; l'écran est aussi atteignable
+depuis Réglages.
+
+Une `Section` de List encartée est un **encart** : la note du rapport est donc dans un `list group`, pas posée nue.
+Un `footer:` de section, lui, se dessine nu — c'est le cas du « Rien n'a encore été créé… » de l'état proposition.
+
+## Ce qui n'est pas maquetté
+
+| Absent | Pourquoi |
+|---|---|
+| `.applying` | Spinners et états transitoires, non maquettés par convention du fichier |
+| Le rapport partiel (`stopped`) | Demande les marques `pending` et `failed`, donc deux glyphes à ajouter à `Icon` d'abord |
+| `.failed` (« Le rangement n'a pas pu être proposé ») et le mur d'indisponibilité | Hors du périmètre demandé ; `AutoSortUnavailableView` a trois messages, un par raison |
+| La section « propositions écartées » | N'apparaît que si le validateur a rejeté une correspondance |
+| L'état `plan.isEmpty` | Une seule phrase, portée par `AutoSort / Note` Content/Secondary — à poser le jour où il est utile |
+
+Les couvertures des huit vignettes sont **la même image** que les écrans voisins, posée en override d'instance : un
+seul visuel pour tous les livres, ce n'est pas une donnée.
+
+## Ce que la construction a appris
+
+- **Les glyphes d'`Icon` sont dessinés au trait, pas au remplissage.** Leurs vecteurs portent un `stroke` bindé à
+  `foreground/default` et **aucun fill**. Teinter une icône veut donc dire remplacer le `stroke` ; poser un `fill`
+  bouche le cercle et fait disparaître la coche — ce qui ne se voit qu'à la capture.
+- **`clone()` d'une variante perd ses `componentPropertyReferences`** en entrant dans le `COMPONENT_SET`. La
+  propriété existait, l'instance la portait à la bonne valeur, et le texte affichait quand même l'ancien libellé. Il
+  faut réattribuer `{ characters: 'Title#26:18' }` à la main après le `appendChild`.
+- En revanche, `set.addComponentProperty` **ne renomme pas** les clés existantes : ajouter une variante et une
+  propriété à un composant déjà consommé par 16 frames est sûr. C'est `combineAsVariants` qui réattribue, pas
+  `appendChild`.
+- Une peinture bindée **suit bien le mode épinglé à travers une instance**, y compris sur un `stroke` d'icône : le
+  clone sombre a résolu `foreground/tinted` en `green/200` sans retouche. Le piège 4 ne concerne que les overrides
+  posés avec une base littérale incohérente.
+
+
+## Tri manuel — proposition (2026-08-20)
+
+Dérivé de l'écran de résultat, dans la même section. **Rien de tout ceci n'existe dans le code** : c'est une
+proposition de design, pas une réplication. La liste cesse d'être une revue et devient une surface de travail —
+on range à la main, sans modèle.
+
+| Frame | id |
+|---|---|
+| `Tri manuel · Light` | `115:3276` |
+| `Tri manuel · Dark` | `120:3636` |
+| `Tri manuel · Appliqué · Light` | `126:3672` |
+| `Spec · Tri manuel` | `117:3526` |
+
+**Spec fonctionnelle : [docs/prd/0008-manual-shelf-sorting.md](../prd/0008-manual-shelf-sorting.md)** — le modèle de
+diff, les états, les cas limites et les questions ouvertes vivent là, pas ici.
+
+Ce que la proposition ajoute à l'écran de résultat :
+
+- une section **« À ranger »** qui se comporte comme une étagère mais n'en est pas une — en dernier, sans marque,
+  et le tas se vide vers le haut au fil du rangement ;
+- une **poignée de déplacement** à droite de chaque rang, « À ranger » compris : le glissement est symétrique, on
+  sort un livre d'une étagère aussi bien qu'on l'y met ;
+- un **« + »** dans la barre de navigation pour créer une étagère à la volée ;
+- **« Terminer »** en **barre épinglée** au bas de l'écran, à la place qu'il occupait dans la barre de navigation.
+
+Le genre est masqué dans « À ranger » : ces livres sont sans étagère faute de genre connu, l'afficher vide dirait
+deux fois la même chose.
+
+### Ajouts au système
+
+| Ajout | node id | Défaut | Pourquoi ce défaut |
+|---|---|---|---|
+| Glyphe `line.3.horizontal` dans `Icon` | `112:232` | — | La poignée de déplacement. 16e variante du jeu |
+| `Show handle` sur `AutoSort / Book Row` | `Show handle#113:0` | **false** | Les frames de résultat miroitent le code livré, qui n'a pas de glisser-déposer |
+| `Show mark` sur `AutoSort / Shelf Header` | `Show mark#113:1` | **true** | L'écran de résultat porte la marque ; le tri manuel l'éteint partout |
+| `Bottom Action Bar` | `114:231` | — | Barre d'action épinglée : `background/default`, filet `border/default` en haut, `Button / Large` Primary en pleine largeur. 393 × 83, se pose à y = 686 |
+
+Les deux booléens sont **défaut-neutres par construction** : ajoutés avec le défaut qui laisse les six instances
+déjà posées sur `Résultat · Light` / `· Dark` exactement comme elles étaient. Vérifié à la capture, pas seulement au
+raisonnement.
+
+### Décisions de design, et leur revers
+
+- **« Terminer » quitte la List.** `AutoSortPlanView` garde délibérément son action *dans* la liste pour que les
+  marques restent le récit principal. Ici il n'y a plus de marques, la liste se réordonne à chaque geste, et une
+  action posée au pied s'éloigne à mesure qu'on travaille. D'où la barre épinglée — et le revers assumé : deux
+  barres empilées au bas de l'écran, 166 pt de chrome.
+- **Le « + » prend la place de « Terminer »** dans la barre de navigation. Les deux ne coexistent jamais : c'est ce
+  qui rend le déplacement nécessaire plutôt que cosmétique.
+- **Le contenu défile sous la barre d'action, jamais sous la barre de navigation.** Le composant de nav est
+  translucide : la première composition faisait passer une carte dessous et le rang fantômait derrière le titre.
+
+### À trancher avant de coder
+
+- **`onMove` ne traverse pas les sections d'une `List`.** Un glisser-déposer d'une étagère à une autre impose
+  `.draggable` / `.dropDestination` avec un transfert typé, pas un mode édition. C'est la contrainte qui décide de
+  la faisabilité, et elle n'est pas visible dans la maquette.
+- Même écran que le résultat d'auto-sort une fois le rangement appliqué (les marques s'éteignent, les poignées
+  s'allument), ou écran distinct atteignable sans avoir rien lancé ? Et dans le premier cas, que devient le rapport
+  « 2 étagères ont été créées et remplies » ?
+- Une écriture par dépôt, ou une seule à « Terminer » ? La première suit l'optimisme de l'ADR 0001 ; la seconde fait
+  de « Terminer » une vraie validation, et impose de savoir ce qu'un abandon annule.
+
+### Non maquetté
+
+Le rang en cours de glissement (soulevé, ombre, emplacement d'accueil) · la section survolée comme cible de dépôt ·
+la feuille de création derrière le « + » · « À ranger » vide, où la section devrait disparaître · l'inventaire
+entièrement rangé.
+
+
+### Passe du 2026-08-20 (soir) — étagères existantes et indicateur d'état
+
+Deux changements de fond après relecture, dont un venu de l'utilisateur directement dans le fichier.
+
+**Ce que l'utilisateur a changé dans la maquette** — repris tel quel, c'est son arbitrage :
+
+- le frame devient un **canevas de défilement** de 393 × 1540 (et non un viewport de 852) : tout le contenu est
+  visible d'un coup, la tab bar est calée en bas du canevas ;
+- le contenu passe dans un conteneur **auto-layout vertical, gap 14, enfants centrés** — d'où les encarts à 361 sans
+  `x` explicite. Une section s'insère maintenant par `insertChild`, sans recalculer un seul `y` ;
+- `Bottom Action Bar` (`114:231`) porte **deux** `Button / Large` — Primary « Créer ces étagères » puis Secondary
+  « Annuler » — et redescend **dans le flux** de la liste, au pied. La barre épinglée est abandonnée.
+
+**Ce que cette passe ajoute :**
+
+| Ajout | id / clé | Défaut |
+|---|---|---|
+| `Show tag` sur `AutoSort / Shelf Header` | `Show tag#119:0` | **false** |
+
+La pastille est une instance du `Tag` du design system (`23:23`), pas un badge nouveau. Trois états, posés en
+override sur l'instance :
+
+| État | Pastille |
+|---|---|
+| Étagère déjà sur le serveur, intacte | *aucune* |
+| Étagère à créer | « Nouvelle », `Color=Tinted` |
+| Étagère existante dont le contenu a bougé | « Modifiée », `Color=Secondary` |
+
+**C'est l'absence qui porte l'état normal** : le diff se lit sans rien compter. Les deux pastilles sont dérivées du
+diff au rendu — jamais stockées — donc une pastille ne peut pas mentir sur ce que fera le bouton, et sortir un livre
+puis le remettre l'éteint.
+
+La maquette montre désormais cinq sections : deux étagères `Nouvelle` issues d'un auto-sort, une existante marquée
+`Modifiée`, une existante sans pastille, puis « À ranger ». La note encartée n'est plus le rapport d'un rangement
+passé mais le **récapitulatif du diff à enregistrer**, en toutes lettres, juste au-dessus des boutons.
+
+Le frame sombre a été **reconstruit** depuis le clair (l'ancien `116:3430` est supprimé) : il avait divergé pendant
+les retouches. Reconstruire un jumeau sombre coûte un clone, un mode épinglé et quatre `Theme=Dark` — moins cher que
+de rejouer les modifications des deux côtés.
+
+
+### Passe du 2026-08-20 (fin) — trois boutons et l'état « appliqué »
+
+Après une session de grilling, l'écran change de nature : il n'y a plus un écran de revue et un écran de tri, mais
+**un seul écran** dont l'entrée est « état initial + changements IA optionnels » et dont l'état de travail est une
+**pile de changements**. L'IA devient un générateur de changements comme le doigt de l'utilisateur. L'architecture
+complète est dans [docs/prd/0008-manual-shelf-sorting.md](../prd/0008-manual-shelf-sorting.md) ; seules ses
+conséquences visuelles sont ici.
+
+`Bottom Action Bar` (`114:231`) porte maintenant **trois** `Button / Large` :
+
+| Bouton | Style | Rôle |
+|---|---|---|
+| « Proposer un rangement » | Secondary | Empile les changements de l'IA. **N'écrit rien** |
+| « Appliquer le rangement » | Primary | Exécute la pile |
+| « Annuler » / « Terminer » | Secondary | Voir la règle ci-dessous |
+
+**Le libellé du troisième bouton est dérivé de `changes.isEmpty`**, pas d'un drapeau collant :
+
+- pile non vide → primaire actif, troisième bouton **« Annuler »** (jette la pile) ;
+- pile vide → primaire **désactivé**, troisième bouton **« Terminer »** (ferme l'écran).
+
+Un apply réussi vide la pile, donc « Terminer » apparaît tout seul — et si l'utilisateur reprend le tri, il redevient
+« Annuler », ce qui est vrai. C'est ce que montre `Tri manuel · Appliqué · Light` (`126:3672`) : plus aucune pastille
+(rien n'est en attente), la note encartée passe du récapitulatif au rapport, le primaire est en `State=Disabled`, le
+troisième dit « Terminer ».
+
+Le mur d'indisponibilité d'Apple Intelligence disparaît de la maquette : il n'y a plus qu'un bouton, qui peut être
+absent ou inerte. Sur un appareil qui ne peut pas faire tourner le modèle, l'écran reste entièrement utilisable.

@@ -131,7 +131,7 @@ struct ProfileDebugSection: View {
                 entryPoint: autoSortEntryPoint,
                 onSort: {
                     isPresentingTally = false
-                    path.append(NavigationDestination.autoSort)
+                    path.append(NavigationDestination.manualSort)
                 },
                 onLater: { isPresentingTally = false }
             )

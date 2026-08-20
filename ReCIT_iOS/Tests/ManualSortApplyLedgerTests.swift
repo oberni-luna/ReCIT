@@ -5,13 +5,14 @@
 //  The apply ledger as the sorting surface uses it: one row per étagère the run writes
 //  to, identified by the section rather than by the name it happens to carry.
 //
-//  It earns its own suite beside `AutoSortApplyProgressTests` because the questions are
-//  not the same ones. That surface only ever creates étagères, and their names are
-//  canonicalised and deduplicated before the ledger sees them. This one writes to
-//  étagères the user already owns — whose names the server never promised to keep
-//  unique — and to drafts whose section id changes the moment they are created. A
-//  ledger that collapsed two rows, or lost one when a draft became real, would misreport
-//  what the user's library now contains, and nothing is rolled back to soften it.
+//  It earns its own suite beside `SortApplyLedgerTests` because the questions are not
+//  the same ones. That one asks the questions the retired auto-sort run asked, where a
+//  run only ever created étagères whose names had been canonicalised and deduplicated
+//  before the ledger saw them. This one writes to étagères the user already owns — whose
+//  names the server never promised to keep unique — and to drafts whose section id
+//  changes the moment they are created. A ledger that collapsed two rows, or lost one
+//  when a draft became real, would misreport what the user's library now contains, and
+//  nothing is rolled back to soften it.
 //
 //  Pure and store-free: a ledger is a value, and these are sentences about it.
 //
@@ -24,7 +25,7 @@ import Testing
 @Suite("ManualSortApplyLedger")
 struct ManualSortApplyLedgerTests {
 
-    private let entries: [AutoSortApplyProgress.Entry] = [
+    private let entries: [SortApplyLedger.Entry] = [
         .init(key: "shelf:s1", name: "Romans classiques"),
         .init(key: "draft:sf", name: "Science-fiction"),
         .init(key: "shelf:s3", name: "Bandes dessinées")
@@ -32,7 +33,7 @@ struct ManualSortApplyLedgerTests {
 
     @Test("A fresh ledger has every étagère still to write")
     func freshLedgerIsAllPending() {
-        let progress: AutoSortApplyProgress = .init(entries: entries)
+        let progress: SortApplyLedger = .init(entries: entries)
 
         #expect(progress.shelfNames == ["Romans classiques", "Science-fiction", "Bandes dessinées"])
         #expect(entries.allSatisfy { progress.outcome(for: $0.key) == .pending })
@@ -43,7 +44,7 @@ struct ManualSortApplyLedgerTests {
     /// thing, and each of them has to be able to succeed or fail on its own.
     @Test("Two étagères that share a name are two rows, and one can land without the other")
     func twoShelvesSharingANameStayApart() {
-        var progress: AutoSortApplyProgress = .init(
+        var progress: SortApplyLedger = .init(
             entries: [
                 .init(key: "shelf:s1", name: "Lectures"),
                 .init(key: "shelf:s2", name: "Lectures")
@@ -69,7 +70,7 @@ struct ManualSortApplyLedgerTests {
     /// user's carousel.
     @Test("An étagère created but not filled is reported as failed, not as never created")
     func createdButNotFilledIsAFailure() {
-        var progress: AutoSortApplyProgress = .init(entries: entries)
+        var progress: SortApplyLedger = .init(entries: entries)
 
         progress.mark(.landed, for: "shelf:s1")
         progress.mark(.applying, for: "draft:sf")
@@ -90,7 +91,7 @@ struct ManualSortApplyLedgerTests {
     /// reads « Science-fiction », never `draft:sf`.
     @Test("The account of a run names étagères the way the user does")
     func theAccountReadsInNames() {
-        var progress: AutoSortApplyProgress = .init(entries: entries)
+        var progress: SortApplyLedger = .init(entries: entries)
 
         for entry in entries {
             progress.mark(.landed, for: entry.key)
@@ -105,7 +106,7 @@ struct ManualSortApplyLedgerTests {
     /// zero étagères were saved.
     @Test("A run with nothing to write is finished, with nothing landed")
     func anEmptyRunIsFinishedAndEmpty() {
-        let progress: AutoSortApplyProgress = .init(entries: [])
+        let progress: SortApplyLedger = .init(entries: [])
 
         #expect(progress.result == .allLanded)
         #expect(progress.isFinished)
@@ -118,7 +119,7 @@ struct ManualSortApplyLedgerTests {
     /// a tick it has not earned.
     @Test("A run partway down the list has landed, applying and pending rows at once")
     func partwayThroughReadsThreeWays() {
-        var progress: AutoSortApplyProgress = .init(entries: entries)
+        var progress: SortApplyLedger = .init(entries: entries)
 
         progress.mark(.landed, for: "shelf:s1")
         progress.mark(.applying, for: "draft:sf")

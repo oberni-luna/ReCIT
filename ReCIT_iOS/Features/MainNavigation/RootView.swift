@@ -45,7 +45,6 @@ struct RootView: View {
         _autoSortModel = State(
             initialValue: AutoSortModel(
                 genreEnrichment: genreEnrichmentModel,
-                shelfModel: shelfModel,
                 errorReporter: errorReporter
             )
         )

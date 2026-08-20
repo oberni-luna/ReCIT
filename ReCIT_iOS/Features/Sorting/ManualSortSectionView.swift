@@ -36,7 +36,7 @@ struct ManualSortSectionView: View {
 
     /// How far the running apply has got with this étagère, or `nil` when there is no
     /// run or the run has nothing to do here.
-    let mark: AutoSortApplyProgress.ShelfOutcome?
+    let mark: SortApplyLedger.ShelfOutcome?
 
     let onDrop: ([SortBookTransfer]) -> Bool
     let onTargeted: (Bool, ManualSortDropTarget) -> Void

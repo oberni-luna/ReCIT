@@ -444,47 +444,6 @@
         }
       }
     },
-    "auto_sort.left_unshelved %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld book will stay off the shelves, for want of a known genre."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld books will stay off the shelves, for want of a known genre."
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livre restera sans étagère, faute de genre connu."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livres resteront sans étagère, faute de genre connu."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "book.other_editions %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1514,6 +1473,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun rangement n’a pu être proposé pour les livres qu’il reste à ranger."
+          }
+        }
+      }
+    },
+    "manual_sort.proposal.unavailable.device" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggestions rely on Apple Intelligence, which this device cannot run. Everything else on this screen works as usual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La proposition s’appuie sur Apple Intelligence, que cet appareil ne peut pas exécuter. Le reste de cet écran fonctionne normalement."
           }
         }
       }

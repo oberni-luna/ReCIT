@@ -747,11 +747,11 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D34 | `Shelf Card`, variante `Paint=Placeholder` (`34:210`) | **Divergence côté Figma.** La passe 0012 n'a corrigé que ce qu'elle touchait : la variante reste périmée face au code livré. Sa `name row` n'a **aucun fill**, donc la pastille de papier ne s'y dessine pas, et elle affiche encore un **crayon** là où le code n'a plus qu'un chevron — le crayon a quitté la carte pour la barre de navigation du détail (issue 0008) | ouverte — demande une passe de design, pas une correction de code |
 | D35 | `Section Header` (`28:164`) vs `ShelfSectionHeader.swift` | Le composant Figma n'a ni action de fin de ligne ni variante pour en porter une, alors que l'en-tête « Étagères » a gagné un bouton **Ajouter** teinté (issue 0010). Le composant décrit donc un en-tête que l'écran Étagères n'utilise plus tel quel | ouverte — passe de design |
 | D36 | `Features/Shelves/ShelfLabelView.swift:43` | Le chevron du label est peint en `.foregroundSecondary` — un rôle qui **s'inverse** en sombre — et dimensionné par `.font(.footnote)` système, sur un papier délibérément mode-indépendant (`shelf/label/ink` / `shelf/label/paper`). En sombre, le chevron passe donc de `gray/600` à `gray/400` sur un papier resté blanc : le contraste baisse au lieu d'être stable, et c'est le seul élément du label à ne pas suivre la règle du reste | ouverte — relevée en documentant l'issue 0013 |
-| D37 | `Features/AutoSort/*` | Toute la feature est en **littéraux français** : « Ranger mes livres », « Créer ces étagères », « Terminer », « Relancer le rangement »… entrent dans `Localizable.xcstrings` comme **clés**, sans aucune localisation — la langue source étant l'anglais, un anglophone lit du français. Même défaut que D20 pour Étagères. Seul `action.open_settings`, dans `AutoSortUnavailableView`, est une vraie clé traduite | ouverte |
-| D38 | `Features/AutoSort/AutoSortApplyReport.swift` | Les pluriels sont concaténés dans l'interpolation (`"étagère\(n > 1 ? "s ont" : " a")"`). Ces phrases ne peuvent pas entrer au catalogue du tout, et la règle de pluriel devient du code au lieu d'être une donnée de traduction | ouverte |
-| D39 | `C3 · Rangement proposé` (`80:2708`) | **Divergence côté Figma.** Le frame d'onboarding est périmé face au code livré : il affiche un résumé « 5 étagères pour 24 livres » que le code n'a pas, un CTA « Créer les 5 étagères » là où le code dit « Créer ces étagères », aucun bouton **Annuler**, et des rangs `Cell / List` au lieu des livres de chaque étagère (le code liste les livres, précisément pour qu'un mauvais classement se voie) | ouverte — passe de design |
+| D37 | `Features/AutoSort/*` | Toute la feature était en **littéraux français** : « Ranger mes livres », « Créer ces étagères », « Terminer », « Relancer le rangement »… entraient dans `Localizable.xcstrings` comme **clés**, sans aucune localisation — la langue source étant l'anglais, un anglophone lisait du français. Même défaut que D20 pour Étagères | **en grande partie résolue par suppression** — l'issue 0043 a supprimé `AutoSortPlanView`, `AutoSortApplyReport` et `AutoSortShelfMark`, qui portaient la quasi-totalité de ces littéraux, et déplacé `AutoSortBookRow` en `Features/Sorting/SortBookRow.swift` (il n'en portait aucun). **Reste ouverte pour le seul survivant**, `AutoSortUnavailableView`, dont les trois messages d'indisponibilité sont toujours des littéraux ; `action.open_settings` y est la seule vraie clé traduite. La surface de tri qui remplace l'écran écrit tout au catalogue |
+| D38 | `Features/AutoSort/AutoSortApplyReport.swift` | Les pluriels étaient concaténés dans l'interpolation (`"étagère\(n > 1 ? "s ont" : " a")"`). Ces phrases ne pouvaient pas entrer au catalogue du tout, et la règle de pluriel devenait du code au lieu d'être une donnée de traduction | **résolue par suppression** — le fichier a été supprimé par l'issue 0043. Son remplaçant, `Features/Sorting/ManualSortApplyReport.swift`, pluralise par substitution au catalogue (`manual_sort.report.*`) et documente explicitement qu'il ne reproduit pas ce défaut |
+| D39 | `C3 · Rangement proposé` (`80:2708`) | **Divergence côté Figma.** Le frame d'onboarding était déjà périmé face au code livré : résumé « 5 étagères pour 24 livres » que le code n'avait pas, CTA « Créer les 5 étagères » là où le code disait « Créer ces étagères », aucun bouton **Annuler**, rangs `Cell / List` au lieu des livres de chaque étagère | **aggravée** — l'issue 0043 a supprimé `AutoSortPlanView` : le frame ne décrit plus un écran périmé, il décrit un écran qui n'existe pas. Le CTA de C2 mène désormais à la surface de tri (`ManualSortView`), maquettée plus bas sous « Tri manuel ». Frame **conservé**, à remaquetter lors d'une passe de design — ne pas le supprimer |
 | D40 | `Icon` (`21:60`), variante `Glyph=line.3.horizontal` | **Divergence côté Figma.** La variante avait été posée à (0, 0), superposée à `Glyph=book` : les deux se chevauchaient dans le jeu, invisible tant qu'on n'ouvre pas le composant | résolue — passe 0036, la variante a reçu sa case (0, 192) et le jeu a été redimensionné |
-| D41 | `Features/AutoSort/AutoSortApplyReport.swift` — branche `.allLanded` | `AutoSortApplyProgress` déclare explicitement qu'un registre **vide** vaut `.allLanded` (« there was nothing to create and nothing failed, which is a finished run »), mais le rapport rend alors « **0 étagère a été créée et remplie.** ». Latent aujourd'hui — l'écran n'est atteint qu'avec un plan non vide — et le devient moins avec la surface de tri, où appliquer une pile qui se coalesce à rien est un cas normal | ouverte |
+| D41 | `Features/AutoSort/AutoSortApplyReport.swift` — branche `.allLanded` | Le registre déclarait explicitement qu'un registre **vide** vaut `.allLanded` (« there was nothing to create and nothing failed, which is a finished run »), mais le rapport rendait alors « **0 étagère a été créée et remplie.** » | **résolue par suppression** — le fichier a été supprimé par l'issue 0043. Le cas qu'elle anticipait — appliquer une pile qui se coalesce à rien — est un cas normal sur la surface de tri, et `ManualSortApplyReport` le traite : `landedCount == 0` rend `manual_sort.report.nothing_to_save`. Le registre lui-même a été déplacé et renommé `SortApplyLedger` (`Model/Sorting/`) |
 
 Rappel de la passe tokens : **D6 reste la priorité** — `OpenSans-SemiBold` et `OpenSans-Regular` ne s'enregistrent
 pas au lancement, donc `action200`, `action300` et `caption200` retombent sur la police système sur l'appareil.
@@ -762,7 +762,8 @@ pas au lancement, donc `action200`, `action300` et `caption200` retombent sur la
 
 Section `Onboarding` (`73:2829`) sur la page `Screens`. Trois propositions pour la mise en route « inventaire vide →
 scanner par lot → rangement automatique ». **Exploration, pas une passe de réplication** : ces frames ne miroitent
-aucun écran Swift existant, sauf l'écran de rangement, qui approxime `Features/AutoSort/AutoSortPlanView.swift`.
+aucun écran Swift existant, sauf l'écran de rangement, qui approximait `Features/AutoSort/AutoSortPlanView.swift`
+— supprimé depuis (issue 0043), ce qui périme `C3` sans le rendre inutile : voir D39.
 
 **La proposition C est retenue** (2026-08-20). A et B restent dans la section, marquées « écartée », comme trace des
 arbitrages — ne pas les supprimer sans supprimer aussi les panneaux qui les expliquent.
@@ -777,7 +778,7 @@ arbitrages — ne pas les supprimer sans supprimer aussi les panneaux qui les ex
 | `C2 · Bilan du scan` | `80:2895` | À la fermeture du scanner. Titre = compte de la session, CTA « Ranger mes livres » |
 | `C2 · Bilan du scan · Sombre` | `87:3064` | idem, mode `Dark` |
 | `C2b · Rangement indisponible` | `87:2960` | Apple Intelligence désactivée : la raison est dite, CTA vers les Réglages |
-| `C3 · Rangement proposé` | `80:2708` | L'écran de `AutoSortPlanView`, inchangé — cible du CTA de C2 |
+| `C3 · Rangement proposé` | `80:2708` | **Périmé (2026-08-21, issue 0043)** : miroitait `AutoSortPlanView`, écran supprimé. La cible du CTA de C2 est désormais la surface de tri (`ManualSortView`), maquettée sous « Tri manuel ». Frame conservé — voir D39 |
 | `Commun · Scanner par lot (existant)` | `81:2847` | Clone de `57:2401`, non modifié |
 | `Spec · C` | `81:2891` | Déclencheurs, flags, cas d'indisponibilité, ce qui reste à trancher |
 
@@ -811,11 +812,19 @@ frames miroitent `Features/AutoSort/AutoSortPlanView.swift` dans sa phase `.appl
 liste que la revue, marques cochées, rapport au pied. Le code n'a pas d'écran de progression séparé : c'est ce qui
 fait qu'un échec partiel s'explique tout seul.
 
+> **Frames périmés depuis le 2026-08-21 (issue 0043) — conservés, pas supprimés.** L'écran qu'ils miroitent a été
+> retiré : la revue, son application et son registre ont disparu, et le rangement se fait désormais sur la surface de
+> tri (`Features/Sorting/ManualSortView.swift`, PRD 0008), seul écran de l'app à créer des étagères et à les remplir.
+> Ce qui suit décrit donc un écran mort. Il reste ici pour deux raisons : c'est la trace d'une passe de réplication
+> conforme au code de son jour, et la surface de tri lui **reprend** l'essentiel — la marque par étagère, le rang de
+> livre et le rapport de fin, tous trois maquettés à partir d'ici. La section « Tri manuel » plus bas décrit l'écran
+> vivant ; c'est elle qui fait foi. Ne pas remaquetter ces deux frames à l'identique.
+
 ## Table des écrans
 
 | Écran | Clair | Sombre | Panneau | Source Swift |
 |---|---|---|---|---|
-| **Ranger mes livres · Résultat** | `103:3008` | `105:3107` | `108:3181` | `AutoSort/AutoSortPlanView.swift` + `AutoSortBookRow.swift` + `AutoSortShelfMark.swift` + `AutoSortApplyReport.swift` |
+| **Ranger mes livres · Résultat** — **périmé, écran supprimé** | `103:3008` | `105:3107` | `108:3181` | à l'époque `AutoSort/AutoSortPlanView.swift` + `AutoSortBookRow.swift` + `AutoSortShelfMark.swift` + `AutoSortApplyReport.swift` ; **plus aucune source Swift** depuis l'issue 0043. Équivalents vivants : `Sorting/ManualSortListView.swift` + `SortBookRow.swift` + `ManualSortShelfMark.swift` + `ManualSortApplyReport.swift` |
 
 Audit de factorisation : **0 dessin brut**, 0 texte sans style, 25 instances par frame, mode épinglé sur chacun.
 Les quatre `▢` de tête sont des conteneurs assumés (`list group / …`), un par `Section` encartée.
@@ -824,8 +833,8 @@ Les quatre `▢` de tête sont des conteneurs assumés (`list group / …`), un 
 
 | Composant | node id | Variantes | Propriétés | Source Swift |
 |---|---|---|---|---|
-| `AutoSort / Shelf Header` | `100:228` | — | `Name#100:0`, `Count#100:1` | le `header:` du `Section` par étagère dans `AutoSortPlanView.planList` |
-| `AutoSort / Book Row` | `100:235` | — | `Title#100:2`, `Authors#100:3`, `Show authors#100:4`, `Genre#100:5`, `Show genre#100:6` | `AutoSort/AutoSortBookRow.swift` |
+| `AutoSort / Shelf Header` | `100:228` | — | `Name#100:0`, `Count#100:1` | à l'époque le `header:` du `Section` par étagère de `AutoSortPlanView.planList` ; désormais `Sorting/ManualSortSectionHeader.swift` — le composant survit à l'écran, c'est le tri manuel qui le porte |
+| `AutoSort / Book Row` | `100:235` | — | `Title#100:2`, `Authors#100:3`, `Show authors#100:4`, `Genre#100:5`, `Show genre#100:6` | `Sorting/SortBookRow.swift` (ex-`AutoSort/AutoSortBookRow.swift`, déplacé par l'issue 0043 : la surface de tri en est le seul lecteur) |
 | `AutoSort / Note` | `101:236` | Style ∈ {Content, Footnote} × Tone ∈ {Default, Secondary} | `Body#101:0` | les `Section { Text }` isolées : rapport, reste sans étagère, propositions écartées |
 
 `AutoSort / Book Row` est délibérément **distinct de `Cell / Book`** : rien n'est encore rangé, donc ni état de
@@ -863,7 +872,7 @@ Un `footer:` de section, lui, se dessine nu — c'est le cas du « Rien n'a enco
 |---|---|
 | `.applying` | Spinners et états transitoires, non maquettés par convention du fichier |
 | Le rapport partiel (`stopped`) | Demande les marques `pending` et `failed`, donc deux glyphes à ajouter à `Icon` d'abord |
-| `.failed` (« Le rangement n'a pas pu être proposé ») et le mur d'indisponibilité | Hors du périmètre demandé ; `AutoSortUnavailableView` a trois messages, un par raison |
+| `.failed` (« Le rangement n'a pas pu être proposé ») et le mur d'indisponibilité | Hors du périmètre demandé ; `AutoSortUnavailableView` a trois messages, un par raison. **Le mur n'existe plus** (issue 0043) : l'indisponibilité est devenue une phrase à côté du bouton de proposition du tri manuel, `ManualSortProposalButton` |
 | La section « propositions écartées » | N'apparaît que si le validateur a rejeté une correspondance |
 | L'état `plan.isEmpty` | Une seule phrase, portée par `AutoSort / Note` Content/Secondary — à poser le jour où il est utile |
 
@@ -922,8 +931,8 @@ deux fois la même chose.
 | Ajout | node id | Défaut | Pourquoi ce défaut |
 |---|---|---|---|
 | Glyphe `line.3.horizontal` dans `Icon` | `112:232` | — | La poignée de déplacement. 16e variante du jeu |
-| `Show handle` sur `AutoSort / Book Row` | `Show handle#113:0` | **false** | Les frames de résultat miroitent le code livré, qui n'a pas de glisser-déposer |
-| `Show mark` sur `AutoSort / Shelf Header` | `Show mark#113:1` | **true** | L'écran de résultat porte la marque ; le tri manuel l'éteint partout |
+| `Show handle` sur `AutoSort / Book Row` | `Show handle#113:0` | **false** | Les frames de résultat miroitaient le code livré, qui n'avait pas de glisser-déposer. Le défaut reste ce qu'il est, les frames de résultat étant conservés — mais le seul écran vivant qui pose ce composant, le tri manuel, le met à `true` partout |
+| `Show mark` sur `AutoSort / Shelf Header` | `Show mark#113:1` | **true** | L'écran de résultat portait la marque ; le tri manuel l'éteint partout |
 | `Bottom Action Bar` | `114:231` | — | Barre d'action épinglée : `background/default`, filet `border/default` en haut, `Button / Large` Primary en pleine largeur. 393 × 83, se pose à y = 686 |
 
 Les deux booléens sont **défaut-neutres par construction** : ajoutés avec le défaut qui laisse les six instances
@@ -932,8 +941,9 @@ raisonnement.
 
 ### Décisions de design, et leur revers
 
-- **« Terminer » quitte la List.** `AutoSortPlanView` garde délibérément son action *dans* la liste pour que les
-  marques restent le récit principal. Ici il n'y a plus de marques, la liste se réordonne à chaque geste, et une
+- **« Terminer » quitte la List.** `AutoSortPlanView` gardait délibérément son action *dans* la liste pour que les
+  marques restent le récit principal (écran supprimé depuis, issue 0043 — l'argument, lui, tient toujours, et c'est
+  celui que le code du tri manuel a finalement retenu : voir `ManualSortListView`). Ici il n'y a plus de marques, la liste se réordonne à chaque geste, et une
   action posée au pied s'éloigne à mesure qu'on travaille. D'où la barre épinglée — et le revers assumé : deux
   barres empilées au bas de l'écran, 166 pt de chrome.
 - **Le « + » prend la place de « Terminer »** dans la barre de navigation. Les deux ne coexistent jamais : c'est ce
@@ -1110,7 +1120,8 @@ trace de ce que le modèle a su faire.
 
 #### Le rapport d'échec partiel
 
-Trois parties, jamais deux, exactement comme `AutoSortApplyProgress.Result.stopped` :
+Trois parties, jamais deux, exactement comme `SortApplyLedger.Result.stopped` (ex-`AutoSortApplyProgress`,
+déplacé en `Model/Sorting/` par l'issue 0043) :
 
 | Sortie | Copie de la maquette |
 |---|---|
@@ -1119,7 +1130,8 @@ Trois parties, jamais deux, exactement comme `AutoSortApplyProgress.Result.stopp
 | **Jamais créée** | « Non traitée : Bandes dessinées. » |
 
 La deuxième ne se replie pas sur « non créée » : rien n'est annulé, donc l'étagère est peut-être là, vide, et
-l'utilisateur irait la chercher. Le sens vient de `AutoSortApplyReport.swift` ; **la forme, non** — les phrases sont
+l'utilisateur irait la chercher. Le sens venait de `AutoSortApplyReport.swift`, supprimé depuis (issue 0043) ;
+**la forme, non** — les phrases sont
 écrites pour se lire au singulier comme au pluriel, la règle de pluriel devant venir du catalogue et non d'une
 ternaire dans l'interpolation (D38, délibérément non reproduite).
 

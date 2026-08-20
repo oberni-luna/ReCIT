@@ -14,19 +14,19 @@
 //  passes `nil` and this view is not drawn. A pending mark on a shelf nobody is going
 //  to touch would read as a queue that never advances.
 //
-//  Its own view rather than `AutoSortShelfMark`'s: the vocabulary is shared — it is
-//  the same ledger — but that one is worded for a screen that only ever *creates*
-//  étagères ("À créer", "Créée"), and here most of them already exist and are merely
-//  being refilled. It also lives in the flow slice 0043 dismantles. The glyphs follow
-//  the design's `Mark glyph` property: outline marks, tinted / error / disabled, as
-//  the token table in docs/design-system/figma-library.md maps them.
+//  It had a counterpart on the auto-sort review screen, worded for a screen that only
+//  ever *created* étagères ("À créer", "Créée"); here most of them already exist and
+//  are merely being refilled, which is why the wording differs. That screen and its
+//  mark went with PRD 0008, so this is now the only reader of the ledger's outcomes.
+//  The glyphs follow the design's `Mark glyph` property: outline marks, tinted / error
+//  / disabled, as the token table in docs/design-system/figma-library.md maps them.
 //
 
 import SwiftUI
 
 struct ManualSortShelfMark: View {
 
-    let outcome: AutoSortApplyProgress.ShelfOutcome
+    let outcome: SortApplyLedger.ShelfOutcome
 
     var body: some View {
         switch outcome {

@@ -108,16 +108,20 @@ struct ProfileView: View {
                     .foregroundStyle(.foregroundSecondary)
             }
 
-            // Auto-sort's primary entry point, and the *only* route for a user who
-            // already has étagères — the empty-shelf card is by definition not shown to
-            // them, and a library of three shelves and two hundred unfiled books is
-            // exactly what this is for. Gone entirely on a device that cannot run Apple
-            // Intelligence: the user can do nothing about that, so an explanation would
-            // be a nag rather than information. See PRD 0006.
+            // Auto-sort's settings entry point. Since PRD 0008 it opens the sorting
+            // surface, which is the app's only screen for creating étagères and filling
+            // them — the review screen it used to open has been retired.
+            //
+            // The availability rule is kept, because this row is the offer of the
+            // *automatic* rangement: on a device that cannot run Apple Intelligence it
+            // would promise something the surface does not have, and the user can do
+            // nothing about that, so an explanation here would be a nag rather than
+            // information. Sorting by hand is not lost with it — the étagères screen's
+            // own toolbar leads to the same surface on any device. See PRD 0006 / 0008.
             if autoSortEntryPoint.isVisible {
                 Section {
                     if autoSortEntryPoint.isEnabled {
-                        NavigationLink(value: NavigationDestination.autoSort) {
+                        NavigationLink(value: NavigationDestination.manualSort) {
                             Text("profile.auto_sort")
                                 .textStyle(.action300)
                                 .foregroundStyle(.foregroundTinted)

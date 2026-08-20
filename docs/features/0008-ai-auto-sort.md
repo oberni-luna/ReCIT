@@ -8,6 +8,12 @@ Shipped on 2026-08-20 from PRD `docs/prd/0006-ai-auto-sort.md`
 > shipped opening the create form on any tap, now starts this flow on every device. Where
 > Apple Intelligence cannot run, the flow says so.
 
+> **Half of this is superseded by PRD `docs/prd/0008-manual-shelf-sorting.md`** (issue
+> `issues/0043-retire-the-auto-sort-review-screen.md`, 2026-08-21): the review-and-apply
+> screen and its write path are gone, replaced by the sorting surface. The pipeline below
+> — histogram, taxonomy, validator, plan — is untouched and is what the surface's
+> « Proposer un rangement » button runs. See "What was superseded" at the foot.
+
 ## What it does
 
 One action proposes a set of étagères for the books that are on none, sized to what the user
@@ -100,6 +106,48 @@ Everything runs on the phone. No book list leaves the device.
 - The shelf sync's first pass is ungated, so a pull-to-refresh inside a delete's round trip
   can make the shelf flash back.
 - `deleteShelf`'s revert — snapshot and re-attach — is asserted only by reading.
+
+## What was superseded
+
+*Added 2026-08-21, by PRD 0008 / issue 0043.*
+
+**The review-and-apply flow was replaced by the sorting surface** (`Features/Sorting/`,
+`ManualSortView`). Not amended — replaced: the screen is deleted and the app is left with one
+implementation of "create étagères and fill them", `SortSessionModel`.
+
+What went, and what stands in its place:
+
+| Gone | Replaced by |
+|---|---|
+| `AutoSortPlanView` — the review-turned-progress list, and the `autoSort` navigation destination | `ManualSortView` / `ManualSortListView`, reached at `NavigationDestination.manualSort` |
+| `AutoSortModel.apply`, its `applying` / `applied` phases, its stored plan, phase, histogram, rejections and ledger, and `AutoSortApplyFailure` | `SortSessionModel.apply` and `SortWritePlan` |
+| `AutoSortApplyReport` | `ManualSortApplyReport` + `ManualSortApplyStoppedReport` |
+| `AutoSortShelfMark` | `ManualSortShelfMark` |
+| `AutoSortApplyProgress` (`Model/AutoSort/`) | the same reduction, moved and renamed: `SortApplyLedger` (`Model/Sorting/`). Its suite moved with it |
+| `AutoSortBookRow` (`Features/AutoSort/`) | the same row, moved and renamed: `SortBookRow` (`Features/Sorting/`), now read only by the surface |
+
+What stayed, and why:
+
+- **The whole pure pipeline**, unchanged and still under test: `GenreHistogram`,
+  `ShelfMappingValidator`, `ValidatedGenreMapping`, `AutoSortPlan`, `AutoSortBook`,
+  `AutoSortName`, and `AutoSortPrompts` — which is documented as drifting whenever a
+  constraint is added, and was not touched.
+- **`AutoSortModel`**, reduced to what it now is: availability, and `proposePlan`, which runs
+  the three phases over a collection the caller names and hands the plan back. It publishes
+  nothing and writes nothing, because it no longer has a screen.
+- **`AutoSortEntryPoint`** and **`AutoSortUnavailableView`**: the availability rule still
+  decides the settings row's shape, and the wording is still used by the scan bilan.
+
+The three entry points move with the destination. The settings row and the empty-shelf card open
+the sorting surface, as does the scan bilan's « Ranger mes livres ». The empty-shelf card still
+leads in **on every device** — the decision recorded in 0005's "The empty card's press" — and the
+reason is still stated where it now belongs: as a sentence beside the missing proposal button
+(`ManualSortProposalButton`), not as a wall in front of a screen that works.
+
+The two gaps this feature listed as known are closed by the replacement rather than by a fix: the
+plan can now be edited, because it lands as ordinary changes on a stack, and books with no genre
+data can be filed by hand instead of staying unshelved. Genre coverage over a real library is
+still unmeasured.
 
 ## Issues
 

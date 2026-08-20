@@ -13,7 +13,8 @@
 //  is recent and on no étagère too, which is exactly what this plank is about.
 //
 //  Owner in the predicate, "on no étagère" in Swift: SwiftData cannot express an empty to-many in
-//  a `#Predicate`, which is why `AutoSortModel.unshelvedBooks` reads the inventory the same way.
+//  a `#Predicate`, which is why `GenreEnrichmentModel.unshelvedWorks` reads the inventory the same
+//  way.
 //
 //  **Why this lives here and not in `ShelfBooksView`.** That view is data-driven and redraws every
 //  time the carousel scrolls; an appearance animation in it would drop the books of every étagère

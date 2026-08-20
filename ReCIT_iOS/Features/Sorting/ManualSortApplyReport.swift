@@ -34,7 +34,7 @@ import SwiftUI
 
 struct ManualSortApplyReport: View {
 
-    let progress: AutoSortApplyProgress
+    let progress: SortApplyLedger
 
     var body: some View {
         switch progress.result {

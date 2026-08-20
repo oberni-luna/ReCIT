@@ -1,5 +1,5 @@
 //
-//  AutoSortApplyProgressTests.swift
+//  SortApplyLedgerTests.swift
 //  ReCIT_iOSTests
 //
 //  The apply run's ledger, and the property the apply's recovery story rests on. Pure
@@ -21,8 +21,8 @@
 import Testing
 @testable import ReCIT_iOS
 
-@Suite("AutoSortApplyProgress")
-struct AutoSortApplyProgressTests {
+@Suite("SortApplyLedger")
+struct SortApplyLedgerTests {
 
     private let names: [String] = ["Imaginaire", "Policiers", "Essais"]
 
@@ -34,7 +34,7 @@ struct AutoSortApplyProgressTests {
 
     @Test("A fresh ledger has every étagère still to create, and the run reads as running")
     func freshLedgerIsAllPending() {
-        let progress: AutoSortApplyProgress = .init(shelfNames: names)
+        let progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         #expect(progress.shelfNames == names)
         #expect(names.allSatisfy { progress.outcome(for: $0) == .pending })
@@ -45,14 +45,14 @@ struct AutoSortApplyProgressTests {
 
     @Test("An étagère the ledger never heard of reads as pending rather than trapping")
     func unknownShelfReadsAsPending() {
-        let progress: AutoSortApplyProgress = .init(shelfNames: names)
+        let progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         #expect(progress.outcome(for: "Bandes dessinées") == .pending)
     }
 
     @Test("Marking an étagère the ledger never heard of adds no row")
     func markingAnUnknownShelfIsIgnored() {
-        var progress: AutoSortApplyProgress = .init(shelfNames: names)
+        var progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         progress.mark(.landed, for: "Bandes dessinées")
 
@@ -63,7 +63,7 @@ struct AutoSortApplyProgressTests {
 
     @Test("A repeated name is one étagère, not two")
     func duplicateNamesCollapse() {
-        let progress: AutoSortApplyProgress = .init(shelfNames: ["Imaginaire", "Policiers", "Imaginaire"])
+        let progress: SortApplyLedger = .init(entries: ["Imaginaire", "Policiers", "Imaginaire"].map { .init(name: $0) })
 
         #expect(progress.shelfNames == ["Imaginaire", "Policiers"])
     }
@@ -72,7 +72,7 @@ struct AutoSortApplyProgressTests {
 
     @Test("A run in progress stays running until the last étagère has landed")
     func partwayThroughIsStillRunning() {
-        var progress: AutoSortApplyProgress = .init(shelfNames: names)
+        var progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         progress.mark(.landed, for: "Imaginaire")
         progress.mark(.applying, for: "Policiers")
@@ -84,7 +84,7 @@ struct AutoSortApplyProgressTests {
 
     @Test("Every étagère landed is a finished run with nothing left out")
     func allLanded() {
-        var progress: AutoSortApplyProgress = .init(shelfNames: names)
+        var progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         for name in names {
             progress.mark(.landed, for: name)
@@ -98,7 +98,7 @@ struct AutoSortApplyProgressTests {
 
     @Test("An empty plan is a finished run, not a stalled one")
     func emptyLedgerIsFinished() {
-        let progress: AutoSortApplyProgress = .init(shelfNames: [])
+        let progress: SortApplyLedger = .init(entries: [])
 
         #expect(progress.result == .allLanded)
         #expect(progress.isFinished)
@@ -112,7 +112,7 @@ struct AutoSortApplyProgressTests {
     /// three, so the user can follow it down the list they just approved.
     @Test("A failure partway splits the étagères into landed, failed and never attempted")
     func failurePartwaySplitsThreeWays() {
-        var progress: AutoSortApplyProgress = .init(shelfNames: names)
+        var progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         progress.mark(.landed, for: "Imaginaire")
         progress.mark(.failed, for: "Policiers")
@@ -129,7 +129,7 @@ struct AutoSortApplyProgressTests {
 
     @Test("A first étagère failing reports nothing created and filled")
     func failureOnTheFirstShelfReportsNothingCreated() {
-        var progress: AutoSortApplyProgress = .init(shelfNames: names)
+        var progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         progress.mark(.failed, for: "Imaginaire")
 
@@ -146,7 +146,7 @@ struct AutoSortApplyProgressTests {
     /// looking for something already in their carousel.
     @Test("The étagère the run broke on is reported apart from the ones never attempted")
     func failedShelfIsReportedApartFromTheUntouchedOnes() {
-        var progress: AutoSortApplyProgress = .init(shelfNames: names)
+        var progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         progress.mark(.landed, for: "Imaginaire")
         progress.mark(.failed, for: "Policiers")
@@ -159,7 +159,7 @@ struct AutoSortApplyProgressTests {
     /// means both stages landed or it means nothing.
     @Test("An étagère whose membership write failed is not counted as created")
     func createdButUnfilledIsNotLanded() {
-        var progress: AutoSortApplyProgress = .init(shelfNames: names)
+        var progress: SortApplyLedger = .init(entries: names.map { .init(name: $0) })
 
         progress.mark(.applying, for: "Imaginaire")
         progress.mark(.failed, for: "Imaginaire")
@@ -196,7 +196,7 @@ struct AutoSortApplyProgressTests {
         let firstPlan: AutoSortPlan = .init(mapping: mapping, books: books)
         #expect(firstPlan.shelves.map(\.name) == ["Imaginaire", "Policiers"])
 
-        var progress: AutoSortApplyProgress = .init(shelfNames: firstPlan.shelves.map(\.name))
+        var progress: SortApplyLedger = .init(entries: firstPlan.shelves.map { .init(name: $0.name) })
         progress.mark(.landed, for: "Imaginaire")
         progress.mark(.failed, for: "Policiers")
 
@@ -227,7 +227,7 @@ struct AutoSortApplyProgressTests {
         let books: [AutoSortBook] = [book("1", genres: ["science-fiction"])]
 
         let firstPlan: AutoSortPlan = .init(mapping: mapping, books: books)
-        var progress: AutoSortApplyProgress = .init(shelfNames: firstPlan.shelves.map(\.name))
+        var progress: SortApplyLedger = .init(entries: firstPlan.shelves.map { .init(name: $0.name) })
         progress.mark(.landed, for: "Imaginaire")
         #expect(progress.result == .allLanded)
 

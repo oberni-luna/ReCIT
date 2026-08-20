@@ -76,7 +76,7 @@ final class SortSessionModel {
     /// The run's ledger, or `nil` before one has been started. Kept after the run
     /// settles: it is the account of what landed, and a user who left mid-apply has to
     /// find it on their return — which is the whole reason this model is app-scoped.
-    private(set) var applyProgress: AutoSortApplyProgress?
+    private(set) var applyProgress: SortApplyLedger?
 
     /// The ledger's key for each section the run is writing to. Kept beside the ledger
     /// rather than derived on the fly because a created draft's section id changes
@@ -483,7 +483,7 @@ final class SortSessionModel {
     /// What mark one section carries, or `nil` for a section this run has nothing to do
     /// to — which draws no mark at all, because an étagère nobody is writing to should
     /// not look like one that is waiting its turn.
-    func applyOutcome(of section: SortSection.ID) -> AutoSortApplyProgress.ShelfOutcome? {
+    func applyOutcome(of section: SortSection.ID) -> SortApplyLedger.ShelfOutcome? {
         guard let applyProgress, let key = ledgerKeys[section] else { return nil }
         return applyProgress.outcome(for: key)
     }

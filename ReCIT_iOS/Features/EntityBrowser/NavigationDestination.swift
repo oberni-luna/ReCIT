@@ -18,12 +18,13 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case allTransactions
     case entityList(id: String)
     case shelf(id: String)
-    /// The AI shelving proposal (PRD 0006). Carries nothing: the plan lives on
-    /// `AutoSortModel`, so navigating back and forth cannot re-run it by accident.
-    case autoSort
-    /// The manual sorting surface (PRD 0008). Carries nothing: the session and its
-    /// frozen snapshot belong to the screen, so pushing it twice cannot half-restore
-    /// a sorting session.
+    /// The sorting surface (PRD 0008) — the app's one screen for arranging books into
+    /// étagères, by hand or from the model's proposal. Carries nothing: the session and
+    /// its frozen snapshot are app-scoped, so pushing it twice cannot half-restore a
+    /// sorting session.
+    ///
+    /// It replaced the auto-sort review screen's `autoSort` destination, which is gone
+    /// along with the screen.
     case manualSort
 
     var id: String {
@@ -44,8 +45,6 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "entityList:\(id)"
         case .shelf(let id):
             return "shelf:\(id)"
-        case .autoSort:
-            return "autoSort"
         case .manualSort:
             return "manualSort"
         }
@@ -101,8 +100,6 @@ extension NavigationDestination {
           EntityListDetail(listId: id, path: path)
       case .shelf(let id):
           ShelfDetailView(shelfId: id, path: path)
-      case .autoSort:
-          AutoSortPlanView(path: path)
       case .manualSort:
           ManualSortView(path: path)
       }

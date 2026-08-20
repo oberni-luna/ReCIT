@@ -19,9 +19,9 @@
 //
 //  The buttons sit at the foot of the list rather than in a pinned bar. The design
 //  proposes a pinned bar; the list already stacks a tab bar under it, and two bars is
-//  166 pt of chrome on a screen whose whole point is showing books. Kept in the list,
-//  as `AutoSortPlanView` does — and revisited if the sections ever grow long enough
-//  that the buttons become hard to reach.
+//  166 pt of chrome on a screen whose whole point is showing books. Kept in the list —
+//  and revisited if the sections ever grow long enough that the buttons become hard to
+//  reach.
 //
 //  See PRD 0008.
 //
@@ -51,7 +51,7 @@ struct ManualSortListView: View {
         // Derived here rather than held, which is what keeps the proposal button live:
         // the availability behind it reads an observable `SystemLanguageModel`, so a
         // user who switches Apple Intelligence on and comes back finds the button
-        // enabled with no relaunch. Same lever as `ProfileView` and `AutoSortPlanView`.
+        // enabled with no relaunch. Same lever as `ProfileView`.
         let entryPoint: AutoSortEntryPoint = .init(availability: autoSortModel.availability)
 
         return List {

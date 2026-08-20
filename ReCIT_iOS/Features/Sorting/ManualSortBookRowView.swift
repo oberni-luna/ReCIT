@@ -26,7 +26,7 @@ struct ManualSortBookRowView: View {
     let section: SortSection
 
     var body: some View {
-        AutoSortBookRow(
+        SortBookRow(
             book: book,
             // The pile's books are unshelved *for want of* a known genre, so an empty
             // genre line under them would state the same fact twice.

@@ -26,7 +26,7 @@ struct ManualSortDragPreview: View {
     let showsGenre: Bool
 
     var body: some View {
-        AutoSortBookRow(
+        SortBookRow(
             book: book,
             showsGenre: showsGenre,
             showsDragHandle: true

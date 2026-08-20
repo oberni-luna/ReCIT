@@ -14,18 +14,18 @@
 //  destructive button labelled « Terminer » — see PRD 0008.
 //
 //  **While a run is writing, both buttons stand down.** The escape hatch is withdrawn
-//  for the duration exactly as the auto-sort screen withdraws its toolbar exit:
-//  discarding a stack that is halfway through being written, or firing a second run on
-//  top of the first, would both destroy the account of what landed. The writes
-//  themselves are owned by the session and carry on regardless of this screen.
+//  for the duration: discarding a stack that is halfway through being written, or firing
+//  a second run on top of the first, would both destroy the account of what landed. The
+//  writes themselves are owned by the session and carry on regardless of this screen.
 //
 //  **« Proposer un rangement » sits first**, and it is the only one of the three that is
 //  live on arrival: with an empty stack the primary is inert and the third is a way out,
-//  so leading with the two dead buttons would put the one useful control last. It is
-//  absent altogether on a device that can never run the model — a button that does
-//  nothing is worse than no button, and the surface is meant to work regardless. What
-//  decides that is `ManualSortProposalButton`, which owns the three unavailability
-//  states.
+//  so leading with the two dead buttons would put the one useful control last. On a
+//  device that can never run the model the button is absent and the reason takes its
+//  place — a control that does nothing is worse than none, but a silence is worse than
+//  either, since this surface is where the empty-shelf card leads on every device. What
+//  decides all of that is `ManualSortProposalButton`, which owns the three
+//  unavailability states.
 //
 //  See PRD 0008.
 //

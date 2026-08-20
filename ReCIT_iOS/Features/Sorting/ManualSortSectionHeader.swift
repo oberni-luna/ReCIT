@@ -35,7 +35,7 @@ struct ManualSortSectionHeader: View {
 
     /// How far the running apply has got with this étagère, or `nil` when there is no
     /// run or the run has nothing to do here.
-    let mark: AutoSortApplyProgress.ShelfOutcome?
+    let mark: SortApplyLedger.ShelfOutcome?
 
     var body: some View {
         HStack(spacing: .small) {

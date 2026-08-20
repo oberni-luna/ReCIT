@@ -121,12 +121,12 @@ struct BatchScanView: View {
         showsTally = true
     }
 
-    /// Pushes the auto-sort review onto the session's own stack rather than dismissing and
-    /// re-presenting: the review screen generates its plan on arrival, and a modal closing under
-    /// it would cost the user the wait twice. Cancelling it pops back to the bilan, which is
-    /// still the screen they came from.
+    /// Pushes the sorting surface onto the session's own stack rather than dismissing and
+    /// re-presenting: it syncs the library on arrival, and a modal closing under it would cost
+    /// the user that wait twice. Leaving it pops back to the bilan, which is still the screen
+    /// they came from.
     private func sortBooks() {
-        path.append(NavigationDestination.autoSort)
+        path.append(NavigationDestination.manualSort)
     }
 
     private func leave() {

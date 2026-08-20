@@ -121,8 +121,8 @@ struct ShelvesContent: View {
 
     /// The empty shelf's note states the next useful thing, and pressing it does that thing:
     /// with an empty inventory, scanning books in; with books already owned and no étagère to
-    /// put them on, arranging them automatically. Both are the same promise kept — the note is
-    /// read, then acted on. See PRD 0007.
+    /// put them on, arranging them. Both are the same promise kept — the note is read, then
+    /// acted on. See PRD 0007.
     ///
     /// **This card had a second destination once and it was deliberately removed, so putting
     /// one back has to say how it differs.** What PRD 0006 took out was a *silent* substitution
@@ -131,7 +131,14 @@ struct ShelvesContent: View {
     /// no way to see why they had landed on a form about naming a shelf — it read as the wrong
     /// screen rather than as an unsupported device, and the substitution hid the actual reason
     /// entirely. That fallback stays gone: on every device a note about tidying books leads into
-    /// the auto-sort flow, and the flow itself states when it cannot run.
+    /// the sorting surface, and the surface itself states when the model cannot run.
+    ///
+    /// **The destination changed under that rule, not the rule** (PRD 0008). It used to be the
+    /// auto-sort review screen, which was nothing but a proposal and so had to be a wall where
+    /// no proposal could be made. The sorting surface sorts books by hand on any device, so the
+    /// reason has shrunk from a wall to a sentence beside a missing button
+    /// (`ManualSortProposalButton`) — still stated, one layer further in, and now next to a
+    /// screen that works.
     ///
     /// What is different here is that the note changes with the state, so the affordance is
     /// stated before it is used. Nothing is substituted behind the label; the label *is* the
@@ -146,7 +153,7 @@ struct ShelvesContent: View {
         case .scan:
             isScanning = true
         case .sort:
-            path.append(NavigationDestination.autoSort)
+            path.append(NavigationDestination.manualSort)
         }
     }
 

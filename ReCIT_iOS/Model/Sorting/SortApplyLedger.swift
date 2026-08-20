@@ -1,42 +1,41 @@
 //
-//  AutoSortApplyProgress.swift
+//  SortApplyLedger.swift
 //  ReCIT_iOS
 //
-//  The apply run's ledger: one outcome per proposed étagère, and the reduction the
-//  report is written from.
+//  The apply run's ledger: one outcome per étagère the run writes to, and the reduction
+//  the report is written from.
 //
 //  Pure because a partial failure makes its two questions load-bearing. *Is this
-//  étagère done* decides which mark the review-turned-progress list draws against
-//  it, and an étagère whose shelf was created but whose books never landed must not
-//  be shown as done — that half-truth is precisely what the waiting apply exists to
-//  rule out. *Which étagères were created and which were not* is the report, and since
-//  nothing is rolled back it is the only account the user gets of the real state of
-//  their library — an account with three parts rather than two, because the étagère the
-//  run broke on may exist without its books.
+//  étagère done* decides which mark the sorting surface draws against it, and an
+//  étagère whose shelf was created but whose books never landed must not be shown as
+//  done — that half-truth is precisely what the waiting apply exists to rule out.
+//  *Which étagères landed and which did not* is the report, and since nothing is rolled
+//  back it is the only account the user gets of the real state of their library — an
+//  account with three parts rather than two, because the étagère the run broke on may
+//  exist without its books.
 //
-//  Declaration order is kept throughout, so the report names étagères in the order
-//  the user reviewed them rather than in whatever order a dictionary yields.
+//  Declaration order is kept throughout, so the report names étagères in the order the
+//  user was reading them rather than in whatever order a dictionary yields.
 //
-//  Keyed on the étagère's name, which is also `AutoSortPlan.ProposedShelf.id`: the
-//  validated mapping canonicalises names and deduplicates them, so within one plan a
-//  name identifies a shelf.
+//  **An entry is keyed apart from its name.** The surface writes to étagères that
+//  already exist as well as to drafted ones, and two of them may legitimately share a
+//  name — the server does not enforce uniqueness — so a ledger keyed on the name would
+//  collapse two rows into one and misreport which of them landed. It also has to
+//  survive a draft becoming a real étagère mid-run, which changes the section's id but
+//  not its name. So an entry carries a stable `key` beside the `name` the report reads
+//  out.
 //
-//  **A key apart from the name, for the manual sorting surface (PRD 0008).** That run
-//  writes to étagères that already exist as well as to drafted ones, and two of them
-//  may legitimately share a name — the server does not enforce uniqueness — so a
-//  ledger keyed on the name would collapse two rows into one and misreport which of
-//  them landed. It also has to survive a draft becoming a real étagère mid-run, which
-//  changes the section's id but not its name. So an entry now carries a stable `key`
-//  beside the `name` the report reads out, and the auto-sort path keeps passing names
-//  as both — which is exactly what it did before. Nothing else changed: the same
-//  vocabulary, the same reduction, the same three-part account.
+//  It was `SortApplyLedger`, under `Model/AutoSort/`, and moved here when PRD 0008
+//  retired the review screen it was written for: the vocabulary is unchanged — pending,
+//  applying, landed, failed — and so is the reduction, but the only run that writes
+//  anything is now the sorting surface's.
 //
 //  No store, no network, no SwiftUI. See PRD 0006 / PRD 0008.
 //
 
 import Foundation
 
-struct AutoSortApplyProgress: Equatable, Sendable {
+struct SortApplyLedger: Equatable, Sendable {
 
     /// How far one étagère has got. `landed` means *both* stages landed — the shelf
     /// exists on the server and its books are on it — because the whole point of
@@ -67,9 +66,9 @@ struct AutoSortApplyProgress: Equatable, Sendable {
     }
 
     /// One étagère of the run: what identifies it while the run goes, and what the
-    /// report calls it afterwards. The two coincide for a plan whose names are already
-    /// canonical and unique (auto-sort); they differ on the sorting surface, where a
-    /// section's identity is its id and its name is user data.
+    /// report calls it afterwards. On the sorting surface the two differ — a section's
+    /// identity is its id, its name is user data — and they coincide only where a name
+    /// is already canonical and unique.
     struct Entry: Equatable, Sendable {
         let key: String
         let name: String
@@ -79,7 +78,7 @@ struct AutoSortApplyProgress: Equatable, Sendable {
             self.name = name
         }
 
-        /// The étagère whose name *is* its identity — an auto-sort proposal.
+        /// The étagère whose name *is* its identity.
         init(name: String) {
             self.init(key: name, name: name)
         }
@@ -103,12 +102,7 @@ struct AutoSortApplyProgress: Equatable, Sendable {
         self.outcomes = outcomes
     }
 
-    /// A run whose étagères are identified by their names.
-    init(shelfNames: [String]) {
-        self.init(entries: shelfNames.map { .init(name: $0) })
-    }
-
-    /// The proposed étagères, in the order phase 1 declared them.
+    /// The étagères of the run, named, in the order they will be written.
     var shelfNames: [String] { entries.map(\.name) }
 
     /// An étagère the ledger does not know reads as `pending` rather than trapping:

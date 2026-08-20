@@ -20,40 +20,77 @@
 //  onto it one at a time. That is the payoff of the whole sequence, and it is the illustration's
 //  own business — see `OnboardingScanTallyIllustrationView`.
 //
-//  The screen decides nothing. Whether it is owed is `OnboardingGate`'s answer and the scanning
-//  session's to ask; where each answer leads is the session's too, since it owns the navigation
-//  stack this pushes into. See `BatchScanView`.
+//  On a phone that cannot run the arrangement, the offer is replaced by the reason — never both,
+//  never neither, and never a control that cannot work. The count and its title are untouched in
+//  that case: the scan happened, and what the phone cannot do afterwards does not unfile a book.
+//  Only the sentence under the title shortens, because its second half offers to arrange the
+//  books and would be contradicted three lines lower. The reason itself, and whether a route to
+//  Settings belongs beside it, are `AutoSortUnavailableView`'s to say — see
+//  `OnboardingTallyUnavailableActions`.
 //
-//  See PRD 0007, design C2.
+//  The screen decides nothing. Whether it is owed is `OnboardingGate`'s answer and the scanning
+//  session's to ask; which shape its ending takes is the session's too, read fresh from
+//  auto-sort's availability and handed in; and where each answer leads is the session's, since
+//  it owns the navigation stack this pushes into. See `BatchScanView`.
+//
+//  See PRD 0007, designs C2 and C2b.
 //
 
 import SwiftUI
 
 struct OnboardingScanTallyView: View {
     let addedBookCount: Int
+    /// The shape auto-sort's availability gives this screen's ending, derived by the session
+    /// that presents it so that it is read fresh on every render.
+    let entryPoint: AutoSortEntryPoint
     let onSort: () -> Void
     let onLater: () -> Void
 
     var body: some View {
         OnboardingScreenLayout(
             title: Text("onboarding.tally.title \(addedBookCount)"),
-            message: Text("onboarding.tally.body")
+            message: Text(message)
         ) {
             OnboardingScanTallyIllustrationView()
         } actions: {
-            OnboardingActions(
-                primaryTitle: "onboarding.tally.sort",
-                onPrimary: onSort,
-                onLater: onLater
-            )
+            if entryPoint.isEnabled {
+                OnboardingActions(
+                    primaryTitle: "onboarding.tally.sort",
+                    onPrimary: onSort,
+                    onLater: onLater
+                )
+            } else {
+                OnboardingTallyUnavailableActions(
+                    entryPoint: entryPoint,
+                    onContinue: onLater
+                )
+            }
         }
+    }
+
+    /// The full sentence offers to arrange the books; where that cannot happen it stops after
+    /// stating where the books stand, and the reason takes over from there.
+    private var message: LocalizedStringKey {
+        entryPoint.isEnabled ? "onboarding.tally.body" : "onboarding.tally.body.unavailable"
     }
 }
 
 #Preview("Many books") {
-    OnboardingScanTallyView(addedBookCount: 24, onSort: {}, onLater: {})
+    OnboardingScanTallyView(addedBookCount: 24, entryPoint: .offered, onSort: {}, onLater: {})
 }
 
 #Preview("One book") {
-    OnboardingScanTallyView(addedBookCount: 1, onSort: {}, onLater: {})
+    OnboardingScanTallyView(addedBookCount: 1, entryPoint: .offered, onSort: {}, onLater: {})
+}
+
+#Preview("Apple Intelligence off") {
+    OnboardingScanTallyView(addedBookCount: 24, entryPoint: .switchedOff, onSort: {}, onLater: {})
+}
+
+#Preview("Model downloading") {
+    OnboardingScanTallyView(addedBookCount: 24, entryPoint: .downloading, onSort: {}, onLater: {})
+}
+
+#Preview("Device ineligible") {
+    OnboardingScanTallyView(addedBookCount: 24, entryPoint: .hidden, onSort: {}, onLater: {})
 }

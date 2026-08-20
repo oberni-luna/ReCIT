@@ -40,6 +40,7 @@ import SwiftData
 
 struct BatchScanView: View {
     @Environment(UserModel.self) private var userModel
+    @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -57,6 +58,14 @@ struct BatchScanView: View {
                 if showsTally {
                     OnboardingScanTallyView(
                         addedBookCount: viewModel.addedBookCount,
+                        // Derived here rather than inside the bilan, and inside this branch
+                        // rather than beside the state: the bilan decides nothing, and reading
+                        // availability during the session's own body is what keeps its ending
+                        // live — `AutoSortModel.availability` reads an observable
+                        // `SystemLanguageModel`, so a user who leaves the reason behind,
+                        // switches Apple Intelligence on and comes back finds the offer with no
+                        // relaunch. Read from here, the camera never depends on it.
+                        entryPoint: .init(availability: autoSortModel.availability),
                         onSort: sortBooks,
                         onLater: leave
                     )

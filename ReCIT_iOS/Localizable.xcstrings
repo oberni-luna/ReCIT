@@ -1597,6 +1597,38 @@
         }
       }
     },
+    "onboarding.tally.body.unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They are not on any shelf."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ils ne sont sur aucune étagère."
+          }
+        }
+      }
+    },
+    "onboarding.tally.continue_without_sorting" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue without sorting"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer sans ranger"
+          }
+        }
+      }
+    },
     "onboarding.tally.sort" : {
       "localizations" : {
         "en" : {

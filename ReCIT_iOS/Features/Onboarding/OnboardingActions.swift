@@ -7,12 +7,10 @@
 //  is a single decision — a second styled button beside the first would read as a choice between
 //  two ways forward rather than as a way out.
 //
-//  "Plus tard" is therefore a bare button: findable, and not competing. It carries design-system
-//  tokens and adds nothing to the design system — the action text style and the tinted
-//  foreground. It appears three times across PRD 0007's screens; a fourth is the point at which
-//  it should become a real button style with its Figma counterpart, not before. Which is also
-//  why the two screens share this view rather than each drawing its own pair: three copies of a
-//  button that is deliberately not a button style is how one of them quietly stops matching.
+//  "Plus tard" is therefore a bare button: findable, and not competing. It lives in
+//  `OnboardingSkipButton`, which is where its tokens are — the same reasoning, now that the
+//  bilan needs that button under a second ending of its own, where it reads "Continuer sans
+//  ranger" and there is no offer above it to pair with.
 //
 //  Only the leading answer's wording differs between the screens — "Scanner mes livres" on the
 //  accueil, "Ranger mes livres" on the bilan — so only that is a parameter.
@@ -35,10 +33,7 @@ struct OnboardingActions: View {
             }
             .buttonStyle(.primary())
 
-            Button("onboarding.later", action: onLater)
-                .textStyle(.action300)
-                .foregroundStyle(.foregroundTinted)
-                .buttonStyle(.plain)
+            OnboardingSkipButton(title: "onboarding.later", action: onLater)
         }
     }
 }

@@ -1485,6 +1485,23 @@
         }
       }
     },
+    "profile.auto_sort" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort my books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ranger mes livres"
+          }
+        }
+      }
+    },
     "profile.current_transactions" : {
       "localizations" : {
         "en" : {

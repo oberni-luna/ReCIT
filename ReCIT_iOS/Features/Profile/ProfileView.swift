@@ -99,6 +99,18 @@ struct ProfileView: View {
                     .foregroundStyle(.foregroundSecondary)
             }
 
+            // The only route to auto-sort for a user who already has étagères — the
+            // empty-shelf card is by definition not shown to them. The empty-state
+            // entry point and the differentiated availability copy are issue 0025;
+            // this entry is deliberately plain. See PRD 0006.
+            Section {
+                NavigationLink(value: NavigationDestination.autoSort) {
+                    Text("profile.auto_sort")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundTinted)
+                }
+            }
+
             Section {
                 AsyncButton(
                     action: {

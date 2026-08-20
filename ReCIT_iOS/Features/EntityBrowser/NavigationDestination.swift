@@ -18,6 +18,9 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case allTransactions
     case entityList(id: String)
     case shelf(id: String)
+    /// The AI shelving proposal (PRD 0006). Carries nothing: the plan lives on
+    /// `AutoSortModel`, so navigating back and forth cannot re-run it by accident.
+    case autoSort
 
     var id: String {
         switch self {
@@ -37,6 +40,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "entityList:\(id)"
         case .shelf(let id):
             return "shelf:\(id)"
+        case .autoSort:
+            return "autoSort"
         }
     }
 
@@ -90,6 +95,8 @@ extension NavigationDestination {
           EntityListDetail(listId: id, path: path)
       case .shelf(let id):
           ShelfDetailView(shelfId: id, path: path)
+      case .autoSort:
+          AutoSortPlanView(path: path)
       }
     }
 }

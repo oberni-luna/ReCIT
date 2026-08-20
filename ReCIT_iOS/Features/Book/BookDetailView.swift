@@ -20,6 +20,7 @@ struct BookDetailView: View {
     @Environment(InventoryModel.self) private var inventoryModel
     @Environment(UserModel.self) private var userModel
     @Environment(ListModel.self) private var listModel
+    @Environment(GenreEnrichmentModel.self) private var genreEnrichmentModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
 
@@ -75,6 +76,12 @@ struct BookDetailView: View {
                     if let work = edition.works.first {
                         ListItemFormView(entity: work, list: list)
                     }
+                }
+                // Keyed on the works rather than on the edition, because a cached edition can
+                // gain a work when the background refresh lands, and that new work needs asking
+                // about too.
+                .task(id: edition.works.map(\.uri).sorted()) {
+                    await enrichGenres(for: edition)
                 }
             case .error(let error):
                 Text("error.with_message \(error.localizedDescription)")
@@ -193,7 +200,8 @@ struct BookDetailView: View {
         Section {
             EntitySummaryView(
                 entityUri: edition.uri,
-                otherEntityUri: edition.works.first?.uri
+                otherEntityUri: edition.works.first?.uri,
+                tags: genres(of: edition)
             )
 
             EntityAuthorsView(
@@ -272,6 +280,37 @@ struct BookDetailView: View {
     func myCopySection(edition: Edition) -> some View {
         if let item = iOwn(edition) {
             BookMyCopySection(item: item)
+        }
+    }
+
+    /// The genres to show as tags, read off the `Work` objects themselves rather than taken from
+    /// an enrichment call's return value — so the row appears on its own the moment the fetch
+    /// below writes them, and reappears after any later sync. (ADR 0001, invariant 1.)
+    ///
+    /// Works are sorted so a two-work edition draws its tags in a stable order; within a work
+    /// the stored order is the claims' own, which is the order the labels were resolved in.
+    private func genres(of edition: Edition) -> [String] {
+        var seen: Set<String> = []
+        return edition.works
+            .sorted(by: { $0.uri < $1.uri })
+            .flatMap(\.genres)
+            .filter { seen.insert($0).inserted }
+    }
+
+    /// Fills in the genres for the works behind this book, at most once each.
+    ///
+    /// The backfill this delegates to only ever covers the works behind *unshelved* books, since
+    /// that is what the arrangement sorts. A book filed by hand — or any book at all in a library
+    /// where the arrangement was never run — is therefore never enriched by it, and would show no
+    /// tags, which reads as the feature not working rather than as data missing. So the screen
+    /// asks for its own.
+    ///
+    /// In `task`, so it starts after the first paint and never delays it. Asking twice is stopped
+    /// in the model, by the timestamp it stores on each work.
+    @MainActor
+    private func enrichGenres(for edition: Edition) async {
+        for work in edition.works {
+            await genreEnrichmentModel.enrichWorkIfNeeded(work, modelContext: modelContext)
         }
     }
 

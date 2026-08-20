@@ -24,16 +24,6 @@
         }
       }
     },
-    "%lld livre%@ restera%@ sans étagère, faute de genre connu." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld livre%2$@ restera%3$@ sans étagère, faute de genre connu."
-          }
-        }
-      }
-    },
     "%lld proposition%@ a été écartée car elle ne correspondait à aucune étagère proposée." : {
       "localizations" : {
         "en" : {
@@ -102,47 +92,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter à une liste"
-          }
-        }
-      }
-    },
-    "auto_sort.left_unshelved %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld book will stay off the shelves, for want of a known genre."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld books will stay off the shelves, for want of a known genre."
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livre restera sans étagère, faute de genre connu."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livres resteront sans étagère, faute de genre connu."
-                }
-              }
-            }
           }
         }
       }
@@ -495,6 +444,47 @@
         }
       }
     },
+    "auto_sort.left_unshelved %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld book will stay off the shelves, for want of a known genre."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld books will stay off the shelves, for want of a known genre."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld livre restera sans étagère, faute de genre connu."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld livres resteront sans étagère, faute de genre connu."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "book.other_editions %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -711,6 +701,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Résumé"
+          }
+        }
+      }
+    },
+    "entity.summary.tags" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genres"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genres"
           }
         }
       }

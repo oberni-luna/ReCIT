@@ -41,6 +41,24 @@ enum GenreClaims {
     /// fix would not reach the libraries that reported it.
     static let revision: Int = 2
 
+    /// Whether a work still has to be asked about, from the two markers it carries.
+    ///
+    /// The two conditions are not interchangeable and both are needed: the timestamp says
+    /// *when* a work was asked, the revision says *what* it was asked. A work stamped under
+    /// the genre-only rule has a timestamp and an empty list, and would otherwise keep that
+    /// empty list for good.
+    ///
+    /// Read by both callers — the batched backfill and the single-work fetch the book screen
+    /// makes — so that "already asked" means one thing in the app rather than two.
+    ///
+    /// - Parameters:
+    ///   - enrichedAt: `Work.genresEnrichedAt`, `nil` when the work was never asked.
+    ///   - revision: `Work.genresRevision`, 0 for a work stored before the marker existed.
+    /// - Returns: `true` when the work should be fetched.
+    static func needsAsking(enrichedAt: Date?, revision: Int) -> Bool {
+        enrichedAt == nil || revision < Self.revision
+    }
+
     /// The uris to resolve into labels for one work, from its claims' string values.
     ///
     /// - Parameters:

@@ -13,6 +13,12 @@
 //  not one per book. Results are persisted per batch, so a failure halfway keeps
 //  everything already fetched and only the remainder is retried next run.
 //
+//  There are two entry points, and the difference between them is who asked. The
+//  backfill above is a step in a flow the user started, so it reports progress and
+//  surfaces its failures. `enrichWorkIfNeeded` is the book screen filling in one
+//  work nobody asked about, so it reports nothing and says nothing when it fails
+//  — see issue 0035. Both share one fetch, and one rule for "already asked".
+//
 
 import Foundation
 import SwiftData
@@ -56,6 +62,13 @@ final class GenreEnrichmentModel {
     /// heavily, so this collapses most of the second pass.
     @ObservationIgnored private var genreLabels: [String: String] = [:]
 
+    /// Uris of the works a single-work fetch is currently in flight for. The stored
+    /// timestamp only stops a *second* visit; it is written when the fetch returns,
+    /// so two overlapping asks — a screen re-appearing, or two books sharing a work
+    /// — would both read "never asked" and both call. Not observed: no view renders
+    /// from it.
+    @ObservationIgnored private var worksInFlight: Set<String> = []
+
     init(
         apiService: APIServicing,
         entityModel: EntityModel,
@@ -98,11 +111,10 @@ final class GenreEnrichmentModel {
         worksProcessed = 0
 
         let works: [Work] = unshelvedWorks(forUser: user, modelContext: modelContext)
-        // A work asked under an older reading of the claims counts as unasked: the timestamp
-        // says *when* it was asked, not *what* it was asked. Without this, every work already
-        // stamped by the genre-only rule would keep its empty list for good.
+        // A work asked under an older reading of the claims counts as unasked — the rule, and
+        // why one marker is not enough, is `GenreClaims.needsAsking`'.
         let pending: [Work] = works.filter {
-            $0.genresEnrichedAt == nil || $0.genresRevision < GenreClaims.revision
+            GenreClaims.needsAsking(enrichedAt: $0.genresEnrichedAt, revision: $0.genresRevision)
         }
         worksToEnrich = pending.count
 
@@ -131,6 +143,37 @@ final class GenreEnrichmentModel {
     /// judge the data before deciding to run — or after, from a fresh screen.
     func currentCoverage(forUser user: User, modelContext: ModelContext) -> GenreCoverage {
         .init(works: unshelvedWorks(forUser: user, modelContext: modelContext))
+    }
+
+    /// Fetches and persists genres for a single work, when it has not been asked about yet.
+    ///
+    /// The backfill above only ever looks at the works behind *unshelved* books, because that
+    /// is the scope the arrangement works on. A book filed by hand, or simply opened by a user
+    /// who never ran the arrangement, is therefore never covered by it — so the book screen
+    /// would show no genres for most of a library, which reads as the feature being broken
+    /// rather than as data missing. This is that screen's way in. One work is one entity call
+    /// plus one label call, and the stored timestamp is what keeps it to that.
+    ///
+    /// Deliberately quiet on both counts:
+    ///
+    /// - It leaves `phase`, `coverage` and the two counters alone. Those describe the run the
+    ///   user is watching in the auto-sort flow; a book screen writing to them would move a
+    ///   progress bar the user is looking at somewhere else entirely.
+    /// - A failure is swallowed rather than reported. Nobody asked for these genres, so a
+    ///   SnackBar about them would be noise — and the work keeps its `nil` timestamp, so the
+    ///   next visit simply tries again.
+    func enrichWorkIfNeeded(_ work: Work, modelContext: ModelContext) async {
+        guard GenreClaims.needsAsking(enrichedAt: work.genresEnrichedAt, revision: work.genresRevision) else {
+            return
+        }
+        guard worksInFlight.insert(work.uri).inserted else { return }
+        defer { worksInFlight.remove(work.uri) }
+
+        do {
+            try await enrich(batch: [work], modelContext: modelContext)
+        } catch {
+            // See above: silent on purpose. Nothing is stamped, so this retries next time.
+        }
     }
 
     // MARK: - Private helpers

@@ -29,9 +29,10 @@ import SwiftData
 final class AutoSortModel {
 
     /// Whether the feature can run, and why not when it cannot. Mirrored off
-    /// `SystemLanguageModel.Availability` rather than exposed directly so views
-    /// never import FoundationModels — and so issue 0025 has one place to hang the
-    /// differentiated treatment each reason deserves.
+    /// `SystemLanguageModel.Availability` rather than exposed directly so views never
+    /// import FoundationModels. What each reason is worth telling the user is not
+    /// decided here: `AutoSortEntryPoint` maps these four states onto the shape an
+    /// entry point should take.
     enum Availability: Equatable {
         case available
         /// The device cannot run Apple Intelligence at all. Nothing the user can do.
@@ -40,8 +41,6 @@ final class AutoSortModel {
         case appleIntelligenceNotEnabled
         /// The model is still downloading. Temporary.
         case modelNotReady
-
-        var isAvailable: Bool { self == .available }
     }
 
     /// Where a run has got to. Named after what the user is waiting on rather than
@@ -135,6 +134,10 @@ final class AutoSortModel {
 
     // MARK: - Availability
 
+    /// Read fresh on every access rather than cached, which is what lets a user switch
+    /// Apple Intelligence on and come back to a working feature: `SystemLanguageModel` is
+    /// itself observable, so a view reading this in its body re-renders when the system
+    /// state changes, with no relaunch and nothing here to invalidate.
     var availability: Availability {
         switch SystemLanguageModel.default.availability {
         case .available:

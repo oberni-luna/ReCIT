@@ -18,9 +18,11 @@ struct ShelvesContent: View {
 
     @Environment(\.isSearching) private var isSearching
     @Environment(ShelfFocusModel.self) private var focus
+    @Environment(AutoSortModel.self) private var autoSortModel
 
-    /// Presents the create-shelf form — from the section header's "Ajouter" action or from
-    /// the empty-state card, which is why the sheet hangs off the page, not the carousel.
+    /// Presents the create-shelf form — from the section header's "Ajouter" action, or from
+    /// the empty-state card on a device where auto-sort cannot run, which is why the sheet
+    /// hangs off the page rather than off the carousel.
     @State private var isCreatingShelf: Bool = false
 
     @Query private var shelves: [Shelf]
@@ -28,6 +30,13 @@ struct ShelvesContent: View {
 
     private let horizontalPadding: CGFloat = 12
     private let gutter: CGFloat = 14
+
+    /// What the empty-state card does when pressed. Derived on every render, so the day
+    /// the user switches Apple Intelligence on the card starts offering the sort without
+    /// a relaunch — `SystemLanguageModel` is observable and this reads it.
+    private var autoSortEntryPoint: AutoSortEntryPoint {
+        .init(availability: autoSortModel.availability)
+    }
 
     init(user: User, searchText: String, path: Binding<NavigationPath>) {
         self.user = user
@@ -71,7 +80,7 @@ struct ShelvesContent: View {
                     // One or the other, never both: with no étagère there is nothing to
                     // page through, so the empty shelf stands in place of the carousel.
                     if shelves.isEmpty {
-                        ShelfEmptyStateView(width: cardWidth) { isCreatingShelf = true }
+                        ShelfEmptyStateView(width: cardWidth, onTap: tapEmptyShelf)
                             // Parked where the carousel's first card would be, so the
                             // first real étagère appears exactly here.
                             .padding(.horizontal, horizontalPadding)
@@ -90,6 +99,21 @@ struct ShelvesContent: View {
                     ShelfFormView()
                 }
             }
+        }
+    }
+
+    /// The empty shelf's label reads as a note to tidy one's books, so pressing it does
+    /// exactly that: it starts the auto-sort flow. The manual route is not lost — the
+    /// section header's "Ajouter" still creates an étagère by hand.
+    ///
+    /// On a device that cannot run Apple Intelligence it opens the create form instead,
+    /// which is what it did before auto-sort existed. This card *is* the empty state, so
+    /// it can be neither hidden nor made inert; it must always lead somewhere.
+    private func tapEmptyShelf() {
+        if autoSortEntryPoint.reachesFlow {
+            path.append(NavigationDestination.autoSort)
+        } else {
+            isCreatingShelf = true
         }
     }
 

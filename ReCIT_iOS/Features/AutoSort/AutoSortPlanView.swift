@@ -12,9 +12,10 @@
 //  explain itself — the marks *are* the account of what exists, and nothing is rolled
 //  back. See `AutoSortShelfMark` and `AutoSortApplyReport`.
 //
-//  Reached from the profile/settings screen. The empty-shelf entry point and the
-//  differentiated treatment of the three unavailability reasons are issue 0025;
-//  what is here is the plain "not available" wall.
+//  Reached from the settings screen and from the empty-shelf étagère card. Which of
+//  the three unavailability reasons is worth telling the user about is
+//  `AutoSortEntryPoint`'s decision and `AutoSortUnavailableView`'s wording; this
+//  screen only picks between the plan and the wall.
 //
 //  See PRD 0006.
 //
@@ -29,12 +30,21 @@ struct AutoSortPlanView: View {
 
     @Binding var path: NavigationPath
 
+    /// Read inside the body, which is what makes the wall reactive: the availability it
+    /// derives from reads an observable `SystemLanguageModel`, so flipping the system
+    /// switch re-renders this screen.
+    private var entryPoint: AutoSortEntryPoint {
+        .init(availability: autoSortModel.availability)
+    }
+
     var body: some View {
         Group {
-            if autoSortModel.availability.isAvailable {
+            if entryPoint.isEnabled {
                 content
             } else {
-                unavailableView
+                AutoSortUnavailableView(entryPoint: entryPoint)
+                    .frame(maxHeight: .infinity)
+                    .padding(.all, .large)
             }
         }
         .navigationTitle("Ranger mes livres")
@@ -52,8 +62,13 @@ struct AutoSortPlanView: View {
         // Generated on arrival rather than behind a button: the user already asked
         // for this by navigating here, and a second tap would only add a wait they
         // have to trigger themselves.
-        .task {
-            guard autoSortModel.availability.isAvailable,
+        //
+        // Keyed on availability so a user who leaves the wall, switches Apple
+        // Intelligence on and comes back gets their plan without relaunching the app.
+        // `SystemLanguageModel` is itself observable, so the wall gives way on its own;
+        // an unkeyed task would leave them staring at a spinner behind it.
+        .task(id: autoSortModel.availability) {
+            guard entryPoint.isEnabled,
                   autoSortModel.plan == nil,
                   !autoSortModel.isRunning,
                   let user = userModel.myUser else { return }
@@ -111,16 +126,6 @@ struct AutoSortPlanView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.all, .large)
-    }
-
-    @ViewBuilder
-    private var unavailableView: some View {
-        Text("Le rangement automatique n'est pas disponible sur cet appareil.")
-            .textStyle(.content300)
-            .foregroundStyle(.foregroundSecondary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.all, .large)
     }
 
     @ViewBuilder

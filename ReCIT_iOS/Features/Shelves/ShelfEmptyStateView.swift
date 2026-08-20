@@ -15,8 +15,13 @@
 //
 //  No "+" glyph: the section header carries the create action (PRD 0003), and a UI symbol
 //  floating inside a painted illustration read as pasted on. No chevron on the label
-//  either — this card opens a sheet, and a chevron would promise a push that never comes.
-//  Its text is centred, which is also why a trailing glyph would look off-centre.
+//  either — its text is centred, so a trailing glyph reads as off-centre, and where the
+//  card leads is not fixed: `ShelvesContent` sends it to the auto-sort flow, or to the
+//  create form on a device that cannot run Apple Intelligence (PRD 0006). A chevron would
+//  promise a push that only sometimes happens.
+//
+//  Which of the two it is, is deliberately not this view's business: it paints an empty
+//  shelf and reports a press. The page knows what the app can currently do.
 //
 
 import SwiftUI
@@ -51,8 +56,9 @@ struct ShelfEmptyStateView: View {
                 .zIndex(1)
             }
             .frame(width: width)
-            // The whole card opens the form, painted or not — the plank, the empty band
-            // above it and the label alike.
+            // The whole card is the target, painted or not — the plank, the empty band
+            // above it and the label alike. Two hit zones inside one painted card is the
+            // problem the card-level pencil's removal solved.
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

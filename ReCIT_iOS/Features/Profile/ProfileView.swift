@@ -13,6 +13,7 @@ struct ProfileView: View {
     @EnvironmentObject private var authModel: AuthModel
     @Environment(UserModel.self) private var userModel
     @Environment(TransactionModel.self) private var transactionModel
+    @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(SyncStatusStore.self) private var syncStatus
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
@@ -23,6 +24,14 @@ struct ProfileView: View {
 
     var currentTransactions: [UserTransaction] {
         allTransactions.filter(\.isCurrent)
+    }
+
+    /// Auto-sort's entry point here, derived on every render. Reading it inside the body
+    /// is what keeps it live: the availability behind it reads an observable
+    /// `SystemLanguageModel`, so switching Apple Intelligence on and coming back to the
+    /// app reveals the row with no relaunch.
+    private var autoSortEntryPoint: AutoSortEntryPoint {
+        .init(availability: autoSortModel.availability)
     }
 
     /// Friends, sourced reactively from SwiftData (excludes the logged-in user).
@@ -99,15 +108,29 @@ struct ProfileView: View {
                     .foregroundStyle(.foregroundSecondary)
             }
 
-            // The only route to auto-sort for a user who already has étagères — the
-            // empty-shelf card is by definition not shown to them. The empty-state
-            // entry point and the differentiated availability copy are issue 0025;
-            // this entry is deliberately plain. See PRD 0006.
-            Section {
-                NavigationLink(value: NavigationDestination.autoSort) {
-                    Text("profile.auto_sort")
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundTinted)
+            // Auto-sort's primary entry point, and the *only* route for a user who
+            // already has étagères — the empty-shelf card is by definition not shown to
+            // them, and a library of three shelves and two hundred unfiled books is
+            // exactly what this is for. Gone entirely on a device that cannot run Apple
+            // Intelligence: the user can do nothing about that, so an explanation would
+            // be a nag rather than information. See PRD 0006.
+            if autoSortEntryPoint.isVisible {
+                Section {
+                    if autoSortEntryPoint.isEnabled {
+                        NavigationLink(value: NavigationDestination.autoSort) {
+                            Text("profile.auto_sort")
+                                .textStyle(.action300)
+                                .foregroundStyle(.foregroundTinted)
+                        }
+                    } else {
+                        // Named but inert, with the reason under it. A row that simply
+                        // did nothing would read as a bug, and one that pushed into the
+                        // flow would push into a wall.
+                        Text("profile.auto_sort")
+                            .textStyle(.action300)
+                            .foregroundStyle(.foregroundSecondary)
+                        AutoSortUnavailableView(entryPoint: autoSortEntryPoint)
+                    }
                 }
             }
 

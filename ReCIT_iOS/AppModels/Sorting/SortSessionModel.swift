@@ -6,12 +6,17 @@
 //  ordered stack of changes laid on top of it. Everything the screen renders comes
 //  back out through `projection`, which is pure.
 //
-//  **App-scoped**, built in `RootView` and injected like every other model. Slice 0040
-//  writes from here, and those writes — plus the ledger that says what landed — have
-//  to outlive the screen: a user who navigates away mid-apply must find the account of
-//  it when they come back. The consequence lands one slice early, in this one: a stack
-//  built by dragging survives leaving the screen, which is exactly what the user
-//  expects of a draft they have not saved.
+//  **App-scoped**, built in `RootView` and injected like every other model. The apply
+//  runs from here, in a task this model owns, and both the writes and the ledger that
+//  says what landed outlive the screen: a user who navigates away mid-apply finds the
+//  account of it when they come back. The same scoping is why a stack built by
+//  dragging survives leaving the screen, which is what the user expects of a draft they
+//  have not saved.
+//
+//  The apply is **awaited, not optimistic** — a documented departure from ADR 0001,
+//  reasoned where it happens (`run`). A failure stops the run, keeps what landed, and
+//  leaves the rest in the stack, so the pills, the recap and the button labels go on
+//  telling the truth with no special case and pressing the button again resumes.
 //
 //  Being app-scoped makes `load` a *resume* as much as an open — see its note.
 //
@@ -39,14 +44,39 @@ final class SortSessionModel {
     private(set) var snapshot: SortSnapshot = .empty
 
     /// The ordered changes laid over the snapshot. Ordered rather than merged, so the
-    /// coalescing the write plan does (slice 0040) — and any undo — stays a pure
-    /// function of the stack alone.
+    /// coalescing the write plan does — and any undo — stays a pure function of the
+    /// stack alone. Trimmed as the apply lands, so it always holds exactly the work
+    /// that is left.
     private(set) var changes: [SortChange] = []
 
     /// Guards against two appearances of the screen syncing over each other. Not a
     /// phase: a load that is already running is not a state the screen renders
     /// differently, it is a call that must not happen twice.
     private var isLoading: Bool = false
+
+    /// Whether a run is writing right now. Not a `Phase`, because the surface goes on
+    /// rendering its sections throughout — the marks ticking down the list *are* the
+    /// progress, so a screen that swapped itself for a spinner would hide the one
+    /// account the user is watching. What it does withdraw is the escape hatch: the
+    /// buttons and the drag both stand down until the run settles.
+    private(set) var isApplying: Bool = false
+
+    /// The run's ledger, or `nil` before one has been started. Kept after the run
+    /// settles: it is the account of what landed, and a user who left mid-apply has to
+    /// find it on their return — which is the whole reason this model is app-scoped.
+    private(set) var applyProgress: AutoSortApplyProgress?
+
+    /// The ledger's key for each section the run is writing to. Kept beside the ledger
+    /// rather than derived on the fly because a created draft's section id changes
+    /// under the run — `.draft(client id)` becomes `.shelf(server id)` — while its row
+    /// in the ledger must not.
+    private var ledgerKeys: [SortSection.ID: String] = [:]
+
+    /// The run itself, owned by the model rather than by the screen. A user who
+    /// navigates away mid-apply leaves the writes going and comes back to the account
+    /// of them; a task tied to the view would take both away. Exposed so a caller can
+    /// await it.
+    @ObservationIgnored private(set) var applyTask: Task<Void, Never>?
 
     /// What the screen draws. Recomputed on every read rather than cached: it is a
     /// walk over a few hundred books, and a cache is one more thing that can
@@ -92,6 +122,11 @@ final class SortSessionModel {
         modelContext: ModelContext
     ) async {
         guard isLoading == false else { return }
+        // A sync during a run would fight the writes: `ShelfModel`'s membership gate
+        // stands the wholesale writers down for the duration of one call, not for the
+        // duration of a batch, so a shelf sync landing between two of them would
+        // rebuild the whole relation from state the run is halfway through changing.
+        guard isApplying == false else { return }
         guard changes.isEmpty else {
             phase = .ready
             return
@@ -127,6 +162,11 @@ final class SortSessionModel {
         from origin: SortSection.ID,
         to destination: SortSection.ID
     ) {
+        // Nothing moves while the run writes. The plan being executed was reduced from
+        // the stack as it stood when the button was pressed, so a book pulled out from
+        // under it would still be filed by the operation already in flight — and the
+        // marks would be describing a library the user had gone on rearranging.
+        guard isApplying == false else { return }
         guard let change = SortChange.move(bookId: bookId, from: origin, to: destination) else { return }
         changes.append(change)
     }
@@ -134,8 +174,233 @@ final class SortSessionModel {
     /// Throws the stack away and hands the screen back its snapshot. The other half of
     /// the derived button rule: with a non-empty stack the third button says
     /// « Annuler » and this is what it does.
+    ///
+    /// The ledger of a run that has already happened is deliberately left alone: those
+    /// writes landed, and « Annuler » only ever discards work that was never sent.
     func discardChanges() {
+        guard isApplying == false else { return }
         changes = []
+    }
+
+    // MARK: - Applying
+
+    /// Executes the write plan: the new étagères are created and the books are filed,
+    /// one étagère at a time, in the order the screen shows them.
+    ///
+    /// Returns at once — the run is a **model-owned** `Task`, so leaving the screen
+    /// mid-apply neither stops the writes nor loses the account of them.
+    ///
+    /// A stack that coalesces to nothing is applied too, and empties: there is nothing
+    /// to send, but the user pressed a button that promised to save, and leaving a
+    /// stack behind would go on offering to discard work that does not exist.
+    func apply(
+        shelfModel: ShelfModel,
+        errorReporter: AppErrorReporter?,
+        modelContext: ModelContext
+    ) {
+        guard isApplying == false, phase == .ready else { return }
+
+        let plan: SortWritePlan = writePlan
+        guard plan.hasWork else {
+            changes = []
+            ledgerKeys = [:]
+            applyProgress = .init(entries: [])
+            return
+        }
+
+        ledgerKeys = .init(
+            uniqueKeysWithValues: plan.operations.map { ($0.section, Self.ledgerKey(for: $0.section)) }
+        )
+        applyProgress = .init(
+            entries: plan.operations.map { .init(key: Self.ledgerKey(for: $0.section), name: $0.name) }
+        )
+        isApplying = true
+
+        applyTask = Task { [weak self] in
+            await self?.run(
+                plan: plan,
+                shelfModel: shelfModel,
+                errorReporter: errorReporter,
+                modelContext: modelContext
+            )
+        }
+    }
+
+    /// One étagère after another, stopping where it breaks.
+    ///
+    /// **The writes are awaited, not optimistic.** This is the same documented
+    /// departure from ADR 0001 as the auto-sort apply and the batch scanner's add, and
+    /// it is deliberate: the user has just approved a whole rearrangement in one
+    /// gesture and has to be able to trust what landed. Six étagères filling instantly
+    /// and then two of them silently emptying again is a failure mode nobody can see,
+    /// whereas six ticks appearing one by one is one they can read. Only single,
+    /// user-initiated gestures — the menu's file-this-book, the swipe that takes it off
+    /// — stay optimistic. **Do not "fix" this into `OptimisticMutating`.**
+    ///
+    /// A failure stops the run there and nothing is rolled back: a rollback that itself
+    /// failed halfway would leave a worse state than a clearly reported partial one.
+    /// What did land has already left the stack (see `land`), so what remains is
+    /// exactly the work that is left and pressing the button again resumes it.
+    private func run(
+        plan: SortWritePlan,
+        shelfModel: ShelfModel,
+        errorReporter: AppErrorReporter?,
+        modelContext: ModelContext
+    ) async {
+        defer { isApplying = false }
+
+        for write in plan.operations {
+            let key: String = Self.ledgerKey(for: write.section)
+            applyProgress?.mark(.applying, for: key)
+            do {
+                try await perform(
+                    write,
+                    shelfModel: shelfModel,
+                    modelContext: modelContext
+                )
+                // A tick means the creation *and* the membership writes landed. An
+                // étagère created but not filled is a failure, not a half-success.
+                applyProgress?.mark(.landed, for: key)
+            } catch {
+                applyProgress?.mark(.failed, for: key)
+                errorReporter?.report(error)
+                return
+            }
+        }
+    }
+
+    /// One étagère's whole share of the write, in the order the plan grouped it:
+    /// create it if it is a draft, then take books off, then put books on.
+    ///
+    /// **Each call lands on its own.** The creation leaves the stack the instant the
+    /// server confirms it, even if the membership write that follows it fails — because
+    /// `add-items` drops what a shelf already holds and is therefore safe to send
+    /// twice, while a creation is not: replaying one that succeeded would make a second
+    /// étagère of the same name. What is left in the stack for a group that broke after
+    /// its creation is a plain fill of an étagère that now exists.
+    private func perform(
+        _ write: SortWritePlan.ShelfWrite,
+        shelfModel: ShelfModel,
+        modelContext: ModelContext
+    ) async throws {
+        let shelf: Shelf = try await resolveShelf(
+            write,
+            shelfModel: shelfModel,
+            modelContext: modelContext
+        )
+
+        if write.removals.isEmpty == false {
+            // Whatever of them the store still knows: a copy that has left the
+            // inventory has left the étagère with it, so there is nothing to ask the
+            // server to take off.
+            try await shelfModel.removeItemsAwaitingServer(
+                localItems(ids: write.removals, modelContext: modelContext),
+                from: shelf,
+                modelContext: modelContext
+            )
+            land(.booksRemoved(shelfId: shelf._id, bookIds: write.removals))
+        }
+
+        if write.additions.isEmpty == false {
+            let items: [InventoryItem] = localItems(ids: write.additions, modelContext: modelContext)
+            // The snapshot was taken from these very items minutes ago, so resolving
+            // none of them means the store moved under the run. Failing is honest;
+            // filing nothing and ticking the étagère off would leave the user an
+            // étagère they were told held books.
+            guard items.isEmpty == false else {
+                throw SortApplyFailure.booksNoLongerInInventory(shelfName: write.name)
+            }
+            try await shelfModel.addItemsAwaitingServer(items, to: shelf, modelContext: modelContext)
+            land(.booksAdded(shelfId: shelf._id, bookIds: write.additions))
+        }
+    }
+
+    /// The étagère this group writes to: created here if it is a draft, looked up in
+    /// the store if the server already holds it.
+    ///
+    /// A created draft's row in the ledger follows it: the section id changes from the
+    /// client draft to the server document, and the mark the user is watching must not
+    /// go back to unmarked because of it.
+    private func resolveShelf(
+        _ write: SortWritePlan.ShelfWrite,
+        shelfModel: ShelfModel,
+        modelContext: ModelContext
+    ) async throws -> Shelf {
+        switch write.section {
+        case .draft(let draftId):
+            // Created private, with no description, exactly as the shelf form's
+            // defaults produce: the surface asks for a name and a set of books, and
+            // inventing anything else on the user's behalf is not its business.
+            let created: Shelf = try await shelfModel.createShelfAwaitingServer(
+                name: write.name,
+                description: "",
+                visibility: [],
+                modelContext: modelContext
+            )
+            ledgerKeys[.shelf(created._id)] = Self.ledgerKey(for: write.section)
+            land(.shelfCreated(draftId: draftId, shelfId: created._id, name: write.name))
+            return created
+
+        case .shelf(let shelfId):
+            guard let shelf = localShelf(id: shelfId, modelContext: modelContext) else {
+                throw SortApplyFailure.shelfNoLongerExists(shelfName: write.name)
+            }
+            return shelf
+
+        case .unshelved:
+            // The pile is never an operation: a book dropped into it is a removal on
+            // the étagère it left, and nothing else. Unreachable by construction, and
+            // stated rather than crashed.
+            throw SortApplyFailure.shelfNoLongerExists(shelfName: write.name)
+        }
+    }
+
+    /// Folds one confirmed call back into the session: the snapshot gains what landed
+    /// and the stack keeps only what is left. The reduction is pure and lives in
+    /// `SortApplyLanding` — which is what makes "the remaining stack is exactly the
+    /// unlanded work" assertable without a store.
+    private func land(_ confirmation: SortApplyLanding.Confirmation) {
+        let landing: SortApplyLanding = .init(
+            snapshot: snapshot,
+            changes: changes,
+            confirmed: confirmation
+        )
+        snapshot = landing.snapshot
+        changes = landing.changes
+    }
+
+    /// What one section's row in the ledger is keyed by. The section's identity rather
+    /// than its name: two étagères may legitimately share a name — the server does not
+    /// enforce uniqueness — and a ledger that collapsed them would tick one off for the
+    /// other. A draft's client id is already prefixed, so it cannot collide with a
+    /// server document's.
+    private static func ledgerKey(for section: SortSection.ID) -> String {
+        switch section {
+        case .shelf(let id): "shelf:\(id)"
+        case .draft(let id): id
+        case .unshelved: "unshelved"
+        }
+    }
+
+    /// What mark one section carries, or `nil` for a section this run has nothing to do
+    /// to — which draws no mark at all, because an étagère nobody is writing to should
+    /// not look like one that is waiting its turn.
+    func applyOutcome(of section: SortSection.ID) -> AutoSortApplyProgress.ShelfOutcome? {
+        guard let applyProgress, let key = ledgerKeys[section] else { return nil }
+        return applyProgress.outcome(for: key)
+    }
+
+    private func localShelf(id: String, modelContext: ModelContext) -> Shelf? {
+        let descriptor: FetchDescriptor<Shelf> = .init(predicate: #Predicate { $0._id == id })
+        return try? modelContext.fetch(descriptor).first
+    }
+
+    private func localItems(ids: [String], modelContext: ModelContext) -> [InventoryItem] {
+        guard ids.isEmpty == false else { return [] }
+        let descriptor: FetchDescriptor<InventoryItem> = .init(
+            predicate: #Predicate { ids.contains($0._id) }
+        )
+        return (try? modelContext.fetch(descriptor)) ?? []
     }
 
     /// **Reads SwiftData exactly once, into value types, and never looks again.**

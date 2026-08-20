@@ -34,6 +34,10 @@ struct ManualSortSectionView: View {
     /// only place that can know a single section is the target.
     let isDropTarget: Bool
 
+    /// How far the running apply has got with this étagère, or `nil` when there is no
+    /// run or the run has nothing to do here.
+    let mark: AutoSortApplyProgress.ShelfOutcome?
+
     let onDrop: ([SortBookTransfer]) -> Bool
     let onTargeted: (Bool, ManualSortDropTarget) -> Void
 
@@ -59,7 +63,7 @@ struct ManualSortSectionView: View {
                 }
             }
         } header: {
-            ManualSortSectionHeader(section: section, status: status)
+            ManualSortSectionHeader(section: section, status: status, mark: mark)
                 .manualSortDropDestination(
                     target: .init(section: section.id, slot: .header),
                     onDrop: onDrop,

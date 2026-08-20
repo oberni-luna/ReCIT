@@ -8,8 +8,9 @@
 //  held stay in the inventory. See issue 0021.
 //
 //  Both writes come in two flavours: the optimistic, fire-and-forget one the menus
-//  use, and an awaiting one for the auto-sort apply, which has to know per étagère
-//  whether the write landed before it ticks it off. See PRD 0006.
+//  use, and an awaiting one for the batch applies — auto-sort (PRD 0006) and the
+//  sorting surface (PRD 0008) — which have to know per étagère whether the write
+//  landed before they tick it off.
 //
 //  Two passes: (1) `by-owners` upserts shelf metadata; (2) `by-ids&with-items`
 //  rebuilds the `Shelf ⇄ InventoryItem` relation from server membership. The second
@@ -393,6 +394,41 @@ final class ShelfModel: OptimisticMutating {
 
         try await sendMembership(
             action: "add-items",
+            shelf: shelf,
+            itemIds: itemIds,
+            modelContext: modelContext
+        )
+        try modelContext.save()
+    }
+
+    /// Takes several items off an étagère in one `remove-items` call and **waits** for
+    /// the server's answer.
+    ///
+    /// The awaiting counterpart of `removeItem`, and the mirror of
+    /// `addItemsAwaitingServer` above — same endpoint family, same payload, same
+    /// reconcile, same gate, only the direction differs. It exists for the sorting
+    /// surface's apply (PRD 0008), where a removal is one step of a batch whose outcome
+    /// has to be known per étagère before that étagère is ticked off: a move between two
+    /// étagères is a removal on one and an addition on the other, and the run cannot
+    /// claim either landed unless it waited for it.
+    ///
+    /// Items the shelf does not hold are dropped from the payload, and an empty payload
+    /// is a no-op — which is what makes calling this twice for the same books harmless,
+    /// and therefore what makes an apply that stopped partway safe to resume.
+    func removeItemsAwaitingServer(
+        _ items: [InventoryItem],
+        from shelf: Shelf,
+        modelContext: ModelContext
+    ) async throws {
+        let onShelf: Set<String> = .init(shelf.items.map(\._id))
+        let itemIds: [String] = items.map(\._id).filter { onShelf.contains($0) }
+        guard itemIds.isEmpty == false else { return }
+
+        Self.raiseMembershipGate()
+        defer { Self.lowerMembershipGate() }
+
+        try await sendMembership(
+            action: "remove-items",
             shelf: shelf,
             itemIds: itemIds,
             modelContext: modelContext

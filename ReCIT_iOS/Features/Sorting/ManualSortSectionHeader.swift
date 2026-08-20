@@ -16,6 +16,12 @@
 //  the apply leaves it alone. Its absence is the normal state, and it draws nothing
 //  at all in that case: see `ManualSortStatusPill`.
 //
+//  The apply mark leads the row, so the list reads as a checklist the moment a run
+//  starts ticking it off — the same reading the review screen's header already had, and
+//  the `Mark glyph` slot the design's header component carries. An étagère the run has
+//  nothing to do to gets no mark at all, so there is no reserved width either: a
+//  placeholder would be a mark of its own.
+//
 //  See PRD 0008.
 //
 
@@ -27,8 +33,16 @@ struct ManualSortSectionHeader: View {
     /// What this étagère's pill says, straight out of the write plan.
     let status: SortWritePlan.ShelfStatus
 
+    /// How far the running apply has got with this étagère, or `nil` when there is no
+    /// run or the run has nothing to do here.
+    let mark: AutoSortApplyProgress.ShelfOutcome?
+
     var body: some View {
         HStack(spacing: .small) {
+            if let mark {
+                ManualSortShelfMark(outcome: mark)
+            }
+
             title
                 .textStyle(.action300)
                 .foregroundStyle(.foregroundDefault)

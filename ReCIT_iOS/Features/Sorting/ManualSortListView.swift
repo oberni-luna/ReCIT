@@ -14,7 +14,8 @@
 //
 //  It owns exactly one piece of state: which drop destination the finger is over. That
 //  cannot live in a section, because only one section may be highlighted at a time and
-//  no section can see the others.
+//  no section can see the others. The apply, its marks and its report all belong to the
+//  session, which outlives this view — so leaving mid-run takes nothing away.
 //
 //  The buttons sit at the foot of the list rather than in a pinned bar. The design
 //  proposes a pinned bar; the list already stacks a tab bar under it, and two bars is
@@ -26,8 +27,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ManualSortListView: View {
+    @Environment(ShelfModel.self) private var shelfModel
+    @Environment(AppErrorReporter.self) private var errorReporter
+    @Environment(\.modelContext) private var modelContext
+
     let session: SortSessionModel
     let onFinish: () -> Void
 
@@ -47,14 +53,26 @@ struct ManualSortListView: View {
                     section: section,
                     status: plan.status(of: section.id),
                     isDropTarget: targeted?.section == section.id,
+                    mark: session.applyOutcome(of: section.id),
                     onDrop: { drop($0, onto: section.id) },
                     onTargeted: setTargeted
                 )
             }
 
+            // The account of the last run, once there has been one. It stays after the
+            // run settles — it is what a user who left mid-apply comes back for — and
+            // is replaced when the next run starts.
+            if let progress = session.applyProgress, progress.isFinished {
+                Section {
+                    ManualSortApplyReport(progress: progress)
+                }
+            }
+
             // Silent while nothing has been done — an empty stack has nothing to
             // recap. Once something has, the recap speaks even if it coalesces to
             // nothing, because the buttons are still offering to save and discard.
+            // After a run that stopped partway it describes exactly what is left,
+            // which is the same thing pressing the button again would send.
             if plan.hasPendingChanges {
                 Section {
                     ManualSortRecapView(plan: plan)
@@ -64,11 +82,8 @@ struct ManualSortListView: View {
             Section {
                 ManualSortActionBar(
                     hasPendingChanges: session.hasPendingChanges,
-                    // Live as soon as there is something to save, and doing nothing
-                    // yet: applying is slice 0040. The alternative — keeping it
-                    // disabled until the write exists — would put the button rule on
-                    // a flag, which is exactly what PRD 0008 forbids.
-                    onApply: {},
+                    isApplying: session.isApplying,
+                    onApply: apply,
                     onDiscard: session.discardChanges,
                     onFinish: onFinish
                 )
@@ -76,6 +91,16 @@ struct ManualSortListView: View {
             .listRowBackground(DesignSystem.Color.clear.color)
         }
         .applyListBackground()
+    }
+
+    /// Fires the run and returns. The writes are owned by the session, so this screen
+    /// can go away without stopping them or losing the ledger of what landed.
+    private func apply() {
+        session.apply(
+            shelfModel: shelfModel,
+            errorReporter: errorReporter,
+            modelContext: modelContext
+        )
     }
 
     /// One drop, one change. The origin travels with the book, so the stack records

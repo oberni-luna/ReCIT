@@ -21,7 +21,17 @@
 //  validated mapping canonicalises names and deduplicates them, so within one plan a
 //  name identifies a shelf.
 //
-//  No store, no network, no SwiftUI. See PRD 0006.
+//  **A key apart from the name, for the manual sorting surface (PRD 0008).** That run
+//  writes to étagères that already exist as well as to drafted ones, and two of them
+//  may legitimately share a name — the server does not enforce uniqueness — so a
+//  ledger keyed on the name would collapse two rows into one and misreport which of
+//  them landed. It also has to survive a draft becoming a real étagère mid-run, which
+//  changes the section's id but not its name. So an entry now carries a stable `key`
+//  beside the `name` the report reads out, and the auto-sort path keeps passing names
+//  as both — which is exactly what it did before. Nothing else changed: the same
+//  vocabulary, the same reduction, the same three-part account.
+//
+//  No store, no network, no SwiftUI. See PRD 0006 / PRD 0008.
 //
 
 import Foundation
@@ -56,37 +66,64 @@ struct AutoSortApplyProgress: Equatable, Sendable {
         case stopped(landed: [String], failed: [String], notAttempted: [String])
     }
 
-    /// The proposed étagères, in the order phase 1 declared them.
-    let shelfNames: [String]
+    /// One étagère of the run: what identifies it while the run goes, and what the
+    /// report calls it afterwards. The two coincide for a plan whose names are already
+    /// canonical and unique (auto-sort); they differ on the sorting surface, where a
+    /// section's identity is its id and its name is user data.
+    struct Entry: Equatable, Sendable {
+        let key: String
+        let name: String
+
+        init(key: String, name: String) {
+            self.key = key
+            self.name = name
+        }
+
+        /// The étagère whose name *is* its identity — an auto-sort proposal.
+        init(name: String) {
+            self.init(key: name, name: name)
+        }
+    }
+
+    /// The étagères of the run, in the order they will be written.
+    let entries: [Entry]
 
     private var outcomes: [String: ShelfOutcome]
 
-    /// Duplicates are collapsed on the way in, so `shelfNames` and the outcome keys
+    /// Duplicates are collapsed on the way in, so `entries` and the outcome keys
     /// cannot disagree about how many étagères there are.
-    init(shelfNames: [String]) {
-        var ordered: [String] = []
+    init(entries: [Entry]) {
+        var ordered: [Entry] = []
         var outcomes: [String: ShelfOutcome] = [:]
-        for name in shelfNames where outcomes[name] == nil {
-            outcomes[name] = .pending
-            ordered.append(name)
+        for entry in entries where outcomes[entry.key] == nil {
+            outcomes[entry.key] = .pending
+            ordered.append(entry)
         }
-        self.shelfNames = ordered
+        self.entries = ordered
         self.outcomes = outcomes
     }
 
-    /// A name the ledger does not know reads as `pending` rather than trapping: the
-    /// list draws a mark per row, and a row it has no record of has plainly not been
-    /// done.
-    func outcome(for shelfName: String) -> ShelfOutcome {
-        outcomes[shelfName] ?? .pending
+    /// A run whose étagères are identified by their names.
+    init(shelfNames: [String]) {
+        self.init(entries: shelfNames.map { .init(name: $0) })
     }
 
-    /// Records an outcome. A name the ledger does not know is ignored — the ledger is
-    /// built from the plan being applied, so an unknown name is a caller bug and
+    /// The proposed étagères, in the order phase 1 declared them.
+    var shelfNames: [String] { entries.map(\.name) }
+
+    /// An étagère the ledger does not know reads as `pending` rather than trapping:
+    /// the list draws a mark per row, and a row it has no record of has plainly not
+    /// been done.
+    func outcome(for key: String) -> ShelfOutcome {
+        outcomes[key] ?? .pending
+    }
+
+    /// Records an outcome. An étagère the ledger does not know is ignored — the ledger
+    /// is built from the plan being applied, so an unknown key is a caller bug and
     /// inventing a row for it would put an étagère on screen that was never proposed.
-    mutating func mark(_ outcome: ShelfOutcome, for shelfName: String) {
-        guard outcomes[shelfName] != nil else { return }
-        outcomes[shelfName] = outcome
+    mutating func mark(_ outcome: ShelfOutcome, for key: String) {
+        guard outcomes[key] != nil else { return }
+        outcomes[key] = outcome
     }
 
     /// The étagères that exist and hold their books, in review order.
@@ -110,7 +147,7 @@ struct AutoSortApplyProgress: Equatable, Sendable {
     /// étagère may exist empty, so lumping it in with the untouched ones would misstate
     /// what the user owns.
     var notLandedNames: [String] {
-        shelfNames.filter { outcome(for: $0) != .landed }
+        entries.filter { outcome(for: $0.key) != .landed }.map(\.name)
     }
 
     var landedCount: Int { landedNames.count }
@@ -129,7 +166,7 @@ struct AutoSortApplyProgress: Equatable, Sendable {
     }
 
     private func names(matching outcome: ShelfOutcome) -> [String] {
-        shelfNames.filter { self.outcome(for: $0) == outcome }
+        entries.filter { self.outcome(for: $0.key) == outcome }.map(\.name)
     }
 
     var isFinished: Bool {

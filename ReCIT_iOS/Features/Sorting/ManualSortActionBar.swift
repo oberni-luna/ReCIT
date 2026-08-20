@@ -13,8 +13,11 @@
 //  once more something to discard. A sticky flag would leave the screen's only
 //  destructive button labelled « Terminer » — see PRD 0008.
 //
-//  Only the empty branch is reachable in this slice, and the rule is written whole
-//  anyway, so the slices that fill the stack change nothing here.
+//  **While a run is writing, both buttons stand down.** The escape hatch is withdrawn
+//  for the duration exactly as the auto-sort screen withdraws its toolbar exit:
+//  discarding a stack that is halfway through being written, or firing a second run on
+//  top of the first, would both destroy the account of what landed. The writes
+//  themselves are owned by the session and carry on regardless of this screen.
 //
 //  « Proposer un rangement » is absent rather than disabled while the AI proposal is
 //  unbuilt (slice 0042): a button that does nothing is worse than no button, and the
@@ -30,6 +33,10 @@ struct ManualSortActionBar: View {
     /// The one input the whole bar is derived from.
     let hasPendingChanges: Bool
 
+    /// Whether a run is writing right now. It disables rather than relabels: what the
+    /// buttons would say is still true, they are simply not offered.
+    let isApplying: Bool
+
     let onApply: () -> Void
     let onDiscard: () -> Void
     let onFinish: () -> Void
@@ -38,13 +45,14 @@ struct ManualSortActionBar: View {
         VStack(spacing: .small) {
             Button("manual_sort.apply", action: onApply)
                 .buttonStyle(.primary())
-                .disabled(hasPendingChanges == false)
+                .disabled(hasPendingChanges == false || isApplying)
 
             Button(
                 hasPendingChanges ? "manual_sort.discard" : "manual_sort.finish",
                 action: hasPendingChanges ? onDiscard : onFinish
             )
             .buttonStyle(.secondary())
+            .disabled(isApplying)
         }
         .frame(maxWidth: .infinity)
     }

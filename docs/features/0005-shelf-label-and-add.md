@@ -8,6 +8,12 @@ Shipped on 2026-08-19 from PRD `docs/prd/0003-shelf-label-and-add-affordances.md
 > The étagère's name is no longer a grey caption with a pencil beside it, and editing a shelf
 > is no longer reachable from its card at all.
 
+> **Amended by PRD `docs/prd/0006-ai-auto-sort.md` (issue
+> `issues/0025-auto-sort-entry-points-availability.md`).** The empty shelf card still takes a
+> press anywhere on it, but that press now starts the automatic shelving flow; opening the
+> create form is what it falls back to on a device that cannot run Apple Intelligence. See
+> "The empty card's press" below.
+
 ## What it does
 
 An étagère's name is now a **label**: a small white paper tag with rounded corners, lifted by a
@@ -29,9 +35,8 @@ the "Étagères" section header, reachable at any time. The trailing create card
 
 A user with no étagère at all sees a single empty shelf — wash and plank, no books — carrying a
 label in the same hand-applied style reading "Todo : ranger mes livres dans une étagère", centred
-over two lines and with no chevron, since it opens a form rather than pushing a screen. Pressing
-anywhere on that card opens the create form, and the card disappears the moment the first
-étagère exists.
+over two lines and with no chevron. Pressing anywhere on that card acts on the note it carries,
+and the card disappears the moment the first étagère exists.
 
 ## Technical surface
 
@@ -49,8 +54,9 @@ anywhere on that card opens the create form, and the card disappears the moment 
   no longer owns an edit sheet. The label overlaps the plank by 14pt from its own top.
 - `ShelfDetailView` gains the `.primaryAction` toolbar button, gated on the `@Query` lookup
   resolving, and owns the `ShelfFormView` sheet.
-- `ShelvesContent` renders the header with its action, owns the create sheet for both entry
-  points, and picks the empty card *or* the carousel — never both.
+- `ShelvesContent` renders the header with its action, owns the create sheet its entry points
+  open, and picks the empty card *or* the carousel — never both. (Since issue 0025 it also
+  decides what the empty card's press means; see "The empty card's press".)
 - `ShelfCreateCardView` becomes `ShelfEmptyStateView`: no "+" glyph, a label instead, and its
   plank metrics come from `ShelfCardMetrics` instead of three private copies of them.
 - `ShelfFocusBookCell` drops its literal shadow for `.shadow(.light)`; the other five documented
@@ -105,6 +111,27 @@ anywhere on that card opens the create form, and the card disappears the moment 
 - The empty card carries **no "+" glyph and no chevron**: the header owns creation now, a UI
   symbol floating inside a painted illustration reads as pasted on, and a chevron would promise
   a push where a sheet opens.
+
+## The empty card's press
+
+*Amended after this feature shipped, by PRD 0006 / issue 0025.*
+
+As shipped here, a press anywhere on the empty card opened the create form. It now starts the
+automatic shelving flow instead: the label reads as a note to tidy one's books, so acting on it
+by doing exactly that is what the card was already promising. The create form is what the press
+falls back to on a device that cannot run Apple Intelligence — the card *is* the empty state, so
+it can be neither hidden nor made inert, and it must always lead somewhere.
+
+Two things about this feature are what make the change cheap. The tap target was already the
+whole card rather than the label alone, so nothing about the hit testing moves — splitting a
+painted card into two hit zones is the problem removing the pencil solved, and it is not
+reintroduced here. And creation had already moved to the section header's "Ajouter", so handing
+the card's press to something else costs the user no route.
+
+The card still carries no chevron, and now for a second reason on top of its centred text: where
+the press leads depends on the device, so a chevron would promise a push that only sometimes
+happens. `ShelfEmptyStateView` is unchanged beyond its comments — it paints an empty shelf and
+reports a press; `ShelvesContent` decides what that press means.
 
 ## Tuning
 

@@ -9,11 +9,18 @@
 //  shows it, so its form belongs to this screen's navigation bar rather than to the card
 //  that led here. See PRD 0003.
 //
+//  Tidying is a gesture here rather than a trip through the book screen's menu: swiping a
+//  row takes the book off *this* étagère, through the same optimistic write the menu calls.
+//  See PRD 0004.
+//
 
 import SwiftUI
 import SwiftData
 
 struct ShelfDetailView: View {
+    @Environment(ShelfModel.self) private var shelfModel
+    @Environment(\.modelContext) private var modelContext
+
     let shelfId: String
     @Binding var path: NavigationPath
 
@@ -39,10 +46,27 @@ struct ShelfDetailView: View {
                 Text("Cette étagère est vide")
                     .textStyle(.action200)
                     .foregroundStyle(.foregroundSecondary)
-            } else {
+            } else if let shelf {
                 ForEach(books) { item in
                     NavigationLink(value: NavigationDestination.book(anchor: .item(item))) {
                         InventoryCell(item: item, filterParameter: .userInventory)
+                    }
+                    // Neither destructive nor red: nothing is deleted here — the copy stays
+                    // in the inventory and on every other étagère — and red would teach the
+                    // user to fear an action that costs one tap to undo. That means giving
+                    // up the trailing-swipe red iOS uses for removal, deliberately. The icon
+                    // lifts the book off the stack rather than binning it, and matches the
+                    // book menu's own remove entry.
+                    //
+                    // Full swipe left on: the write is cheap and reversible, and clearing
+                    // several books off a shelf shouldn't cost a tap each.
+                    //
+                    // The label names the étagère instead of saying "a shelf" — the screen
+                    // already stands for one, and a long name simply truncates.
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button("action.remove_from_shelf_named \(shelf.name)", systemImage: "tray.and.arrow.up") {
+                            shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
+                        }
                     }
                 }
             }

@@ -1867,6 +1867,40 @@
         }
       }
     },
+    "shelf.empty.note.scan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo\n☐ Scan my books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo\n☐ Scanner mes livres"
+          }
+        }
+      }
+    },
+    "shelf.empty.note.sort" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo\n☐ Sort my books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo\n☐ Ranger mes livres"
+          }
+        }
+      }
+    },
     "Supprimer cette étagère ?" : {
 
     },

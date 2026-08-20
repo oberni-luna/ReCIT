@@ -10,6 +10,12 @@
 //  under the plank the way a real étagère's name is. That difference is the point: a shelf
 //  label names a shelf, and this one is a reminder left on an empty one.
 //
+//  What the reminder says is passed in, as a `ShelfEmptyStateErrand`: since PRD 0007 the note
+//  states the next useful thing rather than one fixed errand — scanning while the inventory is
+//  empty, arranging once there are books on no étagère. This view paints the errand and
+//  reports a press; the errand and the destination that press opens are decided together, in
+//  one place, by `ShelvesContent`.
+//
 //  It is *not* a carousel item, which is why it isn't drawn inside one: it is the
 //  alternative to the carousel rather than one card among many. A horizontal, snapping,
 //  view-aligned scroll view holding a single card would offer a paging gesture with
@@ -20,19 +26,18 @@
 //  floating inside a painted illustration read as pasted on.
 //
 //  It does carry a chevron, which it did not when it opened a create sheet. Since PRD 0006
-//  the card leads into the auto-sort flow — a push — so the chevron stopped being a lie.
-//  On a device that cannot run Apple Intelligence `ShelvesContent` still sends the press to
-//  the create form, so the glyph over-promises there; that is the cheaper wrong than a card
-//  whose affordance changes shape depending on the hardware.
-//
-//  Which of the two it is, is deliberately not this view's business: it paints an empty
-//  shelf and reports a press. The page knows what the app can currently do.
+//  the press leads out of this screen and into a flow of its own, and it still does whichever
+//  errand the note carries, so the glyph promises no more than it delivers. It says "this
+//  goes somewhere", which is true of both destinations; it is not a claim about a push rather
+//  than a cover.
 //
 
 import SwiftUI
 
 struct ShelfEmptyStateView: View {
     let width: CGFloat
+    /// What the note asks for. Decided by `ShelvesContent`, together with where the press goes.
+    let errand: ShelfEmptyStateErrand
     let onTap: () -> Void
 
     private var metrics: ShelfCardMetrics { .init(width: width) }
@@ -74,7 +79,7 @@ struct ShelfEmptyStateView: View {
                 // band keeps its full height regardless, so the plank lands where it does
                 // on a populated card.
                 ShelfLabelView(
-                    text: "Todo\n☐ Ranger mes livres",
+                    text: errand.noteText,
                     maxWidth: metrics.booksWidth,
                     lineLimit: 2
                 )

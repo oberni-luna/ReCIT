@@ -20,9 +20,14 @@ struct ShelvesContent: View {
     @Environment(ShelfFocusModel.self) private var focus
 
     /// Presents the create-shelf form, from the section header's "Ajouter" action — the only
-    /// thing that opens it now that the empty-state card leads into the auto-sort flow
-    /// instead.
+    /// thing that opens it, now that the empty-state card runs an errand of its own. That
+    /// header is the manual route, and it is the reason the card is free to lead elsewhere.
     @State private var isCreatingShelf: Bool = false
+
+    /// Presents the batch scanner, from the empty-state card when the inventory is empty.
+    /// A cover rather than a push, on `MainSearchView`'s pattern: the scanner owns its own
+    /// navigation stack, and leaving it comes back here rather than unwinding this tab's path.
+    @State private var isScanning: Bool = false
 
     @Query private var shelves: [Shelf]
     @Query private var myItems: [InventoryItem]
@@ -72,7 +77,11 @@ struct ShelvesContent: View {
                     // One or the other, never both: with no étagère there is nothing to
                     // page through, so the empty shelf stands in place of the carousel.
                     if shelves.isEmpty {
-                        ShelfEmptyStateView(width: cardWidth, onTap: tapEmptyShelf)
+                        ShelfEmptyStateView(
+                            width: cardWidth,
+                            errand: emptyShelfErrand,
+                            onTap: tapEmptyShelf
+                        )
                             // Parked where the carousel's first card would be, so the
                             // first real étagère appears exactly here.
                             .padding(.horizontal, horizontalPadding)
@@ -90,22 +99,55 @@ struct ShelvesContent: View {
                 .sheet(isPresented: $isCreatingShelf) {
                     ShelfFormView()
                 }
+                .fullScreenCover(isPresented: $isScanning) {
+                    BatchScanView()
+                }
             }
         }
     }
 
-    /// The empty shelf's label reads as a note to tidy one's books, so pressing it does
-    /// exactly that: it starts the auto-sort flow. Always — including where Apple
-    /// Intelligence cannot run, in which case the flow says so.
+    /// What the empty card's note asks for — and, through the switch in `tapEmptyShelf`, where
+    /// its press goes. The label and the destination both read this one property, so they are a
+    /// single decision rather than two that have to be kept in step.
     ///
-    /// It used to fall back to the create form on an ineligible device, on the grounds that
-    /// this card is the empty state and must lead somewhere. Somewhere turned out to be the
-    /// wrong somewhere: a note about tidying books that opens a create-shelf form is a
-    /// non-sequitur, and the fallback was silent, so it read as the wrong screen rather than
-    /// as an unsupported device. The manual route was never lost either way — the section
-    /// header's "Ajouter" creates an étagère by hand.
+    /// The card only appears when the user has no étagère, so the inventory is the whole
+    /// question: no books, nothing to arrange yet. Reading an empty `@Query` as "empty" is only
+    /// honest because `ShelvesView` reaches this content once the inventory has synced at least
+    /// once — otherwise "empty" could as easily mean "not arrived yet", and the note would
+    /// invite a user with three hundred books to go and scan them.
+    private var emptyShelfErrand: ShelfEmptyStateErrand {
+        .init(ownsBooks: !myItems.isEmpty)
+    }
+
+    /// The empty shelf's note states the next useful thing, and pressing it does that thing:
+    /// with an empty inventory, scanning books in; with books already owned and no étagère to
+    /// put them on, arranging them automatically. Both are the same promise kept — the note is
+    /// read, then acted on. See PRD 0007.
+    ///
+    /// **This card had a second destination once and it was deliberately removed, so putting
+    /// one back has to say how it differs.** What PRD 0006 took out was a *silent* substitution
+    /// keyed on hardware: a note reading "Ranger mes livres" that opened a create-shelf form on
+    /// a device where Apple Intelligence cannot run. The wording never changed, so the user had
+    /// no way to see why they had landed on a form about naming a shelf — it read as the wrong
+    /// screen rather than as an unsupported device, and the substitution hid the actual reason
+    /// entirely. That fallback stays gone: on every device a note about tidying books leads into
+    /// the auto-sort flow, and the flow itself states when it cannot run.
+    ///
+    /// What is different here is that the note changes with the state, so the affordance is
+    /// stated before it is used. Nothing is substituted behind the label; the label *is* the
+    /// state, and it and this switch come from the same `emptyShelfErrand`, so they cannot
+    /// disagree. The rule that survives from 0006 is the one that mattered all along: a card
+    /// must never open something other than what its label promises.
+    ///
+    /// The manual route is untouched either way — the section header's "Ajouter" creates an
+    /// étagère by hand.
     private func tapEmptyShelf() {
-        path.append(NavigationDestination.autoSort)
+        switch emptyShelfErrand {
+        case .scan:
+            isScanning = true
+        case .sort:
+            path.append(NavigationDestination.autoSort)
+        }
     }
 
     /// Horizontal, snapping carousel of shelf cards (~86% width, next card peeking).

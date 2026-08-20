@@ -154,6 +154,13 @@ struct ProfileView: View {
                     }
                 )
             }
+
+            // Scaffolding, and last on the screen so it reads as such. Both onboarding
+            // screens are meant to be seen once, which leaves no way to look at them again
+            // without one. Absent from Release builds — see `ProfileDebugSection`.
+            #if DEBUG
+            ProfileDebugSection(path: $path)
+            #endif
         }
         .applyListBackground()
     }

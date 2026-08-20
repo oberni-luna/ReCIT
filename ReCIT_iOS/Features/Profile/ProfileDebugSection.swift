@@ -29,6 +29,8 @@ struct ProfileDebugSection: View {
     @Binding var path: NavigationPath
 
     @Environment(AutoSortModel.self) private var autoSortModel
+    @Environment(OnboardingStore.self) private var onboarding
+    @Environment(UserModel.self) private var userModel
 
     /// Every book the store holds, filtered in Swift rather than in the predicate:
     /// SwiftData cannot express an empty to-many, which is the same reason
@@ -49,6 +51,29 @@ struct ProfileDebugSection: View {
         allItems.filter(\.shelves.isEmpty).count
     }
 
+    /// The user's own books, which is what the accueil's condition counts — the same filter
+    /// `OnboardingWelcomeModifier` applies, so the state reported here is the state that
+    /// decides.
+    private var ownedBookCount: Int {
+        guard let ownerId: String = userModel.myUser?._id else { return 0 }
+
+        return allItems.filter { $0.ownerId == ownerId }.count
+    }
+
+    /// Whether the accueil would present itself right now, asked of the same rule the app
+    /// asks. Shown next to the button that forgets the answer, because forgetting it is only
+    /// half of the condition: an inventory holding books suppresses the accueil regardless,
+    /// and without this line the button would look broken every time it did nothing.
+    private var welcomeWouldShow: Bool {
+        guard let user: User = userModel.myUser else { return false }
+
+        return OnboardingGate.presentsWelcome(
+            inventoryHasSynced: user.lastInventorySync != nil,
+            ownedBookCount: ownedBookCount,
+            welcomeAnswered: onboarding.hasAnsweredWelcome(userId: user._id)
+        )
+    }
+
     private var autoSortEntryPoint: AutoSortEntryPoint {
         .init(availability: autoSortModel.availability)
     }
@@ -65,7 +90,17 @@ struct ProfileDebugSection: View {
             }
             .foregroundStyle(.foregroundTinted)
 
-            Text("\(unshelvedCount) livre(s) sur aucune étagère · Apple Intelligence : \(availabilityLabel)")
+            // The accueil in situ: presented by the gate rather than by a button, which is
+            // the one path the two rows above cannot exercise. Its binding is derived, so
+            // this takes effect at once where the conditions hold — not at the next launch.
+            Button("Rejouer l'accueil en situation") {
+                guard let userId: String = userModel.myUser?._id else { return }
+
+                onboarding.resetWelcome(userId: userId)
+            }
+            .foregroundStyle(.foregroundTinted)
+
+            Text(stateLine)
                 .textStyle(.footnote200)
                 .foregroundStyle(.foregroundSecondary)
         }
@@ -98,6 +133,16 @@ struct ProfileDebugSection: View {
                 onLater: { isPresentingTally = false }
             )
         }
+    }
+
+    /// Everything the two conditions depend on, in one line, so a row that does nothing can
+    /// be told from a row that is broken.
+    private var stateLine: String {
+        let welcome: String = welcomeWouldShow
+            ? "l'accueil s'affiche"
+            : "l'accueil ne s'affiche pas (\(ownedBookCount) livre(s) en inventaire)"
+
+        return "\(unshelvedCount) livre(s) sur aucune étagère · Apple Intelligence : \(availabilityLabel) · \(welcome)"
     }
 
     private var availabilityLabel: String {

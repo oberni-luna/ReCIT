@@ -16,8 +16,9 @@
 //  into its key — never with a ternary in Swift, which is what the auto-sort screens do and what
 //  makes them read as machine-generated for one book.
 //
-//  The plank is bare here as it is on the accueil, and only for now: the user's own covers
-//  settling onto it is the payoff of the whole sequence, and it arrives with its own slice.
+//  The plank is not bare here as it is on the accueil: it carries the user's own covers, settling
+//  onto it one at a time. That is the payoff of the whole sequence, and it is the illustration's
+//  own business — see `OnboardingScanTallyIllustrationView`.
 //
 //  The screen decides nothing. Whether it is owed is `OnboardingGate`'s answer and the scanning
 //  session's to ask; where each answer leads is the session's too, since it owns the navigation
@@ -38,7 +39,7 @@ struct OnboardingScanTallyView: View {
             title: Text("onboarding.tally.title \(addedBookCount)"),
             message: Text("onboarding.tally.body")
         ) {
-            OnboardingPlankView()
+            OnboardingScanTallyIllustrationView()
         } actions: {
             OnboardingActions(
                 primaryTitle: "onboarding.tally.sort",

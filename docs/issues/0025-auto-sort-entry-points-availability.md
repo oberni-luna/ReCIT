@@ -40,6 +40,13 @@ Not one blanket "unavailable":
 The empty card cannot be hidden — it *is* the empty state. On an ineligible device it falls
 back to opening the create form, which is its behaviour today, so it is never a dead end.
 
+> **Amended after shipping.** This was built as specified and then removed. A card reading
+> "Todo — ☐ Ranger mes livres" that silently opens a *create-shelf* form does not read as
+> "your device cannot do this", it reads as the wrong screen — and because the fallback was
+> silent, the failure was invisible. The card now always leads into the flow, which states
+> the reason out loud. The manual route was never at risk either way: the section header's
+> "Ajouter" creates an étagère by hand. `AutoSortEntryPoint.reachesFlow` was deleted with it.
+
 ### This supersedes shipped behaviour
 
 Issue 0011 shipped with the criterion *"Tapping anywhere on the card opens the create form"*.
@@ -53,7 +60,7 @@ one thing and the app will do another otherwise.
 - [ ] The section header's "Ajouter" action still creates an étagère by hand.
 - [ ] The settings screen offers auto-sort, and reaches it for a user who already has étagères.
 - [ ] On an ineligible device the settings entry point is not shown.
-- [ ] On an ineligible device the empty-state card opens the create form instead, exactly as it does today.
+- [ ] ~~On an ineligible device the empty-state card opens the create form instead, exactly as it does today.~~ *(Withdrawn — see the amendment above. The card leads into the flow on every device; the flow says why it cannot run.)*
 - [ ] With Apple Intelligence switched off, the entry point is shown with an explanation and a route to Settings.
 - [ ] With the model still downloading, the entry point is shown disabled and described as temporarily unavailable.
 - [ ] Enabling Apple Intelligence and returning to the app makes the feature usable without a relaunch.

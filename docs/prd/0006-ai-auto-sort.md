@@ -177,7 +177,11 @@ costs what a three-hundred-book one costs.
   splitting a painted card into two hit zones is the problem the shelf card's pencil removal
   solved.
 - **On an ineligible device the empty card falls back to opening the create form**, which is
-  its behaviour today, so it is never a dead end.
+  its behaviour today, so it is never a dead end. *(Reversed in implementation: the card leads
+  into the flow on every device, and the flow states the reason. A note about tidying books
+  that silently opens a create-shelf form reads as the wrong screen, not as an unsupported
+  device — and the silence made the failure invisible. The card is still never a dead end; it
+  just says what is wrong instead of substituting a different feature.)*
 
 ## Testing Decisions
 
@@ -226,9 +230,8 @@ costs what a three-hundred-book one costs.
   decision — the bounded cost, the validation seam, the deterministic mutation — falls out of
   that split.
 - This PRD supersedes part of PRD 0003. Issue 0011 shipped with the empty-state card opening
-  the create form on any tap; that becomes the *fallback* behaviour for devices where the AI
-  is unavailable. That issue's acceptance criteria and feature doc need amending rather than
-  being left to drift.
+  the create form on any tap; the card now leads into this flow instead, on every device.
+  That issue's acceptance criteria and feature doc were amended rather than left to drift.
 - Shelf deletion is listed here as a prerequisite because this feature creates the need for
   it, but it is independently useful and could ship on its own at any time.
 - Genre enrichment adds a second reason to want the entity sync reworked; the membership

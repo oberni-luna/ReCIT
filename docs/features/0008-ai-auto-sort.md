@@ -5,8 +5,8 @@ Shipped on 2026-08-20 from PRD `docs/prd/0006-ai-auto-sort.md`
 `issues/0025-auto-sort-entry-points-availability.md`).
 
 > Amends `docs/features/0005-shelf-label-and-add.md`: the empty-state étagère card, which
-> shipped opening the create form on any tap, now starts this flow — and falls back to the
-> create form only where Apple Intelligence cannot run.
+> shipped opening the create form on any tap, now starts this flow on every device. Where
+> Apple Intelligence cannot run, the flow says so.
 
 ## What it does
 
@@ -82,6 +82,12 @@ Everything runs on the phone. No book list leaves the device.
   with a route to Settings; a model still downloading is shown inert and described as
   temporary. Availability is read fresh and the model type is observable, so enabling it and
   returning needs no relaunch.
+- **Hiding applies only to the entry point that can be hidden** — the settings one. The
+  empty-state étagère card is the empty state itself, so it always leads into the flow and the
+  flow states the reason. It briefly fell back to the create form on an ineligible device
+  instead; that was removed within the day, because a note about tidying books that silently
+  opens a create-shelf form reads as the wrong screen rather than as an unsupported device,
+  and a silent substitution hides the failure entirely.
 
 ## Known gaps
 

@@ -18,11 +18,10 @@ struct ShelvesContent: View {
 
     @Environment(\.isSearching) private var isSearching
     @Environment(ShelfFocusModel.self) private var focus
-    @Environment(AutoSortModel.self) private var autoSortModel
 
-    /// Presents the create-shelf form — from the section header's "Ajouter" action, or from
-    /// the empty-state card on a device where auto-sort cannot run, which is why the sheet
-    /// hangs off the page rather than off the carousel.
+    /// Presents the create-shelf form, from the section header's "Ajouter" action — the only
+    /// thing that opens it now that the empty-state card leads into the auto-sort flow
+    /// instead.
     @State private var isCreatingShelf: Bool = false
 
     @Query private var shelves: [Shelf]
@@ -30,13 +29,6 @@ struct ShelvesContent: View {
 
     private let horizontalPadding: CGFloat = 12
     private let gutter: CGFloat = 14
-
-    /// What the empty-state card does when pressed. Derived on every render, so the day
-    /// the user switches Apple Intelligence on the card starts offering the sort without
-    /// a relaunch — `SystemLanguageModel` is observable and this reads it.
-    private var autoSortEntryPoint: AutoSortEntryPoint {
-        .init(availability: autoSortModel.availability)
-    }
 
     init(user: User, searchText: String, path: Binding<NavigationPath>) {
         self.user = user
@@ -103,18 +95,17 @@ struct ShelvesContent: View {
     }
 
     /// The empty shelf's label reads as a note to tidy one's books, so pressing it does
-    /// exactly that: it starts the auto-sort flow. The manual route is not lost — the
-    /// section header's "Ajouter" still creates an étagère by hand.
+    /// exactly that: it starts the auto-sort flow. Always — including where Apple
+    /// Intelligence cannot run, in which case the flow says so.
     ///
-    /// On a device that cannot run Apple Intelligence it opens the create form instead,
-    /// which is what it did before auto-sort existed. This card *is* the empty state, so
-    /// it can be neither hidden nor made inert; it must always lead somewhere.
+    /// It used to fall back to the create form on an ineligible device, on the grounds that
+    /// this card is the empty state and must lead somewhere. Somewhere turned out to be the
+    /// wrong somewhere: a note about tidying books that opens a create-shelf form is a
+    /// non-sequitur, and the fallback was silent, so it read as the wrong screen rather than
+    /// as an unsupported device. The manual route was never lost either way — the section
+    /// header's "Ajouter" creates an étagère by hand.
     private func tapEmptyShelf() {
-        if autoSortEntryPoint.reachesFlow {
-            path.append(NavigationDestination.autoSort)
-        } else {
-            isCreatingShelf = true
-        }
+        path.append(NavigationDestination.autoSort)
     }
 
     /// Horizontal, snapping carousel of shelf cards (~86% width, next card peeking).

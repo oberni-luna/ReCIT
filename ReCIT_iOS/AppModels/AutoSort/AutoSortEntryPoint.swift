@@ -23,6 +23,12 @@ enum AutoSortEntryPoint: Equatable {
     /// Offer it plainly.
     case offered
     /// Show nothing at all. The device cannot run the feature and never will.
+    ///
+    /// This governs entry points that *can* be hidden — the settings screen's. It does not
+    /// govern the empty-state étagère card, which is the empty state itself and so always
+    /// leads into the flow: what a card reading "Todo — Ranger mes livres" must never do is
+    /// open a create-shelf form, which answers a question nobody asked. The flow says why it
+    /// cannot run instead.
     case hidden
     /// Show it, say Apple Intelligence is off, and point at Settings.
     case switchedOff
@@ -56,13 +62,4 @@ enum AutoSortEntryPoint: Equatable {
         self == .switchedOff
     }
 
-    /// Whether an entry point that *cannot* be hidden should still lead into the flow.
-    /// The empty-state étagère card is the empty state itself, so hiding it is not an
-    /// option: on an ineligible device it falls back to the create form — its behaviour
-    /// before this existed — and for the two temporary reasons it opens the flow anyway,
-    /// where the wall states which one it is. Silently opening a create form there would
-    /// answer a question the user never asked.
-    var reachesFlow: Bool {
-        self != .hidden
-    }
 }

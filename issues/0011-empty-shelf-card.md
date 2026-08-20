@@ -55,11 +55,20 @@ card.
 
 **Amended by `issues/0025-auto-sort-entry-points-availability.md` (PRD 0006), shipped after
 this one.** The card's tap *target* is unchanged — the whole card, never a second hit zone —
-but where that tap leads now depends on what the device can do. It starts the automatic
-shelving flow, and opens the create form only where Apple Intelligence cannot run, since the
-flow could never work there and this card is the empty state and so can never be a dead end.
-The manual create path is not lost: the section header's "Ajouter" action covers it, which is
-part of why the create action moved there in the first place.
+but where that tap leads has moved: it starts the automatic shelving flow, on every device.
+Where Apple Intelligence cannot run, the flow itself says so. The manual create path is not
+lost: the section header's "Ajouter" action covers it, which is part of why the create action
+moved there in the first place.
 
-Everything else recorded here stands as shipped: the label and its wording, the retired "+"
-glyph, the absent chevron, the two-line centred text, the plank alignment and the rename.
+0025 first shipped a fallback — the create form on an ineligible device — and it was removed
+within the day. A note about tidying books that silently opens a create-shelf form does not
+read as an unsupported device; it reads as the wrong screen. Saying the reason beats
+substituting a different feature for it.
+
+**Also amended by the design pass that followed.** The label now reads "Todo / ☐ Ranger mes
+livres" over two lines, rests *on* the shelf in the band where books would stand rather than
+hanging under the plank, and does carry a chevron — which it could not honestly do while it
+opened a sheet, and can now that it pushes a screen.
+
+Everything else recorded here stands as shipped: the retired "+" glyph, the centred two-line
+text, the plank alignment and the rename.

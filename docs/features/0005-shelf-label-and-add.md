@@ -9,10 +9,12 @@ Shipped on 2026-08-19 from PRD `docs/prd/0003-shelf-label-and-add-affordances.md
 > is no longer reachable from its card at all.
 
 > **Amended by PRD `docs/prd/0006-ai-auto-sort.md` (issue
-> `issues/0025-auto-sort-entry-points-availability.md`).** The empty shelf card still takes a
-> press anywhere on it, but that press now starts the automatic shelving flow; opening the
-> create form is what it falls back to on a device that cannot run Apple Intelligence. See
-> "The empty card's press" below.
+> `issues/0025-auto-sort-entry-points-availability.md`), and again by the design pass that
+> followed.** The empty shelf card still takes a press anywhere on it, but that press now
+> starts the automatic shelving flow — on every device. Its label reads "Todo / ☐ Ranger mes
+> livres" over two lines, rests on the shelf rather than under the plank, and carries a
+> chevron. The shelf labels are centred under their planks. See "The empty card's press"
+> below.
 
 ## What it does
 
@@ -118,9 +120,14 @@ and the card disappears the moment the first étagère exists.
 
 As shipped here, a press anywhere on the empty card opened the create form. It now starts the
 automatic shelving flow instead: the label reads as a note to tidy one's books, so acting on it
-by doing exactly that is what the card was already promising. The create form is what the press
-falls back to on a device that cannot run Apple Intelligence — the card *is* the empty state, so
-it can be neither hidden nor made inert, and it must always lead somewhere.
+by doing exactly that is what the card was already promising.
+
+On every device, including those that cannot run Apple Intelligence — there the flow states the
+reason. 0025 originally shipped a fallback to the create form for that case and it was removed
+within the day: a note about tidying books that silently opens a create-shelf form does not
+read as an unsupported device, it reads as the wrong screen, and a silent substitution makes
+the failure invisible. Naming the reason beats swapping in a different feature. The manual
+route was never at stake — the section header's "Ajouter" creates an étagère by hand.
 
 Two things about this feature are what make the change cheap. The tap target was already the
 whole card rather than the label alone, so nothing about the hit testing moves — splitting a

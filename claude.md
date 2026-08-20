@@ -188,4 +188,5 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0005 Paper labels, header add button, edit in the detail screen](docs/features/0005-shelf-label-and-add.md) — the shelf name becomes a tilted paper tag, "Ajouter" moves to the section header, editing moves to the étagère's navigation bar (supersedes the card-level pencil in 0003)
 - [0006 Adding and removing books from étagères](docs/features/0006-shelf-membership.md) — file a book from its "..." menu, swipe it off the shelf you're looking at
 - [0007 Batch scanning books into the inventory](docs/features/0007-batch-scanner.md) — the camera stays open and books accumulate; supersedes the single-shot scanner
-- [0008 Automatic shelving with on-device AI](docs/features/0008-ai-auto-sort.md) — proposes étagères sized to the collection, reviewed before anything is written (amends the empty card in 0005)
+- [0008 Automatic shelving with on-device AI](docs/features/0008-ai-auto-sort.md) — proposes étagères sized to the collection; its review-and-apply half is superseded by 0009
+- [0009 Sorting books into étagères, by hand and with help](docs/features/0009-manual-shelf-sorting.md) — drag books between étagères and « À ranger », nothing written until you apply

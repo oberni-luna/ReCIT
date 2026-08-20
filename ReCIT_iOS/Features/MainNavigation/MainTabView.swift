@@ -115,6 +115,9 @@ struct MainTabView: View {
                 ShelfFocusOverlayView(focus: shelfFocus)
             }
         }
+        // The first-launch accueil, over the built app rather than instead of it: the
+        // composition root would have to choose before the user is known. See PRD 0007.
+        .onboardingWelcome(user: userModel.myUser)
         .onChange(of: errorReporter.lastFailure?.id) { _, _ in
             if let failure = errorReporter.lastFailure {
                 snackBar.show { SnackBarView.error(failure.error) }

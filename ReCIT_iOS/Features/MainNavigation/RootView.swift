@@ -21,6 +21,7 @@ struct RootView: View {
     @State var autoSortModel: AutoSortModel
     @State var errorReporter: AppErrorReporter
     @State var syncStatus: SyncStatusStore
+    @State var onboardingStore: OnboardingStore
 
     @Environment(\.modelContext) var modelContext
 
@@ -48,6 +49,7 @@ struct RootView: View {
             )
         )
         _syncStatus = State(initialValue: SyncStatusStore())
+        _onboardingStore = State(initialValue: OnboardingStore())
     }
 
     var body: some View {
@@ -66,6 +68,7 @@ struct RootView: View {
                 .environment(autoSortModel)
                 .environment(errorReporter)
                 .environment(syncStatus)
+                .environment(onboardingStore)
                 .environmentObject(authModel)
                 .refreshable {
                     refreshUserData()

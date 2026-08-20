@@ -1565,6 +1565,70 @@
     "Nouvelle étagère" : {
 
     },
+    "onboarding.welcome.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan barcodes one after another: the camera stays open and the books add up one by one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scannez les codes-barres à la chaîne : la caméra reste ouverte et les livres s'ajoutent l'un après l'autre."
+          }
+        }
+      }
+    },
+    "onboarding.welcome.later" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus tard"
+          }
+        }
+      }
+    },
+    "onboarding.welcome.scan" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan my books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanner mes livres"
+          }
+        }
+      }
+    },
+    "onboarding.welcome.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your books, on your shelves"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres, sur vos étagères"
+          }
+        }
+      }
+    },
     "profile.anonymous" : {
       "localizations" : {
         "en" : {

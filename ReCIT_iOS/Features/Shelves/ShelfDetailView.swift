@@ -13,6 +13,10 @@
 //  row takes the book off *this* étagère, through the same optimistic write the menu calls.
 //  See PRD 0004.
 //
+//  The form can also delete the étagère, which is a screen deleting its own subject: the
+//  shelf is looked up by id, so afterwards it resolves to nothing and this screen has
+//  nothing left to show. It leaves with the sheet. See issue 0021.
+//
 
 import SwiftUI
 import SwiftData
@@ -27,6 +31,10 @@ struct ShelfDetailView: View {
     @Query private var shelves: [Shelf]
 
     @State private var editing: Bool = false
+
+    /// Raised by the form when it deletes this screen's étagère, so the pop happens once
+    /// the sheet has gone rather than out from under it.
+    @State private var shelfWasDeleted: Bool = false
 
     init(shelfId: String, path: Binding<NavigationPath>) {
         self.shelfId = shelfId
@@ -90,10 +98,23 @@ struct ShelfDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: $editing) {
+        .sheet(isPresented: $editing, onDismiss: leaveIfShelfWasDeleted) {
             if let shelf {
-                ShelfFormView(shelf: shelf)
+                ShelfFormView(shelf: shelf) { shelfWasDeleted = true }
             }
         }
+    }
+
+    /// Pops this screen once the form that deleted its étagère has closed. Without it the
+    /// screen sits on an id that no longer resolves: an empty title over an empty list,
+    /// with a "Modifier" action that has gone too.
+    ///
+    /// Driven by the form's own signal rather than reactively by the lookup turning nil,
+    /// because popping is only correct while this screen is the top of the stack — which
+    /// the sheet it presented guarantees, and a background sync dropping the shelf while
+    /// the user is deeper in the stack would not.
+    private func leaveIfShelfWasDeleted() {
+        guard shelfWasDeleted, path.isEmpty == false else { return }
+        path.removeLast()
     }
 }

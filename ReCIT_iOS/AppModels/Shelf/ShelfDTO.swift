@@ -43,6 +43,19 @@ struct UpdateShelfDTO: Codable {
     let visibility: [String]?
 }
 
+// MARK: - Delete
+
+/// Payload for `POST /api/shelves?action=delete`. The endpoint deletes in bulk, so `ids`
+/// is an array even for the single étagère the form removes.
+///
+/// The endpoint also takes a `with-items` flag that deletes the shelf's books along with
+/// it. It is deliberately absent from this payload rather than sent as `false`: removing a
+/// shelf must never cost the user the record of owning its books, and a field that cannot
+/// be set cannot be set by mistake.
+struct DeleteShelvesDTO: Codable {
+    let ids: [String]
+}
+
 // MARK: - Membership
 
 /// Payload for `POST /api/shelves?action=add-items` (and `?action=remove-items`): the

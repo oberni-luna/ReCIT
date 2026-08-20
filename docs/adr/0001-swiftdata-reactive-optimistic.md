@@ -78,6 +78,29 @@ immediately precede a screen dismiss, so the single round-trip's latency is invi
 Optimism is therefore applied to in-place field updates and additive list writes, where
 revert is a clean inverse.
 
+*Amended: the shelf domain departs from this on both counts — creation (ADR 0004) and
+deletion (issue 0021) are optimistic. The carousel is the app's identity, so a card
+missing after a create, or still sitting there after a confirmed delete, reads as a
+failed write rather than as latency. Deletion is the case this exception was written
+about, and it is handled rather than avoided: `ShelfModel.deleteShelf` snapshots the
+shelf's attributes and its items **before** `apply`, then on failure inserts a fresh
+`Shelf` under the same `_id` and re-attaches the books — which survive untouched, the
+relation being nullify rather than cascade.*
+
+**Bulk approved mutations wait (second intentional exception).** The batch scanner's add
+and the auto-sort apply (PRD 0006) both await the server rather than mutating first. The
+reason is the same in both: the user has just approved a *large* mutation in one gesture
+and has to be able to trust the result. Eight étagères appearing instantly and then some
+of them silently vanishing is worse than eight appearing one by one over a few seconds,
+because the optimistic version's failure mode is invisible. Auto-sort adds a second
+reason — its `add-items` call takes the id its `create` call returns, so the two stages
+are sequenced per shelf and the second has nothing to be optimistic *with*. The awaiting
+writes live alongside the optimistic ones as `ShelfModel.createShelfAwaitingServer` /
+`addItemsAwaitingServer`, sharing one implementation of the endpoint call; a failure
+partway stops the run and keeps what landed, and `AutoSortApplyProgress` reports which
+étagères were created and which were not. No rollback: a rollback that itself failed
+mid-way would leave a worse state than a clearly reported partial one.
+
 ## Consequences
 
 - New shared types under `AppModels/Common/`: `SyncFailure`, `AppErrorReporter`,

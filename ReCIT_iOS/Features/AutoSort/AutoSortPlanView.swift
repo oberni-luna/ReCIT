@@ -6,9 +6,11 @@
 //  books — the last of these because a count alone cannot show a misclassification,
 //  and spotting one before it happens is the point of reviewing at all.
 //
-//  There is no approve button in this slice: the plan is read and then abandoned.
-//  Applying it is issue 0024, and until it exists cancelling is the only exit —
-//  which costs nothing, because nothing was written.
+//  Approving turns this same list into the progress list: each étagère's row keeps its
+//  place and gains a mark that fills once both its creation and its membership write
+//  have landed. No separate progress screen, which is what makes a partial failure
+//  explain itself — the marks *are* the account of what exists, and nothing is rolled
+//  back. See `AutoSortShelfMark` and `AutoSortApplyReport`.
 //
 //  Reached from the profile/settings screen. The empty-shelf entry point and the
 //  differentiated treatment of the three unavailability reasons are issue 0025;
@@ -37,10 +39,13 @@ struct AutoSortPlanView: View {
         }
         .navigationTitle("Ranger mes livres")
         .navigationBarTitleDisplayMode(.inline)
+        // Gone while the run is writing: leaving mid-apply would clear the ledger the
+        // user needs in order to know what landed, and the writes would carry on
+        // regardless since the model outlives this screen.
         .toolbar {
-            if autoSortModel.plan != nil {
+            if autoSortModel.plan != nil, !autoSortModel.isRunning {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Annuler", action: cancel)
+                    Button(autoSortModel.phase == .applied ? "Terminer" : "Annuler", action: cancel)
                 }
             }
         }
@@ -63,7 +68,7 @@ struct AutoSortPlanView: View {
             runningView
         case .failed:
             failedView
-        case .ready:
+        case .ready, .applying, .applied:
             if let plan = autoSortModel.plan {
                 planList(plan)
             } else {
@@ -137,8 +142,10 @@ struct AutoSortPlanView: View {
                 } header: {
                     // Name and count together in the header: the count is the thing
                     // the user judges the split on, and putting it anywhere else
-                    // makes them scroll to find it.
+                    // makes them scroll to find it. The mark leads, so the list reads
+                    // as a checklist the moment the run starts ticking it off.
                     HStack {
+                        AutoSortShelfMark(outcome: outcome(for: shelf))
                         Text(shelf.name)
                             .textStyle(.action300)
                             .foregroundStyle(.foregroundDefault)
@@ -172,16 +179,83 @@ struct AutoSortPlanView: View {
                 }
             }
 
+            actionsSection
+        }
+        .applyListBackground()
+    }
+
+    /// The foot of the list, and the only part of it that changes shape across the run:
+    /// approve, then wait, then read what happened. Kept in the list rather than pinned
+    /// as a bar so the marks above it stay the primary account of progress.
+    @ViewBuilder
+    private var actionsSection: some View {
+        switch autoSortModel.phase {
+        case .applying:
             Section {
-                Button("Annuler", action: cancel)
-                    .buttonStyle(.primary())
+                HStack(spacing: .sMedium) {
+                    ProgressView()
+                    Text(autoSortModel.statusText)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundSecondary)
+                }
             } footer: {
-                Text("Rien n'a été créé : ce rangement est une proposition.")
+                Text("Chaque étagère est créée puis remplie. Ne quittez pas l'écran pour suivre la progression.")
+                    .textStyle(.footnote200)
+                    .foregroundStyle(.foregroundSecondary)
+            }
+
+        case .applied:
+            Section {
+                if let progress = autoSortModel.applyProgress {
+                    AutoSortApplyReport(progress: progress)
+                }
+                // Offered only when something is actually left to do. A completed run
+                // has nothing to pick up, and a button that would produce an empty plan
+                // is worse than no button.
+                if autoSortModel.applyProgress?.result != .allLanded {
+                    Button("Relancer le rangement", action: regenerate)
+                        .buttonStyle(.primary())
+                }
+            }
+
+        default:
+            Section {
+                Button("Créer ces étagères", action: apply)
+                    .buttonStyle(.primary())
+                    .disabled(!autoSortModel.canApply)
+                Button("Annuler", action: cancel)
+            } footer: {
+                Text("Rien n'a encore été créé : ce rangement est une proposition. Vos livres déjà rangés ne seront pas touchés.")
                     .textStyle(.footnote200)
                     .foregroundStyle(.foregroundSecondary)
             }
         }
-        .applyListBackground()
+    }
+
+    /// A shelf's mark before the run has started is simply "not created yet", which is
+    /// what an absent ledger means.
+    private func outcome(for shelf: AutoSortPlan.ProposedShelf) -> AutoSortApplyProgress.ShelfOutcome {
+        autoSortModel.applyProgress?.outcome(for: shelf.name) ?? .pending
+    }
+
+    /// Approves the plan. The write is awaited inside the app-scoped model, so it
+    /// survives this screen going away — but the marks do not, which is why the toolbar
+    /// exit is withdrawn while it runs.
+    private func apply() {
+        Task {
+            guard let user = userModel.myUser else { return }
+            await autoSortModel.apply(forUser: user, modelContext: modelContext)
+        }
+    }
+
+    /// Recovery after a partial failure: a *new* plan, not a re-apply of the old one.
+    /// It picks up only the books still on no étagère, so the étagères that landed are
+    /// not proposed again and nothing is created twice.
+    private func regenerate() {
+        Task {
+            guard let user = userModel.myUser else { return }
+            await autoSortModel.generatePlan(forUser: user, modelContext: modelContext)
+        }
     }
 
     /// Discards the proposal and leaves. Nothing to undo — the run wrote nothing.

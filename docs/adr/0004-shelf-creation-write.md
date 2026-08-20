@@ -15,7 +15,8 @@ first write in the shelf domain.
 Allow **creating** a shelf from the app. Scope stays deliberately narrow:
 
 - **Create only.** Renaming, deleting, re-ordering shelves and adding/removing books to a
-  shelf remain out of scope.
+  shelf remain out of scope. *(Superseded as each landed: renaming, then membership
+  (PRD 0004), then deletion (issue 0021) — each built on this same optimistic pattern.)*
 - **Optimistic write** via the existing `OptimisticMutating` runner: a placeholder `Shelf`
   (with an `optimistic:` id) is inserted locally and shown at once (slotting into the A→Z
   order); `POST /api/shelves?action=create` runs in a model-owned background task; on

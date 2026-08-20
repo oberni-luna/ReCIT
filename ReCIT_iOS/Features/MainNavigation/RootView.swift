@@ -35,11 +35,18 @@ struct RootView: View {
         _entityModel = State(initialValue: entityModel)
         _searchModel = State(initialValue: SearchModel(apiService: apiService))
         _inventoryModel = State(initialValue: InventoryModel(apiService: apiService, errorReporter: errorReporter))
-        _shelfModel = State(initialValue: ShelfModel(apiService: apiService, errorReporter: errorReporter))
+        let shelfModel: ShelfModel = .init(apiService: apiService, errorReporter: errorReporter)
+        _shelfModel = State(initialValue: shelfModel)
         _transactionModel = State(initialValue: TransactionModel(apiService: apiService, errorReporter: errorReporter))
         let genreEnrichmentModel: GenreEnrichmentModel = .init(apiService: apiService, entityModel: entityModel, errorReporter: errorReporter)
         _genreEnrichmentModel = State(initialValue: genreEnrichmentModel)
-        _autoSortModel = State(initialValue: AutoSortModel(genreEnrichment: genreEnrichmentModel, errorReporter: errorReporter))
+        _autoSortModel = State(
+            initialValue: AutoSortModel(
+                genreEnrichment: genreEnrichmentModel,
+                shelfModel: shelfModel,
+                errorReporter: errorReporter
+            )
+        )
         _syncStatus = State(initialValue: SyncStatusStore())
     }
 

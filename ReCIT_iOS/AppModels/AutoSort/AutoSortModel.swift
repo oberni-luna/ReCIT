@@ -7,10 +7,10 @@
 //  three pieces that can be got wrong — the histogram, the validator, the
 //  assignment — live in `Model/AutoSort` as pure value types this only calls.
 //
-//  Nothing in this slice writes. `generatePlan` reads the inventory, consults the
-//  model twice per run plus once per batch of genres, and publishes a plan for the
-//  user to read. Creating the étagères is issue 0024; until then `cancel` is the
-//  only other verb, and it throws the plan away.
+//  `generatePlan` reads the inventory, consults the model twice per run plus once
+//  per batch of genres, and publishes a plan for the user to read; it writes
+//  nothing. `apply` then turns an approved plan into real étagères, and `cancel`
+//  throws the proposal away — which costs nothing, since a proposal is all it was.
 //
 //  The model never sees a book. Phase 1 is shown genres and counts, phase 2 is
 //  shown genres and étagère names, phase 3 is arithmetic. That is what keeps a
@@ -57,6 +57,13 @@ final class AutoSortModel {
         /// Phase 3 has run and there is a plan to read.
         case ready
         case failed
+        /// The approved plan is being written, one étagère at a time.
+        case applying
+        /// The run has stopped writing. Not the same as "everything landed": a partial
+        /// failure ends here too, and `applyProgress` is what says which it was. Kept
+        /// as one case rather than two so the screen has a single "the writing is over,
+        /// read the marks" state and cannot show a success it has not checked.
+        case applied
     }
 
     /// Phase 1 is a judgement call, so it keeps a little room to make one — but only
@@ -80,6 +87,10 @@ final class AutoSortModel {
 
     private let genreEnrichment: GenreEnrichmentModel
 
+    /// The one path to `/api/shelves`. Injected rather than reimplemented so the apply
+    /// goes through the same create and `add-items` writes the rest of the app uses.
+    private let shelfModel: ShelfModel
+
     /// Shared channel used to surface a failure to the UI.
     var errorReporter: AppErrorReporter?
 
@@ -102,13 +113,23 @@ final class AutoSortModel {
     /// The étagère names phase 1 proposed, before assignment dropped the empty ones.
     private(set) var proposedTaxonomy: [String] = []
 
+    /// The apply run's ledger, or `nil` before one has been started. The review list
+    /// reads its marks from here, and the report reads which étagères were created and
+    /// which were not from the same place — so the two cannot disagree.
+    private(set) var applyProgress: AutoSortApplyProgress?
+
     /// A session per run rather than one for the app's lifetime: each run is a fresh
     /// question about a collection that may have changed, and a stale transcript
     /// would spend context on the previous library.
     @ObservationIgnored private var session: LanguageModelSession?
 
-    init(genreEnrichment: GenreEnrichmentModel, errorReporter: AppErrorReporter? = nil) {
+    init(
+        genreEnrichment: GenreEnrichmentModel,
+        shelfModel: ShelfModel,
+        errorReporter: AppErrorReporter? = nil
+    ) {
         self.genreEnrichment = genreEnrichment
+        self.shelfModel = shelfModel
         self.errorReporter = errorReporter
     }
 
@@ -131,9 +152,17 @@ final class AutoSortModel {
 
     var isRunning: Bool {
         switch phase {
-        case .analysingLibrary, .designingShelves, .sortingGenres: true
-        case .idle, .ready, .failed: false
+        case .analysingLibrary, .designingShelves, .sortingGenres, .applying: true
+        case .idle, .ready, .failed, .applied: false
         }
+    }
+
+    /// Whether the plan on screen can still be approved. False the moment the apply
+    /// starts, so a second tap cannot create the same étagères twice — recovery after a
+    /// partial failure is a fresh run, never a re-apply of a plan whose books have
+    /// since moved.
+    var canApply: Bool {
+        phase == .ready && (plan?.isEmpty == false)
     }
 
     /// The wait's own copy, kept next to the step that causes it. The genre backfill
@@ -145,8 +174,8 @@ final class AutoSortModel {
         case .analysingLibrary: genreEnrichment.statusText
         case .designingShelves: "Conception des étagères…"
         case .sortingGenres: "Rangement des genres…"
-        case .ready: ""
-        case .failed: ""
+        case .applying: "Création des étagères…"
+        case .ready, .failed, .applied: ""
         }
     }
 
@@ -162,6 +191,10 @@ final class AutoSortModel {
         plan = nil
         rejections = []
         proposedTaxonomy = []
+        // The previous run's marks go with the previous run's plan. A re-run after a
+        // partial failure is a *new* proposal built from what is still unshelved, and
+        // showing it the old ledger's ticks would claim étagères it does not contain.
+        applyProgress = nil
 
         // The backfill first: the whole design rests on genre data, and this is its
         // only caller. Idempotent, so a second run costs nothing.
@@ -209,12 +242,89 @@ final class AutoSortModel {
         }
     }
 
-    /// Throws the proposal away. There is nothing to undo — no étagère was created,
-    /// no book was moved, no field was written — so this is the whole of "cancel".
+    // MARK: - Applying a plan
+
+    /// Turns the approved plan into real étagères: for each proposed shelf, one
+    /// creation and then one membership write, in the order the user reviewed them.
+    ///
+    /// **This waits rather than being optimistic** — a documented departure from
+    /// ADR 0001, alongside the batch scanner's add, and for the same reason: the user
+    /// has just approved a large mutation and has to be able to trust what landed.
+    /// Eight étagères appearing instantly and then some of them silently vanishing is
+    /// the failure being avoided. The two stages are sequenced per shelf rather than run
+    /// in parallel because the membership call's argument is the id the creation call
+    /// returns; the ledger is updated between them so the user watches progress instead
+    /// of one blocking spinner.
+    ///
+    /// **A failure stops the run and keeps what landed.** No rollback: a rollback that
+    /// itself failed mid-way would leave a worse state than a clearly reported partial
+    /// one, and `applyProgress` names both halves. Recovery is another run, not a
+    /// re-apply — and it is safe because the next plan is built from the books that are
+    /// *still* on no étagère, so everything this run filed has stopped being a
+    /// candidate. That is what the unshelved-only scoping buys.
+    ///
+    /// Never throws: the ledger carries what happened and the shared
+    /// `AppErrorReporter` carries why.
+    func apply(forUser user: User, modelContext: ModelContext) async {
+        guard canApply, let plan else { return }
+
+        applyProgress = .init(shelfNames: plan.shelves.map(\.name))
+        phase = .applying
+
+        for shelf in plan.shelves {
+            applyProgress?.mark(.applying, for: shelf.name)
+            do {
+                try await apply(shelf: shelf, modelContext: modelContext)
+                applyProgress?.mark(.landed, for: shelf.name)
+            } catch {
+                // Stop here. Every étagère already ticked off stays exactly as it is,
+                // and the ones below this one were never created.
+                applyProgress?.mark(.failed, for: shelf.name)
+                phase = .applied
+                errorReporter?.report(error)
+                logApplyOutcome()
+                return
+            }
+        }
+
+        phase = .applied
+        logApplyOutcome()
+    }
+
+    /// One étagère, both stages. Creation first, because its id is the membership
+    /// call's argument, and the shelf is only ticked off by the caller once the second
+    /// stage has landed too — a tick against a created-but-empty étagère would be the
+    /// half-truth this whole waiting design exists to rule out.
+    ///
+    /// Created private, with no description and no visibility, matching what the shelf
+    /// form's defaults produce: the plan proposes a name and a set of books, and
+    /// inventing anything else on the user's behalf is not the model's business.
+    private func apply(shelf: AutoSortPlan.ProposedShelf, modelContext: ModelContext) async throws {
+        let created: Shelf = try await shelfModel.createShelfAwaitingServer(
+            name: shelf.name,
+            description: "",
+            visibility: [],
+            modelContext: modelContext
+        )
+
+        let items: [InventoryItem] = localItems(ids: shelf.books.map(\.id), modelContext: modelContext)
+        // The plan was built from these very items minutes ago, so an empty resolution
+        // means the store moved under the run. Failing is honest; filing nothing and
+        // ticking the shelf off would leave the user an empty étagère they were told
+        // held books.
+        guard items.isEmpty == false else { throw AutoSortApplyFailure.booksNoLongerInInventory(shelfName: shelf.name) }
+
+        try await shelfModel.addItemsAwaitingServer(items, to: created, modelContext: modelContext)
+    }
+
+    /// Throws the proposal away. Nothing to undo while the plan is only a proposal; once
+    /// it has been applied there is still nothing to undo *here*, because what landed is
+    /// deliberately kept — an unwanted étagère is deleted from the étagère itself.
     func cancel() {
         plan = nil
         rejections = []
         proposedTaxonomy = []
+        applyProgress = nil
         histogram = .init(books: [])
         session = nil
         phase = .idle
@@ -290,6 +400,16 @@ final class AutoSortModel {
         }
     }
 
+    /// The stored items behind a proposed étagère's books. `AutoSortBook.id` *is* the
+    /// item's server `_id`, which is what makes filing a lookup rather than a match.
+    private func localItems(ids: [String], modelContext: ModelContext) -> [InventoryItem] {
+        guard ids.isEmpty == false else { return [] }
+        let descriptor: FetchDescriptor<InventoryItem> = .init(
+            predicate: #Predicate { ids.contains($0._id) }
+        )
+        return (try? modelContext.fetch(descriptor)) ?? []
+    }
+
     // MARK: - Logging
 
     /// The taxonomy and what the validator refused are the two things a human tuning
@@ -300,6 +420,38 @@ final class AutoSortModel {
         print("## Auto-sort mapped \(mapping.shelfByGenreKey.count)/\(histogram.entries.count) genre(s), \(mapping.rejections.count) rejected, \(mapping.unmappedGenres.count) unmapped")
         for rejection in mapping.rejections {
             print("##   rejected: \(rejection)")
+        }
+    }
+
+    /// What the run actually wrote, so a partial failure can be read from the log as
+    /// well as from the screen — the screen is one dismissal away from being gone.
+    private func logApplyOutcome() {
+        guard let applyProgress else { return }
+        switch applyProgress.result {
+        case .running:
+            break
+        case .allLanded:
+            print("## Auto-sort applied \(applyProgress.landedCount) étagère(s): \(applyProgress.landedNames.joined(separator: " | "))")
+        case .stopped(let landed, let failed, let notAttempted):
+            print("## Auto-sort stopped partway — created and filled: \(landed.joined(separator: " | "))")
+            print("##   failed on: \(failed.joined(separator: " | "))")
+            print("##   never attempted: \(notAttempted.joined(separator: " | "))")
+        }
+    }
+}
+
+/// Why an apply stopped, when the reason is the app's own state rather than the
+/// network's. Spelled out rather than folded into `NetworkError` because the user's
+/// recovery differs: a network failure is worth retrying now, a library that moved
+/// under the run needs a fresh plan.
+enum AutoSortApplyFailure: LocalizedError {
+    /// The proposed étagère's books are no longer in the local inventory.
+    case booksNoLongerInInventory(shelfName: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .booksNoLongerInInventory(let shelfName):
+            "Les livres proposés pour « \(shelfName) » ne sont plus dans votre inventaire."
         }
     }
 }

@@ -3,8 +3,13 @@
 //  ReCIT_iOS
 //
 //  Syncs the current user's inventaire.io shelves into SwiftData, and owns the writes
-//  that go the other way: creating and renaming an étagère, and putting a book on one
-//  or taking it off. Deleting an étagère is not offered yet.
+//  that go the other way: creating, renaming and deleting an étagère, and putting a
+//  book on one or taking it off. Deleting only ever removes the shelf — the books it
+//  held stay in the inventory. See issue 0021.
+//
+//  Both writes come in two flavours: the optimistic, fire-and-forget one the menus
+//  use, and an awaiting one for the auto-sort apply, which has to know per étagère
+//  whether the write landed before it ticks it off. See PRD 0006.
 //
 //  Two passes: (1) `by-owners` upserts shelf metadata; (2) `by-ids&with-items`
 //  rebuilds the `Shelf ⇄ InventoryItem` relation from server membership. The second
@@ -41,9 +46,26 @@ final class ShelfModel: OptimisticMutating {
     /// landing in that window would visibly take the book back off the étagère the user
     /// just put it on, so both writers stand down until the write settles. App-scoped
     /// rather than instance-scoped because the two writers live in two different models.
-    /// One mutation at a time, which suits menu-driven single-book actions; bulk
-    /// membership writes would need a counter instead. See PRD 0004.
+    /// Derived from `membershipWriteDepth` rather than assigned, so overlapping writes
+    /// cannot open the gate on each other. See PRD 0004.
     private(set) static var isMembershipWriteInFlight: Bool = false
+
+    /// How many membership writes are outstanding. A depth rather than a flag because
+    /// the auto-sort apply issues one write per étagère in a row (PRD 0006): a
+    /// menu-driven single-book write settling inside that run would otherwise lower
+    /// the gate while the run is still going, and a sync would take the books back off
+    /// the étagère they had just been filed onto.
+    private static var membershipWriteDepth: Int = 0
+
+    private static func raiseMembershipGate() {
+        membershipWriteDepth += 1
+        isMembershipWriteInFlight = true
+    }
+
+    private static func lowerMembershipGate() {
+        membershipWriteDepth = max(0, membershipWriteDepth - 1)
+        isMembershipWriteInFlight = membershipWriteDepth > 0
+    }
 
     init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
@@ -130,6 +152,69 @@ final class ShelfModel: OptimisticMutating {
         )
     }
 
+    /// Optimistically deletes an étagère: it leaves the carousel at once, the `POST` runs
+    /// in the background, and on failure the shelf comes back exactly as it was — books
+    /// included — with the error surfaced.
+    ///
+    /// **The shelf goes, the books stay.** `Shelf.items` nullifies rather than cascades, so
+    /// deleting the shelf only unhooks the relation: every copy stays in the inventory and
+    /// on every other étagère it sits on. The server's `with-items` flag, which would take
+    /// the books too, is not part of `DeleteShelvesDTO` at all.
+    ///
+    /// Its own path rather than `membershipWrite`'s: the payload is `ids`, not `id` plus
+    /// `items`, there is nothing to reconcile once the shelf is gone, and the membership
+    /// gate would buy nothing here — the sync pass it guards looks each shelf up locally
+    /// and skips the ones that no longer resolve.
+    ///
+    /// Deletion is the one write that cannot revert by inverting itself: SwiftData
+    /// invalidates the deleted object, so the shelf is snapshotted *before* `apply` and a
+    /// fresh one is inserted under the same `_id` on failure. The books survive the delete
+    /// untouched, so re-attaching them restores membership — the relation declares its
+    /// inverse, so assigning on the shelf side moves the item side back too.
+    ///
+    /// This departs from ADR 0001's server-first exception for deletes, the way ADR 0004
+    /// already did for creates: the carousel is the app's identity and a shelf lingering on
+    /// it for a round-trip after the user confirmed reads as a failed delete.
+    func deleteShelf(_ shelf: Shelf, modelContext: ModelContext) {
+        let shelfId: String = shelf._id
+        let items: [InventoryItem] = shelf.items
+        let snapshot: Shelf = .init(
+            _id: shelf._id,
+            _rev: shelf._rev,
+            name: shelf.name,
+            slug: shelf.slug,
+            shelfDescription: shelf.shelfDescription,
+            ownerId: shelf.ownerId,
+            visibility: shelf.visibility,
+            colorHex: shelf.colorHex,
+            created: shelf.created,
+            updated: shelf.updated
+        )
+
+        inFlightTask = optimistic(
+            modelContext,
+            apply: { modelContext.delete(shelf) },
+            revert: {
+                modelContext.insert(snapshot)
+                snapshot.items = items
+            },
+            request: { [weak self] in
+                guard let self else { return }
+                let payload: DeleteShelvesDTO = .init(ids: [shelfId])
+                // Answers `{ ok, shelves }`; the shelves it echoes describe what was just
+                // removed, so there is nothing left to merge back in.
+                guard let _: OkStatusDTO = try await self.apiService.send(
+                    toEndpoint: "/api/shelves?action=delete",
+                    method: "POST",
+                    payload: payload,
+                    debug: true
+                ) else {
+                    throw NetworkError.badResponse
+                }
+            }
+        )
+    }
+
     /// Optimistically files an item onto an étagère: the relation is mutated and saved at
     /// once, so the shelf card fills in before the network is touched, then the write runs
     /// in a model-owned background task and the server's post-write membership is
@@ -192,7 +277,7 @@ final class ShelfModel: OptimisticMutating {
         apply: () -> Void,
         revert: @escaping () -> Void
     ) {
-        Self.isMembershipWriteInFlight = true
+        Self.raiseMembershipGate()
 
         let cycle: Task<Void, Never> = optimistic(
             modelContext,
@@ -200,28 +285,119 @@ final class ShelfModel: OptimisticMutating {
             revert: revert,
             request: { [weak self] in
                 guard let self else { return }
-                let payload: ShelfItemsDTO = .init(id: shelf._id, items: [itemId])
-                guard let response: ShelvesWithItemsResponseDTO = try await self.apiService.send(
-                    toEndpoint: "/api/shelves?action=\(action)",
-                    method: "POST",
-                    payload: payload,
-                    debug: true
-                ) else {
-                    throw NetworkError.badResponse
-                }
-                // Reconcile: the response carries the étagère's membership after the write.
-                // A shelf the write left empty may answer without an `items` key at all,
-                // which means an empty membership and not "no news" — so the shelf is
-                // emptied rather than left holding the book it just lost.
-                guard let dto = response.shelves[shelf._id] else { return }
-                shelf.items = self.localItems(ids: dto.items ?? [], modelContext: modelContext)
+                try await self.sendMembership(
+                    action: action,
+                    shelf: shelf,
+                    itemIds: [itemId],
+                    modelContext: modelContext
+                )
             }
         )
 
         inFlightTask = Task {
             await cycle.value
-            Self.isMembershipWriteInFlight = false
+            Self.lowerMembershipGate()
         }
+    }
+
+    /// The membership call itself, and the reconcile from its answer. One
+    /// implementation, shared by the optimistic single-book path above and the
+    /// awaiting bulk one below, so there is exactly one place in the app that posts to
+    /// `add-items` / `remove-items`.
+    private func sendMembership(
+        action: String,
+        shelf: Shelf,
+        itemIds: [String],
+        modelContext: ModelContext
+    ) async throws {
+        let payload: ShelfItemsDTO = .init(id: shelf._id, items: itemIds)
+        guard let response: ShelvesWithItemsResponseDTO = try await apiService.send(
+            toEndpoint: "/api/shelves?action=\(action)",
+            method: "POST",
+            payload: payload,
+            debug: true
+        ) else {
+            throw NetworkError.badResponse
+        }
+        // Reconcile: the response carries the étagère's membership after the write.
+        // A shelf the write left empty may answer without an `items` key at all,
+        // which means an empty membership and not "no news" — so the shelf is
+        // emptied rather than left holding the book it just lost.
+        guard let dto = response.shelves[shelf._id] else { return }
+        shelf.items = localItems(ids: dto.items ?? [], modelContext: modelContext)
+    }
+
+    // MARK: - Awaiting writes (bulk apply)
+
+    /// Creates an étagère and **waits** for the server to confirm it, answering with the
+    /// canonical shelf so the caller can use the id the server assigned.
+    ///
+    /// The awaiting counterpart of `createShelf`, added alongside it rather than
+    /// replacing it. It exists for the auto-sort apply (PRD 0006), a documented
+    /// departure from ADR 0001's optimistic rule — alongside the batch scanner's add,
+    /// for the same reason: the user has just approved a large mutation and has to be
+    /// able to trust what landed. Eight étagères appearing instantly and then some of
+    /// them silently vanishing is the failure being avoided. There is no placeholder to
+    /// swap either, because the caller cannot take its second step without the server's
+    /// id, so there would be nothing to gain by guessing one.
+    func createShelfAwaitingServer(
+        name: String,
+        description: String,
+        visibility: [String],
+        modelContext: ModelContext
+    ) async throws -> Shelf {
+        let payload: NewShelfDTO = .init(
+            name: name,
+            description: description.isEmpty ? nil : description,
+            visibility: visibility
+        )
+        guard let response: ShelfResponseDTO = try await apiService.send(
+            toEndpoint: "/api/shelves?action=create",
+            method: "POST",
+            payload: payload,
+            debug: true
+        ) else {
+            throw NetworkError.badResponse
+        }
+
+        let shelf: Shelf = .init(dto: response.shelf)
+        modelContext.insert(shelf)
+        try modelContext.save()
+        return shelf
+    }
+
+    /// Files several items onto an étagère in one `add-items` call and **waits** for the
+    /// server's answer.
+    ///
+    /// The awaiting counterpart of `addItem`, which is optimistic and fire-and-forget by
+    /// design: that fits a menu tap on one book, but a sequenced bulk apply has to know
+    /// per étagère whether the write landed before it ticks that étagère off and moves
+    /// to the next one. Same endpoint, same payload, same reconcile — only the waiting
+    /// differs, which is why the call lives in `sendMembership` and is shared.
+    ///
+    /// Server first, then the relation from the server's own answer: waiting is the
+    /// point here, so there is nothing to apply early and nothing to revert on failure.
+    /// Items the shelf already holds are dropped from the payload, and an empty payload
+    /// is a no-op — which is what makes calling this twice for the same books harmless.
+    func addItemsAwaitingServer(
+        _ items: [InventoryItem],
+        to shelf: Shelf,
+        modelContext: ModelContext
+    ) async throws {
+        let alreadyOnShelf: Set<String> = .init(shelf.items.map(\._id))
+        let itemIds: [String] = items.map(\._id).filter { !alreadyOnShelf.contains($0) }
+        guard itemIds.isEmpty == false else { return }
+
+        Self.raiseMembershipGate()
+        defer { Self.lowerMembershipGate() }
+
+        try await sendMembership(
+            action: "add-items",
+            shelf: shelf,
+            itemIds: itemIds,
+            modelContext: modelContext
+        )
+        try modelContext.save()
     }
 
     func syncShelves(forUser: User, modelContext: ModelContext) async throws {

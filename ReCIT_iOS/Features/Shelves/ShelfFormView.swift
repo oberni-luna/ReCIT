@@ -9,6 +9,14 @@
 //  subject of this sheet, so the destructive action belongs at its foot rather than behind
 //  a menu on the card or the carousel. See issue 0021.
 //
+//  **A third mode writes nothing.** Handed a `ShelfDraftRequest`, the same form returns a
+//  name to its caller instead of calling `ShelfModel` at all — that is how the sorting
+//  surface's « + » adds an étagère to a stack that has not been saved yet, and it is the
+//  one behavioural difference from the carousel's create action, which is untouched
+//  (PRD 0008). The mode is a single optional value rather than a pair of flags, so the two
+//  cannot be half-set, and `submit()` reads it first: there is no path from drafting into
+//  a write.
+//
 
 import SwiftUI
 
@@ -25,6 +33,10 @@ struct ShelfFormView: View {
     /// shelf can leave with the sheet instead of outliving its subject.
     private let onDeleted: (() -> Void)?
 
+    /// Set only when the form must **not** write: it hands the name back instead. See the
+    /// note at the top of the file.
+    private let draft: ShelfDraftRequest?
+
     @State private var name: String
     @State private var shelfDescription: String
     @State private var visibility: FormVisibility
@@ -33,14 +45,38 @@ struct ShelfFormView: View {
     init(shelf: Shelf? = nil, onDeleted: (() -> Void)? = nil) {
         self.shelf = shelf
         self.onDeleted = onDeleted
+        draft = nil
         _name = State(initialValue: shelf?.name ?? "")
         _shelfDescription = State(initialValue: shelf?.shelfDescription ?? "")
         _visibility = State(initialValue: FormVisibility(raw: shelf?.visibility ?? []))
     }
 
+    /// The non-writing form. There is nothing to edit and nothing to delete in this mode:
+    /// a draft is a name, and it does not exist yet.
+    init(draft: ShelfDraftRequest) {
+        shelf = nil
+        onDeleted = nil
+        self.draft = draft
+        _name = State(initialValue: "")
+        _shelfDescription = State(initialValue: "")
+        _visibility = State(initialValue: .private)
+    }
+
     private var isEditing: Bool { shelf != nil }
+    private var isDrafting: Bool { draft != nil }
+
+    /// Why the typed name cannot be created, or `nil` when it can. Only drafting asks:
+    /// the server does not enforce unique shelf names, so refusing one on the carousel
+    /// would be inventing a rule the rest of the app does not keep. Here the rule earns
+    /// itself — the whole stack is applied in one gesture, and two étagères the user
+    /// reads as the same would be created by that one gesture.
+    private var nameRefusal: SortDraftNameRule.Refusal? {
+        draft?.nameRule.refusal(for: name)
+    }
+
     private var canSubmit: Bool {
-        name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+        guard name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else { return false }
+        return nameRefusal == nil
     }
 
     var body: some View {
@@ -51,19 +87,38 @@ struct ShelfFormView: View {
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundDefault)
 
-                    TextField("Description (optionnel)", text: $shelfDescription, axis: .vertical)
-                        .lineLimit(2...4)
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundDefault)
+                    // A draft carries a name and nothing else: the change stack has no
+                    // room for a description or a visibility, and the étagère is
+                    // eventually created with the same defaults this form produces. A
+                    // field whose value would be quietly thrown away is worse than an
+                    // absent one, so drafting asks for the name alone.
+                    if isDrafting == false {
+                        TextField("Description (optionnel)", text: $shelfDescription, axis: .vertical)
+                            .lineLimit(2...4)
+                            .textStyle(.content300)
+                            .foregroundStyle(.foregroundDefault)
+                    }
+                } footer: {
+                    // Said as the name is typed rather than on submit: the user is still
+                    // looking at the field, and the shelf they collided with is named
+                    // back to them in its own spelling — « Romans » refusing "romans" is
+                    // otherwise unreadable.
+                    if case .alreadyUsed(let takenName) = nameRefusal {
+                        Text("manual_sort.create.name_taken \(takenName)")
+                            .textStyle(.footnote200)
+                            .foregroundStyle(.foregroundError)
+                    }
                 }
 
-                Section {
-                    Picker("Visibilité", selection: $visibility) {
-                        ForEach(FormVisibility.allCases) { option in
-                            Text(option.label).tag(option)
+                if isDrafting == false {
+                    Section {
+                        Picker("Visibilité", selection: $visibility) {
+                            ForEach(FormVisibility.allCases) { option in
+                                Text(option.label).tag(option)
+                            }
                         }
+                        .foregroundStyle(.foregroundDefault)
                     }
-                    .foregroundStyle(.foregroundDefault)
                 }
 
                 Section {} footer: {
@@ -118,6 +173,14 @@ struct ShelfFormView: View {
         guard canSubmit else { return }
         let trimmedName: String = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedDescription: String = shelfDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Read first, and returns: drafting never falls through to a write. The étagère
+        // does not exist yet and will not until the whole stack is applied.
+        if let draft {
+            draft.onCreate(trimmedName)
+            dismiss()
+            return
+        }
 
         if let shelf {
             shelfModel.updateShelf(

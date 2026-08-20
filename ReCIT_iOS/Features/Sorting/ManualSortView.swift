@@ -15,8 +15,9 @@
 //  Books are filed by dragging them from one section onto another; nothing is written.
 //  The session that holds the snapshot and the stack is **app-scoped**, so a draft
 //  survives leaving the screen — and, from slice 0040, so will the writes and the
-//  ledger of what landed. The pills and recap (0039), the apply (0040), the inline
-//  create form (0041) and the AI proposal (0042) land on this same screen.
+//  ledger of what landed. The pills and recap (0039), the apply (0040) and the create
+//  form behind the « + » (0041) are all on this screen; the AI proposal (0042) lands
+//  here too.
 //
 //  It stands *alongside* the auto-sort review screen, which keeps working untouched
 //  until slice 0043 dismantles it.
@@ -38,6 +39,11 @@ struct ManualSortView: View {
 
     @Binding var path: NavigationPath
 
+    /// Presents the create form. The one piece of state this screen owns — the session
+    /// holds everything else, and a sheet that is up is not something a sorting session
+    /// should survive being left for.
+    @State private var isCreatingShelf: Bool = false
+
     var body: some View {
         Group {
             switch session.phase {
@@ -52,6 +58,34 @@ struct ManualSortView: View {
         }
         .navigationTitle("manual_sort.title")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // Absent until the snapshot exists, exactly as the design has it: there is
+            // nothing to name an étagère against while the library is still being read,
+            // so the naming rule would have nothing to refuse.
+            //
+            // A run in flight only *disables* it, on the action bar's reasoning: what
+            // the button offers is still true, it is simply not offered while the writes
+            // settle. The stack must not grow under a plan that was reduced from it.
+            if session.phase == .ready {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("manual_sort.create_shelf", systemImage: "plus") {
+                        isCreatingShelf = true
+                    }
+                    .disabled(session.isApplying)
+                }
+            }
+        }
+        // The form writes nothing. It hands back a name, the name becomes a draft on the
+        // stack, and the draft is a section that accepts drops straight away — which is
+        // what makes "create it, fill it, then save" one movement (PRD 0008).
+        .sheet(isPresented: $isCreatingShelf) {
+            ShelfFormView(
+                draft: .init(
+                    nameRule: session.draftNameRule,
+                    onCreate: session.createShelf(named:)
+                )
+            )
+        }
         .task {
             guard let user = userModel.myUser else { return }
             await session.load(

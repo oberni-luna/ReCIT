@@ -149,6 +149,36 @@ final class SortSessionModel {
         phase = .ready
     }
 
+    /// Which names a new étagère may not be given: every section the surface is showing,
+    /// existing étagères and drafts alike. Handed to the create form so the refusal
+    /// happens while the user is still looking at the field they typed into.
+    ///
+    /// Read off the projection rather than off the snapshot and the stack separately —
+    /// the names the user can see are the names they could confuse, and the projection
+    /// is the one place that resolves them.
+    var draftNameRule: SortDraftNameRule {
+        .init(sections: projection.sections)
+    }
+
+    /// Records one étagère created on the spot. **Nothing is written**: a draft is a name
+    /// and a client id until the whole stack is applied, which is what makes creating an
+    /// étagère and filling it a single movement (PRD 0008).
+    ///
+    /// The naming rule is asked again here even though the form already asked it. Not a
+    /// second implementation — the same pure rule, over the same sections — but the stack
+    /// is what the pills, the recap and the write are derived from, and a duplicate that
+    /// reached it would be applied. A model that trusts its caller to have validated is a
+    /// model whose invariant lives in a view.
+    func createShelf(named name: String) {
+        // Nothing is added to the stack while the run writes: the plan in flight was
+        // reduced from the stack as it stood when the button was pressed, so a draft
+        // appended under it would be a section the marks say nothing about.
+        guard isApplying == false else { return }
+        guard let trimmed = AutoSortName.trimmed(name) else { return }
+        guard draftNameRule.accepts(trimmed) else { return }
+        changes.append(.createShelf(draftId: SortDraftID.make(), name: trimmed))
+    }
+
     /// Records one drop: the book leaves the section it was dragged from for the one it
     /// was dropped on.
     ///

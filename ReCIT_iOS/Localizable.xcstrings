@@ -1382,6 +1382,40 @@
         }
       }
     },
+    "manual_sort.create.name_taken %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A shelf named “%@” is already in this list."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une étagère nommée « %@ » figure déjà dans cette liste."
+          }
+        }
+      }
+    },
+    "manual_sort.create_shelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle étagère"
+          }
+        }
+      }
+    },
     "manual_sort.discard" : {
       "extractionState" : "manual",
       "localizations" : {

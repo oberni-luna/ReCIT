@@ -1484,6 +1484,91 @@
         }
       }
     },
+    "manual_sort.proposal.generating" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Working out an arrangement…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche d’un rangement…"
+          }
+        }
+      }
+    },
+    "manual_sort.proposal.nothing_proposed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing could be suggested for the books left to file."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun rangement n’a pu être proposé pour les livres qu’il reste à ranger."
+          }
+        }
+      }
+    },
+    "manual_sort.proposal.unavailable.downloading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence is still downloading its model. Suggestions will be available shortly."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modèle d’Apple Intelligence est en cours de téléchargement. La proposition sera disponible sous peu."
+          }
+        }
+      }
+    },
+    "manual_sort.proposal.unavailable.switched_off" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggestions rely on Apple Intelligence, which is switched off on this device. Turn it on in Settings to use them."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La proposition s’appuie sur Apple Intelligence, qui est désactivé sur cet appareil. Activez-le dans les Réglages pour l’utiliser."
+          }
+        }
+      }
+    },
+    "manual_sort.propose" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggest an arrangement"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proposer un rangement"
+          }
+        }
+      }
+    },
     "manual_sort.recap %lld %lld %lld %lld" : {
       "extractionState" : "manual",
       "localizations" : {

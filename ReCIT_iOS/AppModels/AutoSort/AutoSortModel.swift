@@ -226,13 +226,14 @@ final class AutoSortModel {
             self.session = session
 
             phase = .designingShelves
-            let taxonomy: [String] = try await proposeTaxonomy(session: session)
+            let taxonomy: [String] = try await proposeTaxonomy(session: session, histogram: histogram)
             proposedTaxonomy = taxonomy
 
             phase = .sortingGenres
             let assignments: [ShelfMappingValidator.RawAssignment] = try await mapGenres(
                 session: session,
-                taxonomy: taxonomy
+                taxonomy: taxonomy,
+                histogram: histogram
             )
 
             let mapping: ValidatedGenreMapping = try ShelfMappingValidator.validate(
@@ -339,9 +340,95 @@ final class AutoSortModel {
         phase = .idle
     }
 
+    // MARK: - Proposing for the sorting surface
+
+    /// Runs the same three phases over a set of copies the caller names, and hands the
+    /// plan back instead of publishing it.
+    ///
+    /// **This is the sorting surface's entry point** (PRD 0008), and it differs from
+    /// `generatePlan` in exactly two ways, both of which follow from the model being one
+    /// change generator among others there rather than the whole screen:
+    ///
+    /// - **The caller chooses the collection.** The surface holds a frozen snapshot with
+    ///   a stack of unsaved drags on top of it, so "the books on no étagère" is a
+    ///   question only its projection can answer — the store still has every one of them
+    ///   unshelved. Asking the store would propose again for books the user has just
+    ///   filed by hand.
+    /// - **Nothing is published.** `phase`, `plan`, `histogram` and the ledger belong to
+    ///   the review screen, which is still live until slice 0043 retires it; a proposal
+    ///   made from elsewhere must not leave marks on it. The surface's own busy state
+    ///   lives on `SortSessionModel`.
+    ///
+    /// Everything else is deliberately identical, prompts included: the taxonomy, the
+    /// mapping, the validation seam and the assignment are the same code, so a proposal
+    /// is the same proposal wherever it was asked for.
+    ///
+    /// Never throws. A failure is reported through the shared `AppErrorReporter` and
+    /// comes back as a plan that proposes nothing, which the caller lays on its stack as
+    /// no changes at all.
+    ///
+    /// Runs on-device throughout. No part of the library is sent anywhere.
+    func proposePlan(
+        forItems itemIds: [String],
+        user: User,
+        modelContext: ModelContext
+    ) async -> AutoSortPlan {
+        // The genre backfill first, exactly as `generatePlan` does: the whole design
+        // rests on genre data, and it is idempotent, so a second run costs nothing. It
+        // covers the works of unshelved copies — which is every copy the surface can
+        // offer here, bar one the user has just dragged *off* an étagère.
+        await genreEnrichment.enrichUnshelvedWorks(forUser: user, modelContext: modelContext)
+
+        // Read after the backfill, never before: the snapshot the surface froze on
+        // arrival carries the genres of the moment it was taken, and on a first run that
+        // is none of them.
+        let books: [AutoSortBook] = booksInOrder(ids: itemIds, modelContext: modelContext)
+        let histogram: GenreHistogram = .init(books: books)
+
+        // No genre anywhere is a real outcome, not a failure: these books stay where
+        // they are rather than being guessed at from title and author.
+        guard histogram.isEmpty == false else { return .init(nothingToPropose: books) }
+
+        do {
+            let session: LanguageModelSession = .init(instructions: AutoSortPrompts.instructions)
+            let taxonomy: [String] = try await proposeTaxonomy(session: session, histogram: histogram)
+            let assignments: [ShelfMappingValidator.RawAssignment] = try await mapGenres(
+                session: session,
+                taxonomy: taxonomy,
+                histogram: histogram
+            )
+            let mapping: ValidatedGenreMapping = try ShelfMappingValidator.validate(
+                taxonomy: taxonomy,
+                assignments: assignments,
+                offeredGenres: histogram.genres
+            )
+            return .init(mapping: mapping, books: books)
+        } catch {
+            errorReporter?.report(error)
+            return .init(nothingToPropose: books)
+        }
+    }
+
+    /// The named copies, in the order they were named. The caller's order is the order
+    /// the user is reading them in on screen, and a fetch answers in its own.
+    private func booksInOrder(ids: [String], modelContext: ModelContext) -> [AutoSortBook] {
+        let items: [InventoryItem] = localItems(ids: ids, modelContext: modelContext)
+        var booksById: [String: AutoSortBook] = [:]
+        for item in items {
+            booksById[item._id] = Self.book(from: item)
+        }
+        return ids.compactMap { booksById[$0] }
+    }
+
     // MARK: - Phase 1
 
-    private func proposeTaxonomy(session: LanguageModelSession) async throws -> [String] {
+    /// The histogram is passed rather than read off `self` so the sorting surface's
+    /// proposal (`proposePlan`) can run the same phase over its own collection without
+    /// publishing anything into the review screen's state.
+    private func proposeTaxonomy(
+        session: LanguageModelSession,
+        histogram: GenreHistogram
+    ) async throws -> [String] {
         let response = try await session.respond(
             to: AutoSortPrompts.taxonomyPrompt(histogram: histogram),
             generating: AutoSortTaxonomyDraft.self,
@@ -358,7 +445,8 @@ final class AutoSortModel {
     /// a long genre list plus a long answer overruns the context.
     private func mapGenres(
         session: LanguageModelSession,
-        taxonomy: [String]
+        taxonomy: [String],
+        histogram: GenreHistogram
     ) async throws -> [ShelfMappingValidator.RawAssignment] {
         var assignments: [ShelfMappingValidator.RawAssignment] = []
 
@@ -393,20 +481,29 @@ final class AutoSortModel {
         )
         let items: [InventoryItem] = (try? modelContext.fetch(descriptor)) ?? []
 
-        return items.filter(\.shelves.isEmpty).map { item in
-            var seen: Set<String> = []
-            let genres: [String] = (item.edition?.works ?? [])
-                .flatMap(\.genres)
-                .filter { seen.insert($0).inserted }
+        return items.filter(\.shelves.isEmpty).map(Self.book(from:))
+    }
 
-            return .init(
-                id: item._id,
-                title: item.edition?.title ?? "",
-                authors: item.edition?.authorNames.joined(separator: ", ") ?? "",
-                coverImageUrl: item.edition?.image,
-                genres: genres
-            )
-        }
+    /// One stored copy as every phase of the pipeline needs it. Written once and shared
+    /// by both readers of the inventory, so the genre line the sorting surface shows and
+    /// the genre the histogram counts can never be read two different ways.
+    ///
+    /// A copy's genres are the union of the genres of the works behind its edition, in
+    /// claim order and deduplicated; `AutoSortBook.primaryGenre` then decides which
+    /// single one it is filed under.
+    private static func book(from item: InventoryItem) -> AutoSortBook {
+        var seen: Set<String> = []
+        let genres: [String] = (item.edition?.works ?? [])
+            .flatMap(\.genres)
+            .filter { seen.insert($0).inserted }
+
+        return .init(
+            id: item._id,
+            title: item.edition?.title ?? "",
+            authors: item.edition?.authorNames.joined(separator: ", ") ?? "",
+            coverImageUrl: item.edition?.image,
+            genres: genres
+        )
     }
 
     /// The stored items behind a proposed étagère's books. `AutoSortBook.id` *is* the

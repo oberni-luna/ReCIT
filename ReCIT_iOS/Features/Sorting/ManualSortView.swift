@@ -65,13 +65,15 @@ struct ManualSortView: View {
             //
             // A run in flight only *disables* it, on the action bar's reasoning: what
             // the button offers is still true, it is simply not offered while the writes
-            // settle. The stack must not grow under a plan that was reduced from it.
+            // settle. The stack must not grow under a plan that was reduced from it —
+            // nor under a proposal that resolved its names against the sections as they
+            // stood, which is why a run of either kind stands it down.
             if session.phase == .ready {
                 ToolbarItem(placement: .primaryAction) {
                     Button("manual_sort.create_shelf", systemImage: "plus") {
                         isCreatingShelf = true
                     }
-                    .disabled(session.isApplying)
+                    .disabled(session.isBusy)
                 }
             }
         }

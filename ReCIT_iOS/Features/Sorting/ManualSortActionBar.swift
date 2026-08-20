@@ -19,9 +19,13 @@
 //  top of the first, would both destroy the account of what landed. The writes
 //  themselves are owned by the session and carry on regardless of this screen.
 //
-//  « Proposer un rangement » is absent rather than disabled while the AI proposal is
-//  unbuilt (slice 0042): a button that does nothing is worse than no button, and the
-//  screen is meant to be entirely usable on a device that can never run the model.
+//  **« Proposer un rangement » sits first**, and it is the only one of the three that is
+//  live on arrival: with an empty stack the primary is inert and the third is a way out,
+//  so leading with the two dead buttons would put the one useful control last. It is
+//  absent altogether on a device that can never run the model — a button that does
+//  nothing is worse than no button, and the surface is meant to work regardless. What
+//  decides that is `ManualSortProposalButton`, which owns the three unavailability
+//  states.
 //
 //  See PRD 0008.
 //
@@ -30,29 +34,44 @@ import SwiftUI
 
 struct ManualSortActionBar: View {
 
-    /// The one input the whole bar is derived from.
+    /// The one input the two stack buttons are derived from.
     let hasPendingChanges: Bool
+
+    /// What auto-sort's availability makes of the proposal button. Derived by the caller
+    /// in its body, so flipping Apple Intelligence on re-renders it live.
+    let entryPoint: AutoSortEntryPoint
+
+    /// Whether the model is working out a proposal right now.
+    let isProposing: Bool
 
     /// Whether a run is writing right now. It disables rather than relabels: what the
     /// buttons would say is still true, they are simply not offered.
     let isApplying: Bool
 
+    let onPropose: () -> Void
     let onApply: () -> Void
     let onDiscard: () -> Void
     let onFinish: () -> Void
 
     var body: some View {
-        VStack(spacing: .small) {
+        VStack(spacing: .medium) {
+            ManualSortProposalButton(
+                entryPoint: entryPoint,
+                isProposing: isProposing,
+                isApplying: isApplying,
+                onPropose: onPropose
+            )
+
             Button("manual_sort.apply", action: onApply)
                 .buttonStyle(.primary())
-                .disabled(hasPendingChanges == false || isApplying)
+                .disabled(hasPendingChanges == false || isApplying || isProposing)
 
             Button(
                 hasPendingChanges ? "manual_sort.discard" : "manual_sort.finish",
                 action: hasPendingChanges ? onDiscard : onFinish
             )
             .buttonStyle(.secondary())
-            .disabled(isApplying)
+            .disabled(isApplying || isProposing)
         }
         .frame(maxWidth: .infinity)
     }

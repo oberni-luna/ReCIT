@@ -61,6 +61,18 @@ final class SortSessionModel {
     /// buttons and the drag both stand down until the run settles.
     private(set) var isApplying: Bool = false
 
+    /// Whether the on-device model is working out a proposal right now. Like
+    /// `isApplying` and for the same reason it is not a `Phase`: the sections stay on
+    /// screen, because the proposal is about to land *on them* and hiding the library
+    /// would hide the thing being rearranged. What stands down is the same escape
+    /// hatch — the stack must not grow under a run whose reconciliation was resolved
+    /// against the sections as they stood.
+    private(set) var isProposing: Bool = false
+
+    /// Whether a run of any kind owns the stack. One question rather than two, so a
+    /// guard cannot be written for the apply and forgotten for the proposal.
+    var isBusy: Bool { isApplying || isProposing }
+
     /// The run's ledger, or `nil` before one has been started. Kept after the run
     /// settles: it is the account of what landed, and a user who left mid-apply has to
     /// find it on their return — which is the whole reason this model is app-scoped.
@@ -126,7 +138,9 @@ final class SortSessionModel {
         // stands the wholesale writers down for the duration of one call, not for the
         // duration of a batch, so a shelf sync landing between two of them would
         // rebuild the whole relation from state the run is halfway through changing.
-        guard isApplying == false else { return }
+        // A proposal in flight is re-frozen out from under just as badly: it resolves
+        // its names against the sections, and a new snapshot would change them.
+        guard isBusy == false else { return }
         guard changes.isEmpty else {
             phase = .ready
             return
@@ -170,10 +184,11 @@ final class SortSessionModel {
     /// reached it would be applied. A model that trusts its caller to have validated is a
     /// model whose invariant lives in a view.
     func createShelf(named name: String) {
-        // Nothing is added to the stack while the run writes: the plan in flight was
+        // Nothing is added to the stack while a run owns it: the plan in flight was
         // reduced from the stack as it stood when the button was pressed, so a draft
-        // appended under it would be a section the marks say nothing about.
-        guard isApplying == false else { return }
+        // appended under it would be a section the marks say nothing about — and a
+        // draft made under a proposal would be a name it never got to reconcile against.
+        guard isBusy == false else { return }
         guard let trimmed = AutoSortName.trimmed(name) else { return }
         guard draftNameRule.accepts(trimmed) else { return }
         changes.append(.createShelf(draftId: SortDraftID.make(), name: trimmed))
@@ -192,11 +207,12 @@ final class SortSessionModel {
         from origin: SortSection.ID,
         to destination: SortSection.ID
     ) {
-        // Nothing moves while the run writes. The plan being executed was reduced from
-        // the stack as it stood when the button was pressed, so a book pulled out from
-        // under it would still be filed by the operation already in flight — and the
-        // marks would be describing a library the user had gone on rearranging.
-        guard isApplying == false else { return }
+        // Nothing moves while a run owns the stack. The plan being executed was reduced
+        // from the stack as it stood when the button was pressed, so a book pulled out
+        // from under it would still be filed by the operation already in flight — and
+        // the marks would be describing a library the user had gone on rearranging. A
+        // proposal reads the origins it moves books from, so it is no different.
+        guard isBusy == false else { return }
         guard let change = SortChange.move(bookId: bookId, from: origin, to: destination) else { return }
         changes.append(change)
     }
@@ -208,8 +224,60 @@ final class SortSessionModel {
     /// The ledger of a run that has already happened is deliberately left alone: those
     /// writes landed, and « Annuler » only ever discards work that was never sent.
     func discardChanges() {
-        guard isApplying == false else { return }
+        guard isBusy == false else { return }
         changes = []
+    }
+
+    // MARK: - Asking the model
+
+    /// Asks the on-device model for a rangement and lays what it proposes on the stack,
+    /// as ordinary changes.
+    ///
+    /// **The model is one change generator among others.** What comes back is
+    /// indistinguishable from a run of drags: it can be adjusted by dragging, « Annuler »
+    /// discards it like any other pending work, and it can be asked for again after
+    /// sorting by hand. That is what closes the gap PRD 0006 left open, where a plan
+    /// could only be accepted or refused whole.
+    ///
+    /// **It is offered the pile as the screen shows it, not as the store holds it.**
+    /// Nothing has been written, so every book the user has filed by hand this session
+    /// is still unshelved to the store — asking it would propose them all over again.
+    /// The projection is the only thing that knows what is left to do.
+    ///
+    /// The conversion, reconciliation included, is `SortProposal` and is pure: a name
+    /// matching an étagère the user already has — or a draft already on the stack —
+    /// becomes a move into it rather than a second shelf of the same name.
+    ///
+    /// A run that adds nothing says so. From the far side of a wait the user triggered,
+    /// a screen that does not change is indistinguishable from a button that does not
+    /// work.
+    func proposeArrangement(
+        user: User,
+        autoSortModel: AutoSortModel,
+        errorReporter: AppErrorReporter?,
+        modelContext: ModelContext
+    ) async {
+        guard isBusy == false, phase == .ready else { return }
+
+        isProposing = true
+        defer { isProposing = false }
+
+        let plan: AutoSortPlan = await autoSortModel.proposePlan(
+            forItems: projection.unshelved.books.map(\.id),
+            user: user,
+            modelContext: modelContext
+        )
+
+        // Read after the run rather than before it: nothing can have touched the stack
+        // in between — `isProposing` stands every writer down — so this is the same
+        // reading, taken at the point it is used.
+        let proposal: SortProposal = .init(plan: plan, sections: projection.sections)
+        guard proposal.isEmpty == false else {
+            errorReporter?.report(SortProposalFailure.nothingToPropose)
+            return
+        }
+
+        changes.append(contentsOf: proposal.changes)
     }
 
     // MARK: - Applying
@@ -228,7 +296,7 @@ final class SortSessionModel {
         errorReporter: AppErrorReporter?,
         modelContext: ModelContext
     ) {
-        guard isApplying == false, phase == .ready else { return }
+        guard isBusy == false, phase == .ready else { return }
 
         let plan: SortWritePlan = writePlan
         guard plan.hasWork else {

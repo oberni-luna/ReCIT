@@ -31,6 +31,8 @@ import SwiftData
 
 struct ManualSortListView: View {
     @Environment(ShelfModel.self) private var shelfModel
+    @Environment(UserModel.self) private var userModel
+    @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.modelContext) private var modelContext
 
@@ -46,6 +48,11 @@ struct ManualSortListView: View {
         // reductions in one frame.
         let projection: SortProjection = session.projection
         let plan: SortWritePlan = session.writePlan
+        // Derived here rather than held, which is what keeps the proposal button live:
+        // the availability behind it reads an observable `SystemLanguageModel`, so a
+        // user who switches Apple Intelligence on and comes back finds the button
+        // enabled with no relaunch. Same lever as `ProfileView` and `AutoSortPlanView`.
+        let entryPoint: AutoSortEntryPoint = .init(availability: autoSortModel.availability)
 
         return List {
             ForEach(projection.sections) { section in
@@ -82,7 +89,10 @@ struct ManualSortListView: View {
             Section {
                 ManualSortActionBar(
                     hasPendingChanges: session.hasPendingChanges,
+                    entryPoint: entryPoint,
+                    isProposing: session.isProposing,
                     isApplying: session.isApplying,
+                    onPropose: propose,
                     onApply: apply,
                     onDiscard: session.discardChanges,
                     onFinish: onFinish
@@ -91,6 +101,26 @@ struct ManualSortListView: View {
             .listRowBackground(DesignSystem.Color.clear.color)
         }
         .applyListBackground()
+    }
+
+    /// Asks the on-device model for a rangement. What comes back is appended to the same
+    /// stack a drag appends to, so it is adjustable by dragging and « Annuler » discards
+    /// it like anything else (PRD 0008).
+    ///
+    /// The task is not tied to this view's lifetime: a proposal is a wait the user
+    /// triggered, and leaving the screen mid-run should find the changes on the stack on
+    /// their return, exactly as leaving mid-apply finds the ledger.
+    private func propose() {
+        guard let user = userModel.myUser else { return }
+
+        Task {
+            await session.proposeArrangement(
+                user: user,
+                autoSortModel: autoSortModel,
+                errorReporter: errorReporter,
+                modelContext: modelContext
+            )
+        }
     }
 
     /// Fires the run and returns. The writes are owned by the session, so this screen

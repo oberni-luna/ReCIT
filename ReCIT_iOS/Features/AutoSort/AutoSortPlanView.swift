@@ -136,6 +136,14 @@ struct AutoSortPlanView: View {
                     Text("Aucun genre n'a pu être identifié dans vos livres non rangés. Ils restent où ils sont.")
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundSecondary)
+                    // The counts, because "aucun genre" alone is indistinguishable from a
+                    // broken feature — which is exactly how it was reported. Written as a
+                    // labelled tally rather than a sentence: three numbers in one French
+                    // sentence is three agreements to get wrong, and the message that used
+                    // to sit below this one got one of them wrong for months.
+                    Text(coverageTally)
+                        .textStyle(.footnote200)
+                        .foregroundStyle(.foregroundSecondary)
                 }
             }
 
@@ -167,7 +175,10 @@ struct AutoSortPlanView: View {
             // books that are *not* being touched would drown the proposal.
             if !plan.leftUnshelved.isEmpty {
                 Section {
-                    Text("\(plan.leftUnshelved.count) livre\(plan.leftUnshelved.count > 1 ? "s" : "") restera\(plan.leftUnshelved.count > 1 ? "ont" : "") sans étagère, faute de genre connu.")
+                    // Pluralised by the catalogue. Built in Swift, this line read
+                    // "6 livres resteraont sans étagère" — the ternary appended "ont" to
+                    // "restera" instead of replacing its ending.
+                    Text("auto_sort.left_unshelved \(plan.leftUnshelved.count)")
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundSecondary)
                 }
@@ -239,6 +250,15 @@ struct AutoSortPlanView: View {
 
     /// A shelf's mark before the run has started is simply "not created yet", which is
     /// what an absent ledger means.
+    /// The backfill's own tally, so an empty plan can be told apart from an empty scope: a
+    /// zero in the first number means the works behind the books were never reached, which is
+    /// a different problem from a library whose works simply carry no genre.
+    private var coverageTally: String {
+        let coverage: GenreCoverage = autoSortModel.genreCoverage
+
+        return "Œuvres consultées : \(coverage.worksConsidered) · sans genre : \(coverage.worksWithoutGenres) · non consultées : \(coverage.worksPending)"
+    }
+
     private func outcome(for shelf: AutoSortPlan.ProposedShelf) -> AutoSortApplyProgress.ShelfOutcome {
         autoSortModel.applyProgress?.outcome(for: shelf.name) ?? .pending
     }

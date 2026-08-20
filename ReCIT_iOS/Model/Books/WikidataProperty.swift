@@ -11,6 +11,7 @@ enum WikidataProperty: String {
     // Works
     case instanceOf              = "wdt:P31"   // instance of
     case genre                   = "wdt:P136"  // genre
+    case mainSubject             = "wdt:P921"  // main subject — what an inv: work carries instead of a genre
     case publicationDate         = "wdt:P577"  // publication date
     case openLibraryID           = "wdt:P648"  // Open Library ID
     case author                  = "wdt:P50"   // Author
@@ -46,6 +47,7 @@ enum WikidataProperty: String {
         switch self {
         case .instanceOf: return "instance of"
         case .genre: return "genre"
+        case .mainSubject: return "main subject"
         case .publicationDate: return "publication date"
         case .openLibraryID: return "Open Library ID"
         case .author: return "Author"

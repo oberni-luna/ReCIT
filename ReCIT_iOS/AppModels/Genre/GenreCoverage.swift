@@ -48,7 +48,10 @@ struct GenreCoverage: Equatable {
         var pending: Int = 0
 
         for work in works {
-            if work.genresEnrichedAt == nil {
+            // A work asked under an older claim reading is pending, not answered: it is about
+            // to be re-asked, and counting it as "no genre" would report thin data where the
+            // truth is stale data. See `GenreClaims.revision`.
+            if work.genresEnrichedAt == nil || work.genresRevision < GenreClaims.revision {
                 pending += 1
             } else if work.genres.isEmpty {
                 withoutGenres += 1

@@ -106,6 +106,47 @@
         }
       }
     },
+    "auto_sort.left_unshelved %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld book will stay off the shelves, for want of a known genre."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld books will stay off the shelves, for want of a known genre."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld livre restera sans étagère, faute de genre connu."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld livres resteront sans étagère, faute de genre connu."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "action.add_to_shelf" : {
       "localizations" : {
         "en" : {

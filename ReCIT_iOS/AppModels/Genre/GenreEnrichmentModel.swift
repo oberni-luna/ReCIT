@@ -98,7 +98,12 @@ final class GenreEnrichmentModel {
         worksProcessed = 0
 
         let works: [Work] = unshelvedWorks(forUser: user, modelContext: modelContext)
-        let pending: [Work] = works.filter { $0.genresEnrichedAt == nil }
+        // A work asked under an older reading of the claims counts as unasked: the timestamp
+        // says *when* it was asked, not *what* it was asked. Without this, every work already
+        // stamped by the genre-only rule would keep its empty list for good.
+        let pending: [Work] = works.filter {
+            $0.genresEnrichedAt == nil || $0.genresRevision < GenreClaims.revision
+        }
         worksToEnrich = pending.count
 
         guard !pending.isEmpty else {
@@ -155,8 +160,12 @@ final class GenreEnrichmentModel {
         var urisToResolve: Set<String> = []
 
         for entity in entities {
-            let genreUris: [String] = entity.claims[WikidataProperty.genre.rawValue]?
-                .compactMap { $0.getStringValue() } ?? []
+            // Genres where the work has them, subjects where it does not — the rule, and why
+            // the two are not pooled, is `GenreClaims`'.
+            let genreUris: [String] = GenreClaims.uris(
+                genres: entity.claims[GenreClaims.genreProperty]?.compactMap { $0.getStringValue() } ?? [],
+                subjects: entity.claims[GenreClaims.subjectProperty]?.compactMap { $0.getStringValue() } ?? []
+            )
             genreUrisByWork[entity.uri] = genreUris
             for uri in genreUris where genreLabels[uri] == nil {
                 urisToResolve.insert(uri)

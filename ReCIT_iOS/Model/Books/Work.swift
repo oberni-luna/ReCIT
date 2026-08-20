@@ -32,6 +32,11 @@ public class Work: Identifiable, Entity {
     /// re-fetching a work already known to have none.
     var genresEnrichedAt: Date?
 
+    /// Which reading of the claims produced `genres` — see `GenreClaims.revision`. Additive,
+    /// so lightweight migration covers it, and a work carried over from before this property
+    /// existed reads as revision 0 and is therefore re-asked once.
+    var genresRevision: Int = 0
+
     @Relationship(inverse: \Author.works) var authors: [Author] = []
     @Relationship(inverse: \Edition.works) var editions: [Edition] = []
 
@@ -96,6 +101,7 @@ public class Work: Identifiable, Entity {
     func applyEnrichedGenres(_ genres: [String]) {
         self.genres = genres
         genresEnrichedAt = .now
+        genresRevision = GenreClaims.revision
     }
 
     enum Constant {

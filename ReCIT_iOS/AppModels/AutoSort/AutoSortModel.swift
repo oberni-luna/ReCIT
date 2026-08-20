@@ -112,6 +112,12 @@ final class AutoSortModel {
     /// The étagère names phase 1 proposed, before assignment dropped the empty ones.
     private(set) var proposedTaxonomy: [String] = []
 
+    /// How much of the library the genre backfill managed to describe, read from the model
+    /// that did the describing rather than recomputed. An empty plan is the one outcome a
+    /// user cannot tell apart from a broken feature, so the screen that reports it needs
+    /// these counts — see issue 0034.
+    var genreCoverage: GenreCoverage { genreEnrichment.coverage }
+
     /// The apply run's ledger, or `nil` before one has been started. The review list
     /// reads its marks from here, and the report reads which étagères were created and
     /// which were not from the same place — so the two cannot disagree.

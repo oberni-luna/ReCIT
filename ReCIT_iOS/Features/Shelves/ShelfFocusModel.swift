@@ -36,9 +36,6 @@ final class ShelfFocusModel {
         let presentation: Presentation
         /// The last standing book on a shelf leans; the copy has to lean with it.
         let leaning: Bool
-        /// Screen y where the cell's bottom edge rests: clear of the tallest book this shelf
-        /// can grow, so the cell holds still while the finger slides along the shelf.
-        let cellBottom: CGFloat
     }
 
     /// The book under the finger. Nil between presses, and while the finger is off the shelf.

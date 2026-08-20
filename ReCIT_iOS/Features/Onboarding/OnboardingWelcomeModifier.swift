@@ -77,7 +77,7 @@ struct OnboardingWelcomeModifier: ViewModifier {
             get: {
                 OnboardingGate.presentsWelcome(
                     inventoryHasSynced: user?.lastInventorySync != nil,
-                    ownedBookCount: ownedBooks.count,
+                    ownedBookCount: debugForcedBookCount ?? ownedBooks.count,
                     welcomeAnswered: hasAnsweredWelcome
                 )
             },
@@ -87,6 +87,17 @@ struct OnboardingWelcomeModifier: ViewModifier {
                 answer()
             }
         )
+    }
+
+    /// Stands in for the book count when the debug section is forcing the accueil, so the
+    /// gate is still the thing deciding — it is asked the same question with one input
+    /// substituted, rather than bypassed. Always nil in a Release build.
+    private var debugForcedBookCount: Int? {
+        #if DEBUG
+        onboarding.forcesWelcome ? 0 : nil
+        #else
+        nil
+        #endif
     }
 
     private var hasAnsweredWelcome: Bool {

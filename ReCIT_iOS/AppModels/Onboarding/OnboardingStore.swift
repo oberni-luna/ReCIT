@@ -32,10 +32,35 @@ final class OnboardingStore {
     private let defaults: UserDefaults
     private static let defaultsKey: String = "OnboardingStore.welcomeAnsweredUserIds"
 
+    #if DEBUG
+    /// Debug scaffolding: presents the accueil even where the inventory holds books.
+    ///
+    /// The accueil's condition is three clauses, and only one of them — the answer — is
+    /// anything a debug row can reasonably forget. The other two describe an account that
+    /// really is new, and reproducing them for real would mean deleting the tester's own
+    /// books off inventaire.io. So this stands in for the empty-inventory clause instead,
+    /// and the debug section says out loud that it is doing so.
+    ///
+    /// Persisted, because the interesting moment is a *launch*: an override that forgot
+    /// itself on relaunch could only ever show the accueil mid-session, which is the one
+    /// thing the two other debug rows already do.
+    ///
+    /// Cleared by answering, like the answer itself — otherwise the cover would come
+    /// straight back and the screen would be a trap.
+    var forcesWelcome: Bool {
+        didSet { defaults.set(forcesWelcome, forKey: Self.forcesWelcomeKey) }
+    }
+
+    private static let forcesWelcomeKey: String = "OnboardingStore.debugForcesWelcome"
+    #endif
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         let stored: [String] = defaults.stringArray(forKey: Self.defaultsKey) ?? []
         self.welcomeAnsweredUserIds = Set(stored)
+        #if DEBUG
+        self.forcesWelcome = defaults.bool(forKey: Self.forcesWelcomeKey)
+        #endif
     }
 
     // MARK: - Queries
@@ -50,6 +75,10 @@ final class OnboardingStore {
 
     /// Records that the accueil has been answered. Persisted, so the next launch does not ask again.
     func markWelcomeAnswered(userId: String) {
+        #if DEBUG
+        // A forced accueil that stayed forced would reappear the instant it was answered.
+        forcesWelcome = false
+        #endif
         guard !welcomeAnsweredUserIds.contains(userId) else { return }
         welcomeAnsweredUserIds.insert(userId)
         persist()

@@ -69,7 +69,7 @@ struct ProfileDebugSection: View {
 
         return OnboardingGate.presentsWelcome(
             inventoryHasSynced: user.lastInventorySync != nil,
-            ownedBookCount: ownedBookCount,
+            ownedBookCount: onboarding.forcesWelcome ? 0 : ownedBookCount,
             welcomeAnswered: onboarding.hasAnsweredWelcome(userId: user._id)
         )
     }
@@ -97,6 +97,9 @@ struct ProfileDebugSection: View {
                 guard let userId: String = userModel.myUser?._id else { return }
 
                 onboarding.resetWelcome(userId: userId)
+                // The empty-inventory clause is stood in for rather than reproduced: the
+                // real thing would mean deleting the tester's books off inventaire.io.
+                onboarding.forcesWelcome = true
             }
             .foregroundStyle(.foregroundTinted)
 
@@ -138,9 +141,14 @@ struct ProfileDebugSection: View {
     /// Everything the two conditions depend on, in one line, so a row that does nothing can
     /// be told from a row that is broken.
     private var stateLine: String {
-        let welcome: String = welcomeWouldShow
-            ? "l'accueil s'affiche"
-            : "l'accueil ne s'affiche pas (\(ownedBookCount) livre(s) en inventaire)"
+        let welcome: String
+        if welcomeWouldShow {
+            welcome = onboarding.forcesWelcome
+                ? "l'accueil s'affiche (inventaire vide simulé)"
+                : "l'accueil s'affiche"
+        } else {
+            welcome = "l'accueil ne s'affiche pas (\(ownedBookCount) livre(s) en inventaire)"
+        }
 
         return "\(unshelvedCount) livre(s) sur aucune étagère · Apple Intelligence : \(availabilityLabel) · \(welcome)"
     }

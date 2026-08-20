@@ -32,6 +32,20 @@ struct ShelvesView: View {
                 destination.viewForDestination($path)
             }
             .navigationTitle("nav.inventory")
+            // The way into the sorting surface (PRD 0008). In the navigation bar
+            // rather than in a section header: it is about the whole collection, not
+            // about the étagères band or the books band, and the two headers already
+            // carry actions of their own. Shown only once there is a synced
+            // inventory behind it — sorting an empty library sorts nothing.
+            .toolbar {
+                if userModel.myUser?.lastInventorySync != nil {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button("shelves.action.sort", systemImage: "arrow.up.arrow.down") {
+                            path.append(NavigationDestination.manualSort)
+                        }
+                    }
+                }
+            }
             .searchable(text: $searchText)
         }
     }

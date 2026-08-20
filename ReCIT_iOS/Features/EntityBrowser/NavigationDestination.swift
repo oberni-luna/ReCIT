@@ -21,6 +21,10 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// The AI shelving proposal (PRD 0006). Carries nothing: the plan lives on
     /// `AutoSortModel`, so navigating back and forth cannot re-run it by accident.
     case autoSort
+    /// The manual sorting surface (PRD 0008). Carries nothing: the session and its
+    /// frozen snapshot belong to the screen, so pushing it twice cannot half-restore
+    /// a sorting session.
+    case manualSort
 
     var id: String {
         switch self {
@@ -42,6 +46,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "shelf:\(id)"
         case .autoSort:
             return "autoSort"
+        case .manualSort:
+            return "manualSort"
         }
     }
 
@@ -97,6 +103,8 @@ extension NavigationDestination {
           ShelfDetailView(shelfId: id, path: path)
       case .autoSort:
           AutoSortPlanView(path: path)
+      case .manualSort:
+          ManualSortView(path: path)
       }
     }
 }

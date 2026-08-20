@@ -55,6 +55,14 @@ final class SortSessionModel {
         .init(snapshot: snapshot, changes: changes)
     }
 
+    /// What applying would do: the operations to send, each étagère's status, and the
+    /// counts the recap reads from. Recomputed on every read, like `projection` and for
+    /// the same reason — a cached plan is one more thing that can disagree with the
+    /// stack, and disagreeing is precisely what a single reduction exists to prevent.
+    var writePlan: SortWritePlan {
+        .init(snapshot: snapshot, changes: changes)
+    }
+
     /// **The button rule, derived — no "has applied" flag.** A non-empty stack means
     /// the apply button is live and the third button says « Annuler »; an empty one
     /// means the apply button is inert and the third says « Terminer » and closes.

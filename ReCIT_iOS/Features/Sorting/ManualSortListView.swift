@@ -34,14 +34,31 @@ struct ManualSortListView: View {
     @State private var targeted: ManualSortDropTarget?
 
     var body: some View {
-        List {
-            ForEach(session.projection.sections) { section in
+        // Both derivations read once per render rather than once per section: they are
+        // pure functions of the same two values, so reading them repeatedly would only
+        // cost walks, but it is also how a list ends up rendering two different
+        // reductions in one frame.
+        let projection: SortProjection = session.projection
+        let plan: SortWritePlan = session.writePlan
+
+        return List {
+            ForEach(projection.sections) { section in
                 ManualSortSectionView(
                     section: section,
+                    status: plan.status(of: section.id),
                     isDropTarget: targeted?.section == section.id,
                     onDrop: { drop($0, onto: section.id) },
                     onTargeted: setTargeted
                 )
+            }
+
+            // Silent while nothing has been done — an empty stack has nothing to
+            // recap. Once something has, the recap speaks even if it coalesces to
+            // nothing, because the buttons are still offering to save and discard.
+            if plan.hasPendingChanges {
+                Section {
+                    ManualSortRecapView(plan: plan)
+                }
             }
 
             Section {

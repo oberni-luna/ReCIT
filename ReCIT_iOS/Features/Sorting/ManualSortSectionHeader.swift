@@ -11,9 +11,10 @@
 //  rather than by a ternary inside an interpolation: PRD 0008 records that mistake
 //  (D38) as one this screen does not repeat.
 //
-//  The state pill (« Nouvelle » / « Modifiée ») belongs here too, but it is derived
-//  from the write plan and arrives with slice 0039. Its absence is the normal state,
-//  so nothing has to be left behind for it.
+//  The state pill (« Nouvelle » / « Modifiée ») sits beside the name, and is derived
+//  from the write plan rather than stored — so it cannot say an étagère changed while
+//  the apply leaves it alone. Its absence is the normal state, and it draws nothing
+//  at all in that case: see `ManualSortStatusPill`.
 //
 //  See PRD 0008.
 //
@@ -23,12 +24,19 @@ import SwiftUI
 struct ManualSortSectionHeader: View {
     let section: SortSection
 
+    /// What this étagère's pill says, straight out of the write plan.
+    let status: SortWritePlan.ShelfStatus
+
     var body: some View {
         HStack(spacing: .small) {
             title
                 .textStyle(.action300)
                 .foregroundStyle(.foregroundDefault)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(1)
+
+            ManualSortStatusPill(status: status)
+
+            Spacer(minLength: .zero)
 
             Text("manual_sort.section.count \(section.bookCount)")
                 .textStyle(.action200)

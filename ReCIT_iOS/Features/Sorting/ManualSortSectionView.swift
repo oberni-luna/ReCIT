@@ -25,6 +25,11 @@ struct ManualSortSectionView: View {
 
     let section: SortSection
 
+    /// What this band's pill says. Derived by the list from the write plan, which is
+    /// the same reduction the recap and the apply read — so the pill, the sentence at
+    /// the foot and what gets written cannot disagree (PRD 0008).
+    let status: SortWritePlan.ShelfStatus
+
     /// Whether the finger is over this band right now. Owned by the list, which is the
     /// only place that can know a single section is the target.
     let isDropTarget: Bool
@@ -54,7 +59,7 @@ struct ManualSortSectionView: View {
                 }
             }
         } header: {
-            ManualSortSectionHeader(section: section)
+            ManualSortSectionHeader(section: section, status: status)
                 .manualSortDropDestination(
                     target: .init(section: section.id, slot: .header),
                     onDrop: onDrop,

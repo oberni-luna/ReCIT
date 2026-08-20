@@ -25,7 +25,12 @@ struct ShelfLabelView: View {
     let maxWidth: CGFloat
     var showsChevron: Bool = true
     var lineLimit: Int = 1
-    var alignment: TextAlignment = .leading
+    /// How the lines sit relative to each other when the text wraps.
+    var textAlignment: TextAlignment = .leading
+    /// Where the paper sits within `maxWidth`. Separate from `textAlignment` because the
+    /// two genuinely differ: the empty state's tag is centred on the card while its own
+    /// two lines stay left-aligned to each other.
+    var placement: Alignment = .center
 
     var body: some View {
         HStack(spacing: .xSmall) {
@@ -33,7 +38,7 @@ struct ShelfLabelView: View {
                 .textStyle(.content300)
                 .foregroundStyle(ShelfPalette.labelInk)
                 .lineLimit(lineLimit)
-                .multilineTextAlignment(alignment)
+                .multilineTextAlignment(textAlignment)
 
             if showsChevron {
                 // Drawn by hand: a `NavigationLink` outside a `List` supplies no disclosure
@@ -52,15 +57,7 @@ struct ShelfLabelView: View {
         .shadow(.light)
         .rotationEffect(.degrees(ShelfLabelTilt.degrees(for: text)))
         // The paper hugs its text (the background is applied first); this box only caps how
-        // wide it may get and parks it along the books' own edge.
-        .frame(maxWidth: maxWidth, alignment: boxAlignment)
-    }
-
-    private var boxAlignment: Alignment {
-        switch alignment {
-        case .leading: .leading
-        case .center: .center
-        case .trailing: .trailing
-        }
+        // wide it may get and decides where on the card it sits.
+        .frame(maxWidth: maxWidth, alignment: placement)
     }
 }

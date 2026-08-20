@@ -60,6 +60,14 @@ struct ShelfRowView: View {
     /// How far the label's *top* rides up over the plank's bottom edge. Anchored from the
     /// top so a taller label simply extends further down and the inset still holds.
     private let labelOverlap: CGFloat = 14
+    /// Room under the label for what it draws outside its own bounds: the shadow reaches
+    /// about 5pt below it, and the tilt drops a corner a little further.
+    ///
+    /// This is not decoration, it is what stops the carousel clipping the paper's lower
+    /// edge. A negative top padding shortens the row by exactly what it lifts, so the
+    /// label's bottom always lands flush against the card's bottom — raising the overlap
+    /// moves that boundary up with it and never opens a gap. Only real height does.
+    private let labelBleed: CGFloat = 8
 
     var body: some View {
         VStack(spacing: 0) {
@@ -74,6 +82,7 @@ struct ShelfRowView: View {
             }
             .buttonStyle(.plain)
             .padding(.top, -labelOverlap)
+            .padding(.bottom, labelBleed)
             .zIndex(1)
         }
         .frame(width: width)
@@ -157,17 +166,8 @@ struct ShelfRowView: View {
             item: books[index],
             frame: inCard.offsetBy(dx: cardFrame.minX, dy: cardFrame.minY),
             presentation: presentation(at: index),
-            leaning: layout.isLeaning(at: index),
-            cellBottom: cellBottom
+            leaning: layout.isLeaning(at: index)
         )
-    }
-
-    /// Where the focus overlay parks the cell: just above the tallest book this shelf can
-    /// grow, so it clears every one of them and stays put as the finger slides along.
-    private var cellBottom: CGFloat {
-        cardFrame.minY
-            + ShelfBooksView.booksOffset
-            + layout.topOfTallestBook(grownBy: fullGrowth)
     }
 
     private func presentation(at index: Int) -> ShelfFocusModel.Presentation {

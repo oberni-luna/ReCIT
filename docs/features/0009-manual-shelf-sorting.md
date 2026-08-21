@@ -68,14 +68,20 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
   animation and the grip are the system's. What `Section` was drawing for free — a card per
   étagère — is repainted per row from `isCardTop` / `isCardBottom`, through
   `listRowBackground` so the card runs under the grip rather than stopping short of it.
-- **A moved book lands at the foot of its destination**, not in snapshot order. The list's
-  own reorder is positional and this model is set-based, so the two disagree on where the
-  row ends up; SwiftUI animates its arrangement, then animates the diff against ours on
-  top. Ordering by arrival closes most of that gap — a book dropped onto a shelf goes where
-  the list already put it. The drop *index* stays out of the model, so a drop in the middle
-  of a section still settles at the foot. Derived from the stack alone: an untouched book
-  keeps its snapshot position, and once a run empties the stack the library reads as the
-  server holds it again.
+- **The screen hands the projection the permutation the list performed.** Edit-mode
+  reorder is positional — it animates the row into the exact slot the finger chose —
+  while membership carries no user-facing order. Any order the projection invented was a
+  *different* arrangement, so SwiftUI animated the difference on top of the drop, and a
+  dropped row sat over the row it landed on for about half a second. So `onMove` applies
+  the same `move(fromOffsets:toOffset:)` to its own row array and passes the resulting book
+  order down as `displayOrder`. Nothing is derived twice, so there is no second diff.
+  `displayOrder` is **display only**: `SortWritePlan` builds its projections without it, so
+  it cannot change a byte of what is sent; it is cleared on discard, on a fresh freeze, and
+  as an apply lands. A book it does not mention keeps its snapshot position, so a partial
+  order is still a total one.
+- A book nudged **inside** its own étagère records no change — there is no membership to
+  write — but it keeps its new place, because the display order is taken either way. That
+  reorder is never saved, and reopening the screen re-freezes.
 - **Do not disable animations on the move.** It is the obvious-looking cure for the double
   animation and it breaks the gesture outright: the list stops reconciling after its own
   reorder, so the cell stays where UIKit moved it, the data never changes, and the headers

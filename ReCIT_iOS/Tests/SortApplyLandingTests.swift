@@ -281,9 +281,7 @@ struct SortApplyLandingTests {
         #expect(run.plan.operations.count == 1)
         #expect(run.plan.operations.first?.section == .shelf("s2"))
         #expect(run.plan.operations.first?.additions == ["1"])
-        // "1" sits last: it has been moved, and a moved book lands at the foot of its
-        // destination (see `SortProjection`).
-        #expect(section(run.projection, named: "Poésie")?.books.map(\.id) == ["3", "1"])
+        #expect(section(run.projection, named: "Poésie")?.books.map(\.id) == ["1", "3"])
     }
 
     /// The one that would cost the user a duplicate shelf. The creation landed and the

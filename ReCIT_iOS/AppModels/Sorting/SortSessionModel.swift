@@ -49,6 +49,17 @@ final class SortSessionModel {
     /// that is left.
     private(set) var changes: [SortChange] = []
 
+    /// The order the screen wants its books drawn in, flat, across every section —
+    /// **display only.** The list's own reorder is positional, so it animates a dropped
+    /// row into the exact slot the finger chose; membership carries no user-facing order,
+    /// so any order derived here would be a different arrangement and the list would
+    /// animate the difference on top of the drop. Holding the permutation the list
+    /// actually performed is what keeps the gesture smooth.
+    ///
+    /// It reaches `projection` and nothing else. `writePlan` is built without it, so it
+    /// cannot change a single byte of what is sent, and it is thrown away with the stack.
+    private(set) var displayOrder: [String] = []
+
     /// Guards against two appearances of the screen syncing over each other. Not a
     /// phase: a load that is already running is not a state the screen renders
     /// differently, it is a call that must not happen twice.
@@ -94,7 +105,7 @@ final class SortSessionModel {
     /// walk over a few hundred books, and a cache is one more thing that can
     /// disagree with the stack.
     var projection: SortProjection {
-        .init(snapshot: snapshot, changes: changes)
+        .init(snapshot: snapshot, changes: changes, displayOrder: displayOrder)
     }
 
     /// What applying would do: the operations to send, each étagère's status, and the
@@ -202,10 +213,13 @@ final class SortSessionModel {
     /// « Terminer » into « Annuler » — the screen would be claiming there is work to
     /// discard when there is none. The rule itself lives on `SortChange.move`, which is
     /// pure and therefore assertable; this method only appends what comes back.
+    /// `order` is the flat book order the list has just laid out — pass the permutation it
+    /// performed, not an order of your own, or the drop will animate twice.
     func moveBook(
         _ bookId: String,
         from origin: SortSection.ID,
-        to destination: SortSection.ID
+        to destination: SortSection.ID,
+        order: [String]? = nil
     ) {
         // Nothing moves while a run owns the stack. The plan being executed was reduced
         // from the stack as it stood when the button was pressed, so a book pulled out
@@ -213,6 +227,14 @@ final class SortSessionModel {
         // the marks would be describing a library the user had gone on rearranging. A
         // proposal reads the origins it moves books from, so it is no different.
         guard isBusy == false else { return }
+
+        // Taken even when the move records nothing — a book nudged inside its own étagère
+        // changes no membership, so there is nothing to save and no pill to draw, but the
+        // row still has to stay where it was put rather than springing back.
+        if let order {
+            displayOrder = order
+        }
+
         guard let change = SortChange.move(bookId: bookId, from: origin, to: destination) else { return }
         changes.append(change)
     }
@@ -226,6 +248,7 @@ final class SortSessionModel {
     func discardChanges() {
         guard isBusy == false else { return }
         changes = []
+        displayOrder = []
     }
 
     // MARK: - Asking the model
@@ -301,6 +324,7 @@ final class SortSessionModel {
         let plan: SortWritePlan = writePlan
         guard plan.hasWork else {
             changes = []
+            displayOrder = []
             ledgerKeys = [:]
             applyProgress = .init(entries: [])
             return
@@ -465,6 +489,10 @@ final class SortSessionModel {
         )
         snapshot = landing.snapshot
         changes = landing.changes
+        // The display order described the arrangement that was pending. Part of it has
+        // landed, so the snapshot speaks for it now; keeping the old order would have the
+        // screen ranking books by a gesture the server has already absorbed.
+        displayOrder = []
     }
 
     /// What one section's row in the ledger is keyed by. The section's identity rather
@@ -534,6 +562,7 @@ final class SortSessionModel {
         )
         let items: [InventoryItem] = (try? modelContext.fetch(itemDescriptor)) ?? []
 
+        displayOrder = []
         snapshot = .init(
             shelves: shelves.map { shelf in
                 .init(

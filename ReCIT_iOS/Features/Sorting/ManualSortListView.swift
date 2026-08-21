@@ -138,19 +138,29 @@ struct ManualSortListView: View {
     /// costs the stack nothing, which is the honest outcome when order within an étagère
     /// is not part of the state.
     ///
-    /// **Do not wrap this in a transaction that disables animations.** It looks like the
-    /// obvious cure for the drop's double animation, and it breaks the gesture outright:
-    /// the list stops reconciling after its own reorder, so the cell stays where UIKit
-    /// moved it, the data never changes, and the headers go on reporting the old counts
-    /// until the screen is rebuilt. What keeps the two arrangements close instead is
-    /// `SortProjection` ordering a moved book at the foot of its destination — the same
-    /// place the list itself puts a row dropped at the end of a section.
+    /// **The permutation is handed over, not re-derived.** Edit-mode reorder is positional:
+    /// it animates the row into the exact slot the finger chose. Any order the projection
+    /// invented — snapshot order, arrival order — was a different arrangement, and SwiftUI
+    /// animated the difference on top of the drop, which is what left a dropped row sitting
+    /// over the row it landed on for half a second. So the same `move(fromOffsets:toOffset:)`
+    /// the list just performed is applied here and passed down as the display order. Nothing
+    /// is derived twice, so there is no second diff to animate.
+    ///
+    /// Do **not** reach for a transaction with `disablesAnimations` instead. It stops the
+    /// list reconciling after its own reorder: the cell stays where UIKit moved it, the
+    /// change is never pushed, and the headers go on reporting the old counts.
     private func move(_ source: IndexSet, to destination: Int, in rows: ManualSortRows) {
         guard let target = rows.section(forInsertionAt: destination) else { return }
 
+        var permuted: [ManualSortRow] = rows.rows
+        permuted.move(fromOffsets: source, toOffset: destination)
+        let order: [String] = permuted.compactMap { row in
+            if case .book(let book) = row.content { book.id } else { nil }
+        }
+
         for index in source {
             guard let book = rows.book(at: index) else { continue }
-            session.moveBook(book.id, from: book.origin, to: target)
+            session.moveBook(book.id, from: book.origin, to: target, order: order)
         }
     }
 

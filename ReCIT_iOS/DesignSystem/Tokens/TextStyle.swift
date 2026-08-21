@@ -100,25 +100,34 @@ extension DesignSystem.TextStyle {
         case AlegreyaBold, AlegreyaMedium, AlegreyaRegular
         case OpenSansExtraBold, OpenSansSemiBold, OpenSansRegular
 
+        /// The name of the `.ttf` in the bundle. `Bundle.url(forResource:)` is
+        /// case-sensitive, so this has to match the file on disk exactly — including
+        /// `Semibold`, which Open Sans ships with a lowercase `b`.
         var registrationName: String {
             switch self {
             case .AlegreyaBold: "Alegreya-Bold"
             case .AlegreyaMedium: "Alegreya-Medium"
             case .AlegreyaRegular: "Alegreya-Regular"
             case .OpenSansExtraBold: "OpenSans-ExtraBold"
-            case .OpenSansSemiBold: "OpenSans-SemiBold"
+            case .OpenSansSemiBold: "OpenSans-Semibold"
             case .OpenSansRegular: "OpenSans-Regular"
             }
         }
 
+        /// The **PostScript** name, which is what `UIFont(name:)` resolves — not the file
+        /// name, and not always the same string. Open Sans capitalises differently
+        /// (`Extrabold`, `Semibold`) and its regular face is plain `OpenSans`. Getting any
+        /// of these wrong is silent: `UIFont(name:)` returns nil and the style falls back
+        /// to the system font, which is what left every OpenSans style looking like San
+        /// Francisco on device.
         var fontName: String {
             switch self {
             case .AlegreyaBold: "Alegreya-Bold"
             case .AlegreyaMedium: "Alegreya-Medium"
             case .AlegreyaRegular: "Alegreya-Regular"
-            case .OpenSansExtraBold: "OpenSans-ExtraBold"
-            case .OpenSansSemiBold: "OpenSans-SemiBold"
-            case .OpenSansRegular: "OpenSans-Regular"
+            case .OpenSansExtraBold: "OpenSans-Extrabold"
+            case .OpenSansSemiBold: "OpenSans-Semibold"
+            case .OpenSansRegular: "OpenSans"
             }
         }
 

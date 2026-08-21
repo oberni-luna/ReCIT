@@ -17,7 +17,10 @@ public enum DesignSystem: Sendable {
 
     private static func setupFonts() {
         for font in TextStyle.CustomFont.allCases {
-            guard let url = Bundle.main.url(forResource: font.registrationName, withExtension: font.fileExtension) else { break }
+            // `continue`, not `break`: one missing file used to abort the whole loop, so a
+            // single misnamed resource silently cost every font declared after it. That is
+            // how `OpenSans-Regular` came to be unregistered without anyone touching it.
+            guard let url = Bundle.main.url(forResource: font.registrationName, withExtension: font.fileExtension) else { continue }
             CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
         }
     }

@@ -176,6 +176,9 @@ struct SortApplyLandingTests {
         #expect(run.creations == ["Science-fiction"])
         #expect(section(run.projection, named: "Science-fiction")?.books.map(\.id) == ["4"])
         #expect(section(run.projection, named: "Romans classiques")?.books.map(\.id) == ["2"])
+        // Snapshot order, not arrival order — and that is the point: the run emptied the
+        // stack, so nothing is "moved" any more and the library reads as the server holds
+        // it. Arrival order is a property of pending work only.
         #expect(section(run.projection, named: "Poésie")?.books.map(\.id) == ["1", "3"])
         #expect(run.projection.unshelved.books.map(\.id) == ["5"])
     }
@@ -278,7 +281,9 @@ struct SortApplyLandingTests {
         #expect(run.plan.operations.count == 1)
         #expect(run.plan.operations.first?.section == .shelf("s2"))
         #expect(run.plan.operations.first?.additions == ["1"])
-        #expect(section(run.projection, named: "Poésie")?.books.map(\.id) == ["1", "3"])
+        // "1" sits last: it has been moved, and a moved book lands at the foot of its
+        // destination (see `SortProjection`).
+        #expect(section(run.projection, named: "Poésie")?.books.map(\.id) == ["3", "1"])
     }
 
     /// The one that would cost the user a duplicate shelf. The creation landed and the

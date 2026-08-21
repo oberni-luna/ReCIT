@@ -137,6 +137,14 @@ struct ManualSortListView: View {
     /// `SortChange.move` returns `nil` for it — so nudging a row inside its own étagère
     /// costs the stack nothing, which is the honest outcome when order within an étagère
     /// is not part of the state.
+    ///
+    /// **Do not wrap this in a transaction that disables animations.** It looks like the
+    /// obvious cure for the drop's double animation, and it breaks the gesture outright:
+    /// the list stops reconciling after its own reorder, so the cell stays where UIKit
+    /// moved it, the data never changes, and the headers go on reporting the old counts
+    /// until the screen is rebuilt. What keeps the two arrangements close instead is
+    /// `SortProjection` ordering a moved book at the foot of its destination — the same
+    /// place the list itself puts a row dropped at the end of a section.
     private func move(_ source: IndexSet, to destination: Int, in rows: ManualSortRows) {
         guard let target = rows.section(forInsertionAt: destination) else { return }
 

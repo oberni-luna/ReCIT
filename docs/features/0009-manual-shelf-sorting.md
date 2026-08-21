@@ -68,6 +68,18 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
   animation and the grip are the system's. What `Section` was drawing for free — a card per
   étagère — is repainted per row from `isCardTop` / `isCardBottom`, through
   `listRowBackground` so the card runs under the grip rather than stopping short of it.
+- **A moved book lands at the foot of its destination**, not in snapshot order. The list's
+  own reorder is positional and this model is set-based, so the two disagree on where the
+  row ends up; SwiftUI animates its arrangement, then animates the diff against ours on
+  top. Ordering by arrival closes most of that gap — a book dropped onto a shelf goes where
+  the list already put it. The drop *index* stays out of the model, so a drop in the middle
+  of a section still settles at the foot. Derived from the stack alone: an untouched book
+  keeps its snapshot position, and once a run empties the stack the library reads as the
+  server holds it again.
+- **Do not disable animations on the move.** It is the obvious-looking cure for the double
+  animation and it breaks the gesture outright: the list stops reconciling after its own
+  reorder, so the cell stays where UIKit moved it, the data never changes, and the headers
+  go on reporting the old counts until the screen is rebuilt.
 - **The placeholder of an empty étagère has to be movable**, which is not obvious.
   Edit-mode reorder only ever drops a row at an index a *movable* row occupies, so a run of
   immovable rows offers no slot to aim at. With an immovable placeholder, an étagère holding

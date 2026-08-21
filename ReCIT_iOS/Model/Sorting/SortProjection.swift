@@ -19,6 +19,15 @@
 //  first rather than "duplicate it" because duplicating is precisely what makes a
 //  book get written twice.
 //
+//  **Order within a section follows the stack, not the snapshot.** A book nobody has
+//  touched keeps its snapshot position; a book that has been moved goes *after* every
+//  untouched one, in the order the moves were pushed. That is what makes the gesture
+//  believable: the list's own reorder is positional, so a book that jumped to some
+//  unrelated row after being dropped read as the screen undoing the drag. Appending is
+//  the strongest rule derivable from the stack alone — the drop *index* is not in the
+//  model, because membership carries no user-facing order (PRD 0008) — so a book lands at
+//  the foot of the étagère it was filed into rather than exactly under the finger.
+//
 //  Recomputed rather than tracked. It is cheap, and a tracked target state is how a
 //  pill, a recap and a write end up disagreeing.
 //
@@ -65,6 +74,15 @@ struct SortProjection: Equatable, Sendable {
             }
         }
 
+        // How far down its section a book sits. Untouched books rank by snapshot
+        // position; a moved book ranks after all of them, by when it was moved. Derived
+        // from the stack, so there is no ordering state to keep in step with anything.
+        var rankOfBook: [String: Int] = [:]
+        for (offset, bookId) in bookOrder.enumerated() {
+            rankOfBook[bookId] = offset
+        }
+        var nextMovedRank: Int = bookOrder.count
+
         for change in changes {
             switch change {
             case .createShelf(let draftId, let name):
@@ -85,13 +103,15 @@ struct SortProjection: Equatable, Sendable {
                 guard booksById[bookId] != nil else { continue }
                 guard destination == .unshelved || namesById[destination] != nil else { continue }
                 sectionOfBook[bookId] = destination
+                rankOfBook[bookId] = nextMovedRank
+                nextMovedRank += 1
             }
         }
 
         sectionIds.append(.unshelved)
 
         var booksBySection: [SortSection.ID: [AutoSortBook]] = [:]
-        for bookId in bookOrder {
+        for bookId in bookOrder.sorted(by: { rankOfBook[$0, default: 0] < rankOfBook[$1, default: 0] }) {
             guard let book = booksById[bookId] else { continue }
             let section: SortSection.ID = sectionOfBook[bookId] ?? .unshelved
             booksBySection[section, default: []].append(book)

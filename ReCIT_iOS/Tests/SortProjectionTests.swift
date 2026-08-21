@@ -256,9 +256,11 @@ struct SortProjectionTests {
         )
 
         #expect(projection.sections[0].books.map(\.id) == ["1"])
-        // Snapshot order, not arrival order: order within an étagère is not part of
-        // the session's state, so the pile and every shelf read in one order.
-        #expect(projection.sections[1].books.map(\.id) == ["2", "3"])
+        // Arrival order, not snapshot order: a book that has been moved sits after the
+        // books nobody touched. The drop *index* is still not in the model, but a book
+        // that jumped to an unrelated row after being dropped read as the screen undoing
+        // the gesture — so it lands at the foot of the étagère it was filed into.
+        #expect(projection.sections[1].books.map(\.id) == ["3", "2"])
         #expect(projection.unshelved.books.isEmpty)
         expectEveryBookAppearsExactlyOnce(projection, in: snapshot)
     }
@@ -407,4 +409,63 @@ struct SortProjectionTests {
         #expect(SortDraftID.isDraft(SortDraftID.make()))
         #expect(SortDraftID.isDraft("d3fbdd9e0a8d2b1c") == false)
     }
+    /// A book dropped onto an étagère lands at the foot of it, not back in some unrelated
+    /// row. The list's own reorder is positional, so a book that jumped elsewhere after
+    /// being dropped read as the screen undoing the gesture.
+    @Test func aBookMovedOntoAnEtagereLandsAtTheFootOfIt() {
+        let snapshot: SortSnapshot = .init(
+            shelves: [.init(id: "s1", name: "Romans", bookIds: ["1", "2"])],
+            books: [
+                .init(id: "1", title: "A"),
+                .init(id: "2", title: "B"),
+                .init(id: "3", title: "C")
+            ]
+        )
+        let projection: SortProjection = .init(
+            snapshot: snapshot,
+            changes: [.moveBook(bookId: "3", from: .unshelved, to: .shelf("s1"))]
+        )
+
+        #expect(projection.sections.first?.books.map(\.id) == ["1", "2", "3"])
+    }
+
+    /// Two books filed one after the other keep the order they were filed in.
+    @Test func booksFiledOneAfterTheOtherKeepThatOrder() {
+        let snapshot: SortSnapshot = .init(
+            shelves: [.init(id: "s1", name: "Romans", bookIds: [])],
+            books: [
+                .init(id: "1", title: "A"),
+                .init(id: "2", title: "B"),
+                .init(id: "3", title: "C")
+            ]
+        )
+        let projection: SortProjection = .init(
+            snapshot: snapshot,
+            changes: [
+                .moveBook(bookId: "3", from: .unshelved, to: .shelf("s1")),
+                .moveBook(bookId: "1", from: .unshelved, to: .shelf("s1"))
+            ]
+        )
+
+        #expect(projection.sections.first?.books.map(\.id) == ["3", "1"])
+    }
+
+    /// A book nobody has touched keeps its snapshot position, so an untouched étagère is
+    /// not reshuffled by a move that happened elsewhere.
+    @Test func anUntouchedEtagereKeepsItsOrder() {
+        let snapshot: SortSnapshot = .init(
+            shelves: [
+                .init(id: "s1", name: "Romans", bookIds: ["1", "2", "3"]),
+                .init(id: "s2", name: "Poésie", bookIds: ["4"])
+            ],
+            books: (1...4).map { .init(id: "\($0)", title: "T\($0)") }
+        )
+        let projection: SortProjection = .init(
+            snapshot: snapshot,
+            changes: [.moveBook(bookId: "4", from: .shelf("s2"), to: .unshelved)]
+        )
+
+        #expect(projection.sections.first?.books.map(\.id) == ["1", "2", "3"])
+    }
+
 }

@@ -38,6 +38,27 @@ struct ManualSortSectionHeader: View {
     let mark: SortApplyLedger.ShelfOutcome?
 
     var body: some View {
+        VStack(alignment: .leading, spacing: .xSmall) {
+            titleRow
+
+            // An étagère holding nothing says so here rather than in a row of its own. The
+            // row it used to have was deleted the moment a book arrived, which left SwiftUI
+            // animating an insertion and a deletion on top of the drop the list had just
+            // performed — see `ManualSortRows`. This header is also the drop target in that
+            // state, which is why the sentence belongs on it.
+            if section.books.isEmpty {
+                ManualSortEmptySectionRow(isUnshelved: section.isUnshelved)
+            }
+        }
+        // The header sits on the page, aligned with the card's outer edge rather than with
+        // the title inside it, and carries its own spacing now that the rows were
+        // flattened out of `Section` (see `ManualSortRows`).
+        .padding(.horizontal, .medium)
+        .padding(.top, .xxSmall)
+        .padding(.bottom, .small)
+    }
+
+    private var titleRow: some View {
         HStack(spacing: .small) {
             if let mark {
                 ManualSortShelfMark(outcome: mark)
@@ -56,12 +77,6 @@ struct ManualSortSectionHeader: View {
                 .textStyle(.action200)
                 .foregroundStyle(.foregroundSecondary)
         }
-        // The header sits on the page, aligned with the card's outer edge rather than with
-        // the title inside it, and carries its own spacing now that the rows were
-        // flattened out of `Section` (see `ManualSortRows`).
-        .padding(.horizontal, .medium)
-        .padding(.top, .xxSmall)
-        .padding(.bottom, .small)
     }
 
     /// The pile has no name of its own — what it is called is copy, so it is resolved

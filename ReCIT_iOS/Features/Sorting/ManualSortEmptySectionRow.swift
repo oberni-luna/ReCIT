@@ -2,17 +2,19 @@
 //  ManualSortEmptySectionRow.swift
 //  ReCIT_iOS
 //
-//  What a section with no books under it says, and — more to the point — the surface
-//  it gives a finger to aim at.
+//  What an étagère holding nothing says, and — more to the point — the state in which its
+//  header becomes the thing you drop a book onto.
 //
-//  A section can be emptied by the very gesture this slice adds: drag the last book off
-//  an étagère and it stays on screen with nothing in it. Without this row that étagère
-//  would be a drop target zero points tall, so the book could never be put back — the
-//  gesture would stop being its own inverse, which is the whole reason the PRD leaves
-//  single-change undo out.
+//  It used to be a row of its own, under the header. That cost the drop its smoothness:
+//  filling the étagère *deleted* that row, while the list had just performed a
+//  length-preserving reorder, so SwiftUI had an insertion and a deletion to animate on top
+//  of the move — the note and the arriving book overlapped for a third of a second. The
+//  sentence now sits inside `ManualSortSectionHeader`, which is the row the finger aims at
+//  in that state, and a move no longer changes how many rows there are. See
+//  `ManualSortRows`.
 //
-//  The pile keeps its section for the same reason, and says something different: an
-//  empty « À ranger » is the proof the work is done, not an invitation to fill it.
+//  The pile says something different from an étagère: an empty « À ranger » is the proof
+//  the work is done, not an invitation to fill it.
 //
 //  See PRD 0008.
 //

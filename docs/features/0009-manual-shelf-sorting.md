@@ -86,13 +86,19 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
   animation and it breaks the gesture outright: the list stops reconciling after its own
   reorder, so the cell stays where UIKit moved it, the data never changes, and the headers
   go on reporting the old counts until the screen is rebuilt.
-- **The placeholder of an empty étagère has to be movable**, which is not obvious.
-  Edit-mode reorder only ever drops a row at an index a *movable* row occupies, so a run of
-  immovable rows offers no slot to aim at. With an immovable placeholder, an étagère holding
-  nothing could not be filled at all — neither a freshly created one nor « À ranger » once
-  every book had been filed, which is exactly the section a user most wants to drop into.
-  The cost is that the placeholder can be picked up; nothing comes of it, since no book is
-  found at that index.
+- **An empty étagère has no row of its own: its header is the drop target.** Edit-mode
+  reorder only drops a row where a *movable* row already sits, so an étagère with nothing in
+  it needs something to aim at — but giving it a placeholder row meant filling it *deleted*
+  a row, while the list had just performed a length-preserving move. SwiftUI then had an
+  insertion and a deletion to animate on top of the drop, and the placeholder and the
+  arriving book overlapped for about a third of a second. Making the row permanent and
+  invisible does not work either: in edit mode the list reserves a grip's height for every
+  movable row, and the one shape that does collapse (`EmptyView`) leaves it unclear whether
+  `onMove`'s indices still match what the user sees — a risk of filing a book onto the wrong
+  shelf, which is not worth trading for an animation. So the header of an empty étagère is
+  movable, carries the « this shelf is empty » sentence, and claims the boundary just above
+  itself; a move then only ever changes which section a book belongs to, never how many rows
+  there are. The étagère above stays reachable by aiming at one of its own books.
 - **A draft is created even when it ends up empty.** PRD 0008 said the opposite (user story
   35: a shelf nobody filled is a shelf to go and delete). In use that read as the screen
   ignoring an instruction — the étagère is listed among the pending changes and « Appliquer »

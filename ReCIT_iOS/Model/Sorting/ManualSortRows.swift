@@ -14,9 +14,21 @@
 //  drawing for free; `isCardTop` / `isCardBottom` hand that back to the view, which
 //  paints it per row.
 //
-//  A header is a row like any other, but not a movable one — see `isMovable`. The pile
-//  is a section like any other here, which is what lets a book be dragged out of an
-//  étagère and back.
+//  **There is no placeholder row, and that is deliberate.** An empty étagère used to get a
+//  row of its own carrying « cette étagère est vide », because edit-mode reorder can only
+//  drop a row where a movable row already sits. But then filling that étagère *deleted* a
+//  row while the list had just performed a length-preserving move, so SwiftUI had an
+//  insertion and a deletion to animate on top of the drop — the placeholder and the
+//  arriving book were both on screen for a third of a second. Making the row permanent and
+//  invisible does not work either: in edit mode the list reserves a grip's height for every
+//  movable row, and the one shape that does collapse (`EmptyView`) leaves it unclear whether
+//  `onMove`'s indices still line up with what the user can see — a risk of filing a book
+//  onto the wrong shelf, which is not a trade worth making for an animation.
+//
+//  So an empty étagère contributes exactly one row, its header, and **that header is the
+//  drop target** — see `isMovable` and `section(forInsertionAt:)`. A move then only ever
+//  changes which section a book row belongs to, never how many rows there are, which is
+//  precisely the operation the list animated.
 //
 //  Pure by design — no store, no SwiftUI, so the destination rule is asserted as a
 //  sentence rather than exercised through a gesture. See PRD 0008.
@@ -28,16 +40,10 @@ struct ManualSortRow: Identifiable, Equatable, Sendable {
 
     enum Content: Equatable, Sendable {
         /// The band's name, count, pill and mark. Carries the whole section because the
-        /// header view reads all of it.
+        /// header view reads all of it — and because whether the section is empty decides
+        /// whether this row is a drop target.
         case header(SortSection)
         case book(AutoSortBook)
-        /// An étagère with nothing under it. It still occupies a row, because a section
-        /// with no rows is a drop target no finger can reach — and a book dragged out of
-        /// an étagère could then never be put back, so the gesture would stop being its
-        /// own inverse.
-        ///
-        /// It has to be **movable**, too. See `isMovable`.
-        case empty
     }
 
     /// The section this row belongs to — for a book, the section it would be leaving.
@@ -46,7 +52,7 @@ struct ManualSortRow: Identifiable, Equatable, Sendable {
     let content: Content
 
     /// Whether this row draws the top, respectively the bottom, of its étagère's card.
-    /// A single-row group is both.
+    /// A lone book is both. Headers are neither: they sit on the page.
     let isCardTop: Bool
     let isCardBottom: Bool
 
@@ -54,27 +60,30 @@ struct ManualSortRow: Identifiable, Equatable, Sendable {
         switch content {
         case .header: "header-\(sectionKey)"
         case .book(let book): "book-\(book.id)"
-        case .empty: "empty-\(sectionKey)"
         }
     }
 
-    /// Books move, and so does the placeholder of an empty étagère — headers do not.
+    /// Books move. So does the header of an **empty** étagère, because it is the only row
+    /// that étagère has and edit-mode reorder can only drop where a movable row sits — an
+    /// étagère with no movable row cannot be filled at all, neither a freshly created one
+    /// nor « À ranger » once every book has been filed.
     ///
-    /// A header dragged anywhere would be asking to reorder the étagères, which PRD 0008
-    /// puts out of scope. The placeholder is a different matter: **edit-mode reorder can
-    /// only drop a row at an index a movable row occupies**, so a run of immovable rows
-    /// offers no slot to aim at. An étagère holding nothing therefore had exactly one row,
-    /// immovable, and could not be filled at all — neither a freshly created one nor
-    /// « À ranger » once every book had been filed, which is precisely the étagère a user
-    /// most wants to drop into.
-    ///
-    /// Making it movable costs one oddity: the placeholder can be picked up. Nothing comes
-    /// of it — `book(at:)` finds no book, so no change is pushed — and it buys back the
-    /// only drop target the empty section has.
+    /// A header that has books under it stays put: dragging it would be asking to reorder
+    /// the étagères, which PRD 0008 puts out of scope. Picking up an empty one does nothing
+    /// either — `book(at:)` finds no book there, so no change is pushed — it exists to be
+    /// aimed at, not to be carried.
     var isMovable: Bool {
         switch content {
-        case .header: false
-        case .book, .empty: true
+        case .header(let section): section.books.isEmpty
+        case .book: true
+        }
+    }
+
+    /// Whether this row is the sole row of an étagère holding nothing.
+    var isEmptySectionHeader: Bool {
+        switch content {
+        case .header(let section): section.books.isEmpty
+        case .book: false
         }
     }
 
@@ -104,26 +113,15 @@ struct ManualSortRows: Equatable, Sendable {
                 )
             )
 
-            if section.books.isEmpty {
+            for (offset, book) in section.books.enumerated() {
                 rows.append(
                     .init(
                         section: section.id,
-                        content: .empty,
-                        isCardTop: true,
-                        isCardBottom: true
+                        content: .book(book),
+                        isCardTop: offset == section.books.startIndex,
+                        isCardBottom: offset == section.books.count - 1
                     )
                 )
-            } else {
-                for (offset, book) in section.books.enumerated() {
-                    rows.append(
-                        .init(
-                            section: section.id,
-                            content: .book(book),
-                            isCardTop: offset == section.books.startIndex,
-                            isCardBottom: offset == section.books.count - 1
-                        )
-                    )
-                }
             }
         }
 
@@ -132,17 +130,31 @@ struct ManualSortRows: Equatable, Sendable {
 
     /// The étagère a row let go of at `index` has landed in.
     ///
-    /// `onMove` hands over the index the row *would be inserted at* in the list as it
-    /// stands, so the section is the one owning the row just above that point. Dropping
-    /// exactly onto a header therefore lands in the section above it, which is the
-    /// honest reading: the finger is at the boundary, and the row above is the one it
-    /// left the gap under. Above the very first header there is nothing to be above, so
-    /// the first section takes it rather than the drop being refused.
+    /// `onMove` hands over the index the row *would be inserted at*, so ordinarily the
+    /// section is the one owning the row just above that point. Dropping exactly onto a
+    /// header therefore lands in the section above it: the finger is at the boundary, and
+    /// the row above is the one it left the gap under.
+    ///
+    /// **An empty étagère's header claims that boundary instead.** Its header is the only
+    /// row it has, so the gap immediately before it is the only place a finger can aim to
+    /// fill it — whereas the étagère above is still reachable by dropping onto any of its
+    /// books. Giving the ambiguous boundary to the empty one is what makes it fillable at
+    /// all.
+    ///
+    /// Above the very first header there is nothing to be above, so the first section takes
+    /// it rather than the drop being refused.
     func section(forInsertionAt index: Int) -> SortSection.ID? {
         guard rows.isEmpty == false else { return nil }
-        guard index > 0 else { return rows.first?.section }
 
-        return rows[min(index, rows.count) - 1].section
+        let bounded: Int = min(max(index, .zero), rows.count)
+
+        if bounded < rows.count, rows[bounded].isEmptySectionHeader {
+            return rows[bounded].section
+        }
+
+        guard bounded > 0 else { return rows.first?.section }
+
+        return rows[bounded - 1].section
     }
 
     /// The book at a flat index, with the section it is leaving — the two halves a move

@@ -123,9 +123,6 @@ struct ManualSortListView: View {
             SortBookRow(book: book)
                 .manualSortCardRow(isTop: row.isCardTop, isBottom: row.isCardBottom)
 
-        case .empty:
-            ManualSortEmptySectionRow(isUnshelved: row.section == .unshelved)
-                .manualSortCardRow(isTop: row.isCardTop, isBottom: row.isCardBottom)
         }
     }
 

@@ -4,36 +4,6 @@
     "" : {
 
     },
-    "%lld étagère%@ été créée%@ et remplie%@." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld étagère%2$@ été créée%3$@ et remplie%4$@."
-          }
-        }
-      }
-    },
-    "%lld livre%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld livre%2$@"
-          }
-        }
-      }
-    },
-    "%lld proposition%@ a été écartée car elle ne correspondait à aucune étagère proposée." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld proposition%2$@ a été écartée car elle ne correspondait à aucune étagère proposée."
-          }
-        }
-      }
-    },
     "🥲" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -44,9 +14,6 @@
           }
         }
       }
-    },
-    "À créer" : {
-
     },
     "action.add" : {
       "localizations" : {
@@ -374,12 +341,6 @@
     "Annuler" : {
 
     },
-    "Aucun genre n'a pu être identifié dans vos livres non rangés. Ils restent où ils sont." : {
-
-    },
-    "Aucune étagère n'a été créée et remplie." : {
-
-    },
     "author.birth_date %@" : {
       "localizations" : {
         "en" : {
@@ -480,9 +441,6 @@
     "Cette étagère est vide" : {
 
     },
-    "Chaque étagère est créée puis remplie. Ne quittez pas l'écran pour suivre la progression." : {
-
-    },
     "community.owner_not_lending %@" : {
       "localizations" : {
         "en" : {
@@ -499,35 +457,10 @@
         }
       }
     },
-    "Création en cours" : {
-
-    },
-    "Créée" : {
-
-    },
-    "Créée%@ et remplie%@ : %@." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Créée%1$@ et remplie%2$@ : %3$@."
-          }
-        }
-      }
-    },
     "Créer" : {
 
     },
-    "Créer ces étagères" : {
-
-    },
     "Description (optionnel)" : {
-
-    },
-    "Échec" : {
-
-    },
-    "Échec sur %@ : l'étagère a pu être créée sans ses livres. Vous pouvez la supprimer si elle est vide." : {
 
     },
     "edition.add_to_inventory" : {
@@ -1029,12 +962,6 @@
         }
       }
     },
-    "Le rangement n'a pas pu être proposé." : {
-
-    },
-    "Le rangement s'est arrêté en cours de route. Ce qui a été créé est conservé." : {
-
-    },
     "list.empty" : {
       "localizations" : {
         "en" : {
@@ -1341,23 +1268,6 @@
         }
       }
     },
-    "manual_sort.create.name_taken %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A shelf named “%@” is already in this list."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une étagère nommée « %@ » figure déjà dans cette liste."
-          }
-        }
-      }
-    },
     "manual_sort.create_shelf" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1371,6 +1281,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouvelle étagère"
+          }
+        }
+      }
+    },
+    "manual_sort.create.name_taken %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A shelf named “%@” is already in this list."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une étagère nommée « %@ » figure déjà dans cette liste."
           }
         }
       }
@@ -1392,6 +1319,40 @@
         }
       }
     },
+    "manual_sort.error.books_missing %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The books to file into “%@” are no longer in your inventory."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les livres à ranger dans « %@ » ne sont plus dans votre inventaire."
+          }
+        }
+      }
+    },
+    "manual_sort.error.shelf_missing %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” is no longer one of your shelves."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« %@ » ne fait plus partie de vos étagères."
+          }
+        }
+      }
+    },
     "manual_sort.finish" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1405,6 +1366,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminer"
+          }
+        }
+      }
+    },
+    "manual_sort.mark.applying" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement en cours"
+          }
+        }
+      }
+    },
+    "manual_sort.mark.failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving failed"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l'enregistrement"
+          }
+        }
+      }
+    },
+    "manual_sort.mark.landed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrée"
+          }
+        }
+      }
+    },
+    "manual_sort.mark.pending" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still to save"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reste à enregistrer"
           }
         }
       }
@@ -1804,6 +1833,298 @@
         }
       }
     },
+    "manual_sort.report.all_landed %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld shelf has been saved."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld shelves have been saved."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld étagère a été enregistrée."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld étagères ont été enregistrées."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "manual_sort.report.nothing_to_save" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There was nothing to save: your changes cancelled each other out."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il n'y avait rien à enregistrer : vos changements s'annulaient."
+          }
+        }
+      }
+    },
+    "manual_sort.report.stopped" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving stopped partway. What was saved is kept."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'enregistrement s'est arrêté en cours de route. Ce qui a été enregistré est conservé."
+          }
+        }
+      }
+    },
+    "manual_sort.report.stopped.failed %lld %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@shelves@: %2$@."
+          },
+          "substitutions" : {
+            "shelves" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg shelf could not be saved and may exist without all of its books"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg shelves could not be saved and may exist without all of their books"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@shelves@ : %2$@."
+          },
+          "substitutions" : {
+            "shelves" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg étagère n'a pas pu être enregistrée et existe peut-être sans tous ses livres"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg étagères n'ont pas pu être enregistrées et existent peut-être sans tous leurs livres"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "manual_sort.report.stopped.landed %lld %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@shelves@: %2$@."
+          },
+          "substitutions" : {
+            "shelves" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg shelf was saved"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg shelves were saved"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@shelves@ : %2$@."
+          },
+          "substitutions" : {
+            "shelves" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg étagère a été enregistrée"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg étagères ont été enregistrées"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "manual_sort.report.stopped.none_landed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No shelf was saved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune étagère n'a été enregistrée."
+          }
+        }
+      }
+    },
+    "manual_sort.report.stopped.not_attempted %lld %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@shelves@: %2$@."
+          },
+          "substitutions" : {
+            "shelves" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg shelf was not touched"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg shelves were not touched"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@shelves@ : %2$@."
+          },
+          "substitutions" : {
+            "shelves" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg étagère n'a pas été traitée"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg étagères n'ont pas été traitées"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "manual_sort.report.stopped.resume" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press “Save this arrangement” again to finish: what has already been saved will not be redone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appuyez à nouveau sur « Appliquer le rangement » pour terminer : ce qui a déjà été enregistré ne sera pas refait."
+          }
+        }
+      }
+    },
     "manual_sort.section.count %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2165,16 +2486,6 @@
     "Nom de l'étagère" : {
 
     },
-    "Non créée%@ : %@." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Non créée%1$@ : %2$@."
-          }
-        }
-      }
-    },
     "Nouvelle étagère" : {
 
     },
@@ -2460,21 +2771,6 @@
           }
         }
       }
-    },
-    "Ranger mes livres" : {
-
-    },
-    "Réessayer" : {
-
-    },
-    "Relancer le rangement" : {
-
-    },
-    "Relancez le rangement pour reprendre : seuls les livres encore sans étagère seront proposés, donc rien ne sera créé en double." : {
-
-    },
-    "Rien n'a encore été créé : ce rangement est une proposition. Vos livres déjà rangés ne seront pas touchés." : {
-
     },
     "Scan" : {
       "localizations" : {
@@ -2817,9 +3113,6 @@
           }
         }
       }
-    },
-    "Terminer" : {
-
     },
     "transaction.action.accept" : {
       "localizations" : {
@@ -3597,400 +3890,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Éditions de %@"
-          }
-        }
-      }
-    },
-    "manual_sort.mark.pending" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Still to save"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reste à enregistrer"
-          }
-        }
-      }
-    },
-    "manual_sort.mark.applying" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saving"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistrement en cours"
-          }
-        }
-      }
-    },
-    "manual_sort.mark.landed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistrée"
-          }
-        }
-      }
-    },
-    "manual_sort.mark.failed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saving failed"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec de l'enregistrement"
-          }
-        }
-      }
-    },
-    "manual_sort.report.nothing_to_save" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "There was nothing to save: your changes cancelled each other out."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il n'y avait rien à enregistrer : vos changements s'annulaient."
-          }
-        }
-      }
-    },
-    "manual_sort.report.all_landed %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld shelf has been saved."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld shelves have been saved."
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld étagère a été enregistrée."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld étagères ont été enregistrées."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "manual_sort.report.stopped" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saving stopped partway. What was saved is kept."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'enregistrement s'est arrêté en cours de route. Ce qui a été enregistré est conservé."
-          }
-        }
-      }
-    },
-    "manual_sort.report.stopped.none_landed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No shelf was saved."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune étagère n'a été enregistrée."
-          }
-        }
-      }
-    },
-    "manual_sort.report.stopped.landed %lld %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@: %2$@."
-          },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelf was saved"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelves were saved"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@ : %2$@."
-          },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagère a été enregistrée"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagères ont été enregistrées"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "manual_sort.report.stopped.failed %lld %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@: %2$@."
-          },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelf could not be saved and may exist without all of its books"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelves could not be saved and may exist without all of their books"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@ : %2$@."
-          },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagère n'a pas pu être enregistrée et existe peut-être sans tous ses livres"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagères n'ont pas pu être enregistrées et existent peut-être sans tous leurs livres"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "manual_sort.report.stopped.not_attempted %lld %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@: %2$@."
-          },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelf was not touched"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelves were not touched"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@ : %2$@."
-          },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagère n'a pas été traitée"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagères n'ont pas été traitées"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "manual_sort.report.stopped.resume" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Press “Save this arrangement” again to finish: what has already been saved will not be redone."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appuyez à nouveau sur « Appliquer le rangement » pour terminer : ce qui a déjà été enregistré ne sera pas refait."
-          }
-        }
-      }
-    },
-    "manual_sort.error.shelf_missing %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“%@” is no longer one of your shelves."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "« %@ » ne fait plus partie de vos étagères."
-          }
-        }
-      }
-    },
-    "manual_sort.error.books_missing %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The books to file into “%@” are no longer in your inventory."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les livres à ranger dans « %@ » ne sont plus dans votre inventaire."
           }
         }
       }

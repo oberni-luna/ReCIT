@@ -68,6 +68,13 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
   animation and the grip are the system's. What `Section` was drawing for free — a card per
   étagère — is repainted per row from `isCardTop` / `isCardBottom`, through
   `listRowBackground` so the card runs under the grip rather than stopping short of it.
+- **The placeholder of an empty étagère has to be movable**, which is not obvious.
+  Edit-mode reorder only ever drops a row at an index a *movable* row occupies, so a run of
+  immovable rows offers no slot to aim at. With an immovable placeholder, an étagère holding
+  nothing could not be filled at all — neither a freshly created one nor « À ranger » once
+  every book had been filed, which is exactly the section a user most wants to drop into.
+  The cost is that the placeholder can be picked up; nothing comes of it, since no book is
+  found at that index.
 - **A draft is created even when it ends up empty.** PRD 0008 said the opposite (user story
   35: a shelf nobody filled is a shelf to go and delete). In use that read as the screen
   ignoring an instruction — the étagère is listed among the pending changes and « Appliquer »

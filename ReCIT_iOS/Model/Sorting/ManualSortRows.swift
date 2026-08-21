@@ -35,6 +35,8 @@ struct ManualSortRow: Identifiable, Equatable, Sendable {
         /// with no rows is a drop target no finger can reach — and a book dragged out of
         /// an étagère could then never be put back, so the gesture would stop being its
         /// own inverse.
+        ///
+        /// It has to be **movable**, too. See `isMovable`.
         case empty
     }
 
@@ -56,10 +58,24 @@ struct ManualSortRow: Identifiable, Equatable, Sendable {
         }
     }
 
-    /// Only books move. A header dragged anywhere would be asking to reorder the
-    /// étagères, which PRD 0008 puts out of scope.
+    /// Books move, and so does the placeholder of an empty étagère — headers do not.
+    ///
+    /// A header dragged anywhere would be asking to reorder the étagères, which PRD 0008
+    /// puts out of scope. The placeholder is a different matter: **edit-mode reorder can
+    /// only drop a row at an index a movable row occupies**, so a run of immovable rows
+    /// offers no slot to aim at. An étagère holding nothing therefore had exactly one row,
+    /// immovable, and could not be filled at all — neither a freshly created one nor
+    /// « À ranger » once every book had been filed, which is precisely the étagère a user
+    /// most wants to drop into.
+    ///
+    /// Making it movable costs one oddity: the placeholder can be picked up. Nothing comes
+    /// of it — `book(at:)` finds no book, so no change is pushed — and it buys back the
+    /// only drop target the empty section has.
     var isMovable: Bool {
-        if case .book = content { true } else { false }
+        switch content {
+        case .header: false
+        case .book, .empty: true
+        }
     }
 
     private var sectionKey: String {

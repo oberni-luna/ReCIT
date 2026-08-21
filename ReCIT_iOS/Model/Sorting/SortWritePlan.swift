@@ -29,9 +29,13 @@
 //
 //  Two rules are stated here rather than left implicit:
 //
-//  - **A draft that ends up empty is not created.** It yields no operation, and the
-//    recap names it as dropped rather than passing over it in silence — a shelf that
-//    quietly fails to appear reads as a bug.
+//  - **A draft is created whether or not it ends up holding books.** PRD 0008 originally
+//    dropped the empty ones (user story 35, "a new étagère I left empty is not created"),
+//    on the grounds that a shelf nobody filled is a shelf to go and delete. In use that
+//    read as the screen ignoring an instruction: the étagère is listed among the pending
+//    changes and « Appliquer » is live, so not creating it is the screen contradicting
+//    itself. Creating an étagère is what the user asked for by naming one; filling it is a
+//    separate intention. Reversed deliberately — see `docs/features/0009`.
 //  - **An étagère emptied by dragging is modified, never deleted.** A removal is a
 //    removal; a drag does not delete a shelf behind the user's back (PRD 0008).
 //
@@ -51,10 +55,8 @@ struct SortWritePlan: Equatable, Sendable {
         case untouched
         /// Does not exist on the server yet. « Nouvelle », tinted.
         ///
-        /// A draft left empty is still `new` — it does not exist, which is exactly
-        /// what the pill says — but it produces no operation, and the recap names it
-        /// among the drafts that will be dropped. The pill states what the section
-        /// *is*; the recap states what will *happen* to it.
+        /// A draft left empty is `new` like any other, and is created like any other:
+        /// the pill and the write now say the same thing about it.
         case new
         /// Exists on the server and its contents have changed. « Modifiée », secondary.
         case modified
@@ -100,7 +102,7 @@ struct SortWritePlan: Equatable, Sendable {
     /// the string catalogue with its plural rules.
     struct Summary: Equatable, Sendable {
 
-        /// Drafts that will be created. Drafts left empty are not among them.
+        /// Drafts that will be created — every one of them, filled or not.
         let shelvesToCreate: Int
 
         /// Étagères that already exist and whose contents change.
@@ -114,11 +116,6 @@ struct SortWritePlan: Equatable, Sendable {
         /// Books that will still be on no étagère once this is applied. The one count
         /// that describes the result rather than the work.
         let booksLeftUnshelved: Int
-
-        /// Names of the drafts that end up empty and will therefore not be created.
-        /// Named rather than counted: the user is about to lose a shelf they typed a
-        /// name for, and « une étagère » would not tell them which.
-        let droppedDrafts: [String]
     }
 
     /// What applying sends, one group per étagère, in the order the screen shows them
@@ -149,7 +146,6 @@ struct SortWritePlan: Equatable, Sendable {
 
         var operations: [ShelfWrite] = []
         var statuses: [SortSection.ID: ShelfStatus] = [:]
-        var droppedDrafts: [String] = []
 
         // The pile is skipped: it is not an étagère and has no membership of its own.
         // A book dropped into it is a removal on the étagère it left, and nothing else.
@@ -169,14 +165,10 @@ struct SortWritePlan: Equatable, Sendable {
             if case .draft = section.id { isDraft = true }
 
             if isDraft {
+                // Always an operation, even with nothing under it: the user named an
+                // étagère, and creating it is the instruction. An empty one is a shelf
+                // waiting to be filled, not a mistake to be swallowed.
                 statuses[section.id] = .new
-
-                guard has.isEmpty == false else {
-                    if let name = section.name {
-                        droppedDrafts.append(name)
-                    }
-                    continue
-                }
             } else {
                 let isTouched: Bool = removals.isEmpty == false || additions.isEmpty == false
                 statuses[section.id] = isTouched ? .modified : .untouched
@@ -202,8 +194,7 @@ struct SortWritePlan: Equatable, Sendable {
             shelvesToCreate: operations.count(where: \.createsShelf),
             shelvesModified: operations.count { $0.createsShelf == false },
             booksFiled: operations.reduce(0) { $0 + $1.additions.count },
-            booksLeftUnshelved: after.unshelved.books.count,
-            droppedDrafts: droppedDrafts
+            booksLeftUnshelved: after.unshelved.books.count
         )
     }
 

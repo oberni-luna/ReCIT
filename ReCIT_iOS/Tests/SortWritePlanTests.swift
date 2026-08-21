@@ -65,7 +65,6 @@ struct SortWritePlanTests {
         #expect(plan.summary.shelvesToCreate == 0)
         #expect(plan.summary.shelvesModified == 0)
         #expect(plan.summary.booksFiled == 0)
-        #expect(plan.summary.droppedDrafts.isEmpty)
         #expect(plan.summary.booksLeftUnshelved == 2)
     }
 
@@ -200,27 +199,36 @@ struct SortWritePlanTests {
         #expect(plan.summary.shelvesToCreate == 1)
         #expect(plan.summary.booksFiled == 2)
         #expect(plan.summary.booksLeftUnshelved == 0)
-        #expect(plan.summary.droppedDrafts.isEmpty)
     }
 
-    /// A new étagère left empty is not created — the user would otherwise be left with
-    /// a shelf to go and delete — and the recap names it, because they typed that name
-    /// and a shelf that silently fails to appear reads as a bug.
-    @Test func aDraftLeftEmptyIsNotCreatedAndTheRecapNamesIt() {
+    /// A new étagère left empty is created all the same, holding nothing. Naming a shelf
+    /// is the instruction; filling it is a separate one. The screen listed the creation
+    /// among the pending changes and offered to save it, so refusing to create it — which
+    /// is what shipped first, following the PRD's user story 35 — read as the screen
+    /// ignoring what it had just promised.
+    @Test func aDraftLeftEmptyIsCreatedAllTheSame() {
         let draftId: String = SortDraftID.make()
         let plan: SortWritePlan = .init(
             snapshot: library,
             changes: [.createShelf(draftId: draftId, name: "Science-fiction")]
         )
+        let write: SortWritePlan.ShelfWrite? = plan.operations.first
 
-        #expect(plan.operations.isEmpty)
-        #expect(plan.hasWork == false)
+        #expect(plan.operations.count == 1)
+        #expect(plan.hasWork)
         #expect(plan.hasPendingChanges)
-        #expect(plan.summary.shelvesToCreate == 0)
-        #expect(plan.summary.droppedDrafts == ["Science-fiction"])
+        #expect(write?.createsShelf == true)
+        #expect(write?.name == "Science-fiction")
+        #expect(write?.additions.isEmpty == true)
+        #expect(write?.removals.isEmpty == true)
+        #expect(plan.status(of: .draft(draftId)) == .new)
+        #expect(plan.summary.shelvesToCreate == 1)
+        #expect(plan.summary.booksFiled == 0)
     }
 
-    @Test func aDraftFilledAndThenEmptiedIsNotCreatedEither() {
+    /// Filling a draft and then emptying it again leaves the étagère to be created and
+    /// the book where it started — the creation is not undone by the book leaving.
+    @Test func aDraftFilledAndThenEmptiedIsStillCreated() {
         let draftId: String = SortDraftID.make()
         let plan: SortWritePlan = .init(
             snapshot: library,
@@ -231,8 +239,10 @@ struct SortWritePlanTests {
             ]
         )
 
-        #expect(plan.operations.isEmpty)
-        #expect(plan.summary.droppedDrafts == ["Science-fiction"])
+        #expect(plan.operations.count == 1)
+        #expect(plan.operations.first?.createsShelf == true)
+        #expect(plan.operations.first?.additions.isEmpty == true)
+        #expect(plan.summary.shelvesToCreate == 1)
         #expect(plan.summary.booksLeftUnshelved == 2)
     }
 
@@ -312,14 +322,12 @@ struct SortWritePlanTests {
                 #expect(write == nil)
             case .new:
                 newPills += 1
-                // A « Nouvelle » étagère either gets created with its books, or is
-                // empty and named among the drafts the recap says are dropped.
-                if let write {
-                    #expect(write.createsShelf)
-                    #expect(write.additions.isEmpty == false)
-                } else {
-                    #expect(plan.summary.droppedDrafts.contains(section.name ?? ""))
-                }
+                // A « Nouvelle » étagère is always created — with its books when it has
+                // any, empty when it has none. The pill and the write agree by
+                // construction now, which is what the old dropped-draft branch could not
+                // promise.
+                #expect(write?.createsShelf == true)
+                #expect(write?.removals.isEmpty == true)
             case .modified:
                 modifiedPills += 1
                 #expect(write != nil)
@@ -329,7 +337,7 @@ struct SortWritePlanTests {
         }
 
         // The recap's numbers are the pills, counted.
-        #expect(plan.summary.shelvesToCreate + plan.summary.droppedDrafts.count == newPills)
+        #expect(plan.summary.shelvesToCreate == newPills)
         #expect(plan.summary.shelvesModified == modifiedPills)
 
         // And the recap's numbers are the operations, counted.

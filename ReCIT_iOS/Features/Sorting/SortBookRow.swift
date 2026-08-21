@@ -8,13 +8,18 @@
 //  copy and spot a misclassification before it happens.
 //
 //  It was `AutoSortBookRow`, under `Features/AutoSort/`, and moved here when PRD 0008
-//  retired the review screen it was written for. The sorting surface is now its only
-//  reader, on both sides of the drag: the list rows and the lifted preview.
+//  retired the review screen it was written for.
 //
-//  Its two options mirror the `Show handle` / genre-off properties the design file
-//  carries on this component. The genre is off under « À ranger » — those books are
-//  unshelved *for want of* a known genre, so an empty genre line would say the same
-//  thing twice.
+//  Measurements are the design's own (`Tri manuel · Light`, node `115:3278`): a 36 pt
+//  cover, 12 pt between the columns, 4 pt between title and author. The padding around
+//  the row belongs to the list rather than to this view — see `manualSortCardRow`, which
+//  has to own it so the edit-mode grip lands inside the card.
+//
+//  **No genre line, and no handle of its own.** The design shows a genre under each row,
+//  but the live data behind it is Wikidata's `wdt:P136` claims, which return things like
+//  « Figure d'autorité » — a label that says nothing about a book and reads as a bug. The
+//  handle is gone because the list is in edit mode: the system draws its own grip, and
+//  ours beside it was two grips for one gesture. Both are recorded divergences.
 //
 //  See PRD 0006 and PRD 0008.
 //
@@ -24,24 +29,6 @@ import SwiftUI
 struct SortBookRow: View {
     let book: AutoSortBook
 
-    /// The genre is the *reason* a book was proposed for an étagère, so a row under one
-    /// shows it. The unshelved pile turns it off.
-    let showsGenre: Bool
-
-    /// The move handle. Drawn on *every* row, including the pile's, so the gesture reads
-    /// as symmetric — the whole row is draggable, and the handle is what says so.
-    let showsDragHandle: Bool
-
-    init(
-        book: AutoSortBook,
-        showsGenre: Bool = true,
-        showsDragHandle: Bool = false
-    ) {
-        self.book = book
-        self.showsGenre = showsGenre
-        self.showsDragHandle = showsDragHandle
-    }
-
     var body: some View {
         HStack(alignment: .top, spacing: .sMedium) {
             CellThumbnail(imageUrl: book.coverImageUrl, cornerRadius: .minimal, size: .small)
@@ -50,34 +37,20 @@ struct SortBookRow: View {
                 Text(book.title)
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundDefault)
+                    .lineLimit(2)
 
-                if !book.authors.isEmpty {
+                if book.authors.isEmpty == false {
                     Text(book.authors)
                         .textStyle(.footnote200)
                         .foregroundStyle(.foregroundSecondary)
-                }
-
-                // The genre is shown because it is the *reason* a proposal put the
-                // book here. Without it a misplaced book looks like a whim of the
-                // model; with it the user can see whether the genre or the mapping is
-                // at fault.
-                if showsGenre, let genre = book.primaryGenre {
-                    Text(genre)
-                        .textStyle(.footnote200)
-                        .foregroundStyle(.foregroundTinted)
+                        // Clamped where the design shows a single author. A copy with six
+                        // of them would otherwise double the row's height, and a list
+                        // whose rows are all different heights is a list nobody can scan
+                        // for the book they are looking for.
+                        .lineLimit(1)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
-            if showsDragHandle {
-                Image(systemName: "line.3.horizontal")
-                    .foregroundStyle(.foregroundDisable)
-                    // The stack is top-aligned so title and cover line up; the handle
-                    // rides the middle of the row instead, which is where a finger
-                    // reaching for it expects it.
-                    .frame(maxHeight: .infinity)
-                    .accessibilityLabel("manual_sort.row.handle")
-            }
         }
     }
 }

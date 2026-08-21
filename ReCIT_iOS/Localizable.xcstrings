@@ -1804,23 +1804,6 @@
         }
       }
     },
-    "manual_sort.row.handle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Move this book"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Déplacer ce livre"
-          }
-        }
-      }
-    },
     "manual_sort.section.count %lld" : {
       "extractionState" : "manual",
       "localizations" : {

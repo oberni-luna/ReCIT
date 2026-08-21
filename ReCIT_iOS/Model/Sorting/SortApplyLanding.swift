@@ -28,11 +28,12 @@
 //  gave it. Nothing has to be carried between landings, which is why this is a value
 //  and not a piece of the session model's state.
 //
-//  One rule is worth stating: **a draft that ends up holding nothing disappears from
-//  the rebuilt stack.** It was never going to be created (`SortWritePlan` drops it and
-//  the recap names it), so keeping it would leave the stack non-empty after a
-//  successful apply — which would leave the screen offering to save work that does not
-//  exist, and its only destructive button labelled « Annuler » forever.
+//  One rule is worth stating: **a draft that ends up holding nothing stays in the
+//  rebuilt stack**, so a resume still creates it. It used to be dropped, back when
+//  `SortWritePlan` refused to create an empty étagère; now that every draft is created,
+//  dropping it here would be the resume quietly losing a shelf the first attempt had
+//  already promised. It leaves the stack correctly: an empty draft yields an operation,
+//  so a successful run confirms it and it leaves `pendingDrafts` like any other.
 //
 //  Pure by design — no store, no network, no SwiftUI. See PRD 0008.
 //
@@ -131,7 +132,9 @@ struct SortApplyLanding: Equatable, Sendable {
         // Creations first: the projection ignores a move naming a section it does not
         // know, so a stack that filled a draft before declaring it would lose its books.
         var rebuilt: [SortChange] = []
-        for draft in pendingDrafts where destination.values.contains(.draft(draft.id)) {
+        // Every draft still owed, whether or not a book is destined for it: an empty
+        // étagère is created too, so a resume owes it just as much as a filled one.
+        for draft in pendingDrafts {
             rebuilt.append(.createShelf(draftId: draft.id, name: draft.name))
         }
         for book in library.sections.flatMap(\.books) {

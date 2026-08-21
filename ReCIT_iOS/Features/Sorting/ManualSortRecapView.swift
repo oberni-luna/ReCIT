@@ -16,8 +16,11 @@
 //  back) has to be said out loud: the buttons still offer to save and to discard,
 //  because the stack is not empty, and a recap reading « 0 étagère à créer, 0 étagère
 //  modifiée » next to a live save button reads as a broken screen. So that case gets a
-//  sentence of its own that explains itself. A draft left empty gets named rather than
-//  silently dropped, for the same reason: the user typed that name.
+//  sentence of its own that explains itself.
+//
+//  There used to be a third line, naming the drafts left empty so they could be dropped
+//  without vanishing silently. Empty drafts are created now, so there is nothing to warn
+//  about — see `SortWritePlan`.
 //
 //  Every count is pluralised by the string catalogue, through substitutions — never by
 //  a ternary inside an interpolation, which is divergence D38 and cannot enter the
@@ -44,15 +47,6 @@ struct ManualSortRecapView: View {
                     .foregroundStyle(.foregroundDefault)
             }
 
-            if plan.summary.droppedDrafts.isEmpty == false {
-                // Locale-aware joining rather than `", "`: « A, B et C » in French,
-                // "A, B, and C" in English, and neither written in Swift.
-                Text(
-                    "manual_sort.recap.dropped \(plan.summary.droppedDrafts.count) \(plan.summary.droppedDrafts.formatted(.list(type: .and)))"
-                )
-                .textStyle(.footnote200)
-                .foregroundStyle(.foregroundSecondary)
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

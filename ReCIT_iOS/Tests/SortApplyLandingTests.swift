@@ -180,11 +180,12 @@ struct SortApplyLandingTests {
         #expect(run.projection.unshelved.books.map(\.id) == ["5"])
     }
 
-    /// A draft the user left empty is not created, and it stops being offered once the
-    /// rangement is saved — otherwise the stack would never empty and the screen would
-    /// go on offering to save a shelf it has decided not to create.
-    @Test("A new étagère left empty is not created and does not survive the save")
-    func anEmptyDraftIsDroppedByTheRun() {
+    /// A draft the user left empty is created like any other, and the stack still empties
+    /// afterwards — which is what the old dropped-draft rule was protecting: a creation
+    /// that is never sent can never be confirmed, so it would sit in the stack forever.
+    /// Sending it resolves that by the other end.
+    @Test("A new étagère left empty is created, and the save still empties the stack")
+    func anEmptyDraftIsCreatedByTheRun() {
         var run: Run = .init(
             snapshot: Self.library,
             changes: [
@@ -193,13 +194,13 @@ struct SortApplyLandingTests {
             ]
         )
 
-        #expect(run.plan.summary.droppedDrafts == ["Essais"])
+        #expect(run.plan.summary.shelvesToCreate == 1)
 
         run.apply()
 
-        #expect(run.creations.isEmpty)
+        #expect(run.creations == ["Essais"])
         #expect(run.changes.isEmpty)
-        #expect(run.plan.summary.droppedDrafts.isEmpty)
+        #expect(section(run.projection, named: "Essais")?.books.isEmpty == true)
     }
 
     /// A book dragged about all afternoon costs the server one removal and one

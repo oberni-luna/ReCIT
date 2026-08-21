@@ -97,7 +97,6 @@ struct SortProposalTests {
         #expect(writePlan.summary.shelvesToCreate == 2)
         #expect(writePlan.summary.booksFiled == 3)
         #expect(writePlan.summary.booksLeftUnshelved == 0)
-        #expect(writePlan.summary.droppedDrafts.isEmpty)
         for operation in writePlan.operations {
             #expect(writePlan.status(of: operation.section) == .new)
         }

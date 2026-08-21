@@ -56,6 +56,12 @@ struct ManualSortSectionHeader: View {
                 .textStyle(.action200)
                 .foregroundStyle(.foregroundSecondary)
         }
+        // The header sits on the page, aligned with the card's outer edge rather than with
+        // the title inside it, and carries its own spacing now that the rows were
+        // flattened out of `Section` (see `ManualSortRows`).
+        .padding(.horizontal, .medium)
+        .padding(.top, .xxSmall)
+        .padding(.bottom, .small)
     }
 
     /// The pile has no name of its own — what it is called is copy, so it is resolved

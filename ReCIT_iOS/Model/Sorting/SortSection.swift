@@ -29,10 +29,10 @@ struct SortSection: Identifiable, Equatable, Sendable {
     /// for a server document — which matters the moment the write plan starts
     /// deciding what to create and what to merely fill.
     ///
-    /// `Codable` because it travels: a drag carries the section a book came from
-    /// across the drop (`SortBookTransfer`), and the origin is half of what a move
-    /// records. Synthesised — the three cases are the whole encoding.
-    enum ID: Hashable, Codable, Sendable {
+    /// Nothing serialises this any more: the first attempt at the gesture carried the
+    /// origin across a typed drop payload, and the list's own reorder replaced it —
+    /// the origin now comes off the row that was picked up (`ManualSortRows`).
+    enum ID: Hashable, Sendable {
         /// An étagère that exists on the server, by its `Shelf._id`.
         case shelf(String)
         /// An étagère the user has drafted on this screen, by its client id.

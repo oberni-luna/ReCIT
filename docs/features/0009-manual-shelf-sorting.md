@@ -32,11 +32,11 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
 
 - **New pure modules** (`Model/Sorting/`): `SortSection`, `SortSnapshot`, `SortChange`,
   `SortDraftID`, `SortProjection`, `SortWritePlan`, `SortApplyLanding`, `SortApplyFailure`,
-  `SortDraftNameRule`, `SortProposal`, `SortProposalFailure`, `SortBookTransfer`, and
+  `SortDraftNameRule`, `SortProposal`, `SortProposalFailure`, `ManualSortRows`, and
   `SortApplyLedger` (moved from `Model/AutoSort/`). No SwiftUI, no store, no device.
-- **New feature** (`Features/Sorting/`): the screen, its list, sections, headers, rows, drag
-  preview, drop plumbing, pills, recap, marks, reports, action bar and proposal button.
-  `SortBookRow` moved here from `Features/AutoSort/`.
+- **New feature** (`Features/Sorting/`): the screen, its list, headers, rows, cards, pills,
+  recap, marks, reports, action bar and proposal button. `SortBookRow` moved here from
+  `Features/AutoSort/`.
 - **New app model** (`AppModels/Sorting/SortSessionModel.swift`): app-scoped, `@Observable`,
   built in `RootView` and injected with `.environment(...)`.
 - `ShelfModel` gains `removeItemsAwaitingServer`, the awaiting counterpart of the optimistic
@@ -60,6 +60,19 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
 - **The working state is an ordered stack of changes, not a mutable target state.** The move
   carries its origin as well as its destination, so coalescing — and any future undo — is a
   pure function of the stack alone.
+- **The gesture is the list's own reorder, not a custom drag.** The first implementation used
+  `draggable` / `dropDestination` with a typed transfer, because `List`'s built-in move
+  cannot cross a `Section`. On device the drag simply did not take. It was replaced by
+  flattening headers and books into a single `ForEach` held in edit mode (`ManualSortRows`):
+  crossing étagères works because there is only one `ForEach` to cross, and the lift, the
+  animation and the grip are the system's. What `Section` was drawing for free — a card per
+  étagère — is repainted per row from `isCardTop` / `isCardBottom`, through
+  `listRowBackground` so the card runs under the grip rather than stopping short of it.
+- **A draft is created even when it ends up empty.** PRD 0008 said the opposite (user story
+  35: a shelf nobody filled is a shelf to go and delete). In use that read as the screen
+  ignoring an instruction — the étagère is listed among the pending changes and « Appliquer »
+  is live, so refusing to create it made the screen contradict itself. Naming an étagère is
+  the instruction; filling it is a separate one. Reversed on the owner's call.
 - **`SortWritePlan` is a diff of two projections**, the snapshot against the snapshot with the
   stack applied. It therefore describes only memberships the user actually saw on screen, and
   the coalescing falls out of the diff instead of being a rule written twice.
@@ -86,8 +99,7 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
   `AutoSortName.key` throughout — trimmed, case- and diacritic-insensitive — never a second
   implementation.
 - **An emptied étagère is modified, never deleted.** There is no delete operation in this
-  feature. A draft left empty is not created, and the recap names it as dropped rather than
-  omitting it silently.
+  feature — a drag never takes a shelf away behind the user's back.
 - **The action buttons sit at the foot of the list, not in the mockup's pinned bar.** The tab
   bar is already underneath and two bars is 166 pt of chrome.
 - **« À ranger » stays on screen when it empties**, with its count at zero. It is the only
@@ -95,6 +107,27 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
   the handle promises — and a count at zero is the only proof the work is finished.
 - **Copy is real catalogue keys in both locales, with plural substitutions.** This deliberately
   does not repeat divergences D37 and D38, recorded against the retired auto-sort screens.
+- **No genre line on the rows, against the design.** The design puts the book's genre under
+  its author, and the pipeline's own `primaryGenre` is what filled it — but the live data is
+  Wikidata's `wdt:P136` claims, which return labels like « Figure d'autorité ». A line that
+  says nothing about the book reads as a bug, so it is gone from the row; the pipeline still
+  uses the genre to *decide* where a book goes.
+
+## A design-system bug this feature surfaced
+
+Every OpenSans face silently fell back to the system font, which is why the screen's headers
+dwarfed its Alegreya titles and the rows read as wrong even though their measurements matched
+the design. `UIFont(name:)` resolves a **PostScript** name, which is not the file name: the
+faces ship as `OpenSans-Extrabold` and `OpenSans-Semibold` (lowercase `b`), and the regular one
+is plain `OpenSans`. All three were wrong, so `action200`, `action300`, `caption200`, `title50`
+and `title200` were San Francisco everywhere in the app. `Bundle.url(forResource:)` is
+case-sensitive too, so one file was never registered — and `setupFonts` used `break` rather than
+`continue`, so that one failure also cost every face declared after it.
+
+This was divergence D6, recorded as the top priority and open since the design system was
+mirrored. `Tests/DesignSystemFontTests.swift` now asserts that every face resolves and that no
+text style falls back — the only way to catch a bug the compiler cannot see and that looks like
+a design decision on screen.
 
 ## Known gaps
 
@@ -102,12 +135,9 @@ screen works on any device: without Apple Intelligence it has one button fewer, 
   removals-before-additions holds within a group but not across them. A book moving to an
   étagère that sorts earlier gets its addition first, so a failure in between leaves it on two
   étagères until the resume. Never lost, and the projection still shows it once.
-- Three details of the drag frames are undrawn in code: the freed slot's fill (iOS 26 offers
-  no reliable drag-ended signal — `onDragSessionUpdated` is macOS-only), `Shadow/Pressed` on
-  the lifted row (no Swift symbol backs it), and the targeted section's hairlines (nothing on
-  a `List` section to hang them on). The tint alone carries the drop-target reading.
-- Nothing was exercised on device: the surface sits behind a live inventaire.io session.
-  Verified by build and by the pure suites only.
+- The three drag frames (`Tri manuel · Glissement`, `Dépôt sur étagère vide`) describe the
+  custom drag that was replaced. The lift, the freed slot and the drop highlight are the
+  system's now, and not ours to style. Marked superseded rather than deleted.
 
 ## Issues
 

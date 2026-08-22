@@ -49,4 +49,29 @@ extension SortChange {
         guard origin != destination else { return nil }
         return .moveBook(bookId: bookId, from: origin, to: destination)
     }
+
+    /// One étagère created on the spot, and the book that was dropped onto the tile that
+    /// created it — the whole of a gesture the user made once, as the changes it amounts to.
+    ///
+    /// **Both or neither.** The pair is built here rather than appended by a caller in two
+    /// steps, because a move naming a draft that was never created is a move the projection
+    /// ignores: the book would sit where it always was while the screen claimed otherwise. A
+    /// rule about the stack, so it lives with the stack and is assertable without a session.
+    ///
+    /// `origin` is where the book sits *now*, and `nil` when the projection does not know the
+    /// book at all — in which case the étagère is still created, since naming one is an
+    /// instruction of its own (`SortWritePlan`).
+    static func creation(
+        draftId: String,
+        name: String,
+        filling bookId: String? = nil,
+        from origin: SortSection.ID? = nil
+    ) -> [SortChange] {
+        var changes: [SortChange] = [.createShelf(draftId: draftId, name: name)]
+
+        guard let bookId, let origin else { return changes }
+        guard let move = move(bookId: bookId, from: origin, to: .draft(draftId)) else { return changes }
+        changes.append(move)
+        return changes
+    }
 }

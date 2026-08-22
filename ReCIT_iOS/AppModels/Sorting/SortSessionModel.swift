@@ -174,24 +174,49 @@ final class SortSessionModel {
         .init(sections: projection.sections)
     }
 
-    /// Records one étagère created on the spot. **Nothing is written**: a draft is a name
-    /// and a client id until the whole stack is applied, which is what makes creating an
-    /// étagère and filling it a single movement (PRD 0008).
+    /// Records one étagère created on the spot, and — when a book was dropped onto the tile
+    /// that created it — files that book into it in the same movement.
     ///
-    /// The naming rule is asked again here even though the form already asked it. Not a
-    /// second implementation — the same pure rule, over the same sections — but the stack
-    /// is what the pills, the recap and the write are derived from, and a duplicate that
-    /// reached it would be applied. A model that trusts its caller to have validated is a
-    /// model whose invariant lives in a view.
-    func createShelf(named name: String) {
-        // Nothing is added to the stack while a run owns it: the plan in flight was
-        // reduced from the stack as it stood when the button was pressed, so a draft
-        // appended under it would be a section the marks say nothing about — and a
-        // draft made under a proposal would be a name it never got to reconcile against.
+    /// **Nothing is written**: a draft is a name and a client id until the whole stack is
+    /// applied, which is what makes creating an étagère and filling it one gesture (PRD 0008).
+    ///
+    /// **One call, one set of guards, for both changes.** Splitting it into a create that
+    /// returned an id and a move the caller made afterwards would let a caller file a book into
+    /// a draft that was refused — a move the projection ignores, so the book would quietly stay
+    /// where it was while the screen said otherwise (PRD 0009).
+    ///
+    /// The naming rule is asked again here even though the form already asked it. Not a second
+    /// implementation — the same pure rule, over the same sections — but the stack is what the
+    /// pills, the recap and the write are derived from, and a duplicate that reached it would
+    /// be applied. A model that trusts its caller to have validated is a model whose invariant
+    /// lives in a view.
+    func createShelf(named name: String, filling bookId: String? = nil) {
+        // Nothing is added to the stack while a run owns it: the plan in flight was reduced
+        // from the stack as it stood when the button was pressed, so a draft appended under it
+        // would be a section the marks say nothing about — and a draft made under a proposal
+        // would be a name it never got to reconcile against.
         guard isBusy == false else { return }
         guard let trimmed = AutoSortName.trimmed(name) else { return }
         guard draftNameRule.accepts(trimmed) else { return }
-        changes.append(.createShelf(draftId: SortDraftID.make(), name: trimmed))
+
+        // The origin is read off the projection as it stands, which is the same reading the
+        // drop was made against. What the pair amounts to is `SortChange.creation`'s rule,
+        // pure and asserted there.
+        changes.append(
+            contentsOf: SortChange.creation(
+                draftId: SortDraftID.make(),
+                name: trimmed,
+                filling: bookId,
+                from: bookId.flatMap(section(holding:))
+            )
+        )
+    }
+
+    /// Which section holds a book right now, or `nil` if the projection does not know it.
+    private func section(holding bookId: String) -> SortSection.ID? {
+        projection.sections.first { section in
+            section.books.contains { $0.id == bookId }
+        }?.id
     }
 
     /// Records one drop: the book leaves the section it was dragged from for the one it

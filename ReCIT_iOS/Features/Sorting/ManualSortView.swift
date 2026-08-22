@@ -52,6 +52,15 @@ struct ManualSortView: View {
     /// survive being left for.
     @State private var isCreatingShelf: Bool = false
 
+    /// The book dropped onto the « + » tile, held until the form comes back with a name.
+    /// **Nothing is recorded while it waits**: cancelling the form has to leave no trace, and
+    /// the cheapest way to guarantee that is for the drop itself to change nothing.
+    @State private var bookAwaitingNewShelf: String?
+
+    /// The étagère to bring into view once the form has closed. Set after a creation, cleared
+    /// by the grid once it has scrolled — a bounce played off screen is a bounce lost.
+    @State private var scrollTarget: SortSection.ID?
+
     /// The width every measurement on the screen is derived from. Reported rather than read
     /// through a `GeometryReader`, which would take over the layout it is only measuring.
     @State private var containerWidth: CGFloat = 0
@@ -85,6 +94,15 @@ struct ManualSortView: View {
                     isActive: session.isBusy == false,
                     isApplying: session.isApplying,
                     outcome: session.applyOutcome(of:),
+                    scrollTarget: scrollTarget,
+                    onScrolled: { scrollTarget = nil },
+                    onCreateShelf: { isCreatingShelf = true },
+                    onDropOnNewShelf: { bookId in
+                        guard session.isBusy == false else { return false }
+                        bookAwaitingNewShelf = bookId
+                        isCreatingShelf = true
+                        return true
+                    },
                     onDrop: { bookId, section in
                         file(bookId, into: section.id, within: projection)
                     }
@@ -123,22 +141,9 @@ struct ManualSortView: View {
         .navigationDestination(for: SortSection.ID.self) { sectionId in
             SortShelfDetailView(sectionId: sectionId)
         }
+        // No « + » in the navigation bar: creating an étagère is the grid's own tile, at the
+        // place it is used, and one action does not get two controls on one screen (PRD 0009).
         .toolbar {
-            // Absent until the snapshot exists, exactly as the design has it: there is
-            // nothing to name an étagère against while the library is still being read, so
-            // the naming rule would have nothing to refuse.
-            //
-            // A run in flight only *disables* it, on the action bar's reasoning: what the
-            // button offers is still true, it is simply not offered while the writes settle.
-            if session.phase == .ready {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("manual_sort.create_shelf", systemImage: "plus") {
-                        isCreatingShelf = true
-                    }
-                    .disabled(session.isBusy)
-                }
-            }
-
             ToolbarItem(placement: .topBarLeading) {
                 Button("action.close", systemImage: "xmark", action: onClose)
                     .labelStyle(.iconOnly)
@@ -159,11 +164,11 @@ struct ManualSortView: View {
         // The form writes nothing. It hands back a name, the name becomes a draft on the
         // stack, and the draft is a section that accepts drops straight away — which is what
         // makes "create it, fill it, then save" one movement (PRD 0008).
-        .sheet(isPresented: $isCreatingShelf) {
+        .sheet(isPresented: $isCreatingShelf, onDismiss: forgetBookAwaitingNewShelf) {
             ShelfFormView(
                 draft: .init(
                     nameRule: session.draftNameRule,
-                    onCreate: session.createShelf(named:)
+                    onCreate: createShelf(named:)
                 )
             )
         }
@@ -191,6 +196,21 @@ struct ManualSortView: View {
             onApply: apply,
             onPropose: propose
         )
+    }
+
+    /// Records the étagère the form just named, with the dropped book on it when the tile was
+    /// what opened the form — one call, so a refused name cannot leave a book filed into a
+    /// draft that does not exist.
+    private func createShelf(named name: String) {
+        session.createShelf(named: name, filling: bookAwaitingNewShelf)
+        bookAwaitingNewShelf = nil
+        scrollTarget = session.projection.sections.last { $0.isUnshelved == false }?.id
+    }
+
+    /// Drops the held book if the form went away without naming anything. The drop recorded
+    /// nothing, so there is nothing to undo — only this to forget.
+    private func forgetBookAwaitingNewShelf() {
+        bookAwaitingNewShelf = nil
     }
 
     /// One drop: the book leaves wherever the projection says it is for the section it was

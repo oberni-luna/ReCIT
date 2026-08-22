@@ -29,37 +29,67 @@ struct SortShelvesGridView: View {
     let isApplying: Bool
     /// Where one étagère stands in that run, or `nil` for one the plan leaves alone.
     let outcome: (SortSection.ID) -> SortApplyLedger.ShelfOutcome?
+    /// A section to bring into view, once. A new étagère is appended after the ones the server
+    /// holds, so on a large collection it is born off screen and the form closes on a grid that
+    /// looks unchanged.
+    let scrollTarget: SortSection.ID?
+    let onScrolled: () -> Void
+    let onCreateShelf: () -> Void
+    /// Opens the create form with a dropped book in hand. Returns whether the drop was taken.
+    let onDropOnNewShelf: (String) -> Bool
     /// Files a carried book onto a section. Returns whether the drop was taken.
     let onDrop: (String, SortSection) -> Bool
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: .zero) {
-                ShelfSectionHeader(title: String(localized: "manual_sort.shelves_header"))
+            ScrollViewReader { proxy in
+                VStack(alignment: .leading, spacing: .zero) {
+                    ShelfSectionHeader(title: String(localized: "manual_sort.shelves_header"))
 
-                LazyVGrid(
-                    columns: columns,
-                    alignment: .leading,
-                    spacing: SortGridMetrics.shelfSpacing
-                ) {
-                    ForEach(sections) { section in
-                        SortShelfCardCell(
-                            section: section,
-                            status: plan.status(of: section.id),
+                    LazyVGrid(
+                        columns: columns,
+                        alignment: .leading,
+                        spacing: SortGridMetrics.shelfSpacing
+                    ) {
+                        ForEach(sections) { section in
+                            SortShelfCardCell(
+                                section: section,
+                                status: plan.status(of: section.id),
+                                width: metrics.shelfColumnWidth,
+                                isActive: isActive,
+                                outcome: outcome(section.id),
+                                isApplying: isApplying,
+                                onDrop: { bookId in onDrop(bookId, section) }
+                            )
+                        }
+
+                        SortNewShelfTileView(
                             width: metrics.shelfColumnWidth,
                             isActive: isActive,
-                            outcome: outcome(section.id),
-                            isApplying: isApplying,
-                            onDrop: { bookId in onDrop(bookId, section) }
+                            onTap: onCreateShelf,
+                            onDrop: onDropOnNewShelf
                         )
+                        .id(Self.tileId)
                     }
+                    .padding(.horizontal, .medium)
                 }
-                .padding(.horizontal, .medium)
+                .padding(.bottom, .medium)
+                .onChange(of: scrollTarget) { _, target in
+                    guard target != nil else { return }
+                    // The tile rather than the new card: a draft is drawn immediately before
+                    // it, so bringing the tile into view shows both — and the tile is the one
+                    // anchor whose identity does not depend on the library.
+                    withAnimation { proxy.scrollTo(Self.tileId, anchor: .bottom) }
+                    onScrolled()
+                }
             }
-            .padding(.bottom, .medium)
         }
         .scrollIndicators(.hidden)
     }
+
+    /// The tile's scroll anchor. A constant because it is the one cell whose identity does not
+    /// depend on the library.
+    private static let tileId: String = "manual_sort.tile"
 
     /// Fixed rather than adaptive: the design fixes the number of columns at three and lets
     /// the cards narrow, so that the grid and the carousel below stay on the same rhythm.

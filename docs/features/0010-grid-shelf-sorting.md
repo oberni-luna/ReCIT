@@ -149,7 +149,7 @@ onboarding, straight at the sorting surface from the home and from settings.
 ## Issues
 
 - `issues/0044-verify-grid-drag-and-drop.md` — does the drag take — commit `0da1256`
-- `issues/0045-figma-frames-for-the-grid-surface.md` — the twelve missing frames
+- `issues/0045-figma-frames-for-the-grid-surface.md` — the twelve missing frames — commit `4042de6`
 - `issues/0046-grid-sorting-surface-read-only.md` — the surface, read-only — commit `80b7b71`
 - `issues/0047-drag-a-book-between-sections.md` — the gesture, both ways — commit `7436f44`
 - `issues/0048-new-shelf-tile-and-drop-to-create.md` — the tile — commit `9e9330f`
@@ -158,4 +158,4 @@ onboarding, straight at the sorting surface from the home and from settings.
 - `issues/0051-proposal-button-in-the-action-bar.md` — the model as a button — commit `2391f14`
 - `issues/0052-scan-then-sort-modal-flow.md` — one modal flow — commit `c9363bf`
 - `issues/0053-file-a-book-without-dragging.md` — without a drag — commit `326afde`
-- `issues/0054-document-the-grid-sorting-surface.md` — this document
+- `issues/0054-document-the-grid-sorting-surface.md` — this document — commit `54896af`

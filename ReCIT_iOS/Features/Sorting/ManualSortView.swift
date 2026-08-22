@@ -2,27 +2,30 @@
 //  ManualSortView.swift
 //  ReCIT_iOS
 //
-//  The sorting surface: the whole library laid out as it is filed. Every étagère is a
-//  section with the books it holds, and last comes « À ranger », the books that are on
-//  no étagère at all.
+//  The sorting surface: the whole library laid out as it will be filed. Every étagère is a
+//  card on a three-column grid that scrolls; the books on no étagère are a carousel in a
+//  panel anchored to the foot of the screen, with the recap and the three controls under it.
 //
-//  Reached from the étagères screen. On arrival it syncs shelves and inventory against
-//  the server behind a progress indicator — a user is about to rearrange their library
-//  and must not be doing it against a stale one — and then freezes what it read. Why
-//  the freeze, and why it is a deliberate departure from ADR 0001, is written where it
-//  happens: `SortSessionModel.freeze`.
+//  **Why the panel does not scroll** is the decision the screen turns on (PRD 0009): the
+//  source of a drag stays under the thumb while the destinations move under the finger,
+//  taking a book back *off* an étagère always has a target on screen, and « Appliquer » is
+//  never several screens below the work. The panel is content, not chrome, so the argument
+//  PRD 0008 used against a pinned bar does not apply to it.
 //
-//  Books are filed by dragging them from one section onto another; nothing is written.
-//  The session that holds the snapshot and the stack is **app-scoped**, so a draft
-//  survives leaving the screen — and, from slice 0040, so will the writes and the
-//  ledger of what landed. The pills and recap (0039), the apply (0040) and the create
-//  form behind the « + » (0041) are all on this screen; the AI proposal (0042) lands
-//  here too.
+//  On arrival it syncs shelves and inventory behind a progress indicator — a user about to
+//  rearrange their library must not be doing it against a stale one — and then freezes what
+//  it read. Why the freeze, and why it is a deliberate departure from ADR 0001, is written
+//  where it happens: `SortSessionModel.freeze`.
 //
-//  It stands *alongside* the auto-sort review screen, which keeps working untouched
-//  until slice 0043 dismantles it.
+//  **It reads the projection once.** Both derivations are recomputed on every read by design,
+//  so a card that read the session in its own body would pay a walk over the whole library
+//  per card per animation frame. They are read here, and value types go down.
 //
-//  See PRD 0008.
+//  Nothing is written until « Appliquer ». The session holding the snapshot and the stack is
+//  app-scoped, so a draft survives leaving the screen, and so do the writes and the ledger of
+//  what landed.
+//
+//  See PRD 0008 and PRD 0009.
 //
 
 import SwiftUI
@@ -32,6 +35,7 @@ struct ManualSortView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(ShelfModel.self) private var shelfModel
     @Environment(InventoryModel.self) private var inventoryModel
+    @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.modelContext) private var modelContext
 
@@ -39,35 +43,64 @@ struct ManualSortView: View {
 
     @Binding var path: NavigationPath
 
-    /// Presents the create form. The one piece of state this screen owns — the session
-    /// holds everything else, and a sheet that is up is not something a sorting session
-    /// should survive being left for.
+    /// Presents the create form. The one piece of state this screen owns — the session holds
+    /// everything else, and a sheet that is up is not something a sorting session should
+    /// survive being left for.
     @State private var isCreatingShelf: Bool = false
 
+    /// The width every measurement on the screen is derived from. Reported rather than read
+    /// through a `GeometryReader`, which would take over the layout it is only measuring.
+    @State private var containerWidth: CGFloat = 0
+
+    /// The one-off sentence the footer owes the user, if any. Held by the screen rather than
+    /// the session: it is about a button that was pressed here, and it must not outlive the
+    /// next change to the stack.
+    @State private var notice: SortNotice?
+
     var body: some View {
-        Group {
-            switch session.phase {
-            case .syncing:
+        // Read once per render. Both are pure functions of the same two values, so reading
+        // them per card would only cost walks — but it is also how one frame ends up
+        // rendering two different reductions.
+        let projection: SortProjection = session.projection
+        let plan: SortWritePlan = session.writePlan
+        let metrics: SortGridMetrics = .init(containerWidth: containerWidth)
+
+        return VStack(spacing: .zero) {
+            if session.phase == .syncing || containerWidth == 0 {
                 SyncingPlaceholderView(message: "manual_sort.syncing")
-            case .ready:
-                ManualSortListView(
-                    session: session,
-                    onFinish: close
+            } else {
+                SortShelvesGridView(
+                    sections: projection.sections.filter { $0.isUnshelved == false },
+                    plan: plan,
+                    metrics: metrics,
+                    onOpen: open
                 )
             }
+
+            SortUnshelvedPanelView(
+                books: projection.unshelved.books,
+                metrics: metrics,
+                isLoading: session.phase == .syncing,
+                footer: .init(plan: plan, progress: session.applyProgress, notice: notice),
+                actions: actions
+            )
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(DesignSystem.Color.backgroundSecondary.color)
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.width
+        } action: { width in
+            containerWidth = width
         }
         .navigationTitle("manual_sort.title")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             // Absent until the snapshot exists, exactly as the design has it: there is
-            // nothing to name an étagère against while the library is still being read,
-            // so the naming rule would have nothing to refuse.
+            // nothing to name an étagère against while the library is still being read, so
+            // the naming rule would have nothing to refuse.
             //
-            // A run in flight only *disables* it, on the action bar's reasoning: what
-            // the button offers is still true, it is simply not offered while the writes
-            // settle. The stack must not grow under a plan that was reduced from it —
-            // nor under a proposal that resolved its names against the sections as they
-            // stood, which is why a run of either kind stands it down.
+            // A run in flight only *disables* it, on the action bar's reasoning: what the
+            // button offers is still true, it is simply not offered while the writes settle.
             if session.phase == .ready {
                 ToolbarItem(placement: .primaryAction) {
                     Button("manual_sort.create_shelf", systemImage: "plus") {
@@ -78,8 +111,8 @@ struct ManualSortView: View {
             }
         }
         // The form writes nothing. It hands back a name, the name becomes a draft on the
-        // stack, and the draft is a section that accepts drops straight away — which is
-        // what makes "create it, fill it, then save" one movement (PRD 0008).
+        // stack, and the draft is a section that accepts drops straight away — which is what
+        // makes "create it, fill it, then save" one movement (PRD 0008).
         .sheet(isPresented: $isCreatingShelf) {
             ShelfFormView(
                 draft: .init(
@@ -100,11 +133,67 @@ struct ManualSortView: View {
         }
     }
 
-    /// « Terminer » leaves the screen. Only reachable with an empty stack: while there
-    /// is something to discard the same button says « Annuler » and discards it.
-    private func close() {
-        if path.isEmpty == false {
-            path.removeLast()
+    /// The three controls, with the availability read fresh in this body so that switching
+    /// Apple Intelligence on and coming back finds the proposal live with no relaunch.
+    private var actions: SortActions {
+        .init(
+            hasPendingChanges: session.hasPendingChanges,
+            entryPoint: .init(availability: autoSortModel.availability),
+            isProposing: session.isProposing,
+            isApplying: session.isApplying,
+            onDiscard: discard,
+            onApply: apply,
+            onPropose: propose
+        )
+    }
+
+    /// Pushes an étagère's own screen — the books it *will* hold, drafts included. Slice 0049
+    /// gives it a destination; until then a tap is a no-op rather than a wrong screen.
+    private func open(_ section: SortSection) {
+    }
+
+    private func discard() {
+        notice = nil
+        session.discardChanges()
+    }
+
+    /// Fires the run and returns. The writes are owned by the session, so this screen can go
+    /// away without stopping them or losing the ledger of what landed.
+    private func apply() {
+        notice = nil
+        session.apply(
+            shelfModel: shelfModel,
+            errorReporter: errorReporter,
+            modelContext: modelContext
+        )
+    }
+
+    /// Asks the on-device model for a rangement. What comes back is appended to the same stack
+    /// a drop appends to, so it is adjustable by dragging and the discard control throws it
+    /// away like anything else (PRD 0008).
+    ///
+    /// The task is not tied to this view's lifetime: a proposal is a wait the user triggered,
+    /// and leaving the screen mid-run should find the changes on the stack on their return,
+    /// exactly as leaving mid-apply finds the ledger.
+    private func propose() {
+        guard let user = userModel.myUser else { return }
+
+        notice = nil
+        Task {
+            let countBefore: Int = session.changes.count
+            await session.proposeArrangement(
+                user: user,
+                autoSortModel: autoSortModel,
+                errorReporter: errorReporter,
+                modelContext: modelContext
+            )
+            // Said here rather than left to the error reporter: its SnackBar is owned by
+            // `MainTabView`, which does not draw above this screen's cover, and from the far
+            // side of a wait the user triggered a screen that does not change is
+            // indistinguishable from a button that does not work.
+            if session.changes.count == countBefore {
+                notice = .nothingToPropose
+            }
         }
     }
 }

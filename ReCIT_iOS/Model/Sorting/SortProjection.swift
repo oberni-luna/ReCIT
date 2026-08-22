@@ -19,22 +19,24 @@
 //  first rather than "duplicate it" because duplicating is precisely what makes a
 //  book get written twice.
 //
-//  **`displayOrder` is how the screen stays smooth, and it writes nothing.** The list's
-//  own reorder is positional: it animates the row to the exact slot the finger dropped it
-//  in. Membership, though, carries no user-facing order (PRD 0008), so any order this type
-//  invented — snapshot order, arrival order — was a *different* arrangement from the one
-//  just animated, and SwiftUI animated the difference on top. That is what made a dropped
-//  row sit over the row it landed on for half a second.
+//  **Order inside a section is arrival order, and it is derived — not carried.** The books
+//  this session moved into a section come first, the most recent move first; behind them,
+//  the books that were already there, in snapshot order (inventory `created` desc).
 //
-//  So the caller hands in the order it wants, and the screen hands in precisely the
-//  permutation the list performed. Nothing is derived twice and nothing disagrees. It is
-//  display only — `SortWritePlan` builds its projections without it, so what gets written
-//  cannot depend on it — and it is not persisted: reopening the screen re-freezes.
+//  That rule is what makes the sorting surface's piles work (PRD 0009): the front of a pile
+//  is the book just filed, and the front of the pile is what a drag from the card carries —
+//  so a mis-drop is undone by dragging back exactly what was dropped. It replaces
+//  `displayOrder`, which existed only to hand the old `List` the permutation its edit-mode
+//  reorder had just performed. There is no list any more, and nothing positional to mirror:
+//  the order is a function of `(snapshot, changes)` like everything else here, so it cannot
+//  drift from the stack and nothing has to be reset when an apply lands.
 //
 //  Recomputed rather than tracked. It is cheap, and a tracked target state is how a
-//  pill, a recap and a write end up disagreeing.
+//  pill, a recap and a write end up disagreeing. The **caller** must read it once per render
+//  and pass value types down, though: a card reading it in its own body would pay a walk
+//  over the whole library per card per animation frame.
 //
-//  Pure by design — no store, no network, no SwiftUI. See PRD 0008.
+//  Pure by design — no store, no network, no SwiftUI. See PRD 0008 and PRD 0009.
 //
 
 import Foundation
@@ -48,8 +50,7 @@ struct SortProjection: Equatable, Sendable {
 
     init(
         snapshot: SortSnapshot,
-        changes: [SortChange] = [],
-        displayOrder: [String] = []
+        changes: [SortChange] = []
     ) {
         // Books keyed by id, first occurrence winning, so a store that somehow held
         // two rows for one `_id` still yields one book on screen.
@@ -78,18 +79,12 @@ struct SortProjection: Equatable, Sendable {
             }
         }
 
-        // Where each book sits *within* its section. A book named by `displayOrder` takes
-        // its place there; anything the caller did not mention keeps its snapshot position,
-        // after them, so a partial order is still a total one.
-        var rankOfBook: [String: Int] = [:]
-        for (offset, bookId) in bookOrder.enumerated() {
-            rankOfBook[bookId] = displayOrder.count + offset
-        }
-        for (offset, bookId) in displayOrder.enumerated() {
-            rankOfBook[bookId] = offset
-        }
+        // When this session filed each book where it now sits. Overwritten with every
+        // move, so a book moved three times carries the index of its last move only —
+        // the one that decided where it is.
+        var arrivalOfBook: [String: Int] = [:]
 
-        for change in changes {
+        for (index, change) in changes.enumerated() {
             switch change {
             case .createShelf(let draftId, let name):
                 let id: SortSection.ID = .draft(draftId)
@@ -103,31 +98,56 @@ struct SortProjection: Equatable, Sendable {
             case .moveBook(let bookId, _, let destination):
                 // A move naming a book or a section the projection does not know is
                 // ignored rather than trapped: the stack outlives nothing here, but
-                // an apply that rebuilds the snapshot partway (slice 0040) can leave
-                // a change referring to something that has since landed, and the
-                // screen must keep rendering.
+                // an apply that rebuilds the snapshot partway can leave a change
+                // referring to something that has since landed, and the screen must
+                // keep rendering.
                 guard booksById[bookId] != nil else { continue }
                 guard destination == .unshelved || namesById[destination] != nil else { continue }
                 sectionOfBook[bookId] = destination
+                arrivalOfBook[bookId] = index
             }
         }
 
         sectionIds.append(.unshelved)
 
         var booksBySection: [SortSection.ID: [AutoSortBook]] = [:]
-        for bookId in bookOrder.sorted(by: { rankOfBook[$0, default: .max] < rankOfBook[$1, default: .max] }) {
+        for bookId in bookOrder {
             guard let book = booksById[bookId] else { continue }
             let section: SortSection.ID = sectionOfBook[bookId] ?? .unshelved
             booksBySection[section, default: []].append(book)
         }
 
         sections = sectionIds.map { id in
-            .init(
+            let books: [AutoSortBook] = Self.inArrivalOrder(
+                booksBySection[id] ?? [],
+                arrivals: arrivalOfBook
+            )
+            return .init(
                 id: id,
                 name: id == .unshelved ? nil : namesById[id],
-                books: booksBySection[id] ?? []
+                books: books
             )
         }
+    }
+
+    /// One section's books, arrivals first. A stable partition rather than a sort over a
+    /// mixed key: the books this session moved here keep their relative order by *when*
+    /// they arrived (latest first), and everything else keeps snapshot order behind them.
+    private static func inArrivalOrder(
+        _ books: [AutoSortBook],
+        arrivals: [String: Int]
+    ) -> [AutoSortBook] {
+        var arrived: [AutoSortBook] = []
+        var settled: [AutoSortBook] = []
+        for book in books {
+            if arrivals[book.id] == nil {
+                settled.append(book)
+            } else {
+                arrived.append(book)
+            }
+        }
+        arrived.sort { arrivals[$0.id, default: .min] > arrivals[$1.id, default: .min] }
+        return arrived + settled
     }
 
     /// The pile, which every projection has. Convenient for the screen and for a

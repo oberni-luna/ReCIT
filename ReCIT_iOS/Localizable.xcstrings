@@ -1,1663 +1,1678 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "" : {
-
-    },
-    "🥲" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🥲"
+  "sourceLanguage": "en",
+  "strings": {
+    "": {},
+    "Annuler": {},
+    "Cette étagère est vide": {},
+    "Créer": {},
+    "Description (optionnel)": {},
+    "Enregistrer": {},
+    "Fermer": {},
+    "Modifier": {},
+    "Modifier l'étagère": {},
+    "Nom de l'étagère": {},
+    "Nouvelle étagère": {},
+    "Scan": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner"
           }
         }
       }
     },
-    "action.add" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add"
+    "Supprimer cette étagère ?": {},
+    "Supprimer l'étagère": {},
+    "Visibilité": {},
+    "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée.": {},
+    "action.add": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter"
           }
         }
       }
     },
-    "action.add_to_inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to inventory"
+    "action.add_to_inventory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter à l'inventaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter à l'inventaire"
           }
         }
       }
     },
-    "action.add_to_list" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to a list"
+    "action.add_to_list": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to a list"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter à une liste"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter à une liste"
           }
         }
       }
     },
-    "action.add_to_shelf" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to a shelf"
+    "action.add_to_shelf": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to a shelf"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter à une étagère"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter à une étagère"
           }
         }
       }
     },
-    "action.add_to_shelf_named %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to %@"
+    "action.add_to_shelf_named %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter à %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter à %@"
           }
         }
       }
     },
-    "action.borrow_from" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Borrow from"
+    "action.borrow_from": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrow from"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emprunter à"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emprunter à"
           }
         }
       }
     },
-    "action.borrow_from_user %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Borrow from %@"
+    "action.borrow_from_user %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrow from %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emprunter à %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emprunter à %@"
           }
         }
       }
     },
-    "action.cancel" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
+    "action.cancel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annuler"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
           }
         }
       }
     },
-    "action.close" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close"
+    "action.close": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fermer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer"
           }
         }
       }
     },
-    "action.delete" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete"
+    "action.delete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer"
           }
         }
       }
     },
-    "action.edit" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit"
+    "action.edit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modifier"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier"
           }
         }
       }
     },
-    "action.more" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "More"
+    "action.more": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus"
           }
         }
       }
     },
-    "action.open_settings" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open Settings"
+    "action.open_settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvrir les Réglages"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir les Réglages"
           }
         }
       }
     },
-    "action.remove_from_shelf" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove from a shelf"
+    "action.remove_from_shelf": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from a shelf"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirer d’une étagère"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer d’une étagère"
           }
         }
       }
     },
-    "action.remove_from_shelf_named %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove from %@"
+    "action.remove_from_shelf_named %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirer de %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer de %@"
           }
         }
       }
     },
-    "action.reply" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reply"
+    "action.reply": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Répondre"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Répondre"
           }
         }
       }
     },
-    "action.scan" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scan"
+    "action.scan": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scanner"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner"
           }
         }
       }
     },
-    "action.send_message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Send a message"
+    "action.send_message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send a message"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Envoyer un message"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer un message"
           }
         }
       }
     },
-    "action.send_request" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Send a request"
+    "action.send_request": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send a request"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Envoyer une demande"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer une demande"
           }
         }
       }
     },
-    "action.submit" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Submit"
+    "action.submit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Envoyer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer"
           }
         }
       }
-    },
-    "Annuler" : {
-
     },
-    "author.birth_date %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Born on %@"
+    "author.birth_date %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Born on %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Né le %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Né le %@"
           }
         }
       }
     },
-    "author.loading" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading author..."
+    "author.loading": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading author..."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargement de l'auteur..."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement de l'auteur..."
           }
         }
       }
     },
-    "author.loading_works %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading works for %@"
+    "author.loading_works %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading works for %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargement des œuvres de %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement des œuvres de %@"
           }
         }
       }
     },
-    "author.works.header %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Works by %@"
+    "author.works.header %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Works by %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Œuvres de %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Œuvres de %@"
           }
         }
       }
     },
-    "book.other_editions %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Other editions of %@"
+    "book.other_editions %@": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other editions of %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Autres éditions de %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres éditions de %@"
           }
         }
       }
     },
-    "book.other_editions_subtitle" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Other editions"
+    "book.other_editions_subtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other editions"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Autres éditions"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres éditions"
           }
         }
       }
     },
-    "Cette étagère est vide" : {
-
-    },
-    "community.owner_not_lending %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ isn't lending this book right now"
+    "community.owner_not_lending %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ isn't lending this book right now"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ ne prête pas ce livre pour le moment"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ne prête pas ce livre pour le moment"
           }
         }
       }
-    },
-    "Créer" : {
-
-    },
-    "Description (optionnel)" : {
-
     },
-    "edition.add_to_inventory" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to inventory"
+    "edition.add_to_inventory": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter à l'inventaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter à l'inventaire"
           }
         }
       }
     },
-    "edition.added_to_inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Added to your inventory"
+    "edition.added_to_inventory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added to your inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouté à votre inventaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouté à votre inventaire"
           }
         }
       }
     },
-    "edition.error.add_failed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unable to add this book to your inventory."
+    "edition.error.add_failed": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to add this book to your inventory."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible d'ajouter ce livre à votre inventaire."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d'ajouter ce livre à votre inventaire."
           }
         }
       }
     },
-    "edition.error.no_user" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No connected user!"
+    "edition.error.no_user": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No connected user!"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas d'utilisateur connecté !"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas d'utilisateur connecté !"
           }
         }
       }
     },
-    "edition.my_inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In my inventory"
+    "edition.my_inventory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In my inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dans mon inventaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans mon inventaire"
           }
         }
       }
     },
-    "edition.no_result" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This edition does not exist on inventaire.io"
+    "edition.no_result": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This edition does not exist on inventaire.io"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette édition n'existe pas sur inventaire.io"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette édition n'existe pas sur inventaire.io"
           }
         }
       }
     },
-    "edition.others_inventory" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In the inventory of"
+    "edition.others_inventory": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the inventory of"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dans l'inventaire de"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans l'inventaire de"
           }
         }
       }
     },
-    "Enregistrer" : {
-
-    },
-    "entity.summary.label" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Summary"
+    "entity.summary.label": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Summary"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Résumé"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumé"
           }
         }
       }
     },
-    "entity.summary.tags" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Genres"
+    "entity.summary.tags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genres"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Genres"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genres"
           }
         }
       }
     },
-    "error.empty_message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Message can't be empty"
+    "error.empty_message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message can't be empty"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le message ne peut pas être vide"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le message ne peut pas être vide"
           }
         }
       }
     },
-    "error.generic" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "An error occurred"
+    "error.generic": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An error occurred"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une erreur s'est produite"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une erreur s'est produite"
           }
         }
       }
     },
-    "error.invalid_transition" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This action isn't available."
+    "error.invalid_transition": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This action isn't available."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette action n'est pas disponible."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette action n'est pas disponible."
           }
         }
       }
-    },
-    "error.network.bad_response" : {
-
-    },
-    "error.network.bad_status" : {
-
-    },
-    "error.network.bad_url" : {
-
-    },
-    "error.network.decode_failed" : {
-
-    },
-    "error.network.encode_failed" : {
-
     },
-    "error.network.invalid_request" : {
-
-    },
-    "error.with_message %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error: %@"
+    "error.network.bad_response": {},
+    "error.network.bad_status": {},
+    "error.network.bad_url": {},
+    "error.network.decode_failed": {},
+    "error.network.encode_failed": {},
+    "error.network.invalid_request": {},
+    "error.with_message %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error: %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur : %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erreur : %@"
           }
         }
       }
     },
-    "Fermer" : {
-
+    "genre.enrichment.analysing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analysing your library…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyse de votre bibliothèque…"
+          }
+        }
+      }
     },
-    "genre.enrichment.analysing" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Analysing your library…"
+    "inventory.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh, this is empty here"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Analyse de votre bibliothèque…"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh, c’est vide ici "
           }
         }
       }
     },
-    "inventory.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oh, this is empty here"
+    "inventory.item.added_to_list": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "has been added to the list"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oh, c’est vide ici "
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a bien été ajouté à la liste"
           }
         }
       }
     },
-    "inventory.item.added_to_list" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "has been added to the list"
+    "inventory.item.change_notes": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit my note"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "a bien été ajouté à la liste"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changer mon commentaire"
           }
         }
       }
     },
-    "inventory.item.change_notes" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit my note"
+    "inventory.item.created_date %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Created %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Changer mon commentaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créé le %@"
           }
         }
       }
     },
-    "inventory.item.created_date %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Created %@"
+    "inventory.item.delete_confirm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove this item from your inventory?"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Créé le %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer cet item de votre inventaire ?"
           }
         }
       }
     },
-    "inventory.item.delete_confirm" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove this item from your inventory?"
+    "inventory.item.deleted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleted!"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer cet item de votre inventaire ?"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimé !"
           }
         }
       }
     },
-    "inventory.item.deleted" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deleted!"
+    "inventory.item.details.saved": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description saved"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimé !"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description enregistrée"
           }
         }
       }
     },
-    "inventory.item.details.saved" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Description saved"
+    "inventory.item.my_notes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My notes"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Description enregistrée"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que j'en pense"
           }
         }
       }
     },
-    "inventory.item.my_notes" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "My notes"
+    "inventory.item.other_edition_for": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other edition for"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce que j'en pense"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autre édition de"
           }
         }
       }
     },
-    "inventory.item.other_edition_for" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Other edition for"
+    "inventory.item.remove_from_inventory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from my inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Autre édition de"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer de mon inventaire"
           }
         }
       }
     },
-    "inventory.item.remove_from_inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove from my inventory"
+    "inventory.item.since_date %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer de mon inventaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis le %@"
           }
         }
       }
     },
-    "inventory.item.since_date %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Since %@"
+    "inventory.item.this_book": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This book"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Depuis le %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce livre"
           }
         }
       }
     },
-    "inventory.item.this_book" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This book"
+    "inventory.item.transaction_mode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transaction mode"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce livre"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mode de transaction"
           }
         }
       }
     },
-    "inventory.item.transaction_mode" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transaction mode"
+    "inventory.item.write_notes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a note"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mode de transaction"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écrire un commentaire"
           }
         }
       }
     },
-    "inventory.item.write_notes" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Write a note"
+    "inventory.owned_by %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Owned by **%@**"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Écrire un commentaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appartient à **%@**"
           }
         }
       }
     },
-    "inventory.owned_by %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Owned by **%@**"
+    "list.empty": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This list is empty"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appartient à **%@**"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette liste est vide"
           }
         }
       }
     },
-    "list.empty" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This list is empty"
+    "list.error.loading %@": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error loading list: %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette liste est vide"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erreur lors du chargement de la liste : %@"
           }
         }
       }
     },
-    "list.error.loading %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error loading list: %@"
+    "list.form.create_title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create new list"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur lors du chargement de la liste : %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer une liste"
           }
         }
       }
     },
-    "list.form.create_title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create new list"
+    "list.form.delete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete list"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Créer une liste"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer la liste"
           }
         }
       }
     },
-    "list.form.delete" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete list"
+    "list.form.description": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer la liste"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description"
           }
         }
       }
     },
-    "list.form.description" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Description"
+    "list.form.edit_title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit list"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Description"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier la liste"
           }
         }
       }
     },
-    "list.form.edit_title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit list"
+    "list.form.name": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modifier la liste"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom"
           }
         }
       }
     },
-    "list.form.name" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Name"
+    "list.form.type": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nom"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
           }
         }
       }
     },
-    "list.form.type" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type"
+    "list.item.comment": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comment"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commentaire"
           }
         }
       }
     },
-    "list.item.comment" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comment"
+    "list.loading": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading items..."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Commentaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement des éléments..."
           }
         }
       }
     },
-    "list.loading" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading items..."
+    "loading more results...": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "je regarde plus loin…"
           }
+        }
+      }
+    },
+    "login.button.create_account": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create an account"
+          }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargement des éléments..."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer un compte"
           }
         }
       }
     },
-    "loading more results..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "je regarde plus loin…"
+    "login.button.signin": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se connecter"
           }
         }
       }
     },
-    "login.button.create_account" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create an account"
+    "login.noaccount.explanation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You need an account on [inventaire.io](https://inventaire.io) to use this App."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Créer un compte"
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vous devez avoir créé un compte sur [inventaire.io](https://inventaire.io) pour utiliser cette App"
           }
         }
       }
     },
-    "login.button.signin" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in"
+    "login.password": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se connecter"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mot de passe"
           }
         }
       }
     },
-    "login.noaccount.explanation" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You need an account on [inventaire.io](https://inventaire.io) to use this App."
+    "login.subtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in to your inventaire.io account"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Vous devez avoir créé un compte sur [inventaire.io](https://inventaire.io) pour utiliser cette App"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connectez-vous à votre compte inventaire.io"
           }
         }
       }
     },
-    "login.password" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Password"
+    "login.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Login"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mot de passe"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connexion"
           }
         }
       }
     },
-    "login.subtitle" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in to your inventaire.io account"
+    "login.username": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Username"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Connectez-vous à votre compte inventaire.io"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom d'utilisateur"
           }
         }
       }
     },
-    "login.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Login"
+    "manual_sort.apply": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save this arrangement"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Connexion"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appliquer le rangement"
           }
         }
       }
     },
-    "login.username" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Username"
+    "manual_sort.card.title %@ %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nom d'utilisateur"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld"
           }
         }
       }
     },
-    "manual_sort.apply" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save this arrangement"
+    "manual_sort.create.name_taken %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A shelf named “%@” is already in this list."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appliquer le rangement"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une étagère nommée « %@ » figure déjà dans cette liste."
           }
         }
       }
     },
-    "manual_sort.create_shelf" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New shelf"
+    "manual_sort.create_shelf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New shelf"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouvelle étagère"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouvelle étagère"
           }
         }
       }
     },
-    "manual_sort.create.name_taken %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A shelf named “%@” is already in this list."
+    "manual_sort.discard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une étagère nommée « %@ » figure déjà dans cette liste."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
           }
         }
       }
     },
-    "manual_sort.discard" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discard"
+    "manual_sort.error.books_missing %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The books to file into “%@” are no longer in your inventory."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annuler"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les livres à ranger dans « %@ » ne sont plus dans votre inventaire."
           }
         }
       }
     },
-    "manual_sort.error.books_missing %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The books to file into “%@” are no longer in your inventory."
+    "manual_sort.error.shelf_missing %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is no longer one of your shelves."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les livres à ranger dans « %@ » ne sont plus dans votre inventaire."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » ne fait plus partie de vos étagères."
           }
         }
       }
     },
-    "manual_sort.error.shelf_missing %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“%@” is no longer one of your shelves."
+    "manual_sort.finish": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "« %@ » ne fait plus partie de vos étagères."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminer"
           }
         }
       }
     },
-    "manual_sort.finish" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Done"
+    "manual_sort.mark.applying": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrement en cours"
           }
         }
       }
     },
-    "manual_sort.mark.applying" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saving"
+    "manual_sort.mark.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving failed"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistrement en cours"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec de l'enregistrement"
           }
         }
       }
     },
-    "manual_sort.mark.failed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saving failed"
+    "manual_sort.mark.landed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec de l'enregistrement"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrée"
           }
         }
       }
     },
-    "manual_sort.mark.landed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved"
+    "manual_sort.mark.pending": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still to save"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistrée"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reste à enregistrer"
           }
         }
       }
     },
-    "manual_sort.mark.pending" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Still to save"
+    "manual_sort.pill.modified": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modified"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reste à enregistrer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifiée"
           }
         }
       }
     },
-    "manual_sort.pill.modified" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modified"
+    "manual_sort.pill.new": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modifiée"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouvelle"
           }
         }
       }
     },
-    "manual_sort.pill.new" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New"
+    "manual_sort.proposal.generating": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working out an arrangement…"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouvelle"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche d’un rangement…"
           }
         }
       }
     },
-    "manual_sort.proposal.generating" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Working out an arrangement…"
+    "manual_sort.proposal.nothing_proposed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing could be suggested for the books left to file."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche d’un rangement…"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun rangement n’a pu être proposé pour les livres qu’il reste à ranger."
           }
         }
       }
     },
-    "manual_sort.proposal.nothing_proposed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing could be suggested for the books left to file."
+    "manual_sort.proposal.nothing_to_propose": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No arrangement to propose: nothing was added."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun rangement n’a pu être proposé pour les livres qu’il reste à ranger."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun rangement à proposer : rien n’a été ajouté."
           }
         }
       }
     },
-    "manual_sort.proposal.unavailable.device" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggestions rely on Apple Intelligence, which this device cannot run. Everything else on this screen works as usual."
+    "manual_sort.proposal.unavailable.device": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggestions rely on Apple Intelligence, which this device cannot run. Everything else on this screen works as usual."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La proposition s’appuie sur Apple Intelligence, que cet appareil ne peut pas exécuter. Le reste de cet écran fonctionne normalement."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La proposition s’appuie sur Apple Intelligence, que cet appareil ne peut pas exécuter. Le reste de cet écran fonctionne normalement."
           }
         }
       }
     },
-    "manual_sort.proposal.unavailable.downloading" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apple Intelligence is still downloading its model. Suggestions will be available shortly."
+    "manual_sort.proposal.unavailable.downloading": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence is still downloading its model. Suggestions will be available shortly."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le modèle d’Apple Intelligence est en cours de téléchargement. La proposition sera disponible sous peu."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le modèle d’Apple Intelligence est en cours de téléchargement. La proposition sera disponible sous peu."
           }
         }
       }
     },
-    "manual_sort.proposal.unavailable.switched_off" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggestions rely on Apple Intelligence, which is switched off on this device. Turn it on in Settings to use them."
+    "manual_sort.proposal.unavailable.switched_off": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggestions rely on Apple Intelligence, which is switched off on this device. Turn it on in Settings to use them."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La proposition s’appuie sur Apple Intelligence, qui est désactivé sur cet appareil. Activez-le dans les Réglages pour l’utiliser."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La proposition s’appuie sur Apple Intelligence, qui est désactivé sur cet appareil. Activez-le dans les Réglages pour l’utiliser."
           }
         }
       }
     },
-    "manual_sort.propose" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggest an arrangement"
+    "manual_sort.propose": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggest an arrangement"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Proposer un rangement"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proposer un rangement"
           }
         }
       }
     },
-    "manual_sort.recap %lld %lld %lld %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@created@, %#@modified@, %#@filed@, %#@left@."
+    "manual_sort.recap %lld %lld %lld %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@created@, %#@modified@, %#@filed@, %#@left@."
           },
-          "substitutions" : {
-            "created" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelf to create"
+          "substitutions": {
+            "created": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelf to create"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelves to create"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelves to create"
                     }
                   }
                 }
               }
             },
-            "filed" : {
-              "argNum" : 3,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg book filed"
+            "filed": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg book filed"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg books filed"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg books filed"
                     }
                   }
                 }
               }
             },
-            "left" : {
-              "argNum" : 4,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg book still on no shelf"
+            "left": {
+              "argNum": 4,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg book still on no shelf"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg books still on no shelf"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg books still on no shelf"
                     }
                   }
                 }
               }
             },
-            "modified" : {
-              "argNum" : 2,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelf modified"
+            "modified": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelf modified"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelves modified"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelves modified"
                     }
                   }
                 }
@@ -1665,87 +1680,87 @@
             }
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@created@, %#@modified@, %#@filed@, %#@left@."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@created@, %#@modified@, %#@filed@, %#@left@."
           },
-          "substitutions" : {
-            "created" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagère à créer"
+          "substitutions": {
+            "created": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagère à créer"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagères à créer"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagères à créer"
                     }
                   }
                 }
               }
             },
-            "filed" : {
-              "argNum" : 3,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg livre rangé"
+            "filed": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg livre rangé"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg livres rangés"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg livres rangés"
                     }
                   }
                 }
               }
             },
-            "left" : {
-              "argNum" : 4,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg livre restera sans étagère"
+            "left": {
+              "argNum": 4,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg livre restera sans étagère"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg livres resteront sans étagère"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg livres resteront sans étagère"
                     }
                   }
                 }
               }
             },
-            "modified" : {
-              "argNum" : 2,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagère modifiée"
+            "modified": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagère modifiée"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagères modifiées"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagères modifiées"
                     }
                   }
                 }
@@ -1755,30 +1770,30 @@
         }
       }
     },
-    "manual_sort.recap.dropped %lld %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@drafts@: %2$@."
+    "manual_sort.recap.dropped %lld %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@drafts@: %2$@."
           },
-          "substitutions" : {
-            "drafts" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg new shelf is empty and will not be created"
+          "substitutions": {
+            "drafts": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg new shelf is empty and will not be created"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg new shelves are empty and will not be created"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg new shelves are empty and will not be created"
                     }
                   }
                 }
@@ -1786,27 +1801,27 @@
             }
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@drafts@ : %2$@."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@drafts@ : %2$@."
           },
-          "substitutions" : {
-            "drafts" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg nouvelle étagère est vide et ne sera pas créée"
+          "substitutions": {
+            "drafts": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg nouvelle étagère est vide et ne sera pas créée"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg nouvelles étagères sont vides et ne seront pas créées"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg nouvelles étagères sont vides et ne seront pas créées"
                     }
                   }
                 }
@@ -1816,57 +1831,57 @@
         }
       }
     },
-    "manual_sort.recap.nothing_to_save" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your changes cancel each other out: there is nothing to save."
+    "manual_sort.recap.nothing_to_save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your changes cancel each other out: there is nothing to save."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vos changements s’annulent : il n’y a rien à enregistrer."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos changements s’annulent : il n’y a rien à enregistrer."
           }
         }
       }
     },
-    "manual_sort.report.all_landed %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld shelf has been saved."
+    "manual_sort.report.all_landed %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld shelf has been saved."
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld shelves have been saved."
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld shelves have been saved."
                 }
               }
             }
           }
         },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld étagère a été enregistrée."
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld étagère a été enregistrée."
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld étagères ont été enregistrées."
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld étagères ont été enregistrées."
                 }
               }
             }
@@ -1874,64 +1889,64 @@
         }
       }
     },
-    "manual_sort.report.nothing_to_save" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "There was nothing to save: your changes cancelled each other out."
+    "manual_sort.report.nothing_to_save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There was nothing to save: your changes cancelled each other out."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il n'y avait rien à enregistrer : vos changements s'annulaient."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n'y avait rien à enregistrer : vos changements s'annulaient."
           }
         }
       }
     },
-    "manual_sort.report.stopped" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saving stopped partway. What was saved is kept."
+    "manual_sort.report.stopped": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving stopped partway. What was saved is kept."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'enregistrement s'est arrêté en cours de route. Ce qui a été enregistré est conservé."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'enregistrement s'est arrêté en cours de route. Ce qui a été enregistré est conservé."
           }
         }
       }
     },
-    "manual_sort.report.stopped.failed %lld %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@: %2$@."
+    "manual_sort.report.stopped.failed %lld %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@shelves@: %2$@."
           },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelf could not be saved and may exist without all of its books"
+          "substitutions": {
+            "shelves": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelf could not be saved and may exist without all of its books"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelves could not be saved and may exist without all of their books"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelves could not be saved and may exist without all of their books"
                     }
                   }
                 }
@@ -1939,88 +1954,27 @@
             }
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@ : %2$@."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@shelves@ : %2$@."
           },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagère n'a pas pu être enregistrée et existe peut-être sans tous ses livres"
+          "substitutions": {
+            "shelves": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagère n'a pas pu être enregistrée et existe peut-être sans tous ses livres"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagères n'ont pas pu être enregistrées et existent peut-être sans tous leurs livres"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "manual_sort.report.stopped.landed %lld %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@: %2$@."
-          },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelf was saved"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelves were saved"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@ : %2$@."
-          },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagère a été enregistrée"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagères ont été enregistrées"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagères n'ont pas pu être enregistrées et existent peut-être sans tous leurs livres"
                     }
                   }
                 }
@@ -2030,47 +1984,30 @@
         }
       }
     },
-    "manual_sort.report.stopped.none_landed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No shelf was saved."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune étagère n'a été enregistrée."
-          }
-        }
-      }
-    },
-    "manual_sort.report.stopped.not_attempted %lld %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@: %2$@."
+    "manual_sort.report.stopped.landed %lld %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@shelves@: %2$@."
           },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelf was not touched"
+          "substitutions": {
+            "shelves": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelf was saved"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg shelves were not touched"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelves were saved"
                     }
                   }
                 }
@@ -2078,27 +2015,27 @@
             }
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@shelves@ : %2$@."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@shelves@ : %2$@."
           },
-          "substitutions" : {
-            "shelves" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagère n'a pas été traitée"
+          "substitutions": {
+            "shelves": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagère a été enregistrée"
                     }
                   },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg étagères n'ont pas été traitées"
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagères ont été enregistrées"
                     }
                   }
                 }
@@ -2108,57 +2045,135 @@
         }
       }
     },
-    "manual_sort.report.stopped.resume" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Press “Save this arrangement” again to finish: what has already been saved will not be redone."
+    "manual_sort.report.stopped.none_landed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No shelf was saved."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appuyez à nouveau sur « Appliquer le rangement » pour terminer : ce qui a déjà été enregistré ne sera pas refait."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune étagère n'a été enregistrée."
           }
         }
       }
     },
-    "manual_sort.section.count %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld book"
+    "manual_sort.report.stopped.not_attempted %lld %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@shelves@: %2$@."
+          },
+          "substitutions": {
+            "shelves": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelf was not touched"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg shelves were not touched"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@shelves@ : %2$@."
+          },
+          "substitutions": {
+            "shelves": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagère n'a pas été traitée"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg étagères n'ont pas été traitées"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "manual_sort.report.stopped.resume": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press “Save this arrangement” again to finish: what has already been saved will not be redone."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuyez à nouveau sur « Appliquer le rangement » pour terminer : ce qui a déjà été enregistré ne sera pas refait."
+          }
+        }
+      }
+    },
+    "manual_sort.section.count %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld book"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld books"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld books"
                 }
               }
             }
           }
         },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livre"
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld livre"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livres"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld livres"
                 }
               }
             }
@@ -2166,442 +2181,508 @@
         }
       }
     },
-    "manual_sort.shelf.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This shelf is still empty. Drop a book here to fill it."
+    "manual_sort.shelf.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This shelf is still empty. Drop a book here to fill it."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette étagère est encore vide. Déposez un livre ici pour la remplir."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette étagère est encore vide. Déposez un livre ici pour la remplir."
           }
         }
       }
     },
-    "manual_sort.syncing" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reading your library…"
+    "manual_sort.shelves_header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shelves"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lecture de votre bibliothèque…"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Étagères"
           }
         }
       }
     },
-    "manual_sort.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sort my books"
+    "manual_sort.syncing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading your library…"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ranger mes livres"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lecture de votre bibliothèque…"
           }
         }
       }
     },
-    "manual_sort.unshelved.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every one of your books is on a shelf."
+    "manual_sort.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort my books"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tous vos livres sont rangés."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranger mes livres"
           }
         }
       }
     },
-    "manual_sort.unshelved.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To be sorted"
+    "manual_sort.unshelved.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every one of your books is on a shelf."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À ranger"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tous vos livres sont rangés."
           }
         }
       }
     },
-    "Modifier" : {
-
-    },
-    "Modifier l'étagère" : {
-
-    },
-    "nav.author" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Author"
+    "manual_sort.unshelved.header %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "To be sorted · %arg book"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "To be sorted · %arg books"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auteur"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@count@"
+          },
+          "substitutions": {
+            "count": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Livres à ranger · %arg"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "Livres à ranger · %arg"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "nav.book" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Book"
+    "manual_sort.unshelved.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To be sorted"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Livre"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À ranger"
           }
         }
       }
     },
-    "nav.community" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In the community"
+    "nav.author": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Author"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dans la communauté"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auteur"
           }
         }
       }
     },
-    "nav.edition" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edition"
+    "nav.book": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Édition"
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Livre"
           }
         }
       }
     },
-    "nav.inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventory"
+    "nav.community": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the community"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans la communauté"
           }
         }
       }
     },
-    "nav.lists" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lists"
+    "nav.edition": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edition"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listes"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Édition"
           }
         }
       }
     },
-    "nav.profile" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Profile"
+    "nav.inventory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Profil"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventaire"
           }
         }
       }
     },
-    "nav.search" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
+    "nav.lists": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lists"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listes"
           }
         }
       }
     },
-    "nav.settings" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Settings"
+    "nav.profile": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réglages"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil"
           }
         }
       }
     },
-    "nav.transactions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transactions"
+    "nav.search": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transactions"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche"
           }
         }
       }
     },
-    "nav.transactions_placeholder" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transactions View"
+    "nav.settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vue Transactions"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglages"
           }
         }
       }
     },
-    "nav.user" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User"
+    "nav.transactions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transactions"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utilisateur"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transactions"
           }
         }
       }
     },
-    "nav.work" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Work"
+    "nav.transactions_placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transactions View"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Œuvre"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vue Transactions"
           }
         }
       }
     },
-    "nav.works" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Works"
+    "nav.user": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Œuvres"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisateur"
           }
         }
       }
     },
-    "Nom de l'étagère" : {
-
-    },
-    "Nouvelle étagère" : {
-
-    },
-    "onboarding.later" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Later"
+    "nav.work": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus tard"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Œuvre"
           }
         }
       }
     },
-    "onboarding.tally.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "They are not on any shelf yet. RECITs can sort them for you — everything happens on your phone, your library goes nowhere."
+    "nav.works": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Works"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ils ne sont sur aucune étagère. RECITs peut les répartir pour vous — tout se passe sur votre téléphone, votre liste ne part nulle part."
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Œuvres"
           }
         }
       }
     },
-    "onboarding.tally.body.unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "They are not on any shelf."
+    "onboarding.later": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ils ne sont sur aucune étagère."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus tard"
           }
         }
       }
     },
-    "onboarding.tally.continue_without_sorting" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continue without sorting"
+    "onboarding.tally.body": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They are not on any shelf yet. RECITs can sort them for you — everything happens on your phone, your library goes nowhere."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuer sans ranger"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ils ne sont sur aucune étagère. RECITs peut les répartir pour vous — tout se passe sur votre téléphone, votre liste ne part nulle part."
           }
         }
       }
     },
-    "onboarding.tally.sort" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sort my books"
+    "onboarding.tally.body.unavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They are not on any shelf."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ranger mes livres"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ils ne sont sur aucune étagère."
           }
         }
       }
     },
-    "onboarding.tally.title %lld" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld book added"
+    "onboarding.tally.continue_without_sorting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue without sorting"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer sans ranger"
+          }
+        }
+      }
+    },
+    "onboarding.tally.sort": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort my books"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranger mes livres"
+          }
+        }
+      }
+    },
+    "onboarding.tally.title %lld": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld book added"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld books added"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld books added"
                 }
               }
             }
           }
         },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livre ajouté"
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld livre ajouté"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livres ajoutés"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld livres ajoutés"
                 }
               }
             }
@@ -2609,1291 +2690,1280 @@
         }
       }
     },
-    "onboarding.welcome.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scan barcodes one after another: the camera stays open and the books add up one by one."
+    "onboarding.welcome.body": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan barcodes one after another: the camera stays open and the books add up one by one."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scannez les codes-barres à la chaîne : la caméra reste ouverte et les livres s'ajoutent l'un après l'autre."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scannez les codes-barres à la chaîne : la caméra reste ouverte et les livres s'ajoutent l'un après l'autre."
           }
         }
       }
     },
-    "onboarding.welcome.scan" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scan my books"
+    "onboarding.welcome.scan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan my books"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scanner mes livres"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner mes livres"
           }
         }
       }
     },
-    "onboarding.welcome.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your books, on your shelves"
+    "onboarding.welcome.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your books, on your shelves"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vos livres, sur vos étagères"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos livres, sur vos étagères"
           }
         }
       }
     },
-    "profile.anonymous" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You are not logged in."
+    "profile.anonymous": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are not logged in."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous n'êtes pas connecté."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous n'êtes pas connecté."
           }
         }
       }
     },
-    "profile.auto_sort" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sort my books"
+    "profile.auto_sort": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort my books"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ranger mes livres"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranger mes livres"
           }
         }
       }
     },
-    "profile.current_transactions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Current transactions"
+    "profile.current_transactions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current transactions"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transactions en cours"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transactions en cours"
           }
         }
       }
     },
-    "profile.current_transactions.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No current transaction at this time"
+    "profile.current_transactions.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No current transaction at this time"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas de transaction en cours."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de transaction en cours."
           }
         }
       }
     },
-    "profile.logout" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign out"
+    "profile.logout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se déconnecter"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se déconnecter"
           }
         }
       }
     },
-    "profile.network" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Network"
+    "profile.network": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réseau"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réseau"
           }
         }
       }
     },
-    "profile.network.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No friends yet"
+    "profile.network.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No friends yet"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun ami pour le moment"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun ami pour le moment"
           }
         }
       }
     },
-    "Scan" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scanner"
+    "scanner.permission.denied_message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera access is turned off for RECITs. Allow it in Settings and come back to scan your books."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'accès à l'appareil photo est désactivé pour RECITs. Autorisez-le dans les Réglages, puis revenez pour scanner vos livres."
+          }
         }
       }
     },
-    "scanner.permission.denied_message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera access is turned off for RECITs. Allow it in Settings and come back to scan your books."
+    "scanner.permission.restricted_message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera access is blocked on this device, by parental controls or a device restriction."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'accès à l'appareil photo est désactivé pour RECITs. Autorisez-le dans les Réglages, puis revenez pour scanner vos livres."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'accès à l'appareil photo est bloqué sur cet appareil, par le contrôle parental ou une restriction de l'appareil."
           }
         }
       }
     },
-    "scanner.permission.restricted_message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera access is blocked on this device, by parental controls or a device restriction."
+    "scanner.permission.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The scanner needs the camera"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'accès à l'appareil photo est bloqué sur cet appareil, par le contrôle parental ou une restriction de l'appareil."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le scanner a besoin de l'appareil photo"
           }
         }
       }
     },
-    "scanner.permission.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The scanner needs the camera"
+    "search.error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to fetch results."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le scanner a besoin de l'appareil photo"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de récupérer les résultats."
           }
         }
       }
     },
-    "search.error" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unable to fetch results."
+    "search.friends_inventory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In your friends' inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de récupérer les résultats."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans l'inventaire de tes amis"
           }
         }
       }
     },
-    "search.friends_inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In your friends' inventory"
+    "search.placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search for an edition"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dans l'inventaire de tes amis"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher une édition"
           }
         }
       }
     },
-    "search.placeholder" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search for an edition"
+    "search.remote.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No search results"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechercher une édition"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de résultat "
           }
         }
       }
     },
-    "search.remote_results" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On [inventaire.io](https://inventaire.io)"
+    "search.remote_results": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On [inventaire.io](https://inventaire.io)"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Sur [inventaire.io](https://inventaire.io)"
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sur [inventaire.io](https://inventaire.io)"
           }
         }
       }
     },
-    "search.remote.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No search results"
+    "select_list.message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select the list you want to add this item to."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas de résultat "
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sélectionnez la liste à laquelle vous voulez ajouter cet élément."
           }
         }
       }
     },
-    "select_list.message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select the list you want to add this item to."
+    "select_list.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick list"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sélectionnez la liste à laquelle vous voulez ajouter cet élément."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir une liste"
           }
         }
       }
     },
-    "select_list.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick list"
+    "shelf.empty.note.scan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo\n☐ Scan my books"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir une liste"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo\n☐ Scanner mes livres"
           }
         }
       }
     },
-    "shelf.empty.note.scan" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todo\n☐ Scan my books"
+    "shelf.empty.note.sort": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo\n☐ Sort my books"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todo\n☐ Scanner mes livres"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo\n☐ Ranger mes livres"
           }
         }
       }
     },
-    "shelf.empty.note.sort" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todo\n☐ Sort my books"
+    "shelves.action.sort": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todo\n☐ Ranger mes livres"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranger"
           }
         }
       }
     },
-    "shelves.action.sort" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sort"
+    "sync.loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syncing your data…"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ranger"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronisation de vos données…"
           }
         }
       }
-    },
-    "Supprimer cette étagère ?" : {
-
-    },
-    "Supprimer l'étagère" : {
-
     },
-    "sync.loading" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Syncing your data…"
+    "tab.community": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Community"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Synchronisation de vos données…"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Communauté"
           }
         }
       }
     },
-    "tab.community" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Community"
+    "tab.inventory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Communauté"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventaire"
           }
         }
       }
     },
-    "tab.inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventory"
+    "tab.lists": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lists"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventaire"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listes"
           }
         }
       }
     },
-    "tab.lists" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lists"
+    "tab.profile": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listes"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglages"
           }
         }
       }
     },
-    "tab.profile" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Settings"
+    "tab.search": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réglages"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche"
           }
         }
       }
     },
-    "tab.search" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
+    "tab.transactions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transactions"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transactions"
           }
         }
       }
     },
-    "tab.transactions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transactions"
+    "transaction.action.accept": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accept"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transactions"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepter"
           }
         }
       }
     },
-    "transaction.action.accept" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accept"
+    "transaction.action.cancel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel request"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accepter"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler la demande"
           }
         }
       }
     },
-    "transaction.action.cancel" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel request"
+    "transaction.action.cancelled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled transaction"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annuler la demande"
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Transaction annulée"
           }
         }
       }
     },
-    "transaction.action.cancelled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelled transaction"
+    "transaction.action.complete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complete"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Transaction annulée"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminer"
           }
         }
       }
     },
-    "transaction.action.complete" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Complete"
+    "transaction.action.confirm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmer"
           }
         }
       }
     },
-    "transaction.action.confirm" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Confirm"
+    "transaction.action.decline": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decline"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Confirmer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décliner"
           }
         }
       }
     },
-    "transaction.action.decline" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Decline"
+    "transaction.action.owner.accepted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You accepted the request"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Décliner"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez accepté la demande"
           }
         }
       }
     },
-    "transaction.action.owner.accepted" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You accepted the request"
+    "transaction.action.owner.confirmed %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** confirmed the receipt"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous avez accepté la demande"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** a confirmé la réception"
           }
         }
       }
     },
-    "transaction.action.owner.confirmed %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** confirmed the receipt"
+    "transaction.action.owner.declined": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You declined this request"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** a confirmé la réception"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez refusé cette demande"
           }
         }
       }
     },
-    "transaction.action.owner.declined" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You declined this request"
+    "transaction.action.owner.requested %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** sent you a request"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous avez refusé cette demande"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** vous a fait une demande"
           }
         }
       }
     },
-    "transaction.action.owner.requested %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** sent you a request"
+    "transaction.action.owner.returned": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You picked up the book"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** vous a fait une demande"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez récupéré le livre"
           }
         }
       }
     },
-    "transaction.action.owner.returned" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You picked up the book"
+    "transaction.action.request": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous avez récupéré le livre"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander"
           }
         }
       }
     },
-    "transaction.action.request" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Request"
+    "transaction.action.requester.accepted %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** accepted the request"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demander"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** a accepté la demande"
           }
         }
       }
     },
-    "transaction.action.requester.accepted %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** accepted the request"
+    "transaction.action.requester.confirmed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You confirmed the receipt"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** a accepté la demande"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez confirmé la réception"
           }
         }
       }
     },
-    "transaction.action.requester.confirmed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You confirmed the receipt"
+    "transaction.action.requester.declined %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** declined this request"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous avez confirmé la réception"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** a refusé cette demande"
           }
         }
       }
     },
-    "transaction.action.requester.declined %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** declined this request"
+    "transaction.action.requester.requested %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You made a borrow request to **%@**"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** a refusé cette demande"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez fait une demande d'emprunt à **%@**"
           }
         }
       }
     },
-    "transaction.action.requester.requested %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You made a borrow request to **%@**"
+    "transaction.action.requester.returned": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You returned the book"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous avez fait une demande d'emprunt à **%@**"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez retourné le livre"
           }
         }
       }
     },
-    "transaction.action.requester.returned" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You returned the book"
+    "transaction.actions.confirm_title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure?"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous avez retourné le livre"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Êtes-vous sûr ?"
           }
         }
       }
     },
-    "transaction.actions.confirm_title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Are you sure?"
+    "transaction.actions.destructive_warning": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This action is permanent."
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Êtes-vous sûr ?"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette action est définitive."
           }
         }
       }
     },
-    "transaction.actions.destructive_warning" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This action is permanent."
+    "transaction.actions.more": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More actions"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette action est définitive."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus d'actions"
           }
         }
       }
     },
-    "transaction.actions.more" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "More actions"
+    "transaction.desc.inventoried": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventoried"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus d'actions"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventorié"
           }
         }
       }
     },
-    "transaction.desc.inventoried" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventoried"
+    "transaction.desc.owner.giving %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** wants to take it"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventorié"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** souhaite le récupérer"
           }
         }
       }
     },
-    "transaction.desc.owner.giving %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** wants to take it"
+    "transaction.desc.owner.lending %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** wants to borrow it"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** souhaite le récupérer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** souhaite l'emprunter"
           }
         }
       }
     },
-    "transaction.desc.owner.lending %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** wants to borrow it"
+    "transaction.desc.owner.selling %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** wants to buy it"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** souhaite l'emprunter"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**%@** souhaite l'acheter"
           }
         }
       }
     },
-    "transaction.desc.owner.selling %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** wants to buy it"
+    "transaction.desc.requester.giving %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You want to take it from **%@**"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**%@** souhaite l'acheter"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous souhaitez le récupérer de **%@**"
           }
         }
       }
     },
-    "transaction.desc.requester.giving %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You want to take it from **%@**"
+    "transaction.desc.requester.lending %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You want to borrow it from **%@**"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous souhaitez le récupérer de **%@**"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous souhaitez l'emprunter à **%@**"
           }
         }
       }
     },
-    "transaction.desc.requester.lending %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You want to borrow it from **%@**"
+    "transaction.desc.requester.selling %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You want to buy it from **%@**"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous souhaitez l'emprunter à **%@**"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous souhaitez l'acheter à **%@**"
           }
         }
       }
     },
-    "transaction.desc.requester.selling %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You want to buy it from **%@**"
+    "transaction.form.header %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request %@ \\nto %@ "
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous souhaitez l'acheter à **%@**"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande pour %@ à %@"
           }
         }
       }
     },
-    "transaction.form.header %@ %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Request %@ \\nto %@ "
+    "transaction.form.type": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demande pour %@ à %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
           }
         }
       }
     },
-    "transaction.form.type" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type"
+    "transaction.form.your_message": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your message"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre message"
           }
         }
       }
     },
-    "transaction.form.your_message" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your message"
+    "transaction.form.your_message_required": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your message (required)"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre message"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre message (obligatoire)"
           }
         }
       }
     },
-    "transaction.form.your_message_required" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your message (required)"
+    "transaction.messages.header": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre message (obligatoire)"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages"
           }
         }
       }
     },
-    "transaction.messages.header" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Messages"
+    "transaction.state.accepted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepted"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Messages"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepté"
           }
         }
       }
     },
-    "transaction.state.accepted" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accepted"
+    "transaction.state.cancelled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accepté"
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Annulée"
           }
         }
       }
     },
-    "transaction.state.cancelled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelled"
+    "transaction.state.confirmed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmed"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Annulée"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmé"
           }
         }
       }
     },
-    "transaction.state.confirmed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Confirmed"
+    "transaction.state.declined": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Declined"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Confirmé"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décliné"
           }
         }
       }
     },
-    "transaction.state.declined" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Declined"
+    "transaction.state.requested": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requested"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Décliné"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demandé"
           }
         }
       }
     },
-    "transaction.state.requested" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requested"
+    "transaction.state.returned": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Returned"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demandé"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retourné"
           }
         }
       }
     },
-    "transaction.state.returned" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Returned"
+    "transaction.type.giving": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To give"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retourné"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À donner"
           }
         }
       }
     },
-    "transaction.type.giving" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To give"
+    "transaction.type.inventorying": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventoried"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À donner"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventorié"
           }
         }
       }
     },
-    "transaction.type.inventorying" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventoried"
+    "transaction.type.lending": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To lend"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventorié"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À prêter"
           }
         }
       }
     },
-    "transaction.type.lending" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To lend"
+    "transaction.type.selling": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For sale"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À prêter"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À vendre"
           }
         }
       }
     },
-    "transaction.type.selling" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For sale"
+    "transactions.all": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All transactions"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À vendre"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toutes les transactions"
           }
         }
       }
     },
-    "transactions.all" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All transactions"
+    "transactions.past": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Past transactions"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toutes les transactions"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transactions finies"
           }
         }
       }
     },
-    "transactions.past" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Past transactions"
+    "transactions.see_all": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All transactions"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transactions finies"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toutes les transactions"
           }
         }
       }
     },
-    "transactions.see_all" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All transactions"
+    "user.inventory.header %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@'s inventory"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toutes les transactions"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inventaire de %@"
           }
         }
       }
     },
-    "user.inventory.header %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@'s inventory"
+    "user.item_count %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld items"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventaire de %@"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld éléments"
           }
         }
       }
     },
-    "user.item_count %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld items"
+    "work.editions.header %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editions of %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld éléments"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éditions de %@"
           }
         }
       }
     },
-    "Visibilité" : {
-
-    },
-    "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée." : {
-
-    },
-    "work.editions.header %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editions of %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Éditions de %@"
+    "🥲": {
+      "extractionState": "stale",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🥲"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

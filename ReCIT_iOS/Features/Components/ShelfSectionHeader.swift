@@ -18,6 +18,10 @@
 //  because reaching it would make this header half again as tall as the one below it for an
 //  action that sits alone in its row, where a miss costs nothing. See PRD 0003 / ADR 0004.
 //
+//  It moved out of `Features/Shelves/` when the sorting surface adopted it for both of its
+//  own headings (« Étagères » and « Livres à ranger · N »): a view two features import is a
+//  component, and leaving it under one of them makes the folders lie. See PRD 0009.
+//
 
 import SwiftUI
 

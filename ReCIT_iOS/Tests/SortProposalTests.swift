@@ -114,10 +114,12 @@ struct SortProposalTests {
             changes: proposal.changes
         )
 
-        let named: [String: [String]] = .init(
+        // Compared as sets: which étagère a book lands on is this type's business, while
+        // where it sits inside it is the projection's arrival order (PRD 0009).
+        let named: [String: Set<String>] = .init(
             uniqueKeysWithValues: projection.sections
                 .filter { $0.isUnshelved == false }
-                .map { ($0.name ?? "", $0.books.map(\.id)) }
+                .map { ($0.name ?? "", Set($0.books.map(\.id))) }
         )
         #expect(named["Romans policiers"] == ["1", "2"])
         #expect(named["Poésie"] == ["3"])

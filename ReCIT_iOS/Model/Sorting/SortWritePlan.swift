@@ -144,6 +144,18 @@ struct SortWritePlan: Equatable, Sendable {
             booksBefore[section.id] = section.books.map(\.id)
         }
 
+        // Where each book sits in the snapshot, used to put every operation's ids back into
+        // snapshot order below. **What gets sent must not depend on how the screen arranged
+        // itself**: sections read in arrival order (the book just filed comes first, so the
+        // pile hands the right book to a drag — PRD 0009), and taking that order into the
+        // write would make the payload a function of the user's gestures rather than of the
+        // membership they add up to. Same rule `displayOrder` was held to before it was
+        // replaced by the derivation.
+        var rankOfBook: [String: Int] = .init(minimumCapacity: snapshot.books.count)
+        for (offset, book) in snapshot.books.enumerated() {
+            rankOfBook[book.id] = offset
+        }
+
         var operations: [ShelfWrite] = []
         var statuses: [SortSection.ID: ShelfStatus] = [:]
 
@@ -158,8 +170,12 @@ struct SortWritePlan: Equatable, Sendable {
             // Snapshot order on both sides, so the same stack always produces the
             // same operations — a plan that reordered itself between two renders
             // would make the marks jump around during an apply.
-            let removals: [String] = had.filter { hasIds.contains($0) == false }
-            let additions: [String] = has.filter { hadIds.contains($0) == false }
+            let removals: [String] = had
+                .filter { hasIds.contains($0) == false }
+                .sorted { rankOfBook[$0, default: .max] < rankOfBook[$1, default: .max] }
+            let additions: [String] = has
+                .filter { hadIds.contains($0) == false }
+                .sorted { rankOfBook[$0, default: .max] < rankOfBook[$1, default: .max] }
 
             var isDraft: Bool = false
             if case .draft = section.id { isDraft = true }

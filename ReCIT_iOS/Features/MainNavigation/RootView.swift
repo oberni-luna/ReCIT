@@ -20,6 +20,9 @@ struct RootView: View {
     @State var genreEnrichmentModel: GenreEnrichmentModel
     @State var autoSortModel: AutoSortModel
     @State var sortSessionModel: SortSessionModel
+    /// Whether the sorting flow's cover is up. App-scoped so the four entry points raise one
+    /// flag rather than four (PRD 0009).
+    @State var sortFlowPresentation: SortFlowPresentation = .init()
     @State var errorReporter: AppErrorReporter
     @State var syncStatus: SyncStatusStore
     @State var onboardingStore: OnboardingStore
@@ -71,6 +74,7 @@ struct RootView: View {
                 .environment(genreEnrichmentModel)
                 .environment(autoSortModel)
                 .environment(sortSessionModel)
+                .environment(sortFlowPresentation)
                 .environment(errorReporter)
                 .environment(syncStatus)
                 .environment(onboardingStore)

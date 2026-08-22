@@ -42,7 +42,7 @@ struct AddInventoryItemSearchView: View {
             // book, and carries its own navigation stack. Presented modally so leaving it
             // returns here rather than unwinding this screen's path. See PRD 0005.
             .fullScreenCover(isPresented: $showScanner) {
-                BatchScanView()
+                SortFlowView(start: .scanning)
             }
         }
     }

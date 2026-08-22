@@ -1,6 +1,25 @@
 //
-//  BatchScanView.swift
+//  SortFlowView.swift
 //  ReCIT_iOS
+//
+//  The flow that ends in a sorted library: scan, read the bilan, file the books. One modal,
+//  one navigation stack, entered at either end — at the camera by onboarding and by the scan
+//  buttons, straight at the sorting surface from the home and from settings (`start`).
+//
+//  It was `BatchScanView`, and it kept the role that file's header already described: the
+//  frame of a session — the modal, the close control, the stack and the ending. What changed
+//  is that the sorting surface is now part of the flow rather than a screen in a tab, so the
+//  frame is named after the whole thing (PRD 0009).
+//
+//  **`.fullScreenCover`, never `.sheet`**: a sheet's drag-to-dismiss fights the sorting
+//  surface's drag and drop, and a book picked up a little low would take the screen down with
+//  it. The presentation itself is the caller's, but the flow is written on that assumption.
+//
+//  **Nothing goes back to the sorting surface's left.** Reached from the bilan it would
+//  re-offer « Ranger mes livres » for work already done, so the surface hides the back button
+//  and offers an explicit close instead. Closing **keeps the draft** — the session is
+//  app-scoped, and a user who steps out has to find their work where they left it; the only
+//  thing that throws work away is the discard control, which asks first.
 //
 //  A scanning *session*, presented modally. The camera stays up and books accumulate — point at
 //  a barcode, the book rises over the live feed, one tap files it, the camera is already waiting
@@ -38,11 +57,16 @@
 import SwiftUI
 import SwiftData
 
-struct BatchScanView: View {
+struct SortFlowView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+
+    /// Where the flow opens. `.scanning` walks the whole way — camera, bilan, then the
+    /// surface; `.sorting` puts the surface at the root, for a user who came to file books and
+    /// not to scan them.
+    var start: SortFlowStart = .scanning
 
     @State private var viewModel: BatchScanViewModel = .init()
     @State private var path: NavigationPath = .init()
@@ -55,7 +79,9 @@ struct BatchScanView: View {
     var body: some View {
         NavigationStack(path: $path) {
             Group {
-                if showsTally {
+                if start == .sorting {
+                    ManualSortView(onClose: leave)
+                } else if showsTally {
                     OnboardingScanTallyView(
                         addedBookCount: viewModel.addedBookCount,
                         // Derived here rather than inside the bilan, and inside this branch
@@ -91,6 +117,15 @@ struct BatchScanView: View {
             .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }
+            // The surface, pushed from the bilan. A route local to this flow rather than a
+            // case of the app-wide enum: nothing outside this modal can reach it, and the
+            // enum gets smaller as the flow gets richer.
+            .navigationDestination(for: SortFlowRoute.self) { route in
+                switch route {
+                case .sorting:
+                    ManualSortView(onClose: leave)
+                }
+            }
         }
     }
 
@@ -121,12 +156,11 @@ struct BatchScanView: View {
         showsTally = true
     }
 
-    /// Pushes the sorting surface onto the session's own stack rather than dismissing and
+    /// Pushes the sorting surface onto the flow's own stack rather than dismissing and
     /// re-presenting: it syncs the library on arrival, and a modal closing under it would cost
-    /// the user that wait twice. Leaving it pops back to the bilan, which is still the screen
-    /// they came from.
+    /// the user that wait twice. There is no way back from it — see the header.
     private func sortBooks() {
-        path.append(NavigationDestination.manualSort)
+        path.append(SortFlowRoute.sorting)
     }
 
     private func leave() {

@@ -11,15 +11,15 @@
 //  retired the review screen it was written for.
 //
 //  Measurements are the design's own (`Tri manuel · Light`, node `115:3278`): a 36 pt
-//  cover, 12 pt between the columns, 4 pt between title and author. The padding around
-//  the row belongs to the list rather than to this view — see `manualSortCardRow`, which
-//  has to own it so the edit-mode grip lands inside the card.
+//  cover, 12 pt between the columns, 4 pt between title and author.
 //
-//  **No genre line, and no handle of its own.** The design shows a genre under each row,
-//  but the live data behind it is Wikidata's `wdt:P136` claims, which return things like
-//  « Figure d'autorité » — a label that says nothing about a book and reads as a bug. The
-//  handle is gone because the list is in edit mode: the system draws its own grip, and
-//  ours beside it was two grips for one gesture. Both are recorded divergences.
+//  Since PRD 0009 its only reader is `SortShelfDetailView` — the surface itself draws books as
+//  cards now — so the row keeps the plain `List` insets rather than the card background the
+//  old flattened list needed.
+//
+//  **No genre line.** The design shows a genre under each row, but the live data behind it is
+//  Wikidata's `wdt:P136` claims, which return things like « Figure d'autorité » — a label that
+//  says nothing about a book and reads as a bug. A recorded divergence.
 //
 //  See PRD 0006 and PRD 0008.
 //

@@ -62,7 +62,7 @@ struct OnboardingWelcomeModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .fullScreenCover(isPresented: $isScanning) {
-                BatchScanView()
+                SortFlowView(start: .scanning)
             }
             .fullScreenCover(isPresented: presentsWelcome, onDismiss: openScannerIfChosen) {
                 OnboardingWelcomeView(onScan: scanNow, onLater: answer)

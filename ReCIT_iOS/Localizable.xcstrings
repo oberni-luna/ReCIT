@@ -1317,6 +1317,40 @@
         }
       }
     },
+    "manual_sort.discard.confirm.action": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandonner"
+          }
+        }
+      }
+    },
+    "manual_sort.discard.confirm.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard your arrangement?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandonner votre rangement ?"
+          }
+        }
+      }
+    },
     "manual_sort.error.books_missing %@": {
       "extractionState": "manual",
       "localizations": {

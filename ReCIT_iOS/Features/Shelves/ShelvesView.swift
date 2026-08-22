@@ -10,6 +10,7 @@
 import SwiftUI
 
 struct ShelvesView: View {
+    @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(UserModel.self) private var userModel
 
     @State private var searchText: String = ""
@@ -41,7 +42,7 @@ struct ShelvesView: View {
                 if userModel.myUser?.lastInventorySync != nil {
                     ToolbarItem(placement: .primaryAction) {
                         Button("shelves.action.sort", systemImage: "arrow.up.arrow.down") {
-                            path.append(NavigationDestination.manualSort)
+                            sortFlow.presentSorting()
                         }
                     }
                 }

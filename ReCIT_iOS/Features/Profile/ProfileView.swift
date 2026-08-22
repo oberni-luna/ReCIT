@@ -11,6 +11,7 @@ import LBSnackBar
 
 struct ProfileView: View {
     @EnvironmentObject private var authModel: AuthModel
+    @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(UserModel.self) private var userModel
     @Environment(TransactionModel.self) private var transactionModel
     @Environment(AutoSortModel.self) private var autoSortModel
@@ -121,7 +122,11 @@ struct ProfileView: View {
             if autoSortEntryPoint.isVisible {
                 Section {
                     if autoSortEntryPoint.isEnabled {
-                        NavigationLink(value: NavigationDestination.manualSort) {
+                        // A button rather than a link: the surface is a modal flow now, not a
+                        // screen in this tab's stack (PRD 0009).
+                        Button {
+                            sortFlow.presentSorting()
+                        } label: {
                             Text("profile.auto_sort")
                                 .textStyle(.action300)
                                 .foregroundStyle(.foregroundTinted)

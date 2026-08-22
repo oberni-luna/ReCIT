@@ -16,6 +16,7 @@ struct ShelvesContent: View {
     let searchText: String
     @Binding var path: NavigationPath
 
+    @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(\.isSearching) private var isSearching
     @Environment(ShelfFocusModel.self) private var focus
 
@@ -100,7 +101,7 @@ struct ShelvesContent: View {
                     ShelfFormView()
                 }
                 .fullScreenCover(isPresented: $isScanning) {
-                    BatchScanView()
+                    SortFlowView(start: .scanning)
                 }
             }
         }
@@ -153,7 +154,7 @@ struct ShelvesContent: View {
         case .scan:
             isScanning = true
         case .sort:
-            path.append(NavigationDestination.manualSort)
+            sortFlow.presentSorting()
         }
     }
 

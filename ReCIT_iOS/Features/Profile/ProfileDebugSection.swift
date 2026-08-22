@@ -30,6 +30,7 @@ struct ProfileDebugSection: View {
 
     @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(OnboardingStore.self) private var onboarding
+    @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(UserModel.self) private var userModel
 
     /// Every book the store holds, filtered in Swift rather than in the predicate:
@@ -120,7 +121,7 @@ struct ProfileDebugSection: View {
             )
         }
         .fullScreenCover(isPresented: $isScanning) {
-            BatchScanView()
+            SortFlowView(start: .scanning)
         }
         // The bilan on its own, standing in for the end of a session. Its CTA pushes onto
         // this screen's path rather than the session's, which is the one thing here that is
@@ -131,7 +132,7 @@ struct ProfileDebugSection: View {
                 entryPoint: autoSortEntryPoint,
                 onSort: {
                     isPresentingTally = false
-                    path.append(NavigationDestination.manualSort)
+                    sortFlow.presentSorting()
                 },
                 onLater: { isPresentingTally = false }
             )

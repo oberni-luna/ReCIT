@@ -41,7 +41,11 @@ struct ManualSortView: View {
 
     @Environment(SortSessionModel.self) private var session
 
-    @Binding var path: NavigationPath
+    /// Closes the whole flow. Handed in rather than taken from `dismiss`, because the surface
+    /// is sometimes the flow's root and sometimes pushed over the bilan — and `dismiss` in a
+    /// pushed view pops instead of closing the modal, which would land the user back on the
+    /// receipt of a session that has already ended.
+    let onClose: () -> Void
 
     /// Presents the create form. The one piece of state this screen owns — the session holds
     /// everything else, and a sheet that is up is not something a sorting session should
@@ -51,6 +55,11 @@ struct ManualSortView: View {
     /// The width every measurement on the screen is derived from. Reported rather than read
     /// through a `GeometryReader`, which would take over the layout it is only measuring.
     @State private var containerWidth: CGFloat = 0
+
+    /// Whether the discard control is asking first. It asks above one pending change: a round
+    /// icon button beside « Appliquer » is a "throw it all away" one thumb's width from "keep it
+    /// all", and an hour of filing is not worth a mis-tap.
+    @State private var isConfirmingDiscard: Bool = false
 
     /// The one-off sentence the footer owes the user, if any. Held by the screen rather than
     /// the session: it is about a button that was pressed here, and it must not outlive the
@@ -104,6 +113,10 @@ struct ManualSortView: View {
         }
         .navigationTitle("manual_sort.title")
         .navigationBarTitleDisplayMode(.inline)
+        // No way back. Reached from the bilan, a back button would re-offer « Ranger mes
+        // livres » for work that has already been done — the bilan is the receipt of a session
+        // that ended. Closing is explicit, and it **keeps** the draft (PRD 0009).
+        .navigationBarBackButtonHidden()
         // Declared here rather than in the stack's owner: the destination is a section of
         // *this* screen's session, and `SortSection.ID` is already `Hashable`, so nothing has
         // to be encoded into the app-wide navigation enum for it.
@@ -124,6 +137,23 @@ struct ManualSortView: View {
                     }
                     .disabled(session.isBusy)
                 }
+            }
+
+            ToolbarItem(placement: .topBarLeading) {
+                Button("action.close", systemImage: "xmark", action: onClose)
+                    .labelStyle(.iconOnly)
+            }
+        }
+        // A dialog rather than an alert: it is a destructive choice, and the platform's
+        // vocabulary for those is a sheet of options with the destructive one named.
+        .confirmationDialog(
+            "manual_sort.discard.confirm.title",
+            isPresented: $isConfirmingDiscard,
+            titleVisibility: .visible
+        ) {
+            Button("manual_sort.discard.confirm.action", role: .destructive) {
+                notice = nil
+                session.discardChanges()
             }
         }
         // The form writes nothing. It hands back a name, the name becomes a draft on the
@@ -193,9 +223,15 @@ struct ManualSortView: View {
         return true
     }
 
+    /// Throws the session away — asking first, unless there is only one change to lose, in
+    /// which case the question costs more than the mistake.
     private func discard() {
-        notice = nil
-        session.discardChanges()
+        guard session.changes.count > 1 else {
+            notice = nil
+            session.discardChanges()
+            return
+        }
+        isConfirmingDiscard = true
     }
 
     /// Fires the run and returns. The writes are owned by the session, so this screen can go

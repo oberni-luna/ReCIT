@@ -29,6 +29,8 @@ struct SortShelvesGridView: View {
     let isApplying: Bool
     /// Where one étagère stands in that run, or `nil` for one the plan leaves alone.
     let outcome: (SortSection.ID) -> SortApplyLedger.ShelfOutcome?
+    /// Changes when a proposal lands, so every étagère it filled plays an arrival. Nil at rest.
+    let arrivalToken: String?
     /// A section to bring into view, once. A new étagère is appended after the ones the server
     /// holds, so on a large collection it is born off screen and the form closes on a grid that
     /// looks unchanged.
@@ -51,7 +53,7 @@ struct SortShelvesGridView: View {
                         alignment: .leading,
                         spacing: SortGridMetrics.shelfSpacing
                     ) {
-                        ForEach(sections) { section in
+                        ForEach(sections.enumerated(), id: \.element.id) { index, section in
                             SortShelfCardCell(
                                 section: section,
                                 status: plan.status(of: section.id),
@@ -59,6 +61,11 @@ struct SortShelvesGridView: View {
                                 isActive: isActive,
                                 outcome: outcome(section.id),
                                 isApplying: isApplying,
+                                // Only the étagères a proposal actually filled: a card it left
+                                // alone must not bounce, or the arrival would say the model
+                                // touched the whole library.
+                                arrivalToken: plan.status(of: section.id) == .untouched ? nil : arrivalToken,
+                                arrivalDelay: Double(index) * SortPileView.landingStagger,
                                 onDrop: { bookId in onDrop(bookId, section) }
                             )
                         }

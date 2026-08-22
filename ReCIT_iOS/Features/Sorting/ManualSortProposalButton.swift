@@ -15,8 +15,13 @@
 //  switched off, or a model still downloading, keeps the button and greys it.
 //
 //  The reason itself used to be a sentence under the button. The footer slot belongs to the
-//  recap now, so it moved to a tap on the button — slice 0051. Until then the greyed button
-//  says "not now" without saying why.
+//  recap now, so it moved to **a tap on the greyed button**: the reason is still said out loud,
+//  as PRD 0008 insisted — this surface is where the empty-shelf card leads on every device, so
+//  a user who followed a note reading « Ranger mes livres » has asked the question — but it is
+//  answered on demand rather than occupying two lines of a footer that belongs to the recap.
+//  The route to the Settings switch travels with it, and only where Settings can help: under a
+//  downloading model it would point at a switch that is already flipped, and on an ineligible
+//  device at one that does not exist.
 //
 //  **The generating state is this control alone becoming a spinner**, with the library left
 //  exactly where it is — deliberately not the full-screen block the opening sync uses. The
@@ -49,6 +54,12 @@ struct ManualSortProposalButton: View {
 
     let onPropose: () -> Void
 
+    @Environment(\.openURL) private var openURL
+
+    /// Whether the reason is being shown. Only reachable on a greyed button — a working one
+    /// proposes instead.
+    @State private var isExplaining: Bool = false
+
     var body: some View {
         if entryPoint.isVisible {
             if isProposing {
@@ -57,12 +68,50 @@ struct ManualSortProposalButton: View {
                     .padding(.all, .medium)
                     .background(DesignSystem.Color.backgroundTinted.color)
                     .clipShape(Circle())
-            } else {
+            } else if entryPoint.isEnabled {
                 Button("manual_sort.propose", systemImage: "wand.and.sparkles", action: onPropose)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.circularIcon)
-                    .disabled(entryPoint.isEnabled == false || isApplying)
+                    .disabled(isApplying)
+            } else {
+                // Inert-looking, but not dead: `.disabled` would swallow the tap, and a control
+                // that swallows a tap reads as a bug rather than as a setting.
+                Button("manual_sort.propose", systemImage: "wand.and.sparkles") {
+                    isExplaining = true
+                }
+                .labelStyle(.iconOnly)
+                .buttonStyle(.circularIcon)
+                .foregroundStyle(.foregroundDisable)
+                .alert("manual_sort.propose", isPresented: $isExplaining) {
+                    if entryPoint.offersSettingsRoute {
+                        Button("action.open_settings", action: openSettings)
+                    }
+                    Button("action.ok", role: .cancel) { }
+                } message: {
+                    if let reason {
+                        Text(reason)
+                    }
+                }
             }
         }
+    }
+
+    /// One sentence per reason the proposal cannot be asked for, and none when it can: a working
+    /// model needs no explanation. The ineligible device is named rather than passed over in
+    /// silence — though on that device there is no button to tap, so this is the honest answer
+    /// for the two cases that keep one.
+    private var reason: LocalizedStringKey? {
+        switch entryPoint {
+        case .switchedOff: "manual_sort.proposal.unavailable.switched_off"
+        case .downloading: "manual_sort.proposal.unavailable.downloading"
+        case .hidden: "manual_sort.proposal.unavailable.device"
+        case .offered: nil
+        }
+    }
+
+    private func openSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+
+        openURL(url)
     }
 }

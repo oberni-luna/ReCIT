@@ -94,6 +94,7 @@ struct ManualSortView: View {
                     isActive: session.isBusy == false,
                     isApplying: session.isApplying,
                     outcome: session.applyOutcome(of:),
+                    arrivalToken: session.proposalsLanded > 0 ? "proposal-\(session.proposalsLanded)" : nil,
                     scrollTarget: scrollTarget,
                     onScrolled: { scrollTarget = nil },
                     onCreateShelf: { isCreatingShelf = true },

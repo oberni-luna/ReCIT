@@ -39,6 +39,12 @@ struct SortShelfCardView: View {
     /// Whether a run is writing right now. Told apart from `outcome` because a failure's badge
     /// outlives the run while the dimming and the breathing do not.
     var isApplying: Bool = false
+    /// Changes when this étagère has just received a proposal, so its covers bounce in like an
+    /// étagère that has just been written. Nil for a card no proposal touched.
+    var arrivalToken: String?
+    /// How long this card waits before its covers start arriving, so a proposal reads left to
+    /// right across the grid rather than as one jump.
+    var arrivalDelay: Double = 0
 
     private var pile: SortPile { .init(section: section) }
 
@@ -48,7 +54,8 @@ struct SortShelfCardView: View {
                 pile: pile,
                 width: width,
                 isDraggable: isDraggable,
-                landingToken: outcome == .landed ? "landed" : nil
+                landingToken: outcome == .landed ? "landed" : arrivalToken,
+                landingDelay: outcome == .landed ? 0 : arrivalDelay
             )
 
             Text(title)

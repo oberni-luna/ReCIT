@@ -73,6 +73,12 @@ final class SortSessionModel {
     /// guard cannot be written for the apply and forgotten for the proposal.
     var isBusy: Bool { isApplying || isProposing }
 
+    /// How many proposals have landed on the stack. The surface watches it to play the
+    /// arrival: a proposal fills several étagères at once, and without motion the screen just
+    /// jumps from one library to another (PRD 0009). A counter rather than a flag, so two
+    /// proposals in a row are two arrivals.
+    private(set) var proposalsLanded: Int = 0
+
     /// The run's ledger, or `nil` before one has been started. Kept after the run
     /// settles: it is the account of what landed, and a user who left mid-apply has to
     /// find it on their return — which is the whole reason this model is app-scoped.
@@ -308,6 +314,7 @@ final class SortSessionModel {
         }
 
         changes.append(contentsOf: proposal.changes)
+        proposalsLanded += 1
     }
 
     // MARK: - Applying

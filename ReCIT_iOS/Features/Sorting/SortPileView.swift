@@ -35,9 +35,12 @@ struct SortPileView: View {
     /// Whether the front cover can be dragged off. False while a run owns the stack, and on
     /// any surface that is showing a pile rather than offering to rearrange it.
     var isDraggable: Bool = true
-    /// Set when this étagère has just been written: every visible cover bounces in, one after
-    /// another. Nil at rest.
+    /// Set when this étagère has just been written, or has just received a proposal: every
+    /// visible cover bounces in, one after another. Nil at rest.
     var landingToken: String?
+    /// How long this pile waits before starting its pass. Non-zero when several étagères are
+    /// landing together and the design wants them to arrive left to right.
+    var landingDelay: Double = 0
 
     var body: some View {
         ZStack {
@@ -69,7 +72,7 @@ struct SortPileView: View {
         .sortLandingBounce(bookId: isFront ? cover.book.id : nil)
         .sortStaggeredBounce(
             token: landingToken,
-            delay: Double(cover.depth) * SortPileView.landingStagger
+            delay: landingDelay + Double(cover.depth) * SortPileView.landingStagger
         )
         .sortBookDraggable(
             cover.book,

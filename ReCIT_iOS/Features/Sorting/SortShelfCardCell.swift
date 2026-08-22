@@ -31,6 +31,10 @@ struct SortShelfCardCell: View {
     let outcome: SortApplyLedger.ShelfOutcome?
     /// Whether a run is writing right now.
     let isApplying: Bool
+    /// Changes when a proposal has just filled this étagère.
+    let arrivalToken: String?
+    /// How long this card waits before playing that arrival.
+    let arrivalDelay: Double
     /// Files the carried book onto this étagère. Returns whether the drop was taken.
     let onDrop: (String) -> Bool
 
@@ -45,7 +49,9 @@ struct SortShelfCardCell: View {
                 isTargeted: isTargeted,
                 isDraggable: isActive,
                 outcome: outcome,
-                isApplying: isApplying
+                isApplying: isApplying,
+                arrivalToken: arrivalToken,
+                arrivalDelay: arrivalDelay
             )
         }
         // Plain: the card is its own visual, and a link style that tinted or chevroned it

@@ -26,12 +26,18 @@ struct SortShelfCardView: View {
     let section: SortSection
     let status: SortWritePlan.ShelfStatus
     let width: CGFloat
+    /// Whether a dragged book is hovering this card. It grows a little and takes an accent
+    /// border — enough to be unmistakable under a finger, little enough not to shove its
+    /// neighbours around.
+    var isTargeted: Bool = false
+    /// Whether the front cover hands itself over to a drag.
+    var isDraggable: Bool = true
 
     private var pile: SortPile { .init(section: section) }
 
     var body: some View {
         VStack(spacing: .xSmall) {
-            SortPileView(pile: pile, width: width)
+            SortPileView(pile: pile, width: width, isDraggable: isDraggable)
 
             Text(title)
                 .textStyle(.footnote200Bold)
@@ -45,6 +51,14 @@ struct SortShelfCardView: View {
         .frame(width: width, height: SortGridMetrics.cardHeight)
         .background(DesignSystem.Color.backgroundDefault.color)
         .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.rounded.rawValue))
+        .overlay {
+            if isTargeted {
+                RoundedRectangle(cornerRadius: .rounded)
+                    .strokeBorder(DesignSystem.Color.borderTinted.color, lineWidth: 2)
+            }
+        }
+        .scaleEffect(isTargeted ? 1.03 : 1)
+        .animation(.easeOut(duration: 0.15), value: isTargeted)
         // Top trailing, over the card's own corner: the pill is about the card, not about
         // any one book in it, and the pile is drawn towards the middle.
         .overlay(alignment: .topTrailing) {

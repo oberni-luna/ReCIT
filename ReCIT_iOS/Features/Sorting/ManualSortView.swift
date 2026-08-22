@@ -73,7 +73,10 @@ struct ManualSortView: View {
                     sections: projection.sections.filter { $0.isUnshelved == false },
                     plan: plan,
                     metrics: metrics,
-                    onOpen: open
+                    isActive: session.isBusy == false,
+                    onDrop: { bookId, section in
+                        file(bookId, into: section.id, within: projection)
+                    }
                 )
             }
 
@@ -81,6 +84,10 @@ struct ManualSortView: View {
                 books: projection.unshelved.books,
                 metrics: metrics,
                 isLoading: session.phase == .syncing,
+                isActive: session.isBusy == false,
+                onDrop: { bookId in
+                    file(bookId, into: .unshelved, within: projection)
+                },
                 footer: .init(plan: plan, progress: session.applyProgress, notice: notice),
                 actions: actions
             )
@@ -94,6 +101,12 @@ struct ManualSortView: View {
         }
         .navigationTitle("manual_sort.title")
         .navigationBarTitleDisplayMode(.inline)
+        // Declared here rather than in the stack's owner: the destination is a section of
+        // *this* screen's session, and `SortSection.ID` is already `Hashable`, so nothing has
+        // to be encoded into the app-wide navigation enum for it.
+        .navigationDestination(for: SortSection.ID.self) { sectionId in
+            SortShelfDetailView(sectionId: sectionId)
+        }
         .toolbar {
             // Absent until the snapshot exists, exactly as the design has it: there is
             // nothing to name an étagère against while the library is still being read, so
@@ -147,9 +160,34 @@ struct ManualSortView: View {
         )
     }
 
-    /// Pushes an étagère's own screen — the books it *will* hold, drafts included. Slice 0049
-    /// gives it a destination; until then a tap is a no-op rather than a wrong screen.
-    private func open(_ section: SortSection) {
+    /// One drop: the book leaves wherever the projection says it is for the section it was
+    /// let go on.
+    ///
+    /// **The origin is resolved here, not carried in the payload.** The projection is the
+    /// only thing that knows where a book sits, and a payload that named its origin could
+    /// name one the book had since left — which is what the first attempt at this gesture
+    /// got wrong (PRD 0008, superseded).
+    ///
+    /// A drop back onto the section the book already sits in is taken and records nothing:
+    /// `SortChange.move` returns `nil` for it, so the stack does not grow, the discard
+    /// control stays inert, and there is no bounce and no haptic. The silence is the honest
+    /// answer — nothing happened.
+    private func file(
+        _ bookId: String,
+        into destination: SortSection.ID,
+        within projection: SortProjection
+    ) -> Bool {
+        guard session.isBusy == false else { return false }
+        guard let origin = projection.sections.first(where: { section in
+            section.books.contains { $0.id == bookId }
+        })?.id else { return false }
+
+        notice = nil
+        guard origin != destination else { return true }
+
+        session.moveBook(bookId, from: origin, to: destination)
+        Haptics.Impact.light.play()
+        return true
     }
 
     private func discard() {

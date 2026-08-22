@@ -32,8 +32,17 @@ struct SortUnshelvedPanelView: View {
     /// Whether the opening sync is still running. The panel is drawn and inert, rather than
     /// absent: it holds the screen's shape while there is nothing to put in it.
     let isLoading: Bool
+    /// Whether the panel accepts gestures. False while a run owns the stack.
+    let isActive: Bool
+    /// Takes a book off whatever étagère it is on. Returns whether the drop was taken.
+    let onDrop: (String) -> Bool
     let footer: SortFooter
     let actions: SortActions
+
+    /// Whether a dragged book is hovering the panel. The **whole** panel is the target: the
+    /// order in here is arrival order, so aiming at a slot between two cards would mean
+    /// nothing, and a 200 pt target is one a hand coming back from an étagère cannot miss.
+    @State private var isTargeted: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: .sMedium) {
@@ -68,13 +77,36 @@ struct SortUnshelvedPanelView: View {
                 topTrailingRadius: DesignSystem.CornerRadius.roundedLarge.rawValue
             )
         )
+        .overlay {
+            if isTargeted {
+                UnevenRoundedRectangle(
+                    topLeadingRadius: DesignSystem.CornerRadius.roundedLarge.rawValue,
+                    topTrailingRadius: DesignSystem.CornerRadius.roundedLarge.rawValue
+                )
+                .strokeBorder(DesignSystem.Color.borderTinted.color, lineWidth: 2)
+            }
+        }
+        .dropDestination(for: SortBookTransfer.self) { transfers, _ in
+            guard isActive, let transfer = transfers.first else { return false }
+            return onDrop(transfer.bookId)
+        } isTargeted: { targeted in
+            isTargeted = targeted && isActive
+        }
+        .onChange(of: isTargeted) { _, targeted in
+            guard targeted else { return }
+            Haptics.Impact.soft.play()
+        }
     }
 
     private var carousel: some View {
         ScrollView(.horizontal) {
             LazyHStack(spacing: SortGridMetrics.bookSpacing) {
                 ForEach(books) { book in
-                    SortBookCardView(book: book, width: metrics.bookColumnWidth)
+                    SortBookCardView(
+                        book: book,
+                        width: metrics.bookColumnWidth,
+                        isDraggable: isActive
+                    )
                 }
             }
             .padding(.horizontal, .medium)

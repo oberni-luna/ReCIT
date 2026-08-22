@@ -21,6 +21,8 @@ import SwiftUI
 struct SortBookCardView: View {
     let book: AutoSortBook
     let width: CGFloat
+    /// Whether the card hands itself over to a drag. False while a run owns the stack.
+    var isDraggable: Bool = true
 
     var body: some View {
         VStack(spacing: .xSmall) {
@@ -41,6 +43,7 @@ struct SortBookCardView: View {
         .padding(.vertical, .small)
         .padding(.horizontal, .xSmall)
         .frame(width: width, height: SortGridMetrics.cardHeight)
+        .sortBookDraggable(book, coverSize: coverSize, isEnabled: isDraggable)
     }
 
     /// As wide as the card allows without touching its neighbour, and as tall as that width

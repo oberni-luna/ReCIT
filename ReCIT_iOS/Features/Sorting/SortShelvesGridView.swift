@@ -23,7 +23,10 @@ struct SortShelvesGridView: View {
     let sections: [SortSection]
     let plan: SortWritePlan
     let metrics: SortGridMetrics
-    let onOpen: (SortSection) -> Void
+    /// Whether the grid accepts gestures. False while an apply or a proposal owns the stack.
+    let isActive: Bool
+    /// Files a carried book onto a section. Returns whether the drop was taken.
+    let onDrop: (String, SortSection) -> Bool
 
     var body: some View {
         ScrollView {
@@ -36,19 +39,13 @@ struct SortShelvesGridView: View {
                     spacing: SortGridMetrics.shelfSpacing
                 ) {
                     ForEach(sections) { section in
-                        Button {
-                            onOpen(section)
-                        } label: {
-                            SortShelfCardView(
-                                section: section,
-                                status: plan.status(of: section.id),
-                                width: metrics.shelfColumnWidth
-                            )
-                        }
-                        // Plain: the card is its own visual, and a style that scaled or
-                        // tinted it on press would fight the drop highlight slice 0047 puts
-                        // on the same card.
-                        .buttonStyle(.plain)
+                        SortShelfCardCell(
+                            section: section,
+                            status: plan.status(of: section.id),
+                            width: metrics.shelfColumnWidth,
+                            isActive: isActive,
+                            onDrop: { bookId in onDrop(bookId, section) }
+                        )
                     }
                 }
                 .padding(.horizontal, .medium)

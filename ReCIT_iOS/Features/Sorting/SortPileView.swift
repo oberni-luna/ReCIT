@@ -19,6 +19,12 @@
 //  Every cover reserves a 2:3 frame before its image exists (`SortGridMetrics`), so a pile
 //  does not re-lay itself out five times while the grid scrolls.
 //
+//  **The front cover is the drag source**, and the only one: the rest of the card taps
+//  through to the étagère's own screen. A narrow source is deliberate — it is the app's
+//  existing grammar, where a *book* is pressed on a shelf and not the card around it
+//  (ADR 0006) — and it is the same cover the bounce plays on, so what the user grabs is
+//  what they just saw arrive.
+//
 
 import SwiftUI
 
@@ -26,6 +32,9 @@ struct SortPileView: View {
     let pile: SortPile
     /// The card's width. Every measurement here is a share of it.
     let width: CGFloat
+    /// Whether the front cover can be dragged off. False while a run owns the stack, and on
+    /// any surface that is showing a pile rather than offering to rearrange it.
+    var isDraggable: Bool = true
 
     var body: some View {
         ZStack {
@@ -35,17 +44,31 @@ struct SortPileView: View {
                 // Back to front: the last cover is painted first, so the front cover — the
                 // one a drag carries — ends up on top without a z-index to maintain.
                 ForEach(pile.covers.reversed()) { cover in
-                    ShelfCoverView(
-                        imageUrl: cover.book.coverImageUrl,
-                        title: cover.book.title,
-                        size: coverSize
-                    )
-                    .rotationEffect(.degrees(cover.tiltDegrees))
-                    .offset(offset(for: cover))
+                    coverView(cover)
                 }
             }
         }
         .frame(width: width, height: SortGridMetrics.artHeight)
+    }
+
+    /// One cover of the pile — and, for the front one only, the handle a drag starts from and
+    /// the bounce an arrival plays on.
+    private func coverView(_ cover: SortPile.Cover) -> some View {
+        let isFront: Bool = cover.depth == 0
+
+        return ShelfCoverView(
+            imageUrl: cover.book.coverImageUrl,
+            title: cover.book.title,
+            size: coverSize
+        )
+        .rotationEffect(.degrees(cover.tiltDegrees))
+        .offset(offset(for: cover))
+        .sortLandingBounce(bookId: isFront ? cover.book.id : nil)
+        .sortBookDraggable(
+            cover.book,
+            coverSize: coverSize,
+            isEnabled: isFront && isDraggable
+        )
     }
 
     /// One cover's frame. Narrow enough that a fan of five still shows five spines' worth of

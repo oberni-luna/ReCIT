@@ -1249,6 +1249,40 @@
         }
       }
     },
+    "manual_sort.a11y.file_into %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File into %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranger dans %@"
+          }
+        }
+      }
+    },
+    "manual_sort.a11y.unshelve %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take %@ off this shelf"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer %@ de cette étagère"
+          }
+        }
+      }
+    },
     "manual_sort.apply": {
       "extractionState": "manual",
       "localizations": {

@@ -45,6 +45,8 @@ struct SortShelfCardView: View {
     /// How long this card waits before its covers start arriving, so a proposal reads left to
     /// right across the grid rather than as one jump.
     var arrivalDelay: Double = 0
+    /// Takes the top book off this étagère without a drag. Nil while a run owns the stack.
+    var onUnshelveTop: (() -> Void)?
 
     private var pile: SortPile { .init(section: section) }
 
@@ -105,6 +107,30 @@ struct SortShelfCardView: View {
         .overlay(alignment: .topTrailing) {
             ManualSortStatusPill(status: status)
                 .padding(.all, .xSmall)
+        }
+        // The pile's lower covers say nothing a reader needs: what the étagère holds is
+        // reachable by opening it, and five covers would be five stops on the way to the next
+        // étagère. The label carries the name, the count and the pending status, so the pill is
+        // not information reserved to sighted users.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityActions {
+            if let onUnshelveTop, let top = pile.draggableBook {
+                Button("manual_sort.a11y.unshelve \(top.title)", action: onUnshelveTop)
+            }
+        }
+    }
+
+    /// « Nom · N », plus « Nouvelle » or « Modifiée » when the étagère is on one side of the
+    /// pending work.
+    private var accessibilityLabel: Text {
+        switch status {
+        case .untouched:
+            Text(title)
+        case .new:
+            Text(title) + Text(", ") + Text("manual_sort.pill.new")
+        case .modified:
+            Text(title) + Text(", ") + Text("manual_sort.pill.modified")
         }
     }
 

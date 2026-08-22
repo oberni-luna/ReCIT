@@ -41,6 +41,9 @@ struct SortShelvesGridView: View {
     let onDropOnNewShelf: (String) -> Bool
     /// Files a carried book onto a section. Returns whether the drop was taken.
     let onDrop: (String, SortSection) -> Bool
+    /// Takes one étagère's top book back to the books to file — the accessibility counterpart
+    /// of dragging its front cover onto the panel.
+    let onUnshelveTop: (SortSection) -> Void
 
     var body: some View {
         ScrollView {
@@ -66,6 +69,7 @@ struct SortShelvesGridView: View {
                                 // touched the whole library.
                                 arrivalToken: plan.status(of: section.id) == .untouched ? nil : arrivalToken,
                                 arrivalDelay: Double(index) * SortPileView.landingStagger,
+                                onUnshelveTop: { onUnshelveTop(section) },
                                 onDrop: { bookId in onDrop(bookId, section) }
                             )
                         }

@@ -35,6 +35,8 @@ struct SortShelfCardCell: View {
     let arrivalToken: String?
     /// How long this card waits before playing that arrival.
     let arrivalDelay: Double
+    /// Takes this étagère's top book back to the books to file, without a drag.
+    let onUnshelveTop: () -> Void
     /// Files the carried book onto this étagère. Returns whether the drop was taken.
     let onDrop: (String) -> Bool
 
@@ -51,7 +53,8 @@ struct SortShelfCardCell: View {
                 outcome: outcome,
                 isApplying: isApplying,
                 arrivalToken: arrivalToken,
-                arrivalDelay: arrivalDelay
+                arrivalDelay: arrivalDelay,
+                onUnshelveTop: isActive ? onUnshelveTop : nil
             )
         }
         // Plain: the card is its own visual, and a link style that tinted or chevroned it

@@ -39,6 +39,10 @@ struct SortUnshelvedPanelView: View {
     let isApplying: Bool
     /// Takes a book off whatever étagère it is on. Returns whether the drop was taken.
     let onDrop: (String) -> Bool
+    /// The étagères a book can be filed into without a drag.
+    let filingOptions: [SortFilingOption]
+    /// Files one book into one étagère, as the accessibility action offers it.
+    let onFile: (String, SortSection.ID) -> Void
     let footer: SortFooter
     let actions: SortActions
 
@@ -109,7 +113,9 @@ struct SortUnshelvedPanelView: View {
                     SortBookCardView(
                         book: book,
                         width: metrics.bookColumnWidth,
-                        isDraggable: isActive
+                        isDraggable: isActive,
+                        filingOptions: isActive ? filingOptions : [],
+                        onFile: { sectionId in onFile(book.id, sectionId) }
                     )
                 }
             }

@@ -106,6 +106,10 @@ struct ManualSortView: View {
                     },
                     onDrop: { bookId, section in
                         file(bookId, into: section.id, within: projection)
+                    },
+                    onUnshelveTop: { section in
+                        guard let top = section.books.first else { return }
+                        _ = file(top.id, into: .unshelved, within: projection)
                     }
                 )
             }
@@ -118,6 +122,12 @@ struct ManualSortView: View {
                 isApplying: session.isApplying,
                 onDrop: { bookId in
                     file(bookId, into: .unshelved, within: projection)
+                },
+                filingOptions: projection.sections
+                    .filter { $0.isUnshelved == false }
+                    .map { .init(sectionId: $0.id, name: $0.name ?? "") },
+                onFile: { bookId, sectionId in
+                    _ = file(bookId, into: sectionId, within: projection)
                 },
                 footer: .init(plan: plan, progress: session.applyProgress, notice: notice),
                 actions: actions

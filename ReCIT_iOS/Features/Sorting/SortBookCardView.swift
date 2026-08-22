@@ -23,6 +23,10 @@ struct SortBookCardView: View {
     let width: CGFloat
     /// Whether the card hands itself over to a drag. False while a run owns the stack.
     var isDraggable: Bool = true
+    /// The étagères this book can be filed into without a drag. Empty while a run owns the
+    /// stack, and on any surface that is not offering to rearrange anything.
+    var filingOptions: [SortFilingOption] = []
+    let onFile: (SortSection.ID) -> Void
 
     var body: some View {
         VStack(spacing: .xSmall) {
@@ -44,6 +48,16 @@ struct SortBookCardView: View {
         .padding(.horizontal, .xSmall)
         .frame(width: width, height: SortGridMetrics.cardHeight)
         .sortBookDraggable(book, coverSize: coverSize, isEnabled: isDraggable)
+        // One element rather than a cover and a title: the card is one thing to a reader, and
+        // its cover carries no information the title does not.
+        .accessibilityElement(children: .combine)
+        .accessibilityActions {
+            ForEach(filingOptions) { option in
+                Button("manual_sort.a11y.file_into \(option.name)") {
+                    onFile(option.sectionId)
+                }
+            }
+        }
     }
 
     /// As wide as the card allows without touching its neighbour, and as tall as that width

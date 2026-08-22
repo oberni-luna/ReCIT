@@ -39,6 +39,37 @@ Two divergences are already known and must be recorded rather than drawn away: t
 gutter is 16 pt in code against the mockup's 12 pt, and the nav bar's « + » is gone, replaced
 by the grid's tile.
 
+## What was generated — 2026-08-23
+
+Twelve frames in the `Ranger mes livres` section (page `Tokens`), in a row at `y = 3283`
+starting at `x = 1085`, each cloned from the nominal frame so they carry the same components,
+the same instances and the same bound variables:
+
+| Frame | Node | What it shows |
+|---|---|---|
+| Ouverture · Light | `164:2` | the grid replaced by « Synchronisation de votre bibliothèque… », the carousel's height reserved and empty, no recap |
+| Grille vide · Light | `164:58` | the « + Nouvelle étagère » tile alone — dashed, tinted, glyph above the label |
+| Tout rangé · Light | `164:114` | « Livres à ranger · 0 », the carousel replaced by one line, the panel shrunk |
+| Carte à un livre · Light | `164:170` | one cover face-on, « · 1 » |
+| Carte à deux livres · Light | `164:226` | the fan's first two positions, « · 2 » |
+| Étagère vide · Light | `164:282` | a cover-shaped dashed hole — the normal state of a draft |
+| Survol de la cible · Light | `164:5945` | the target card with its accent border, and the cover travelling under the finger |
+| Enregistrement en cours · Light | `164:6001` | library at 80 %, a spinner on the étagère in flight |
+| Échec partiel · Light | `164:6057` | the warning badge on the étagère that broke, and the three-part report — the panel grown upward, as it does on device |
+| Pastilles · Light | `164:6113` | « Nouvelle » and « Modifiée » as glyphless `Tag` instances |
+| Détail étagère · Light | `164:6169` | the pushed screen, which had no mockup at all: three books in pile order, the swipe revealed, no genre line and no grip |
+| Dark | `164:6225` | the nominal state with the `Color` collection's Dark mode set explicitly, the way the file's existing dark frames declare themselves |
+
+The three drag frames are renamed `Superseded (PRD 0009) · …` rather than deleted.
+
+Divergences recorded in `docs/design-system/figma-library.md` as **D45–D48**: the étagère
+gutter (12 in Figma, 16 in code), the nav bar's `+` replaced by the grid tile, the missing
+Alegreya token at card-title size, and the generation itself.
+
+**Owner review is still owed.** Two known roughnesses to look at: the travelling cover on the
+hover frame overlaps the second row of cards, and the spinner on the saving frame sits inside
+the card's auto-layout rather than over its art.
+
 ## Acceptance criteria
 
 - [ ] The twelve frames exist under the `Ranger mes livres` section, named consistently with

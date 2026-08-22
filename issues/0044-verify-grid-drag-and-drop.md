@@ -30,6 +30,31 @@ fallback is a `DragGesture` with an overlay redrawing the cover under the finger
 resolved from `anchorPreference` — the mechanism `ShelfFocusOverlayView` already uses
 (ADR 0006), and a rewrite of slice 0047 alone.
 
+## Verdict — 2026-08-23, iPhone 17 simulator (iOS 26.1)
+
+1. **`draggable` from a `LazyVGrid` cell onto a `dropDestination` sibling: yes.** The drop
+   target in the harness is a grid cell, and it received the payload.
+2. **`draggable` from a horizontal `LazyHStack` cell: yes.** `SortDragHarnessUITests` performs
+   a real press-and-drag (1 s press, slow velocity, 0.6 s hold) from a carousel cell onto a
+   grid card and asserts the harness reports the drop; it passes. The horizontal pan and the
+   long press cohabit — the failure recorded in feature 0009 was `List` in edit mode, whose
+   reorder recogniser owns the long press, and not `draggable` itself.
+3. **Autoscroll while a drag is held at the grid's edge: not verified.** The harness fits on
+   one screen and XCUITest cannot assert a scroll offset during a drag session without
+   instrumenting the app. Deferred to the owner's device pass.
+
+   Fallback if it turns out absent, for slice 0047 to implement without re-deciding: two 60 pt
+   sensitive bands, at the top and bottom of the shelves grid, each holding a `ScrollViewReader`
+   scroll while a drag stays inside it — the drag's location comes from
+   `dropDestination`'s `isTargeted` on band-shaped overlays, so no gesture of our own is needed.
+
+**Device verdict is the owner's**, since the simulator's press-and-drag is synthesised and the
+one failure this slice exists to rule out was device-only. The screen was built on the answer
+above; if the device disagrees, only slice 0047 is rewritten.
+
+The harness (`SortDragHarnessView`, its launch-argument branch in `ReCIT.swift`, and
+`SortDragHarnessUITests`) was removed once these answers were in hand.
+
 ## Acceptance criteria
 
 - [ ] A harness exercises drag from a `LazyVGrid` cell to a sibling card, and the drop is

@@ -26,6 +26,11 @@ struct SortShelfCardCell: View {
     /// the stack: the session refuses the write anyway, and a drag that starts and achieves
     /// nothing is worse than one that cannot start.
     let isActive: Bool
+    /// Where this étagère stands in the run that is writing, or `nil` if the plan leaves it
+    /// alone.
+    let outcome: SortApplyLedger.ShelfOutcome?
+    /// Whether a run is writing right now.
+    let isApplying: Bool
     /// Files the carried book onto this étagère. Returns whether the drop was taken.
     let onDrop: (String) -> Bool
 
@@ -38,7 +43,9 @@ struct SortShelfCardCell: View {
                 status: status,
                 width: width,
                 isTargeted: isTargeted,
-                isDraggable: isActive
+                isDraggable: isActive,
+                outcome: outcome,
+                isApplying: isApplying
             )
         }
         // Plain: the card is its own visual, and a link style that tinted or chevroned it

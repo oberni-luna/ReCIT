@@ -25,6 +25,10 @@ struct SortShelvesGridView: View {
     let metrics: SortGridMetrics
     /// Whether the grid accepts gestures. False while an apply or a proposal owns the stack.
     let isActive: Bool
+    /// Whether a run is writing right now — which the cards read to dim, breathe and tick.
+    let isApplying: Bool
+    /// Where one étagère stands in that run, or `nil` for one the plan leaves alone.
+    let outcome: (SortSection.ID) -> SortApplyLedger.ShelfOutcome?
     /// Files a carried book onto a section. Returns whether the drop was taken.
     let onDrop: (String, SortSection) -> Bool
 
@@ -44,6 +48,8 @@ struct SortShelvesGridView: View {
                             status: plan.status(of: section.id),
                             width: metrics.shelfColumnWidth,
                             isActive: isActive,
+                            outcome: outcome(section.id),
+                            isApplying: isApplying,
                             onDrop: { bookId in onDrop(bookId, section) }
                         )
                     }

@@ -62,3 +62,43 @@ struct SortLandingBounce: ViewModifier {
             }
     }
 }
+
+/// Bounces a pile's covers one after another, oldest first, when a token changes — the
+/// arrival an apply plays as an étagère lands, and the one a proposal plays on every card it
+/// touched.
+///
+/// A stagger rather than one bounce for the whole card: `0.08 s` apart is what says *one at a
+/// time*, and it is the same interval the onboarding plank settles its books with, so the app
+/// has one number for this and not two.
+struct SortStaggeredBounce: ViewModifier {
+    /// Changes when there is something to play. Nil plays nothing.
+    let token: String?
+    let delay: Double
+
+    @State private var isArriving: Bool = false
+    @State private var playedFor: String?
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(isArriving ? 1.12 : 1)
+            .animation(.spring(response: 0.32, dampingFraction: 0.55), value: isArriving)
+            .onChange(of: token) { _, newValue in
+                guard let newValue, newValue != playedFor else { return }
+                playedFor = newValue
+                Task {
+                    try? await Task.sleep(for: .seconds(delay))
+                    isArriving = true
+                    try? await Task.sleep(for: .milliseconds(16))
+                    isArriving = false
+                }
+            }
+    }
+}
+
+extension View {
+
+    /// Bounces this view `delay` seconds after `token` changes.
+    func sortStaggeredBounce(token: String?, delay: Double) -> some View {
+        modifier(SortStaggeredBounce(token: token, delay: delay))
+    }
+}

@@ -32,12 +32,24 @@ struct SortShelfCardView: View {
     var isTargeted: Bool = false
     /// Whether the front cover hands itself over to a drag.
     var isDraggable: Bool = true
+    /// Where this étagère stands in the run that is writing, or `nil` for one the plan does
+    /// not touch — which draws nothing, because an étagère nobody is writing to must not look
+    /// like one waiting its turn.
+    var outcome: SortApplyLedger.ShelfOutcome?
+    /// Whether a run is writing right now. Told apart from `outcome` because a failure's badge
+    /// outlives the run while the dimming and the breathing do not.
+    var isApplying: Bool = false
 
     private var pile: SortPile { .init(section: section) }
 
     var body: some View {
         VStack(spacing: .xSmall) {
-            SortPileView(pile: pile, width: width, isDraggable: isDraggable)
+            SortPileView(
+                pile: pile,
+                width: width,
+                isDraggable: isDraggable,
+                landingToken: outcome == .landed ? "landed" : nil
+            )
 
             Text(title)
                 .textStyle(.footnote200Bold)
@@ -59,12 +71,45 @@ struct SortShelfCardView: View {
         }
         .scaleEffect(isTargeted ? 1.03 : 1)
         .animation(.easeOut(duration: 0.15), value: isTargeted)
+        // Back to full opacity the moment it lands, which is half of what says "this one is
+        // done" — the other half being its covers bouncing in.
+        .opacity(isDimmed ? 0.8 : 1)
+        .sortBreathing(isBreathing)
+        .overlay {
+            if outcome == .applying {
+                ProgressView()
+                    .controlSize(.small)
+                    .accessibilityLabel("manual_sort.mark.applying")
+            }
+        }
+        // Top leading, opposite the pill: a failure and a pending status are different facts
+        // about the same étagère and must not overlap. It stays after the run settles — the
+        // footer names it, and the card is where the user goes looking.
+        .overlay(alignment: .topLeading) {
+            if outcome == .failed {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.foregroundError)
+                    .accessibilityLabel("manual_sort.mark.failed")
+                    .padding(.all, .xSmall)
+            }
+        }
         // Top trailing, over the card's own corner: the pill is about the card, not about
         // any one book in it, and the pile is drawn towards the middle.
         .overlay(alignment: .topTrailing) {
             ManualSortStatusPill(status: status)
                 .padding(.all, .xSmall)
         }
+    }
+
+    /// Dimmed while a run is writing, unless this étagère has already landed. An étagère the
+    /// plan does not touch dims too: the whole screen is busy, and only the *breathing* is
+    /// reserved for the ones being written.
+    private var isDimmed: Bool {
+        isApplying && outcome != .landed
+    }
+
+    private var isBreathing: Bool {
+        isApplying && (outcome == .pending || outcome == .applying)
     }
 
     /// « Nom · N ». Built through the string catalogue so the separator and the plural are

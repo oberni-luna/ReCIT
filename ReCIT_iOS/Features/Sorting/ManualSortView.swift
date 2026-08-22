@@ -74,6 +74,8 @@ struct ManualSortView: View {
                     plan: plan,
                     metrics: metrics,
                     isActive: session.isBusy == false,
+                    isApplying: session.isApplying,
+                    outcome: session.applyOutcome(of:),
                     onDrop: { bookId, section in
                         file(bookId, into: section.id, within: projection)
                     }
@@ -85,6 +87,7 @@ struct ManualSortView: View {
                 metrics: metrics,
                 isLoading: session.phase == .syncing,
                 isActive: session.isBusy == false,
+                isApplying: session.isApplying,
                 onDrop: { bookId in
                     file(bookId, into: .unshelved, within: projection)
                 },

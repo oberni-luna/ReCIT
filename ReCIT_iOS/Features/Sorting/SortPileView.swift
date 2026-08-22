@@ -35,6 +35,9 @@ struct SortPileView: View {
     /// Whether the front cover can be dragged off. False while a run owns the stack, and on
     /// any surface that is showing a pile rather than offering to rearrange it.
     var isDraggable: Bool = true
+    /// Set when this étagère has just been written: every visible cover bounces in, one after
+    /// another. Nil at rest.
+    var landingToken: String?
 
     var body: some View {
         ZStack {
@@ -64,12 +67,20 @@ struct SortPileView: View {
         .rotationEffect(.degrees(cover.tiltDegrees))
         .offset(offset(for: cover))
         .sortLandingBounce(bookId: isFront ? cover.book.id : nil)
+        .sortStaggeredBounce(
+            token: landingToken,
+            delay: Double(cover.depth) * SortPileView.landingStagger
+        )
         .sortBookDraggable(
             cover.book,
             coverSize: coverSize,
             isEnabled: isFront && isDraggable
         )
     }
+
+    /// The gap between two covers' arrivals. The interval the onboarding plank already
+    /// settles its books with, so the app has one number for "one at a time".
+    static let landingStagger: Double = 0.08
 
     /// One cover's frame. Narrow enough that a fan of five still shows five spines' worth of
     /// colour, tall enough to keep the book's own proportions.

@@ -34,6 +34,9 @@ struct SortUnshelvedPanelView: View {
     let isLoading: Bool
     /// Whether the panel accepts gestures. False while a run owns the stack.
     let isActive: Bool
+    /// Whether a run is writing right now. The carousel dims with the grid: the whole screen
+    /// is busy, and the books in here are the ones being filed away.
+    let isApplying: Bool
     /// Takes a book off whatever étagère it is on. Returns whether the drop was taken.
     let onDrop: (String) -> Bool
     let footer: SortFooter
@@ -59,6 +62,7 @@ struct SortUnshelvedPanelView: View {
                     .padding(.vertical, .medium)
             } else {
                 carousel
+                    .opacity(isApplying ? 0.8 : 1)
             }
 
             ManualSortActionBar(actions: actions)

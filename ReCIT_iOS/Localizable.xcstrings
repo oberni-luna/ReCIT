@@ -2657,22 +2657,6 @@
         }
       }
     },
-    "nav.works": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Works"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Œuvres"
-          }
-        }
-      }
-    },
     "onboarding.later": {
       "localizations": {
         "en": {

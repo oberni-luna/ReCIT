@@ -83,10 +83,17 @@ struct SortUnshelvedPanelView: View {
             }
             .padding(.horizontal, .medium)
             .padding(.top, .medium)
+            // Half-opaque white from the rule down, over the gradient that is already there: the
+            // controls and the recap are the one thing on this screen that must stay readable
+            // whatever scrolls behind them.
+            .background(DesignSystem.Color.backgroundDefault.color.opacity(0.5))
             // The one rule left in the region: the controls are separated from the books, not
             // the region from the grid. The grid's own edge is the gradient's business.
+            //
+            // Black at 20 % rather than `border/default`: a token border reads as a drawn line
+            // on white, where what is wanted here is a shadow of one.
             .overlay(alignment: .top) {
-                DesignSystem.Color.borderDefault.color
+                Color.black.opacity(0.2)
                     .frame(height: 1)
             }
         }
@@ -98,7 +105,10 @@ struct SortUnshelvedPanelView: View {
         // enough to compete with the buttons; the blur alone left them sharp behind white text.
         .background {
             ZStack {
-                VariableBlurView(maxRadius: 18, strongEdge: .bottom)
+                // A short fade rather than one spread over the whole panel: at full span the
+                // radius near the top edge is barely anything, and « Livres à ranger » sat over
+                // sharp covers.
+                VariableBlurView(maxRadius: 22, strongEdge: .bottom, fadeSpan: 0.45)
 
                 LinearGradient(
                     colors: [

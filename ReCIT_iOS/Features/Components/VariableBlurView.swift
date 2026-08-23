@@ -48,14 +48,20 @@ struct VariableBlurView: UIViewRepresentable {
     /// `UIVisualEffectView` turns its mask, not its backdrop, so what it samples is unchanged.
     var strongEdge: VerticalEdge = .top
 
+    /// How much of the height the fade takes, measured from the weak edge. `1` spreads it over
+    /// the whole view — the gentlest ramp, and the reason a caption sitting near the weak edge
+    /// can end up over content that is barely blurred at all. A smaller value reaches full
+    /// radius sooner and holds it for the rest of the view.
+    var fadeSpan: CGFloat = 1
+
     func makeUIView(context: Context) -> VariableBlurUIView {
-        let view: VariableBlurUIView = .init(maxRadius: maxRadius)
+        let view: VariableBlurUIView = .init(maxRadius: maxRadius, fadeSpan: fadeSpan)
         view.transform = transform
         return view
     }
 
     func updateUIView(_ uiView: VariableBlurUIView, context: Context) {
-        uiView.configure(maxRadius: maxRadius)
+        uiView.configure(maxRadius: maxRadius, fadeSpan: fadeSpan)
         uiView.transform = transform
     }
 
@@ -68,11 +74,13 @@ struct VariableBlurView: UIViewRepresentable {
 /// filter masked by a vertical gradient, which is what turns a uniform blur into a ramp.
 final class VariableBlurUIView: UIVisualEffectView {
     private var maxRadius: CGFloat
+    private var fadeSpan: CGFloat
     /// The size the current gradient was built for, so it is only rebuilt when it must be.
     private var gradientSize: CGSize = .zero
 
-    init(maxRadius: CGFloat) {
+    init(maxRadius: CGFloat, fadeSpan: CGFloat = 1) {
         self.maxRadius = maxRadius
+        self.fadeSpan = min(max(fadeSpan, 0.05), 1)
         super.init(effect: UIBlurEffect(style: .regular))
 
         // The blur effect also paints a tint over the backdrop. That tint is what would read
@@ -87,9 +95,11 @@ final class VariableBlurUIView: UIVisualEffectView {
         fatalError("VariableBlurView is created in code only")
     }
 
-    func configure(maxRadius: CGFloat) {
-        guard maxRadius != self.maxRadius else { return }
+    func configure(maxRadius: CGFloat, fadeSpan: CGFloat) {
+        let clamped: CGFloat = min(max(fadeSpan, 0.05), 1)
+        guard maxRadius != self.maxRadius || clamped != self.fadeSpan else { return }
         self.maxRadius = maxRadius
+        self.fadeSpan = clamped
         gradientSize = .zero
         setNeedsLayout()
     }
@@ -133,7 +143,10 @@ final class VariableBlurUIView: UIVisualEffectView {
         let gradient = CIFilter.smoothLinearGradient()
         gradient.color0 = .black
         gradient.color1 = .clear
-        gradient.point0 = .init(x: 0, y: size.height)
+        // The black end is pulled in by `fadeSpan`: past it the gradient keeps returning
+        // `color0`, so the radius is already at full strength for the rest of the view instead
+        // of climbing all the way across it.
+        gradient.point0 = .init(x: 0, y: size.height * fadeSpan)
         gradient.point1 = .init(x: 0, y: 0)
 
         guard let output = gradient.outputImage else { return nil }

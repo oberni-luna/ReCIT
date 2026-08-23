@@ -110,6 +110,11 @@ struct SortShelfDetailView: View {
             .books.contains { $0.id == book.id } ?? false
         guard stillHere else { return }
 
-        session.moveBook(book.id, from: section.id, to: .unshelved)
+        // Animated at the mutation rather than declared on the list: the rows come out of the
+        // session's projection, so the row that leaves and the ones that close up behind it are
+        // one change to one observable — and without a transaction around it the list jumps.
+        withAnimation(.easeInOut(duration: 0.25)) {
+            session.moveBook(book.id, from: section.id, to: .unshelved)
+        }
     }
 }

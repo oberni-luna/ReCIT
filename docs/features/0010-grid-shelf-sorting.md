@@ -172,10 +172,22 @@ The first device run produced eight changes, all of them visible rather than str
   accent colour, and a cover does not inherit the app's `.tint` — so it came out system green.
   Set on the flow.
 - **One swipe takes one book off.** A `List` can re-diff under its own swipe animation and fire
-  the action again for the row that has taken the swiped one's place, which took a second book
-  off the étagère. Both ends now refuse it: the screen re-reads the book from the session before
-  acting, and `moveBook` ignores a move to where the book already sits — which protects every
-  caller rather than each one separately.
+  the action again for the row that has taken the swiped one's place. Both ends refuse it now:
+  the screen re-reads the book from the session before acting, and `moveBook` ignores a move to
+  where the book already sits — which protects every caller rather than each one separately.
+- **A cancelled image load is no longer a failure** (`CachedAsyncImage`). This was the real cause
+  of three reported symptoms at once: covers vanishing from the piles and from the carousel after
+  several books moved, a pile that looked two books short, and the fact that leaving the screen
+  and coming back fixed it. Lazy containers recycle their cells and a re-diffing list tears views
+  down mid-flight — both cancel the load — and the component rendered **nothing at all** in the
+  failed state (not even the parchment placeholder) while `.task(id:)` would not run again for
+  the same id. So a blank frame latched until the view's identity changed. Cancellation is now
+  told apart from a genuine failure and leaves the state untouched, so the next appearance
+  retries against Nuke's memory cache. A genuine failure still draws nothing, deliberately: a
+  broken URL must not leave a parchment slab on screen forever.
+- **Removing a book from an étagère's screen animates.** The transaction sits at the mutation,
+  not on the list: the rows come out of the projection, so the row that leaves and the ones that
+  close up behind it are one change to one observable.
 
 ## Known gaps
 

@@ -60,6 +60,15 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
                             )
                             loadedImage = Image(uiImage: uiImage)
                         } catch {
+                            // **A cancelled load is not a failure.** Lazy containers recycle
+                            // their cells and a list re-diffing tears views down mid-flight, both
+                            // of which cancel this task — and `loadFailed` renders *nothing*, not
+                            // even the placeholder, while `.task(id:)` will not run again for the
+                            // same id. Latching it left permanently blank frames: a pile of
+                            // covers emptying itself as soon as several books moved at once.
+                            // Left alone, the state is untouched and the next appearance retries,
+                            // hitting Nuke's memory cache.
+                            guard isCancellation(error) == false else { return }
                             loadedImage = nil
                             loadFailed = true
                         }
@@ -68,6 +77,18 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
         }
         .id(url)
     }
+}
+
+// MARK: - Cancellation
+
+/// Whether an error means "this load was torn down", as opposed to "this image cannot be had".
+/// The distinction matters because the two are rendered differently: a failure draws nothing at
+/// all, deliberately, so that a broken URL does not leave a parchment slab on screen forever.
+private func isCancellation(_ error: Error) -> Bool {
+    if error is CancellationError { return true }
+    if let loaderError = error as? ImageLoaderError, loaderError == .canceled { return true }
+    if let urlError = error as? URLError, urlError.code == .cancelled { return true }
+    return Task.isCancelled
 }
 
 // MARK: - Convenience Initializers
@@ -84,11 +105,12 @@ extension CachedAsyncImage where Content == Image {
 
 // MARK: - ImageLoader
 
+private enum ImageLoaderError: Error, Equatable {
+    case canceled
+    case undecodable
+}
+
 private actor ImageLoader {
-    enum ImageLoaderError: Error {
-        case canceled
-        case undecodable
-    }
 
     static let shared: ImageLoader = ImageLoader()
 

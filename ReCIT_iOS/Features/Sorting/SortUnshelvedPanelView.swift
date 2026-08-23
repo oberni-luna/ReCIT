@@ -5,6 +5,13 @@
 //  The anchored foot of the sorting surface: the books that are on no étagère, then what
 //  saving would do, then the three controls that do it.
 //
+//  **It floats over the grid rather than sitting beside it.** The étagères scroll *underneath*
+//  it and dissolve into it: white at the buttons, nothing at the top edge, with a progressive
+//  blur under the gradient so what shows through is legible rather than busy (`160:6659`). A
+//  solid block with a hard line above it cut the grid off mid-row; a fade says "there is more
+//  up there" while keeping the controls readable. It is laid on with `safeAreaInset`, which is
+//  what lets the scroll view keep its content behind it.
+//
 //  **It does not scroll away**, and that is content rather than chrome — which is why the
 //  argument PRD 0008 used against a pinned bar (a tab bar already underneath, 166 pt of
 //  furniture) does not apply. Three things depend on it staying put: the drag always has a
@@ -69,22 +76,40 @@ struct SortUnshelvedPanelView: View {
                     .opacity(isApplying ? 0.8 : 1)
             }
 
-            ManualSortActionBar(actions: actions)
-                .padding(.horizontal, .medium)
+            VStack(alignment: .leading, spacing: .sMedium) {
+                ManualSortActionBar(actions: actions)
 
-            SortFooterView(footer: footer)
-                .padding(.horizontal, .medium)
+                SortFooterView(footer: footer)
+            }
+            .padding(.horizontal, .medium)
+            .padding(.top, .medium)
+            // The one rule left in the region: the controls are separated from the books, not
+            // the region from the grid. The grid's own edge is the gradient's business.
+            .overlay(alignment: .top) {
+                DesignSystem.Color.borderDefault.color
+                    .frame(height: 1)
+            }
         }
         .padding(.top, .medium)
         .padding(.bottom, .small)
         .frame(maxWidth: .infinity)
-        // Square, edge to edge, white like everything else: the panel is the foot of the screen
-        // rather than a card sitting on it. What separates it from the grid is one hairline —
-        // enough to read as a region, quiet enough not to become furniture.
-        .background(DesignSystem.Color.backgroundDefault.color)
-        .overlay(alignment: .top) {
-            DesignSystem.Color.borderDefault.color
-                .frame(height: 1)
+        // White where the controls are, nothing where the grid shows through, and a blur that
+        // ramps the same way underneath it. The gradient alone left scrolled covers legible
+        // enough to compete with the buttons; the blur alone left them sharp behind white text.
+        .background {
+            ZStack {
+                VariableBlurView(maxRadius: 18, strongEdge: .bottom)
+
+                LinearGradient(
+                    colors: [
+                        DesignSystem.Color.backgroundDefault.color.opacity(0),
+                        DesignSystem.Color.backgroundDefault.color
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            .ignoresSafeArea(edges: .bottom)
         }
         .overlay {
             if isTargeted {

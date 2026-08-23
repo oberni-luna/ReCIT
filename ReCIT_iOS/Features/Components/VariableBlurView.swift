@@ -36,19 +36,31 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 import UIKit
 
-/// A blur that is strongest at the top edge and absent at the bottom.
+/// A blur that is strongest at one edge and absent at the opposite one.
 struct VariableBlurView: UIViewRepresentable {
-    /// The blur radius at the top edge, in points. It falls to nothing by the bottom edge, so
-    /// the view's own height *is* the fade — give it the region you want blurred and nothing
+    /// The blur radius at the strong edge, in points. It falls to nothing by the opposite edge,
+    /// so the view's own height *is* the fade — give it the region you want blurred and nothing
     /// more.
     var maxRadius: CGFloat = 25
 
+    /// Which edge carries the full radius. The ramp is built top-down inside the effect view, so
+    /// `.bottom` turns the whole thing over rather than building a second gradient: rotating a
+    /// `UIVisualEffectView` turns its mask, not its backdrop, so what it samples is unchanged.
+    var strongEdge: VerticalEdge = .top
+
     func makeUIView(context: Context) -> VariableBlurUIView {
-        .init(maxRadius: maxRadius)
+        let view: VariableBlurUIView = .init(maxRadius: maxRadius)
+        view.transform = transform
+        return view
     }
 
     func updateUIView(_ uiView: VariableBlurUIView, context: Context) {
         uiView.configure(maxRadius: maxRadius)
+        uiView.transform = transform
+    }
+
+    private var transform: CGAffineTransform {
+        strongEdge == .bottom ? .init(scaleX: 1, y: -1) : .identity
     }
 }
 

@@ -19,6 +19,9 @@
 //
 //  The cover reserves its 2:3 frame before the image lands, like every cover in the app.
 //
+//  **The cell hangs from its top edge.** Centred, a one-line title and a two-line title put
+//  their covers on different lines, and a row of books read as ragged (`160:6659`).
+//
 
 import SwiftUI
 
@@ -54,7 +57,7 @@ struct SortBookCardView: View {
         // its second line, and 8 pt at the sides.
         .padding(.vertical, .xxSmall)
         .padding(.horizontal, .small)
-        .frame(width: width, height: SortGridMetrics.cardHeight)
+        .frame(width: width, height: SortGridMetrics.cardHeight, alignment: .top)
         // One element rather than a cover and a title: the card is one thing to a reader, and
         // its cover carries no information the title does not.
         .accessibilityElement(children: .combine)
@@ -70,7 +73,7 @@ struct SortBookCardView: View {
     /// As wide as the card allows without touching its neighbour, and as tall as that width
     /// makes it — capped at the art's height so a tall format does not push the title out.
     private var coverSize: CGSize {
-        let coverWidth: CGFloat = width * 0.6
+        let coverWidth: CGFloat = width * 0.62
         return .init(
             width: coverWidth,
             height: min(SortGridMetrics.bookArtHeight, coverWidth / SortGridMetrics.coverAspectRatio)

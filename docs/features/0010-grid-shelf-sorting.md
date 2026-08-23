@@ -189,6 +189,28 @@ The first device run produced eight changes, all of them visible rather than str
   not on the list: the rows come out of the projection, so the row that leaves and the ones that
   close up behind it are one change to one observable.
 
+### The dissolve
+
+The anchored panel stopped being a sibling of the grid and became a `safeAreaInset` over it
+(`160:6659`, third design pass). Three consequences, in the order they matter:
+
+- **The grid scrolls underneath and dissolves into the panel.** A white gradient runs from
+  nothing at the panel's top edge to solid at the controls, with `VariableBlurView` ramping the
+  same way beneath it — the gradient alone left scrolled covers competing with the buttons, the
+  blur alone left them sharp behind white text. This is also *why* it has to be an inset: two
+  views in a stack leave the lower one with no backdrop to blur, and cut the grid off on a hard
+  line mid-row.
+- **The hairline moved.** It separates the controls from the books rather than the region from
+  the grid, which is now the gradient's job.
+- **The books-to-file cells hang from their top edge.** Centred, a one-line title and a
+  two-line title put their covers on different lines and the row read as ragged.
+
+`VariableBlurView` gained a `strongEdge`: the ramp is built top-down inside the effect view, so
+`.bottom` flips the view rather than building a second gradient — rotating a
+`UIVisualEffectView` turns its mask, not its backdrop. Note that this component reaches private
+QuartzCore API, documented at its own call site; it had exactly one caller before this and now
+has two.
+
 ## Known gaps
 
 - **Autoscroll during a drag is unverified.** See issue 0044 for the fallback design.

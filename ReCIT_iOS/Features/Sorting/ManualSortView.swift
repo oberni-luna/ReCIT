@@ -83,7 +83,7 @@ struct ManualSortView: View {
         let plan: SortWritePlan = session.writePlan
         let metrics: SortGridMetrics = .init(containerWidth: containerWidth)
 
-        return VStack(spacing: .zero) {
+        return Group {
             if session.phase == .syncing || containerWidth == 0 {
                 SyncingPlaceholderView(message: "manual_sort.syncing")
             } else {
@@ -113,7 +113,12 @@ struct ManualSortView: View {
                     }
                 )
             }
-
+        }
+        // **An inset, not a sibling.** The books to file, the controls and the recap sit over the
+        // grid, which keeps scrolling underneath and dissolves into the panel's gradient — a
+        // stack of two views would leave the panel with nothing behind it to blur, and cut the
+        // grid off on a hard line (`160:6659`).
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             SortUnshelvedPanelView(
                 books: projection.unshelved.books,
                 metrics: metrics,

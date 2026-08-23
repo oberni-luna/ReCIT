@@ -38,9 +38,11 @@ struct SortGridMetrics: Equatable, Sendable {
     /// How much of the fourth book card shows past the third. It is the only thing on the
     /// carousel that says "this scrolls", so it is a measurement rather than a leftover.
     static let bookPeek: CGFloat = 40
-    /// How many columns both sections show. Three, per the design, at every width — the
-    /// cards get narrower rather than fewer, so the two sections stay aligned.
+    /// How many columns the design lays the grid on when the collection fills it.
     static let columnCount: Int = 3
+
+    /// Above how many étagères the grid uses its full three columns.
+    static let narrowGridThreshold: Int = 2
     /// A card's total height: the art, then one or two lines of title.
     static let cardHeight: CGFloat = 158
     /// The share of a card's height its art occupies, the rest being the title.
@@ -57,11 +59,26 @@ struct SortGridMetrics: Equatable, Sendable {
         self.containerWidth = containerWidth
     }
 
-    /// One étagère card's width: `(width − 4 × 16) / 3`.
+    /// How many columns to lay `shelfCount` étagères on. Two when there are two or fewer:
+    /// three narrow cards and two empty slots read as a screen that failed to load rather than
+    /// as a small collection, and the cards are the only thing on screen worth looking at.
+    /// The « + » tile does not count — it is an affordance, not an étagère.
+    static func columnCount(forShelfCount shelfCount: Int) -> Int {
+        shelfCount <= narrowGridThreshold ? 2 : columnCount
+    }
+
+    /// One étagère card's width on a grid of `columns`: `(width − (columns + 1) × 16) / columns`.
+    /// The owner's formula, generalised — at three columns it still gives 109,67 on a 393 pt
+    /// screen.
+    func shelfColumnWidth(columns: Int) -> CGFloat {
+        let count: CGFloat = .init(max(1, columns))
+        let gaps: CGFloat = (count + 1) * Self.shelfSpacing
+        return max(0, (containerWidth - gaps) / count)
+    }
+
+    /// One étagère card's width on the full three-column grid.
     var shelfColumnWidth: CGFloat {
-        let columns: CGFloat = .init(Self.columnCount)
-        let gaps: CGFloat = (columns + 1) * Self.shelfSpacing
-        return max(0, (containerWidth - gaps) / columns)
+        shelfColumnWidth(columns: Self.columnCount)
     }
 
     /// One book card's width: one margin, three columns, **three** gutters — two between

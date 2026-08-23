@@ -35,6 +35,35 @@ struct SortGridMetricsTests {
         #expect(abs(metrics.shelfColumnWidth - 109.666) < 0.01)
     }
 
+    /// A small collection gets two columns. Three narrow cards with two empty slots beside them
+    /// read as a screen that failed to load rather than as a library of two.
+    @Test(arguments: [0, 1, 2]) func aSmallCollectionUsesTwoColumns(shelfCount: Int) {
+        #expect(SortGridMetrics.columnCount(forShelfCount: shelfCount) == 2)
+    }
+
+    @Test(arguments: [3, 4, 12, 40]) func aFullCollectionUsesThreeColumns(shelfCount: Int) {
+        #expect(SortGridMetrics.columnCount(forShelfCount: shelfCount) == 3)
+    }
+
+    /// Whatever the column count, the row fills its width exactly: the owner's formula
+    /// generalised, so two columns are two wide cards rather than three cards with a hole.
+    @Test(arguments: [2, 3]) func everyColumnCountFillsTheWidth(columns: Int) {
+        for width in widths {
+            let metrics: SortGridMetrics = .init(containerWidth: width)
+            let card: CGFloat = metrics.shelfColumnWidth(columns: columns)
+            let laidOut: CGFloat = card * CGFloat(columns)
+                + SortGridMetrics.shelfSpacing * CGFloat(columns + 1)
+
+            #expect(abs(laidOut - width) < 0.01)
+        }
+    }
+
+    @Test func twoColumnsAreWiderThanThree() {
+        let metrics: SortGridMetrics = .init(containerWidth: 393)
+
+        #expect(metrics.shelfColumnWidth(columns: 2) > metrics.shelfColumnWidth(columns: 3))
+    }
+
     // MARK: - Livres à ranger
 
     /// Three cards, three gutters, one margin, and 40 pt of the fourth card showing — the

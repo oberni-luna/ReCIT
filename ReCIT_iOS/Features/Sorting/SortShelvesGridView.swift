@@ -60,7 +60,7 @@ struct SortShelvesGridView: View {
                             SortShelfCardCell(
                                 section: section,
                                 status: plan.status(of: section.id),
-                                width: metrics.shelfColumnWidth,
+                                width: cardWidth,
                                 isActive: isActive,
                                 outcome: outcome(section.id),
                                 isApplying: isApplying,
@@ -75,7 +75,7 @@ struct SortShelvesGridView: View {
                         }
 
                         SortNewShelfTileView(
-                            width: metrics.shelfColumnWidth,
+                            width: cardWidth,
                             isActive: isActive,
                             onTap: onCreateShelf,
                             onDrop: onDropOnNewShelf
@@ -102,12 +102,23 @@ struct SortShelvesGridView: View {
     /// depend on the library.
     private static let tileId: String = "manual_sort.tile"
 
-    /// Fixed rather than adaptive: the design fixes the number of columns at three and lets
-    /// the cards narrow, so that the grid and the carousel below stay on the same rhythm.
+    /// Two columns for a collection of two étagères or fewer, three above that. Three narrow
+    /// cards with two empty slots beside them read as a screen that failed to load, not as a
+    /// small library — and on this screen the cards are the only thing worth looking at.
+    private var columnCount: Int {
+        SortGridMetrics.columnCount(forShelfCount: sections.count)
+    }
+
+    private var cardWidth: CGFloat {
+        metrics.shelfColumnWidth(columns: columnCount)
+    }
+
+    /// Fixed widths rather than flexible: the cards are sized by `SortGridMetrics` so the grid
+    /// and the carousel below stay on the same rhythm.
     private var columns: [GridItem] {
         .init(
-            repeating: .init(.fixed(metrics.shelfColumnWidth), spacing: SortGridMetrics.shelfSpacing),
-            count: SortGridMetrics.columnCount
+            repeating: .init(.fixed(cardWidth), spacing: SortGridMetrics.shelfSpacing),
+            count: columnCount
         )
     }
 }

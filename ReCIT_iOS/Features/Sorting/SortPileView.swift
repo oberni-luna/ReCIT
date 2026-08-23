@@ -74,11 +74,7 @@ struct SortPileView: View {
             token: landingToken,
             delay: landingDelay + Double(cover.depth) * SortPileView.landingStagger
         )
-        .sortBookDraggable(
-            cover.book,
-            coverSize: coverSize,
-            isEnabled: isFront && isDraggable
-        )
+        .sortBookDraggable(cover.book, isEnabled: isFront && isDraggable)
     }
 
     /// The gap between two covers' arrivals. The interval the onboarding plank already

@@ -78,20 +78,13 @@ struct SortUnshelvedPanelView: View {
         .padding(.top, .medium)
         .padding(.bottom, .small)
         .frame(maxWidth: .infinity)
+        // Square, edge to edge: the panel is the foot of the screen rather than a card sitting
+        // on it, and rounded corners over a full-width band read as a sheet that failed to open.
         .background(DesignSystem.Color.backgroundDefault.color)
-        .clipShape(
-            .rect(
-                topLeadingRadius: DesignSystem.CornerRadius.roundedLarge.rawValue,
-                topTrailingRadius: DesignSystem.CornerRadius.roundedLarge.rawValue
-            )
-        )
         .overlay {
             if isTargeted {
-                UnevenRoundedRectangle(
-                    topLeadingRadius: DesignSystem.CornerRadius.roundedLarge.rawValue,
-                    topTrailingRadius: DesignSystem.CornerRadius.roundedLarge.rawValue
-                )
-                .strokeBorder(DesignSystem.Color.borderTinted.color, lineWidth: 2)
+                Rectangle()
+                    .strokeBorder(DesignSystem.Color.borderTinted.color, lineWidth: 2)
             }
         }
         .dropDestination(for: SortBookTransfer.self) { transfers, _ in

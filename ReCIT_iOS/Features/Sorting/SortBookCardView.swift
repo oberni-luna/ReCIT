@@ -9,9 +9,13 @@
 //  that a fourth card peeks past the third and the row shows it scrolls. A carousel ending
 //  flush at the screen edge looks finished.
 //
-//  **A tap does nothing.** The card is a handle for the drag and nothing else: opening a
-//  book's screen mid-sort is how a user loses the thread of what they were arranging
-//  (PRD 0009). Which is also why there is no `Button` here — nothing to press.
+//  **A tap does nothing.** There is nothing to press: opening a book's screen mid-sort is how a
+//  user loses the thread of what they were arranging (PRD 0009).
+//
+//  **Only the cover is the drag handle.** Attached to the whole card, the drag took every press
+//  in the card's transparent margins with it, so the carousel could not be scrolled — the zone
+//  read as one big draggable slab. The cover is also the thing that travels, which makes the
+//  handle and the payload the same object.
 //
 //  The cover reserves its 2:3 frame before the image lands, like every cover in the app.
 //
@@ -35,6 +39,7 @@ struct SortBookCardView: View {
                 title: book.title,
                 size: coverSize
             )
+            .sortBookDraggable(book, isEnabled: isDraggable)
             .frame(width: width, height: SortGridMetrics.artHeight)
 
             Text(book.title)
@@ -47,7 +52,6 @@ struct SortBookCardView: View {
         .padding(.vertical, .small)
         .padding(.horizontal, .xSmall)
         .frame(width: width, height: SortGridMetrics.cardHeight)
-        .sortBookDraggable(book, coverSize: coverSize, isEnabled: isDraggable)
         // One element rather than a cover and a title: the card is one thing to a reader, and
         // its cover carries no information the title does not.
         .accessibilityElement(children: .combine)

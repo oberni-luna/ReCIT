@@ -31,13 +31,21 @@ struct ShelfCoverView: View {
     /// instead, which the sorting surface wants: a fitted cover leaves transparent bands that a
     /// drag lifts along with the artwork.
     var contentMode: ContentMode = .fit
+    /// Where the artwork sits inside the frame when it does not fill it. A cover's real
+    /// proportions rarely match the frame reserved for it — `ShelfBooksLayout` reserves a 0,66
+    /// portrait, and a comic album is wider — so a fitted cover is letterboxed, and centred it
+    /// **floats above the plank**. A book on a shelf stands on it: `.bottom`.
+    var alignment: Alignment = .center
     /// Whether to stand in a sheet of parchment until the cover has loaded. The focus overlay
     /// turns it off: the shelf's own cover is still drawn underneath, so a placeholder there
     /// only ever reads as a flash — a pale slab twice the size of the book.
     var showsPlaceholder: Bool = true
 
     var body: some View {
-        CachedAsyncImage(url: imageUrl.flatMap { URL(string: $0) }) { image in
+        CachedAsyncImage(
+            url: imageUrl.flatMap { URL(string: $0) },
+            contentAlignment: alignment
+        ) { image in
             image
                 .resizable()
                 .aspectRatio(contentMode: contentMode)
@@ -55,7 +63,7 @@ struct ShelfCoverView: View {
                 Color.clear
             }
         }
-        .frame(width: size.width, height: size.height)
+        .frame(width: size.width, height: size.height, alignment: alignment)
         .clipShape(.rect(cornerRadius: 2))
         .shadow(color: .black.opacity(0.22), radius: 3, x: 1, y: 2)
     }
@@ -69,6 +77,7 @@ extension ShelfCoverView {
         item: InventoryItem,
         size: CGSize,
         contentMode: ContentMode = .fit,
+        alignment: Alignment = .center,
         showsPlaceholder: Bool = true
     ) {
         self.init(
@@ -76,6 +85,7 @@ extension ShelfCoverView {
             title: item.edition?.title ?? "",
             size: size,
             contentMode: contentMode,
+            alignment: alignment,
             showsPlaceholder: showsPlaceholder
         )
     }

@@ -79,7 +79,12 @@ struct ShelfBooksView: View {
     }
 
     /// A lone book is shown face-on with its real cover — prettier than a single spine.
+    ///
+    /// Anchored to the bottom of its frame, because the frame is a fixed 0,66 portrait
+    /// (`ShelfBooksLayout.singleCoverAspect`) and a real cover rarely matches it: a wider one —
+    /// a comic album, an art book — is letterboxed inside it, and centred that leaves the book
+    /// hovering above the plank.
     private var singleCover: some View {
-        ShelfCoverView(item: books[0], size: layout.coverFrame.size)
+        ShelfCoverView(item: books[0], size: layout.coverFrame.size, alignment: .bottom)
     }
 }

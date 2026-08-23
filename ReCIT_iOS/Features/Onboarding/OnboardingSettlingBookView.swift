@@ -49,7 +49,9 @@ struct OnboardingSettlingBookView: View {
     var body: some View {
         Group {
             if presentation == .cover {
-                ShelfCoverView(item: item, size: frame.size)
+                // Bottom-anchored, like the shelf's own lone book: the frame is a fixed
+                // portrait and a wider cover would otherwise settle *above* the plank.
+                ShelfCoverView(item: item, size: frame.size, alignment: .bottom)
             } else {
                 PaintedBookView(
                     edition: item.edition,

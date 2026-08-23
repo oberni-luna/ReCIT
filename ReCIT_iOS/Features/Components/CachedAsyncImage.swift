@@ -12,6 +12,7 @@ import Nuke
 
 struct CachedAsyncImage<Content: View, Placeholder: View>: View {
     private let url: URL?
+    private let contentAlignment: Alignment
     private let content: (Image) -> Content
     private let placeholder: () -> Placeholder
     private let imageAppearanceDuration: TimeInterval = 0.1
@@ -19,18 +20,24 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
     @State private var loadedImage: Image?
     @State private var loadFailed = false
 
+    /// Where the artwork sits when it does not fill the frame it was given — which happens
+    /// whenever a cover's real proportions differ from the frame reserved for it, and the
+    /// content mode is `.fit`. Centred by default; a book standing on a shelf wants `.bottom`,
+    /// or it floats above the plank.
     init(
         url: URL?,
+        contentAlignment: Alignment = .center,
         @ViewBuilder content: @escaping (Image) -> Content,
         @ViewBuilder placeholder: @escaping () -> Placeholder
     ) {
         self.url = url
+        self.contentAlignment = contentAlignment
         self.content = content
         self.placeholder = placeholder
     }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: contentAlignment) {
             if loadedImage == nil && !loadFailed {
                 placeholder()
                     .transition(
@@ -94,9 +101,14 @@ private func isCancellation(_ error: Error) -> Bool {
 // MARK: - Convenience Initializers
 
 extension CachedAsyncImage where Content == Image {
-    init(url: URL?, @ViewBuilder placeholder: @escaping () -> Placeholder) {
+    init(
+        url: URL?,
+        contentAlignment: Alignment = .center,
+        @ViewBuilder placeholder: @escaping () -> Placeholder
+    ) {
         self.init(
             url: url,
+            contentAlignment: contentAlignment,
             content: { $0 },
             placeholder: placeholder
         )

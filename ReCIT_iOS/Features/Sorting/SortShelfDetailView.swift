@@ -97,9 +97,19 @@ struct SortShelfDetailView: View {
         }
     }
 
-    /// Takes one book off this étagère: a move into « à ranger », on the stack, and nothing
-    /// else. Refused while a run owns the stack, like every other change.
+    /// Takes one book off this étagère: a move into « à ranger », on the stack, and nothing else.
+    /// Refused while a run owns the stack, like every other change.
+    ///
+    /// The book is re-read from the session first. The action closure belongs to the render the
+    /// swipe started in, and a `List` that re-diffs under its own swipe animation can fire it
+    /// again for the row that has taken the swiped one's place — which took a second book off the
+    /// étagère for one gesture. Both ends now check: this one, and `moveBook` itself.
     private func unshelve(_ book: AutoSortBook, from section: SortSection) {
+        let stillHere: Bool = session.projection.sections
+            .first { $0.id == section.id }?
+            .books.contains { $0.id == book.id } ?? false
+        guard stillHere else { return }
+
         session.moveBook(book.id, from: section.id, to: .unshelved)
     }
 }

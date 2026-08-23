@@ -26,6 +26,11 @@ struct ShelfCoverView: View {
     /// The book's title, shown on the parchment placeholder while the image loads.
     let title: String
     let size: CGSize
+    /// How the artwork meets its frame. `.fit` keeps a cover whole with air around it — right on
+    /// a shelf, where the book's proportions are the point. `.fill` crops it to the frame
+    /// instead, which the sorting surface wants: a fitted cover leaves transparent bands that a
+    /// drag lifts along with the artwork.
+    var contentMode: ContentMode = .fit
     /// Whether to stand in a sheet of parchment until the cover has loaded. The focus overlay
     /// turns it off: the shelf's own cover is still drawn underneath, so a placeholder there
     /// only ever reads as a flash — a pale slab twice the size of the book.
@@ -35,7 +40,7 @@ struct ShelfCoverView: View {
         CachedAsyncImage(url: imageUrl.flatMap { URL(string: $0) }) { image in
             image
                 .resizable()
-                .scaledToFit()
+                .aspectRatio(contentMode: contentMode)
         } placeholder: {
             if showsPlaceholder {
                 ZStack {
@@ -63,12 +68,14 @@ extension ShelfCoverView {
     init(
         item: InventoryItem,
         size: CGSize,
+        contentMode: ContentMode = .fit,
         showsPlaceholder: Bool = true
     ) {
         self.init(
             imageUrl: item.edition?.image,
             title: item.edition?.title ?? "",
             size: size,
+            contentMode: contentMode,
             showsPlaceholder: showsPlaceholder
         )
     }

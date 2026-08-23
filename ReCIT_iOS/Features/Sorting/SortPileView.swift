@@ -65,7 +65,8 @@ struct SortPileView: View {
         return ShelfCoverView(
             imageUrl: cover.book.coverImageUrl,
             title: cover.book.title,
-            size: coverSize
+            size: coverSize,
+            contentMode: .fill
         )
         // The drag is attached **before** the tilt on purpose: `draggable` snapshots the view it
         // is attached to, and above the rotation it lifted a turned cover clipped by the card —

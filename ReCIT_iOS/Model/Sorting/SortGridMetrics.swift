@@ -45,8 +45,11 @@ struct SortGridMetrics: Equatable, Sendable {
     static let narrowGridThreshold: Int = 2
     /// A card's total height: the art, then one or two lines of title.
     static let cardHeight: CGFloat = 158
-    /// The share of a card's height its art occupies, the rest being the title.
+    /// The share of an étagère card's height its pile occupies, the rest being the title.
     static let artHeight: CGFloat = 106
+    /// The same for a book card, whose title is a 17 pt face over two lines and therefore
+    /// taller than an étagère's (`160:6659`).
+    static let bookArtHeight: CGFloat = 100
     /// A cover's reserved shape, before its image exists.
     static let coverAspectRatio: CGFloat = 2.0 / 3.0
     /// How many covers a pile draws at most.

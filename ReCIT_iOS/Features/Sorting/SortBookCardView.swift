@@ -37,20 +37,23 @@ struct SortBookCardView: View {
             ShelfCoverView(
                 imageUrl: book.coverImageUrl,
                 title: book.title,
-                size: coverSize
+                size: coverSize,
+                contentMode: .fill
             )
             .sortBookDraggable(book, isEnabled: isDraggable)
-            .frame(width: width, height: SortGridMetrics.artHeight)
+            .frame(width: width, height: SortGridMetrics.bookArtHeight)
 
             Text(book.title)
-                .textStyle(.footnote200Bold)
+                .textStyle(.content300)
                 .foregroundStyle(.foregroundDefault)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
-        .padding(.vertical, .small)
-        .padding(.horizontal, .xSmall)
+        // The mockup's own paddings (`160:6659`): 2 pt top and bottom, so the title has room for
+        // its second line, and 8 pt at the sides.
+        .padding(.vertical, .xxSmall)
+        .padding(.horizontal, .small)
         .frame(width: width, height: SortGridMetrics.cardHeight)
         // One element rather than a cover and a title: the card is one thing to a reader, and
         // its cover carries no information the title does not.
@@ -70,7 +73,7 @@ struct SortBookCardView: View {
         let coverWidth: CGFloat = width * 0.6
         return .init(
             width: coverWidth,
-            height: min(SortGridMetrics.artHeight, coverWidth / SortGridMetrics.coverAspectRatio)
+            height: min(SortGridMetrics.bookArtHeight, coverWidth / SortGridMetrics.coverAspectRatio)
         )
     }
 }

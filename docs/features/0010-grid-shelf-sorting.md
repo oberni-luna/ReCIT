@@ -161,6 +161,22 @@ The first device run produced eight changes, all of them visible rather than str
   white background, which is what removed the two part-width separators floating above the first
   row and under the last.
 
+### And the pass after that
+
+- **Covers fill their frame on this screen** (`ShelfCoverView` gains a `contentMode`, still
+  `.fit` by default for the shelves). A fitted cover leaves transparent bands inside its frame,
+  and a drag lifts those bands along with the artwork.
+- **The books-to-file cells follow the mockup's own numbers**: 2 pt of vertical padding, and
+  their titles in `content300` (Alegreya Medium 17) over two lines rather than 12 pt.
+- **The drop badge takes the app's tint.** The system draws the drag session's « + » in the
+  accent colour, and a cover does not inherit the app's `.tint` — so it came out system green.
+  Set on the flow.
+- **One swipe takes one book off.** A `List` can re-diff under its own swipe animation and fire
+  the action again for the row that has taken the swiped one's place, which took a second book
+  off the étagère. Both ends now refuse it: the screen re-reads the book from the session before
+  acting, and `moveBook` ignores a move to where the book already sits — which protects every
+  caller rather than each one separately.
+
 ## Known gaps
 
 - **Autoscroll during a drag is unverified.** See issue 0044 for the fallback design.
@@ -174,10 +190,6 @@ The first device run produced eight changes, all of them visible rather than str
 - **Apply ordering**, inherited from feature 0009: operations are grouped per étagère in screen
   order, so a book moving to an étagère that sorts earlier gets its addition before the removal
   that frees it, and a failure in between leaves it on two étagères until the resume.
-- **Card typography diverges from the design.** The mockup's card title is a serif face at
-  roughly 13 pt; the design system has no Alegreya token at that size, so the cards use
-  `footnote200Bold` (OpenSans 12). To be recorded in
-  `docs/design-system/figma-library.md` or resolved by a new token.
 - **The étagère gutter is 16 pt in code against the mockup's 12 pt**, per the owner's formula.
 
 ## Issues

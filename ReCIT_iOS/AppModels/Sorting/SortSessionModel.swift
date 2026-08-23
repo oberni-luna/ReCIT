@@ -249,6 +249,13 @@ final class SortSessionModel {
         // proposal reads the origins it moves books from, so it is no different.
         guard isBusy == false else { return }
 
+        // **Resolved against the projection, not trusted from the caller.** A `List` can re-diff
+        // under its own swipe animation and fire the action a second time — for the row that has
+        // meanwhile taken the swiped one's place — which used to take a second book off an
+        // étagère for one gesture. A move to where the book already sits is nothing at all, and
+        // saying so here protects every caller rather than each one separately.
+        guard section(holding: bookId) != destination else { return }
+
         guard let change = SortChange.move(bookId: bookId, from: origin, to: destination) else { return }
         changes.append(change)
     }

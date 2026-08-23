@@ -139,6 +139,10 @@ struct SortFlowView: View {
                 }
             }
         }
+        // The drag session's own badges — the « + » that appears over a drop target — are drawn
+        // by the system in the accent colour. A cover does not inherit the app's tint, so the
+        // badge came out in the system green rather than ours.
+        .tint(.foregroundTinted)
     }
 
     /// Pushes the book screen. The pending row is deliberately left standing, so coming back

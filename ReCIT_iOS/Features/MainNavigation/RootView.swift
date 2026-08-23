@@ -72,6 +72,27 @@ struct RootView: View {
             LoginView(authModel: authModel) {}
         } else {
             MainTabView(authModel: authModel)
+                // **Innermost of the three, on purpose.** Pull-to-refresh belongs to the tabs
+                // and to nothing else: an action set here reaches every `ScrollView` *inside*
+                // `MainTabView`, and stops short of the cover declared above it. Applied
+                // outside the cover it would reach the sorting flow's scroll views too, where a
+                // downward drag is a book being filed and not a refresh — and
+                // `EnvironmentValues.refresh` is read-only, so it cannot be cleared from within.
+                .refreshable {
+                    refreshUserData()
+                }
+                // The sorting flow: **above the refreshable, below the models.** Above, so the
+                // flow's scroll views keep their downward drags; below, so its screens actually
+                // find the models — a cover's content inherits what its ancestors inject, and a
+                // cover attached outside the `.environment` calls sees none of them (which is a
+                // crash, not a degradation).
+                //
+                // One presentation for every entry point (PRD 0009): the étagères toolbar, the
+                // empty-shelf card, the settings row and its debug twin open it at the surface,
+                // the scan buttons open it at the camera, all through one app-scoped flag.
+                .fullScreenCover(isPresented: presentsSortFlow) {
+                    SortFlowView(start: sortFlowPresentation.start)
+                }
                 .environment(userModel)
                 .environment(listModel)
                 .environment(entityModel)
@@ -87,23 +108,6 @@ struct RootView: View {
                 .environment(syncStatus)
                 .environment(onboardingStore)
                 .environmentObject(authModel)
-                .refreshable {
-                    refreshUserData()
-                }
-                // **Presented from here, above the app's `.refreshable`, on purpose.** The
-                // sorting flow's one gesture is a drag, and a `ScrollView` that inherits a
-                // refresh action steals every downward drag to rubber-band instead. The action
-                // reaches a modal's content the same way it reaches any descendant, and
-                // `EnvironmentValues.refresh` is read-only — so the only way to be rid of it is
-                // to present the flow outside the modifier that provides it.
-                //
-                // It is one presentation for every entry point (PRD 0009): the étagères
-                // toolbar, the empty-shelf card, the settings row and its debug twin open it at
-                // the surface, and the scan buttons open it at the camera — all through the
-                // same app-scoped flag.
-                .fullScreenCover(isPresented: presentsSortFlow) {
-                    SortFlowView(start: sortFlowPresentation.start)
-                }
                 .onAppear {
                     refreshUserData()
                 }

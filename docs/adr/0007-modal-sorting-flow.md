@@ -51,12 +51,21 @@ inside that cover rather than stacking a second one.
    four scan buttons that open at the camera — raises the same flag. A `NavigationLink` in
    settings becomes a `Button`.
 
-   The *where* is not tidiness. `RootView` puts a `.refreshable` on the app, and a cover
-   presented from inside that subtree hands the refresh action to every `ScrollView` in the
-   flow — which then steals the downward drags the sorting surface is built on.
-   `EnvironmentValues.refresh` is read-only, so a flow carrying a drag **must** be presented
-   from outside the modifier that provides it. Any future flow with its own gestures inherits
-   this rule.
+   The *where* is not tidiness — it is three modifiers whose order is the mechanism:
+
+   ```
+   MainTabView
+     .refreshable { … }        // innermost: reaches the tabs, stops short of the cover
+     .fullScreenCover { flow } // above it: the flow keeps its downward drags
+     .environment(…)           // outermost: the cover is inside these, so the flow finds them
+   ```
+
+   A `.refreshable` above the cover hands its action to every `ScrollView` in the flow, which
+   then steals the drags the sorting surface is built on, and `EnvironmentValues.refresh` is
+   read-only so it cannot be cleared from within. But a cover above the `.environment` calls
+   inherits none of them and **crashes** on the first model it reads. Both were shipped and both
+   were fixed; the middle position is the only one that satisfies the pair. Any future flow with
+   its own gestures inherits this.
 6. **No back button out of a pushed flow step whose predecessor is a receipt.** The bilan
    reports a session that has ended; going back to it after filing would re-offer work already
    done. The surface hides the back button and offers an explicit close.

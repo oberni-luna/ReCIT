@@ -59,6 +59,14 @@ struct RootView: View {
         _onboardingStore = State(initialValue: OnboardingStore())
     }
 
+    /// The sorting flow's flag as a binding: a cover needs one, and an observable is not one.
+    private var presentsSortFlow: Binding<Bool> {
+        .init(
+            get: { sortFlowPresentation.isPresented },
+            set: { sortFlowPresentation.isPresented = $0 }
+        )
+    }
+
     var body: some View {
         if !authModel.isAuthenticated {
             LoginView(authModel: authModel) {}
@@ -81,6 +89,20 @@ struct RootView: View {
                 .environmentObject(authModel)
                 .refreshable {
                     refreshUserData()
+                }
+                // **Presented from here, above the app's `.refreshable`, on purpose.** The
+                // sorting flow's one gesture is a drag, and a `ScrollView` that inherits a
+                // refresh action steals every downward drag to rubber-band instead. The action
+                // reaches a modal's content the same way it reaches any descendant, and
+                // `EnvironmentValues.refresh` is read-only — so the only way to be rid of it is
+                // to present the flow outside the modifier that provides it.
+                //
+                // It is one presentation for every entry point (PRD 0009): the étagères
+                // toolbar, the empty-shelf card, the settings row and its debug twin open it at
+                // the surface, and the scan buttons open it at the camera — all through the
+                // same app-scoped flag.
+                .fullScreenCover(isPresented: presentsSortFlow) {
+                    SortFlowView(start: sortFlowPresentation.start)
                 }
                 .onAppear {
                     refreshUserData()

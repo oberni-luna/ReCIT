@@ -46,8 +46,8 @@ onboarding, straight at the sorting surface from the home and from settings.
   `SortShelfDetailView`, `SortFlowView` (renamed from `Features/Scanner/BatchScanView`),
   `SortFlowRoute`, `SortFilingOption`, and the motion modifiers `SortLandingBounce`,
   `SortStaggeredBounce`, `SortBreathingModifier`, `SortBookDraggable`.
-- **New app model**: `AppModels/Sorting/SortFlowPresentation` — app-scoped, one flag, four entry
-  points.
+- **New app model**: `AppModels/Sorting/SortFlowPresentation` — app-scoped, one flag, every
+  entry point, presented by `RootView` **above** the app's `.refreshable`.
 - **Moved to `Features/Components/`**: `ShelfSectionHeader`, and `ShelfCoverView` refactored to
   take `(url, title, size)` with an `InventoryItem` convenience for the shelf screens.
 - **Deleted**: `ManualSortListView`, `ManualSortCard`, `ManualSortEmptySectionRow`,
@@ -126,6 +126,40 @@ onboarding, straight at the sorting surface from the home and from settings.
 - **The projection is read once per render**, by the root view, and value types go down. It is
   recomputed on every read by design (PRD 0008), so a card reading it in its own body would
   walk the whole library per card per animation frame.
+
+## The design pass after the first run on device
+
+The first device run produced eight changes, all of them visible rather than structural:
+
+- **Two columns for two étagères or fewer.** Three narrow cards with two empty slots read as a
+  screen that failed to load rather than as a small library. The width formula is generalised —
+  `(width − (columns + 1) × 16) / columns` — so a row still fills its width exactly at either
+  count, and the « + » tile does not count towards the threshold.
+- **The books-to-file zone scrolls again.** The drag had been attached to the whole book card,
+  whose background is transparent, so every press in its margins started a drag. The handle is
+  the cover alone, which is what the étagère cards already did.
+- **What travels is the cover, square and whole.** Two bugs, two causes. The custom preview
+  closure built a fresh `CachedAsyncImage` that the drag session snapshotted before Nuke handed
+  the image over — hence a parchment slab with a title on it; dropping the closure makes the
+  lifted object the source view. And on an étagère card the drag was attached *above* the tilt,
+  so it lifted a rotated cover clipped by the card; attaching it below the rotation lifts the
+  cover as drawn.
+- **The pile fans both ways.** It opened rightwards only, so a shelf of five walked off towards
+  the card's edge. Covers now alternate side by side around the front one, which keeps the pile
+  roughly centred on the book a drag will take.
+- **No pull-to-refresh anywhere in the flow.** `RootView`'s app-wide `.refreshable` reached
+  every `ScrollView` in the cover through the environment and swallowed downward drags.
+  `EnvironmentValues.refresh` is read-only, so the flow is presented from *above* that modifier
+  instead — which is also why the scan buttons stopped owning their own covers. Recorded in
+  ADR 0007.
+- **One close control.** The flow's own cross showed alongside the surface's, and it ended a
+  scanning session that was not running.
+- **White throughout, structure by outline.** The grey backdrop is gone: cards carry a hairline
+  border, the anchored panel a hairline on top, and neither has rounded corners. The empty
+  étagère's « · 0 » is gone too — the dashed hole in its art already says it.
+- **The étagère's own screen is one `Section`** with a footer saying what the swipe does, on a
+  white background, which is what removed the two part-width separators floating above the first
+  row and under the last.
 
 ## Known gaps
 

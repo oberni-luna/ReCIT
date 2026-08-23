@@ -40,7 +40,6 @@ struct ProfileDebugSection: View {
 
     @State private var isPresentingWelcome: Bool = false
     @State private var isPresentingTally: Bool = false
-    @State private var isScanning: Bool = false
     /// Set when the accueil is dismissed through its call to action, so the scanner opens
     /// only then — a cover cannot be raised from inside the one that is leaving.
     @State private var scanWasChosen: Bool = false
@@ -120,9 +119,6 @@ struct ProfileDebugSection: View {
                 onLater: { isPresentingWelcome = false }
             )
         }
-        .fullScreenCover(isPresented: $isScanning) {
-            SortFlowView(start: .scanning)
-        }
         // The bilan on its own, standing in for the end of a session. Its CTA pushes onto
         // this screen's path rather than the session's, which is the one thing here that is
         // not the real wiring — the destination is the same.
@@ -167,7 +163,7 @@ struct ProfileDebugSection: View {
         guard scanWasChosen else { return }
 
         scanWasChosen = false
-        isScanning = true
+        sortFlow.presentScanning()
     }
 }
 

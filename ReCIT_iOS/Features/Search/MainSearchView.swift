@@ -10,10 +10,10 @@ import SwiftData
 
 struct AddInventoryItemSearchView: View {
     @Environment(InventoryModel.self) private var inventoryModel
+    @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    @State private var showScanner: Bool = false
     @State private var searchResult: SearchResult?
     @State private var addingItemId: String?
     @State private var path: NavigationPath = .init()
@@ -31,7 +31,7 @@ struct AddInventoryItemSearchView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .confirmationAction) {
                     Button("Scan", systemImage: "barcode.viewfinder") {
-                        showScanner = true
+                        sortFlow.presentScanning()
                     }
                 } label: {
                     Image(systemName: "plus")
@@ -41,9 +41,6 @@ struct AddInventoryItemSearchView: View {
             // The scanner is a mode, not a one-shot reader: it stays up, files book after
             // book, and carries its own navigation stack. Presented modally so leaving it
             // returns here rather than unwinding this screen's path. See PRD 0005.
-            .fullScreenCover(isPresented: $showScanner) {
-                SortFlowView(start: .scanning)
-            }
         }
     }
 

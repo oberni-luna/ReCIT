@@ -67,6 +67,10 @@ struct SortPileView: View {
             title: cover.book.title,
             size: coverSize
         )
+        // The drag is attached **before** the tilt on purpose: `draggable` snapshots the view it
+        // is attached to, and above the rotation it lifted a turned cover clipped by the card —
+        // white corners and a cropped spine. Here what travels is the cover, square and whole.
+        .sortBookDraggable(cover.book, isEnabled: isFront && isDraggable)
         .rotationEffect(.degrees(cover.tiltDegrees))
         .offset(offset(for: cover))
         .sortLandingBounce(bookId: isFront ? cover.book.id : nil)
@@ -74,7 +78,6 @@ struct SortPileView: View {
             token: landingToken,
             delay: landingDelay + Double(cover.depth) * SortPileView.landingStagger
         )
-        .sortBookDraggable(cover.book, isEnabled: isFront && isDraggable)
     }
 
     /// The gap between two covers' arrivals. The interval the onboarding plank already
@@ -91,16 +94,21 @@ struct SortPileView: View {
         )
     }
 
-    /// Where a cover sits relative to the middle of the card. The fan opens right and down
-    /// as it goes back, so each cover's spine edge stays visible and the front one is the
-    /// one nearest the reader — which is what makes "grab the top book" mean anything.
+    /// Where a cover sits relative to the front one, which stays put in the middle of the card.
+    ///
+    /// The fan opens **alternately** — one cover right, the next left, then further right, then
+    /// further left — so the pile stays roughly centred on the book a drag will take. Opening
+    /// one way only walked the whole pile off towards the right edge as it grew. Roughly, not
+    /// exactly: each cover also leans by its own derived angle, and that is what keeps it
+    /// looking handled.
     private func offset(for cover: SortPile.Cover) -> CGSize {
-        guard pile.isSingleCover == false else { return .zero }
+        guard pile.isSingleCover == false, cover.depth > 0 else { return .zero }
         let step: CGFloat = width * 0.075
-        let depth: CGFloat = .init(cover.depth)
+        let rank: CGFloat = .init((cover.depth + 1) / 2)
+        let side: CGFloat = cover.depth.isMultiple(of: 2) ? -1 : 1
         return .init(
-            width: depth * step - step,
-            height: depth * step * 0.5 - step * 0.5
+            width: side * rank * step,
+            height: rank * step * 0.5
         )
     }
 }

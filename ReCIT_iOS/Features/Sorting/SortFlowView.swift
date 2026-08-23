@@ -21,6 +21,13 @@
 //  app-scoped, and a user who steps out has to find their work where they left it; the only
 //  thing that throws work away is the discard control, which asks first.
 //
+//  **No pull-to-refresh anywhere in the flow**, and that is a matter of *where the cover is
+//  presented from*. `RootView` puts a `.refreshable` on the app, which every descendant
+//  `ScrollView` picks up through the environment — so the shelves grid and the books carousel
+//  both grew a spinner and swallowed vertical drags, on a screen whose one gesture is a drag.
+//  `EnvironmentValues.refresh` is read-only, so it cannot be cleared from the inside: the flow
+//  is presented from **outside** that modifier instead (see `RootView`).
+//
 //  A scanning *session*, presented modally. The camera stays up and books accumulate — point at
 //  a barcode, the book rises over the live feed, one tap files it, the camera is already waiting
 //  for the next one — and when the session ends it reports what it did before letting go.
@@ -109,9 +116,14 @@ struct SortFlowView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("action.close", systemImage: "xmark", action: endSession)
-                        .tint(ScanOverlayPalette.ink)
+                // The camera's way out. The sorting surface carries its own close control, so
+                // offering this one alongside it made two crosses in one bar, one of which
+                // ended a scanning session that was not running.
+                if start == .scanning {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("action.close", systemImage: "xmark", action: endSession)
+                            .tint(ScanOverlayPalette.ink)
+                    }
                 }
             }
             .navigationDestination(for: NavigationDestination.self) { destination in

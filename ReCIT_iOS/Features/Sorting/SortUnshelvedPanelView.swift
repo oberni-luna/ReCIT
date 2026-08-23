@@ -78,9 +78,14 @@ struct SortUnshelvedPanelView: View {
         .padding(.top, .medium)
         .padding(.bottom, .small)
         .frame(maxWidth: .infinity)
-        // Square, edge to edge: the panel is the foot of the screen rather than a card sitting
-        // on it, and rounded corners over a full-width band read as a sheet that failed to open.
+        // Square, edge to edge, white like everything else: the panel is the foot of the screen
+        // rather than a card sitting on it. What separates it from the grid is one hairline —
+        // enough to read as a region, quiet enough not to become furniture.
         .background(DesignSystem.Color.backgroundDefault.color)
+        .overlay(alignment: .top) {
+            DesignSystem.Color.borderDefault.color
+                .frame(height: 1)
+        }
         .overlay {
             if isTargeted {
                 Rectangle()

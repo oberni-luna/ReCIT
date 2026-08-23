@@ -45,18 +45,23 @@ inside that cover rather than stacking a second one.
    app-wide enum every tab dispatches on — **loses** its sorting case. The enum gets *smaller*
    as a flow gets richer, because nothing outside the cover can reach inside it.
 4. **`.fullScreenCover`, never `.sheet`, for a flow carrying a drag.**
-5. **One presentation point for the flow.** `SortFlowPresentation` is app-scoped and injected
-   like every other model; `MainTabView` mounts the cover from it, and the four entry points
-   raise the flag. A `NavigationLink` in settings becomes a `Button`.
+5. **One presentation point for the flow, and it sits above the app's `.refreshable`.**
+   `SortFlowPresentation` is app-scoped and injected like every other model; **`RootView`**
+   mounts the cover from it, and every entry point — the four that open at the surface and the
+   four scan buttons that open at the camera — raises the same flag. A `NavigationLink` in
+   settings becomes a `Button`.
+
+   The *where* is not tidiness. `RootView` puts a `.refreshable` on the app, and a cover
+   presented from inside that subtree hands the refresh action to every `ScrollView` in the
+   flow — which then steals the downward drags the sorting surface is built on.
+   `EnvironmentValues.refresh` is read-only, so a flow carrying a drag **must** be presented
+   from outside the modifier that provides it. Any future flow with its own gestures inherits
+   this rule.
 6. **No back button out of a pushed flow step whose predecessor is a receipt.** The bilan
    reports a session that has ended; going back to it after filing would re-offer work already
    done. The surface hides the back button and offers an explicit close.
 7. **Closing a flow keeps its draft.** The sorting session is app-scoped, so the close control
    is "step out", not "discard". Throwing work away is a separate, named, confirmed action.
-
-The scan buttons keep presenting the container themselves, with `start: .scanning`. They are
-local presentations that already work, and centralising them would buy nothing — the flow they
-open ends in the same place either way.
 
 ## Consequences
 
@@ -75,3 +80,6 @@ open ends in the same place either way.
   find the same draft.
 - One tab bar's worth of vertical space comes back to the screen, which is what let the books
   to file, the recap and the controls live in an anchored panel.
+- **Local `@State` presentation flags are gone from the four scan buttons.** They each owned a
+  cover, which was harmless until the flow grew a screen with gestures — at which point the
+  presentation's position in the view tree became a behavioural decision rather than a detail.

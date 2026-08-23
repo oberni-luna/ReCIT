@@ -13,7 +13,6 @@ struct MainTabView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.snackBar) private var snackBar
-    @Environment(SortFlowPresentation.self) private var sortFlow
     let authModel: AuthModel
     
     enum TabConfig: String, Hashable, CaseIterable {
@@ -91,15 +90,6 @@ struct MainTabView: View {
     /// it drives has to reach over the nav bar and the tab bar. See ADR 0006.
     @State private var shelfFocus: ShelfFocusModel = .init()
 
-    /// The flow's flag as a binding. `@Environment` hands over an observable, not a binding,
-    /// and a cover needs one.
-    private var presentsSortFlow: Binding<Bool> {
-        .init(
-            get: { sortFlow.isPresented },
-            set: { sortFlow.isPresented = $0 }
-        )
-    }
-
     var body: some View {
         TabView(selection: $selectedTab) {
             ForEach(TabConfig.allCases, id: \.self) { tabConfig in
@@ -128,12 +118,6 @@ struct MainTabView: View {
         // The first-launch accueil, over the built app rather than instead of it: the
         // composition root would have to choose before the user is known. See PRD 0007.
         .onboardingWelcome(user: userModel.myUser)
-        // The sorting flow, over the built app rather than inside a tab: it is a modal flow
-        // (PRD 0009), and presenting it from each of its four entry points would mean the same
-        // screen presented from two tabs at once.
-        .fullScreenCover(isPresented: presentsSortFlow) {
-            SortFlowView(start: .sorting)
-        }
         .onChange(of: errorReporter.lastFailure?.id) { _, _ in
             if let failure = errorReporter.lastFailure {
                 snackBar.show { SnackBarView.error(failure.error) }

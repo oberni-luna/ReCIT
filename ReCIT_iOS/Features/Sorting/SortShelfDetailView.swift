@@ -41,31 +41,32 @@ struct SortShelfDetailView: View {
 
         return List {
             if let section {
-                if section.books.isEmpty {
-                    Text("manual_sort.shelf.detail.empty")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
-                } else {
-                    ForEach(section.books) { book in
-                        SortBookRow(book: book)
-                            // Full swipe on: the change is cheap and reversible — it is not
-                            // even sent yet — and clearing several books off an étagère should
-                            // not cost a tap each.
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(
-                                    "action.remove_from_shelf_named \(section.name ?? "")",
-                                    systemImage: "tray.and.arrow.up"
-                                ) {
-                                    unshelve(book, from: section)
-                                }
-                                .disabled(session.isBusy)
-                            }
+                Section {
+                    if section.books.isEmpty {
+                        Text("manual_sort.shelf.detail.empty")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
+                    } else {
+                        rows(of: section)
+                    }
+                } footer: {
+                    // The swipe is the screen's only action and nothing else advertises it.
+                    // In the footer rather than as a first row: it is a note about the list, not
+                    // a thing in it.
+                    if section.books.isEmpty == false {
+                        Text("manual_sort.shelf.detail.swipe_hint")
+                            .textStyle(.footnote200)
+                            .foregroundStyle(.foregroundSecondary)
                     }
                 }
             }
         }
         .listStyle(.plain)
-        .applyListBackground()
+        // A section's own separators run the full width; the plain list's leading inset was what
+        // left a hairline hanging above the first row and under the last.
+        .listSectionSeparator(.hidden)
+        .scrollContentBackground(.hidden)
+        .background(DesignSystem.Color.backgroundDefault.color)
         .navigationTitle(section?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         // Reactive rather than signalled: unlike `ShelfDetailView`, which pops on a form's own
@@ -75,6 +76,24 @@ struct SortShelfDetailView: View {
         .onChange(of: section == nil) { _, hasGone in
             guard hasGone else { return }
             dismiss()
+        }
+    }
+
+    /// The étagère's books, each swipeable off it.
+    private func rows(of section: SortSection) -> some View {
+        ForEach(section.books) { book in
+            SortBookRow(book: book)
+            // Full swipe on: the change is cheap and reversible — it is not even sent yet —
+            // and clearing several books off an étagère should not cost a tap each.
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(
+                    "action.remove_from_shelf_named \(section.name ?? "")",
+                    systemImage: "tray.and.arrow.up"
+                ) {
+                    unshelve(book, from: section)
+                }
+                .disabled(session.isBusy)
+            }
         }
     }
 

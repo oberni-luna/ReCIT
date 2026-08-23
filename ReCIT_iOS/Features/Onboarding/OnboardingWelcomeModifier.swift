@@ -43,6 +43,10 @@ struct OnboardingWelcomeModifier: ViewModifier {
     let user: User?
 
     @Environment(OnboardingStore.self) private var onboarding
+    /// The flow's one presentation point (PRD 0009): the accueil raises the flag and `RootView`
+    /// opens the cover, above the app's `.refreshable` so the flow's scroll views keep their
+    /// downward drags.
+    @Environment(SortFlowPresentation.self) private var sortFlow
 
     /// The user's books, for the one thing the gate asks about them: whether there are any. Read
     /// from the store like the empty shelf's note is, so the two cannot disagree about it.
@@ -50,7 +54,6 @@ struct OnboardingWelcomeModifier: ViewModifier {
 
     /// Set by "Scanner mes livres" and spent once the accueil is off screen.
     @State private var opensScannerOnDismiss: Bool = false
-    @State private var isScanning: Bool = false
 
     init(user: User?) {
         self.user = user
@@ -61,9 +64,6 @@ struct OnboardingWelcomeModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .fullScreenCover(isPresented: $isScanning) {
-                SortFlowView(start: .scanning)
-            }
             .fullScreenCover(isPresented: presentsWelcome, onDismiss: openScannerIfChosen) {
                 OnboardingWelcomeView(onScan: scanNow, onLater: answer)
             }
@@ -121,6 +121,6 @@ struct OnboardingWelcomeModifier: ViewModifier {
         guard opensScannerOnDismiss else { return }
 
         opensScannerOnDismiss = false
-        isScanning = true
+        sortFlow.presentScanning()
     }
 }

@@ -28,7 +28,6 @@ struct ShelvesContent: View {
     /// Presents the batch scanner, from the empty-state card when the inventory is empty.
     /// A cover rather than a push, on `MainSearchView`'s pattern: the scanner owns its own
     /// navigation stack, and leaving it comes back here rather than unwinding this tab's path.
-    @State private var isScanning: Bool = false
 
     @Query private var shelves: [Shelf]
     @Query private var myItems: [InventoryItem]
@@ -100,9 +99,6 @@ struct ShelvesContent: View {
                 .sheet(isPresented: $isCreatingShelf) {
                     ShelfFormView()
                 }
-                .fullScreenCover(isPresented: $isScanning) {
-                    SortFlowView(start: .scanning)
-                }
             }
         }
     }
@@ -152,7 +148,7 @@ struct ShelvesContent: View {
     private func tapEmptyShelf() {
         switch emptyShelfErrand {
         case .scan:
-            isScanning = true
+            sortFlow.presentScanning()
         case .sort:
             sortFlow.presentSorting()
         }

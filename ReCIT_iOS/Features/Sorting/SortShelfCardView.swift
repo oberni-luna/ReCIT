@@ -72,11 +72,16 @@ struct SortShelfCardView: View {
         .frame(width: width, height: SortGridMetrics.cardHeight)
         .background(DesignSystem.Color.backgroundDefault.color)
         .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.rounded.rawValue))
+        // The card is white on white now, so its outline is what makes it a card. The accent
+        // border replaces it while a book hovers rather than doubling it.
         .overlay {
-            if isTargeted {
-                RoundedRectangle(cornerRadius: .rounded)
-                    .strokeBorder(DesignSystem.Color.borderTinted.color, lineWidth: 2)
-            }
+            RoundedRectangle(cornerRadius: .rounded)
+                .strokeBorder(
+                    isTargeted
+                        ? DesignSystem.Color.borderTinted.color
+                        : DesignSystem.Color.borderDefault.color,
+                    lineWidth: isTargeted ? 2 : 1
+                )
         }
         .scaleEffect(isTargeted ? 1.03 : 1)
         .animation(.easeOut(duration: 0.15), value: isTargeted)
@@ -145,10 +150,10 @@ struct SortShelfCardView: View {
         isApplying && (outcome == .pending || outcome == .applying)
     }
 
-    /// « Nom · N ». Built through the string catalogue so the separator and the plural are
-    /// the translator's business, not Swift's — the divergence D38 the sorting surface has
-    /// avoided since PRD 0008.
+    /// « Nom · N », or the name alone for an étagère holding nothing: the dashed hole in its art
+    /// already says it is empty, and « · 0 » next to it says it twice.
     private var title: LocalizedStringKey {
-        "manual_sort.card.title \(section.name ?? "") \(section.bookCount)"
+        guard section.bookCount > 0 else { return .init(section.name ?? "") }
+        return "manual_sort.card.title \(section.name ?? "") \(section.bookCount)"
     }
 }

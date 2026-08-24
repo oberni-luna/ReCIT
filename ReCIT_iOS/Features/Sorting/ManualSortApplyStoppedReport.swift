@@ -6,6 +6,12 @@
 //  of `ManualSortApplyReport` only because it is a type of its own; the reasoning for
 //  the three parts is there.
 //
+//  Colour and alignment come from `SortFooterView`, for the whole slot. This report used to
+//  set its own — its first line in `foreground/default` over three details in
+//  `foreground/secondary`, so the headline of a failure carried more weight than its
+//  breakdown. That hierarchy is gone; what is left to tell the resume line apart from the
+//  rest is its smaller text style. Worth restoring here if a stopped run ever reads too flat.
+//
 
 import SwiftUI
 
@@ -20,19 +26,13 @@ struct ManualSortApplyStoppedReport: View {
     let notAttempted: [String]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: .sMedium) {
+        VStack(spacing: .sMedium) {
             Text("manual_sort.report.stopped")
-                .textStyle(.content300)
-                .foregroundStyle(.foregroundDefault)
 
             if landed.isEmpty {
                 Text("manual_sort.report.stopped.none_landed")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundSecondary)
             } else {
                 Text("manual_sort.report.stopped.landed \(landed.count) \(landed.formatted(.list(type: .and)))")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundSecondary)
             }
 
             // Said apart from "never touched" on purpose: nothing is rolled back, so
@@ -40,20 +40,15 @@ struct ManualSortApplyStoppedReport: View {
             // books. A user told it was not saved would go looking for it and find it.
             if failed.isEmpty == false {
                 Text("manual_sort.report.stopped.failed \(failed.count) \(failed.formatted(.list(type: .and)))")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundSecondary)
             }
 
             if notAttempted.isEmpty == false {
                 Text("manual_sort.report.stopped.not_attempted \(notAttempted.count) \(notAttempted.formatted(.list(type: .and)))")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundSecondary)
             }
 
             Text("manual_sort.report.stopped.resume")
                 .textStyle(.footnote200)
-                .foregroundStyle(.foregroundSecondary)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
     }
 }

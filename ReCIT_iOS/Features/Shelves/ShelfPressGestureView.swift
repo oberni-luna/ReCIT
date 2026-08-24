@@ -21,8 +21,10 @@ struct ShelfPressGestureView: UIViewRepresentable {
     var onMoved: (CGPoint) -> Void
     /// The finger lifted while selection mode is on.
     var onEnded: () -> Void
-    /// The press ended with nothing selected (lifted or moved too soon, or interrupted).
-    var onCancelled: () -> Void
+    /// The press ended with nothing selected. The reason says which: a lift is a tap and
+    /// settles back gently, a travel means the scroll view has the touch and the copy has to
+    /// go at once.
+    var onCancelled: (ShelfPressRecognizer.Cancellation) -> Void
 
     func makeCoordinator() -> Coordinator { .init(self) }
 
@@ -38,7 +40,7 @@ struct ShelfPressGestureView: UIViewRepresentable {
         press.onArmed = { [weak coordinator] in coordinator?.parent.onArmed() }
         press.onMoved = { [weak coordinator] in coordinator?.parent.onMoved($0) }
         press.onEnded = { [weak coordinator] in coordinator?.parent.onEnded() }
-        press.onCancelled = { [weak coordinator] in coordinator?.parent.onCancelled() }
+        press.onCancelled = { [weak coordinator] in coordinator?.parent.onCancelled($0) }
 
         view.addGestureRecognizer(press)
         return view

@@ -14,6 +14,19 @@ import UIKit
 
 final class ShelfPressRecognizer: UIGestureRecognizer {
 
+    /// Why a press ended without arming. The shelf unwinds differently for each: a lift is a
+    /// tap, and its book settles back mirroring how far it got; the other two mean the touch
+    /// has gone somewhere else — a scroll, or the system — and the copy has to be off the
+    /// screen before that somewhere-else has moved far. See ADR 0006.
+    enum Cancellation {
+        /// The finger lifted before the hold completed.
+        case lifted
+        /// The finger travelled past `slop`: the scroll view owns the touch now.
+        case travelled
+        /// The system took the touch away.
+        case interrupted
+    }
+
     /// How long the finger must stay down before selection mode arms.
     static let holdDuration: TimeInterval = 0.5
     /// Travel allowed before arming; past it the touch belongs to the scroll view.
@@ -28,7 +41,7 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
     var onArmed: (() -> Void)?
     var onMoved: ((CGPoint) -> Void)?
     var onEnded: (() -> Void)?
-    var onCancelled: (() -> Void)?
+    var onCancelled: ((Cancellation) -> Void)?
 
     private var startLocation: CGPoint = .zero
     private var armTask: Task<Void, Never>?
@@ -66,7 +79,7 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
                 location.x - startLocation.x,
                 location.y - startLocation.y
             )
-            if travel > Self.slop { giveUp(.failed) }
+            if travel > Self.slop { giveUp(.failed, because: .travelled) }
             return
         }
         state = .changed
@@ -76,7 +89,7 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesEnded(touches, with: event)
         guard isArmed else {
-            giveUp(.failed)
+            giveUp(.failed, because: .lifted)
             return
         }
         onEnded?()
@@ -85,7 +98,7 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesCancelled(touches, with: event)
-        giveUp(.cancelled)
+        giveUp(.cancelled, because: .interrupted)
     }
 
     override func reset() {
@@ -102,10 +115,11 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
     }
 
     /// Ends the press without a selection: the finger travelled too soon, lifted too soon,
-    /// or the system took the touch away.
-    private func giveUp(_ endState: State) {
+    /// or the system took the touch away. `reason` is what tells the shelf which of those it
+    /// was, because the unwind is not the same for a tap as for a swipe.
+    private func giveUp(_ endState: State, because reason: Cancellation) {
         armTask?.cancel()
-        onCancelled?()
+        onCancelled?(reason)
         state = endState
     }
 }

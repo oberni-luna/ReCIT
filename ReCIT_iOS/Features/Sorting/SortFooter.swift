@@ -6,6 +6,12 @@
 //  on screen. One slot, four readings — the sorting surface's footer is an *emplacement*,
 //  not a sentence, and it grows upward against the grid when it has more to say (PRD 0009).
 //
+//  **The slot is never empty.** A session nobody has touched yet used to render nothing, so
+//  the panel was shorter before the first drag than after it and the buttons moved down the
+//  moment anything was done. `idle` says what to do and that there is nothing to save — which
+//  is the same two-line shape the recap has, so the panel keeps its height across the change
+//  (design `160:6659` / `185:7804`, both footers 113 pt).
+//
 //  The order of the cases is the rule: a finished run's account outranks the recap, because
 //  the recap in the present tense next to a report in the past tense reads as a screen
 //  contradicting itself; and a notice — « aucun rangement à proposer » — outranks both,
@@ -21,8 +27,9 @@
 import Foundation
 
 enum SortFooter: Equatable {
-    /// Nothing pending and nothing done: an empty stack has nothing to recap.
-    case silent
+    /// Nothing pending and nothing done. Not silence: an untouched session is the one moment
+    /// the surface has to say how it is used, and the one reading that has no numbers in it.
+    case idle
     /// What saving would do — and, during a run, what is left of it.
     case recap(SortWritePlan)
     /// What a settled run did, in full: all landed, nothing to save, or the three-part
@@ -44,7 +51,7 @@ enum SortFooter: Equatable {
         } else if plan.hasPendingChanges {
             self = .recap(plan)
         } else {
-            self = .silent
+            self = .idle
         }
     }
 }

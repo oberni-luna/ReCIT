@@ -101,11 +101,11 @@ qu'il faut lire les deux modes.
 |---|---|---|---|
 | `color/gray/0` | `#FFFFFF` | 1 | `background/default` L · `shelf/label/paper` **L et D** |
 | `color/gray/50` | `#F1F1F1` | 1 | `foreground/inverse` L · `foreground/default` D · `background/secondary` L |
-| `color/gray/200` | `#E8ECE6` | 1 | `background/inverse` D · `background/disable` L · `border/default` L · `background/tinted-inverse` D |
+| `color/gray/200` | `#E8ECE6` | 1 | `background/inverse` D · `background/disable` L · `background/tinted-inverse` D — **plus `border/default`, voir D49** |
 | `color/gray/400` | `#AFAFAF` | 1 | `foreground/disable` L · `foreground/secondary` D · `foreground/placeholder` L |
 | `color/gray/500` | `#959A92` | 1 | — inutilisé |
 | `color/gray/600` | `#7E837C` | 1 | `foreground/secondary` L · `foreground/disable` D · `background/disable` D |
-| `color/gray/700` | `#2D2D2D` | 1 | `border/default` D · `background/error` D |
+| `color/gray/700` | `#2D2D2D` | 1 | `background/error` D — **plus `border/default`, voir D49** |
 | `color/gray/700 75%` | `#2D2D2D` | **0.50** | — inutilisé · **le nom ment** (voir D1) |
 | `color/gray/800` | `#2A2A2A` | 1 | `background/secondary` D |
 | `color/gray/900` | `#191919` | 1 | `foreground/default` L · `foreground/inverse` D · `background/inverse` L · `shelf/label/ink` **L et D** |
@@ -167,7 +167,7 @@ valeur fixe, donc pas de variable.
 | `background/tinted` | `green/100` | `green/900` | `.backgroundTinted` |
 | `background/tinted-inverse` | `green/800` | `green/200` | `.backgroundTintedInverse` |
 | `background/error` | `red/100` | **`gray/700`** | `.backgroundError` — voir D7 |
-| `border/default` | `gray/200` | `gray/700` | `.borderDefault` |
+| `border/default` | **noir α 0.10** | **blanc α 0.10** | `.borderDefault` — seul alias sans primitive, voir D49 |
 | `border/tinted` | `green/700` | `green/200` | `.borderTinted` |
 | `border/error` | `red/800` | `red/400` | `.borderError` |
 | `clear` | transparent | transparent | `.clear` |
@@ -759,6 +759,7 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D46 | `Ranger mes livres · Light`, `+` de la barre de navigation | **Divergence assumée côté code.** La maquette met la création d'étagère dans la nav bar ; le code l'a déplacée en **dernière tuile de la grille** — à l'endroit où le geste s'utilise, et elle sert en même temps d'état vide et de cible de dépôt (déposer un livre dessus crée l'étagère et le range). Une action, un contrôle | ouverte côté Figma — les frames ajoutés en 0045 montrent la tuile ; le frame nominal garde le `+` |
 | D47 | `Ranger mes livres · Light`, titre de carte vs `TextStyle` | **Diagnostic erroné, refermé.** J'avais écrit qu'aucun token serif n'existait à la taille du titre de carte : `Footnote/footnote200Bold` **est** une Alegreya Bold 12, et c'est exactement ce que la maquette applique. Aucun écart. Le titre des cartes « livre à ranger », lui, est `Content/content300` (Alegreya Medium 17) sur deux lignes, et le code le rendait en 12 — corrigé côté code | résolue — rien à changer côté Figma |
 | D48 | `Ranger mes livres`, frames d'états | **Écart de production, résolu.** Les 12 frames d'états manquants ont été générés depuis les décisions du PRD 0009 en clonant le frame nominal, donc à partir des mêmes composants et des mêmes variables. Les pastilles instancient bien `Tag` sans glyphe (`Show glyph = false`), comme le code | résolue — frames à relire par l'owner ; le détail d'étagère (`Détail étagère · Light`) est le seul écran de la feature qui n'avait aucune maquette |
+| D49 | `border/default` (variable Figma) vs `DesignSystem.Color.borderDefault` | **Divergence assumée côté code.** La variable Figma résout `gray/200` en clair et `gray/700` en sombre — deux gris opaques. Le code rend désormais **noir à 10 %** et **blanc à 10 %**, donc un voile et non une couleur. La raison : un gris opaque ne se lit comme un bord que sur un seul fond. `gray/200` est légèrement vert (il porte la teinte de marque dans les gris, cf. la note sous les primitives), et sur le lavis d'une étagère ou sur le blanc semi-opaque du panneau de tri il se lisait comme un **trait dessiné** au lieu d'une arête. C'est ce qui avait poussé le filet du panneau de tri à être écrit en `Color.black.opacity(0.2)` en dur, hors token — un contournement maintenant supprimé, le token faisant le travail. Conséquence : `border/default` est le seul alias de la bibliothèque qui ne pointe pas sur une primitive `color/*`, et il n'a pas de hex fixe | ouverte côté Figma — la variable doit passer à une couleur avec alpha (noir 10 % / blanc 10 %) ; aucune primitive existante ne convient, donc soit deux primitives `color/black 10%` / `color/white 10%`, soit une valeur brute sur l'alias |
 
 Rappel historique de la passe tokens : **D6 était la priorité** — `OpenSans-SemiBold` et `OpenSans-Regular` ne s'enregistraient
 pas au lancement, donc `action200`, `action300` et `caption200` retombent sur la police système sur l'appareil.

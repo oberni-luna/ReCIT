@@ -72,16 +72,17 @@ struct SortShelfCardView: View {
         .frame(width: width, height: SortGridMetrics.cardHeight)
         .background(DesignSystem.Color.backgroundDefault.color)
         .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.rounded.rawValue))
-        // The card is white on white now, so its outline is what makes it a card. The accent
-        // border replaces it while a book hovers rather than doubling it.
+        // Nothing at rest, an accent border under a finger. The card used to carry a grey
+        // outline at all times, on the argument that white on white needs an edge to read as
+        // a card — but nine outlined rectangles read as a table, and what makes these cards
+        // is their art and their titles, which the grid's own spacing already separates. The
+        // border is now a *state*: it appears only where a book is about to land, which is the
+        // one moment an edge has something to say.
         .overlay {
-            RoundedRectangle(cornerRadius: .rounded)
-                .strokeBorder(
-                    isTargeted
-                        ? DesignSystem.Color.borderTinted.color
-                        : DesignSystem.Color.borderDefault.color,
-                    lineWidth: isTargeted ? 2 : 1
-                )
+            if isTargeted {
+                RoundedRectangle(cornerRadius: .rounded)
+                    .strokeBorder(DesignSystem.Color.borderTinted.color, lineWidth: 2)
+            }
         }
         .scaleEffect(isTargeted ? 1.03 : 1)
         .animation(.easeOut(duration: 0.15), value: isTargeted)

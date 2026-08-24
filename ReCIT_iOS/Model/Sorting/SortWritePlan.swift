@@ -100,6 +100,10 @@ struct SortWritePlan: Equatable, Sendable {
     /// The counts the recap sentence is built from — and nothing else. Four numbers
     /// rather than a formatted string, because the sentence is copy and copy lives in
     /// the string catalogue with its plural rules.
+    ///
+    /// `clauses` is the same four numbers minus the zeros, which is the shape the sentence
+    /// is actually written from. It lives here rather than in the view because "which parts
+    /// of this are worth saying" is a fact about the plan, not a drawing decision.
     struct Summary: Equatable, Sendable {
 
         /// Drafts that will be created — every one of them, filled or not.
@@ -116,6 +120,36 @@ struct SortWritePlan: Equatable, Sendable {
         /// Books that will still be on no étagère once this is applied. The one count
         /// that describes the result rather than the work.
         let booksLeftUnshelved: Int
+
+        /// One clause of the recap sentence: what it counts, and how many.
+        ///
+        /// A clause exists only when its count does. « 0 étagère à créer » is a
+        /// statement about nothing, and three of them in front of the one number that
+        /// moved is how a sentence stops being read at all.
+        enum Clause: Equatable, Sendable {
+            case shelvesToCreate(Int)
+            case shelvesModified(Int)
+            case booksFiled(Int)
+            case booksLeftUnshelved(Int)
+        }
+
+        /// The clauses to say, in the order they are said, the empty ones left out.
+        ///
+        /// The order is fixed rather than sorted by size or by recency: the sentence runs
+        /// from the work to its result — what gets created, what changes, what that files,
+        /// and what is left over. A sentence whose clauses reordered themselves between two
+        /// drags would have to be re-read from the start each time.
+        ///
+        /// Empty for a stack that coalesces to nothing. The recap says that case in its own
+        /// words rather than as a sentence with no clauses in it — see `hasWork`.
+        var clauses: [Clause] {
+            var clauses: [Clause] = []
+            if shelvesToCreate > 0 { clauses.append(.shelvesToCreate(shelvesToCreate)) }
+            if shelvesModified > 0 { clauses.append(.shelvesModified(shelvesModified)) }
+            if booksFiled > 0 { clauses.append(.booksFiled(booksFiled)) }
+            if booksLeftUnshelved > 0 { clauses.append(.booksLeftUnshelved(booksLeftUnshelved)) }
+            return clauses
+        }
     }
 
     /// What applying sends, one group per étagère, in the order the screen shows them

@@ -30,6 +30,10 @@
 //  The carousel's height is reserved before the library has loaded, so nothing jumps when
 //  the opening sync lands on a screen the user is already looking at.
 //
+//  **The drop target is the row of books, not the whole region.** « Appliquer » and the recap
+//  share the panel but are not somewhere a book can be let go, and the outline that shows the
+//  target says so — it stops at the rule above them.
+//
 
 import SwiftUI
 
@@ -53,28 +57,15 @@ struct SortUnshelvedPanelView: View {
     let footer: SortFooter
     let actions: SortActions
 
-    /// Whether a dragged book is hovering the panel. The **whole** panel is the target: the
-    /// order in here is arrival order, so aiming at a slot between two cards would mean
-    /// nothing, and a 200 pt target is one a hand coming back from an étagère cannot miss.
+    /// Whether a dragged book is hovering the row of books. The **whole row** is the target,
+    /// header included: the order in here is arrival order, so aiming at a slot between two
+    /// cards would mean nothing, and a 200 pt target is one a hand coming back from an étagère
+    /// cannot miss. The controls below the rule are not part of it.
     @State private var isTargeted: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: .sMedium) {
-            ShelfSectionHeader(title: header)
-
-            if isLoading {
-                DesignSystem.Color.clear.color
-                    .frame(height: metrics.carouselHeight)
-            } else if books.isEmpty {
-                Text("manual_sort.unshelved.empty")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundSecondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, .medium)
-            } else {
-                carousel
-                    .opacity(isApplying ? 0.8 : 1)
-            }
+            dropZone
 
             VStack(alignment: .leading, spacing: .sMedium) {
                 ManualSortActionBar(actions: actions)
@@ -90,10 +81,13 @@ struct SortUnshelvedPanelView: View {
             // The one rule left in the region: the controls are separated from the books, not
             // the region from the grid. The grid's own edge is the gradient's business.
             //
-            // Black at 20 % rather than `border/default`: a token border reads as a drawn line
-            // on white, where what is wanted here is a shadow of one.
+            // `border/default` now, and black at 20 % before it. The 20 % was too dark — it
+            // read as a drawn line where a shadow of one was wanted — and the reason it was
+            // not a token in the first place has been fixed at the token instead:
+            // `border/default` is 10 % black over whatever is behind it, so it is the same
+            // hairline here, on a card, and around a dashed hole.
             .overlay(alignment: .top) {
-                Color.black.opacity(0.2)
+                DesignSystem.Color.borderDefault.color
                     .frame(height: 1)
             }
         }
@@ -121,6 +115,34 @@ struct SortUnshelvedPanelView: View {
             }
             .ignoresSafeArea(edges: .bottom)
         }
+    }
+
+    /// The target: the header and the row of books, and nothing else. The controls under the
+    /// rule are not a place a book can be let go — a drop that landed on « Appliquer » filed
+    /// the book somewhere the finger was never pointing, and the outline that promised it
+    /// covered half the screen's furniture.
+    private var dropZone: some View {
+        VStack(alignment: .leading, spacing: .sMedium) {
+            ShelfSectionHeader(title: header)
+
+            if isLoading {
+                DesignSystem.Color.clear.color
+                    .frame(height: metrics.carouselHeight)
+            } else if books.isEmpty {
+                Text("manual_sort.unshelved.empty")
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, .medium)
+            } else {
+                carousel
+                    .opacity(isApplying ? 0.8 : 1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // Drawn on the zone that takes the drop, so the outline and the target are the same
+        // rectangle. It still runs to the screen's edges sideways — the row of books does —
+        // and stops at the rule above the controls.
         .overlay {
             if isTargeted {
                 Rectangle()

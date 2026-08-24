@@ -282,6 +282,69 @@ struct SortWritePlanTests {
         #expect(plan.status(of: .shelf("s3")) == .modified)
     }
 
+    // MARK: - Which clauses the sentence is worth saying
+
+    /// A count of zero is not a clause. The session below creates nothing, so the
+    /// sentence starts at what did change — « 1 étagère modifiée, … » and never
+    /// « 0 étagère à créer, 1 étagère modifiée, … ».
+    @Test func aCountOfZeroIsNotSaidAtAll() {
+        let plan: SortWritePlan = .init(
+            snapshot: library,
+            changes: [.moveBook(bookId: "4", from: .unshelved, to: .shelf("s1"))]
+        )
+
+        #expect(plan.summary.shelvesToCreate == 0)
+        #expect(
+            plan.summary.clauses == [
+                .shelvesModified(1),
+                .booksFiled(1),
+                .booksLeftUnshelved(1)
+            ]
+        )
+    }
+
+    /// Every number moved, so every clause is said — in the one order they are ever
+    /// said in: what gets created, what changes, what that files, what is left over.
+    @Test func everyClauseIsSaidInOrderWhenEveryCountMoves() {
+        let draftId: String = SortDraftID.make()
+        let plan: SortWritePlan = .init(
+            snapshot: library,
+            changes: [
+                .createShelf(draftId: draftId, name: "Science-fiction"),
+                .moveBook(bookId: "4", from: .unshelved, to: .draft(draftId)),
+                .moveBook(bookId: "1", from: .shelf("s1"), to: .shelf("s2"))
+            ]
+        )
+
+        #expect(
+            plan.summary.clauses == [
+                .shelvesToCreate(1),
+                .shelvesModified(2),
+                .booksFiled(2),
+                .booksLeftUnshelved(1)
+            ]
+        )
+    }
+
+    /// The case that stops the recap from reading its own clauses to decide what to
+    /// say. A stack that coalesces to nothing has no work in it — but the books on no
+    /// étagère are still on no étagère, so one clause survives. Rendering it would
+    /// answer a question nobody asked; the recap owes « vos changements s'annulent »
+    /// here, which is why it gates on `hasWork` and not on the clauses being empty.
+    @Test func aStackThatCoalescesToNothingStillLeavesTheUnshelvedClause() {
+        let plan: SortWritePlan = .init(
+            snapshot: library,
+            changes: [
+                .moveBook(bookId: "1", from: .shelf("s1"), to: .shelf("s2")),
+                .moveBook(bookId: "1", from: .shelf("s2"), to: .shelf("s1"))
+            ]
+        )
+
+        #expect(plan.hasPendingChanges)
+        #expect(plan.hasWork == false)
+        #expect(plan.summary.clauses == [.booksLeftUnshelved(2)])
+    }
+
     // MARK: - The pills, the recap and the write, on the same fixtures
 
     /// The point of the slice: all three readings come out of one reduction, so on any
@@ -347,6 +410,16 @@ struct SortWritePlanTests {
 
         // And the last number is what the screen actually shows in « À ranger ».
         #expect(plan.summary.booksLeftUnshelved == projection.unshelved.books.count)
+
+        // The sentence says exactly the numbers that moved: as many clauses as there are
+        // non-zero counts, so none is dropped and none is padded with a zero.
+        let counts: [Int] = [
+            plan.summary.shelvesToCreate,
+            plan.summary.shelvesModified,
+            plan.summary.booksFiled,
+            plan.summary.booksLeftUnshelved
+        ]
+        #expect(plan.summary.clauses.count == counts.count { $0 > 0 })
     }
 
     /// One sorting session, as a value the agreement test can be handed. Named so a

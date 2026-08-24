@@ -139,8 +139,9 @@ struct ManualSortView: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // White throughout: the structure is carried by the cards' outlines and the panel's
-        // hairline, not by a grey backdrop (PRD 0009, design pass of 2026-08-23).
+        // White throughout: the structure is carried by the grid's spacing and the panel's
+        // hairline, not by a grey backdrop and no longer by an outline on every card
+        // (PRD 0009, design passes of 2026-08-23 and 2026-08-24).
         .background(DesignSystem.Color.backgroundDefault.color)
         .onGeometryChange(for: CGFloat.self) { proxy in
             proxy.size.width

@@ -59,7 +59,7 @@ public extension DesignSystem {
             case .backgroundInverse:
                     .init(light:.init("color/gray/900"), dark:.init("color/gray/200"))
             case .backgroundDisable:
-                    .init(light:.init("color/gray/200"), dark:.init("color/gray/600"))
+                    .init(light:.init("color/gray/200"), dark:.init("color/gray/400"))
             case .backgroundSecondary:
                     .init(light:.init("color/gray/50"), dark:.init("color/gray/800"))
             case .backgroundTinted:
@@ -69,8 +69,14 @@ public extension DesignSystem {
             case .backgroundError:
                     .init(light:.init("color/red/100"), dark:.init("color/gray/700"))
 
+            // The one token that is not a named asset. A border is a *veil over whatever is
+            // behind it*, not a colour of its own: on white, on the sorting panel's
+            // half-opaque wash, and on a shelf's watercolour it has to read as the same
+            // hairline. A solid grey does that on exactly one backdrop — `gray/200` is
+            // slightly green (it carries the brand tint into the greys) and on anything but
+            // pure white it read as a drawn line rather than an edge.
             case .borderDefault:
-                    .init(light:.init("color/gray/200"), dark:.init("color/gray/700"))
+                    .init(light: .black.opacity(0.1), dark: .white.opacity(0.1))
             }
         }
 

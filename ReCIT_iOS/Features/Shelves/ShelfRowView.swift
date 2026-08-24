@@ -13,8 +13,11 @@
 //  pressing its label — which, drawing above the plank, takes the narrow band it overlaps out
 //  of the press gesture. Accepted: books stand above the plank. See PRD 0003.
 //
-//  While a press is on, the pressed book is handed to `ShelfFocusModel` and drawn by
-//  `ShelfFocusOverlayView` over the whole app — the card leaves its own copy out. See ADR 0006.
+//  While a press is on, the pressed book is handed to `ShelfFocusModel` and drawn again by
+//  `ShelfFocusOverlayView` over the whole app. The card keeps drawing its own book underneath
+//  — at rest the copy sits exactly over it — which is why this view republishes the card's
+//  origin for as long as the press lasts: let the two drift apart and you see the same book
+//  twice. See ADR 0006.
 //
 //  Sizing is driven entirely by the `width` passed in (the grid cell width) so the
 //  view returns a deterministic size — self-measuring here caused a UICollectionView
@@ -35,7 +38,15 @@ struct ShelfRowView: View {
     @State private var grownIndex: Int?
     /// This card's frame on screen, so the overlay can place the book it redraws. Published
     /// on every layout pass, not only while pressing — otherwise the first press has none.
+    /// Local state, so every visible card can keep its own without contending for one.
     @State private var cardFrame: CGRect = .zero
+    /// True while the book in `focus` is this card's. Only the owner writes `focus.cardOrigin`
+    /// — it is one shared slot, and every visible card publishes its frame every layout pass.
+    ///
+    /// It has to outlast `grownIndex`, which goes nil the moment the finger leaves the
+    /// étagère while the copy is still unwinding on screen; it is cleared in exactly the two
+    /// places the copy is handed back.
+    @State private var ownsFocus: Bool = false
     /// When the finger landed — a short press is a tap, and gets a peek instead of a plain
     /// settle so the press-to-select gesture shows itself.
     @State private var pressStarted: ContinuousClock.Instant?
@@ -91,6 +102,14 @@ struct ShelfRowView: View {
             armed ? .impact(weight: .medium) : nil
         }
         .sensoryFeedback(.selection, trigger: focus.isArmed ? grownIndex : nil)
+        // Torn down mid-press — the carousel is lazy, and a hard flick can recycle this card
+        // while the copy is still unwinding. Nobody would republish the origin after that, so
+        // the copy would freeze and, worse, never be handed back.
+        .onDisappear {
+            guard ownsFocus else { return }
+            ownsFocus = false
+            focus.reset()
+        }
     }
 
     private var shelfStack: some View {
@@ -122,11 +141,14 @@ struct ShelfRowView: View {
             }
         }
         .frame(width: width, height: metrics.cardHeight)
-        // The overlay redraws the pressed book at these screen coordinates.
+        // The overlay redraws the pressed book relative to this origin — republished for as
+        // long as the press lasts, so the copy travels with the shelf when the page or the
+        // carousel scrolls under it. Published only once, it hung in mid-air.
         .onGeometryChange(for: CGRect.self) { proxy in
             proxy.frame(in: .global)
         } action: { frame in
             cardFrame = frame
+            if ownsFocus { focus.cardOrigin = frame.origin }
         }
         .overlay(alignment: .bottom) {
             ShelfPressGestureView(
@@ -153,21 +175,26 @@ struct ShelfRowView: View {
         return index
     }
 
-    /// Hands the book at `index` to the overlay, in screen coordinates, dressed the way this
-    /// shelf draws it.
+    /// Hands the book at `index` to the overlay, in this card's coordinates, dressed the way
+    /// this shelf draws it — and, with it, where the card currently sits on screen. The
+    /// overlay adds the two.
+    ///
+    /// Only the frame within the card is computed here, so nothing has to run again when the
+    /// page scrolls: from then on the origin alone moves, and `onGeometryChange` publishes it.
     private func publish(_ index: Int?) {
         guard let index, books.indices.contains(index) else {
             focus.book = nil
             return
         }
-        let inCard: CGRect = layout.bookFrame(at: index)
-            .offsetBy(dx: ShelfCardMetrics.horizontalMargin, dy: ShelfBooksView.booksOffset)
+        focus.cardOrigin = cardFrame.origin
         focus.book = .init(
             item: books[index],
-            frame: inCard.offsetBy(dx: cardFrame.minX, dy: cardFrame.minY),
+            frameInCard: layout.bookFrame(at: index)
+                .offsetBy(dx: ShelfCardMetrics.horizontalMargin, dy: ShelfBooksView.booksOffset),
             presentation: presentation(at: index),
             leaning: layout.isLeaning(at: index)
         )
+        ownsFocus = true
     }
 
     private func presentation(at index: Int) -> ShelfFocusModel.Presentation {
@@ -244,7 +271,9 @@ struct ShelfRowView: View {
             focus.growth = 1
         } completion: {
             // Unless the finger came back, or moved to another book, in the meantime.
-            if grownIndex == nil { focus.book = nil }
+            guard grownIndex == nil else { return }
+            focus.book = nil
+            ownsFocus = false
         }
     }
 
@@ -280,18 +309,32 @@ struct ShelfRowView: View {
         grownIndex = nil
         // Dropped outright rather than animated away: the book detail screen is about to cover
         // this one, and an overlay unwinding on top of it reads as a leftover.
+        ownsFocus = false
         focus.reset()
         guard let index, books.indices.contains(index) else { return }
         path.append(NavigationDestination.book(anchor: .item(books[index])))
     }
 
-    /// The press ended without opening anything. The exit mirrors how far the entrance got: a
-    /// tap that barely started growing settles back just as quickly.
-    private func releasePress() {
+    /// The press ended without opening anything. How long it takes to come apart depends on
+    /// why it ended.
+    ///
+    /// A **lift** is a tap, and the exit mirrors how far the entrance got: a book that barely
+    /// started growing settles back just as quickly (ADR 0006, rule 3).
+    ///
+    /// A **travel** is the shelf being scrolled, and the mirror is wrong there. The scroll
+    /// view's own slop and this recogniser's fire at about the same instant, so the shelf
+    /// starts moving exactly when the copy starts unwinding — and every millisecond of that
+    /// unwind is a millisecond in which the copy and the shelf's own book can be seen apart.
+    /// The origin now follows the scroll, but it follows it a frame late, which on a hard
+    /// flick is a hundred points of daylight. So the copy leaves at the floor instead: the
+    /// shortest exit that still reads as a movement rather than a disappearance.
+    ///
+    /// An interruption is treated as a travel — the touch has gone elsewhere either way.
+    private func releasePress(_ reason: ShelfPressRecognizer.Cancellation) {
         let held: Duration = pressStarted.map { ContinuousClock.now - $0 } ?? .zero
         pressStarted = nil
         grownIndex = nil
-        exitFocus(over: mirroredExit(of: held))
+        exitFocus(over: reason == .lifted ? mirroredExit(of: held) : minimumExit)
     }
 
     /// How long the exit should take: as long as the press lasted, capped at the hold it was

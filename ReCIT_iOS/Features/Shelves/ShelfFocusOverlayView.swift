@@ -106,15 +106,22 @@ struct ShelfFocusOverlayView: View {
     /// The pressed book, sharp above the veil, grown about its centre. Nothing here animates
     /// from one book to the next: the finger is picking, and a cover morphing into another
     /// cover reads as a glitch rather than a transition.
+    ///
+    /// Its screen position is the sum of two things published separately — the card's origin,
+    /// which the shelf republishes on every layout pass, and the book's frame within that
+    /// card, which only changes when the finger moves to another book. Summing them here
+    /// rather than at press time is what keeps the copy on the shelf while the page scrolls
+    /// under it; the shelf is still drawing the same book underneath, so a copy left behind
+    /// does not merely float, it doubles.
     @ViewBuilder
     private func book(_ book: ShelfFocusModel.Book) -> some View {
         Group {
             if book.presentation == .cover {
-                ShelfCoverView(item: book.item, size: book.frame.size, showsPlaceholder: false)
+                ShelfCoverView(item: book.item, size: book.frameInCard.size, showsPlaceholder: false)
             } else {
                 PaintedBookView(
                     edition: book.item.edition,
-                    size: book.frame.size,
+                    size: book.frameInCard.size,
                     orientation: book.presentation.orientation,
                     showsPlaceholder: false
                 ) { ink in
@@ -122,14 +129,17 @@ struct ShelfFocusOverlayView: View {
                         title: book.item.edition?.title ?? "",
                         ink: ink,
                         orientation: book.presentation.orientation,
-                        size: book.frame.size
+                        size: book.frameInCard.size
                     )
                 }
             }
         }
         .rotationEffect(book.leaning ? .degrees(-ShelfBooksLayout.leanDegrees) : .zero, anchor: .bottomTrailing)
         .scaleEffect(focus.growth, anchor: .center)
-        .position(x: book.frame.midX, y: book.frame.midY)
+        .position(
+            x: focus.cardOrigin.x + book.frameInCard.midX,
+            y: focus.cardOrigin.y + book.frameInCard.midY
+        )
     }
 
     /// The book's cell, at the top of the screen: a margin below the status bar, centred, and

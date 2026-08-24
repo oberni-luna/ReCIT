@@ -24,6 +24,9 @@
 //  the string catalogue through substitutions, never by a ternary inside an
 //  interpolation (D38).
 //
+//  Colour, text style and alignment come from `SortFooterView`, which sets them for the
+//  whole slot — see the note there.
+//
 //  The wording says « enregistrée » rather than the mockup's « créée et remplie »: on
 //  this surface most of what a run writes to are étagères that already existed, and
 //  telling a user they were created would be the same class of lie the third part
@@ -44,12 +47,8 @@ struct ManualSortApplyReport: View {
         case .allLanded:
             if progress.landedCount == 0 {
                 Text("manual_sort.report.nothing_to_save")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundDefault)
             } else {
                 Text("manual_sort.report.all_landed \(progress.landedCount)")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundDefault)
             }
 
         case .stopped(let landed, let failed, let notAttempted):

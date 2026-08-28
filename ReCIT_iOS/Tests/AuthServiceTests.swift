@@ -24,7 +24,15 @@
 //  sign-in is unreachable by hand and would break for every new user at once the day the server
 //  changes its mind. Here it is one canned response.
 //
-//  See PRD 0010 and issues 0056 and 0057.
+//  The reset cases (issue 0058) are the third of that kind. `POST /auth/reset-password` answers
+//  `400 "email not found"` for an address nobody registered, so the accepted and the refused
+//  case are asserted to come back *identical* — the assertion is the app's guarantee, not the
+//  server's. And like the availability checks, the call must leave the session alone in both
+//  directions: it is public, it sits behind the same global cookie-session middleware, and a
+//  `Set-Cookie` from it would be an anonymous session under the two names this service reads to
+//  decide whether somebody is signed in.
+//
+//  See PRD 0010 and issues 0056, 0057 and 0058.
 //
 
 import Foundation
@@ -462,6 +470,104 @@ struct AuthServiceTests {
         #expect(urls.contains("https://inventaire.io/api/auth/email-availability?email=someone@example.org"))
         #expect(recorder.methods.allSatisfy { $0 == "GET" })
         #expect(urls.allSatisfy { !$0.contains("action=") })
+    }
+
+    // MARK: - Asking for a reset link
+
+    @Test("An accepted reset request and a refused one come back identical")
+    func resetCollapsesTheServerSTwoAnswers() async throws {
+        // What production sends for an address it has a user for.
+        let accepted: Fixture = makeFixture(
+            session: makeSession(status: 200, body: Data(#"{"ok":true}"#.utf8))
+        )
+        defer { tearDown(accepted) }
+
+        // And for one it does not. The `400` is the server telling us the account does not
+        // exist; nothing downstream may be able to tell it from the `200`.
+        let refused: Fixture = makeFixture(
+            session: makeSession(
+                status: 400,
+                body: Data(#"{"status":400,"message":"email not found","email":"ghost@example.org"}"#.utf8)
+            )
+        )
+        defer { tearDown(refused) }
+
+        let first: PasswordResetOutcome = await accepted.service.requestPasswordReset(
+            email: "alice@example.org"
+        )
+        let second: PasswordResetOutcome = await refused.service.requestPasswordReset(
+            email: "ghost@example.org"
+        )
+
+        #expect(first == .submitted)
+        #expect(first == second)
+    }
+
+    @Test("A status nobody planned for is still the confirmation, not an error about the address")
+    func resetCollapsesUnexpectedStatusesToo() async throws {
+        let fixture: Fixture = makeFixture(
+            session: makeSession(status: 500, body: Data(#"{"status":500,"message":"oops"}"#.utf8))
+        )
+        defer { tearDown(fixture) }
+
+        #expect(await fixture.service.requestPasswordReset(email: "alice@example.org") == .submitted)
+    }
+
+    @Test("A reset request that never completed reads as an unreachable server")
+    func resetNetworkFailure() async throws {
+        let fixture: Fixture = makeFixture(session: makeFailingSession())
+        defer { tearDown(fixture) }
+
+        #expect(await fixture.service.requestPasswordReset(email: "alice@example.org") == .unreachable)
+    }
+
+    @Test("Asking for a reset link never signs anybody in")
+    func resetLeavesTheSessionAlone() async throws {
+        let recorder: RequestRecorder = .init()
+        // The endpoint is public and sits behind the same global cookie-session middleware as
+        // the availability endpoints, which do hand back an *anonymous* session under these two
+        // names. Absorbing one would open the app on the tabs of an account nobody signed into.
+        let session: URLSession = MockURLProtocol.makeSession { request in
+            recorder.record(request)
+            return (
+                Self.response(for: request, status: 200, setCookies: Self.sessionSetCookies),
+                Data(#"{"ok":true}"#.utf8)
+            )
+        }
+        let fixture: Fixture = makeFixture(session: session)
+        defer { tearDown(fixture) }
+
+        _ = await fixture.service.requestPasswordReset(email: "alice@example.org")
+
+        #expect(fixture.service.isLoggedIn() == false)
+        #expect(Keychain.load(key: fixture.keychainKey) == nil)
+        // And the jar `URLSession` keeps on its own is spared too, which is the half this
+        // service cannot undo after the fact.
+        #expect(recorder.cookieHandling.allSatisfy { $0 == false })
+    }
+
+    @Test("The address is posted in the body, to the documented path")
+    func resetUsesTheDocumentedPath() async throws {
+        let recorder: RequestRecorder = .init()
+        let session: URLSession = MockURLProtocol.makeSession { request in
+            recorder.record(request)
+            return (
+                Self.response(for: request, status: 200, setCookies: []),
+                Data(#"{"ok":true}"#.utf8)
+            )
+        }
+        let fixture: Fixture = makeFixture(session: session)
+        defer { tearDown(fixture) }
+
+        _ = await fixture.service.requestPasswordReset(email: "alice@example.org")
+
+        #expect(recorder.urls == ["https://inventaire.io/api/auth/reset-password"])
+        #expect(recorder.methods == ["POST"])
+        // The address goes in the body, never in a query string.
+        #expect(recorder.urls.allSatisfy { !$0.contains("alice") })
+
+        let body: [String: String] = try #require(recorder.jsonBodies.first)
+        #expect(body == ["email": "alice@example.org"])
     }
 
     // MARK: - The documented paths

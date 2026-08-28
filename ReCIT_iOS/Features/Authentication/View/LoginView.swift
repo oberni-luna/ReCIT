@@ -11,13 +11,14 @@
 //
 //  "Créer un compte" **replaces** the stack rather than pushing onto it. From here it is a
 //  change of mind, not a step forward, and pushing would let a user build accueil → connexion →
-//  création → connexion without ever going back.
+//  création → connexion without ever going back. « Mot de passe oublié ? » (issue 0058) does the
+//  same, for the same reason.
 //
 //  The message shown on failure is always ours. `AuthFailure.message` is a catalogue resource in
 //  every branch, so the English prose inventaire.io writes in its `message` field has no path to
 //  this screen — see the suite on that type.
 //
-//  See PRD 0010, issue 0056, and the `Se connecter` frames in the Figma library.
+//  See PRD 0010, issues 0056 and 0058, and the `Se connecter` frames in the Figma library.
 //
 
 import SwiftUI
@@ -25,6 +26,7 @@ import SwiftUI
 struct LoginView: View {
     let authModel: AuthModel
     let onCreateAccount: () -> Void
+    let onForgotPassword: () -> Void
 
     @State private var username: String = ""
     @State private var password: String = ""
@@ -88,6 +90,15 @@ struct LoginView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
+            // Under the password box, where somebody who has just failed to remember one is
+            // already looking — and not in the bar below, which is where the two doors out of
+            // this screen live and where a third choice would dilute both.
+            Button(action: onForgotPassword) {
+                Text("login.button.forgot_password")
+                    .textStyle(.action200)
+                    .foregroundStyle(.foregroundTinted)
+            }
+
             Spacer(minLength: .zero)
         }
         .padding(.horizontal, .medium)
@@ -132,7 +143,8 @@ struct LoginView: View {
     NavigationStack {
         LoginView(
             authModel: .init(authService: .init(config: .init(keychainKey: "preview"))),
-            onCreateAccount: {}
+            onCreateAccount: {},
+            onForgotPassword: {}
         )
     }
 }

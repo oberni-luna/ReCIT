@@ -1357,7 +1357,7 @@ est une édition, pas une reprise.
 | **Accueil** | `222:7168` | `222:7226` | — | *aucune* — l'écran n'existe pas |
 | **Se connecter** | `224:7232` | `224:7275` | Erreur : `224:7318` | `Authentication/View/LoginView.swift` |
 | **Créer un compte** | `224:7363` | `224:7408` | — | *aucune* — l'inscription part vers le web |
-| **Mot de passe oublié** | `234:7382` | `234:7417` | Confirmation : `234:7452` / `234:7493` | *aucune* — l'écran n'existe pas |
+| **Mot de passe oublié** | `234:7382` | `234:7417` | Confirmation : `234:7452` / `234:7493` | `Authentication/View/ForgotPasswordView.swift` + `PasswordResetSentView.swift` |
 | **Spec** | `226:7383` | | | |
 
 La confirmation de réinitialisation lit « **si** un compte existe pour cette adresse, un e-mail vient de

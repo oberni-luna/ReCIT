@@ -62,6 +62,15 @@ public class AuthModel {
         await authService.emailAvailability(email)
     }
 
+    /// Asks for a password-reset link to be mailed to this address.
+    ///
+    /// Never throws, and never says whether an account exists: `PasswordResetOutcome` tells a
+    /// server that answered from a server that could not be reached, and nothing else. The
+    /// session is untouched — asking for a link is not a way of signing in.
+    func requestPasswordReset(email: String) async -> PasswordResetOutcome {
+        await authService.requestPasswordReset(email: email)
+    }
+
     public func logout() async {
         await authService.logout()
         self.isAuthenticated = false

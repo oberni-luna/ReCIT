@@ -24,7 +24,12 @@
 //  credentials just used, so nobody ever retypes a password they chose ten seconds ago. Whether
 //  to chain it is `PostSignupSession`'s call, not this file's.
 //
-//  See PRD 0010 and issues 0056 and 0057.
+//  Asking for a reset link (issue 0058) is the opposite kind of call: it opens no session, it
+//  absorbs no cookie, and it reports nothing the server said. `PasswordResetOutcome` owns the
+//  reason — the endpoint answers "email not found" for an address nobody registered, and
+//  repeating that would answer "does this account exist?" for any address someone types.
+//
+//  See PRD 0010 and issues 0056, 0057 and 0058.
 //
 
 import Foundation
@@ -40,6 +45,9 @@ final class AuthService {
         /// available", which is why no naming rule is written anywhere in this app.
         let usernameAvailabilityPath: String
         let emailAvailabilityPath: String
+        /// `POST`, with the address in the body. Public, like the two availability endpoints,
+        /// and like them it must never be allowed to hand this app a session.
+        let resetPasswordPath: String
         /// The cookies that *are* the session. Both persistence and the logout purge are scoped
         /// to these names — the purge used to empty the whole jar, which signed the user out of
         /// every other host the app had ever talked to.
@@ -54,6 +62,7 @@ final class AuthService {
             signupPath: String = "/auth/signup",
             usernameAvailabilityPath: String = "/auth/username-availability",
             emailAvailabilityPath: String = "/auth/email-availability",
+            resetPasswordPath: String = "/auth/reset-password",
             sessionCookieNames: Set<String> = [
                 "inventaire:session",
                 "inventaire:session.sig"
@@ -66,6 +75,7 @@ final class AuthService {
             self.signupPath = signupPath
             self.usernameAvailabilityPath = usernameAvailabilityPath
             self.emailAvailabilityPath = emailAvailabilityPath
+            self.resetPasswordPath = resetPasswordPath
             self.sessionCookieNames = sessionCookieNames
             self.keychainKey = keychainKey
         }
@@ -94,6 +104,10 @@ final class AuthService {
         let username: String
         let email: String
         let password: String
+    }
+
+    private struct Address: Encodable {
+        let email: String
     }
 
     private let cfg: Config
@@ -248,6 +262,42 @@ final class AuthService {
             errorName: body?.errorName,
             serverMessage: body?.message
         )
+    }
+
+    /// Asks inventaire.io to mail a reset link to this address.
+    ///
+    /// It does not throw, and it does not report what the server said, because **what the server
+    /// says is the one thing that must not get out**. Its controller looks the address up, mails
+    /// the link when it finds a user, and answers `400 { message: "email not found", email }`
+    /// when it does not — so passing the answer along would answer "does this account exist?"
+    /// for any address somebody types. `PasswordResetOutcome` collapses every answer onto one
+    /// confirmation; this method's only job is to tell an answer from no answer at all.
+    ///
+    /// Like the availability checks, and for the same reason, the request is kept out of the
+    /// session in both directions: it is a public endpoint sitting behind the same global
+    /// `cookie-session` middleware, its controller never opens a session, and any
+    /// `inventaire:session` cookie coming back from it is therefore anonymous — under the very
+    /// names this service reads to decide whether somebody is signed in.
+    func requestPasswordReset(email: String) async -> PasswordResetOutcome {
+        var request: URLRequest = .init(url: URL(string: cfg.baseURL + cfg.resetPasswordPath)!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONEncoder().encode(Address(email: email))
+        request.httpShouldHandleCookies = false
+
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            return .transportFailure
+        }
+
+        // Anything that came back at all is an answer, and every answer reads the same. A
+        // response with no status to read is still a response, so it goes through the same door
+        // rather than being reported as a phone that could not reach the network.
+        let http: HTTPURLResponse? = response as? HTTPURLResponse
+        return .fromServer(status: http?.statusCode ?? 0, serverMessage: serverMessage(in: data))
     }
 
     /// Closes the session: tells the server, then forgets it locally whatever the server said.

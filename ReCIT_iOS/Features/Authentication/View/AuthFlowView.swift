@@ -13,7 +13,12 @@
 //  création → connexion → …` cannot be built. It matters most from the sign-in screen, where
 //  "Créer un compte" is a change of mind and not a step forward.
 //
-//  See PRD 0010 and issue 0056.
+//  The reset pair (issue 0058) follows the same rule: « Mot de passe oublié ? » replaces the
+//  stack, and so does its confirmation. Which is why that confirmation carries an explicit
+//  « Retour à la connexion » — the chevron behind it leads to the welcome screen, and a
+//  confirmation whose only exit is backwards is a dead end with a link in it.
+//
+//  See PRD 0010 and issues 0056 and 0058.
 //
 
 import SwiftUI
@@ -41,11 +46,24 @@ struct AuthFlowView: View {
         case .signIn:
             LoginView(
                 authModel: authModel,
-                onCreateAccount: { path = [.createAccount] }
+                onCreateAccount: { path = [.createAccount] },
+                onForgotPassword: { path = [.forgotPassword] }
             )
 
         case .createAccount:
             CreateAccountView(authModel: authModel)
+
+        case .forgotPassword:
+            ForgotPasswordView(
+                authModel: authModel,
+                onSubmitted: { address in path = [.passwordResetSent(address: address)] }
+            )
+
+        case .passwordResetSent(let address):
+            PasswordResetSentView(
+                address: address,
+                onBackToSignIn: { path = [.signIn] }
+            )
         }
     }
 }

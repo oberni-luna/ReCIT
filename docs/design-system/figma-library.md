@@ -1357,7 +1357,14 @@ est une édition, pas une reprise.
 | **Accueil** | `222:7168` | `222:7226` | — | *aucune* — l'écran n'existe pas |
 | **Se connecter** | `224:7232` | `224:7275` | Erreur : `224:7318` | `Authentication/View/LoginView.swift` |
 | **Créer un compte** | `224:7363` | `224:7408` | — | *aucune* — l'inscription part vers le web |
+| **Mot de passe oublié** | `234:7382` | `234:7417` | Confirmation : `234:7452` / `234:7493` | *aucune* — l'écran n'existe pas |
 | **Spec** | `226:7383` | | | |
+
+La confirmation de réinitialisation lit « **si** un compte existe pour cette adresse, un e-mail vient de
+partir ». Jamais « e-mail envoyé », jamais « adresse inconnue » : distinguer les deux cas ferait de
+l'écran un oracle répondant « ce compte existe » à qui teste une liste d'adresses. Le serveur ne devrait
+pas les distinguer non plus, mais la maquette n'en dépend pas — la formulation prudente est écrite côté
+client quoi qu'il réponde.
 
 Audit de factorisation : **7 frames, 0 dessin brut**, aucun `▢` — que des instances.
 
@@ -1402,7 +1409,9 @@ Compte à jour : **34 composants** sur `Screens · Components`, 3 sur `Component
    frame « Créer un compte » suppose un formulaire **dans** l'app : à valider contre l'API avant implémentation.
    Repli si l'endpoint ne convient pas : garder le renvoi web, et l'écran devient une explication plus un bouton
    sortant. Ne pas partir du frame comme d'un acquis.
-2. **Mot de passe oublié** : aucun écran. Le renvoi vers inventaire.io est assumé, dit dans la note de pied.
+2. ~~**Mot de passe oublié** : aucun écran, renvoi web assumé.~~ **Faux, corrigé le 2026-08-28** :
+   `POST /auth/reset-password { email }` est public et documenté. Deux frames ajoutés, plus leur
+   confirmation. Le renvoi web n'avait aucune justification.
 3. **Le renommage touche le catalogue**, pas seulement l'icône : « RECITs » est en dur dans `onboarding.tally.body`.
 4. **Trois écrans d'affilée pour un nouvel arrivant** — accueil → création de compte → `C1 · Bienvenue`. À arbitrer :
    fondre C1 dans l'accueil, ou ne garder C1 que pour un inventaire vide constaté après connexion. En l'état les deux

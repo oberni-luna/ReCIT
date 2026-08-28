@@ -23,6 +23,22 @@ struct EntityListDetail: View {
 
     private var list: EntityList? { matchingLists.first }
 
+    /// Leaves when the list this screen is about stops existing.
+    ///
+    /// Deleting a list used to drop this screen into its own not-found branch, which draws
+    /// `ContentUnavailableView("list.empty")` — so the same screen meant both "this list holds
+    /// nothing" and "this list is gone", and the user was left looking at the remains of what
+    /// they had just deleted until they pressed back.
+    ///
+    /// Keyed on the transition rather than on the current value, which is what tells a deletion
+    /// apart from the list simply not having synced yet: a screen opened before the first sync
+    /// starts empty and must wait, a screen whose list disappears under it must leave.
+    private func popIfTheListIsGone(wasMissing: Bool, isMissing: Bool) {
+        guard isMissing, !wasMissing, !path.isEmpty else { return }
+
+        path.removeLast()
+    }
+
     var body: some View {
         Group {
             if let list {
@@ -58,6 +74,7 @@ struct EntityListDetail: View {
             }
         }
         .applyListBackground()
+        .onChange(of: matchingLists.isEmpty, popIfTheListIsGone)
     }
 }
 

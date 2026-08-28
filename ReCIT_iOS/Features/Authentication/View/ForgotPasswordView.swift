@@ -6,9 +6,9 @@
 //  button that asks for the link.
 //
 //  The same rhythm as « Se connecter » and « Créer un compte », which are its neighbours in the
-//  same stack — lead sentence, `AuthField`, full-width primary button, and the three
-//  arrangements of `ViewThatFits` so that at an accessibility text size the form scrolls and the
-//  button the user came for stays on the screen.
+//  same stack — lead sentence, `AuthField`, full-width primary button, and a scrolling form under
+//  a pinned button so that at an accessibility text size the button the user came for stays on
+//  the screen.
 //
 //  **This screen never learns whether the address has an account, and it must not look as
 //  though it might.** `PasswordResetOutcome` collapses every answer inventaire.io can give onto
@@ -40,28 +40,13 @@ struct ForgotPasswordView: View {
     @State private var outcome: PasswordResetOutcome?
 
     var body: some View {
-        ViewThatFits(in: .vertical) {
-            VStack(spacing: .zero) {
-                form
-
-                actionsBar
-            }
-
-            ScrollView {
-                form
-            }
-            .frame(idealHeight: .zero, maxHeight: .infinity)
-            .safeAreaInset(edge: .bottom, spacing: .zero) {
-                actionsBar
-            }
-
-            ScrollView {
-                VStack(spacing: .zero) {
-                    form
-
-                    actionsBar
-                }
-            }
+        // One arrangement, and not `ViewThatFits` — see the note in `LoginView`: under a keyboard
+        // it rebuilds the `TextField` in another branch and the field loses focus as it is tapped.
+        ScrollView {
+            form
+        }
+        .safeAreaInset(edge: .bottom, spacing: .zero) {
+            actionsBar
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.backgroundDefault)

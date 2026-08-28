@@ -53,31 +53,13 @@ struct CreateAccountView: View {
     private static let checkDelay: Duration = .milliseconds(600)
 
     var body: some View {
-        ViewThatFits(in: .vertical) {
-            // The three arrangements of `WelcomeView` and `LoginView`, for the same reason: at an
-            // accessibility text size the form alone is taller than the phone, and the button the
-            // user came for may not be the thing that leaves the screen.
-            VStack(spacing: .zero) {
-                form
-
-                actionsBar
-            }
-
-            ScrollView {
-                form
-            }
-            .frame(idealHeight: .zero, maxHeight: .infinity)
-            .safeAreaInset(edge: .bottom, spacing: .zero) {
-                actionsBar
-            }
-
-            ScrollView {
-                VStack(spacing: .zero) {
-                    form
-
-                    actionsBar
-                }
-            }
+        // One arrangement, and not `ViewThatFits` — see the note in `LoginView`: under a keyboard
+        // it rebuilds the `TextField` in another branch and the field loses focus as it is tapped.
+        ScrollView {
+            form
+        }
+        .safeAreaInset(edge: .bottom, spacing: .zero) {
+            actionsBar
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.backgroundDefault)

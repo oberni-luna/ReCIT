@@ -88,6 +88,15 @@ suite.
   conformance the compiler only sees when both files land in the same batch of a batch-mode build.
   Adding unrelated files anywhere in the target broke the build in a file nobody had touched.
 
+- **`ViewThatFits` must not wrap a screen that raises a keyboard.** The three account screens were
+  built with it, copying the onboarding layout. Focusing a field raised the keyboard, which shrank
+  the available height, which made `ViewThatFits` pick a different branch, which rebuilt the
+  `TextField` at a different place in the view tree — SwiftUI read that as a different view and
+  dropped the focus. The username field could not be typed into at all. They now use one
+  arrangement: a `ScrollView` with the actions pinned by a bottom safe-area inset, which handles
+  the accessibility sizes just as well and cannot change identity. `WelcomeView`, the reset
+  confirmation and the onboarding screens keep `ViewThatFits` — nothing on them raises a keyboard.
+
 - **Onboarding uses `ViewThatFits` over three arrangements**, not a pinned bottom inset. C2b's answers
   are a three-sentence reason plus two controls; as an inset that block ate the whole screen at AX5 and
   truncated its own reason. The default-size layout is provably unchanged — captured before and after

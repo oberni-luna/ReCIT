@@ -33,28 +33,21 @@ struct LoginView: View {
     @State private var failure: AuthFailure?
 
     var body: some View {
-        ViewThatFits(in: .vertical) {
-            VStack(spacing: .zero) {
-                form
-
-                actionsBar
-            }
-
-            ScrollView {
-                form
-            }
-            .frame(idealHeight: .zero, maxHeight: .infinity)
-            .safeAreaInset(edge: .bottom, spacing: .zero) {
-                actionsBar
-            }
-
-            ScrollView {
-                VStack(spacing: .zero) {
-                    form
-
-                    actionsBar
-                }
-            }
+        // One arrangement, deliberately. The form scrolls when it does not fit and sits still
+        // when it does, and the actions stay pinned either way.
+        //
+        // **Not `ViewThatFits`**, which the onboarding screens use for the problem that looks
+        // like this one. On a screen with a keyboard it is a focus bug: raising the keyboard
+        // shrinks the available height, `ViewThatFits` picks a different branch, and the
+        // `TextField` is rebuilt at a different place in the view tree. SwiftUI reads that as a
+        // different view, drops the focus and dismisses the keyboard — which made the username
+        // field impossible to type into at all. The onboarding screens are safe because nothing
+        // on them raises a keyboard.
+        ScrollView {
+            form
+        }
+        .safeAreaInset(edge: .bottom, spacing: .zero) {
+            actionsBar
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.backgroundDefault)

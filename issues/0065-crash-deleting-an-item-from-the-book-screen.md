@@ -13,7 +13,45 @@ the inventory, from the book screen's « Supprimer de mon inventaire », with no
 
 So this issue is a reproduction first and a fix second. Do not fix by guessing.
 
-## The reading that made it worth an issue
+## Investigated 2026-08-28 — the hypothesis below is REFUTED, and the issue stays open
+
+Two things were established before writing any fix, and both contradict what this issue
+originally assumed.
+
+**The deleted-object access does not trap.** A throwaway probe against a real container deleted
+an `InventoryItem` and read it back every way the book screen does — through
+`edition.items`, directly, through a to-many (`shelves`) and a to-one (`edition`) — in both
+windows, before `save()` and after:
+
+```
+avant suppression : items = 1
+supprimé, avant save : items = 1 · ownerId via relation = me · shelves = 0
+après save : items = 0
+lecture directe sur l'objet supprimé : ownerId = me · isDeleted = false
+relations sur l'objet supprimé : shelves = 0 · edition = "Probe"
+```
+
+Nothing traps, the relationship updates itself, and the deleted object keeps answering. So
+"the screen holds a deleted model" is **not** the mechanism, at least not on the main context
+without concurrency.
+
+**Staying on the screen is deliberate and correct.** `deleteOwnedItem` carries a comment saying
+so: the book screen is about the *edition*, which still exists — only the "my copy" section goes
+away, and the add-to-inventory action comes back. Unlike a deleted list, whose screen loses its
+whole subject, this screen loses one section. **The claim below that this is the same shape as
+`0064` is wrong**, and no dismiss should be added here to "fix" the crash.
+
+What is left to look at, none of it verified:
+
+- concurrency around the `await` in `removeItem` — the only part not covered by the probe;
+- `BookShelfMenu(item:)`, which hands the item to a UIKit menu that may outlive it;
+- `borrowableItems(_:)` and `item.owner`, read from the same toolbar;
+- something else entirely, which is why the log matters more than any of this.
+
+**Do not ship a fix without a log or a reproduction.** The next step is capturing one, not
+guessing better.
+
+## The reading that made it worth an issue *(kept for the record — refuted above)*
 
 `BookDetailView.deleteOwnedItem()` awaits `InventoryModel.removeItem(_:modelContext:)`, which
 deletes the `InventoryItem` from the store and saves — and then the book screen **stays on
@@ -35,17 +73,18 @@ is on screen and how fast the server answered.
 - Keep the log. Xcode's Organizer holds device crashes, and the stack tells an invalidated-object
   access apart from a concurrency fault — which is the other candidate worth ruling out.
 
-## The likely fix, to be confirmed rather than assumed
+## The fix is not known yet
 
-The screen leaves when the thing it is about is deleted — the same reflex as
-`issues/0064-deleting-a-list-leaves-you-on-its-corpse.md`. Popping before the delete lands, or
-holding the id rather than the object, are both defensible; which one depends on what the log
-says.
+The first candidate — leave the screen, as `issues/0064-deleting-a-list-leaves-you-on-its-corpse.md`
+does — is **wrong here**, and the investigation above says why: this screen is about the edition,
+not the copy, and staying is a deliberate decision written into `deleteOwnedItem`. Adding a
+dismiss would trade a crash nobody has reproduced for a behaviour change nobody asked for.
 
 ## Acceptance criteria
 
 - [ ] The crash is reproduced, and the stack recorded in the fix's commit message
-- [ ] Deleting a book from its own screen returns to where the user came from, with no crash
+- [ ] Deleting a book from its own screen no longer crashes, with the screen still staying put —
+      the 'my copy' section drops and the add-to-inventory action returns, as designed
 - [ ] Deleting the same book while the inventory list is behind it does not crash either
 - [ ] The delete still fails loudly when the server refuses: a book that was not deleted must
       not vanish from the screen

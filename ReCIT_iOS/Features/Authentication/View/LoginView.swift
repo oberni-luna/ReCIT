@@ -1,120 +1,138 @@
 //
-//  FirebaseLoginView.swift
+//  LoginView.swift
 //  ReCIT_iOS
 //
-//  Created by Olivier Berni on 19/08/2025.
+//  « Se connecter » : a lead sentence saying whose account this is, two fields, and the way in.
 //
+//  It is no longer the app's root — `WelcomeView` is — so it has a navigation bar and a back
+//  chevron, and it no longer carries the branding block that used to stand in for a welcome
+//  screen. What it keeps is the note under the fields: a sign-in failure belongs to neither
+//  field on its own, so it is written once under both rather than attributed to a guess.
+//
+//  "Créer un compte" **replaces** the stack rather than pushing onto it. From here it is a
+//  change of mind, not a step forward, and pushing would let a user build accueil → connexion →
+//  création → connexion without ever going back.
+//
+//  The message shown on failure is always ours. `AuthFailure.message` is a catalogue resource in
+//  every branch, so the English prose inventaire.io writes in its `message` field has no path to
+//  this screen — see the suite on that type.
+//
+//  See PRD 0010, issue 0056, and the `Se connecter` frames in the Figma library.
+//
+
 import SwiftUI
 
 struct LoginView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
     let authModel: AuthModel
-    let onLogin: () -> Void
+    let onCreateAccount: () -> Void
 
-    @State private var username = ""
-    @State private var password = ""
-    @State private var errorMessage: String?
+    @State private var username: String = ""
+    @State private var password: String = ""
+    @State private var failure: AuthFailure?
 
     var body: some View {
-        Form {
-            // MARK: - Fields
-            Section {
+        ViewThatFits(in: .vertical) {
+            VStack(spacing: .zero) {
+                form
 
-                TextField("", text: $username)
-                    .textStyle(.content300)
-                    .padding(.all, .medium)
-                    .background(.backgroundSecondary)
-                    .cornerRadius(.medium)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .foregroundStyle(.foregroundDefault)
-                    .withLabel(label: "login.username")
-
-                SecureField("", text: $password)
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundDefault)
-                    .padding(.all, .medium)
-                    .background(.backgroundSecondary)
-                    .cornerRadius(.medium)
-                    .withLabel(label: "login.password")
-                    .listRowSeparator(.hidden)
-
-                if let errorMessage {
-                    Text(errorMessage)
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundError)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .listRowSeparator(.hidden)
-                }
-
-                HStack {
-                    AsyncButton(action: {
-                        do {
-                            try await authModel.login(username: username, password: password)
-                            onLogin()
-                        } catch {
-                            errorMessage = (error as? AuthService.AuthError)?.errorDescription ?? error.localizedDescription
-                        }
-                    }, actionOptions: [.showProgressView], label: {
-                        Text("login.button.signin")
-                    })
-                    .buttonStyle(.primary())
-                }
-                .frame(maxWidth: .infinity)
-                .listRowSeparator(.hidden)
-
-            } header: {
-                // MARK: - Branding
-                VStack(spacing: .medium) {
-                    Image("mainLogo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 128)
-                        .cornerRadius(.roundedLarge)
-
-                    VStack(spacing: .xSmall) {
-                        Text("login.title")
-                            .textStyle(.title50)
-                            .foregroundStyle(.foregroundDefault)
-
-                        Text("login.subtitle")
-                            .textStyle(.content300)
-                            .foregroundStyle(.foregroundSecondary)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .padding(.horizontal, .large)
-                .padding(.top, .large)
-                .frame(maxWidth: .infinity)
-
+                actionsBar
             }
 
-            Section {
-                // MARK: - Actions
-                VStack(spacing: .sMedium) {
-                    Image(.inventaireIo)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 64, height: 64)
-                        .cornerRadius(.medium)
+            ScrollView {
+                form
+            }
+            .frame(idealHeight: .zero, maxHeight: .infinity)
+            .safeAreaInset(edge: .bottom, spacing: .zero) {
+                actionsBar
+            }
 
-                    Text(.init("login.noaccount.explanation"))
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundDefault)
-                        .multilineTextAlignment(.center)
+            ScrollView {
+                VStack(spacing: .zero) {
+                    form
 
-                    Button {
-                        openURL(URL(string: "https://inventaire.io/signup")!)
-                    } label: {
-                        Text("login.button.create_account")
-                    }
-                    .buttonStyle(.secondary())
+                    actionsBar
                 }
-                .frame(maxWidth: .infinity)
             }
         }
-        .defaultScrollAnchor(.center)
-        .applyListBackground()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.backgroundDefault)
+        .navigationTitle(Text("login.button.signin"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var form: some View {
+        VStack(alignment: .leading, spacing: .large) {
+            Text("login.subtitle")
+                .textStyle(.content300)
+                .foregroundStyle(.foregroundSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            AuthField(
+                label: "login.username",
+                contentType: .username,
+                isSecure: false,
+                text: $username
+            )
+
+            AuthField(
+                label: "login.password",
+                contentType: .password,
+                isSecure: true,
+                text: $password
+            )
+
+            if let failure {
+                Text(failure.message)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundError)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            Spacer(minLength: .zero)
+        }
+        .padding(.horizontal, .medium)
+        .padding(.vertical, .large)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var actionsBar: some View {
+        VStack(spacing: .medium) {
+            AsyncButton(
+                action: signIn,
+                actionOptions: [.showProgressView],
+                label: {
+                    Text("login.button.signin")
+                        .frame(maxWidth: .infinity)
+                }
+            )
+            .buttonStyle(.primary())
+
+            Button(action: onCreateAccount) {
+                Text("login.button.create_account")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.secondary())
+        }
+        .padding(.horizontal, .medium)
+        .padding(.vertical, .large)
+        .background(.backgroundDefault)
+    }
+
+    private func signIn() async {
+        do {
+            try await authModel.login(username: username, password: password)
+            failure = nil
+        } catch {
+            failure = error
+        }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        LoginView(
+            authModel: .init(authService: .init(config: .init(keychainKey: "preview"))),
+            onCreateAccount: {}
+        )
     }
 }

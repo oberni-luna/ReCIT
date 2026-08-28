@@ -69,7 +69,10 @@ struct RootView: View {
 
     var body: some View {
         if !authModel.isAuthenticated {
-            LoginView(authModel: authModel) {}
+            // The signed-out branch owns its own navigation stack (PRD 0010): the welcome
+            // screen is its root, so a logged-out launch opens on what the app is for rather
+            // than on a form. Signing out lands back here for the same reason.
+            AuthFlowView(authModel: authModel)
         } else {
             MainTabView(authModel: authModel)
                 // **Innermost of the three, on purpose.** Pull-to-refresh belongs to the tabs

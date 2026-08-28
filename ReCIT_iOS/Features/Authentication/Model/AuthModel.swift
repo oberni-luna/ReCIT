@@ -20,7 +20,10 @@ public class AuthModel {
         isAuthenticated = authService.isLoggedIn()
     }
 
-    public func login(username: String, password: String) async throws {
+    /// Typed, so a screen can render `AuthFailure.message` without first proving the error is
+    /// one. That proof used to be a cast with a French fallback behind it, and the fallback was
+    /// `localizedDescription` — which is where the server's English prose would have surfaced.
+    func login(username: String, password: String) async throws(AuthFailure) {
         do {
             try await authService.login(username: username, password: password)
             self.isAuthenticated = true

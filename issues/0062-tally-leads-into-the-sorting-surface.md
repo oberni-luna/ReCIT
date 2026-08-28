@@ -65,4 +65,11 @@ underneath it.
 
 ## Blocked by
 
-- The sorting surface itself must exist and accept a proposal — `issues/0046-grid-sorting-surface-read-only.md`, `issues/0051-proposal-button-in-the-action-bar.md` and `issues/0052-scan-then-sort-modal-flow.md`.
+None - can start immediately.
+
+The three issues this once waited on have all shipped: `0046` (the grid surface), `0051` (the
+proposal button) and `0052` (the one modal flow, `5d83959`). That changes the work rather than
+removing it: `0052` was **built with** the withdrawn no-screen rule in force, so this issue now
+edits a shipped flow instead of completing a missing one. Read `Features/Sorting/SortFlowView`
+and `SortFlowRoute` before touching anything — the route enum is where the loading step belongs,
+and the flow already owns its stack and its close.

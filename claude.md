@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-**RECITs** — iOS app (SwiftUI + SwiftData) that tracks personal books and lets users give, lend, or sell them to friends. Status: pre-1.0, headed for production. App data is sourced from and synced to the third-party [`inventaire.io`](https://inventaire.io) backend (a CouchDB-backed open-data book inventory), so most server entities carry CouchDB-style `_id` / `_rev` string identifiers.
+**Ex-libris** — iOS app (SwiftUI + SwiftData) that tracks personal books and lets users give, lend, or sell them to friends. Status: pre-1.0, headed for production. App data is sourced from and synced to the third-party [`inventaire.io`](https://inventaire.io) backend (a CouchDB-backed open-data book inventory), so most server entities carry CouchDB-style `_id` / `_rev` string identifiers.
 
 Key features: physical-book inventory, search across editions/works/authors, curated book lists, transactions (give/lend/sell), and a community/friends view.
 
@@ -49,24 +49,24 @@ xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj -list
 # Build the app for the simulator
 xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
   -scheme ReCIT_iOS \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
   build
 
 # Run the full test target (ReCIT_iOSTests — Swift Testing)
 xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
   -scheme ReCIT_iOSTests \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
   test
 
 # Run a single test (Swift Testing identifier = TypeName/methodName)
 xcodebuild test \
   -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
   -scheme ReCIT_iOSTests \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
   -only-testing:ReCIT_iOSTests/InventoryIntegrationTests/inventoryScenario
 ```
 
-**Heads-up on the test target:** `Tests/ReCIT_iOSTests.swift` is an *integration* suite that logs into the real `inventaire.io` production server with hard-coded credentials (`OlivierB_test`) and mutates that account's data. It is documented as "Run manually; not suitable for CI." Do not add it to automated pipelines without first stubbing the network or moving the credentials out of the repo.
+**Heads-up on the test target:** `Tests/ReCIT_iOSTests.swift` is an *integration* suite that logs into the real `inventaire.io` production server with hard-coded credentials (`OlivierB_test`) and mutates that account's data. It is now gated behind `.enabled(if: IntegrationConfig.isEnabled)`, so a normal run skips it — but the credentials are still in the repo. Do not add it to automated pipelines without first stubbing the network or moving them out. Everything else is a pure or `MockURLProtocol`-backed suite and is safe to run anywhere.
 
 ## Architecture (the parts that span files)
 
@@ -80,7 +80,7 @@ xcodebuild test \
 
 `RootView` then instantiates the rest of the shared app models (`UserModel`, `ListModel`, `EntityModel`, `SearchModel`, `InventoryModel`, `TransactionModel`) as `@StateObject` and re-injects them as `EnvironmentObject` into `MainTabView`. Any new shared model belongs in `AppModels/<Domain>/` and must be added in **both** places (`@StateObject` + `.environmentObject`).
 
-Note: the codebase currently mixes Combine `ObservableObject` (used by all `AppModels` reference types) with the project guidance to prefer `@Observable`. Treat new shared models as `@Observable @MainActor`; only touch the legacy ones if you're explicitly converting them.
+Note: every shared model is `@Observable @MainActor`. `AuthModel` was the last Combine `ObservableObject` and was converted in issue 0055 — `@Published`, `@StateObject`, `@EnvironmentObject` and `.environmentObject` now return zero hits across the codebase. Keep it that way.
 
 ### Networking
 
@@ -146,7 +146,7 @@ Target: **iOS 26.0+**, **Swift 6.2+**, strict concurrency, SwiftUI-only (no UIKi
 
 - `foregroundStyle()` over `foregroundColor()`; `clipShape(.rect(cornerRadius:))` over `cornerRadius()`.
 - `Tab` API over `tabItem()`; `NavigationStack` + `navigationDestination(for:)` — never `NavigationView`.
-- `@Observable` only — no new `ObservableObject` types (the existing `AppModels` are legacy).
+- `@Observable` only — no `ObservableObject` anywhere; none remains.
 - Two-arg `onChange(_:_:)` or zero-arg variant; never the deprecated single-arg form.
 - `Button` over `onTapGesture()` unless tap location / count is genuinely needed.
 - Buttons with an image must also carry text: `Button("Tap me", systemImage: "plus", action: …)`.

@@ -5,7 +5,7 @@ This repository contains an Xcode project written with Swift and SwiftUI. Please
 
 ## Project overview
 
-- **App name:** RECITs
+- **App name:** Ex-libris
 - **Bundle ID:** <!-- e.g. com.yourname.myapp -->
 - **Purpose:** This App allows users to keep track of their books; give, lend or sell them to friends. 
 - **Key features:**
@@ -52,7 +52,7 @@ You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and relat
 - Always use `foregroundStyle()` instead of `foregroundColor()`.
 - Always use `clipShape(.rect(cornerRadius:))` instead of `cornerRadius()`.
 - Always use the `Tab` API instead of `tabItem()`.
-- Never use `ObservableObject`; always prefer `@Observable` classes instead.
+- Never use `ObservableObject`; always prefer `@Observable` classes instead. None remains in this project.
 - Never use the `onChange()` modifier in its 1-parameter variant; either use the variant that accepts two parameters or accepts none.
 - Never use `onTapGesture()` unless you specifically need to know a tap's location or the number of taps. All other usages should use `Button`.
 - Never use `Task.sleep(nanoseconds:)`; always use `Task.sleep(for:)` instead.

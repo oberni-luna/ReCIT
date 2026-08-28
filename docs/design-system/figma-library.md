@@ -1429,3 +1429,21 @@ Compte à jour : **34 composants** sur `Screens · Components`, 3 sur `Component
 - Corollaire du piège déjà connu sur `resetOverrides()` : les deux effacements silencieux de cette famille
   (le **nom** du nœud pour `resetOverrides`, la **référence de propriété** pour `clone`) ne lèvent aucune erreur et ne
   se voient qu'à la capture.
+
+## Divergences relevées en implémentant le PRD 0010 (2026-08-28)
+
+Suite des tables précédentes. Toutes trouvées en écrivant le code ou en le faisant tourner, pas en
+relisant.
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| D57 | `AppModels/Shelf/ShelfModel.swift` | La forme `?action=` **dépréciée côté serveur** survit à huit points d'appel (`create`, `by-owners`, `by-ids`, `add-items`…). L'authentification en est sortie (issue 0056) ; l'API des étagères non. Le critère « plus aucun `?action=` dans le code » de l'issue 0056 n'était donc pas tenable, et a été restreint à l'authentification | ouverte — même travail à refaire pour les étagères |
+| D58 | `Components/WithLabel.swift` vs la maquette | `withLabel(label:)` dessine son libellé en **`caption200`** ; la maquette des champs de compte demande **`footnote200`**. `AuthField` écrit donc son propre libellé plutôt que de restyler les six autres formulaires qui consomment ce modificateur | ouverte — à trancher : aligner la maquette sur `caption200`, ou faire porter le style au modificateur |
+| D59 | `inventaire.io` — `cookie-session` global | **Le plus grave de la passe.** `GET /auth/username-availability` répond `200` **et** `Set-Cookie: inventaire:session` — une session **anonyme**, sous les deux noms exacts qu'`AuthService` lit pour décider si quelqu'un est connecté. Constaté sur appareil : taper trois lettres dans le champ nom d'utilisateur, relancer, et l'app ouvrait sur les onglets d'un compte inexistant. La cause est côté serveur — `server/middlewares/middlewares.ts` applique `cookie-session` globalement — donc **tout appel public d'authentification doit poser `httpShouldHandleCookies = false` et ne pas appeler `absorbCookies`** ; seuls `login` et `signUp` absorbent | contournée côté app, tenue par deux tests · **ouverte côté serveur**, à signaler à inventaire.io |
+| D60 | `inventaire.io` — `reset_password.ts` | Le serveur **est un oracle** : un compte introuvable donne `400 "email not found"`, avec l'adresse recopiée dans le corps. N'importe qui peut donc tester une liste d'adresses. L'app le neutralise en écrasant toutes les réponses sauf l'échec de transport sur une seule confirmation (`PasswordResetOutcome`) — cette collapse porte seule la protection | contournée côté app · **ouverte côté serveur**, à signaler |
+| D61 | `Model/SearchResult/SearchResult.swift` | `Hashable` était **synthétisé** au-dessus d'un `@Model` SwiftData, dont la conformité n'est visible depuis un autre fichier que si les deux tombent dans le même lot d'une compilation en batch mode. Ajouter n'importe quel fichier ailleurs dans la cible repartitionnait les lots et cassait le build dans un fichier que personne n'avait touché | résolue — les deux témoins sont écrits à la main, sémantique de synthèse préservée |
+| D62 | `DesignSystem/Tokens/TextStyle.swift` | La `UIFont` est construite via `UIFontMetrics` **à la construction**, donc le texte en police personnalisée ne se remet pas à l'échelle sur un changement **vif** de taille de contenu : il ne prend la nouvelle taille qu'au relancement. Concerne toutes les vues de l'app à égalité | ouverte — antérieure à cette passe, relevée en vérifiant les tailles d'accessibilité |
+| D63 | `Localizable.xcstrings`, `Assets.xcassets` | Orphelins après la réécriture de l'écran de connexion : la clé `login.title` et les jeux d'images `mainLogo` et `inventaireIo` ne sont référencés par aucun fichier Swift | ouverte — suppression à faire dans la passe de nettoyage des chaînes |
+
+Rappel : D51 (la case « ☐ » de la note d'étagère) et D52 (le bouton de tri au-dessus d'une bibliothèque
+vide) restent ouvertes côté code, sans rapport avec cette feature.

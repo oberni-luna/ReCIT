@@ -191,3 +191,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0008 Automatic shelving with on-device AI](docs/features/0008-ai-auto-sort.md) — proposes étagères sized to the collection; its review-and-apply half is superseded by 0009
 - [0009 Sorting books into étagères, by hand and with help](docs/features/0009-manual-shelf-sorting.md) — drag books between étagères and « À ranger », nothing written until you apply; its surface is superseded by 0010
 - [0010 Ranger mes livres, in a grid](docs/features/0010-grid-shelf-sorting.md) — étagères as cards over an anchored panel of books to file, drag both ways, one modal flow
+- [0011 Ex-libris — pre-login welcome and native account flow](docs/features/0011-ex-libris-pre-login-onboarding.md) — the app says what it is for before asking who you are

@@ -2678,13 +2678,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "They are not on any shelf yet. RECITs can sort them for you — everything happens on your phone, your library goes nowhere."
+            "value": "They are not on any shelf yet. Ex-libris can sort them for you — everything happens on your phone, your library goes nowhere."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ils ne sont sur aucune étagère. RECITs peut les répartir pour vous — tout se passe sur votre téléphone, votre liste ne part nulle part."
+            "value": "Ils ne sont sur aucune étagère. Ex-libris peut les répartir pour vous — tout se passe sur votre téléphone, votre liste ne part nulle part."
           }
         }
       }
@@ -2945,13 +2945,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Camera access is turned off for RECITs. Allow it in Settings and come back to scan your books."
+            "value": "Camera access is turned off for Ex-libris. Allow it in Settings and come back to scan your books."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L'accès à l'appareil photo est désactivé pour RECITs. Autorisez-le dans les Réglages, puis revenez pour scanner vos livres."
+            "value": "L'accès à l'appareil photo est désactivé pour Ex-libris. Autorisez-le dans les Réglages, puis revenez pour scanner vos livres."
           }
         }
       }

@@ -17,10 +17,20 @@ struct ListFormView: View {
 
     @Bindable var list: EntityList = .init(_id: "", _rev: "", name: "", explanation: "", created: Date(), visibility: [], type: .work)
 
+    /// Whether this form is making a list or editing one. A list only has a server id once the
+    /// server has answered, so an empty id is what "does not exist yet" means here.
+    ///
+    /// Read by everything that differs between the two modes — the title, the type picker and
+    /// the delete control — because those three disagreeing is exactly how the form came to
+    /// offer deleting a list that had never existed.
+    private var isCreating: Bool {
+        list._id.isEmpty
+    }
+
     var body: some View {
         NavigationStack {
             Form {
-                if list._id.isEmpty {
+                if isCreating {
                     Section {
                         Picker("list.form.type", selection: $list.type) {
                             ForEach(EntityListType.allCases, id: \.self) { type in
@@ -66,30 +76,36 @@ struct ListFormView: View {
                         })
                         .buttonStyle(.primary())
 
-                        AsyncButton(action: {
-                            do {
-                                try await listModel.deleteList(
-                                    modelContext: modelContext,
-                                    list: list
-                                )
-                                dismiss()
-                            } catch {
-                                snackBar.show { SnackBarView.error(error) }
-                            }
-                        },
-                                    actionOptions: [.showProgressView],
-                                    label: {
-                            Text("list.form.delete")
-                                .frame(maxWidth: .infinity)
-                        })
-                        .buttonStyle(.destructive())
+                        // Only an existing list can be deleted. The same test decides the
+                        // title and the type picker above: a list with no server id has
+                        // never existed, so offering to delete it asked the endpoint to
+                        // remove an empty id.
+                        if !isCreating {
+                            AsyncButton(action: {
+                                do {
+                                    try await listModel.deleteList(
+                                        modelContext: modelContext,
+                                        list: list
+                                    )
+                                    dismiss()
+                                } catch {
+                                    snackBar.show { SnackBarView.error(error) }
+                                }
+                            },
+                                        actionOptions: [.showProgressView],
+                                        label: {
+                                Text("list.form.delete")
+                                    .frame(maxWidth: .infinity)
+                            })
+                            .buttonStyle(.destructive())
+                        }
                     }
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
             }
             .applyListBackground()
-            .navigationTitle(list._id.isEmpty ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
+            .navigationTitle(isCreating ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.close", systemImage: "xmark") {

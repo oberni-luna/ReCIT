@@ -23,20 +23,20 @@ Reported from a device (an iPhone 14 Pro, ineligible) where the bilan ended on
 « Le rangement automatique n'est pas disponible sur cet appareil » and « Continuer sans
 ranger », leaving the user with two freshly scanned books and nowhere to put them.
 
-## This contradicts issue 0052 on two points — resolve before building
+## Settled: 0052's rule was withdrawn, not worked around
 
-`issues/0052-scan-then-sort-modal-flow.md` specifies the same stretch of the flow and says:
+`issues/0052-scan-then-sort-modal-flow.md` said no screen may come between the bilan and the
+sorting screen. **That rule is withdrawn**, on a decision taken 2026-08-28, and the withdrawal is
+recorded in an amendment on that issue rather than by quietly editing it away. The loading screen
+is in scope.
 
-1. *« The bilan doubles as the invitation to file; no screen is added between it and the
-   sorting screen. »* — this issue adds exactly one screen there, the loading step, and that is
-   what was asked for out loud.
-2. *« The sorting screen offers no way back to the bilan »* — a pushed loading screen sits in
-   that stack and inherits the question of what its back gesture does.
+The second half of the tension is resolved by construction: the loading screen is **replaced by**
+the sorting surface rather than pushed under it, so 0052's other rule — the surface has no back
+to the bilan, only an explicit close — survives untouched. Backing out of the loading screen
+itself returns to the bilan and means "never mind": nothing has been computed or written yet.
 
-They cannot both ship as written. Either the loading step becomes the sorting surface's own
-loading state — which is `0036`'s territory, and one destination rather than two — or `0052`'s
-criterion is amended to allow it. **Decide it in writing on one of the two issues before either
-is implemented**; do not let the second implementer discover the contradiction.
+Division of labour between the two issues: 0052 owns the container, the stack and the close;
+this one owns what the bilan offers and what happens behind each CTA.
 
 ## The unavailability reason does not disappear
 
@@ -59,7 +59,9 @@ underneath it.
 - [ ] Availability is read fresh, so switching Apple Intelligence on and returning changes which
       CTA is offered without a relaunch
 - [ ] Both labels live in `Localizable.xcstrings`
-- [ ] The contradiction with `0052` is settled in writing on one of the two issues
+- [ ] The loading screen is replaced by the sorting surface, never left underneath it, so no back
+      chevron to the bilan appears
+- [ ] Backing out of the loading screen returns to the bilan with nothing computed or written
 
 ## Blocked by
 

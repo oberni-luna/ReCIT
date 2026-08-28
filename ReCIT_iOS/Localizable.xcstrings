@@ -3229,19 +3229,155 @@
         }
       }
     },
-    "signup.placeholder.body" : {
+    "signup.button.create" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Creating an account from inside the app is on its way. For now, sign in with an existing inventaire.io account."
+            "value" : "Create my account"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La création de compte depuis l'app arrive bientôt. Pour l'instant, connectez-vous avec un compte inventaire.io existant."
+            "value" : "Créer mon compte"
+          }
+        }
+      }
+    },
+    "signup.email" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email address"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse e-mail"
+          }
+        }
+      }
+    },
+    "signup.error.email_invalid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This email address is not valid."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette adresse e-mail n'est pas valide."
+          }
+        }
+      }
+    },
+    "signup.error.email_taken" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An account already uses this email address."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un compte utilise déjà cette adresse e-mail."
+          }
+        }
+      }
+    },
+    "signup.error.password_rejected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This password was not accepted. Try a longer one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce mot de passe n'a pas été accepté. Essayez-en un plus long."
+          }
+        }
+      }
+    },
+    "signup.error.username_invalid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This username cannot be used. Try another one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce nom d'utilisateur ne peut pas être utilisé. Essayez-en un autre."
+          }
+        }
+      }
+    },
+    "signup.error.username_taken" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This username is already taken."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce nom d'utilisateur est déjà pris."
+          }
+        }
+      }
+    },
+    "signup.footnote" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By continuing, you accept the inventaire.io terms."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En continuant, vous acceptez les conditions d'inventaire.io."
+          }
+        }
+      }
+    },
+    "signup.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You are creating an account on inventaire.io: that is where your books will be hosted."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous créez un compte sur inventaire.io : c'est là que vos livres seront hébergés."
           }
         }
       }

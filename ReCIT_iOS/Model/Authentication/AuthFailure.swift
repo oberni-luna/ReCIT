@@ -21,7 +21,14 @@
 //  Everything else is one sentence — a user cannot act on the difference between a 500 and a
 //  502, and pretending otherwise means writing copy for statuses nobody has ever seen.
 //
-//  See PRD 0010 and issue 0056.
+//  Signing up adds five more, and they are the exception that proves that rule: each one *is*
+//  actionable, and each one belongs to exactly one of the three fields. The sign-in screen shows
+//  its failure once, under both fields, because a refused password is not attributable; the
+//  sign-up screen shows its failures under the field that caused them, because they are. That
+//  attribution is `signupField`, and it is a property of this type rather than a guess the view
+//  makes from the sentence it was handed.
+//
+//  See PRD 0010 and issues 0056 and 0057.
 //
 
 import Foundation
@@ -44,9 +51,35 @@ enum AuthFailure: Error, Equatable, Sendable {
     /// this type owes nothing to `Security`.
     case keychain(status: Int32)
 
+    /// Somebody already has this username.
+    case usernameTaken
+
+    /// The server would not accept the shape of this username. What is wrong with it is not
+    /// spelled out on purpose: the naming rules live on the server, the availability endpoint
+    /// enforces them, and a client that restates them is a client that will be wrong one day.
+    case usernameInvalid
+
+    /// An account already exists for this address.
+    case emailTaken
+
+    /// The server would not accept the shape of this address.
+    case emailInvalid
+
+    /// The server refused the password. Its own case rather than a generic failure because of
+    /// where it lands: iOS offers to generate a strong password on this screen, and somebody
+    /// whose *phone* chose the password has no way to make sense of "something went wrong".
+    case passwordRejected
+
     /// Any other refusal from the server. `serverMessage` is the server's own English prose:
     /// kept for logs and for a debugger, never shown.
     case server(status: Int, serverMessage: String?)
+
+    /// Which sign-up field a failure belongs under, when it belongs under one.
+    enum SignupField: Equatable, Sendable {
+        case username
+        case email
+        case password
+    }
 
     /// The failure an HTTP status stands for, or `nil` when the status is a success.
     ///
@@ -69,6 +102,63 @@ enum AuthFailure: Error, Equatable, Sendable {
         return .server(status: status, serverMessage: serverMessage)
     }
 
+    /// The failure a **sign-up** status stands for, or `nil` when the status is a success.
+    ///
+    /// A second classifier rather than a flag on the first, because the two endpoints do not
+    /// answer the same alphabet. A `400` from `/auth/login` is a malformed request nobody can
+    /// act on; a `400` from `/auth/signup` is the server naming which of the three fields it
+    /// would not take, and throwing that away is throwing away the only thing that lets the
+    /// screen point at the right box.
+    ///
+    /// It reads `error_name` first, which the server sets for every shape refusal, and falls
+    /// back to matching the sentence as a token for the ones it does not set — a name already
+    /// taken carries no `error_name` at all. Neither string goes any further than this method.
+    ///
+    /// - Parameters:
+    ///   - status: the HTTP status the server answered with.
+    ///   - errorName: the `error_name` field of the error body, if it had one.
+    ///   - serverMessage: the `message` field of the error body, if it had one.
+    static func classifySignup(
+        status: Int,
+        errorName: String?,
+        serverMessage: String?
+    ) -> AuthFailure? {
+        guard !(200..<300).contains(status) else { return nil }
+
+        guard status == 400 else {
+            return classify(status: status, serverMessage: serverMessage)
+        }
+
+        switch errorName {
+        case "invalid_username": return .usernameInvalid
+        case "invalid_email": return .emailInvalid
+        case "invalid_password": return .passwordRejected
+        default: break
+        }
+
+        if let serverMessage {
+            // Protocol strings, matched with `contains`: this is the server talking to us, not a
+            // person typing, so the localised comparison the project uses on user input is the
+            // wrong tool.
+            if serverMessage.contains("username is already used") { return .usernameTaken }
+            if serverMessage.contains("email is already used") { return .emailTaken }
+            if serverMessage.contains("reserved word") { return .usernameInvalid }
+        }
+
+        return .server(status: status, serverMessage: serverMessage)
+    }
+
+    /// The sign-up field this failure belongs under, or `nil` when it belongs to none of them
+    /// and has to be said once for the whole form.
+    var signupField: SignupField? {
+        switch self {
+        case .usernameTaken, .usernameInvalid: .username
+        case .emailTaken, .emailInvalid: .email
+        case .passwordRejected: .password
+        case .invalidCredentials, .network, .noSessionCookies, .keychain, .server: nil
+        }
+    }
+
     /// What the user reads. A catalogue resource in every case — there is no branch of this
     /// property that can return a string the server wrote, which is the whole point.
     var message: LocalizedStringResource {
@@ -77,6 +167,16 @@ enum AuthFailure: Error, Equatable, Sendable {
             "auth.error.invalid_credentials"
         case .network:
             "auth.error.network"
+        case .usernameTaken:
+            "signup.error.username_taken"
+        case .usernameInvalid:
+            "signup.error.username_invalid"
+        case .emailTaken:
+            "signup.error.email_taken"
+        case .emailInvalid:
+            "signup.error.email_invalid"
+        case .passwordRejected:
+            "signup.error.password_rejected"
         case .noSessionCookies, .keychain, .server:
             "auth.error.generic"
         }

@@ -16,6 +16,6 @@ enum AuthDestination: Hashable, Sendable {
     /// The form: a username, a password, and a way in.
     case signIn
 
-    /// Account creation. A placeholder in this slice — issue 0057 builds the form.
+    /// Account creation: three fields, checked live, and a session at the end of them.
     case createAccount
 }

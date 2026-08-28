@@ -18,7 +18,13 @@
 //  a service that cannot be tested and, worse, one whose behaviour depends on which session it
 //  was built with.
 //
-//  See PRD 0010 and issue 0056.
+//  Signing up (issue 0057) is treated as one more way of signing in, not as a thing of its own:
+//  same absorption, same keychain write, same "you are in" at the end. What it adds is the
+//  fallback — if the sign-up response carried no session, a login is chained with the
+//  credentials just used, so nobody ever retypes a password they chose ten seconds ago. Whether
+//  to chain it is `PostSignupSession`'s call, not this file's.
+//
+//  See PRD 0010 and issues 0056 and 0057.
 //
 
 import Foundation
@@ -29,6 +35,11 @@ final class AuthService {
         let baseURL: String
         let loginPath: String
         let logoutPath: String
+        let signupPath: String
+        /// `GET`, with the candidate in the query string. The endpoint answers "valid **and**
+        /// available", which is why no naming rule is written anywhere in this app.
+        let usernameAvailabilityPath: String
+        let emailAvailabilityPath: String
         /// The cookies that *are* the session. Both persistence and the logout purge are scoped
         /// to these names — the purge used to empty the whole jar, which signed the user out of
         /// every other host the app had ever talked to.
@@ -40,6 +51,9 @@ final class AuthService {
             baseURL: String = "https://inventaire.io/api",
             loginPath: String = "/auth/login",
             logoutPath: String = "/auth/logout",
+            signupPath: String = "/auth/signup",
+            usernameAvailabilityPath: String = "/auth/username-availability",
+            emailAvailabilityPath: String = "/auth/email-availability",
             sessionCookieNames: Set<String> = [
                 "inventaire:session",
                 "inventaire:session.sig"
@@ -49,6 +63,9 @@ final class AuthService {
             self.baseURL = baseURL
             self.loginPath = loginPath
             self.logoutPath = logoutPath
+            self.signupPath = signupPath
+            self.usernameAvailabilityPath = usernameAvailabilityPath
+            self.emailAvailabilityPath = emailAvailabilityPath
             self.sessionCookieNames = sessionCookieNames
             self.keychainKey = keychainKey
         }
@@ -56,13 +73,26 @@ final class AuthService {
 
     /// The shape of an inventaire.io error body. `message` is English prose written by the
     /// server; it is decoded so it can be carried into `AuthFailure.server`, and it goes no
-    /// further than that.
+    /// further than that. `error_name` is the opposite: a stable machine token — `invalid_email`
+    /// and friends — which is what the two classifiers actually read.
     private struct ErrorBody: Decodable {
         let message: String?
+        let errorName: String?
+
+        enum CodingKeys: String, CodingKey {
+            case message
+            case errorName = "error_name"
+        }
     }
 
     private struct Credentials: Encodable {
         let username: String
+        let password: String
+    }
+
+    private struct NewAccount: Encodable {
+        let username: String
+        let email: String
         let password: String
     }
 
@@ -116,6 +146,108 @@ final class AuthService {
         guard hasValidSessionCookies() else { throw .noSessionCookies }
 
         try persistCookiesToKeychain()
+    }
+
+    /// Creates the account, and leaves the user signed in — never asking them to type any of it
+    /// a second time.
+    ///
+    /// `POST /auth/signup` serialises the session itself today, so the common path is one round
+    /// trip. When it does not, `PostSignupSession` says so and a login is chained with the same
+    /// credentials. The account exists either way by then: a failure after this point is a
+    /// failure to *open a session*, not a failure to create an account, which is why the
+    /// fallback is worth having at all.
+    func signUp(username: String, email: String, password: String) async throws(AuthFailure) {
+        var request: URLRequest = .init(url: URL(string: cfg.baseURL + cfg.signupPath)!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONEncoder().encode(
+            NewAccount(username: username, email: email, password: password)
+        )
+
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            throw .network
+        }
+
+        guard let http = response as? HTTPURLResponse else {
+            throw .server(status: 0, serverMessage: nil)
+        }
+
+        let body: ErrorBody? = errorBody(in: data)
+        if let failure = AuthFailure.classifySignup(
+            status: http.statusCode,
+            errorName: body?.errorName,
+            serverMessage: body?.message
+        ) {
+            throw failure
+        }
+
+        absorbCookies(from: http)
+
+        switch PostSignupSession.next(hasSessionCookies: hasValidSessionCookies()) {
+        case .established:
+            try persistCookiesToKeychain()
+
+        case .chainSignIn:
+            // The credentials just used, and `login` does the rest — absorption, the check, the
+            // keychain write. A branch production does not produce on demand, which is exactly
+            // why it goes through the path that is exercised on every launch.
+            try await login(username: username, password: password)
+        }
+    }
+
+    /// Whether this username is both well formed and free, as far as the server is concerned.
+    ///
+    /// It does not throw. A check that fails is not a field that is wrong — the answer is
+    /// `undetermined`, which says nothing on screen and blocks nothing.
+    func usernameAvailability(_ username: String) async -> FieldAvailability.Outcome {
+        await availability(path: cfg.usernameAvailabilityPath, parameter: "username", value: username)
+    }
+
+    /// The same, for an address.
+    func emailAvailability(_ email: String) async -> FieldAvailability.Outcome {
+        await availability(path: cfg.emailAvailabilityPath, parameter: "email", value: email)
+    }
+
+    private func availability(
+        path: String,
+        parameter: String,
+        value: String
+    ) async -> FieldAvailability.Outcome {
+        guard var components = URLComponents(string: cfg.baseURL + path) else { return .undetermined }
+        components.queryItems = [.init(name: parameter, value: value)]
+        guard let url = components.url else { return .undetermined }
+
+        var request: URLRequest = .init(url: url)
+        request.httpMethod = "GET"
+        // **This request must not touch the session, in either direction.** Both availability
+        // endpoints are public, and both answer with `Set-Cookie: inventaire:session=…` — an
+        // *anonymous* session, under the very names this service reads to decide whether
+        // somebody is signed in. Left to `URLSession`'s own jar, typing three letters into the
+        // username box would hand the app a session cookie, and the next launch would open on
+        // the tabs of an account that does not exist. Verified against production: a `200` from
+        // `/auth/username-availability` sets both cookies.
+        request.httpShouldHandleCookies = false
+
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            return .undetermined
+        }
+
+        guard let http = response as? HTTPURLResponse else { return .undetermined }
+
+        let body: ErrorBody? = errorBody(in: data)
+        return .from(
+            status: http.statusCode,
+            errorName: body?.errorName,
+            serverMessage: body?.message
+        )
     }
 
     /// Closes the session: tells the server, then forgets it locally whatever the server said.
@@ -214,6 +346,13 @@ final class AuthService {
     /// The server's own sentence, when the body carries one. Decoded so it can be carried into
     /// the failure for a log; never read by a view.
     private func serverMessage(in data: Data) -> String? {
-        try? JSONDecoder().decode(ErrorBody.self, from: data).message
+        errorBody(in: data)?.message
+    }
+
+    /// The error body, when the response had one that decodes. A success body decodes to a
+    /// record with both fields `nil`, which is the same thing as far as every caller is
+    /// concerned — the status is what says whether there was a failure at all.
+    private func errorBody(in data: Data) -> ErrorBody? {
+        try? JSONDecoder().decode(ErrorBody.self, from: data)
     }
 }

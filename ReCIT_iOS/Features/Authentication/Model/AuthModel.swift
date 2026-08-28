@@ -34,6 +34,34 @@ public class AuthModel {
         }
     }
 
+    /// Creates the account and leaves the user signed in, or throws what to say about it.
+    ///
+    /// The same shape as `login` on purpose: signing up is a way of opening a session, and the
+    /// screen that follows cannot tell which door the user came through — which is the point.
+    /// The chained sign-in the service may run when no session comes back is invisible from
+    /// here; see `PostSignupSession`.
+    func signUp(username: String, email: String, password: String) async throws(AuthFailure) {
+        do {
+            try await authService.signUp(username: username, email: email, password: password)
+            self.isAuthenticated = true
+            self.username = username
+        } catch {
+            self.isAuthenticated = false
+            throw error
+        }
+    }
+
+    /// Whether a candidate username is well formed and free. Never throws: an availability check
+    /// that does not come back is not a field the user got wrong.
+    func usernameAvailability(_ username: String) async -> FieldAvailability.Outcome {
+        await authService.usernameAvailability(username)
+    }
+
+    /// The same, for an address.
+    func emailAvailability(_ email: String) async -> FieldAvailability.Outcome {
+        await authService.emailAvailability(email)
+    }
+
     public func logout() async {
         await authService.logout()
         self.isAuthenticated = false

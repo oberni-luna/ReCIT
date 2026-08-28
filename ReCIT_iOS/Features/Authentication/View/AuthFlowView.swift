@@ -45,7 +45,7 @@ struct AuthFlowView: View {
             )
 
         case .createAccount:
-            CreateAccountPlaceholderView()
+            CreateAccountView(authModel: authModel)
         }
     }
 }

@@ -119,9 +119,16 @@ struct SortFlowView: View {
                 // The camera's way out. The sorting surface carries its own close control, so
                 // offering this one alongside it made two crosses in one bar, one of which
                 // ended a scanning session that was not running.
+                //
+                // It says « Terminer » rather than wearing a cross, because it does not close
+                // anything: it ends the session and hands over to the bilan, which is the
+                // affirmative way out of this cover and belongs in `.confirmationAction` for
+                // the same reason. A cross over a live camera reads as *cancel* — as though the
+                // books just filed were about to be thrown away, when every one of them was
+                // written to the server as it was added.
                 if start == .scanning {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("action.close", systemImage: "xmark", action: endSession)
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("action.finish", action: endSession)
                             .tint(ScanOverlayPalette.ink)
                     }
                 }

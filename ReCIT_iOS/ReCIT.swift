@@ -15,7 +15,7 @@ struct ReCIT: App {
     /// tests create and SwiftData traps on duplicate schema registration.
     private let sharedModelContainer: ModelContainer?
 
-    @StateObject private var authModel: AuthModel = .init(authService: .init(config: .init()))
+    @State private var authModel: AuthModel = .init(authService: .init(config: .init()))
 
     init() {
         DesignSystem.start()
@@ -26,7 +26,7 @@ struct ReCIT: App {
         WindowGroup {
             if let sharedModelContainer {
                 RootView()
-                    .environmentObject(authModel)
+                    .environment(authModel)
                     .modelContainer(sharedModelContainer)
                     .tint(.foregroundTinted)
             } else {

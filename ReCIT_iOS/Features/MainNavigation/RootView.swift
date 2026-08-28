@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct RootView: View {
-    @EnvironmentObject var authModel: AuthModel
+    @Environment(AuthModel.self) var authModel
     @State var userModel: UserModel
     @State var listModel: ListModel
     @State var entityModel: EntityModel
@@ -107,7 +107,7 @@ struct RootView: View {
                 .environment(errorReporter)
                 .environment(syncStatus)
                 .environment(onboardingStore)
-                .environmentObject(authModel)
+                .environment(authModel)
                 .onAppear {
                     refreshUserData()
                 }

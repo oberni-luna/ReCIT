@@ -6,14 +6,14 @@
 //
 
 import Foundation
-import Combine
 
 @MainActor
-public class AuthModel: ObservableObject {
+@Observable
+public class AuthModel {
     let authService: AuthService
 
-    @Published public var isAuthenticated: Bool = true
-    @Published public var username: String = ""
+    public var isAuthenticated: Bool = true
+    public var username: String = ""
 
     init(authService: AuthService) {
         self.authService = authService

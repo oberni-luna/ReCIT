@@ -10,7 +10,7 @@ import SwiftData
 import LBSnackBar
 
 struct ProfileView: View {
-    @EnvironmentObject private var authModel: AuthModel
+    @Environment(AuthModel.self) private var authModel
     @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(UserModel.self) private var userModel
     @Environment(TransactionModel.self) private var transactionModel

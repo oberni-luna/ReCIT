@@ -2,9 +2,14 @@
 //  OnboardingTallyUnavailableActions.swift
 //  ReCIT_iOS
 //
-//  What the foot of the bilan holds on a phone that cannot arrange books: the reason, and the
-//  way out. The offer is not shown greyed out beside it — a button that cannot work is a worse
-//  answer than a sentence saying why.
+//  What the foot of the bilan holds on a phone that cannot arrange books: the reason, then the
+//  way to file the books by hand, then the way out. The *automatic* offer is not shown greyed
+//  out beside it — a button that cannot work is a worse answer than a sentence saying why.
+//
+//  The reason stopped being the end of the screen at issue 0062. A phone that cannot run the
+//  model loses the proposal, not the ability to sort, and leaving a freshly scanned library
+//  with nowhere to go was the whole complaint: « Ranger mes livres » opens the same surface,
+//  with everything in « À ranger » and nothing proposed on it.
 //
 //  It words nothing itself. `AutoSortUnavailableView` is the one place auto-sort's three
 //  reasons are put into words, and it decides on its own whether a route to Settings belongs
@@ -29,11 +34,15 @@ import SwiftUI
 
 struct OnboardingTallyUnavailableActions: View {
     let entryPoint: AutoSortEntryPoint
+    let onSort: () -> Void
     let onContinue: () -> Void
 
     var body: some View {
         VStack(spacing: .medium) {
             AutoSortUnavailableView(entryPoint: entryPoint)
+
+            Button("onboarding.tally.sort", action: onSort)
+                .buttonStyle(.primary())
 
             OnboardingSkipButton(
                 title: "onboarding.tally.continue_without_sorting",
@@ -44,16 +53,16 @@ struct OnboardingTallyUnavailableActions: View {
 }
 
 #Preview("Apple Intelligence off") {
-    OnboardingTallyUnavailableActions(entryPoint: .switchedOff, onContinue: {})
+    OnboardingTallyUnavailableActions(entryPoint: .switchedOff, onSort: {}, onContinue: {})
         .padding(.horizontal, .medium)
 }
 
 #Preview("Model downloading") {
-    OnboardingTallyUnavailableActions(entryPoint: .downloading, onContinue: {})
+    OnboardingTallyUnavailableActions(entryPoint: .downloading, onSort: {}, onContinue: {})
         .padding(.horizontal, .medium)
 }
 
 #Preview("Device ineligible") {
-    OnboardingTallyUnavailableActions(entryPoint: .hidden, onContinue: {})
+    OnboardingTallyUnavailableActions(entryPoint: .hidden, onSort: {}, onContinue: {})
         .padding(.horizontal, .medium)
 }

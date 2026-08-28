@@ -20,13 +20,15 @@
 //  onto it one at a time. That is the payoff of the whole sequence, and it is the illustration's
 //  own business — see `OnboardingScanTallyIllustrationView`.
 //
-//  On a phone that cannot run the arrangement, the offer is replaced by the reason — never both,
-//  never neither, and never a control that cannot work. The count and its title are untouched in
-//  that case: the scan happened, and what the phone cannot do afterwards does not unfile a book.
-//  Only the sentence under the title shortens, because its second half offers to arrange the
-//  books and would be contradicted three lines lower. The reason itself, and whether a route to
-//  Settings belongs beside it, are `AutoSortUnavailableView`'s to say — see
-//  `OnboardingTallyUnavailableActions`.
+//  On a phone that cannot run the arrangement, the *automatic* offer is replaced by the reason —
+//  never a control that cannot work. Filing by hand is still offered underneath it, because
+//  losing the model is not losing the ability to sort, and a freshly scanned library with
+//  nowhere to go was the complaint that changed this screen (issue 0062). The count and its
+//  title are untouched either way: the scan happened, and what the phone cannot do afterwards
+//  does not unfile a book. Only the sentence under the title shortens, because its second half
+//  offers to arrange the books and would be contradicted three lines lower. The reason itself,
+//  and whether a route to Settings belongs beside it, are `AutoSortUnavailableView`'s to say —
+//  see `OnboardingTallyUnavailableActions`.
 //
 //  The screen decides nothing. Whether it is owed is `OnboardingGate`'s answer and the scanning
 //  session's to ask; which shape its ending takes is the session's too, read fresh from
@@ -54,14 +56,17 @@ struct OnboardingScanTallyView: View {
             OnboardingScanTallyIllustrationView()
         } actions: {
             if entryPoint.isEnabled {
+                // « Rangement automatique » where the model can answer: the CTA names what
+                // happens next, which is a wait and then a proposal — not the filing itself.
                 OnboardingActions(
-                    primaryTitle: "onboarding.tally.sort",
+                    primaryTitle: "onboarding.tally.auto_sort",
                     onPrimary: onSort,
                     onLater: onLater
                 )
             } else {
                 OnboardingTallyUnavailableActions(
                     entryPoint: entryPoint,
+                    onSort: onSort,
                     onContinue: onLater
                 )
             }

@@ -75,6 +75,11 @@ struct ManualSortView: View {
     /// next change to the stack.
     @State private var notice: SortNotice?
 
+    /// What the screen has to say before anyone has pressed anything here — set when the
+    /// arrival itself is the outcome, which is the case for a run started on the bilan and
+    /// finished on the way in. Seeded once into `notice`, then behaves like any other.
+    var initialNotice: SortNotice?
+
     var body: some View {
         // Read once per render. Both are pure functions of the same two values, so reading
         // them per card would only cost walks — but it is also how one frame ends up
@@ -192,6 +197,11 @@ struct ManualSortView: View {
             )
         }
         .task {
+            // Before the load, so the sentence is already up when the surface first draws:
+            // arriving unchanged from a wait the user triggered is exactly the case this
+            // exists to explain.
+            if notice == nil { notice = initialNotice }
+
             guard let user = userModel.myUser else { return }
             await session.load(
                 user: user,

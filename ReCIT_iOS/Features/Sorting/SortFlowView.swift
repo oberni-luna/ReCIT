@@ -141,8 +141,13 @@ struct SortFlowView: View {
             // enum gets smaller as the flow gets richer.
             .navigationDestination(for: SortFlowRoute.self) { route in
                 switch route {
-                case .sorting:
-                    ManualSortView(onClose: leave)
+                case .proposing:
+                    SortProposingView(onReady: showSurface(proposed:))
+                case .sorting(let nothingProposed):
+                    ManualSortView(
+                        onClose: leave,
+                        initialNotice: nothingProposed ? .nothingToPropose : nil
+                    )
                 }
             }
         }
@@ -182,8 +187,25 @@ struct SortFlowView: View {
     /// Pushes the sorting surface onto the flow's own stack rather than dismissing and
     /// re-presenting: it syncs the library on arrival, and a modal closing under it would cost
     /// the user that wait twice. There is no way back from it — see the header.
+    /// The bilan's call to action. Where the model can answer, the run gets its own screen and
+    /// the surface arrives with a proposal on it; where it cannot, the surface arrives bare and
+    /// the user files by hand. A phone that cannot run the model loses the proposal, not the
+    /// ability to sort — which is the whole reason the surface exists.
     private func sortBooks() {
-        path.append(SortFlowRoute.sorting)
+        let entryPoint: AutoSortEntryPoint = .init(availability: autoSortModel.availability)
+
+        path.append(entryPoint.isEnabled ? SortFlowRoute.proposing : SortFlowRoute.sorting())
+    }
+
+    /// Swaps the model's run for the surface, rather than stacking one on the other: the
+    /// surface must not gain a back chevron to the bilan, which is a screen the user has
+    /// finished with. Backing out of the run itself still returns there, having written nothing.
+    private func showSurface(proposed: Bool) {
+        if !path.isEmpty {
+            path.removeLast()
+        }
+
+        path.append(SortFlowRoute.sorting(nothingProposed: !proposed))
     }
 
     private func leave() {

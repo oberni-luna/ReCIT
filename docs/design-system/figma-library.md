@@ -1203,3 +1203,220 @@ La section `Ranger mes livres` passe à 8754 × 3247 pour les contenir. Aucun ch
   translucide.
 - Une variante ajoutée à `Icon` atterrit à (0, 0) si on ne lui donne pas sa case ; `line.3.horizontal` y était depuis
   la passe précédente, superposée à `book` (D40).
+
+---
+
+# États vides (passe du 2026-08-28, `extract-screens`)
+
+Cinq états vides de l'onglet **Inventaire** et de la feature **Listes**, chacun en « tel quel » (ce que l'app rend
+aujourd'hui) et en « proposé », clair et sombre : **18 frames** dans la section `Empty states` (`199:5924`) de la page
+`Screens`, plus 5 panneaux de spécification.
+
+La section existait déjà, vide, avant cette passe.
+
+## Table des écrans
+
+| État | Tel quel · Clair | Tel quel · Sombre | Proposé · Clair | Proposé · Sombre | Panneau | Source Swift |
+|---|---|---|---|---|---|---|
+| **A · Collection vide** | `209:5967` | `209:6110` | `209:6301` | `209:6438` | `215:7151` | `Shelves/ShelvesContent.swift:79` |
+| **B · Livres sans étagère** | `210:6233` | `210:6374` | — | — | `215:7163` | `Shelves/ShelvesContent.swift:79` |
+| **C · Recherche sans résultat** | `211:6475` | `211:6538` | `211:6605` | `211:6686` | `215:7171` | `Inventory/InventoryListContent.swift:65` |
+| **E · Aucune liste** | `212:6707` | `212:6773` | `212:6839` | `212:6921` | `215:7181` | `Lists/EntityListView.swift:41` |
+| **H · Liste ouverte, vide** | `213:6935` | `213:7015` | `213:7095` | `213:7168` | `215:7191` | `Lists/EntityListDetail.swift:88` / `:173` |
+
+**B n'a pas de frame « Proposé », volontairement** : c'est le seul des cinq où le code n'a rien à corriger. La carte
+remplace le carrousel, sa note dit l'action suivante, la liste dessous est pleine. Dessiner un doublon n'aurait rien
+documenté ; le panneau le dit à la place.
+
+Audit de factorisation : **18 frames, 0 dessin brut**. Un seul `▢` en tête de frame — le `list group` de H, conteneur
+de layout assumé (le groupe encarté qu'une `List` dessine).
+
+## Composant ajouté — `Screens · Components`
+
+| Composant | node id | Variantes | Propriétés |
+|---|---|---|---|
+| `Empty State` | `204:263` | Layout ∈ {Centered, Row} × Tone ∈ {Default, Secondary} | `Title#205:0`, `Body#205:5`, `Show body#205:10`, `Glyph#205:15` (INSTANCE_SWAP), `Show glyph#205:20`, `Show action#205:25` |
+
+- **Layout=Row** reproduit ce que le code dessine : une ligne alignée à gauche, posée comme un rang de `List`.
+- **Layout=Centered** porte les propositions : glyphe, titre, phrase, et une instance de `Button / Large`.
+- Les variantes `Row` **n'ont pas** les nœuds glyphe / body / action. `Show glyph`, `Show body` et `Show action` y
+  sont donc sans effet — c'est voulu : un rang n'a rien à cacher.
+- Le **libellé du bouton n'est pas une propriété** du composant : c'est le `Label#22:1` de l'instance
+  `Button / Large` imbriquée, à surcharger sur l'instance (`findOne(name === 'Action')`).
+- `Tone` porte **deux choses à la fois** — le style de texte *et* la couleur. C'est un axe impur, assumé : il
+  reproduit l'écart réel entre les deux points d'entrée du code plutôt que de le lisser. Voir D50.
+
+## Composants corrigés
+
+| Composant | node id | Ce qui a changé |
+|---|---|---|
+| `Section Header` | `28:164` | Gagne `Action label#206:0` et `Show action#206:1` (défaut **false**, pour ne pas modifier les frames existants). L'action est un `Label(…, systemImage: "plus")` tinté en `action200`, padding vertical 8. **Referme D35.** |
+| `Shelf Empty Card` | `34:211` | Perd sa ligne de nom **sous la planche**, héritée de `ShelfCreateCardView` : le code ne dessine qu'une note **sur** l'étagère. La propriété `Name#34:3` est renommée **`Note#34:3`** et rebranchée sur cette note. |
+
+⚠️ Le renommage `Name` → `Note` change le sens de la propriété sur les instances existantes du fichier. Les frames
+nominaux `Étagères · Light` / `Dark` portent encore la valeur « Nouvelle étagère », qui n'existe plus dans le code —
+à reprendre en passe de design.
+
+## Corrections à apporter à ce document (constats de cette passe)
+
+La doc était en retard sur trois points, vérifiés dans le fichier :
+
+| Écrit plus haut | Réalité au 2026-08-28 |
+|---|---|
+| `Shelf Create Card` — « le composant Figma porte encore l'ancien nom » | Il s'appelle **`Shelf Empty Card`** depuis une passe antérieure. Le « + » avait bien déjà disparu. |
+| `Icon` (`21:60`) — 18 variantes | **20** : `magic` et `undo` se sont ajoutées sans être documentées. |
+| `Chrome / Nav Bar` (`26:162`) — 3 styles | **4** : `Inline + Back + Text action`, plus la propriété `Action label#102:6`. |
+
+Compte à jour : **30 composants** sur `Screens · Components` (+`Empty State`), 3 sur `Components`.
+
+## Ce qui n'est pas maquetté
+
+| Absent | Raison |
+|---|---|
+| **D · Sync en cours** (inventaire) et **G · Sync en cours** (listes) | `Syncing Placeholder` (`32:174`) existe déjà ; seuls les frames manquent. Écartés à la sélection. |
+| **F · Recherche de liste sans résultat** | Rend exactement le frame « E · Tel quel » : le même écran blanc. |
+| **I · Liste introuvable** (`ContentUnavailableView`) et **J · type `publisher`** | Hors sélection. Les deux réutilisent la clé `list.empty` — voir D53. |
+| **Détail étagère vide** (`ShelfDetailView:53`) | Adjacent, hors périmètre demandé. Son libellé « Cette étagère est vide » est un littéral français non localisé (D20). |
+
+## Divergences relevées dans le code — passe états vides
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| D50 | `InventoryListContent.swift:79` vs `EntityListDetail.swift:89` | Deux états vides de la même app rendus autrement : l'un en `action200` + `.secondary`, l'autre en `content300` + couleur de label héritée. Ni la graisse, ni la couleur, ni l'alignement ne se répondent | ouverte — l'axe `Tone` d'`Empty State` reproduit l'écart au lieu de le masquer |
+| D51 | `ShelfEmptyStateErrand.noteText` | Le code imprime une case **« ☐ »** en tête de seconde ligne (`"Todo\n☐ Scanner mes livres"`). La maquette ne la rend pas : Alegreya n'a pas U+2610, et un tofu dans une note manuscrite se verrait plus que son absence | ouverte côté Figma — écart assumé. Côté code, vérifier ce que l'appareil rend réellement |
+| D52 | `ShelvesView.swift:41-48` | Le commentaire annonce que le bouton de tri n'apparaît qu'« une fois l'inventaire synchronisé, car trier une bibliothèque vide ne trie rien » — mais la garde ne teste que `lastInventorySync != nil`, jamais le **nombre** de livres. Avec zéro livre le bouton s'affiche quand même, et ouvre une surface qui n'a rien à ranger. Le commentaire décrit une intention que le code n'applique pas | ouverte |
+| D53 | `Lists/EntityListDetail.swift:37`, `:56`, `:89`, `:173` | La clé **`list.empty`** (« Cette liste est vide ») sert **trois sens différents** : la liste est vide, la liste est **introuvable** (`ContentUnavailableView` ligne 54), et le type `publisher` n'est **pas implémenté** (ligne 37, qui rend ce texte quel que soit le contenu). Une liste d'éditeurs pleine affiche donc « Cette liste est vide » | ouverte |
+| D54 | `Lists/EntityListView.swift:41` | L'onglet Listes n'a **aucun état vide** : sans liste, la `List` ne rend aucun rang et rien ne la remplace — un écran gris, sans phrase et sans issue, à l'endroit exact où l'utilisateur arrive la première fois. Le « + » de la barre de navigation est la seule sortie, et rien ne l'indique. Même écran pour une recherche sans résultat | ouverte — c'est le frame `212:6707` |
+| D55 | `Inventory/InventoryListContent.swift:65-83` | Deux défauts dans la même branche. **(a)** Le message « Oh, c'est vide ici » décrit un inventaire vide, alors que la branche sert aussi — et surtout — la **recherche sans résultat** : un utilisateur qui a 300 livres et cherche « Vercors » lit qu'il n'a rien. **(b)** `emptyView` est un `VStack` sans `frame(maxWidth:maxHeight:)` : le texte se pose en haut à gauche du premier rang de la `List`, pas au centre de l'écran — donc il se lit comme un résultat plutôt que comme une absence | ouverte |
+| D56 | `Localizable.xcstrings`, clé `inventory.empty` | La valeur `fr` finit par une **espace** : `"Oh, c'est vide ici "`. (`search.remote.empty` a le même défaut : `"Pas de résultat "`) | ouverte |
+| D35 | `Section Header` (`28:164`) | Le composant n'avait ni action ni variante pour en porter une, alors que l'en-tête « Étagères » a gagné un bouton **Ajouter** tinté à l'issue 0010 | **résolue** — `Action label` + `Show action` ajoutés, métriques et cible de ~31pt documentées dans la description |
+
+## Nœuds à trier sur la page `Screens` (hors section)
+
+Repérés en inventoriant la page, laissés en place — **à trancher par l'owner** :
+
+| Nœud | id | Constat |
+|---|---|---|
+| `Étagères · Empty` | `70:2460` | Brouillon de l'état B, hors section. C'est lui qui a servi de source aux clones de cette passe. Doublonne maintenant `210:6233`. |
+| `Étagères · Light` | `52:1983`, `70:2635` | Deux copies du frame nominal `39:2`, hors section, à `y = -74`. |
+| `image 2` | `170:7722` | `RECTANGLE` nu de 392 × 852 posé sur la page, sur la rangée « Recherche ». |
+
+## Ce que la construction a appris
+
+- **`resetOverrides()` efface aussi le nom du nœud.** Une instance créée puis renommée puis « nettoyée » repart sous
+  le nom de sa variante (`Glyph=list.bullet`), et le câblage des propriétés par nom échoue en silence — la propriété
+  se crée, la référence ne se pose pas. Renommer **après** le reset.
+- **Une propriété de texte n'a qu'un défaut, et il écrase les variantes.** Les deux variantes `Row` avaient reçu
+  chacune leur libellé avant la combinaison ; l'ajout de `Title` les a toutes ramenées au même. C'est le rappel
+  déjà écrit dans `factorisation.md`, constaté ici à la capture.
+- **`findAncestor` n'existe pas sur les nœuds de cet environnement.** L'audit de factorisation publié plus haut
+  l'utilise (`n.parent.findAncestor?.(…)`) et ne lève rien grâce à l'optional chaining — il compte donc **tous** les
+  nœuds de dessin, instances comprises, et ne peut pas rendre 0. Remonter les parents à la main :
+
+  ```js
+  function insideInstance(n, stop) {
+    let p = n.parent;
+    while (p && p.id !== stop.id) { if (p.type === 'INSTANCE') return true; p = p.parent; }
+    return false;
+  }
+  ```
+
+- **Le canal `use_figma` casse au-delà d'environ 19 ko de réponse**, et l'erreur remonte comme un JSON tronqué
+  (`Invalid JSON: EOF while parsing a string`), pas comme un dépassement. Lire un composant lourd — `Shelf Empty
+  Card` et ses images — demande de ne renvoyer que des identifiants et des noms, jamais `characters`.
+- **Un état vide « fidèle au code » est un livrable en soi.** Le frame `212:6707` est un écran gris et c'est tout
+  son intérêt : mis à côté de sa proposition, il rend une absence discutable. Sans lui, D54 resterait une phrase.
+
+---
+
+# Accueil & compte — proposition (passe du 2026-08-28)
+
+Section `Accueil & compte` (`222:7167`) sur la page `Screens`. **Exploration, pas une réplication** : aucun de ces
+écrans n'existe en Swift, sauf `Se connecter` qui remaquette `Authentication/View/LoginView.swift` au design system.
+
+Le besoin : dire à quoi sert l'app avant la connexion — inventorier et ranger, garder trace des prêts, emprunter à ses
+connaissances — et offrir connexion **et** inscription, sachant que beaucoup d'utilisateurs ont déjà un compte
+inventaire.io.
+
+## Le nom
+
+Les maquettes portent **« Ex-libris »**, retenu le 2026-08-28 parmi Ex-libris · Passe-livre · Rayon · Étagère.
+
+« Étagère » a été écarté pour une raison qui n'est pas esthétique : **le mot est déjà un nom commun du produit**.
+L'utilisateur crée des étagères ; nommer l'app pareil rend ambiguë chaque phrase de l'interface, de la doc et du
+support. S'y ajoutent l'accent (recherche App Store, claviers non français) et le fait que le mot ne dit rien des deux
+tiers de la promesse — prêter et emprunter.
+
+Le nom est une **propriété de texte** sur `Onboarding / Brand`, précisément parce qu'il n'est pas arrêté : le changer
+est une édition, pas une reprise.
+
+## Table des écrans
+
+| Écran | Clair | Sombre | Autre état | Source Swift |
+|---|---|---|---|---|
+| **Accueil** | `222:7168` | `222:7226` | — | *aucune* — l'écran n'existe pas |
+| **Se connecter** | `224:7232` | `224:7275` | Erreur : `224:7318` | `Authentication/View/LoginView.swift` |
+| **Créer un compte** | `224:7363` | `224:7408` | — | *aucune* — l'inscription part vers le web |
+| **Spec** | `226:7383` | | | |
+
+Audit de factorisation : **7 frames, 0 dessin brut**, aucun `▢` — que des instances.
+
+## Composants ajoutés — `Screens · Components`
+
+| Composant | node id | Variantes | Propriétés |
+|---|---|---|---|
+| `Onboarding / Brand` | `222:258` | — | `Name#222:0`, `Tagline#222:1` |
+| `Onboarding / Value Row` | `221:260` | — | `Glyph#221:0` (INSTANCE_SWAP), `Title#221:1`, `Body#221:2` |
+| `Field` | `221:271` | Type ∈ {Text, Secure} | `Label#221:3`, `Value#221:6` |
+
+`Field` reproduit `LoginView`'s `.withLabel(label:)` sur `background/secondary`, rayon 12. `Type=Secure` ne diffère
+que par la valeur affichée : c'est un axe de **contenu**, gardé en variante parce que le code emploie deux types de vue
+distincts (`TextField` / `SecureField`).
+
+## Composant renommé et étendu
+
+| Avant | Après | Pourquoi |
+|---|---|---|
+| `AutoSort / Note` | **`Note`** (`101:236`) | Les écrans de compte le consomment aussi. Un composant que deux features importent ne peut pas garder le nom de l'une d'elles — le même raisonnement que `ShelfSectionHeader` sortant de `Features/Shelves/`. |
+
+`Note` gagne **`Tone=Error`** (2 variantes de plus, 6 au total) : `LoginView.swift:43-49` affiche un message d'échec
+en `foregroundError` et rien dans le fichier ne le portait.
+
+Compte à jour : **34 composants** sur `Screens · Components`, 3 sur `Components`.
+
+## Décisions, et leur revers
+
+- **« Se connecter » est primaire, « Créer un compte » secondaire.** Parce que la plupart des utilisateurs ont déjà un
+  compte inventaire.io. Le revers est réel : le nouvel arrivant — celui qui vient d'installer l'app — trouve son
+  action en second, et le bouton secondaire de ce design system se lit comme un lien.
+- **Un seul écran plutôt que trois slides.** Les trois usages sont une seule idée, et trois balayages avant un
+  formulaire de connexion se paient pour rien. Le revers : moins de place pour illustrer chaque usage.
+- **Pas d'illustration sur l'accueil.** Les trois glyphes en tiennent lieu. La planche est réservée à la séquence
+  post-connexion, qui la remplit avec les vrais livres de l'utilisateur — la promesse tenue plutôt qu'annoncée.
+- **La mention inventaire.io est répétée sur les trois écrans.** Le compte n'appartient pas à cette app ; le découvrir
+  après coup serait pire que le lire trois fois.
+
+## À trancher avant de coder
+
+1. **L'inscription native n'existe pas.** `LoginView.swift:108` envoie vers `inventaire.io/signup` par `openURL`. Le
+   frame « Créer un compte » suppose un formulaire **dans** l'app : à valider contre l'API avant implémentation.
+   Repli si l'endpoint ne convient pas : garder le renvoi web, et l'écran devient une explication plus un bouton
+   sortant. Ne pas partir du frame comme d'un acquis.
+2. **Mot de passe oublié** : aucun écran. Le renvoi vers inventaire.io est assumé, dit dans la note de pied.
+3. **Le renommage touche le catalogue**, pas seulement l'icône : « RECITs » est en dur dans `onboarding.tally.body`.
+4. **Trois écrans d'affilée pour un nouvel arrivant** — accueil → création de compte → `C1 · Bienvenue`. À arbitrer :
+   fondre C1 dans l'accueil, ou ne garder C1 que pour un inventaire vide constaté après connexion. En l'état les deux
+   séquences se suivent sans se connaître.
+5. **La langue source du catalogue est l'anglais.** Ces copies veulent leur version EN avant d'entrer au catalogue,
+   sinon elles reproduisent D20 et D37.
+
+## Ce que la construction a appris
+
+- **`clone()` d'une variante perd `componentPropertyReferences`.** Les deux variantes `Tone=Error` clonées depuis
+  `Tone=Default` ont gardé leur texte littéral et perdu le lien vers `Body#101:0` : la propriété existait, l'instance
+  l'affichait bien dans son panneau, et le texte ne bougeait pas. Le symptôme est un écran d'erreur qui annonce
+  « 2 étagères ont été créées et remplies ». **Reposer la référence après tout `clone()` de variante**, et vérifier
+  au rendu — le panneau de propriétés ne montre pas l'absence de lien.
+- Corollaire du piège déjà connu sur `resetOverrides()` : les deux effacements silencieux de cette famille
+  (le **nom** du nœud pour `resetOverrides`, la **référence de propriété** pour `clone`) ne lèvent aucune erreur et ne
+  se voient qu'à la capture.

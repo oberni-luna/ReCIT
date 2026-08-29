@@ -4,6 +4,10 @@ Shipped on 2026-08-19 from PRD `docs/prd/0003-shelf-label-and-add-affordances.md
 (issues `issues/0008-modifier-action-shelf-detail.md` through
 `issues/0012-figma-shadow-light-style.md`). No new ADR: ADRs 0003, 0004 and 0006 stand.
 
+> Most issue files cited in this document were deleted in the 2026-08-29 docs cleanup, once
+> shipped — `issues/0014-factorize-shadow-styles.md` is still open. To read the deleted ones:
+> `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
+
 > Supersedes the card-level pencil affordance of `docs/features/0003-shelf-tap-selection.md`.
 > The étagère's name is no longer a grey caption with a pencil beside it, and editing a shelf
 > is no longer reachable from its card at all.

@@ -151,6 +151,9 @@ still unmeasured.
 
 ## Issues
 
+> The issue files listed here were deleted in the 2026-08-29 docs cleanup, once shipped.
+> To read them: `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
+
 - `issues/0021-delete-shelf.md` — delete an étagère from its form
 - `issues/0022-genre-enrichment.md` — fetch and persist genres for works
 - `issues/0023-auto-sort-plan-generation.md` — generate and review a shelving plan

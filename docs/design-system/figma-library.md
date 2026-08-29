@@ -471,7 +471,7 @@ Produites par la réplication. **Statut « ouverte » = rien n'a été changé c
 | D7 | `Color.swift` — `backgroundError` | En sombre, la valeur est un **gris** (`gray/700`), là où tous les autres tokens d'erreur restent rouges dans les deux modes | ouverte — probable oubli |
 | D8 | `DesignSystem/TagView.swift:26` | `RoundedRectangle(cornerRadius: .medium)` sans `.fill` → se peint dans la couleur de premier plan héritée | ouverte |
 | D9 | Les six ombres | Toutes en noir pur dans les deux modes. En mode sombre, sur `background/default` (noir pur), elles sont **invisibles** — visible sur la planche `Ombres — Sombre` (`16:36`) | ouverte — la variable `shadow/*` est mode-aware, il suffit d'y mettre une teinte claire en sombre |
-| D10 | `CLAUDE.md` (racine) | Affirme que `ReCIT_iOS/CLAUDE.md` est un « **duplicate** of this file ». C'en est un fichier **différent** : un guide Swift/SwiftUI pour agents, pas un miroir | ouverte — commentaire périmé |
+| D10 | `CLAUDE.md` (racine) | Affirmait que `ReCIT_iOS/CLAUDE.md` en était un « **duplicate** », alors que c'était un fichier différent — un guide Swift/SwiftUI pour agents | **résolue** le 2026-08-29 — le fichier interne est supprimé (ses règles étaient déjà toutes dans la racine, seuls les exemples avant/après sont perdus, voir l'historique git) et la mention est retirée |
 
 D6 mérite une correction indépendamment de ce travail Figma : deux polices ne se chargent pas sur l'appareil.
 

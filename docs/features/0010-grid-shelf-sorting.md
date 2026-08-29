@@ -267,6 +267,9 @@ four at the surface, four at the camera — raises one app-scoped flag.
 
 ## Issues
 
+> The issue files listed here were deleted in the 2026-08-29 docs cleanup, once shipped.
+> To read them: `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
+
 - `issues/0044-verify-grid-drag-and-drop.md` — does the drag take — commit `0da1256`
 - `issues/0045-figma-frames-for-the-grid-surface.md` — the twelve missing frames — commit `4042de6`
 - `issues/0046-grid-sorting-surface-read-only.md` — the surface, read-only — commit `80b7b71`

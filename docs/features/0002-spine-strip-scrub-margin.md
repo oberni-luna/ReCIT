@@ -1,6 +1,6 @@
 # Cover-strip spines, reliable scrub, shelf margin
 
-Shipped on 2026-08-06 from PRD `prd/0002-spine-strip-scrub-margin.md`.
+Shipped on 2026-08-06 from PRD `docs/prd/0002-spine-strip-scrub-margin.md`.
 
 > The scrub described here was replaced on 2026-08-18 by tap-to-select — see
 > `docs/features/0003-shelf-tap-selection.md` / ADR 0005. The cover-strip spines and the
@@ -36,6 +36,9 @@ haptic) and opens the one under the finger, while a plain swipe still scrolls th
   Nuke-cached cover — no persistence, no extra network beyond loading the cover once.
 
 ## Issues
+
+> The issue files listed here were deleted in the 2026-08-29 docs cleanup, once shipped.
+> To read them: `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
 
 - `issues/0005-shelf-books-margin.md` — 24pt horizontal margin around books
 - `issues/0006-cover-strip-spines.md` — cover-strip spines replacing the shader

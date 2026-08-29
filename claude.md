@@ -178,7 +178,6 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 
 - **`AppModels/` vs `Model/`** — `Model/` is SwiftData + DTOs + value types (data). `AppModels/` is the reference-type service layer (`*Model.swift` classes that wrap `APIService` + `ModelContext`). The split is consistent across every domain.
 - **Both `Env.development` and `Env.production` point at `https://inventaire.io`** — there is no staging server; `Env` exists mainly to switch the Keychain namespace between dev and prod builds.
-- **`/Users/olivier/Sources/ReCIT/ReCIT_iOS/CLAUDE.md` mirrors this file** — when you edit guidance, update both (or delete the inner one).
 
 ## Shipped features
 

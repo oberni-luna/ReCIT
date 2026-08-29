@@ -200,6 +200,7 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 
 ## Shipped features
 
+- [0001 The shelf carousel, and making a shelf from inside the app](docs/features/0001-shelf-carousel-and-creation.md) — étagères as a snapping horizontal carousel, a shelf created optimistically from the app, the layout maths lifted into a testable module
 - [0002 Cover-strip spines, reliable scrub, shelf margin](docs/features/0002-spine-strip-scrub-margin.md) — spines from cover art, UIKit scrub, 24pt book margin
 - [0003 Tap-to-select shelves, spines for lying books](docs/features/0003-shelf-tap-selection.md) — tap grows the nearest book, tap again opens it; quarter-turned cover for pile books (supersedes the scrub in 0002)
 - [0004 Press-and-hold book selection with a focus overlay](docs/features/0004-shelf-press-selection.md) — press grows a book ×2, the screen recedes behind a half-strength veil, the book's cell fades in above it, slide picks, release opens (supersedes the tapping in 0003)

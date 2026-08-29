@@ -53,9 +53,12 @@ docs/
 ```
 
 `issues/` and `prd/` used to exist at the repository root as well, drifting out of sync with
-their `docs/` twins; both root copies were deleted on 2026-08-29. The `to-issues` and `to-prd`
-skills write to the repository root by default — move what they produce into `docs/` rather
-than letting the split come back.
+their `docs/` twins; both root copies were deleted on 2026-08-29.
+
+The `toml-skills:*` workflow skills write to the repository root, which is how the split
+appeared. Use the `olive-skills:*` fork instead — `olive-skills:to-prd`,
+`olive-skills:to-issues`, `olive-skills:implement-feature` — which writes to `docs/`. If
+something does land at the root, move it rather than letting the split come back.
 
 ## Build, run, test
 

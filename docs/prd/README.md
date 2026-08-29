@@ -12,9 +12,9 @@ git log --diff-filter=D --oneline -- docs/prd/ prd/   # find the commit that rem
 git show <commit>^:docs/prd/0008-manual-shelf-sorting.md
 ```
 
-New PRDs land here. The `to-prd` and `to-issues` skills write to the repository root by default,
-which is how two duplicate trees appeared in the first place — move what they produce into
-`docs/`.
+New PRDs land here. Write them with `olive-skills:to-prd`, which targets `docs/`; the
+`toml-skills:*` originals write to the repository root, which is how two duplicate trees
+appeared in the first place.
 
 ## One feature has no write-up
 

@@ -34,9 +34,27 @@ ReCIT_iOS/                       # Xcode project root (also where you `cd` to bu
 │   └── Components/              # Cross-feature widgets (AsyncButton, CachedAsyncImage, SnackBar…)
 ├── DesignSystem/                # Tokens (Color/Spacing/CornerRadius/TextStyle), fonts, button + label styles
 ├── Assets.xcassets, Localizable.xcstrings
-├── Tests/, UITests/             # Swift Testing (@Suite/@Test) + XCUITest targets
-└── CLAUDE.md                    # **duplicate** of this file — keep them in sync or delete the inner one
+└── Tests/, UITests/             # Swift Testing (@Suite/@Test) + XCUITest targets
 ```
+
+### Where documents live
+
+Everything written about the project lives under `docs/`, nowhere else:
+
+```
+docs/
+├── adr/                         # architecture decisions
+├── prd/                         # what a feature is meant to be, before it is built
+├── issues/                      # open work only — shipped issues are deleted, git keeps them
+├── features/                    # what a feature turned out to be, once shipped
+├── design-system/               # the Figma library and its divergences from code
+└── integrations/
+```
+
+`issues/` and `prd/` used to exist at the repository root as well, drifting out of sync with
+their `docs/` twins; both root copies were deleted on 2026-08-29. The `to-issues` and `to-prd`
+skills write to the repository root by default — move what they produce into `docs/` rather
+than letting the split come back.
 
 ## Build, run, test
 

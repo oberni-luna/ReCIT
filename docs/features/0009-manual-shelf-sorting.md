@@ -173,7 +173,9 @@ a design decision on screen.
 ## Issues
 
 > The issue files listed here were deleted in the 2026-08-29 docs cleanup, once shipped.
-> To read them: `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
+> The paths below are the ones they had then; issues have since moved under `docs/`.
+> To read them: `git log --diff-filter=D --oneline -- issues/ docs/issues/` then
+> `git show <commit>^:<path>`.
 
 - `issues/0036-sorting-surface-missing-states.md` — the states never drawn — commit `f276573`
 - `issues/0037-sorting-surface-read-only.md` — the surface, read-only — commit `7ca8c2a`

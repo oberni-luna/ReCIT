@@ -70,7 +70,9 @@ shelves.
 ## Issues
 
 > The issue files listed here were deleted in the 2026-08-29 docs cleanup, once shipped.
-> To read them: `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
+> The paths below are the ones they had then; issues have since moved under `docs/`.
+> To read them: `git log --diff-filter=D --oneline -- issues/ docs/issues/` then
+> `git show <commit>^:<path>`.
 
 - `issues/0015-add-book-to-shelf-from-menu.md` — add a book to an étagère from the book menu
 - `issues/0016-remove-book-from-shelf-from-menu.md` — remove a book from an étagère

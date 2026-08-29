@@ -115,7 +115,9 @@ suite.
 ## Issues
 
 > The issue files listed here were deleted in the 2026-08-29 docs cleanup, once shipped.
-> To read them: `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
+> The paths below are the ones they had then; issues have since moved under `docs/`.
+> To read them: `git log --diff-filter=D --oneline -- issues/ docs/issues/` then
+> `git show <commit>^:<path>`.
 
 - `issues/0055-authmodel-observable.md` — AuthModel becomes @Observable — commit `9f5b6d8`
 - `issues/0056-sign-in-from-a-welcome-screen.md` — sign in from a welcome screen — commit `2cb2836`

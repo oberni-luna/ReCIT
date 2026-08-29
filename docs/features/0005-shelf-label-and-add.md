@@ -5,8 +5,10 @@ Shipped on 2026-08-19 from PRD `docs/prd/0003-shelf-label-and-add-affordances.md
 `issues/0012-figma-shadow-light-style.md`). No new ADR: ADRs 0003, 0004 and 0006 stand.
 
 > Most issue files cited in this document were deleted in the 2026-08-29 docs cleanup, once
-> shipped — `issues/0014-factorize-shadow-styles.md` is still open. To read the deleted ones:
-> `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
+> shipped — `docs/issues/0014-factorize-shadow-styles.md` is still open. To read the deleted ones:
+> The paths below are the ones they had then; issues have since moved under `docs/`.
+> To read them: `git log --diff-filter=D --oneline -- issues/ docs/issues/` then
+> `git show <commit>^:<path>`.
 
 > Supersedes the card-level pencil affordance of `docs/features/0003-shelf-tap-selection.md`.
 > The étagère's name is no longer a grey caption with a pencil beside it, and editing a shelf
@@ -66,7 +68,7 @@ and the card disappears the moment the first étagère exists.
 - `ShelfCreateCardView` becomes `ShelfEmptyStateView`: no "+" glyph, a label instead, and its
   plank metrics come from `ShelfCardMetrics` instead of three private copies of them.
 - `ShelfFocusBookCell` drops its literal shadow for `.shadow(.light)`; the other five documented
-  shadows stay literals for now (follow-up: `issues/0014-factorize-shadow-styles.md`).
+  shadows stay literals for now (follow-up: `docs/issues/0014-factorize-shadow-styles.md`).
 - Figma: the `Shadow/Light` effect style and the `shadow/light`, `shelf/label/paper` and
   `shelf/label/ink` variables were created and bound on both `Shelf Card` variants — see
   `docs/design-system/figma-library.md`.

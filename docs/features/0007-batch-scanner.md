@@ -77,7 +77,9 @@ screen.
 ## Issues
 
 > The issue files listed here were deleted in the 2026-08-29 docs cleanup, once shipped.
-> To read them: `git log --diff-filter=D --oneline -- issues/` then `git show <commit>^:<path>`.
+> The paths below are the ones they had then; issues have since moved under `docs/`.
+> To read them: `git log --diff-filter=D --oneline -- issues/ docs/issues/` then
+> `git show <commit>^:<path>`.
 
 - `issues/0018-batch-scanner-skeleton.md` — the camera stays open, books add one after another
 - `issues/0019-scanner-failure-states.md` — unknown edition, timeout, already owned

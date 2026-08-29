@@ -1,6 +1,6 @@
 # Paper labels on the shelves, an add button in the header, edit in the detail screen
 
-Shipped on 2026-08-19 from PRD `docs/prd/0003-shelf-label-and-add-affordances.md`
+Shipped on 2026-08-19 from PRD `docs/prd/0003-shelf-label-and-add-affordances.md` (deleted — git history)
 (issues `issues/0008-modifier-action-shelf-detail.md` through
 `issues/0012-figma-shadow-light-style.md`). No new ADR: ADRs 0003, 0004 and 0006 stand.
 
@@ -14,7 +14,7 @@ Shipped on 2026-08-19 from PRD `docs/prd/0003-shelf-label-and-add-affordances.md
 > The étagère's name is no longer a grey caption with a pencil beside it, and editing a shelf
 > is no longer reachable from its card at all.
 
-> **Amended by PRD `docs/prd/0006-ai-auto-sort.md` (issue
+> **Amended by PRD `docs/prd/0006-ai-auto-sort.md` (deleted — git history) (issue
 > `issues/0025-auto-sort-entry-points-availability.md`), and again by the design pass that
 > followed.** The empty shelf card still takes a press anywhere on it, but that press now
 > starts the automatic shelving flow — on every device. Its label reads "Todo / ☐ Ranger mes

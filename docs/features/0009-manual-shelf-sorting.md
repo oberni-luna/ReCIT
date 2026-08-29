@@ -1,6 +1,6 @@
 # Sorting books into étagères, by hand and with help
 
-Shipped on 2026-08-21 from PRD `docs/prd/0008-manual-shelf-sorting.md`
+Shipped on 2026-08-21 from PRD `docs/prd/0008-manual-shelf-sorting.md` (deleted — git history)
 (issues `issues/0036-sorting-surface-missing-states.md` through
 `issues/0043-retire-the-auto-sort-review-screen.md`). Design: Figma `Nouveau récits`, section
 `Ranger mes livres` (`97:3755`), spec panel `Spec · Tri manuel` (`117:3526`).

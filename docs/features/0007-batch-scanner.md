@@ -1,6 +1,6 @@
 # Batch scanning books into the inventory
 
-Shipped on 2026-08-20 from PRD `docs/prd/0005-batch-scanner.md`
+Shipped on 2026-08-20 from PRD `docs/prd/0005-batch-scanner.md` (deleted — git history)
 (issues `issues/0018-batch-scanner-skeleton.md` through
 `issues/0020-scanner-camera-permission.md`). Design: Figma node `57:2401`, captured in
 `grill-me/design/`.

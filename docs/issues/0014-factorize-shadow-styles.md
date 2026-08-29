@@ -4,7 +4,9 @@ Type: AFK
 
 ## Parent
 
-PRD: docs/prd/0003-shelf-label-and-add-affordances.md
+Feature: docs/features/0005-shelf-label-and-add.md
+(the original PRD, `docs/prd/0003-shelf-label-and-add-affordances.md`, was deleted on
+2026-08-29 and lives in git history)
 
 ## What to build
 

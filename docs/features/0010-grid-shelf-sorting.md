@@ -1,6 +1,6 @@
 # Ranger mes livres, in a grid
 
-Shipped on 2026-08-23 from PRD `docs/prd/0009-grid-shelf-sorting.md`
+Shipped on 2026-08-23 from PRD `docs/prd/0009-grid-shelf-sorting.md` (deleted — git history)
 (issues `issues/0044-verify-grid-drag-and-drop.md` through
 `issues/0054-document-the-grid-sorting-surface.md`). Design: Figma `Nouveau récits`, frame
 `Ranger mes livres · Light` (`160:6659`), cell `160:6797`, footer `161:6924`.

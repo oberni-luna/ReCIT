@@ -44,7 +44,8 @@ Everything written about the project lives under `docs/`, nowhere else:
 ```
 docs/
 ├── adr/                         # architecture decisions
-├── prd/                         # what a feature is meant to be, before it is built
+├── prd/                         # what a feature is meant to be, before it is built —
+│                                # deleted once its feature doc exists (see docs/prd/README.md)
 ├── issues/                      # open work only — shipped issues are deleted, git keeps them
 ├── features/                    # what a feature turned out to be, once shipped
 ├── design-system/               # the Figma library and its divergences from code

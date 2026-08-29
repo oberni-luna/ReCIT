@@ -919,8 +919,10 @@ on range à la main, sans modèle.
 Neuf frames de plus ont rejoint la section le soir même — le glissement, la cible de dépôt, la synchronisation
 d'ouverture, « À ranger » vide et l'échec partiel : voir [Les cinq états jamais dessinés](#passe-du-2026-08-20-issue-0036--les-cinq-états-jamais-dessinés).
 
-**Spec fonctionnelle : [docs/prd/0008-manual-shelf-sorting.md](../prd/0008-manual-shelf-sorting.md)** — le modèle de
-diff, les états, les cas limites et les questions ouvertes vivent là, pas ici.
+**Spec fonctionnelle : [docs/features/0010-grid-shelf-sorting.md](../features/0010-grid-shelf-sorting.md)**
+(et, pour la surface qu'elle remplace, [0009](../features/0009-manual-shelf-sorting.md)) — le modèle de
+diff, les états et les cas limites vivent là, pas ici. Le PRD d'origine
+(`docs/prd/0008-manual-shelf-sorting.md`) est supprimé depuis le 2026-08-29 ; il reste dans l'historique git.
 
 Ce que la proposition ajoute à l'écran de résultat :
 
@@ -1027,7 +1029,7 @@ de rejouer les modifications des deux côtés.
 Après une session de grilling, l'écran change de nature : il n'y a plus un écran de revue et un écran de tri, mais
 **un seul écran** dont l'entrée est « état initial + changements IA optionnels » et dont l'état de travail est une
 **pile de changements**. L'IA devient un générateur de changements comme le doigt de l'utilisateur. L'architecture
-complète est dans [docs/prd/0008-manual-shelf-sorting.md](../prd/0008-manual-shelf-sorting.md) ; seules ses
+complète est dans [docs/features/0010-grid-shelf-sorting.md](../features/0010-grid-shelf-sorting.md) ; seules ses
 conséquences visuelles sont ici.
 
 `Bottom Action Bar` (`114:231`) porte maintenant **trois** `Button / Large` :
@@ -1059,7 +1061,7 @@ fonctionnalité : le rang pendant qu'on le glisse, et la section sous le doigt. 
 frames existants, dans la même section `Ranger mes livres` (`97:3755`).
 
 **Rien de tout ceci n'existe dans le code** — comme le reste du tri manuel, c'est une proposition de design. La spec
-fonctionnelle reste [docs/prd/0008-manual-shelf-sorting.md](../prd/0008-manual-shelf-sorting.md).
+fonctionnelle reste [docs/features/0010-grid-shelf-sorting.md](../features/0010-grid-shelf-sorting.md).
 
 #### Les frames
 

@@ -1,6 +1,6 @@
 # Cover-strip spines, reliable scrub, shelf margin
 
-Shipped on 2026-08-06 from PRD `docs/prd/0002-spine-strip-scrub-margin.md`.
+Shipped on 2026-08-06 from PRD `docs/prd/0002-spine-strip-scrub-margin.md` (deleted — git history).
 
 > The scrub described here was replaced on 2026-08-18 by tap-to-select — see
 > `docs/features/0003-shelf-tap-selection.md` / ADR 0005. The cover-strip spines and the

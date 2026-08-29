@@ -1,6 +1,6 @@
 # Ex-libris — the pre-login welcome and the native account flow
 
-Shipped on 2026-08-28 from PRD `docs/prd/0010-ex-libris-pre-login-onboarding.md`.
+Shipped on 2026-08-28 from PRD `docs/prd/0010-ex-libris-pre-login-onboarding.md` (deleted — git history).
 
 ## What it does
 

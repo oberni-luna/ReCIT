@@ -1,6 +1,6 @@
 # Automatic shelving with on-device AI
 
-Shipped on 2026-08-20 from PRD `docs/prd/0006-ai-auto-sort.md`
+Shipped on 2026-08-20 from PRD `docs/prd/0006-ai-auto-sort.md` (deleted — git history)
 (issues `issues/0021-delete-shelf.md` through
 `issues/0025-auto-sort-entry-points-availability.md`).
 
@@ -8,7 +8,7 @@ Shipped on 2026-08-20 from PRD `docs/prd/0006-ai-auto-sort.md`
 > shipped opening the create form on any tap, now starts this flow on every device. Where
 > Apple Intelligence cannot run, the flow says so.
 
-> **Half of this is superseded by PRD `docs/prd/0008-manual-shelf-sorting.md`** (issue
+> **Half of this is superseded by PRD `docs/prd/0008-manual-shelf-sorting.md` (deleted — git history)** (issue
 > `issues/0043-retire-the-auto-sort-review-screen.md`, 2026-08-21): the review-and-apply
 > screen and its write path are gone, replaced by the sorting surface. The pipeline below
 > — histogram, taxonomy, validator, plan — is untouched and is what the surface's

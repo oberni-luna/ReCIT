@@ -1,6 +1,6 @@
 # Adding and removing books from étagères
 
-Shipped on 2026-08-20 from PRD `docs/prd/0004-shelf-membership.md`
+Shipped on 2026-08-20 from PRD `docs/prd/0004-shelf-membership.md` (deleted — git history)
 (issues `issues/0015-add-book-to-shelf-from-menu.md` through
 `issues/0017-swipe-to-remove-in-shelf-detail.md`). No new ADR — this is ADR 0001's
 optimistic pattern applied to a new domain, and ADR 0004's "membership out of scope" note

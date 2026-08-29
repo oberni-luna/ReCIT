@@ -30,6 +30,15 @@ struct BookMyCopySection: View {
     }
 
     var body: some View {
+        // The section is already gated on `iOwn(edition)` by the screen, but the gate and this
+        // body are not evaluated together: deleting the item invalidates this view first, and
+        // every line below reads a persisted property. See `PersistentModel+StillInTheStore`.
+        if item.isStillInTheStore {
+            section
+        }
+    }
+
+    private var section: some View {
         Section("edition.my_inventory") {
             TextField(
                 "inventory.item.write_notes",

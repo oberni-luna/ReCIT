@@ -156,22 +156,27 @@ anything that is not a field and `driver.textField(_:)` asks by type.
 
 ## What the first runs found
 
-The scenario's first complete run reproduced
-[issue 0065](../issues/0065-crash-deleting-an-item-from-the-book-screen.md) — a crash reported
-from a device on 2026-08-28 and never reproduced since — and left the stack that names the
-culprit: not `BookDetailView`, which had been probed and cleared, but `InventoryCell` in the
-list *behind* it, reading `InventoryItem.transaction` on a model that has just been deleted.
+The scenario's first complete run reproduced the crash of issue 0065 — reported from a device on
+2026-08-28, never reproduced since, and fixed on 2026-08-29 because this test could finally
+produce it on demand. The stack named a culprit nobody had looked at: not `BookDetailView`, which
+had been probed and cleared, but `InventoryCell` in the list *behind* it, reading
+`InventoryItem.transaction` off a model whose row had just been deleted. The guard is
+`PersistentModel.isStillInTheStore`; the issue is gone from `docs/issues/` and lives in git
+history.
 
-**So « Suppression des livres de l'inventaire » is KO on every run until that issue is fixed**,
-and the row says so: "L'application ne tournait plus : elle a planté pendant cette étape." The
-driver notices a dead app, relaunches it **without** the signed-out wipe — the session lives in
-the keychain, so it comes back where it was — and the steps after it are attempted for real. A
-run that ends 25 OK / 1 KO on that row is the expected result today.
+That is the argument for this test in one paragraph: two days of not being able to reproduce a
+crash, against one run of a scenario that deletes its own books.
 
-A consequence worth knowing: because the delete loop stops at the crash, a run leaves its books
-behind on the account. `E2E_RESET_ACCOUNT=1` is the broom.
+It then found a second one, on the same screen and with a different stack:
+[issue 0067](../issues/0067-genre-enrichment-writes-to-a-work-that-may-be-gone.md), a *write* to a
+`Work` whose row has gone while two network round trips were in flight. That one is left open on
+purpose — what removes the row is not established, and a guard that hides it would bury the
+question. **So « Suppression des livres de l'inventaire » can still end KO with "elle a planté
+pendant cette étape"**, roughly two minutes in. The driver notices the dead app, says so, relaunches
+it without the signed-out wipe — the session lives in the keychain, so it comes back where it was —
+and the steps after it are attempted for real.
 
-## Known limits
+## Known limits## Known limits
 
 - The scanner is exercised through the package's simulator placard, so the run proves the lookup,
   the already-owned gate, the add and the tally — but not the camera or the barcode decoding.

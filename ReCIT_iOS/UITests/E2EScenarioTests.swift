@@ -287,7 +287,7 @@ final class E2EScenarioTests: XCTestCase {
                 }
 
                 let book: XCUIElement = books.element(boundBy: 0)
-                let bookLabel: String = book.label
+                let bookLabel: String = Self.shorten(book.label)
                 let countBefore: Int = books.count
 
                 let target: XCUIElement = try driver.waitForIdentifier(
@@ -476,6 +476,13 @@ final class E2EScenarioTests: XCTestCase {
             try driver.openTab(.inventory)
             try driver.popBack(to: .inventory)
 
+            // The section header is the only honest counter on this screen: the rows are a lazy
+            // stack, so deleting the book at the top simply promotes the next one into view and
+            // the number of *rendered* rows does not move.
+            let counter: XCUIElement = app.staticTexts
+                .matching(NSPredicate(format: "label BEGINSWITH %@", "Tous les livres"))
+                .firstMatch
+
             var removed: [String] = []
             // Bounded rather than "while there are books left": a removal that silently failed
             // would otherwise loop until the test timed out with nothing to say.
@@ -490,7 +497,7 @@ final class E2EScenarioTests: XCTestCase {
 
                 let row: XCUIElement = driver.all("e2e.inventoryBook").element(boundBy: 0)
                 let label: String = row.label
-                let countBefore: Int = driver.all("e2e.inventoryBook").count
+                let countedBefore: String = counter.exists ? counter.label : ""
 
                 try driver.tap(row, "le premier livre de l'inventaire", until: {
                     driver.exists("e2e.book.menu")
@@ -517,10 +524,10 @@ final class E2EScenarioTests: XCTestCase {
                     timeout: E2EDriver.defaultTimeout
                 )
 
-                removed.append(label)
+                removed.append(Self.shorten(label))
                 try driver.popBack(to: .inventory)
-                try driver.waitUntil("la mise à jour de la liste des livres", timeout: 20) {
-                    driver.all("e2e.inventoryBook").count < countBefore
+                try driver.waitUntil("la mise à jour du compteur « Tous les livres »", timeout: 25) {
+                    counter.exists && counter.label != countedBefore
                 }
             }
 
@@ -567,6 +574,17 @@ final class E2EScenarioTests: XCTestCase {
         return app
     }
 
+    /// A row's accessibility label, cut short enough to read in a report.
+    ///
+    /// A cell reads out everything it draws — title, every author, the transaction tag — which
+    /// for a fifteen-contributor anthology is a paragraph. The report wants the book, not the
+    /// credits.
+    private static func shorten(_ label: String, to limit: Int = 48) -> String {
+        guard label.count > limit else { return label }
+
+        return label.prefix(limit).trimmingCharacters(in: .whitespaces) + "…"
+    }
+
     /// A short, sortable token for the names this run creates.
     private static func runStamp() -> String {
         let formatter: DateFormatter = .init()
@@ -584,13 +602,23 @@ final class E2EScenarioTests: XCTestCase {
         // The simulator's stand-in for the camera answers a touch anywhere on its view. High
         // enough to miss both the package's own "Select a custom image" button and the row that
         // rises from the bottom.
-        app.coordinate(withNormalizedOffset: .init(dx: 0.5, dy: 0.22)).tap()
+        //
+        // **Tapped more than once if need be.** The placard is a `UIViewController` inside a
+        // cover that has just been raised, and a touch that lands before it is on screen goes
+        // nowhere — which showed up as the first book of a session failing while the second
+        // sailed through. Re-tapping is safe: the state machine refuses a barcode it is already
+        // holding, and the scenario's list only moves on when a book has been *finished with*.
+        let add: XCUIElement = driver.any("e2e.scan.add")
+        var appeared: Bool = false
 
-        let add: XCUIElement = try driver.waitForIdentifier(
-            "e2e.scan.add",
-            "la fiche du livre scanné",
-            timeout: 45
-        )
+        for _ in 0..<3 where appeared == false {
+            app.coordinate(withNormalizedOffset: .init(dx: 0.5, dy: 0.22)).tap()
+            appeared = driver.holds({ add.exists }, within: 15)
+        }
+
+        guard appeared else {
+            throw E2EFailure("La fiche du livre scanné n'est pas apparue après trois touches sur la caméra simulée.")
+        }
 
         // The row rises redacted while the edition is fetched, with its action disabled: waiting
         // for the button to become live is waiting for the *real* book rather than the

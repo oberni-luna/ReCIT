@@ -14,7 +14,10 @@ struct UserItemCellView: View {
     @Bindable var item: InventoryItem
 
     var body: some View {
-        if let owner = item.owner {
+        // Same guard as `InventoryCell`, for the same reason: this row reads `item.transaction`
+        // and `item.details` off an item it does not own, and a sync can take that item away
+        // under it. See `PersistentModel+StillInTheStore` and issue 0065.
+        if item.isStillInTheStore, let owner = item.owner {
             othersItemCellView(owner: owner)
         }
     }

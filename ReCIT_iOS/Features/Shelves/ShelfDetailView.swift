@@ -44,8 +44,16 @@ struct ShelfDetailView: View {
 
     private var shelf: Shelf? { shelves.first }
 
+    /// This étagère's books, newest first.
+    ///
+    /// Deleted copies are dropped before `created` is read. Unlike an inventory list, these come
+    /// from a relationship rather than a `@Query`, so a book deleted from its own screen — pushed
+    /// from this very list — can still be in the array when this screen redraws behind it. See
+    /// `PersistentModel+StillInTheStore` and issue 0065.
     private var books: [InventoryItem] {
-        (shelf?.items ?? []).sorted { $0.created > $1.created }
+        (shelf?.items ?? [])
+            .filter(\.isStillInTheStore)
+            .sorted { $0.created > $1.created }
     }
 
     var body: some View {

@@ -103,10 +103,11 @@ account first). The report lands in `build/e2e/<timestamp>/report.html`. **inven
 rate-limits sign-ins**, so several runs in quick succession will meet a `429` and report a KO on
 the connexion step — wait a few minutes rather than retrying at once. The scheme is `ReCIT_iOSE2E`; the scenario itself is
 `UITests/E2EScenarioTests.swift`, and it signs in, scans, searches, sorts, lists, **deletes
-everything it created**, and signs out. It currently ends **25 OK / 1 KO**: the book-deletion
-step reproduces the crash tracked in
-[issue 0065](docs/issues/0065-crash-deleting-an-item-from-the-book-screen.md), which is what it
-is for. Read
+everything it created**, and signs out. Its first complete run reproduced — and so got fixed —
+a crash that had been unreproducible for two days (issue 0065, now in git history), and turned up
+a second one still open
+([issue 0067](docs/issues/0067-genre-enrichment-writes-to-a-work-that-may-be-gone.md)), which is
+what it is for. Read
 [docs/features/0012-end-to-end-scenario.md](docs/features/0012-end-to-end-scenario.md) before
 touching it — in particular the `e2e.*` accessibility identifiers it depends on, and the two
 seams it needs in the app (`AppModels/UITest/UITestHooks.swift`).

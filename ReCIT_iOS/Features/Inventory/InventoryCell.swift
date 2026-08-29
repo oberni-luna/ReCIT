@@ -12,7 +12,12 @@ struct InventoryCell: View {
     let filterParameter: InventoryItem.FilterParameter
 
     var body: some View {
-        if let edition = item.edition {
+        // `isStillInTheStore` first, and it is not decoration: this cell is the one the crash of
+        // issue 0065 came out of. The book screen deletes the copy and stays put, this row is
+        // still on screen behind it, and the deletion invalidates its body — which then read
+        // `item.transaction` off a model with no row left and trapped. See
+        // `PersistentModel+StillInTheStore`.
+        if item.isStillInTheStore, let edition = item.edition {
             HStack(alignment: .top, spacing: .sMedium) {
                 CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: .medium)
 

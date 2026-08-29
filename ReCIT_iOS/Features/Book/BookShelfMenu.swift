@@ -37,8 +37,15 @@ struct BookShelfMenu: View {
         )
     }
 
+    /// The two lists, or nothing at all once the copy has been deleted under the open menu —
+    /// `item.shelves` is a read off a model that may have no row left. See
+    /// `PersistentModel+StillInTheStore` and issue 0065.
     private var options: ShelfMenuOptions {
-        .init(
+        guard item.isStillInTheStore else {
+            return .init(userShelves: [], itemShelves: [])
+        }
+
+        return .init(
             userShelves: shelves.map { .init(id: $0._id, name: $0.name) },
             itemShelves: item.shelves.map { .init(id: $0._id, name: $0.name) }
         )

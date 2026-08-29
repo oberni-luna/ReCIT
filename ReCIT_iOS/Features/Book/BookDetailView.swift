@@ -41,8 +41,13 @@ struct BookDetailView: View {
         _path = path
     }
 
+    /// My copy of this edition, if I have one.
+    ///
+    /// The `isStillInTheStore` test comes first because this runs on the screen that does the
+    /// deleting: `edition.items` can still hold the copy that was just removed, and `ownerId` is
+    /// a persisted read that traps on it. See `PersistentModel+StillInTheStore` and issue 0065.
     private func iOwn(_ edition: Edition) -> InventoryItem? {
-        edition.items.first { $0.ownerId == userModel.myUser?._id }
+        edition.items.first { $0.isStillInTheStore && $0.ownerId == userModel.myUser?._id }
     }
 
     var body: some View {
@@ -194,6 +199,7 @@ struct BookDetailView: View {
     private func borrowableItems(_ edition: Edition) -> [InventoryItem] {
         var seenOwners: Set<String> = []
         return edition.items
+            .filter { $0.isStillInTheStore }
             .filter { $0.ownerId != userModel.myUser?._id && $0.owner != nil && $0.transaction != .inventorying }
             .filter { seenOwners.insert($0.ownerId).inserted }
             .prefix(5)
@@ -246,7 +252,10 @@ struct BookDetailView: View {
 
     @ViewBuilder
     func communitySection(edition: Edition) -> some View {
-        let othersItems: [InventoryItem] = edition.items.filter { $0.ownerId != userModel.myUser?._id }
+        // Deleted copies are dropped before `ownerId` is read: the list can still hold the one
+        // this screen has just removed. See `PersistentModel+StillInTheStore` and issue 0065.
+        let othersItems: [InventoryItem] = edition.items
+            .filter { $0.isStillInTheStore && $0.ownerId != userModel.myUser?._id }
         let canBorrow: Bool = iOwn(edition) == nil
         if !othersItems.isEmpty {
             Section("nav.community") {

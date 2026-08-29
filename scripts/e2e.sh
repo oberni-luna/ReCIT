@@ -7,6 +7,7 @@
 #   E2E_SIMULATOR="iPhone 17 Pro" scripts/e2e.sh
 #   E2E_USERNAME=someone scripts/e2e.sh
 #   E2E_RESET_ACCOUNT=1 scripts/e2e.sh   # empty the account first, after a run died halfway
+#   E2E_KEEP_RESULT_BUNDLE=1 scripts/e2e.sh  # keep run.xcresult (~130 MB) to open in Xcode
 #
 # What it does, in order: finds and boots the simulator, uninstalls both the app and the
 # test runner so the run starts from nothing, runs `ReCIT_iOSE2E`, pulls the report the
@@ -148,6 +149,13 @@ set +e
 python3 "$REPO_ROOT/scripts/e2e_report.py" "$OUT_DIR"
 REPORT_STATUS=$?
 set -e
+
+# The `.xcresult` is the same run again, with Xcode's own automatic screenshots on top: about
+# 130 MB per run, against a report folder of 10. It is only worth keeping when the run is being
+# opened in Xcode, so it goes unless asked for.
+if [[ "${E2E_KEEP_RESULT_BUNDLE:-0}" != "1" ]]; then
+  rm -rf "$RESULT_BUNDLE"
+fi
 
 echo
 say "Compte-rendu : $OUT_DIR/report.html"

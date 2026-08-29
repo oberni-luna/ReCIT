@@ -171,6 +171,7 @@ struct ManualSortView: View {
             ToolbarItem(placement: .topBarLeading) {
                 Button("action.close", systemImage: "xmark", action: onClose)
                     .labelStyle(.iconOnly)
+                    .accessibilityIdentifier("e2e.sort.close")
             }
         }
         // A dialog rather than an alert: it is a destructive choice, and the platform's

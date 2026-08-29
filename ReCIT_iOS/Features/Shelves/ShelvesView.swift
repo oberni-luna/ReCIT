@@ -44,6 +44,7 @@ struct ShelvesView: View {
                         Button("shelves.action.sort", systemImage: "arrow.up.arrow.down") {
                             sortFlow.presentSorting()
                         }
+                        .accessibilityIdentifier("e2e.shelves.sort")
                     }
                 }
             }

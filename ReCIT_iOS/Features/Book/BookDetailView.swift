@@ -123,6 +123,7 @@ struct BookDetailView: View {
                     await deleteOwnedItem()
                 }
             }
+            .accessibilityIdentifier("e2e.book.confirmRemove")
             Button("action.cancel", role: .cancel) { }
         }
         .task {
@@ -147,6 +148,7 @@ struct BookDetailView: View {
                                 await addToInventory(edition: edition)
                             }
                         }
+                        .accessibilityIdentifier("e2e.book.addToInventory")
 
                         let lenders: [InventoryItem] = borrowableItems(edition)
                         if !lenders.isEmpty {
@@ -165,6 +167,7 @@ struct BookDetailView: View {
                     Button("action.add_to_list", systemImage: "list.bullet") {
                         showAddToListDialog = true
                     }
+                    .accessibilityIdentifier("e2e.book.addToList")
 
                     // Étagères hold a specific copy, so filing is offered only on mine.
                     if let myItem = iOwn(edition) {
@@ -176,10 +179,12 @@ struct BookDetailView: View {
                             showDeleteConfirmation = true
                         }
                         .tint(.foregroundError)
+                        .accessibilityIdentifier("e2e.book.remove")
                     }
                 } label: {
                     Label("action.more", systemImage: "ellipsis")
                 }
+                .accessibilityIdentifier("e2e.book.menu")
             }
         }
     }

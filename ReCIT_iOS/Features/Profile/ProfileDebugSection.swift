@@ -84,6 +84,11 @@ struct ProfileDebugSection: View {
                 isPresentingWelcome = true
             }
             .foregroundStyle(.foregroundTinted)
+            // The end-to-end scenario's fallback way into the scanner. Every other entry point
+            // depends on the state of the library — the accueil needs an empty one, the empty
+            // étagère's note changes errand once there are books, and the search tab's toolbar
+            // is not drawn at all on iOS 26. See `docs/features/0012-end-to-end-scenario.md`.
+            .accessibilityIdentifier("e2e.debug.scanOnboarding")
 
             Button("Ouvrir l'onboarding auto-sort") {
                 isPresentingTally = true

@@ -148,6 +148,7 @@ private struct AuthorListItemRow: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("e2e.listItemRow")
             .swipeActions(edge: .trailing) {
                 Button("action.delete", systemImage: "trash") {
                     Task {
@@ -233,6 +234,7 @@ private struct WorkListItemRow: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("e2e.listItemRow")
             .swipeActions(edge: .trailing) {
                 Button("action.delete", systemImage: "trash") {
                     Task {

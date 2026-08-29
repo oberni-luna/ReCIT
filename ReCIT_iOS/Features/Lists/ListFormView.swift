@@ -43,6 +43,10 @@ struct ListFormView: View {
 
                 Section {
                     TextField("list.form.name", text: $list.name)
+                        // Before `withLabel`, which wraps the field with a `Text` of its own:
+                        // applied after it, the identifier lands on the pair and resolves to
+                        // the label rather than to the box the scenario has to type into.
+                        .accessibilityIdentifier("e2e.listForm.name")
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundDefault)
                         .withLabel(label: "list.form.name")
@@ -75,6 +79,7 @@ struct ListFormView: View {
                                 .frame(maxWidth: .infinity)
                         })
                         .buttonStyle(.primary())
+                        .accessibilityIdentifier("e2e.listForm.submit")
 
                         // Only an existing list can be deleted. The same test decides the
                         // title and the type picker above: a list with no server id has
@@ -98,6 +103,7 @@ struct ListFormView: View {
                                     .frame(maxWidth: .infinity)
                             })
                             .buttonStyle(.destructive())
+                            .accessibilityIdentifier("e2e.listForm.delete")
                         }
                     }
                 }

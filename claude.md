@@ -88,6 +88,29 @@ xcodebuild test \
   -only-testing:ReCIT_iOSTests/InventoryIntegrationTests/inventoryScenario
 ```
 
+### The end-to-end scenario
+
+One command plays the whole app on a simulator, against the real `inventaire.io`, and opens a
+compte-rendu — one row per step, with a screenshot, what it acted on, and OK / KO / non joué:
+
+```sh
+scripts/e2e.sh
+```
+
+It asks for the test account's password (`OlivierB_test2` by default; `E2E_PASSWORD` and
+`E2E_USERNAME` override, `E2E_SIMULATOR` picks the device, `E2E_RESET_ACCOUNT=1` empties the
+account first). The report lands in `build/e2e/<timestamp>/report.html`. **inventaire.io
+rate-limits sign-ins**, so several runs in quick succession will meet a `429` and report a KO on
+the connexion step — wait a few minutes rather than retrying at once. The scheme is `ReCIT_iOSE2E`; the scenario itself is
+`UITests/E2EScenarioTests.swift`, and it signs in, scans, searches, sorts, lists, **deletes
+everything it created**, and signs out. It currently ends **25 OK / 1 KO**: the book-deletion
+step reproduces the crash tracked in
+[issue 0065](docs/issues/0065-crash-deleting-an-item-from-the-book-screen.md), which is what it
+is for. Read
+[docs/features/0012-end-to-end-scenario.md](docs/features/0012-end-to-end-scenario.md) before
+touching it — in particular the `e2e.*` accessibility identifiers it depends on, and the two
+seams it needs in the app (`AppModels/UITest/UITestHooks.swift`).
+
 **Heads-up on the test target:** `Tests/ReCIT_iOSTests.swift` is an *integration* suite that logs into the real `inventaire.io` production server with hard-coded credentials (`OlivierB_test`) and mutates that account's data. It is now gated behind `.enabled(if: IntegrationConfig.isEnabled)`, so a normal run skips it — but the credentials are still in the repo. Do not add it to automated pipelines without first stubbing the network or moving them out. Everything else is a pure or `MockURLProtocol`-backed suite and is safe to run anywhere.
 
 ## Architecture (the parts that span files)
@@ -214,3 +237,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0009 Sorting books into étagères, by hand and with help](docs/features/0009-manual-shelf-sorting.md) — drag books between étagères and « À ranger », nothing written until you apply; its surface is superseded by 0010
 - [0010 Ranger mes livres, in a grid](docs/features/0010-grid-shelf-sorting.md) — étagères as cards over an anchored panel of books to file, drag both ways, one modal flow
 - [0011 Ex-libris — pre-login welcome and native account flow](docs/features/0011-ex-libris-pre-login-onboarding.md) — the app says what it is for before asking who you are
+- [0012 The end-to-end scenario, and the compte-rendu it leaves behind](docs/features/0012-end-to-end-scenario.md) — `scripts/e2e.sh` plays the whole app on a simulator and reports every step with a screenshot and an OK / KO

@@ -40,6 +40,7 @@ struct ScanResultRowView: View {
                     .contentShape(.rect)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("e2e.scan.row")
             .disabled(opensBook == false)
 
             // An edition inventaire does not have is the one row with no action at all:

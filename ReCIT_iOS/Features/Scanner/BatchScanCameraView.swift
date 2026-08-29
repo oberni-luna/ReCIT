@@ -63,7 +63,11 @@ struct BatchScanCameraView: View {
                     // Nothing here wants the frame as an image, and capturing one per
                     // scan is the most expensive thing the package does.
                     requiresPhotoOutput: false,
-                    simulatedData: "9782367935836",
+                    // On the simulator the package draws a placard instead of a feed and hands
+                    // this string back on any tap. Under the end-to-end scenario that is the
+                    // only camera there is, so the barcode comes from the scenario's own list;
+                    // everywhere else it stays the constant it always was. See `UITestHooks`.
+                    simulatedData: UITestHooks.shared.currentBarcode ?? "9782367935836",
                     // The tick is ours, fired when a scan is *accepted* rather than seen.
                     shouldVibrateOnSuccess: false,
                     completion: handleScan
@@ -91,6 +95,18 @@ struct BatchScanCameraView: View {
             }
         }
         .animation(.snappy, value: viewModel.state)
+        // The simulated camera's page turn: a book the session is done with — filed, unknown,
+        // or already owned — is what moves the scenario on to the next barcode. Keyed on the
+        // outcome rather than on the sighting, because a barcode in frame is read several times
+        // a second. Inert outside a `-uitest` run. See `UITestHooks`.
+        .onChange(of: viewModel.state) { _, state in
+            switch state {
+            case .added, .notFound, .alreadyOwned:
+                UITestHooks.shared.advanceBarcode()
+            case .idle, .lookingUp, .resolved, .adding:
+                break
+            }
+        }
         .task {
             // Asked when the flow opens rather than on the first barcode: someone who
             // has already refused should meet the explanation as the screen appears, not

@@ -103,6 +103,7 @@ struct SearchView: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("e2e.searchResult")
                     .padding(.vertical, 4)
                 }
             } else {

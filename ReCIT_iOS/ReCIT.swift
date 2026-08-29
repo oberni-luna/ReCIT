@@ -15,10 +15,16 @@ struct ReCIT: App {
     /// tests create and SwiftData traps on duplicate schema registration.
     private let sharedModelContainer: ModelContainer?
 
-    @State private var authModel: AuthModel = .init(authService: .init(config: .init()))
+    @State private var authModel: AuthModel
 
     init() {
+        // First, and before the session is read: building `AuthService` restores the keychain's
+        // cookies into the jar, so a scenario asking for a signed-out launch has to have wiped
+        // them by now. Inert outside a `-uitest` run. See `UITestHooks`.
+        UITestHooks.prepareLaunch()
+
         DesignSystem.start()
+        _authModel = State(initialValue: .init(authService: .init(config: .init())))
         sharedModelContainer = Self.isRunningTests ? nil : Self.makeModelContainer()
     }
 

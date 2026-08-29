@@ -120,6 +120,7 @@ struct WelcomeView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.primary())
+            .accessibilityIdentifier("e2e.welcome.signIn")
 
             Button(action: onCreateAccount) {
                 Text("login.button.create_account")

@@ -82,6 +82,7 @@ struct ShelvesContent: View {
                             errand: emptyShelfErrand,
                             onTap: tapEmptyShelf
                         )
+                            .accessibilityIdentifier("e2e.shelves.emptyCard")
                             // Parked where the carousel's first card would be, so the
                             // first real étagère appears exactly here.
                             .padding(.horizontal, horizontalPadding)
@@ -184,6 +185,7 @@ struct ShelvesContent: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("e2e.inventoryBook")
                 Divider()
                     .padding(.leading, .medium)
             }

@@ -109,6 +109,7 @@ struct WorkEditionPicker: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("e2e.workEdition")
                 }
             }
         } header: {

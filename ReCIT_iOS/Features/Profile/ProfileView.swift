@@ -162,6 +162,7 @@ struct ProfileView: View {
                             .foregroundStyle(.foregroundError)
                     }
                 )
+                .accessibilityIdentifier("e2e.profile.logout")
             }
 
             // Scaffolding, and last on the screen so it reads as such. Both onboarding

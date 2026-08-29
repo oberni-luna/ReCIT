@@ -60,6 +60,7 @@ struct SortShelfCardCell: View {
         // Plain: the card is its own visual, and a link style that tinted or chevroned it
         // would fight both the pile and the drop highlight.
         .buttonStyle(.plain)
+        .accessibilityIdentifier("e2e.sortShelf.\(section.name ?? "")")
         .dropDestination(for: SortBookTransfer.self) { transfers, _ in
             guard isActive, let transfer = transfers.first else { return false }
             return onDrop(transfer.bookId)

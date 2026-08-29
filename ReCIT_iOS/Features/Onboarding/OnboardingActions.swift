@@ -32,8 +32,10 @@ struct OnboardingActions: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.primary())
+            .accessibilityIdentifier("e2e.onboarding.primary")
 
             OnboardingSkipButton(title: "onboarding.later", action: onLater)
+                .accessibilityIdentifier("e2e.onboarding.later")
         }
     }
 }

@@ -92,6 +92,7 @@ struct ShelfRowView: View {
                 ShelfLabelView(text: shelf.name, maxWidth: metrics.booksWidth)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("e2e.shelfLabel.\(shelf.name)")
             .padding(.top, -labelOverlap)
             .padding(.bottom, labelBleed)
             .zIndex(1)

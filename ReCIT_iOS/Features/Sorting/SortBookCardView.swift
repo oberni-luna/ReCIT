@@ -61,6 +61,7 @@ struct SortBookCardView: View {
         // One element rather than a cover and a title: the card is one thing to a reader, and
         // its cover carries no information the title does not.
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("e2e.sortBook")
         .accessibilityActions {
             ForEach(filingOptions) { option in
                 Button("manual_sort.a11y.file_into \(option.name)") {

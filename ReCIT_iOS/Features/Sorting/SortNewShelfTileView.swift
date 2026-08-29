@@ -58,6 +58,7 @@ struct SortNewShelfTileView: View {
             .animation(.easeOut(duration: 0.15), value: isTargeted)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("e2e.sort.newShelf")
         .disabled(isActive == false)
         .dropDestination(for: SortBookTransfer.self) { transfers, _ in
             guard isActive, let transfer = transfers.first else { return false }

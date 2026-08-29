@@ -86,6 +86,7 @@ struct ShelfFormView: View {
                     TextField("Nom de l'étagère", text: $name)
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundDefault)
+                        .accessibilityIdentifier("e2e.shelfForm.name")
 
                     // A draft carries a name and nothing else: the change stack has no
                     // room for a description or a visibility, and the étagère is
@@ -130,6 +131,7 @@ struct ShelfFormView: View {
                         }
                         .buttonStyle(.primary())
                         .disabled(!canSubmit)
+                        .accessibilityIdentifier("e2e.shelfForm.submit")
 
                         // Edit only. There is nothing to delete while creating, and a
                         // destructive button standing next to "Créer" would read as the
@@ -141,6 +143,7 @@ struct ShelfFormView: View {
                                 Text("Supprimer l'étagère").frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.destructive())
+                            .accessibilityIdentifier("e2e.shelfForm.delete")
                         }
                     }
                 }
@@ -162,6 +165,7 @@ struct ShelfFormView: View {
                 titleVisibility: .visible
             ) {
                 Button("Supprimer l'étagère", role: .destructive) { delete() }
+                    .accessibilityIdentifier("e2e.shelfForm.confirmDelete")
                 Button("Annuler", role: .cancel) { }
             } message: {
                 Text("Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée.")

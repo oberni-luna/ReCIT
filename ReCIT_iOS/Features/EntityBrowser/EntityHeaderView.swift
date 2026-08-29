@@ -22,6 +22,7 @@ struct EntityHeaderView: View {
                 Text(title)
                     .textStyle(.title200)
                     .foregroundStyle(.foregroundDefault)
+                    .accessibilityIdentifier("e2e.entityTitle")
 
                 if let subtitle {
                     Text(subtitle)

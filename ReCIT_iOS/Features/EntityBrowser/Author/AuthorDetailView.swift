@@ -73,6 +73,7 @@ struct AuthorDetailView: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("e2e.authorWork")
                         }
                     }
                 } header: {

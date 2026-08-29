@@ -49,6 +49,10 @@ struct ManualSortApplyReport: View {
                 Text("manual_sort.report.nothing_to_save")
             } else {
                 Text("manual_sort.report.all_landed \(progress.landedCount)")
+                    // The end-to-end scenario's proof that a run *finished* rather than
+                    // merely started: while it is in flight every control on the screen is
+                    // disabled, which is the same state as "nothing left to save".
+                    .accessibilityIdentifier("e2e.sort.applyReport")
             }
 
         case .stopped(let landed, let failed, let notAttempted):

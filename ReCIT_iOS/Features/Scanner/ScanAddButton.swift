@@ -32,6 +32,7 @@ struct ScanAddButton: View {
         .buttonStyle(.circularIcon)
         .disabled(isDisabled)
         .accessibilityLabel(Text("action.add_to_inventory"))
+        .accessibilityIdentifier("e2e.scan.add")
     }
 
     private var glyph: String {

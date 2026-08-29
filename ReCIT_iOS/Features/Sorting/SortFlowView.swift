@@ -130,6 +130,7 @@ struct SortFlowView: View {
                     ToolbarItem(placement: .confirmationAction) {
                         Button("action.finish", action: endSession)
                             .tint(ScanOverlayPalette.ink)
+                            .accessibilityIdentifier("e2e.scan.finish")
                     }
                 }
             }

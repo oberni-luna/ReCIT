@@ -33,6 +33,7 @@ struct AddInventoryItemSearchView: View {
                     Button("Scan", systemImage: "barcode.viewfinder") {
                         sortFlow.presentScanning()
                     }
+                    .accessibilityIdentifier("e2e.search.scan")
                 } label: {
                     Image(systemName: "plus")
                         .imageScale(.large)

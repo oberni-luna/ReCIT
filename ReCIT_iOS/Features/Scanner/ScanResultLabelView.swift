@@ -25,6 +25,10 @@ struct ScanResultLabelView: View {
                 .textStyle(.content400Bold)
                 .foregroundStyle(ScanOverlayPalette.ink)
                 .lineLimit(2)
+                // The title alone, for the end-to-end scenario's report: the row as a whole
+                // reads out its fifteen contributors too, which is not a line anybody wants in
+                // a compte-rendu.
+                .accessibilityIdentifier("e2e.scan.title")
 
             caption
                 .textStyle(.footnote200)

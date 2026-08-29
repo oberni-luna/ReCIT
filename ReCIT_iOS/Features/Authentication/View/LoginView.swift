@@ -81,6 +81,10 @@ struct LoginView: View {
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundError)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    // Read back by the end-to-end scenario when the session never opens, so its
+                    // report carries what the screen actually said instead of "rien ne s'est
+                    // passé".
+                    .accessibilityIdentifier("e2e.login.failure")
             }
 
             // Under the password box, where somebody who has just failed to remember one is
@@ -110,6 +114,7 @@ struct LoginView: View {
                 }
             )
             .buttonStyle(.primary())
+            .accessibilityIdentifier("e2e.login.submit")
 
             Button(action: onCreateAccount) {
                 Text("login.button.create_account")

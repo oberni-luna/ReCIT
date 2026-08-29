@@ -58,6 +58,7 @@ struct ListItemFormView: View {
                                 .frame(maxWidth: .infinity)
                         })
                         .buttonStyle(.primary())
+                        .accessibilityIdentifier("e2e.listItemForm.submit")
                     }
                 }
                 .listRowSeparator(.visible)

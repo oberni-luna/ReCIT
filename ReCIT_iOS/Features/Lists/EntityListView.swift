@@ -58,6 +58,7 @@ struct EntityListView: View {
                                     .tint(.red)
                                 }
                             }
+                            .accessibilityIdentifier("e2e.listRow")
                         }
                     }
                 }
@@ -71,6 +72,7 @@ struct EntityListView: View {
                     Button("action.add", systemImage: "plus") {
                         showNewListModal = true
                     }
+                    .accessibilityIdentifier("e2e.lists.add")
                 }
             }
             .searchable(text: $searchText)

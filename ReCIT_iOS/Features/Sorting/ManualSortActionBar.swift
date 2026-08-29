@@ -41,6 +41,7 @@ struct ManualSortActionBar: View {
             Button("manual_sort.apply", action: actions.onApply)
                 .buttonStyle(.primary())
                 .disabled(actions.hasPendingChanges == false || actions.isBusy)
+                .accessibilityIdentifier("e2e.sort.apply")
 
             ManualSortProposalButton(
                 entryPoint: actions.entryPoint,

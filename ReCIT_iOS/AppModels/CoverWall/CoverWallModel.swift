@@ -14,6 +14,12 @@
 //  The path form (`/api/items/recent-public`) and not the `?action=` alias, which inventaire.io
 //  deprecated server-wide.
 //
+//  It also **remembers**. The paths of the last successful answer are kept in `UserDefaults` —
+//  a few kilobytes of strings — and read back before any network call, so a second launch in a
+//  tunnel draws the wall it drew yesterday, from Nuke's disk cache, at the first frame. The
+//  painted wall is then only ever seen on a very first launch, or by someone whose server has
+//  never answered. A failure never clears that list: yesterday's books beat a painted wall.
+//
 //  See PRD 0011 and ADR 0001 — the view reads `coverPaths`, not this method's return value.
 //
 
@@ -24,6 +30,10 @@ import Foundation
 final class CoverWallModel {
 
     private let apiService: APIServicing
+    private let defaults: UserDefaults
+
+    /// Where the last successful answer is kept. One key, one array of strings.
+    static let storageKey: String = "coverWall.recentPublicPaths"
 
     /// The covers to draw, in feed order. Empty until the first answer lands, which is what the
     /// painted wall is for.
@@ -32,11 +42,18 @@ final class CoverWallModel {
     /// Where the images live, for the view to build its URLs against.
     var baseUrl: String { apiService.baseUrl() }
 
-    /// `coverPaths` seeds the wall before any network call. Issue 0071 hands it the list it
-    /// persisted from the last successful answer; a test hands it a wall to check is not lost.
-    init(apiService: APIServicing, coverPaths: [String] = []) {
+    /// Comes up on the last wall it managed to draw. `coverPaths` overrides that — a test hands
+    /// it a wall to check is not lost — and an empty one falls back to what was persisted.
+    init(
+        apiService: APIServicing,
+        defaults: UserDefaults = .standard,
+        coverPaths: [String] = []
+    ) {
         self.apiService = apiService
-        self.coverPaths = coverPaths
+        self.defaults = defaults
+        self.coverPaths = coverPaths.isEmpty
+            ? Self.persistedPaths(in: defaults)
+            : coverPaths
     }
 
     /// Asks for the latest public books and keeps their covers. Silent by design: no error
@@ -57,8 +74,18 @@ final class CoverWallModel {
             guard catalog.coverPaths.isEmpty == false else { return }
 
             coverPaths = catalog.coverPaths
+            defaults.set(catalog.coverPaths, forKey: Self.storageKey)
         } catch {
-            // Kept on purpose: the wall that is already up stays up.
+            // Kept on purpose: the wall that is already up stays up, and so does the list it
+            // was drawn from.
         }
+    }
+
+    /// The persisted list, capped on the way in. A file on disk is not a promise: it could hold
+    /// a thousand paths written by an older build, and a wall does not need them.
+    private static func persistedPaths(in defaults: UserDefaults) -> [String] {
+        let stored: [String] = defaults.stringArray(forKey: storageKey) ?? []
+
+        return .init(stored.prefix(CoverWallCatalog.coverLimit))
     }
 }

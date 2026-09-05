@@ -25,7 +25,10 @@ struct CoverWallModelTests {
     // MARK: - Decoding a real answer
 
     @Test func itReadsTheCoversOfARealAnswer() async {
-        let model: CoverWallModel = .init(apiService: apiService(answering: .success(Self.realAnswer)))
+        let model: CoverWallModel = .init(
+            apiService: apiService(answering: .success(Self.realAnswer)),
+            defaults: freshDefaults()
+        )
 
         await model.refresh()
 
@@ -41,7 +44,8 @@ struct CoverWallModelTests {
     @Test func itCallsTheEndpointByPath() async {
         let requested: RequestRecorder = .init()
         let model: CoverWallModel = .init(
-            apiService: apiService(answering: .success(Self.realAnswer), recorder: requested)
+            apiService: apiService(answering: .success(Self.realAnswer), recorder: requested),
+            defaults: freshDefaults()
         )
 
         await model.refresh()
@@ -58,6 +62,7 @@ struct CoverWallModelTests {
     @Test func aTransportFailureLeavesTheWallAlone() async {
         let model: CoverWallModel = .init(
             apiService: apiService(answering: .failure),
+            defaults: freshDefaults(),
             coverPaths: ["/img/entities/kept"]
         )
 
@@ -69,6 +74,7 @@ struct CoverWallModelTests {
     @Test(arguments: [404, 429, 500]) func aServerErrorLeavesTheWallAlone(status: Int) async {
         let model: CoverWallModel = .init(
             apiService: apiService(answering: .success(Self.realAnswer, status: status)),
+            defaults: freshDefaults(),
             coverPaths: ["/img/entities/kept"]
         )
 
@@ -80,6 +86,7 @@ struct CoverWallModelTests {
     @Test func anUnreadablePayloadLeavesTheWallAlone() async {
         let model: CoverWallModel = .init(
             apiService: apiService(answering: .success(Data("<html>nope</html>".utf8))),
+            defaults: freshDefaults(),
             coverPaths: ["/img/entities/kept"]
         )
 
@@ -94,6 +101,7 @@ struct CoverWallModelTests {
         let empty: Data = Data(#"{"items":[{"snapshot":{"entity:title":"Sans couverture"}}]}"#.utf8)
         let model: CoverWallModel = .init(
             apiService: apiService(answering: .success(empty)),
+            defaults: freshDefaults(),
             coverPaths: ["/img/entities/kept"]
         )
 
@@ -105,12 +113,89 @@ struct CoverWallModelTests {
     @Test func anEmptyFeedLeavesTheWallAlone() async {
         let model: CoverWallModel = .init(
             apiService: apiService(answering: .success(Data(#"{"items":[]}"#.utf8))),
+            defaults: freshDefaults(),
             coverPaths: ["/img/entities/kept"]
         )
 
         await model.refresh()
 
         #expect(model.coverPaths == ["/img/entities/kept"])
+    }
+
+    // MARK: - Remembering
+
+    /// The point of the cache: a second launch without a network draws yesterday's wall at the
+    /// first frame, rather than the painted one.
+    @Test func itComesUpOnTheWallItLastDrew() async {
+        let defaults: UserDefaults = freshDefaults()
+        let first: CoverWallModel = .init(
+            apiService: apiService(answering: .success(Self.realAnswer)),
+            defaults: defaults
+        )
+        await first.refresh()
+
+        let second: CoverWallModel = .init(
+            apiService: apiService(answering: .failure),
+            defaults: defaults
+        )
+
+        #expect(second.coverPaths == first.coverPaths)
+        #expect(second.coverPaths.count == 3)
+    }
+
+    @Test func aFailedRefreshKeepsWhatWasPersisted() async {
+        let defaults: UserDefaults = freshDefaults()
+        let seeded: CoverWallModel = .init(
+            apiService: apiService(answering: .success(Self.realAnswer)),
+            defaults: defaults
+        )
+        await seeded.refresh()
+
+        let offline: CoverWallModel = .init(
+            apiService: apiService(answering: .failure),
+            defaults: defaults
+        )
+        await offline.refresh()
+
+        #expect(defaults.stringArray(forKey: CoverWallModel.storageKey)?.count == 3)
+        #expect(offline.coverPaths.count == 3)
+    }
+
+    @Test func aSuccessfulRefreshReplacesWhatWasPersisted() async {
+        let defaults: UserDefaults = freshDefaults()
+        defaults.set(["/img/entities/old"], forKey: CoverWallModel.storageKey)
+
+        let model: CoverWallModel = .init(
+            apiService: apiService(answering: .success(Self.realAnswer)),
+            defaults: defaults
+        )
+        await model.refresh()
+
+        #expect(defaults.stringArray(forKey: CoverWallModel.storageKey) == model.coverPaths)
+        #expect(model.coverPaths.contains("/img/entities/old") == false)
+    }
+
+    /// A file on disk is not a promise: an older build could have written a thousand paths, and
+    /// a wall does not need them.
+    @Test func itCapsWhatItReadsBack() {
+        let defaults: UserDefaults = freshDefaults()
+        defaults.set((0..<500).map { "/img/entities/\($0)" }, forKey: CoverWallModel.storageKey)
+
+        let model: CoverWallModel = .init(
+            apiService: apiService(answering: .failure),
+            defaults: defaults
+        )
+
+        #expect(model.coverPaths.count == CoverWallCatalog.coverLimit)
+    }
+
+    @Test func nothingPersistedIsAPaintedWall() {
+        let model: CoverWallModel = .init(
+            apiService: apiService(answering: .failure),
+            defaults: freshDefaults()
+        )
+
+        #expect(model.coverPaths.isEmpty)
     }
 
     // MARK: - Support
@@ -134,6 +219,16 @@ struct CoverWallModelTests {
             lock.lock(); defer { lock.unlock() }
             url = request.url?.absoluteString
         }
+    }
+
+    /// A defaults domain of this test's own. Swift Testing runs suites in parallel, and a
+    /// shared `standard` would have one test reading another's wall.
+    private func freshDefaults() -> UserDefaults {
+        let suite: String = "CoverWallModelTests.\(UUID().uuidString)"
+        let defaults: UserDefaults = .init(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+
+        return defaults
     }
 
     private func apiService(

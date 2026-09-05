@@ -239,3 +239,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0010 Ranger mes livres, in a grid](docs/features/0010-grid-shelf-sorting.md) — étagères as cards over an anchored panel of books to file, drag both ways, one modal flow
 - [0011 Ex-libris — pre-login welcome and native account flow](docs/features/0011-ex-libris-pre-login-onboarding.md) — the app says what it is for before asking who you are
 - [0012 The end-to-end scenario, and the compte-rendu it leaves behind](docs/features/0012-end-to-end-scenario.md) — `scripts/e2e.sh` plays the whole app on a simulator and reports every step with a screenshot and an OK / KO
+- [0013 The welcome screen's wall of covers](docs/features/0013-welcome-cover-wall.md) — the pre-login screen opens on a drifting wall of the books inventaire.io just published, painted jackets underneath, dark in both appearances

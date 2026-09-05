@@ -4,7 +4,22 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
-- **Dernière passe** : 2026-09-04 — section `Propositions · Chaleur` (`265:7465`) sur la page `Screens` : trois
+- **Dernière passe** : 2026-09-05 — `B3 · Accueil · Plein écran illustré` (`265:7532`) est la **maquette retenue**
+  et est implémentée ([feature 0013](../features/0013-welcome-cover-wall.md)). Divergences code ↔ Figma constatées à
+  l'implémentation, le code faisant foi :
+
+  | Point | Figma `B3` | Code |
+  |---|---|---|
+  | Couvertures | 28 tuiles fixes de 88 × 132, gouttière 8 | 4 colonnes dérivantes, largeur dérivée de l'écran (88,25 sur 393), ratio 2:3, gouttière 8 |
+  | Voile | 5 arrêts de `green/900` (0,92 · 0,6 · 0,74 · 0,96 · 1) | 6 arrêts (0,9 · 0,52 · 0,62 · 0,82 · 0,95 · 1) — densifiés là où le pitch se pose, une fois les vraies couvertures en place |
+  | Mouvement | aucun (maquette statique) | 10,5 à 15 pt/s, impaires vers le bas, paires vers le haut |
+  | Sol des gouttières | néant (le fond de la frame) | `green/900` plein, pour que l'inter-couverture lise comme une ombre |
+  | Bouton primaire | rectangle papier dessiné à la main | `background/tinted-inverse` en mode sombre, soit `green/200` — le token donne la maquette |
+  | Mention | texte de l'ancienne note | réécrite (provenance des couvertures + hébergement du compte), fr et en |
+
+  Les frames `A1`-`A3` et `B1`-`B2` de la section `Propositions · Chaleur` ne sont pas retenues ; `A3` reste la
+  référence pour l'état « inventaire vide », qui n'est pas implémenté.
+- **Passe du 2026-09-04** — section `Propositions · Chaleur` (`265:7465`) sur la page `Screens` : trois
   propositions plus illustrées pour « Inventaire vide » et trois pour « Accueil », à côté d'un clone de l'écran
   actuel. Aucun token, style ni composant nouveau — les couvertures réutilisent les quatre `imageHash` déjà présents
   dans le fichier (`ShelfPlank` + trois couvertures), les dos sont peints avec les primitives `color/*`.

@@ -155,6 +155,55 @@ struct CoverWallGeometryTests {
         }
     }
 
+    /// The pace scales the drift and nothing else: half the pace is half the distance, in the
+    /// same direction. It is what "Reduce Motion" turns to zero and what a calmer screen would
+    /// turn down.
+    @Test func thePaceScalesTheDistanceTravelled() {
+        let geometry: CoverWallGeometry = .init(size: .init(width: 393, height: 852))
+        let elapsed: TimeInterval = 2
+
+        for column in 0..<geometry.columnCount {
+            let full: CGFloat = travelled(
+                geometry: geometry,
+                column: column,
+                over: elapsed,
+                pace: 1
+            )
+            let half: CGFloat = travelled(
+                geometry: geometry,
+                column: column,
+                over: elapsed,
+                pace: 0.5
+            )
+
+            #expect(abs(full - geometry.speed(ofColumn: column) * CGFloat(elapsed)) < 0.01)
+            #expect(abs(half - full / 2) < 0.01)
+        }
+    }
+
+    /// A column only ever goes one way. Sampled across a full period, so a wrap cannot pass for
+    /// a reversal.
+    @Test func aColumnNeverBacktracks() {
+        let geometry: CoverWallGeometry = .init(size: .init(width: 393, height: 852))
+
+        for column in 0..<geometry.columnCount {
+            let period: TimeInterval = .init(geometry.period / geometry.speed(ofColumn: column))
+            let step: TimeInterval = period / 40
+
+            for sample in 0..<40 {
+                let distance: CGFloat = travelled(
+                    geometry: geometry,
+                    column: column,
+                    from: step * TimeInterval(sample),
+                    over: step,
+                    pace: 1
+                )
+
+                #expect(abs(distance - geometry.speed(ofColumn: column) * CGFloat(step)) < 0.01)
+            }
+        }
+    }
+
     @Test func theColumnsTravelInAlternatingDirections() {
         let geometry: CoverWallGeometry = .init(size: .init(width: 393, height: 852))
 
@@ -299,5 +348,31 @@ struct CoverWallGeometryTests {
     private func circularDistance(from: CGFloat, to: CGFloat, period: CGFloat) -> CGFloat {
         let raw: CGFloat = (to - from).truncatingRemainder(dividingBy: period)
         return raw < 0 ? raw + period : raw
+    }
+
+    /// How far one column's covers moved along their own direction over a stretch of time.
+    private func travelled(
+        geometry: CoverWallGeometry,
+        column: Int,
+        from start: TimeInterval = 0,
+        over elapsed: TimeInterval,
+        pace: CGFloat
+    ) -> CGFloat {
+        let before: CGFloat = geometry.y(
+            ofRow: 1,
+            inColumn: column,
+            at: start,
+            speedScale: pace
+        )
+        let after: CGFloat = geometry.y(
+            ofRow: 1,
+            inColumn: column,
+            at: start + elapsed,
+            speedScale: pace
+        )
+
+        return geometry.direction(ofColumn: column) == 1
+            ? circularDistance(from: before, to: after, period: geometry.period)
+            : circularDistance(from: after, to: before, period: geometry.period)
     }
 }

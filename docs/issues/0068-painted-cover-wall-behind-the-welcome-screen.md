@@ -37,7 +37,12 @@ devient leur fond, sous le voile.
       d'usage lisibles, boutons intacts. L'écran est sombre **dans les deux modes système**, status
       bar et home indicator en apparence sombre.
 - [ ] Le mur est décoratif : masqué au lecteur d'écran (VoiceOver passe directement au contenu) et
-      porteur de l'identifiant `e2e.welcome.coverWall`.
+      insensible au toucher, pour qu'il ne puisse jamais avaler un appui destiné à un bouton.
+
+      **Corrigé en cours de route** : cette issue demandait aussi un identifiant
+      `e2e.welcome.coverWall`. Les deux s'excluent — un nœud masqué au lecteur d'écran sort de
+      l'arbre d'accessibilité, et XCUITest ne voit que cet arbre. L'accessibilité gagne : le
+      scénario end-to-end prouve déjà l'écran d'accueil par `e2e.welcome.signIn`, qui existe.
 - [ ] Aux tailles d'accessibilité, les trois arrangements existants continuent de fonctionner :
       rien n'est tronqué, les deux boutons restent atteignables.
 - [ ] Tests `CoverWallGeometry` : couverture complète de l'écran, phases distinctes, directions

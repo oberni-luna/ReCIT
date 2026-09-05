@@ -19,7 +19,15 @@
 //  app's — and a disclosure that scrolls away from the button it qualifies is a disclosure that
 //  was not made.
 //
-//  See PRD 0010, issue 0056, and the `Accueil` frames in the Figma library.
+//  Behind all three arrangements: a wall of book covers under a green veil (PRD 0011). The
+//  screen is therefore dark **in both system appearances** — `AuthFlowView` pins the appearance
+//  while this screen is the stack's root, which is also what turns the status bar's glyphs
+//  white. Every colour here still comes from a token; they simply resolve to their dark
+//  values. The one thing that had to change is the actions bar's background: an opaque
+//  `backgroundDefault` under the buttons would punch a black rectangle through the wall, so it
+//  carries the veil's own gradient instead.
+//
+//  See PRD 0010, PRD 0011, issue 0056, and the `Accueil` frames in the Figma library.
 //
 
 import SwiftUI
@@ -62,7 +70,7 @@ struct WelcomeView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.backgroundDefault)
+        .background { WelcomeWallBackground() }
         .toolbar(.hidden, for: .navigationBar)
     }
 
@@ -111,8 +119,9 @@ struct WelcomeView: View {
         .frame(maxWidth: .infinity)
     }
 
-    /// The two doors and the disclosure under them. The background is the screen's own,
-    /// invisible until the pitch scrolls beneath it.
+    /// The two doors and the disclosure under them. The background is the veil's own gradient,
+    /// invisible until the pitch scrolls beneath it — and transparent at its top edge, so the
+    /// bar has no seam against the wall.
     private var actionsBar: some View {
         VStack(spacing: .medium) {
             Button(action: onSignIn) {
@@ -135,7 +144,7 @@ struct WelcomeView: View {
         }
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
-        .background(.backgroundDefault)
+        .background(WelcomeWallBackground.actionsVeil)
     }
 }
 

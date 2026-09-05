@@ -18,7 +18,15 @@
 //  « Retour à la connexion » — the chevron behind it leads to the welcome screen, and a
 //  confirmation whose only exit is backwards is a dead end with a link in it.
 //
-//  See PRD 0010 and issues 0056 and 0058.
+//  The stack also **pins the appearance to dark while the welcome screen is its root**
+//  (PRD 0011). The welcome screen is a wall of book covers under a green veil, so it is dark in
+//  both system appearances — and the status bar's glyphs only turn white if the scene asks for
+//  a dark appearance, which is a scene-level preference and cannot be scoped to one view.
+//  Keyed on the path being empty rather than declared inside `WelcomeView`, because that view
+//  stays in the hierarchy once a form is pushed: declared there, the pin would follow the
+//  sign-in screen and drag a light-mode user's password field into the dark with it.
+//
+//  See PRD 0010, PRD 0011, and issues 0056 and 0058.
 //
 
 import SwiftUI
@@ -38,6 +46,7 @@ struct AuthFlowView: View {
                 view(for: destination)
             }
         }
+        .preferredColorScheme(path.isEmpty ? .dark : nil)
     }
 
     @ViewBuilder

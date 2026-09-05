@@ -4469,6 +4469,23 @@
         }
       }
     },
+    "welcome.pitch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan your books, keep track of the ones you lend, and see what the people close to you have at home."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scannez vos livres, gardez la trace de ceux que vous prêtez, et voyez ce que vos proches ont chez eux."
+          }
+        }
+      }
+    },
     "welcome.tagline" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4482,108 +4499,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vos livres, et ceux qui circulent."
-          }
-        }
-      }
-    },
-    "welcome.value.borrow.body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "See what the people close to you have at home, and ask for it."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voyez ce que vos proches ont chez eux, et demandez-le."
-          }
-        }
-      }
-    },
-    "welcome.value.borrow.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Borrow"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Empruntez"
-          }
-        }
-      }
-    },
-    "welcome.value.inventory.body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scan your books and arrange them on shelves."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scannez vos livres et rangez-les sur des étagères."
-          }
-        }
-      }
-    },
-    "welcome.value.inventory.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Take stock"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventoriez"
-          }
-        }
-      }
-    },
-    "welcome.value.lend.body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep track of what you have lent, and to whom."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gardez la trace de ce que vous avez prêté, et à qui."
-          }
-        }
-      }
-    },
-    "welcome.value.lend.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lend"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prêtez"
           }
         }
       }

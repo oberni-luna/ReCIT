@@ -11,11 +11,20 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   | Point | Figma `B3` | Code |
   |---|---|---|
   | Couvertures | 28 tuiles fixes de 88 × 132, gouttière 8 | 4 colonnes dérivantes, largeur dérivée de l'écran (88,25 sur 393), ratio 2:3, gouttière 8 |
-  | Voile | 5 arrêts de `green/900` (0,92 · 0,6 · 0,74 · 0,96 · 1) | 6 arrêts (0,9 · 0,52 · 0,62 · 0,82 · 0,95 · 1) — densifiés là où le pitch se pose, une fois les vraies couvertures en place |
+  | Voile | 5 arrêts de `green/900` (0,92 · 0,6 · 0,74 · 0,96 · 1) | **identique** — le voile avait été densifié au milieu tant que le texte était centré ; le texte passé en bas, la densité est revenue au mur |
   | Mouvement | aucun (maquette statique) | 10,5 à 15 pt/s, impaires vers le bas, paires vers le haut |
   | Sol des gouttières | néant (le fond de la frame) | `green/900` plein, pour que l'inter-couverture lise comme une ombre |
   | Bouton primaire | rectangle papier dessiné à la main | `background/tinted-inverse` en mode sombre, soit `green/200` — le token donne la maquette |
+  | Écart bouton ↔ lien | 17 pt (hors échelle) | `spacing/zero` + le padding du style secondaire, soit 16 pt et une cible tactile de 55 |
+  | Retrait latéral de la phrase | 10 pt (hors échelle) | `spacing/small` (8) |
+  | Bas du bloc | 832 pt, soit 14 pt dans la zone du home indicator | le bas de la zone sûre |
   | Mention | texte de l'ancienne note | réécrite (provenance des couvertures + hébergement du compte), fr et en |
+
+  Alignement et écarts repris tels quels de la révision du 2026-09-05 : bloc **aligné en bas**,
+  construit du bas vers le haut, `spacing/large` entre les trois groupes, `spacing/medium` entre
+  l'accroche et la phrase, `spacing/x-small` entre le nom et l'accroche, `spacing/medium` de marge
+  latérale, `spacing/s-medium` de padding vertical sur la mention. Les trois `Onboarding / Value
+  Row` de l'ancienne maquette ne sont plus instanciées : une phrase les remplace.
 
   Les frames `A1`-`A3` et `B1`-`B2` de la section `Propositions · Chaleur` ne sont pas retenues ; `A3` reste la
   référence pour l'état « inventaire vide », qui n'est pas implémenté.

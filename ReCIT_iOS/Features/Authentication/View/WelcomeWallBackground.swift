@@ -7,10 +7,14 @@
 //
 //  The veil is not a flat scrim. It is dense at the very top, where the status bar's own
 //  glyphs have to read over whatever cover happens to be passing; it thins out through the
-//  upper third, where the wall is the picture; and it closes to opaque low down, where the
-//  name, the pitch and the doors sit. A single opacity cannot do those three jobs — pick one
-//  that saves the text and the wall disappears, pick one that saves the wall and the pitch
-//  sits on a book jacket.
+//  upper third, where the wall is the picture; and it closes to opaque over the bottom third,
+//  where the name, the sentence and the doors sit. A single opacity cannot do those three jobs —
+//  pick one that saves the text and the wall disappears, pick one that saves the wall and the
+//  text sits on a book jacket.
+//
+//  The five stops are the mockup's (`265:7532`). They were briefly denser in the middle, back
+//  when the copy was centred on the screen and had to be read over the covers; the copy moving
+//  to the floor gave that density back to the wall.
 //
 //  The colour is `color/green/900`, taken as a primitive rather than through a semantic token
 //  on purpose: this screen is dark in both system appearances (`AuthFlowView` pins the
@@ -34,24 +38,10 @@ struct WelcomeWallBackground: View {
     /// The sheet over the whole screen. Stops read top to bottom.
     private static let veil: LinearGradient = .init(
         stops: [
-            .init(color: veilColor.opacity(0.9), location: 0),
-            .init(color: veilColor.opacity(0.52), location: 0.08),
-            .init(color: veilColor.opacity(0.62), location: 0.2),
-            .init(color: veilColor.opacity(0.82), location: 0.34),
-            .init(color: veilColor.opacity(0.95), location: 0.56),
-            .init(color: veilColor, location: 1),
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
-    /// The sheet behind the actions bar, for the arrangement where the pitch scrolls under it.
-    /// Transparent at its top edge so the bar has no visible seam, opaque under the buttons so
-    /// a line of the pitch cannot pass behind « Se connecter » and still be read.
-    static let actionsVeil: LinearGradient = .init(
-        stops: [
-            .init(color: veilColor.opacity(0), location: 0),
-            .init(color: veilColor.opacity(0.92), location: 0.35),
+            .init(color: veilColor.opacity(0.92), location: 0),
+            .init(color: veilColor.opacity(0.6), location: 0.1),
+            .init(color: veilColor.opacity(0.74), location: 0.38),
+            .init(color: veilColor.opacity(0.96), location: 0.58),
             .init(color: veilColor, location: 1),
         ],
         startPoint: .top,

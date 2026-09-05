@@ -3,7 +3,8 @@
 Livré le 2026-09-05 depuis le PRD `docs/prd/0011-welcome-cover-wall.md` (supprimé — voir l'histoire
 git), en quatre issues : 0068 (le mur peint), 0069 (le défilement), 0070 (les vraies couvertures),
 0071 (la mémoire). Maquette retenue : `B3 · Accueil · Plein écran illustré` du fichier Figma
-(`265:7532`), choisie parmi six propositions dessinées le 2026-09-04.
+(`265:7532`), choisie parmi six propositions dessinées le 2026-09-04, puis **révisée le même jour**
+une fois le rendu vu sur simulateur : le texte est passé du centre au bas de l'écran.
 
 ## Ce que ça fait
 
@@ -18,13 +19,28 @@ apparition de l'écran. Le mur n'est donc jamais deux fois le même, et il dit s
 des gens de l'autre côté. La mention sous les boutons dit d'où viennent ces images et où vivra le
 compte, sans nommer personne.
 
+Le texte **se pose sur le bas de l'écran** et se construit du bas vers le haut. Le mur est l'image ;
+un bloc de texte flottant en son milieu se bat avec les couvertures derrière lui et se lit comme une
+légende posée sur une photo. Aligné en bas, le mur prend les deux tiers du haut, le voile se ferme
+sous le texte, et l'œil atterrit sur « Se connecter » — ce pour quoi la plupart des gens ont ouvert
+l'app. Trois groupes, `spacing/large` d'écart : le titre, les deux actions, la mention.
+
+Les **trois lignes de valeur** (un glyphe, un titre, une phrase) ont disparu avec ce déplacement,
+remplacées par la seule phrase qu'elles disaient à trois : « Scannez vos livres, gardez la trace de
+ceux que vous prêtez, et voyez ce que vos proches ont chez eux. » Neuf lignes de pitch sur une image,
+c'est une page de texte avec un mur derrière ; une phrase, c'est une promesse. `WelcomeValueRow` et
+ses six chaînes ont été supprimés avec elles.
+
 Avant la première réponse — et pour de bon si le serveur ne répond jamais — le mur est **peint** :
 des jaquettes à plat dans les teintes de la marque, avec un pli, un bandeau et deux lignes de titre.
 Aucun visuel d'éditeur n'est embarqué dans le binaire, et l'écran n'a donc pas d'état vide.
 
-Les trois arrangements `ViewThatFits` de l'écran (tout debout, le pitch défilant sous une barre
-épinglée, tout défilant) sont inchangés : ils résolvent déjà Dynamic Type jusqu'aux tailles
-d'accessibilité, et le mur passe simplement derrière.
+Restent **deux arrangements** `ViewThatFits` au lieu de trois : le bloc debout sur le sol, puis, aux
+tailles d'accessibilité où il devient plus haut que le téléphone, le même bloc dans un `ScrollView`
+**ancré en bas** (`defaultScrollAnchor(.bottom)`) — l'écran s'ouvre encore sur les deux portes et
+non sur le haut d'un paragraphe. Le troisième arrangement d'avant (le pitch défilant sous une barre
+épinglée) n'a plus de raison d'être : il existait pour garder les boutons visibles sous un pitch
+long, et le pitch fait maintenant trois lignes.
 
 ## Surface technique
 
@@ -91,10 +107,16 @@ appui coûterait à quelqu'un sa connexion. Corollaire : **pas d'identifiant `e2
 nœud masqué au lecteur d'écran sort de l'arbre d'accessibilité, et XCUITest ne voit que cet arbre.
 Le scénario end-to-end continue de prouver l'écran par `e2e.welcome.signIn`.
 
-**La barre d'actions porte le dégradé du voile**, pas `backgroundDefault` : un fond opaque sous les
-boutons perce un rectangle noir dans le mur. Son bord supérieur est transparent pour qu'il n'y ait
-pas de couture, et opaque sous les boutons pour qu'une ligne du pitch ne puisse pas passer derrière
-« Se connecter » et rester lisible.
+**Aucun fond derrière le bloc de texte** : c'est le voile qui s'en charge, opaque à 96 % puis à
+100 % sur le tiers bas, là où le bloc se pose. Le dégradé dédié à la barre d'actions a disparu avec
+la barre épinglée, et `backgroundDefault` ne doit surtout pas revenir : un fond opaque sous les
+boutons perce un rectangle noir dans le mur.
+
+**Les couleurs sont celles du thème sombre, par token.** Le titre et la phrase en
+`foreground/default`, l'accroche en `foreground/tinted` (et non plus `foreground/secondary` : sur un
+fond vert, un gris secondaire se lit comme du texte désactivé), le bouton primaire en
+`background/tinted-inverse` avec son libellé en `foreground/tinted-inverse`, « Créer un compte » en
+`foreground/tinted`, la mention en `foreground/secondary`.
 
 **Les gouttières laissent voir le sol**, qui est vert et non le fond de fenêtre : huit points de
 noir entre deux couvertures se lisent comme une grille de tuiles, huit points de vert comme de
@@ -125,6 +147,18 @@ l'ombre entre des livres.
   Plus le cache : relecture, remplacement, plafond, et l'échec qui ne l'efface pas.
 
 Le défilement lui-même se juge à l'œil sur simulateur — mais sa formule est testée.
+
+## Divergences code ↔ Figma
+
+Le code fait foi ; la table complète est dans
+[la bibliothèque Figma](../design-system/figma-library.md). Les quatre qui comptent :
+
+| Point | Figma `B3` | Code | Pourquoi |
+|---|---|---|---|
+| Écart bouton ↔ « Créer un compte » | 17 pt | `spacing/zero` + le padding propre du style secondaire, soit 16 pt | 17 est hors échelle, et le padding du bouton est ce qui garde à « Créer un compte » une cible tactile de 55 pt au lieu d'une ligne de texte de 23 |
+| Retrait latéral de la phrase | 10 pt (un `Frame` de padding 10) | `spacing/small`, 8 pt | 10 est hors échelle |
+| Bas du bloc | 832 pt, soit 14 pt dans la zone du home indicator | le bas de la zone sûre | on ne pose pas du texte sous l'indicateur |
+| Texte de la mention | l'ancienne phrase (« Votre compte est un compte inventaire.io… ») | la nouvelle (provenance des couvertures + hébergement du compte) | l'instance Figma n'a pas été remise à jour ; le code fait foi sur la copie |
 
 ## Ce qui reste ouvert
 

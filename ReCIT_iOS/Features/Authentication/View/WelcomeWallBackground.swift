@@ -24,15 +24,21 @@ import SwiftUI
 
 struct WelcomeWallBackground: View {
 
+    /// The covers to draw, as inventaire.io image paths, and where they resolve. Empty is a
+    /// valid wall: it is painted instead.
+    var coverPaths: [String] = []
+    var baseUrl: String = ""
+
     private static let veilColor: Color = .init("color/green/900")
 
     /// The sheet over the whole screen. Stops read top to bottom.
     private static let veil: LinearGradient = .init(
         stops: [
-            .init(color: veilColor.opacity(0.88), location: 0),
-            .init(color: veilColor.opacity(0.48), location: 0.1),
-            .init(color: veilColor.opacity(0.66), location: 0.36),
-            .init(color: veilColor.opacity(0.94), location: 0.58),
+            .init(color: veilColor.opacity(0.9), location: 0),
+            .init(color: veilColor.opacity(0.52), location: 0.08),
+            .init(color: veilColor.opacity(0.62), location: 0.2),
+            .init(color: veilColor.opacity(0.82), location: 0.34),
+            .init(color: veilColor.opacity(0.95), location: 0.56),
             .init(color: veilColor, location: 1),
         ],
         startPoint: .top,
@@ -59,7 +65,7 @@ struct WelcomeWallBackground: View {
             // of tiles, eight points of green reads as shadow between books.
             Self.veilColor
 
-            CoverWallView()
+            CoverWallView(coverPaths: coverPaths, baseUrl: baseUrl)
 
             Self.veil
         }

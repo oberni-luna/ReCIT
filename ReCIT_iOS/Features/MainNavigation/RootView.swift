@@ -26,6 +26,10 @@ struct RootView: View {
     @State var errorReporter: AppErrorReporter
     @State var syncStatus: SyncStatusStore
     @State var onboardingStore: OnboardingStore
+    /// The welcome screen's wall of covers (PRD 0011). Built here like every other model, and
+    /// injected into the signed-out branch — it is the one model that runs before there is a
+    /// user, so it is also the one that never reaches `MainTabView`.
+    @State var coverWallModel: CoverWallModel
 
     @Environment(\.modelContext) var modelContext
 
@@ -57,6 +61,7 @@ struct RootView: View {
         _sortSessionModel = State(initialValue: SortSessionModel())
         _syncStatus = State(initialValue: SyncStatusStore())
         _onboardingStore = State(initialValue: OnboardingStore())
+        _coverWallModel = State(initialValue: CoverWallModel(apiService: apiService))
     }
 
     /// The sorting flow's flag as a binding: a cover needs one, and an observable is not one.
@@ -72,7 +77,7 @@ struct RootView: View {
             // The signed-out branch owns its own navigation stack (PRD 0010): the welcome
             // screen is its root, so a logged-out launch opens on what the app is for rather
             // than on a form. Signing out lands back here for the same reason.
-            AuthFlowView(authModel: authModel)
+            AuthFlowView(authModel: authModel, coverWall: coverWallModel)
         } else {
             MainTabView(authModel: authModel)
                 // **Innermost of the three, on purpose.** Pull-to-refresh belongs to the tabs

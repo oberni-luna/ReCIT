@@ -33,12 +33,17 @@ import SwiftUI
 
 struct AuthFlowView: View {
     let authModel: AuthModel
+    /// The welcome screen's wall of covers. Built by the composition root like every other
+    /// model, and held here rather than inside `WelcomeView` so the covers it fetched survive a
+    /// trip to the sign-in screen and back.
+    let coverWall: CoverWallModel
 
     @State private var path: [AuthDestination] = []
 
     var body: some View {
         NavigationStack(path: $path) {
             WelcomeView(
+                coverWall: coverWall,
                 onSignIn: { path = [.signIn] },
                 onCreateAccount: { path = [.createAccount] }
             )
@@ -78,5 +83,8 @@ struct AuthFlowView: View {
 }
 
 #Preview {
-    AuthFlowView(authModel: .init(authService: .init(config: .init(keychainKey: "preview"))))
+    AuthFlowView(
+        authModel: .init(authService: .init(config: .init(keychainKey: "preview"))),
+        coverWall: .init(apiService: APIService(env: .production))
+    )
 }

@@ -4458,13 +4458,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your account is an inventaire.io account, the open database that hosts your books."
+            "value" : "The covers are the books most recently shared on inventaire.io — the open database that will also host your account and your books."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre compte est un compte inventaire.io, la base ouverte qui héberge vos livres."
+            "value" : "Les couvertures sont celles des livres derniers partagés sur inventaire.io — la base ouverte, qui hébergera aussi votre compte et vos livres."
           }
         }
       }

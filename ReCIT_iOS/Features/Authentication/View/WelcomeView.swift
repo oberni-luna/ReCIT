@@ -33,6 +33,7 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    let coverWall: CoverWallModel
     let onSignIn: () -> Void
     let onCreateAccount: () -> Void
 
@@ -70,8 +71,16 @@ struct WelcomeView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background { WelcomeWallBackground() }
+        .background {
+            WelcomeWallBackground(
+                coverPaths: coverWall.coverPaths,
+                baseUrl: coverWall.baseUrl
+            )
+        }
         .toolbar(.hidden, for: .navigationBar)
+        // Every time the screen comes up, including on the way back from signing out: the wall
+        // shows what the community added last, and "last" moves.
+        .task { await coverWall.refresh() }
     }
 
     /// The name, the tagline and the three uses. Written once and carried by all three
@@ -150,6 +159,11 @@ struct WelcomeView: View {
 
 #Preview {
     NavigationStack {
-        WelcomeView(onSignIn: {}, onCreateAccount: {})
+        WelcomeView(
+            coverWall: .init(apiService: APIService(env: .production)),
+            onSignIn: {},
+            onCreateAccount: {}
+        )
     }
+    .preferredColorScheme(.dark)
 }

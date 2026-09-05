@@ -4,7 +4,11 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
-- **Dernière passe** : 2026-08-20 (issue 0036) — les cinq états jamais dessinés de la surface de tri : 9 frames dans
+- **Dernière passe** : 2026-09-04 — section `Propositions · Chaleur` (`265:7465`) sur la page `Screens` : trois
+  propositions plus illustrées pour « Inventaire vide » et trois pour « Accueil », à côté d'un clone de l'écran
+  actuel. Aucun token, style ni composant nouveau — les couvertures réutilisent les quatre `imageHash` déjà présents
+  dans le fichier (`ShelfPlank` + trois couvertures), les dos sont peints avec les primitives `color/*`.
+- **Passe du 2026-08-20** (issue 0036) — les cinq états jamais dessinés de la surface de tri : 9 frames dans
   `Ranger mes livres`, 2 variantes d'`Icon` (`circle`, `exclamationmark.circle`), la propriété `Mark glyph#133:0` sur
   `AutoSort / Shelf Header`.
 - **Passes précédentes** : 2026-08-20 — onboarding, « Ranger mes livres · Résultat », puis le tri manuel.

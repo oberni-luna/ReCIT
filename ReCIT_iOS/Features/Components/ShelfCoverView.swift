@@ -36,10 +36,16 @@ struct ShelfCoverView: View {
     /// portrait, and a comic album is wider — so a fitted cover is letterboxed, and centred it
     /// **floats above the plank**. A book on a shelf stands on it: `.bottom`.
     var alignment: Alignment = .center
-    /// Whether to stand in a sheet of parchment until the cover has loaded. The focus overlay
+    /// Whether to stand in a sheet of parchment *while a cover loads*. The focus overlay
     /// turns it off: the shelf's own cover is still drawn underneath, so a placeholder there
-    /// only ever reads as a flash — a pale slab twice the size of the book.
+    /// only ever reads as a flash — a pale slab twice the size of the book. It says nothing
+    /// about a book that has no cover at all: that one is always parchment, since there is
+    /// nothing arriving to replace it.
     var showsPlaceholder: Bool = true
+
+    /// Whether there is cover art to wait for. Without a URL the parchment is the finished
+    /// book, not a placeholder.
+    private var hasCover: Bool { imageUrl?.isEmpty == false }
 
     var body: some View {
         CachedAsyncImage(
@@ -50,7 +56,7 @@ struct ShelfCoverView: View {
                 .resizable()
                 .aspectRatio(contentMode: contentMode)
         } placeholder: {
-            if showsPlaceholder {
+            if showsPlaceholder || hasCover == false {
                 ZStack {
                     RoundedRectangle(cornerRadius: 2).fill(ShelfPalette.parchment)
                     Text(title)

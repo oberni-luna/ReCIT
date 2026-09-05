@@ -16,9 +16,11 @@ struct PaintedBookView<Overlay: View>: View {
     let edition: Edition?
     let size: CGSize
     var orientation: ShelfBookOrientation = .standing
-    /// Whether to stand in a sheet of parchment until the cover has loaded. The focus overlay
+    /// Whether to stand in a sheet of parchment *while a cover loads*. The focus overlay
     /// turns it off: the shelf's own book is still drawn underneath, so a placeholder there
-    /// only ever reads as a flash.
+    /// only ever reads as a flash. It says nothing about a book that has no cover at all —
+    /// that one is always parchment, or the overlay would grow an invisible spine with a
+    /// title floating free of it.
     var showsPlaceholder: Bool = true
     @ViewBuilder var overlay: (Color) -> Overlay
 
@@ -41,6 +43,13 @@ struct PaintedBookView<Overlay: View>: View {
         return strip.titleIsDark ? .init(hex: "#2A2A2A") : .white
     }
 
+    /// Whether this book has cover art at all. Without it there is nothing to paint and
+    /// nothing to wait for, so the parchment is the finished spine rather than a placeholder.
+    private var hasCover: Bool {
+        guard let image = edition?.image else { return false }
+        return image.isEmpty == false
+    }
+
     private func paint(_ strip: SpineStripLoader.Strip) -> UIImage {
         switch orientation {
         case .standing: strip.image
@@ -54,7 +63,7 @@ struct PaintedBookView<Overlay: View>: View {
                 Image(uiImage: paint(strip))
                     .resizable()
                     .interpolation(.medium)
-            } else if showsPlaceholder {
+            } else if showsPlaceholder || hasCover == false {
                 Rectangle().fill(ShelfPalette.parchment)
             } else {
                 Color.clear

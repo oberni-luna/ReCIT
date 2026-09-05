@@ -16,10 +16,20 @@
 //  sentence they said between them. Nine lines of pitch over a picture is a page of text with a
 //  wall behind it; one sentence is a promise. `WelcomeValueRow` went with them.
 //
-//  **The actions may never leave the screen.** On a 667pt phone at an accessibility text size
-//  the block is taller than the display, so the screen takes the first of two arrangements that
-//  fits: standing on the floor, then scrolling — still anchored to the bottom, so what is on
-//  screen when it opens is still the doors.
+//  **The actions may never leave the screen.** One arrangement covers every size rather than a
+//  `ViewThatFits` picking between two: the block always lives in a `ScrollView`, given a
+//  *minimum* height of the viewport and aligned to its bottom. Short content therefore sits on
+//  the floor and does not scroll at all (`.scrollBounceBehavior(.basedOnSize)` — no rubber band
+//  on a screen with nothing to scroll); content taller than the phone grows past that minimum
+//  and scrolls, and `.defaultScrollAnchor(.bottom, for: .initialOffset)` opens it at its end,
+//  so a 667pt phone at an accessibility text size still shows the two doors rather than the
+//  top of a paragraph.
+//
+//  Three things were tried before this one, and the notes are worth more than the result:
+//  `.defaultScrollAnchor(.bottom)` alone opens a tall block at its *top*; adding
+//  `for: .alignment` on top of the minimum height leaves a screenful of slack under the block;
+//  and `containerRelativeFrame` cannot express a *minimum* height, only an exact one, which
+//  clips the block at the very sizes this is here to survive. Hence the `GeometryReader`.
 //
 //  The inventaire.io note stays **under the buttons** rather than above the headline. It
 //  qualifies « Créer un compte » — the account being created is not this app's, and the covers
@@ -42,22 +52,23 @@ struct WelcomeView: View {
     let onCreateAccount: () -> Void
 
     var body: some View {
-        ViewThatFits(in: .vertical) {
-            // 1. The block stands on the floor of the screen, the wall drifting above it. At the
-            //    sizes this screen was drawn for there is no scroll view in the tree at all.
-            VStack(spacing: .zero) {
-                Spacer(minLength: .zero)
-
-                content
-            }
-
-            // 2. Past the largest accessibility sizes the block is taller than the phone. It
-            //    scrolls, anchored to its bottom: the screen still opens on the two doors rather
-            //    than on the top of a paragraph.
+        GeometryReader { proxy in
             ScrollView {
                 content
+                    .frame(
+                        maxWidth: .infinity,
+                        minHeight: proxy.size.height,
+                        alignment: .bottom
+                    )
             }
-            .defaultScrollAnchor(.bottom)
+            // Where it opens, and where it stays when the block grows under it — the covers and
+            // the text settle a frame or two after the first layout, and an offset anchored only
+            // at the start lands a screenful short of the end. `.alignment` is deliberately not
+            // asked for: the minimum height above already does that job, and asking for both
+            // leaves slack under the block.
+            .defaultScrollAnchor(.bottom, for: .initialOffset)
+            .defaultScrollAnchor(.bottom, for: .sizeChanges)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {

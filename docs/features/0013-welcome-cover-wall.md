@@ -35,12 +35,23 @@ Avant la première réponse — et pour de bon si le serveur ne répond jamais �
 des jaquettes à plat dans les teintes de la marque, avec un pli, un bandeau et deux lignes de titre.
 Aucun visuel d'éditeur n'est embarqué dans le binaire, et l'écran n'a donc pas d'état vide.
 
-Restent **deux arrangements** `ViewThatFits` au lieu de trois : le bloc debout sur le sol, puis, aux
-tailles d'accessibilité où il devient plus haut que le téléphone, le même bloc dans un `ScrollView`
-**ancré en bas** (`defaultScrollAnchor(.bottom)`) — l'écran s'ouvre encore sur les deux portes et
-non sur le haut d'un paragraphe. Le troisième arrangement d'avant (le pitch défilant sous une barre
-épinglée) n'a plus de raison d'être : il existait pour garder les boutons visibles sous un pitch
-long, et le pitch fait maintenant trois lignes.
+**Un seul arrangement**, au lieu des trois `ViewThatFits` d'avant : le bloc vit toujours dans un
+`ScrollView`, avec une hauteur **minimale** égale à celle de la fenêtre et un alignement en bas.
+Quand il tient, il se pose donc sur le sol et ne défile pas du tout
+(`scrollBounceBehavior(.basedOnSize)` — pas d'élastique sur un écran qui n'a rien à faire défiler) ;
+quand il dépasse — un 667 pt en taille d'accessibilité — il grandit au-delà de ce minimum et défile,
+en s'ouvrant sur sa fin. Vérifié sur iPhone SE (3ᵉ génération) aux deux extrêmes de Dynamic Type.
+
+Trois essais ont précédé celui-là, et les notes valent mieux que le résultat :
+`defaultScrollAnchor(.bottom)` seul ouvre un bloc trop haut **sur son début** ; y ajouter
+`for: .alignment` par-dessus la hauteur minimale laisse un écran de mou sous le bloc ; et
+`containerRelativeFrame` ne sait poser qu'une hauteur *exacte*, ce qui tronque le bloc aux tailles
+mêmes que ce montage doit encaisser — d'où le `GeometryReader`.
+
+Il faut **deux** ancres de défilement : `for: .initialOffset` pour ouvrir sur la fin, et
+`for: .sizeChanges` pour y rester quand le bloc grandit sous elle — les couvertures et le texte se
+posent une frame ou deux après le premier layout, et une ancre seulement initiale atterrit un écran
+avant la fin (c'est ce qui laissait 165 pt de vide sous la mention).
 
 ## Surface technique
 

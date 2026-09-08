@@ -132,7 +132,9 @@ Note: every shared model is `@Observable @MainActor`. `AuthModel` was the last C
 
 Everything that talks to `inventaire.io` goes through `AppModels/Service/APIService.swift`. It exposes generic `send<T,U>(toEndpoint:method:payload:)` and `fetchData<T>(fromEndpoint:)` over `URLSession.shared`, with errors funnelled through `NetworkError`. `APIService.absoluteImageUrl(_:)` resolves three image-URL shapes (absolute, `/img/...` on inventaire, and Wikimedia `Special:FilePath`).
 
-Authentication is cookie-based: `AuthService` performs `/api/auth?action=login`, captures the `inventaire:session*` cookies from `HTTPCookieStorage.shared`, and persists them to the Keychain under `Env.keychainKey` so subsequent `URLSession.shared` requests stay authenticated.
+Authentication is cookie-based: `AuthService` performs `POST /api/auth/login`, captures the `inventaire:session*` cookies from the response, and persists them to the Keychain under `Env.keychainKey` so subsequent `URLSession.shared` requests stay authenticated.
+
+**Read [ADR 0008](docs/adr/0008-session-login-signup-keychain.md) before touching anything about sessions** — signing in, signing up, the two copies of the session (jar and keychain) and which one answers `isLoggedIn()`, why public traffic goes through `URLSession.cookieless`, and what a `401` is allowed to do. Two releases have already been broken by changing one of those pieces without the others (issues 0068 and 0069). Short version: nothing outside `AuthService` reads or writes cookies or the keychain, every server answer worth a sentence is a case on a pure type in `Model/Authentication/`, and a call made before there is a user goes through `publicAPIService`.
 
 ### Server entities ↔ SwiftData
 

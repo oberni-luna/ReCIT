@@ -31,6 +31,19 @@
 //  `isChecking` is the live check saying so, and `keyboardType` is the address field asking for
 //  the right keys.
 //
+//  `isOnTinted` is the fourth, and it is a *mode* rather than a colour. The account screens now
+//  stand on the same green as the welcome screen, which means they are drawn in the dark
+//  appearance whatever the phone is set to — and a box that follows them into the dark is a
+//  dark box, when what the design asks for is a sheet of white paper on green (`278:2`,
+//  `278:12`). So the input alone is pinned back to the light appearance: `backgroundSecondary`
+//  becomes `gray/50` again and, because the text is inside it, `foregroundDefault` comes back as
+//  dark ink without a second decision. Not a hard-coded white — the token pair is the design,
+//  and pinning the mode is how Figma states it too.
+//
+//  Everything outside that box stays in the dark: the label lifts to `foregroundDefault`
+//  (`foregroundSecondary` is white at 60% there, and 4.5:1 on `green/900` only just misses AA
+//  for text this small), the spinner and the error keep the screen's own appearance.
+//
 //  See PRD 0010 and issues 0056 and 0057.
 //
 
@@ -46,14 +59,19 @@ struct AuthField: View {
     /// What is wrong with this field, when something is. Always one of ours — every sentence
     /// that reaches here comes from `AuthFailure`, never from the server.
     var message: LocalizedStringResource?
+    /// Whether this field stands on the account screens' green ground, where the box keeps its
+    /// light-appearance paper and the label has to carry more contrast.
+    var isOnTinted: Bool = false
     @Binding var text: String
+
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: .xSmall) {
             HStack(spacing: .small) {
                 Text(label)
                     .textStyle(.footnote200)
-                    .foregroundStyle(.foregroundSecondary)
+                    .foregroundStyle(isOnTinted ? .foregroundDefault : .foregroundSecondary)
 
                 if isChecking {
                     ProgressView()
@@ -72,6 +90,11 @@ struct AuthField: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(.backgroundSecondary)
                 .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.medium.rawValue))
+                // The box, and only the box, keeps the light appearance on the green screens.
+                // Written unconditionally rather than behind an `if`: a branch here would give
+                // the `TextField` two identities and hand the keyboard a reason to close mid-word,
+                // which is the same trap `LoginView` avoids by refusing `ViewThatFits`.
+                .environment(\.colorScheme, isOnTinted ? .light : colorScheme)
 
             if let message {
                 Text(message)

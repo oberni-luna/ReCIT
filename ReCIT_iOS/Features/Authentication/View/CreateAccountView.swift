@@ -27,6 +27,15 @@
 //  `AuthFailure.passwordRejected` exists as its own case: somebody whose *phone* chose the
 //  password cannot make anything of "une erreur est survenue".
 //
+//  **The screen stands on the welcome screen's green** (`278:12`), for the same reason as
+//  « Se connecter » next door: the two forms are one doorstep, and one of them turning white
+//  would say they came from different places. The green is `backgroundTinted` read in the dark
+//  appearance, which `AuthFlowView` pins for this screen — so the button comes out cream and the
+//  navigation bar is painted the same green rather than left to its default grey material.
+//  The fields keep their white paper through `AuthField(isOnTinted:)`, the green is drawn behind
+//  every safe area including the keyboard's, and the bar's top edge is faded in by
+//  `AuthActionsBackground` rather than ruled across the form.
+//
 //  See PRD 0010, issue 0057, and the `Créer un compte` frames in the Figma library.
 //
 
@@ -62,9 +71,16 @@ struct CreateAccountView: View {
             actionsBar
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.backgroundDefault)
+        // Behind the keyboard too — see `LoginView`: a background that stops at the keyboard's
+        // safe area shows the window's black through a translucent keyboard.
+        .background {
+            DesignSystem.Color.backgroundTinted.color
+                .ignoresSafeArea()
+        }
         .navigationTitle(Text("login.button.create_account"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(DesignSystem.Color.backgroundTinted.color, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .task(id: username) {
             await check(username, into: $usernameCheck, with: authModel.usernameAvailability)
         }
@@ -78,9 +94,12 @@ struct CreateAccountView: View {
 
     private var form: some View {
         VStack(alignment: .leading, spacing: .large) {
+            // `foregroundDefault`, not `foregroundSecondary`: on `green/900` the secondary grey
+            // gives 4.1:1, under AA for a sentence at this size.
             Text("signup.subtitle")
                 .textStyle(.content300)
-                .foregroundStyle(.foregroundSecondary)
+                .foregroundStyle(.foregroundDefault)
+                .tint(.foregroundTinted)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             AuthField(
@@ -89,6 +108,7 @@ struct CreateAccountView: View {
                 isSecure: false,
                 isChecking: usernameCheck.state == .checking,
                 message: message(for: .username, checking: usernameCheck),
+                isOnTinted: true,
                 text: $username
             )
 
@@ -99,6 +119,7 @@ struct CreateAccountView: View {
                 keyboardType: .emailAddress,
                 isChecking: emailCheck.state == .checking,
                 message: message(for: .email, checking: emailCheck),
+                isOnTinted: true,
                 text: $email
             )
 
@@ -107,6 +128,7 @@ struct CreateAccountView: View {
                 contentType: .newPassword,
                 isSecure: true,
                 message: failure?.signupField == .password ? failure?.message : nil,
+                isOnTinted: true,
                 text: $password
             )
 
@@ -143,11 +165,12 @@ struct CreateAccountView: View {
             Text("signup.footnote")
                 .textStyle(.footnote200)
                 .foregroundStyle(.foregroundSecondary)
+                .tint(.foregroundTinted)
                 .multilineTextAlignment(.center)
         }
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
-        .background(.backgroundDefault)
+        .background { AuthActionsBackground() }
     }
 
     /// Only what is already known to be wrong holds the button back. A check that never came
@@ -212,4 +235,6 @@ struct CreateAccountView: View {
             authModel: .init(authService: .init(config: .init(keychainKey: "preview")))
         )
     }
+    // As `AuthFlowView` pins it: this screen is green in both system appearances.
+    .preferredColorScheme(.dark)
 }

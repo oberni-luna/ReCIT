@@ -12,7 +12,9 @@ import Foundation
 public class AuthModel {
     let authService: AuthService
 
-    public var isAuthenticated: Bool = true
+    /// Whether the app is holding a session. Seeded from `AuthService`, which reads the
+    /// keychain — never a default that guesses the answer before the question is asked.
+    public var isAuthenticated: Bool = false
     public var username: String = ""
 
     init(authService: AuthService) {

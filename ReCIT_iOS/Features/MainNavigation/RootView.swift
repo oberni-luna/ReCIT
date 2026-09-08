@@ -35,7 +35,16 @@ struct RootView: View {
 
     /// Composition root: a single `APIService` is shared by every app model so
     /// dependencies are wired in one place and a mock can be injected for tests.
-    init(apiService: APIServicing = APIService(env: .production)) {
+    ///
+    /// Two services rather than one, since issue 0068. `apiService` carries the session, the
+    /// way everything that talks about a user has to. `publicAPIService` is for the calls made
+    /// before there is a user — today, the cover wall's — and it goes through
+    /// `URLSession.cookieless`: every public endpoint on inventaire.io answers with an
+    /// *anonymous* session under the two names a real one uses, and the app has no use for one.
+    init(
+        apiService: APIServicing = APIService(env: .production),
+        publicAPIService: APIServicing = APIService(env: .production, session: .cookieless)
+    ) {
         let errorReporter: AppErrorReporter = .init()
         _errorReporter = State(initialValue: errorReporter)
         _userModel = State(initialValue: UserModel(apiService: apiService))
@@ -61,7 +70,7 @@ struct RootView: View {
         _sortSessionModel = State(initialValue: SortSessionModel())
         _syncStatus = State(initialValue: SyncStatusStore())
         _onboardingStore = State(initialValue: OnboardingStore())
-        _coverWallModel = State(initialValue: CoverWallModel(apiService: apiService))
+        _coverWallModel = State(initialValue: CoverWallModel(apiService: publicAPIService))
     }
 
     /// The sorting flow's flag as a binding: a cover needs one, and an observable is not one.

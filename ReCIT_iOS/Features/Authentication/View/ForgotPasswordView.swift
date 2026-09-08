@@ -5,39 +5,43 @@
 //  « Mot de passe oublié » : a sentence saying what is about to happen, one address, and the
 //  button that asks for the link.
 //
-//  The same rhythm as « Se connecter » and « Créer un compte », which are its neighbours in the
-//  same stack — lead sentence, `AuthField`, full-width primary button, and a scrolling form under
-//  a pinned button so that at an accessibility text size the button the user came for stays on
-//  the screen.
+//  **A sheet over the sign-in screen, not a push.** Asking for a link is an errand, not a
+//  destination: it interrupts signing in and hands the screen back the moment it is done. A pull
+//  down is the way out of it, which is the gesture for "never mind" that a chevron only
+//  approximates — and it costs nothing, because there is nothing on this screen to lose but one
+//  address.
 //
-//  **This screen never learns whether the address has an account, and it must not look as
-//  though it might.** `PasswordResetOutcome` collapses every answer inventaire.io can give onto
-//  one confirmation before this view sees it, so there is no branch here to get wrong — the only
-//  thing that changes what is drawn is a request that never completed, and that reads as a
-//  network failure at the foot of the form, exactly like a sign-in that could not reach the
-//  server. It says nothing about the address, because nothing is known about it.
+//  It stands on the same green as « Se connecter » and « Créer un compte » — same lead sentence,
+//  same `AuthField` with its light box, same pinned button over `AuthActionsBackground`, and the
+//  same scrolling form so that at an accessibility text size the button the user came for stays
+//  on the screen.
 //
-//  That failure is written under the form rather than under the field on purpose. An error under
-//  the box means "this box is wrong"; an unreachable server is not the address's fault, and
-//  putting it there would send somebody hunting for a typo in a perfectly good email.
+//  **Neither outcome is drawn on this screen.** Both are said in a snackbar, which is the app's
+//  own voice everywhere else and which outlives the sheet — so the confirmation is still legible
+//  after the sheet has gone, and the failure arrives without the form having to grow a paragraph
+//  under it. Success dismisses; failure does not, because the address is still typed and asking
+//  again is one tap.
 //
-//  See PRD 0010, issue 0058, and the `Mot de passe oublié` frames in the Figma library.
+//  **This screen never learns whether the address has an account, and it must not look as though
+//  it might.** `PasswordResetOutcome` collapses every answer inventaire.io can give onto one
+//  confirmation before this view sees it, so there is no branch here to get wrong — and the
+//  confirmation is still the conditional sentence, « si un compte existe pour cette adresse… »,
+//  read out of the type that owns the rule rather than written out here. The only outcome that
+//  differs is a request that never completed, and that says nothing about the address either.
+//
+//  See PRD 0010, issues 0058 and 0059, and the `Mot de passe oublié` frames in the Figma library.
 //
 
+import LBSnackBar
 import SwiftUI
 
 struct ForgotPasswordView: View {
     let authModel: AuthModel
 
-    /// Where to go once the request has been made. Handed the address so the confirmation can
-    /// name it back.
-    let onSubmitted: (String) -> Void
-
     @State private var email: String = ""
 
-    /// The outcome of the last attempt, when it was one worth saying something about. Only ever
-    /// `.unreachable` — `.submitted` leaves this screen the moment it happens.
-    @State private var outcome: PasswordResetOutcome?
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.snackBar) var snackBar
 
     var body: some View {
         // One arrangement, and not `ViewThatFits` — see the note in `LoginView`: under a keyboard
@@ -49,19 +53,25 @@ struct ForgotPasswordView: View {
             actionsBar
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.backgroundDefault)
+        // Behind the keyboard too, like the two screens this one stands beside: a raised
+        // keyboard is translucent, and `ignoresSafeAreaEdges` stops at its safe area.
+        .background {
+            DesignSystem.Color.backgroundTinted.color
+                .ignoresSafeArea()
+        }
         .navigationTitle(Text("reset.title"))
         .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: email) {
-            outcome = nil
-        }
+        .toolbarBackground(DesignSystem.Color.backgroundTinted.color, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
     }
 
     private var form: some View {
         VStack(alignment: .leading, spacing: .large) {
+            // `foregroundDefault`, not `foregroundSecondary`: on `green/900` the secondary veil
+            // gives 4.5:1, just under AA for a sentence at this size.
             Text("reset.lead")
                 .textStyle(.content300)
-                .foregroundStyle(.foregroundSecondary)
+                .foregroundStyle(.foregroundDefault)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             AuthField(
@@ -69,15 +79,9 @@ struct ForgotPasswordView: View {
                 contentType: .emailAddress,
                 isSecure: false,
                 keyboardType: .emailAddress,
+                isOnTinted: true,
                 text: $email
             )
-
-            if let message = outcome?.message {
-                Text(message)
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundError)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
 
             Spacer(minLength: .zero)
         }
@@ -99,8 +103,7 @@ struct ForgotPasswordView: View {
         .disabled(email.allSatisfy(\.isWhitespace))
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
-        .frame(maxWidth: .infinity)
-        .background(.backgroundDefault)
+        .background { AuthActionsBackground() }
     }
 
     private func requestLink() async {
@@ -109,11 +112,29 @@ struct ForgotPasswordView: View {
 
         switch outcome {
         case .submitted:
-            self.outcome = nil
-            onSubmitted(address)
+            // Shown before the dismissal, and it survives it: the snackbar lives in a window of
+            // its own, above whatever the sheet uncovers on its way out.
+            if let confirmation = outcome.confirmation(for: address) {
+                snackBar.show {
+                    SnackBarView(
+                        title: String(localized: "reset.sent.title"),
+                        subtitle: String(localized: confirmation),
+                        onDismiss: nil
+                    )
+                }
+            }
+
+            dismiss()
 
         case .unreachable:
-            self.outcome = outcome
+            // Not `SnackBarView.error(_:)`, which reads an `Error`'s own description: what the
+            // user sees here is `AuthFailure`'s sentence, so nothing inventaire.io wrote can
+            // reach the screen by this door either.
+            if let message = outcome.message {
+                snackBar.show {
+                    SnackBarView(title: String(localized: message), onDismiss: nil)
+                }
+            }
         }
     }
 }
@@ -121,8 +142,8 @@ struct ForgotPasswordView: View {
 #Preview {
     NavigationStack {
         ForgotPasswordView(
-            authModel: .init(authService: .init(config: .init(keychainKey: "preview"))),
-            onSubmitted: { _ in }
+            authModel: .init(authService: .init(config: .init(keychainKey: "preview")))
         )
     }
+    .preferredColorScheme(.dark)
 }

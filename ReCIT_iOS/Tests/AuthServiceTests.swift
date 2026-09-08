@@ -117,6 +117,14 @@ struct AuthServiceTests {
         HTTPCookie(properties: [.name: name, .value: value, .domain: domain, .path: "/"])!
     }
 
+    /// One of this suite's `Set-Cookie` lines as the cookie a jar would have stored.
+    private static func parse(setCookie header: String) -> HTTPCookie? {
+        HTTPCookie.cookies(
+            withResponseHeaderFields: ["Set-Cookie": header],
+            for: URL(string: "https://inventaire.io/")!
+        ).first
+    }
+
     // MARK: - Signing in
 
     @Test("A 200 that sets the session cookies signs the user in and persists them")
@@ -164,6 +172,60 @@ struct AuthServiceTests {
         )
 
         #expect(restored.isLoggedIn())
+    }
+
+    @Test("A session cookie the app never asked for is not a signed-in user")
+    func anAnonymousCookieInTheJarIsNotASession() async throws {
+        let session: URLSession = makeSession(status: 200, setCookies: Self.sessionSetCookies)
+        let fixture: Fixture = makeFixture(session: session)
+        defer { tearDown(fixture) }
+
+        // What production hands out for free. Every public endpoint on inventaire.io sits behind
+        // a global `cookie-session` middleware and answers with an *anonymous* session under
+        // the two names a real one uses — `GET /api/items/recent-public`, the one call the
+        // welcome screen's cover wall makes, was verified to set both. So after a sign-out the
+        // jar filled itself back up, the next launch read it, and the app opened on the tabs of
+        // nobody: every call 401s, the first sync gives up, and the placeholder spins for ever.
+        for cookie in Self.sessionSetCookies.compactMap(Self.parse(setCookie:)) {
+            fixture.cookieStorage.setCookie(cookie)
+        }
+        #expect(fixture.cookieStorage.cookies?.isEmpty == false)
+
+        #expect(fixture.service.isLoggedIn() == false)
+
+        // And a relaunch reads the same nothing: the keychain is the record, and only a login
+        // writes it.
+        let config: AuthService.Config = .init(
+            baseURL: "https://inventaire.io/api",
+            sessionCookieNames: [Self.sessionCookieName, Self.signatureCookieName],
+            keychainKey: fixture.keychainKey
+        )
+        let relaunched: AuthService = .init(
+            config: config,
+            cookieStorage: fixture.cookieStorage,
+            session: session
+        )
+        #expect(relaunched.isLoggedIn() == false)
+    }
+
+    @Test("Signing out survives a jar that fills itself back up")
+    func signingOutSurvivesAnAnonymousCookie() async throws {
+        let session: URLSession = makeSession(status: 200, setCookies: Self.sessionSetCookies)
+        let fixture: Fixture = makeFixture(session: session)
+        defer { tearDown(fixture) }
+
+        try await fixture.service.login(username: "someone", password: "secret")
+        #expect(fixture.service.isLoggedIn())
+
+        await fixture.service.logout()
+
+        // The welcome screen comes up and draws its wall, which puts the anonymous session
+        // straight back in the jar. That must not undo the sign-out.
+        for cookie in Self.sessionSetCookies.compactMap(Self.parse(setCookie:)) {
+            fixture.cookieStorage.setCookie(cookie)
+        }
+
+        #expect(fixture.service.isLoggedIn() == false)
     }
 
     @Test("A refusal is a refusal, and leaves nothing behind")

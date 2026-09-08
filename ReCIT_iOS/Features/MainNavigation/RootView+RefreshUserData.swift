@@ -17,6 +17,13 @@ extension RootView {
                 print(" --> done \(userModel.myUser?.username ?? "<Empty>")")
             } catch {
                 print("⚠️⚠️⚠️⚠️⚠️ Error during user sync: \(error)")
+                // A session the server no longer honours is not a sync that failed: nothing
+                // below can succeed either, so the tabs would keep their first-sync
+                // placeholders for ever with nothing to tap — the shape of issue 0068. Drop
+                // the session and `RootView` shows the authentication flow on the next render.
+                if SessionExpiry.isSessionGone(error) {
+                    await authModel.logout()
+                }
                 return
             }
 

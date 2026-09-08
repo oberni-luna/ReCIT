@@ -144,6 +144,7 @@ struct WelcomeView: View {
         Text("welcome.footnote")
             .textStyle(.footnote200)
             .foregroundStyle(.foregroundSecondary)
+            .tint(.foregroundTinted)
             .multilineTextAlignment(.center)
             .padding(.horizontal, .medium)
             .padding(.vertical, .sMedium)

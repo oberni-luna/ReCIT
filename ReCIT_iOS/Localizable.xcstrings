@@ -1294,13 +1294,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sign in to your inventaire.io account."
+            "value" : "Sign in to your [inventaire.io](https://inventaire.io/) account."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Connectez-vous à votre compte inventaire.io."
+            "value" : "Connectez-vous à votre compte [inventaire.io](https://inventaire.io/)."
           }
         }
       }
@@ -3125,23 +3125,6 @@
         }
       }
     },
-    "reset.sent.button" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Back to sign-in"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retour à la connexion"
-          }
-        }
-      }
-    },
     "reset.sent.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3524,13 +3507,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "By continuing, you accept the inventaire.io terms."
+            "value" : "By continuing, you accept the [inventaire.io](https://inventaire.io/) terms."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En continuant, vous acceptez les conditions d'inventaire.io."
+            "value" : "En continuant, vous acceptez les conditions d'[inventaire.io](https://inventaire.io/)."
           }
         }
       }
@@ -3541,13 +3524,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You are creating an account on inventaire.io: that is where your books will be hosted."
+            "value" : "You are creating an account on [inventaire.io](https://inventaire.io/): that is where your books will be hosted."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous créez un compte sur inventaire.io : c'est là que vos livres seront hébergés."
+            "value" : "Vous créez un compte sur [inventaire.io](https://inventaire.io/) : c'est là que vos livres seront hébergés."
           }
         }
       }
@@ -4458,13 +4441,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The covers are the books most recently shared on inventaire.io — the open database that will also host your account and your books."
+            "value" : "The covers are the books most recently shared on [inventaire.io](https://inventaire.io/) — the open database that will also host your account and your books."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les couvertures sont celles des livres derniers partagés sur inventaire.io — la base ouverte, qui hébergera aussi votre compte et vos livres."
+            "value" : "Les couvertures sont celles des livres derniers partagés sur [inventaire.io](https://inventaire.io/) — la base ouverte, qui hébergera aussi votre compte et vos livres."
           }
         }
       }

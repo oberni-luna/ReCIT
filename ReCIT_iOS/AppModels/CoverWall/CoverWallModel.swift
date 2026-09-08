@@ -11,6 +11,12 @@
 //  A welcome screen that emptied itself because a server hiccuped would be worse than a welcome
 //  screen that shows yesterday's books.
 //
+//  "No session" is now enforced rather than asserted (issue 0068): the composition root hands
+//  this model a service built on `URLSession.cookieless`. The endpoint is public but sits behind
+//  inventaire.io's global `cookie-session` middleware, so it answers `200` **and** an anonymous
+//  `inventaire:session` — under the very name a real session uses. Absorbed into the shared jar,
+//  that cookie made the launch after a sign-out open on the tabs of nobody.
+//
 //  The path form (`/api/items/recent-public`) and not the `?action=` alias, which inventaire.io
 //  deprecated server-wide.
 //

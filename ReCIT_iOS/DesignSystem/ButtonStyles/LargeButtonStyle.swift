@@ -72,6 +72,11 @@ struct LargeButtonStyle: ButtonStyle {
             .padding(.horizontal, horizontalPadding)
             .background(isEnabled ? self.background : .backgroundDisable)
             .foregroundStyle(isEnabled ? self.foreground : .foregroundDisable)
+            // The same colour again, as a tint. A `ProgressView` takes no notice of
+            // `foregroundStyle` — a circular one is drawn in the tint colour — so the spinner
+            // `AsyncButton` swaps in for the label came out in the app's accent green, which on
+            // the primary button's cream fill is very nearly nothing at all.
+            .tint(isEnabled ? self.foreground : .foregroundDisable)
             .textStyle(textStyle)
             .clipShape(Capsule())
             .scaleEffect(configuration.isPressed ? 0.9 : 1)

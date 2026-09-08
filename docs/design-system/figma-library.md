@@ -28,6 +28,40 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
   Les frames `A1`-`A3` et `B1`-`B2` de la section `Propositions · Chaleur` ne sont pas retenues ; `A3` reste la
   référence pour l'état « inventaire vide », qui n'est pas implémenté.
+- **Passe du 2026-09-05 (2)** — connexion et création de compte sur le vert de l'accueil, section `Accueil &
+  compte` (`222:7167`), troisième rangée : `Se connecter · Vert` (`278:2`) et `Créer un compte · Vert` (`278:12`).
+  Les six frames `Light` / `Dark` / `Erreur` existantes sont conservées telles quelles. Aucun token, style ni
+  composant nouveau — la maquette est faite de modes épinglés :
+
+  | Élément | Traitement |
+  |---|---|
+  | Frame | collection `Color` épinglée sur `Dark`, fond `background/tinted` — soit `green/900`, le vert du voile de `B3` |
+  | `nav`, `status bar`, `home indicator` | variantes `Theme=Dark` ; le fill du `nav` repassé sur `background/tinted` pour qu'il se fonde dans le vert au lieu du `#1C1C1E` littéral de la variante |
+  | `box` des champs | collection `Color` **ré-épinglée sur `Light`** — le seul îlot clair de l'écran. Le `Value` étant enfant de `box`, il hérite du mode et reste en `foreground/default` encre sombre. `background/secondary` en clair, donc `gray/50` : les champs restent blancs, sans binder de primitive |
+  | Libellés des champs, `note/lead` | montés de `foreground/secondary` à `foreground/default` (`Tone=Default` pour la note) : sur `green/900`, `foreground/secondary` ne donne que 4,1:1 — 4,5:1 depuis que le token est passé au voile blanc 60 % le 2026-09-06, toujours sous le seuil AA du petit texte. La décision tient |
+  | Boutons | inchangés — en mode sombre `background/tinted-inverse` vaut `green/200` et `foreground/tinted-inverse` `green/900`, soit exactement le bouton de `B3` ; le secondaire reste en `foreground/tinted`, `green/200` |
+
+  Reste à trancher : la mention de bas d'écran garde `foreground/secondary` (4,5:1 depuis le 2026-09-06), au même niveau de discrétion
+  que la mention de `B3`. **Ces deux frames sont implémentées** — `LoginView`, `CreateAccountView`,
+  `AuthField(isOnTinted:)` et le pin d'apparence d'`AuthFlowView`. Le code suit la maquette, à trois choses près,
+  et le code fait foi :
+
+  | Point | Figma | Code |
+  |---|---|---|
+  | Épinglage des modes | par nœud (`Dark` sur la frame, `Light` sur chaque `box`) | `preferredColorScheme(.dark)` sur la pile pour ces destinations, `environment(\.colorScheme, .light)` sur la seule boîte du champ — même mécanique, mêmes tokens |
+  | Barre de navigation | fill `background/tinted` opaque | `toolbarBackground(...backgroundTinted..., .visible)` — le matériau par défaut d'iOS poserait une vitre grise en haut |
+  | Bouton primaire désactivé | non dessiné | `background/disable` — **réglé le 2026-09-06** : le token est passé de `gray/400` (une dalle grise plus forte que l'état actif crème) à un voile blanc 10 %, qui s'efface sur le vert au lieu de crier |
+  | Bord haut de la barre d'actions | arête franche | dégradé `background/tinted` de 0 % à 100 %, `xLarge` de haut, démarré `small` au-dessus de la barre (`AuthActionsBackground`) — sinon le formulaire disparaît derrière une ligne |
+  | Fond sous le clavier | hors maquette | le vert est peint derrière **toutes** les safe areas, celle du clavier comprise : un clavier translucide laissait voir le noir de la fenêtre |
+  | `action/secondary` « Créer un compte » sur `Se connecter · Vert` | présent | **supprimé** — les deux portes sont sur l'accueil, une seule reste sur cet écran. La frame Figma n'a pas été mise à jour |
+
+- **Passe du 2026-09-06** — deux échelles d'alpha, et cinq tokens qui deviennent des voiles. D'abord 18 primitives
+  dans `Primitives` : `color/white-01`…`color/white-09` et `color/black-01`…`color/black-09`, de 10 % à 90 %. Puis
+  cinq sémantiques rebasées dessus — `foreground/disable` (sombre), `foreground/secondary`,
+  `foreground/placeholder`, `background/disable` (sombre) et `border/default`, ce dernier **fermant D49**. Le code a
+  suivi : `Color.swift` écrit ces cinq cas en `.black.opacity(x)` / `.white.opacity(x)`, `color/gray/600` n'est plus
+  consommé par personne. Sens de la passe **inhabituel — Figma vers le code** : c'est une décision de design, prise
+  dans le fichier puis répercutée, et non une divergence à trancher en faveur du code.
 - **Passe du 2026-09-04** — section `Propositions · Chaleur` (`265:7465`) sur la page `Screens` : trois
   propositions plus illustrées pour « Inventaire vide » et trois pour « Accueil », à côté d'un clone de l'écran
   actuel. Aucun token, style ni composant nouveau — les couvertures réutilisent les quatre `imageHash` déjà présents
@@ -103,7 +137,7 @@ cadre sans qu'aucun contrôle ne le voie.
 
 | Collection | id | Modes (id) | Variables |
 |---|---|---|---|
-| `Primitives` | `VariableCollectionId:4:2` | `Value` (`4:0`) | 30 |
+| `Primitives` | `VariableCollectionId:4:2` | `Value` (`4:0`) | 48 |
 | `Color` | `VariableCollectionId:4:3` | `Light` (`4:1`), `Dark` (`4:2`) | 30 |
 | `Spacing` | `VariableCollectionId:4:4` | `Value` (`4:3`) | 11 |
 | `Radius` | `VariableCollectionId:4:5` | `Value` (`4:4`) | 8 |
@@ -129,11 +163,11 @@ qu'il faut lire les deux modes.
 |---|---|---|---|
 | `color/gray/0` | `#FFFFFF` | 1 | `background/default` L · `shelf/label/paper` **L et D** |
 | `color/gray/50` | `#F1F1F1` | 1 | `foreground/inverse` L · `foreground/default` D · `background/secondary` L |
-| `color/gray/200` | `#E8ECE6` | 1 | `background/inverse` D · `background/disable` L · `background/tinted-inverse` D — **plus `border/default`, voir D49** |
-| `color/gray/400` | `#AFAFAF` | 1 | `foreground/disable` L · `foreground/secondary` D · `foreground/placeholder` L |
+| `color/gray/200` | `#E8ECE6` | 1 | `background/inverse` D · `background/disable` L · `background/tinted-inverse` D |
+| `color/gray/400` | `#AFAFAF` | 1 | `foreground/disable` L — a perdu `foreground/secondary` D et `foreground/placeholder` L le 2026-09-06 |
 | `color/gray/500` | `#959A92` | 1 | — inutilisé |
-| `color/gray/600` | `#7E837C` | 1 | `foreground/secondary` L · `foreground/disable` D · `background/disable` D |
-| `color/gray/700` | `#2D2D2D` | 1 | `background/error` D — **plus `border/default`, voir D49** |
+| `color/gray/600` | `#7E837C` | 1 | — **inutilisé depuis le 2026-09-06** : ses trois rôles sont passés aux voiles |
+| `color/gray/700` | `#2D2D2D` | 1 | `background/error` D |
 | `color/gray/700 75%` | `#2D2D2D` | **0.50** | — inutilisé · **le nom ment** (voir D1) |
 | `color/gray/800` | `#2A2A2A` | 1 | `background/secondary` D |
 | `color/gray/900` | `#191919` | 1 | `foreground/default` L · `foreground/inverse` D · `background/inverse` L · `shelf/label/ink` **L et D** |
@@ -156,6 +190,28 @@ qu'il faut lire les deux modes.
 
 `color/gray/200` est **légèrement vert**, pas neutre — c'est volontaire, il porte la teinte de marque dans les gris.
 `color/red/100` est le seul `.colorset` stocké en composantes hexadécimales et non en flottants.
+
+### Primitives — `color/white-0x` et `color/black-0x` (nées dans Figma)
+
+Deux échelles d'alpha, de 10 % à 90 % par pas de 10, sur du blanc pur et du noir pur. **Elles n'ont aucune
+contrepartie dans `Assets.xcassets`** : ce sont les premières primitives du fichier qui ne miroitent pas le
+catalogue. Elles existent pour les voiles — un bord, une ombre portée, un scrim — que le code rend en
+`Color.white.opacity(x)` / `Color.black.opacity(x)` et qu'aucune couleur opaque ne peut donner (voir D49).
+
+| Tokens | Base | Alphas |
+|---|---|---|
+| `color/white-01` … `color/white-09` | `#FFFFFF` | 0.10 · 0.20 · 0.30 · 0.40 · 0.50 · 0.60 · 0.70 · 0.80 · 0.90 |
+| `color/black-01` … `color/black-09` | `#000000` | 0.10 · 0.20 · 0.30 · 0.40 · 0.50 · 0.60 · 0.70 · 0.80 · 0.90 |
+
+Portées `[]` et aucune `codeSyntax`, comme toute primitive — et parce qu'aucun symbole Swift ne leur correspond.
+
+Six sont consommées depuis le 2026-09-06 : `white-01` (`background/disable` D, `border/default` D), `white-03`
+(`foreground/placeholder` D), `white-05` (`foreground/disable` D), `white-06` (`foreground/secondary` D),
+`black-01` (`border/default` L), `black-04` (`foreground/placeholder` L), `black-05` (`foreground/secondary` L).
+Les douze autres restent un stock.
+
+`color/black-01` fait doublon de valeur avec `color/gray/1000 10%`, qui vient du catalogue et reste la primitive
+de référence tant qu'un asset la porte. Le doublon est assumé : l'échelle vaut par sa continuité.
 
 ### Primitives — `shelf/*` (source : `Features/Shelves/ShelfPalette.swift`)
 
@@ -182,20 +238,20 @@ valeur fixe, donc pas de variable.
 |---|---|---|---|
 | `foreground/default` | `gray/900` | `gray/50` | `DesignSystem.Color.foregroundDefault` |
 | `foreground/inverse` | `gray/50` | `gray/900` | `.foregroundInverse` |
-| `foreground/disable` | `gray/400` | `gray/600` | `.foregroundDisable` |
-| `foreground/secondary` | `gray/600` | `gray/400` | `.foregroundSecondary` |
+| `foreground/disable` | `gray/400` | **`white-05`** | `.foregroundDisable` |
+| `foreground/secondary` | **`black-05`** | **`white-06`** | `.foregroundSecondary` |
 | `foreground/tinted` | `green/700` | `green/200` | `.foregroundTinted` |
 | `foreground/tinted-inverse` | `green/100` | `green/900` | `.foregroundTintedInverse` |
 | `foreground/error` | `red/800` | `red/400` | `.foregroundError` |
-| `foreground/placeholder` | `gray/400` | `gray/600` | `.foregroundPlaceholder` |
+| `foreground/placeholder` | **`black-04`** | **`white-03`** | `.foregroundPlaceholder` |
 | `background/default` | `gray/0` | `gray/1000` | `.backgroundDefault` |
 | `background/inverse` | `gray/900` | `gray/200` | `.backgroundInverse` |
-| `background/disable` | `gray/200` | `gray/600` | `.backgroundDisable` |
+| `background/disable` | `gray/200` | **`white-01`** | `.backgroundDisable` |
 | `background/secondary` | `gray/50` | `gray/800` | `.backgroundSecondary` |
 | `background/tinted` | `green/100` | `green/900` | `.backgroundTinted` |
 | `background/tinted-inverse` | `green/800` | `green/200` | `.backgroundTintedInverse` |
 | `background/error` | `red/100` | **`gray/700`** | `.backgroundError` — voir D7 |
-| `border/default` | **noir α 0.10** | **blanc α 0.10** | `.borderDefault` — seul alias sans primitive, voir D49 |
+| `border/default` | **`black-01`** | **`white-01`** | `.borderDefault` — voir D49, close |
 | `border/tinted` | `green/700` | `green/200` | `.borderTinted` |
 | `border/error` | `red/800` | `red/400` | `.borderError` |
 | `clear` | transparent | transparent | `.clear` |
@@ -204,7 +260,18 @@ valeur fixe, donc pas de variable.
 les deux paires sont égales par construction, pas par coïncidence. Si l'une doit bouger, il faut d'abord scinder le
 `case` dans `Color.swift`.
 
-`foreground/placeholder` est identique à `foreground/disable` dans les deux modes, mais reste un rôle distinct.
+**Cinq tokens sont des voiles**, pas des couleurs : `foreground/disable` (sombre), `foreground/secondary`,
+`foreground/placeholder`, `background/disable` (sombre) et `border/default` aliasent les primitives d'alpha
+`color/white-0x` / `color/black-0x`. Ils prennent donc la teinte de ce qui est derrière eux, au lieu de ne bien se
+lire que sur un seul fond — c'est le raisonnement de D49, étendu le 2026-09-06 aux quatre autres. Côté Swift ils
+s'écrivent `.black.opacity(x)` / `.white.opacity(x)` : aucun `.colorset` ne les porte.
+
+Conséquence à surveiller : un voile n'a pas de contraste fixe. `foreground/secondary` en sombre (blanc 60 %) donne
+4,5:1 sur `green/900` — tout juste sous le seuil AA du petit texte, ce qui est pourquoi l'écran de connexion monte
+ses libellés à `foreground/default` (voir la passe du 2026-09-05 (2)).
+
+`foreground/placeholder` **n'est plus identique** à `foreground/disable` : il est d'un cran plus léger dans les deux
+modes (40 % contre 50 % en clair, 30 % contre 50 % en sombre). Le rôle distinct porte enfin une valeur distincte.
 
 ### Sémantiques — `shadow/*` et `shelf/*`
 
@@ -787,7 +854,7 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D46 | `Ranger mes livres · Light`, `+` de la barre de navigation | **Divergence assumée côté code.** La maquette met la création d'étagère dans la nav bar ; le code l'a déplacée en **dernière tuile de la grille** — à l'endroit où le geste s'utilise, et elle sert en même temps d'état vide et de cible de dépôt (déposer un livre dessus crée l'étagère et le range). Une action, un contrôle | ouverte côté Figma — les frames ajoutés en 0045 montrent la tuile ; le frame nominal garde le `+` |
 | D47 | `Ranger mes livres · Light`, titre de carte vs `TextStyle` | **Diagnostic erroné, refermé.** J'avais écrit qu'aucun token serif n'existait à la taille du titre de carte : `Footnote/footnote200Bold` **est** une Alegreya Bold 12, et c'est exactement ce que la maquette applique. Aucun écart. Le titre des cartes « livre à ranger », lui, est `Content/content300` (Alegreya Medium 17) sur deux lignes, et le code le rendait en 12 — corrigé côté code | résolue — rien à changer côté Figma |
 | D48 | `Ranger mes livres`, frames d'états | **Écart de production, résolu.** Les 12 frames d'états manquants ont été générés depuis les décisions du PRD 0009 en clonant le frame nominal, donc à partir des mêmes composants et des mêmes variables. Les pastilles instancient bien `Tag` sans glyphe (`Show glyph = false`), comme le code | résolue — frames à relire par l'owner ; le détail d'étagère (`Détail étagère · Light`) est le seul écran de la feature qui n'avait aucune maquette |
-| D49 | `border/default` (variable Figma) vs `DesignSystem.Color.borderDefault` | **Divergence assumée côté code.** La variable Figma résout `gray/200` en clair et `gray/700` en sombre — deux gris opaques. Le code rend désormais **noir à 10 %** et **blanc à 10 %**, donc un voile et non une couleur. La raison : un gris opaque ne se lit comme un bord que sur un seul fond. `gray/200` est légèrement vert (il porte la teinte de marque dans les gris, cf. la note sous les primitives), et sur le lavis d'une étagère ou sur le blanc semi-opaque du panneau de tri il se lisait comme un **trait dessiné** au lieu d'une arête. C'est ce qui avait poussé le filet du panneau de tri à être écrit en `Color.black.opacity(0.2)` en dur, hors token — un contournement maintenant supprimé, le token faisant le travail. Conséquence : `border/default` est le seul alias de la bibliothèque qui ne pointe pas sur une primitive `color/*`, et il n'a pas de hex fixe | ouverte côté Figma — la variable doit passer à une couleur avec alpha (noir 10 % / blanc 10 %) ; aucune primitive existante ne convient, donc soit deux primitives `color/black 10%` / `color/white 10%`, soit une valeur brute sur l'alias |
+| D49 | `border/default` (variable Figma) vs `DesignSystem.Color.borderDefault` | **Divergence assumée côté code.** La variable Figma résout `gray/200` en clair et `gray/700` en sombre — deux gris opaques. Le code rend désormais **noir à 10 %** et **blanc à 10 %**, donc un voile et non une couleur. La raison : un gris opaque ne se lit comme un bord que sur un seul fond. `gray/200` est légèrement vert (il porte la teinte de marque dans les gris, cf. la note sous les primitives), et sur le lavis d'une étagère ou sur le blanc semi-opaque du panneau de tri il se lisait comme un **trait dessiné** au lieu d'une arête. C'est ce qui avait poussé le filet du panneau de tri à être écrit en `Color.black.opacity(0.2)` en dur, hors token — un contournement maintenant supprimé, le token faisant le travail. Conséquence : `border/default` n'a pas de hex fixe — il aliase désormais `color/black-01` / `color/white-01`, primitives d'alpha nées dans Figma et sans `.colorset` | **close le 2026-09-06** — les primitives manquantes ont été créées (`color/black-01`, `color/white-01`, dans les deux échelles d'alpha) et `border/default` les aliase. Figma et le code disent enfin la même chose, et le raisonnement du voile a été étendu à quatre autres tokens (`foreground/disable` D, `foreground/secondary`, `foreground/placeholder`, `background/disable` D) |
 
 Rappel historique de la passe tokens : **D6 était la priorité** — `OpenSans-SemiBold` et `OpenSans-Regular` ne s'enregistraient
 pas au lancement, donc `action200`, `action300` et `caption200` retombent sur la police système sur l'appareil.

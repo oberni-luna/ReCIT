@@ -11,26 +11,45 @@
 //
 //  "Créer un compte" **replaces** the stack rather than pushing onto it. From here it is a
 //  change of mind, not a step forward, and pushing would let a user build accueil → connexion →
-//  création → connexion without ever going back. « Mot de passe oublié ? » (issue 0058) does the
-//  same, for the same reason.
+//  création → connexion without ever going back.
+//
+//  « Mot de passe oublié ? » is neither: it opens as a **sheet** this screen owns (issue 0059).
+//  Asking for a link is an errand that interrupts signing in and hands the screen straight back,
+//  so it never touches the stack at all — a pull down is the way out, and what is behind it is
+//  the half-filled form it was called from.
 //
 //  The message shown on failure is always ours. `AuthFailure.message` is a catalogue resource in
 //  every branch, so the English prose inventaire.io writes in its `message` field has no path to
 //  this screen — see the suite on that type.
 //
-//  See PRD 0010, issues 0056 and 0058, and the `Se connecter` frames in the Figma library.
+//  **The screen stands on the welcome screen's green** (`278:2`). It is the same doorstep seen
+//  from one step further in, and a white form arriving over the wall of covers reads as another
+//  app's screen borrowed for the occasion. The green is `backgroundTinted`, and it is the dark
+//  value of that token — `AuthFlowView` pins the appearance for this screen as it does for the
+//  welcome screen, so every token here resolves dark and the primary button comes out cream
+//  without anything being said about it. The navigation bar is painted the same green rather
+//  than left to its default material, which would lay a grey pane across the top of it, and the
+//  green is drawn behind every safe area — the keyboard included, or its translucency shows the
+//  window's black through it.
+//
+//  The bottom bar's own top edge is **faded in** (`AuthActionsBackground`) rather than drawn as a
+//  line the form disappears behind.
+//
+//  What does *not* follow into the dark is the inside of the fields: `AuthField(isOnTinted:)`
+//  pins its box back to the light appearance, so the paper stays white and the ink stays dark.
+//
+//  See PRD 0010, issues 0056, 0058 and 0059, and the `Se connecter` frames in the Figma library.
 //
 
 import SwiftUI
 
 struct LoginView: View {
     let authModel: AuthModel
-    let onCreateAccount: () -> Void
-    let onForgotPassword: () -> Void
 
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var failure: AuthFailure?
+    @State private var isAskingForResetLink: Bool = false
 
     var body: some View {
         // One arrangement, deliberately. The form scrolls when it does not fit and sits still
@@ -50,22 +69,49 @@ struct LoginView: View {
             actionsBar
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.backgroundDefault)
+        // Behind the keyboard too. `background(_:ignoresSafeAreaEdges:)` ignores the *container*
+        // safe area and stops at the keyboard's, which left the window's own black showing
+        // through a raised keyboard — visible, because the keyboard is translucent.
+        .background {
+            DesignSystem.Color.backgroundTinted.color
+                .ignoresSafeArea()
+        }
         .navigationTitle(Text("login.button.signin"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(DesignSystem.Color.backgroundTinted.color, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .sheet(isPresented: $isAskingForResetLink) {
+            NavigationStack {
+                ForgotPasswordView(authModel: authModel)
+            }
+            // Full height: the sheet carries a keyboard and a pinned button, and a medium detent
+            // that grows as the keyboard rises moves the button mid-tap.
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            // Sheets are presented outside this stack, so `AuthFlowView`'s pin does not reach
+            // them. Stated again here, or the green screen would come up in the light appearance
+            // with a grey navigation bar over it.
+            .preferredColorScheme(.dark)
+        }
     }
 
     private var form: some View {
         VStack(alignment: .leading, spacing: .large) {
+            // `foregroundDefault`, not `foregroundSecondary`: on `green/900` the secondary veil
+            // gives 4.5:1, just under AA for a sentence at this size.
             Text("login.subtitle")
                 .textStyle(.content300)
-                .foregroundStyle(.foregroundSecondary)
+                .foregroundStyle(.foregroundDefault)
+                // The subtitle carries a markdown link to inventaire.io. Links keep the tint,
+                // not the `foregroundStyle`, so the tint is what has to read on `green/900`.
+                .tint(.foregroundTinted)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             AuthField(
                 label: "login.username",
                 contentType: .username,
                 isSecure: false,
+                isOnTinted: true,
                 text: $username
             )
 
@@ -73,6 +119,7 @@ struct LoginView: View {
                 label: "login.password",
                 contentType: .password,
                 isSecure: true,
+                isOnTinted: true,
                 text: $password
             )
 
@@ -90,7 +137,9 @@ struct LoginView: View {
             // Under the password box, where somebody who has just failed to remember one is
             // already looking — and not in the bar below, which is where the two doors out of
             // this screen live and where a third choice would dilute both.
-            Button(action: onForgotPassword) {
+            Button {
+                isAskingForResetLink = true
+            } label: {
                 Text("login.button.forgot_password")
                     .textStyle(.action200)
                     .foregroundStyle(.foregroundTinted)
@@ -104,27 +153,23 @@ struct LoginView: View {
     }
 
     private var actionsBar: some View {
-        VStack(spacing: .medium) {
-            AsyncButton(
-                action: signIn,
-                actionOptions: [.showProgressView],
-                label: {
-                    Text("login.button.signin")
-                        .frame(maxWidth: .infinity)
-                }
-            )
-            .buttonStyle(.primary())
-            .accessibilityIdentifier("e2e.login.submit")
-
-            Button(action: onCreateAccount) {
-                Text("login.button.create_account")
+        AsyncButton(
+            action: signIn,
+            actionOptions: [.showProgressView],
+            label: {
+                Text("login.button.signin")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.secondary())
-        }
+        )
+        .buttonStyle(.primary())
+        // Held back until there is a name to sign in with, the way the create-account button is
+        // held back. An empty form pressing a live button only ever earns a round trip and a
+        // refusal — and inventaire.io rate-limits sign-ins, so that refusal is not free.
+        .disabled(username.isEmpty)
+        .accessibilityIdentifier("e2e.login.submit")
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
-        .background(.backgroundDefault)
+        .background { AuthActionsBackground() }
     }
 
     private func signIn() async {
@@ -140,9 +185,9 @@ struct LoginView: View {
 #Preview {
     NavigationStack {
         LoginView(
-            authModel: .init(authService: .init(config: .init(keychainKey: "preview"))),
-            onCreateAccount: {},
-            onForgotPassword: {}
+            authModel: .init(authService: .init(config: .init(keychainKey: "preview")))
         )
     }
+    // As `AuthFlowView` pins it: this screen is green in both system appearances.
+    .preferredColorScheme(.dark)
 }

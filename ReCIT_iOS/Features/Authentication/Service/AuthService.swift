@@ -24,6 +24,12 @@
 //  credentials just used, so nobody ever retypes a password they chose ten seconds ago. Whether
 //  to chain it is `PostSignupSession`'s call, not this file's.
 //
+//  **Who is signed in is read off the keychain, not off the cookie jar** (issue 0068). Every
+//  public endpoint on inventaire.io answers with an *anonymous* session under the two names a
+//  real one uses, so the mere presence of an `inventaire:session` cookie proves nothing: after
+//  a sign-out, the welcome screen's own cover wall was enough to put one in the jar and make
+//  the next launch open on the tabs of nobody. `isLoggedIn()` says so at more length.
+//
 //  Asking for a reset link (issue 0058) is the opposite kind of call: it opens no session, it
 //  absorbs no cookie, and it reports nothing the server said. `PasswordResetOutcome` owns the
 //  reason — the endpoint answers "email not found" for an address nobody registered, and
@@ -128,8 +134,26 @@ final class AuthService {
 
     // MARK: - Public API
 
+    /// Whether *this app* opened a session and still holds it.
+    ///
+    /// Read off the **keychain**, not off the cookie jar, because the jar is not a record of who
+    /// is signed in. inventaire.io sits behind a global `cookie-session` middleware that hands
+    /// an *anonymous* session to anyone who asks it a public question — under the same two
+    /// names, on `/`, with six months of expiry. Verified against production:
+    /// `GET /api/items/recent-public`, which the welcome screen's cover wall calls before
+    /// anybody has signed in, answers `200` and sets both cookies.
+    ///
+    /// So the launch after a sign-out used to read the wall's own cookie back and open on the
+    /// tabs: every call 401s, `refreshUserData` returns on the first failure, and the
+    /// "Synchronisation de vos données…" placeholder spins for ever while the profile screen
+    /// says nobody is signed in. The keychain cannot be forged that way — it is written on a
+    /// successful `login` / `signUp`, deleted on `logout`, and nothing else touches it.
+    ///
+    /// The two availability checks and the reset call keep their `httpShouldHandleCookies =
+    /// false`, and public calls made elsewhere in the app now go through
+    /// `URLSession.cookieless`: not believing the jar is no reason to keep filling it.
     func isLoggedIn() -> Bool {
-        hasValidSessionCookies()
+        isValid(persistedSessionCookies())
     }
 
     /// Opens a session for these credentials and persists it, or throws an `AuthFailure`.
@@ -328,11 +352,19 @@ final class AuthService {
         }
     }
 
-    /// Signed in as long as one unexpired session cookie is held. Some session cookies carry no
-    /// expiry at all, which is not the same thing as being expired.
+    /// Whether the jar holds a session cookie worth keeping. Read right after a login or a
+    /// sign-up, to tell a response that carried a session from one that did not — never to
+    /// decide whether the *user* is signed in, which is `isLoggedIn()`'s job and the keychain's
+    /// answer.
     private func hasValidSessionCookies() -> Bool {
+        isValid(sessionCookies())
+    }
+
+    /// A session is held as long as one of these cookies is unexpired. Some session cookies
+    /// carry no expiry at all, which is not the same thing as being expired.
+    private func isValid(_ cookies: [HTTPCookie]) -> Bool {
         let now: Date = .init()
-        return sessionCookies().contains { cookie in
+        return cookies.contains { cookie in
             cookie.expiresDate.map { $0 > now } ?? true
         }
     }
@@ -358,8 +390,10 @@ final class AuthService {
         guard status == errSecSuccess else { throw .keychain(status: status) }
     }
 
-    private func restoreCookiesFromKeychain() {
-        guard let data = Keychain.load(key: cfg.keychainKey) else { return }
+    /// The session this app persisted, if any — the one place a session it opened deliberately
+    /// is written, and therefore the answer to `isLoggedIn()`.
+    private func persistedSessionCookies() -> [HTTPCookie] {
+        guard let data = Keychain.load(key: cfg.keychainKey) else { return [] }
         do {
             let unarchiver: NSKeyedUnarchiver = try .init(forReadingFrom: data)
             unarchiver.requiresSecureCoding = true
@@ -370,13 +404,21 @@ final class AuthService {
                 of: [NSArray.self, HTTPCookie.self],
                 forKey: NSKeyedArchiveRootObjectKey
             ) as? [HTTPCookie]
-            for cookie in cookies ?? [] {
-                cookieStorage.setCookie(cookie)
-            }
+
+            // Filtered on the way out as well as on the way in: an entry written by an older
+            // build under a wider rule must not widen what counts as a session today.
+            return (cookies ?? []).filter { cfg.sessionCookieNames.contains($0.name) }
         } catch {
             // An entry we cannot read is an entry we will never read: drop it rather than
             // fail the same way at every launch.
             deleteCookiesFromKeychain()
+            return []
+        }
+    }
+
+    private func restoreCookiesFromKeychain() {
+        for cookie in persistedSessionCookies() {
+            cookieStorage.setCookie(cookie)
         }
     }
 

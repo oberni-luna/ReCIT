@@ -8,25 +8,25 @@
 //  before signing in there is no user id to key on. Being signed out *is* the state that needs
 //  the pitch.
 //
-//  The stack never grows past one level, and that is enforced here rather than trusted: both
-//  entry points **assign** the path instead of appending to it, so `accueil → connexion →
-//  création → connexion → …` cannot be built. It matters most from the sign-in screen, where
-//  "Créer un compte" is a change of mind and not a step forward.
+//  The stack never grows past one level, and that is enforced here rather than trusted: every
+//  entry point **assigns** the path instead of appending to it, so `accueil → connexion →
+//  création → connexion → …` cannot be built. The sign-in screen no longer offers « Créer un
+//  compte » at all — both doors are on the welcome screen — so there are two destinations left,
+//  and they are siblings rather than steps.
 //
-//  The reset pair (issue 0058) follows the same rule: « Mot de passe oublié ? » replaces the
-//  stack, and so does its confirmation. Which is why that confirmation carries an explicit
-//  « Retour à la connexion » — the chevron behind it leads to the welcome screen, and a
-//  confirmation whose only exit is backwards is a dead end with a link in it.
+//  Asking for a reset link is **not** one of them (issue 0059). It used to be a pair of pushed
+//  screens, the form and its confirmation; it is now a sheet owned by « Se connecter » and a
+//  snackbar, so nothing about it reaches this file. That is the point of the change: an errand
+//  that hands the screen back is not a place the user navigated to.
 //
-//  The stack also **pins the appearance to dark while the welcome screen is its root**
-//  (PRD 0011). The welcome screen is a wall of book covers under a green veil, so it is dark in
-//  both system appearances — and the status bar's glyphs only turn white if the scene asks for
-//  a dark appearance, which is a scene-level preference and cannot be scoped to one view.
-//  Keyed on the path being empty rather than declared inside `WelcomeView`, because that view
-//  stays in the hierarchy once a form is pushed: declared there, the pin would follow the
-//  sign-in screen and drag a light-mode user's password field into the dark with it.
+//  The stack **pins the appearance to dark** (PRD 0011). Every screen it can show is green — the
+//  welcome wall under its veil, and the two account forms standing on that same green — so the
+//  pin no longer needs to ask which one is on screen. It stays a stack-level statement because
+//  the status bar's glyphs only turn white if the *scene* asks for a dark appearance, which
+//  cannot be scoped to one view. The reset sheet is presented outside this stack and states it
+//  again for itself.
 //
-//  See PRD 0010, PRD 0011, and issues 0056 and 0058.
+//  See PRD 0010, PRD 0011, and issues 0056, 0058 and 0059.
 //
 
 import SwiftUI
@@ -51,33 +51,17 @@ struct AuthFlowView: View {
                 view(for: destination)
             }
         }
-        .preferredColorScheme(path.isEmpty ? .dark : nil)
+        .preferredColorScheme(.dark)
     }
 
     @ViewBuilder
     private func view(for destination: AuthDestination) -> some View {
         switch destination {
         case .signIn:
-            LoginView(
-                authModel: authModel,
-                onCreateAccount: { path = [.createAccount] },
-                onForgotPassword: { path = [.forgotPassword] }
-            )
+            LoginView(authModel: authModel)
 
         case .createAccount:
             CreateAccountView(authModel: authModel)
-
-        case .forgotPassword:
-            ForgotPasswordView(
-                authModel: authModel,
-                onSubmitted: { address in path = [.passwordResetSent(address: address)] }
-            )
-
-        case .passwordResetSent(let address):
-            PasswordResetSentView(
-                address: address,
-                onBackToSignIn: { path = [.signIn] }
-            )
         }
     }
 }

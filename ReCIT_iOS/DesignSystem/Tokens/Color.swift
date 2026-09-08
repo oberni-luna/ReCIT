@@ -42,10 +42,14 @@ public extension DesignSystem {
                 .init(light:.init("color/gray/900"), dark:.init("color/gray/50"))
             case .foregroundInverse:
                 .init(light:.init("color/gray/50"), dark:.init("color/gray/900"))
+            // Five tokens are veils, not colours: they are stated as an alpha over black or
+            // white so they take the tint of whatever sits behind them. They have no colorset —
+            // in Figma they alias the `color/white-0x` / `color/black-0x` primitives, which have
+            // no counterpart in Assets.xcassets either.
             case .foregroundDisable:
-                .init(light:.init("color/gray/400"), dark:.init("color/gray/600"))
+                .init(light:.init("color/gray/400"), dark: .white.opacity(0.5))
             case .foregroundSecondary:
-                .init(light:.init("color/gray/600"), dark:.init("color/gray/400"))
+                .init(light: .black.opacity(0.5), dark: .white.opacity(0.6))
             case .foregroundTinted, .borderTinted:
                 .init(light:.init("color/green/700"), dark:.init("color/green/200"))
             case .foregroundTintedInverse:
@@ -53,13 +57,13 @@ public extension DesignSystem {
             case .foregroundError, .borderError:
                 .init(light:.init("color/red/800"), dark:.init("color/red/400"))
             case .foregroundPlaceholder:
-                .init(light:.init("color/gray/400"), dark:.init("color/gray/600"))
+                .init(light: .black.opacity(0.4), dark: .white.opacity(0.3))
             case .backgroundDefault:
                 .init(light:.init("color/gray/0"), dark:.init("color/gray/1000"))
             case .backgroundInverse:
                     .init(light:.init("color/gray/900"), dark:.init("color/gray/200"))
             case .backgroundDisable:
-                    .init(light:.init("color/gray/200"), dark:.init("color/gray/400"))
+                    .init(light:.init("color/gray/200"), dark: .white.opacity(0.1))
             case .backgroundSecondary:
                     .init(light:.init("color/gray/50"), dark:.init("color/gray/800"))
             case .backgroundTinted:
@@ -69,12 +73,12 @@ public extension DesignSystem {
             case .backgroundError:
                     .init(light:.init("color/red/100"), dark:.init("color/gray/700"))
 
-            // The one token that is not a named asset. A border is a *veil over whatever is
-            // behind it*, not a colour of its own: on white, on the sorting panel's
-            // half-opaque wash, and on a shelf's watercolour it has to read as the same
-            // hairline. A solid grey does that on exactly one backdrop — `gray/200` is
-            // slightly green (it carries the brand tint into the greys) and on anything but
-            // pure white it read as a drawn line rather than an edge.
+            // Like the four veils above, a border is a *veil over whatever is behind it*, not a
+            // colour of its own: on white, on the sorting panel's half-opaque wash, and on a
+            // shelf's watercolour it has to read as the same hairline. A solid grey does that on
+            // exactly one backdrop — `gray/200` is slightly green (it carries the brand tint into
+            // the greys) and on anything but pure white it read as a drawn line rather than an
+            // edge.
             case .borderDefault:
                     .init(light: .black.opacity(0.1), dark: .white.opacity(0.1))
             }

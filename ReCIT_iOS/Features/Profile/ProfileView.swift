@@ -145,16 +145,7 @@ struct ProfileView: View {
 
             Section {
                 AsyncButton(
-                    action: {
-                        await authModel.logout()
-                        await Task.yield()
-                        do {
-                            try transactionModel.deleteLocalTransactions(modelContext: modelContext)
-                            try userModel.logout(modelContext: modelContext)
-                        } catch {
-                            snackBar.show { SnackBarView.error(error) }
-                        }
-                    },
+                    action: { await signOut() },
                     actionOptions: [.showProgressView],
                     label: {
                         Text("profile.logout")
@@ -175,8 +166,53 @@ struct ProfileView: View {
         .applyListBackground()
     }
 
+    /// What this tab shows when there is no user to show: the statement, and a way out of it.
+    ///
+    /// Reachable in two ways, and the button answers both. Signed out, it is what the screen
+    /// says while `RootView` is about to replace the whole tab view with the authentication
+    /// flow. Signed in but with no user — a session the server has stopped honouring — it is the
+    /// only screen that tells the truth, and before issue 0068 it was also a dead end: the tabs
+    /// stayed up, every call failed, and the placeholders spun for ever with nothing to tap.
     @ViewBuilder
     var anonymousView: some View {
-        Text("profile.anonymous")
+        VStack(spacing: .medium) {
+            Text("profile.anonymous")
+                .textStyle(.content300)
+                .foregroundStyle(.foregroundSecondary)
+                .multilineTextAlignment(.center)
+
+            // Signing out *is* the way to the sign-in flow: `RootView` shows the authentication
+            // flow exactly when `isAuthenticated` is false, so what this button has to do is
+            // drop the session the app is holding — which is also the stale one that got the
+            // user here. Same action as the row above, on purpose.
+            AsyncButton(
+                action: { await signOut() },
+                actionOptions: [.showProgressView],
+                label: {
+                    Text("login.button.signin")
+                }
+            )
+            .buttonStyle(.primary())
+            .accessibilityIdentifier("e2e.profile.signin")
+        }
+        .padding(.all, .large)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .applyListBackground()
+    }
+
+    /// Drops the session and everything local that belonged to it.
+    ///
+    /// One method for the two buttons that need it: the sign-out row, and the sign-in button on
+    /// `anonymousView` — which reaches the login flow *through* a sign-out, since a session the
+    /// server no longer honours has to go before a new one can be opened.
+    private func signOut() async {
+        await authModel.logout()
+        await Task.yield()
+        do {
+            try transactionModel.deleteLocalTransactions(modelContext: modelContext)
+            try userModel.logout(modelContext: modelContext)
+        } catch {
+            snackBar.show { SnackBarView.error(error) }
+        }
     }
 }

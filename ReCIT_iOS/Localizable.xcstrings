@@ -3365,6 +3365,23 @@
         }
       }
     },
+    "shelves.action.scan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanner"
+          }
+        }
+      }
+    },
     "shelves.action.sort" : {
       "extractionState" : "manual",
       "localizations" : {

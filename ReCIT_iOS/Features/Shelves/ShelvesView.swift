@@ -33,19 +33,24 @@ struct ShelvesView: View {
                 destination.viewForDestination($path)
             }
             .navigationTitle("nav.inventory")
-            // The way into the sorting surface (PRD 0008). In the navigation bar
-            // rather than in a section header: it is about the whole collection, not
-            // about the étagères band or the books band, and the two headers already
-            // carry actions of their own. Shown only once there is a synced
-            // inventory behind it — sorting an empty library sorts nothing.
+            // The two ways out of the inventory (PRD 0008). In the navigation bar rather
+            // than in a section header: both are about the whole collection, not about the
+            // étagères band or the books band, and the two headers already carry actions of
+            // their own. "Ranger" waits for a synced inventory behind it — sorting an empty
+            // library sorts nothing — while "Scanner" is how the library stops being empty,
+            // so it is always there.
             .toolbar {
-                if userModel.myUser?.lastInventorySync != nil {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button("shelves.action.sort", systemImage: "arrow.up.arrow.down") {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    if userModel.myUser?.lastInventorySync != nil {
+                        Button("shelves.action.sort", systemImage: "books.vertical.fill") {
                             sortFlow.presentSorting()
                         }
                         .accessibilityIdentifier("e2e.shelves.sort")
                     }
+                    Button("shelves.action.scan", systemImage: "barcode.viewfinder") {
+                        sortFlow.presentScanning()
+                    }
+                    .accessibilityIdentifier("e2e.shelves.scan")
                 }
             }
             .searchable(text: $searchText)

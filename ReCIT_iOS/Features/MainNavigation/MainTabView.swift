@@ -52,7 +52,7 @@ struct MainTabView: View {
             case .profile:
                 "person"
             case .lists:
-                "list.bullet"
+                "list.clipboard"
             case .search:
                 "magnifyingglass"
             }

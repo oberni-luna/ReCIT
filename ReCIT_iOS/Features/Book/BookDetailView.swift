@@ -19,15 +19,12 @@ struct BookDetailView: View {
     @Environment(EntityModel.self) private var entityModel
     @Environment(InventoryModel.self) private var inventoryModel
     @Environment(UserModel.self) private var userModel
-    @Environment(ListModel.self) private var listModel
     @Environment(GenreEnrichmentModel.self) private var genreEnrichmentModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
 
     @State private var viewModel: BookViewModel
     @State private var nextEntityDestination: NavigationDestination?
-    @State private var showAddToListDialog: Bool = false
-    @State private var addToListItemForm: EntityList?
     @State private var borrowFromItem: InventoryItem?
     @State private var showDeleteConfirmation: Bool = false
 
@@ -63,25 +60,6 @@ struct BookDetailView: View {
                     myCopySection(edition: edition)
                 }
                 .applyListBackground()
-                .selectListToAdd(
-                    showAddToListDialog: $showAddToListDialog,
-                    onListSelected: { list in
-                        if edition.workUris.count > 1 {
-                            listModel.addEntitiesToList(
-                                modelContext: modelContext,
-                                list: list,
-                                entityUris: edition.workUris
-                            )
-                        } else if edition.works.first != nil {
-                            addToListItemForm = list
-                        }
-                    }
-                )
-                .sheet(item: $addToListItemForm) { list in
-                    if let work = edition.works.first {
-                        ListItemFormView(entity: work, list: list)
-                    }
-                }
                 // Keyed on the works rather than on the edition, because a cached edition can
                 // gain a work when the background refresh lands, and that new work needs asking
                 // about too.
@@ -147,50 +125,60 @@ struct BookDetailView: View {
         ToolbarItem(placement: .confirmationAction) {
             if case .loaded(let edition) = viewModel.viewState {
                 Menu {
-                    if iOwn(edition) == nil {
-                        Button("action.add_to_inventory", systemImage: "plus") {
-                            Task {
-                                await addToInventory(edition: edition)
-                            }
-                        }
-                        .accessibilityIdentifier("e2e.book.addToInventory")
-
-                        let lenders: [InventoryItem] = borrowableItems(edition)
-                        if !lenders.isEmpty {
-                            Menu("action.borrow_from", systemImage: "hand.wave") {
-                                ForEach(lenders) { item in
-                                    if let owner = item.owner {
-                                        Button(owner.username) {
-                                            borrowFromItem = item
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Button("action.add_to_list", systemImage: "list.bullet") {
-                        showAddToListDialog = true
-                    }
-                    .accessibilityIdentifier("e2e.book.addToList")
-
-                    // Étagères hold a specific copy, so filing is offered only on mine.
-                    if let myItem = iOwn(edition) {
-                        BookShelfMenu(item: myItem)
-                    }
-
-                    if iOwn(edition) != nil {
-                        Button("inventory.item.remove_from_inventory", systemImage: "trash", role: .destructive) {
-                            showDeleteConfirmation = true
-                        }
-                        .tint(.foregroundError)
-                        .accessibilityIdentifier("e2e.book.remove")
-                    }
+                    menuContent(edition: edition)
                 } label: {
                     Label("action.more", systemImage: "ellipsis")
                 }
                 .accessibilityIdentifier("e2e.book.menu")
             }
+        }
+    }
+
+    /// Two menus, one per side of the ownership line: what I can do to my own copy, and what
+    /// I can do about someone else's. Nothing here is tinted — a menu belongs to iOS, and the
+    /// framework colours the destructive role on its own.
+    @ViewBuilder
+    private func menuContent(edition: Edition) -> some View {
+        if let myItem = iOwn(edition) {
+            // Étagères hold a specific copy, so filing is offered only on mine.
+            BookShelfMenu(item: myItem)
+            listMenu(edition: edition)
+
+            Button("inventory.item.remove_from_inventory", systemImage: "trash", role: .destructive) {
+                showDeleteConfirmation = true
+            }
+            .accessibilityIdentifier("e2e.book.remove")
+        } else {
+            let lenders: [InventoryItem] = borrowableItems(edition)
+            if !lenders.isEmpty {
+                Menu("action.borrow_from", systemImage: "hand.wave") {
+                    ForEach(lenders) { item in
+                        if let owner = item.owner {
+                            Button(owner.username) {
+                                borrowFromItem = item
+                            }
+                        }
+                    }
+                }
+            }
+
+            listMenu(edition: edition)
+
+            Button("action.add_to_inventory", systemImage: "plus") {
+                Task {
+                    await addToInventory(edition: edition)
+                }
+            }
+            .accessibilityIdentifier("e2e.book.addToInventory")
+        }
+    }
+
+    /// Listes hold works, not editions. An edition standing behind several works would have to
+    /// file them all, which is not what the menu says it does, so it offers nothing there.
+    @ViewBuilder
+    private func listMenu(edition: Edition) -> some View {
+        if edition.workUris.count == 1, let workUri = edition.workUris.first {
+            EntityListMenu(entityUri: workUri, identifier: "e2e.book.addToList")
         }
     }
 

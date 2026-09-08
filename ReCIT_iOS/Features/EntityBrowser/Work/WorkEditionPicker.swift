@@ -13,12 +13,7 @@ import SwiftUI
 import SwiftData
 
 struct WorkEditionPicker: View {
-    @Environment(ListModel.self) private var listModel
-    @Environment(\.modelContext) private var modelContext
-
     @State private var nextEntityDestination: NavigationDestination?
-    @State private var showAddToListDialog: Bool = false
-    @State private var addToListItemForm: EntityList?
 
     let work: Work
     let editions: [Edition]
@@ -36,15 +31,6 @@ struct WorkEditionPicker: View {
         .toolbar {
             toolbarContent
         }
-        .selectListToAdd(
-            showAddToListDialog: $showAddToListDialog,
-            onListSelected: { list in
-                addToListItemForm = list
-            }
-        )
-        .sheet(item: $addToListItemForm) { list in
-            ListItemFormView(entity: work, list: list)
-        }
         .onChange(of: nextEntityDestination) { _, destination in
             if let destination {
                 path.append(destination)
@@ -55,15 +41,13 @@ struct WorkEditionPicker: View {
 
     @ToolbarContentBuilder
     var toolbarContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .confirmationAction) {
-            Button {
-                showAddToListDialog = true
+        ToolbarItem(placement: .confirmationAction) {
+            Menu {
+                EntityListMenu(entityUri: work.uri, identifier: "e2e.work.addToList")
             } label: {
-                Label("action.add_to_list", systemImage: "list.bullet")
+                Label("action.more", systemImage: "ellipsis")
             }
-        } label: {
-            Image(systemName: "ellipsis")
-                .imageScale(.large)
+            .accessibilityIdentifier("e2e.work.menu")
         }
     }
 

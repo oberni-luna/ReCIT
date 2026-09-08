@@ -377,8 +377,7 @@ final class E2EScenarioTests: XCTestCase {
                 let title: String = try Self.addBookToList(
                     bookIndex: index,
                     listName: listName,
-                    driver: driver,
-                    app: app
+                    driver: driver
                 )
                 return "« \(title) » ajouté à « \(listName) »"
             }
@@ -796,8 +795,7 @@ final class E2EScenarioTests: XCTestCase {
     private static func addBookToList(
         bookIndex: Int,
         listName: String,
-        driver: E2EDriver,
-        app: XCUIApplication
+        driver: E2EDriver
     ) throws -> String {
         try driver.openTab(.inventory)
         try driver.popBack(to: .inventory)
@@ -817,25 +815,20 @@ final class E2EScenarioTests: XCTestCase {
             "le menu « … » du livre",
             until: { driver.exists("e2e.book.addToList") }
         )
+        // The liste submenu is offered only behind a single work — an edition standing behind
+        // several files none of them. A KO here therefore means either a broken menu or a
+        // multi-work edition picked out of the inventory.
+        let entry: String = "e2e.book.addToList.\(listName)"
         try driver.tap(
             driver.any("e2e.book.addToList"),
-            "« Ajouter à une liste »",
-            until: { app.alerts.buttons[listName].exists }
+            "le sous-menu « Liste »",
+            until: { driver.exists(entry) }
         )
         try driver.tap(
-            app.alerts.buttons[listName],
-            "la liste « \(listName) » dans le sélecteur",
-            until: { app.alerts.buttons[listName].exists == false }
+            driver.any(entry),
+            "« Ajouter à \(listName) »",
+            until: { driver.exists(entry) == false }
         )
-
-        // An edition behind a single work opens a form for the comment; one behind several is
-        // filed straight away. Both are correct, so both are accepted.
-        let submit: XCUIElement = driver.any("e2e.listItemForm.submit")
-        if submit.waitForExistence(timeout: 8) {
-            try driver.tap(submit, "le bouton « Envoyer » du formulaire d'élément", until: {
-                driver.exists("e2e.listItemForm.submit") == false
-            })
-        }
 
         try driver.popBack(to: .inventory)
         return title.isEmpty ? "livre nº \(bookIndex + 1)" : title

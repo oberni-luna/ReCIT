@@ -50,39 +50,8 @@
         }
       }
     },
-    "action.add_to_list" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to a list"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter à une liste"
-          }
-        }
-      }
-    },
-    "action.add_to_shelf" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to a shelf"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter à une étagère"
-          }
-        }
-      }
-    },
-    "action.add_to_shelf_named %@" : {
+    "action.add_to_named %@" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -211,6 +180,23 @@
         }
       }
     },
+    "action.list" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste"
+          }
+        }
+      }
+    },
     "action.more" : {
       "localizations" : {
         "en" : {
@@ -260,18 +246,19 @@
         }
       }
     },
-    "action.remove_from_shelf" : {
+    "action.remove_from_named %@" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remove from a shelf"
+            "value" : "Remove from %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Retirer d’une étagère"
+            "value" : "Retirer de %@"
           }
         }
       }
@@ -355,6 +342,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Envoyer une demande"
+          }
+        }
+      }
+    },
+    "action.shelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étagère"
           }
         }
       }
@@ -1176,23 +1180,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Type"
-          }
-        }
-      }
-    },
-    "list.item.comment" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comment"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Commentaire"
           }
         }
       }
@@ -3295,38 +3282,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas de résultat "
-          }
-        }
-      }
-    },
-    "select_list.message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select the list you want to add this item to."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sélectionnez la liste à laquelle vous voulez ajouter cet élément."
-          }
-        }
-      }
-    },
-    "select_list.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick list"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir une liste"
           }
         }
       }

@@ -43,7 +43,9 @@ struct WorkEditionPicker: View {
     var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
             Menu {
+                // Glyphs in the label colour rather than the app's green — see BookDetailView.
                 EntityListMenu(entityUri: work.uri, identifier: "e2e.work.addToList")
+                    .tint(.foregroundDefault)
             } label: {
                 Label("action.more", systemImage: "ellipsis")
             }

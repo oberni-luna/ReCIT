@@ -125,7 +125,11 @@ struct BookDetailView: View {
         ToolbarItem(placement: .confirmationAction) {
             if case .loaded(let edition) = viewModel.viewState {
                 Menu {
+                    // Glyphs in the label colour rather than the app's green, and titles
+                    // already are: the framework's own menus read that way, and an accent on
+                    // the icons alone made every line look like a link. See `foregroundDefault`.
                     menuContent(edition: edition)
+                        .tint(.foregroundDefault)
                 } label: {
                     Label("action.more", systemImage: "ellipsis")
                 }
@@ -135,8 +139,9 @@ struct BookDetailView: View {
     }
 
     /// Two menus, one per side of the ownership line: what I can do to my own copy, and what
-    /// I can do about someone else's. Nothing here is tinted — a menu belongs to iOS, and the
-    /// framework colours the destructive role on its own.
+    /// I can do about someone else's. Nothing carries a colour of its own: a red « Supprimer »
+    /// among five black lines shouted, and the confirmation behind it is what actually guards
+    /// the deletion.
     @ViewBuilder
     private func menuContent(edition: Edition) -> some View {
         if let myItem = iOwn(edition) {
@@ -144,7 +149,7 @@ struct BookDetailView: View {
             BookShelfMenu(item: myItem)
             listMenu(edition: edition)
 
-            Button("inventory.item.remove_from_inventory", systemImage: "trash", role: .destructive) {
+            Button("inventory.item.remove_from_inventory", systemImage: "trash") {
                 showDeleteConfirmation = true
             }
             .accessibilityIdentifier("e2e.book.remove")

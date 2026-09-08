@@ -7,8 +7,8 @@
 //  submenu rather than two complementary ones, so the whole set is visible at once and the
 //  line itself says which way it goes.
 //
-//  Nothing is tinted here: a menu belongs to iOS, and the framework already colours a
-//  destructive role red on its own.
+//  Colours are the caller's: the menus that carry this set their contents to the label
+//  colour, so glyphs and titles read alike the way the framework's own menus do.
 //
 
 import SwiftUI
@@ -37,8 +37,8 @@ struct MembershipMenu: View {
     @ViewBuilder
     private func entryButton(_ entry: MembershipMenuEntry) -> some View {
         if entry.isMember {
-            // Not destructive and not red: nothing is deleted, the entity stays in the
-            // inventory and in every other container.
+            // Nothing is deleted: the entity stays in the inventory and in every other
+            // container. The icon says "off the shelf", not "trash".
             Button("action.remove_from_named \(entry.name)", systemImage: "minus.circle") {
                 toggle(entry)
             }

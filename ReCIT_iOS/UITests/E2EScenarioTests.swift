@@ -2,9 +2,10 @@
 //  E2EScenarioTests.swift
 //  ReCIT_iOSUITests
 //
-//  The whole app, once through, on a simulator, against the real inventaire.io: sign in, scan
-//  two books, find three more by hand, make two étagères and fill them by dragging, make a list
-//  and put two works in it, then take every one of those things back out again and sign out.
+//  The whole app, once through, on a simulator, against the real inventaire.io: sign in, quit
+//  and reopen still signed in, scan two books, find three more by hand, make two étagères and
+//  fill them by dragging, make a list and put two works in it, then take every one of those
+//  things back out again and sign out.
 //
 //  **It is a scenario, not an assertion suite.** Nothing here calls `XCTFail`: every step files
 //  a line in `E2EReport` — what it did, on what, a screenshot, and OK or KO with the reason —
@@ -104,35 +105,51 @@ final class E2EScenarioTests: XCTestCase {
         // MARK: 2. Sign in
 
         driver.step("Connexion") {
-            try driver.tap("e2e.welcome.signIn", "le bouton « Se connecter » de l'accueil")
-
-            let usernameField: XCUIElement = app.textFields.firstMatch
-            try driver.type(username, into: usernameField, "le champ identifiant")
-
-            let passwordField: XCUIElement = app.secureTextFields.firstMatch
-            try driver.type(password, into: passwordField, "le champ mot de passe")
-
-            try driver.tap("e2e.login.submit", "le bouton « Se connecter »")
-
-            guard driver.holds(
-                { app.tabBars.firstMatch.exists },
-                within: E2EDriver.syncTimeout
-            ) else {
-                // The screen says why under the two fields — a refused password, an unreachable
-                // server, inventaire.io rate-limiting the sign-ins of a machine that has run
-                // this scenario three times in ten minutes. Carrying that sentence into the
-                // report is the difference between a KO somebody can act on and one they cannot.
-                let stated: String = driver.any("e2e.login.failure").label
-                throw E2EFailure(
-                    stated.isEmpty
-                        ? "La session ne s'est pas ouverte au bout de 90 s, sans message à l'écran."
-                        : "Connexion refusée. L'écran indique : « \(stated) »"
-                )
-            }
-            return "Connecté en tant que \(username)"
+            try Self.signIn(driver: driver, app: app, username: username, password: password)
         }
 
-        // MARK: 3. The first-launch cover, answered by scanning
+        // MARK: 3. Restart, still signed in
+
+        // The one step that is about nothing on screen: the app is quit and opened again, and
+        // the session has to still be there. It is here rather than at the end because it is
+        // the shape of the launch every other step assumes, and because it broke — issue 0069:
+        // reading the keychain and only the keychain made every install that had signed in
+        // under an earlier build ask for the password at every single launch, and the session
+        // was in the cookie jar the whole time.
+        //
+        // Not critical, and it repairs what it reports: a run whose session does not survive
+        // signs in again so the twenty-three steps after it are still played. One KO line, and
+        // the rest of the compte-rendu intact.
+        driver.step("Redémarrage de l'application", critical: false) {
+            driver.restartKeepingSession()
+
+            // Either is proof of a live session, and which one shows depends on whether the
+            // first-launch cover has been answered — the step that answers it is the next one.
+            // What must *not* show is the welcome screen.
+            guard driver.holds(
+                {
+                    app.tabBars.firstMatch.exists || driver.exists("e2e.onboarding.primary")
+                },
+                within: E2EDriver.syncTimeout
+            ) else {
+                let onWelcome: Bool = driver.exists("e2e.welcome.signIn")
+                let stated: String = onWelcome
+                    ? "L'application redemande la connexion après un redémarrage : "
+                        + "la session n'a pas survécu."
+                    : "Ni les onglets ni l'accueil premier lancement au bout de 90 s "
+                        + "après le redémarrage."
+
+                if onWelcome {
+                    // Signed in again, so the journey carries on. The KO above is the finding;
+                    // stopping here would only hide the twenty-three steps behind it.
+                    _ = try? Self.signIn(driver: driver, app: app, username: username, password: password)
+                }
+                throw E2EFailure(stated)
+            }
+            return "Session retrouvée après redémarrage, sans ressaisie"
+        }
+
+        // MARK: 4. The first-launch cover, answered by scanning
 
         driver.step("Accueil premier lancement", critical: false) {
             let primary: XCUIElement = driver.any("e2e.onboarding.primary")
@@ -150,7 +167,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Accueil affiché, répondu par « Scanner mes livres »"
         }
 
-        // MARK: 4. The scanner
+        // MARK: 5. The scanner
 
         driver.step("Ouverture du scanner") {
             if scannerWasOpenedFromWelcome,
@@ -175,7 +192,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Session de scan ouverte depuis la section debug (pas d'accueil)"
         }
 
-        // MARK: 5–6. Scan the two books
+        // MARK: 6–7. Scan the two books
 
         for (offset, isbn) in Self.scannedIsbns.enumerated() {
             driver.step("Scan du livre \(offset + 1)", critical: false) {
@@ -185,7 +202,7 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 7. End the scanning session
+        // MARK: 8. End the scanning session
 
         driver.step("Fin de la session de scan") {
             // The condition is what the session *ends on*, never the row it has already
@@ -220,7 +237,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Session close sans bilan"
         }
 
-        // MARK: 8–10. Three books found by hand
+        // MARK: 9–11. Three books found by hand
 
         for (offset, search) in Self.searches.enumerated() {
             driver.step("Recherche \(offset + 1) — \(search.kind) : « \(search.query) »", critical: false) {
@@ -234,7 +251,7 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 11. The sorting surface
+        // MARK: 12. The sorting surface
 
         driver.step("Ouverture de l'écran de tri") {
             try driver.openTab(.inventory)
@@ -251,7 +268,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Surface de tri ouverte, \(driver.all("e2e.sortBook").count) livre(s) à ranger"
         }
 
-        // MARK: 12–13. Two étagères
+        // MARK: 13–14. Two étagères
 
         for name in [firstShelfName, secondShelfName] {
             driver.step("Création de l'étagère « \(name) »", critical: false) {
@@ -277,7 +294,7 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 14–15. Two books dragged onto them
+        // MARK: 15–16. Two books dragged onto them
 
         for (offset, name) in [firstShelfName, secondShelfName].enumerated() {
             driver.step("Glisser-déposer d'un livre sur « \(name) »", critical: false) {
@@ -313,7 +330,7 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 16. Apply
+        // MARK: 17. Apply
 
         driver.step("Application du rangement", critical: false) {
             let apply: XCUIElement = try driver.waitForIdentifier(
@@ -334,7 +351,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Rangement écrit sur inventaire.io — \(landed.label)"
         }
 
-        // MARK: 17. Leave the flow
+        // MARK: 18. Leave the flow
 
         driver.step("Fermeture de l'écran de tri", critical: false) {
             try driver.tap(
@@ -345,7 +362,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Retour à l'inventaire"
         }
 
-        // MARK: 18. A list
+        // MARK: 19. A list
 
         driver.step("Création de la liste « \(listName) »", critical: false) {
             try driver.openTab(.lists)
@@ -370,7 +387,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Liste « \(listName) » créée (type : œuvres)"
         }
 
-        // MARK: 19–20. Two works into it
+        // MARK: 20–21. Two works into it
 
         for index in 0..<2 {
             driver.step("Ajout de l'œuvre \(index + 1) à la liste", critical: false) {
@@ -383,7 +400,7 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 21. What the list holds
+        // MARK: 22. What the list holds
 
         driver.step("Vérification du contenu de la liste", critical: false) {
             try driver.openTab(.lists)
@@ -400,7 +417,7 @@ final class E2EScenarioTests: XCTestCase {
             return "\(driver.all("e2e.listItemRow").count) œuvre(s) présentes dans « \(listName) »"
         }
 
-        // MARK: 22. Delete the list
+        // MARK: 23. Delete the list
 
         driver.step("Suppression de la liste", critical: false) {
             if driver.exists("e2e.listItemRow") == false {
@@ -426,7 +443,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Liste « \(listName) » supprimée"
         }
 
-        // MARK: 23–24. Delete the shelves
+        // MARK: 24–25. Delete the shelves
 
         // Alphabetically, which is the order the carousel puts them in: the first card is the
         // only one fully on screen, and deleting it promotes the next one into its place. Taking
@@ -469,7 +486,7 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 25. Delete the books
+        // MARK: 26. Delete the books
 
         driver.step("Suppression des livres de l'inventaire", critical: false) {
             try driver.openTab(.inventory)
@@ -541,7 +558,7 @@ final class E2EScenarioTests: XCTestCase {
             return "\(removed.count) livre(s) supprimé(s) : \(removed.joined(separator: ", "))"
         }
 
-        // MARK: 26. Sign out
+        // MARK: 27. Sign out
 
         driver.step("Déconnexion", critical: false) {
             try driver.openTab(.settings)
@@ -593,6 +610,46 @@ final class E2EScenarioTests: XCTestCase {
     }
 
     // MARK: - Composite moves
+
+    /// The welcome screen through to the tabs: the two fields, the button, and the wait for a
+    /// session. Returns the step's detail.
+    ///
+    /// Factored out because the restart step needs it too — a session that did not survive is
+    /// reported and then repaired, so the rest of the journey is still played.
+    @MainActor
+    private static func signIn(
+        driver: E2EDriver,
+        app: XCUIApplication,
+        username: String,
+        password: String
+    ) throws -> String {
+        try driver.tap("e2e.welcome.signIn", "le bouton « Se connecter » de l'accueil")
+
+        let usernameField: XCUIElement = app.textFields.firstMatch
+        try driver.type(username, into: usernameField, "le champ identifiant")
+
+        let passwordField: XCUIElement = app.secureTextFields.firstMatch
+        try driver.type(password, into: passwordField, "le champ mot de passe")
+
+        try driver.tap("e2e.login.submit", "le bouton « Se connecter »")
+
+        guard driver.holds(
+            { app.tabBars.firstMatch.exists },
+            within: E2EDriver.syncTimeout
+        ) else {
+            // The screen says why under the two fields — a refused password, an unreachable
+            // server, inventaire.io rate-limiting the sign-ins of a machine that has run
+            // this scenario three times in ten minutes. Carrying that sentence into the
+            // report is the difference between a KO somebody can act on and one they cannot.
+            let stated: String = driver.any("e2e.login.failure").label
+            throw E2EFailure(
+                stated.isEmpty
+                    ? "La session ne s'est pas ouverte au bout de 90 s, sans message à l'écran."
+                    : "Connexion refusée. L'écran indique : « \(stated) »"
+            )
+        }
+        return "Connecté en tant que \(username)"
+    }
 
     /// One book through the scanner: tap the placard, wait for the row to resolve, file it, wait
     /// for the row to clear. Returns the title the row showed, which is what the report names.

@@ -19,14 +19,20 @@ step acted on in the app's own words (the book that was added, the shelf that wa
 The journey, in order:
 
 1. sign in as the test account;
-2. scan two books through the batch scanner — the two barcodes the feature was written from,
+2. **quit the app and open it again — still signed in.** The one step that looks at nothing: it
+   restarts without the `-uitest-reset` wipe, so what the app remembers about the session is
+   what it would remember on a phone, and either the tabs or the first-launch cover has to come
+   back. The welcome screen coming back is the KO. It is not critical and it repairs what it
+   reports — a session that did not survive is opened again so the twenty-three steps behind it
+   are still played (issue 0069);
+3. scan two books through the batch scanner — the two barcodes the feature was written from,
    « Lucioles » (`9782370493002`) and « Penss et les plis du monde » (`9782413013518`);
-3. find three more by hand: a French author (Victor Hugo), an English one (Virginia Woolf), and a
+4. find three more by hand: a French author (Victor Hugo), an English one (Virginia Woolf), and a
    title looked up directly (Le Petit Prince), adding a copy of each to the inventory;
-4. open « Ranger mes livres », create two étagères, drag a book onto each, apply;
-5. create a list and put two works in it;
-6. delete all of it — the list, the two étagères, every book;
-7. sign out.
+5. open « Ranger mes livres », create two étagères, drag a book onto each, apply;
+6. create a list and put two works in it;
+7. delete all of it — the list, the two étagères, every book;
+8. sign out.
 
 Every name the run creates carries a timestamp (`E2E Romans 0829-141207`), so a run that failed
 halfway and left an étagère behind cannot block the next one.
@@ -63,7 +69,7 @@ and a search that has to back out of a work with no edition spends a minute doin
 
 - `E2EScenarioTests` — the scenario itself, one `step` per line of the report.
 - `E2EDriver` — the vocabulary it is written in: `step`, `waitFor`, `waitUntil`, `tap`, `type`,
-  `drag`, `openTab`, `popBack`. **Nothing calls `XCTFail`**: a step that throws is recorded KO
+  `drag`, `openTab`, `popBack`, `restartKeepingSession`. **Nothing calls `XCTFail`**: a step that throws is recorded KO
   with its reason and the run carries on, because the deliverable is a compte-rendu of the whole
   journey and not a stop at the first surprise. `step(critical:)` marks the failures that make
   what follows meaningless — no session, no scanner — after which the remaining steps are

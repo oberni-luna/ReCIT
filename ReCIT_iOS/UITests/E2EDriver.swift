@@ -124,10 +124,23 @@ final class E2EDriver {
     /// the keychain, so relaunching this way lands where the crash happened rather than on the
     /// welcome screen, and the steps that were still to come can be attempted for real.
     private func relaunchAfterCrash() {
+        restartKeepingSession()
+        holds({ self.app.tabBars.firstMatch.exists }, within: E2EDriver.syncTimeout)
+    }
+
+    /// Quits the app and opens it again, the way the user does — and **without** the signed-out
+    /// wipe, so what the app remembers about being signed in is exactly what it would remember
+    /// on a phone.
+    ///
+    /// Dropping `-uitest-reset` is the whole point: it is the argument that empties the
+    /// keychain, the jar and the store to guarantee the scenario's first step a welcome screen
+    /// (see `UITestHooks`). A restart that kept it would prove nothing about staying signed in.
+    /// It is dropped for the rest of the run, which is what the crash recovery already wanted.
+    func restartKeepingSession() {
         app.launchArguments.removeAll { $0 == UITestHooksArguments.reset }
+        app.terminate()
         app.launch()
         _ = app.wait(for: .runningForeground, timeout: E2EDriver.defaultTimeout)
-        holds({ self.app.tabBars.firstMatch.exists }, within: E2EDriver.syncTimeout)
     }
 
     /// The screen as it stands, for the report and for the `.xcresult`.

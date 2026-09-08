@@ -48,6 +48,18 @@ struct AuthServiceTests {
         "\(sessionCookieName)=abc; Path=/; Domain=inventaire.io",
         "\(signatureCookieName)=def; Path=/; Domain=inventaire.io"
     ]
+    /// The same pair, with the values production actually serialises: a payload naming a user,
+    /// and its signature. `SessionCookieTests` decodes both; here they are what tells a session
+    /// the app was given by signing in from one the server handed out for free.
+    private static let userSessionSetCookies: [String] = [
+        "\(sessionCookieName)=\(SessionCookieTests.userSession); Path=/; Domain=inventaire.io",
+        "\(signatureCookieName)=cuCMaGQD6PYluiHJ7c-oZdxJG39Xgf1twwkbtjFOIrE; Path=/; Domain=inventaire.io"
+    ]
+    /// And the free one, which no amount of it in the jar may add up to a signed-in user.
+    private static let anonymousSessionSetCookies: [String] = [
+        "\(sessionCookieName)=\(SessionCookieTests.anonymousSession); Path=/; Domain=inventaire.io",
+        "\(signatureCookieName)=Iku88GjZUOULCV58_U7mvGRGaj7SyXq6DgkxqSO8VCQ; Path=/; Domain=inventaire.io"
+    ]
 
     // MARK: - Fixtures
 
@@ -206,6 +218,64 @@ struct AuthServiceTests {
             session: session
         )
         #expect(relaunched.isLoggedIn() == false)
+    }
+
+    @Test("A session in the jar that names a user is still a session, and is adopted")
+    func aUserSessionInTheJarSurvivesAnEmptyKeychain() async throws {
+        let session: URLSession = makeSession(status: 200, setCookies: Self.sessionSetCookies)
+        let fixture: Fixture = makeFixture(session: session)
+        defer { tearDown(fixture) }
+
+        // The state every install was in when `isLoggedIn()` started reading the keychain: a
+        // real session in the jar, where iOS persists it across launches and where the app had
+        // left it, and nothing in the keychain — which only a login run by *this* build writes.
+        // Read as "signed out", it asked for the password again at every single launch, which
+        // is issue 0069.
+        #expect(Keychain.load(key: fixture.keychainKey) == nil)
+        for cookie in Self.userSessionSetCookies.compactMap(Self.parse(setCookie:)) {
+            fixture.cookieStorage.setCookie(cookie)
+        }
+
+        let config: AuthService.Config = .init(
+            baseURL: "https://inventaire.io/api",
+            sessionCookieNames: [Self.sessionCookieName, Self.signatureCookieName],
+            keychainKey: fixture.keychainKey
+        )
+        let relaunched: AuthService = .init(
+            config: config,
+            cookieStorage: fixture.cookieStorage,
+            session: session
+        )
+
+        #expect(relaunched.isLoggedIn())
+        // And adopted on the way past, so the session now survives an uninstall too — and the
+        // answer no longer depends on a jar the next sign-out will empty.
+        #expect(Keychain.load(key: fixture.keychainKey) != nil)
+    }
+
+    @Test("Adopting a session out of the jar never adopts the anonymous one")
+    func anAnonymousJarIsNeverAdopted() async throws {
+        let session: URLSession = makeSession(status: 200, setCookies: Self.sessionSetCookies)
+        let fixture: Fixture = makeFixture(session: session)
+        defer { tearDown(fixture) }
+
+        for cookie in Self.anonymousSessionSetCookies.compactMap(Self.parse(setCookie:)) {
+            fixture.cookieStorage.setCookie(cookie)
+        }
+
+        let config: AuthService.Config = .init(
+            baseURL: "https://inventaire.io/api",
+            sessionCookieNames: [Self.sessionCookieName, Self.signatureCookieName],
+            keychainKey: fixture.keychainKey
+        )
+        let relaunched: AuthService = .init(
+            config: config,
+            cookieStorage: fixture.cookieStorage,
+            session: session
+        )
+
+        #expect(relaunched.isLoggedIn() == false)
+        #expect(Keychain.load(key: fixture.keychainKey) == nil)
     }
 
     @Test("Signing out survives a jar that fills itself back up")

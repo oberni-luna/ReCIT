@@ -30,6 +30,16 @@
 //  a sign-out, the welcome screen's own cover wall was enough to put one in the jar and make
 //  the next launch open on the tabs of nobody. `isLoggedIn()` says so at more length.
 //
+//  **A cookie that names a user is a session all the same** (issue 0069). Reading the keychain
+//  and nothing else made every existing install sign in again at every launch: the session was
+//  in the jar — where iOS persists it across launches, and where the app had left it — and the
+//  keychain entry only ever gets written by a login this build ran. `SessionCookie` tells the
+//  two apart from the cookie's own payload, which is what makes trusting the jar safe again:
+//  the free anonymous session carries a timestamp and no user, and only signing in produces one
+//  that names somebody. So a launch adopts such a session into the keychain (`adoptJarSession`)
+//  and `isLoggedIn()` accepts it, and the keychain stays what it was: the copy that survives an
+//  uninstall, and the one thing a sign-out has to delete.
+//
 //  Asking for a reset link (issue 0058) is the opposite kind of call: it opens no session, it
 //  absorbs no cookie, and it reports nothing the server said. `PasswordResetOutcome` owns the
 //  reason — the endpoint answers "email not found" for an address nobody registered, and
@@ -130,6 +140,7 @@ final class AuthService {
         self.session = session
 
         restoreCookiesFromKeychain()
+        adoptJarSession()
     }
 
     // MARK: - Public API
@@ -152,8 +163,18 @@ final class AuthService {
     /// The two availability checks and the reset call keep their `httpShouldHandleCookies =
     /// false`, and public calls made elsewhere in the app now go through
     /// `URLSession.cookieless`: not believing the jar is no reason to keep filling it.
+    ///
+    /// The jar is read as a second answer, and only for a cookie that **names a user** (issue
+    /// 0069). That is not the mere presence the paragraph above refuses: `SessionCookie` reads
+    /// the payload, the free anonymous session names nobody, and only a successful login
+    /// produces one that does. Keeping this clause means the keychain is not a single point of
+    /// failure for staying signed in — a write that did not happen, on an install that signed
+    /// in under an earlier build or on a phone whose keychain refused us, costs a re-sync and
+    /// not a re-login.
     func isLoggedIn() -> Bool {
-        isValid(persistedSessionCookies())
+        if isValid(persistedSessionCookies()) { return true }
+
+        return jarHoldsAUserSession()
     }
 
     /// Opens a session for these credentials and persists it, or throws an `AuthFailure`.
@@ -375,6 +396,33 @@ final class AuthService {
     /// in after signing out.
     private func sessionCookies() -> [HTTPCookie] {
         (cookieStorage.cookies ?? []).filter { cfg.sessionCookieNames.contains($0.name) }
+    }
+
+    /// Whether the jar holds an unexpired session that **names a user** — one this app can only
+    /// have got by signing in. `SessionCookie` explains why the payload is a safe thing to read
+    /// where the name is not.
+    private func jarHoldsAUserSession() -> Bool {
+        let jar: [HTTPCookie] = sessionCookies()
+
+        return isValid(jar) && SessionCookie.namesAUser(jar.map(\.value))
+    }
+
+    /// Copies a signed-in session out of the jar and into the keychain, so the record this app
+    /// keeps of its own sessions catches up with the one iOS keeps for it.
+    ///
+    /// Run once, at build time of the service — which is app launch — right after the restore,
+    /// where it is a no-op for anyone the keychain already knows about. It is what stops issue
+    /// 0069 from needing a re-login *per launch* rather than once: the jar's session is
+    /// persisted by iOS but wiped by an uninstall, the keychain's is neither, and every install
+    /// that signed in before this file read the keychain had only the first.
+    ///
+    /// An anonymous session is never adopted, which is the whole of issue 0068 left standing.
+    private func adoptJarSession() {
+        guard jarHoldsAUserSession() else { return }
+
+        // Best effort on purpose: a keychain that refuses us is not a reason to refuse the user
+        // the session they already hold — `isLoggedIn()` reads the jar for exactly that case.
+        try? persistCookiesToKeychain()
     }
 
     private func persistCookiesToKeychain() throws(AuthFailure) {

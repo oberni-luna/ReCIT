@@ -29,6 +29,10 @@ enum ShelfPalette {
     /// that keeps the spine's contact shadow at 45% instead of normalising it.
     static let labelPaper: Color = .init("color/gray/0")
     static let labelInk: Color = .init("color/gray/900")
+    /// The same ink, softened — for a glyph beside the text rather than the text itself.
+    /// `foregroundSecondary` used to serve here and was the one thing on the paper that did
+    /// invert: white at 60% onto white paper, which is to say nothing at all in dark mode.
+    static let labelInkSecondary: Color = labelInk.opacity(0.5)
 
     /// The painted spine colour: the persisted hex pushed toward a punchier saturation
     /// so books read vivid on the shelf, with brightness clamped for legibility.

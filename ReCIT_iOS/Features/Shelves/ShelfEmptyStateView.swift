@@ -81,6 +81,7 @@ struct ShelfEmptyStateView: View {
                 ShelfLabelView(
                     text: errand.noteText,
                     maxWidth: metrics.booksWidth,
+                    kind: .note,
                     lineLimit: 2
                 )
                 .padding(.bottom, labelAbovePlank)

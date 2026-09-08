@@ -1,4 +1,22 @@
 {
-  "images" : [ { "filename" : "plank.png", "idiom" : "universal" } ],
-  "info" : { "author" : "xcode", "version" : 1 }
+  "images" : [
+    {
+      "filename" : "ChatGPT Image 8 sept. 2026, 23_57_41 (1).png",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "ChatGPT Image 8 sept. 2026, 23_57_41 (2).png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
 }

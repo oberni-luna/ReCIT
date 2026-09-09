@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "Property 1=Light.png",
+      "filename" : "icone light.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Property 1=Dark.png",
+      "filename" : "icone dark.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,6 +25,7 @@
           "value" : "tinted"
         }
       ],
+      "filename" : "icone tinted.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

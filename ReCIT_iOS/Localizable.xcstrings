@@ -1699,23 +1699,6 @@
         }
       }
     },
-    "manual_sort.proposing" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Working out an arrangement…"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche d’un rangement…"
-          }
-        }
-      }
-    },
     "manual_sort.proposal.unavailable.device" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1780,6 +1763,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proposer un rangement"
+          }
+        }
+      }
+    },
+    "manual_sort.proposing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Working out an arrangement…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche d’un rangement…"
           }
         }
       }
@@ -4419,7 +4419,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les couvertures sont celles des livres derniers partagés sur [inventaire.io](https://inventaire.io/) — la base ouverte, qui hébergera aussi votre compte et vos livres."
+            "value" : "Les couvertures sont celles des derniers livres partagés sur [inventaire.io](https://inventaire.io/) : la base ouverte, qui héberge votre compte et vos livres."
           }
         }
       }
@@ -4436,7 +4436,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scannez vos livres, gardez la trace de ceux que vous prêtez, et voyez ce que vos proches ont chez eux."
+            "value" : "Organisez vos livres et partagez-les avec vos proches."
           }
         }
       }

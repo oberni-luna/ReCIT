@@ -3156,6 +3156,22 @@
         }
       }
     },
+    "scanner.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold a book's barcode up to your camera"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approchez le code-barres d'un livre de l'appareil photo"
+          }
+        }
+      }
+    },
     "scanner.permission.denied_message" : {
       "localizations" : {
         "en" : {

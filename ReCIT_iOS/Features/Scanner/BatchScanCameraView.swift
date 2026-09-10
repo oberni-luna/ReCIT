@@ -4,7 +4,9 @@
 //
 //  The working half of a scanning session: the live feed, and the one book rising over it that
 //  is waiting to be filed. Point at a barcode, the book appears from the bottom, one tap files
-//  it, the row confirms and clears, and the camera is already waiting for the next one.
+//  it, the row confirms and clears, and the camera is already waiting for the next one. With
+//  nothing recognised, the same slot carries the sentence saying what to aim at — see
+//  `ScanHintView`.
 //
 //  A view of its own because it is the half that goes away. When a session ends having added
 //  books it hands the screen to the bilan, and the camera has to be *torn down* rather than
@@ -74,21 +76,31 @@ struct BatchScanCameraView: View {
                 )
                 .ignoresSafeArea()
 
-                if viewModel.state.showsRow {
-                    ScanResultRowView(
-                        state: viewModel.state,
-                        onOpen: onOpenBook,
-                        onAdd: addPendingBook
-                    )
-                    .background {
-                        // Without this, light text over an arbitrary camera image is
-                        // unreadable — a pale book on a pale table. It bleeds past the row
-                        // on both sides so it fades out rather than ending on an edge.
-                        ScanOverlayPalette.scrim
-                            .padding(.vertical, -DesignSystem.Spacing.xxLarge.rawValue)
-                            .allowsHitTesting(false)
+                // One slot at the bottom of the feed, and two things that can occupy it: the
+                // book that was recognised, or — when nothing has been — the sentence saying
+                // what to point the phone at. The scrim belongs to the slot rather than to
+                // either occupant, so a book arriving swaps one block for another instead of
+                // fading a veil in behind it.
+                Group {
+                    if viewModel.state.showsRow {
+                        ScanResultRowView(
+                            state: viewModel.state,
+                            onOpen: onOpenBook,
+                            onAdd: addPendingBook
+                        )
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else {
+                        ScanHintView()
+                            .transition(.opacity)
                     }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .background {
+                    // Without this, light text over an arbitrary camera image is
+                    // unreadable — a pale book on a pale table. It bleeds past the block
+                    // on both sides so it fades out rather than ending on an edge.
+                    ScanOverlayPalette.scrim
+                        .padding(.vertical, -DesignSystem.Spacing.xxLarge.rawValue)
+                        .allowsHitTesting(false)
                 }
             } else if cameraAccess.needsExplanation {
                 ScannerPermissionView(access: cameraAccess)

@@ -28,6 +28,49 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
   Les frames `A1`-`A3` et `B1`-`B2` de la section `Propositions · Chaleur` ne sont pas retenues ; `A3` reste la
   référence pour l'état « inventaire vide », qui n'est pas implémenté.
+- **Passe du 2026-09-09 (2)** — les astuces TipKit, section `Astuces · TipKit` (`314:8069`) sur la page `Screens` :
+  six écrans et un `Spec · Astuces TipKit` (`318:8580`) qui porte le scénario — quoi, où, dans quel ordre, et ce qui
+  invalide chaque astuce. Un composant nouveau, `Astuce / TipKit` (`316:8597`) sur la page `Components` : carte
+  `background/tinted-inverse`, titre `Action/action300`, texte `Content/content300`, rayon `radius/rounded`, ombre
+  `Shadow/Light`. **La pointe n'est pas dans le composant** — un nœud d'instance ne peut pas être déplacé, et une
+  pointe fixée au centre ne viserait ni un bouton de barre ni le premier livre d'un carrousel ; c'est un triangle de
+  20 × 9 posé dans l'écran, à côté de l'instance.
+
+  | Frame | Astuce | Visée |
+  |---|---|---|
+  | `314:8070` | INV-1 · Choisir un livre | les tranches de la première étagère |
+  | `314:8083` | INV-2 · Ranger mes livres | le bouton `Ranger` de la barre |
+  | `314:8096` | INV-3 · Ajouter des livres | le bouton `Scanner` |
+  | `314:8109` | SORT-1 · Glissez pour ranger | le premier livre de « Livres à ranger » |
+  | `314:8199` | SORT-2 · Rien n'est encore enregistré | « Appliquer » |
+  | `314:8247` | SORT-3 · Laissez proposer un rangement | le bouton de proposition |
+
+  Trois divergences assumées, le code faisant foi : les frames `Étagères` du fichier datent d'avant PRD 0008, donc
+  les deux actions `Ranger` et `Scanner` ont été **posées à la main** dans la barre (le composant `Chrome / Nav Bar`
+  n'en porte qu'une) ; le glyphe de `Ranger` est `Icon/book`, faute d'un `books.vertical.fill` dans le jeu ; et la
+  section est en `Light` seulement — la carte est bâtie sur des tokens, le mode sombre suit sans redessin.
+  **Rien de tout cela n'est implémenté** : aucune astuce TipKit n'existe dans le code à ce jour.
+- **Passe du 2026-09-09** — le repère du scanner, section `Scan · Repère` (`313:7880`) sur la page `Screens`.
+  Trois frames, mode `Dark` épinglé, toutes clonées de `Batch Add` (`57:2401`) — même photo de caméra, même voile,
+  même chrome :
+
+  | Frame | id | Ce qu'elle montre |
+  |---|---|---|
+  | `S0 · Existant · Livre reconnu` | `313:7881` | Le clone non modifié — l'état `.resolved`, pour comparer |
+  | `S1 · Repère · Texte sur voile` | `313:7897` | `.idle` : glyphe `barcode.viewfinder` + une phrase centrée, sur le voile nu |
+  | `S2 · Repère · Encart teinté` | `313:7913` | `.idle` : la même phrase dans un encart `background/tinted` + `radius/medium`, glyphe à gauche |
+
+  Le point de la maquette : **le repère prend la place exacte de la rangée** — il est le seul enfant de
+  `Frame Highlighted Book`, à la même origine (`y = 678`), donc l'arrivée d'un livre remplace un bloc par un autre
+  sans que rien ne se déplace. Copie : « Approchez le code-barres d'un livre de l'appareil photo », `Content/content300`,
+  `foreground/default` ; le glyphe en `foreground/tinted`.
+
+  Arbitrage à rendre : S1 est plus léger et laisse voir la scène, mais son contraste dépend de ce que filme
+  l'appareil — le voile de `ScanOverlayPalette.scrim` est faible à cette hauteur. S2 se lit sur n'importe quelle
+  image et pèse plus. **S1 est retenue et implémentée** le 2026-09-10 (`Features/Scanner/ScanHintView.swift`,
+  clé `scanner.hint`) ; S2 reste une proposition. Les trois frames portent du texte hors instance — c'était une
+  exploration, pas une passe de réplication — donc elles sont exclues de l'audit de factorisation.
+
 - **Passe du 2026-09-05 (2)** — connexion et création de compte sur le vert de l'accueil, section `Accueil &
   compte` (`222:7167`), troisième rangée : `Se connecter · Vert` (`278:2`) et `Créer un compte · Vert` (`278:12`).
   Les six frames `Light` / `Dark` / `Erreur` existantes sont conservées telles quelles. Aucun token, style ni
@@ -603,7 +646,7 @@ retoucher un seul nœud.
 | `Tokens` | `0:1` | 6 sections, 9 planches de tokens |
 | `Components` | `20:2` | Les 3 composants qui **miroitent le package** design system |
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
-| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification, puis les sections `Onboarding` (`73:2829`) et `Ranger mes livres` (`97:3755`) |
+| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification, puis les sections `Onboarding` (`73:2829`) et `Ranger mes livres` (`97:3755`), puis `Scan · Repère` (`313:7880`) |
 
 La séparation entre `Components` et `Screens · Components` est intentionnelle : `Components` ne contient que ce qui
 existe dans `DesignSystem/` côté Swift (les deux `ButtonStyle`, le `LabelStyle` de tag). Tout le reste — le chrome iOS

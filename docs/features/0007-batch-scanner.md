@@ -32,6 +32,18 @@ screen.
 - Items are created through the existing inventory write, mirroring its transaction and
   visibility defaults, and are filed onto no étagère.
 
+## Added on 2026-09-10 — the hint under an empty slot
+
+`.idle` used to be a live camera feed and nothing else: a full-screen mode with no
+instruction, whose only clue about what to point the phone at was the name of the button the
+user came through. `ScanHintView` fills that silence — the `barcode.viewfinder` glyph and one
+sentence, « Approchez le code-barres d'un livre de l'appareil photo ».
+
+It takes the **exact place** of the result row: same origin, same scrim, and the scrim now
+belongs to the slot rather than to the row, so a book being recognised swaps one block for
+another instead of fading a veil in behind it. Maquette: `S1 · Repère · Texte sur voile`
+(`313:7897`) in the Figma file, section `Scan · Repère` (`313:7880`).
+
 ## Notable decisions
 
 - **The repeat-scan gate is the feature.** The camera reports a barcode continuously while it

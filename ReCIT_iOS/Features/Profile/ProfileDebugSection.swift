@@ -16,6 +16,11 @@
 //  Release build — which also means it is absent from TestFlight, where a Release
 //  configuration is what gets archived.
 //
+//  Since PRD 0013 it also carries the astuces of « Ranger mes livres », which are just as
+//  hard to reach twice: each one ends for good at the gesture it teaches, and what it has
+//  taught is recorded per account. « Réafficher les astuces » is the recette tool of that
+//  feature, and the only one — the PRD takes no automated suite for it.
+//
 //  The rows are deliberately not translated and not styled like the rest of the screen.
 //  They should look like what they are.
 //
@@ -24,6 +29,7 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 struct ProfileDebugSection: View {
     @Binding var path: NavigationPath
@@ -31,6 +37,7 @@ struct ProfileDebugSection: View {
     @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(OnboardingStore.self) private var onboarding
     @Environment(SortFlowPresentation.self) private var sortFlow
+    @Environment(TipsStore.self) private var tipsStore
     @Environment(UserModel.self) private var userModel
 
     /// Every book the store holds, filtered in Swift rather than in the predicate:
@@ -74,6 +81,17 @@ struct ProfileDebugSection: View {
         )
     }
 
+    /// How many of the sorting surface's astuces this account has already been taught, read
+    /// from the observed store so the line changes the instant the row below empties it.
+    /// Shown for the same reason the accueil's condition is: an account that has learned
+    /// nothing has nothing to hand back, and without the count the button would look broken
+    /// every time it did nothing.
+    private var learnedTipCount: Int {
+        guard let userId: String = userModel.myUser?._id else { return 0 }
+
+        return tipsStore.learnedTips(userId: userId).count
+    }
+
     private var autoSortEntryPoint: AutoSortEntryPoint {
         .init(availability: autoSortModel.availability)
     }
@@ -105,6 +123,21 @@ struct ProfileDebugSection: View {
                 // The empty-inventory clause is stood in for rather than reproduced: the
                 // real thing would mean deleting the tester's books off inventaire.io.
                 onboarding.forcesWelcome = true
+            }
+            .foregroundStyle(.foregroundTinted)
+
+            // The astuces back, for this account only. Two records rather than one, and both
+            // have to go: `TipsStore` holds what *this user* has learned, TipKit holds what
+            // *this app* has already displayed — `resetTips` deliberately leaves the second
+            // alone (PRD 0013), so clearing it is this row's job. Another account signed in on
+            // the same phone keeps everything it learned.
+            Button("Réafficher les astuces") {
+                guard let userId: String = userModel.myUser?._id else { return }
+
+                tipsStore.resetTips(userId: userId)
+                // Swallowed like the datastore's opening at launch: a reset that will not run
+                // costs a tester one replay, and must not cost them the app.
+                try? Tips.resetDatastore()
             }
             .foregroundStyle(.foregroundTinted)
 
@@ -152,7 +185,7 @@ struct ProfileDebugSection: View {
             welcome = "l'accueil ne s'affiche pas (\(ownedBookCount) livre(s) en inventaire)"
         }
 
-        return "\(unshelvedCount) livre(s) sur aucune étagère · Apple Intelligence : \(availabilityLabel) · \(welcome)"
+        return "\(unshelvedCount) livre(s) sur aucune étagère · Apple Intelligence : \(availabilityLabel) · \(welcome) · astuces : \(learnedTipCount)/\(SortTip.allCases.count) acquise(s)"
     }
 
     private var availabilityLabel: String {

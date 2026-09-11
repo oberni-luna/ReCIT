@@ -24,6 +24,10 @@ struct EntityListMenu: View {
     /// Accessibility identifier of the submenu, so the same menu can be told apart on the
     /// screens that carry it.
     let identifier: String
+    /// Where the menu writes its demand for a liste that does not exist yet. Given by a screen
+    /// that mounts `containerCreationSheet(_:)`; `nil` on one that does not, and the menu then
+    /// offers no creation line and hides itself when empty, exactly as before.
+    var creationRequest: Binding<ContainerCreationRequest?>?
 
     @Query(sort: \EntityList.name) private var lists: [EntityList]
 
@@ -40,13 +44,22 @@ struct EntityListMenu: View {
         )
     }
 
+    /// Writing the demand is all the menu does: the form is mounted by the screen. `nil` when
+    /// the screen carries no creation sheet, which is what hides the line.
+    private var create: (() -> Void)? {
+        guard let creationRequest else { return nil }
+        return { creationRequest.wrappedValue = .list(workUri: entityUri) }
+    }
+
     var body: some View {
         MembershipMenu(
             titleKey: "action.list",
             systemImage: "list.clipboard",
             identifier: identifier,
             entries: entries,
-            toggle: toggle
+            toggle: toggle,
+            creationTitleKey: "action.add_to_new_list",
+            create: create
         )
     }
 

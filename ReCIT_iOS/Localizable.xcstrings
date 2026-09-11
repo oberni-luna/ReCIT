@@ -67,6 +67,40 @@
         }
       }
     },
+    "action.add_to_new_list" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to a new list"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à une nouvelle liste"
+          }
+        }
+      }
+    },
+    "action.add_to_new_shelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to a new shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à une nouvelle étagère"
+          }
+        }
+      }
+    },
     "action.borrow_from" : {
       "localizations" : {
         "en" : {
@@ -1054,6 +1088,329 @@
         }
       }
     },
+    "inventory.search.error.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io did not answer. Check your connection, then try again — your own books are still listed above."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io n'a pas répondu. Vérifiez votre connexion, puis réessayez — vos livres restent affichés au-dessus."
+          }
+        }
+      }
+    },
+    "inventory.search.error.retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "inventory.search.error.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The search did not go through"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La recherche n'a pas abouti"
+          }
+        }
+      }
+    },
+    "inventory.search.loading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searching inventaire.io…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche sur inventaire.io…"
+          }
+        }
+      }
+    },
+    "inventory.search.local_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In my books and my friends’"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans mes livres et chez mes amis"
+          }
+        }
+      }
+    },
+    "inventory.search.recents_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent searches"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherches récentes"
+          }
+        }
+      }
+    },
+    "inventory.search.recents.clear" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer"
+          }
+        }
+      }
+    },
+    "inventory.search.recents.empty.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your recent searches will appear here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos recherches récentes apparaîtront ici."
+          }
+        }
+      }
+    },
+    "inventory.search.recents.empty.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No recent searches"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune recherche récente"
+          }
+        }
+      }
+    },
+    "inventory.search.remote_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher sur inventaire.io"
+          }
+        }
+      }
+    },
+    "inventory.search.results.empty.message %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No book and no author matches “%@” on inventaire.io. Try another spelling, or fewer words."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun livre ni auteur·ice ne correspond à « %@ » sur inventaire.io. Essayez une autre orthographe, ou moins de mots."
+          }
+        }
+      }
+    },
+    "inventory.search.results.empty.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No result"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat"
+          }
+        }
+      }
+    },
+    "inventory.search.results.humans %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authors · %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur·ices · %lld"
+          }
+        }
+      }
+    },
+    "inventory.search.results.works %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books · %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres · %lld"
+          }
+        }
+      }
+    },
+    "inventory.search.see_all" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See all"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout voir"
+          }
+        }
+      }
+    },
+    "inventory.search.suggestion.everything %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search %@ on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher %@ sur inventaire.io"
+          }
+        }
+      }
+    },
+    "inventory.search.suggestion.humans %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authors containing %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur·ices contenant %@"
+          }
+        }
+      }
+    },
+    "inventory.search.suggestion.works %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books containing %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres contenant %@"
+          }
+        }
+      }
+    },
+    "list.added_to_named %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added to %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouté à %@"
+          }
+        }
+      }
+    },
     "list.empty" : {
       "localizations" : {
         "en" : {
@@ -1083,6 +1440,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erreur lors du chargement de la liste : %@"
+          }
+        }
+      }
+    },
+    "list.form.create_and_add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create and add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer et ajouter"
           }
         }
       }
@@ -1197,16 +1571,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chargement des éléments..."
-          }
-        }
-      }
-    },
-    "loading more results..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "je regarde plus loin…"
           }
         }
       }
@@ -1530,6 +1894,23 @@
       }
     },
     "manual_sort.footer.idle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to apply for now."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à appliquer pour le moment."
+          }
+        }
+      }
+    },
+    "manual_sort.footer.idle.no_shelf" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -2659,22 +3040,6 @@
         }
       }
     },
-    "nav.search" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche"
-          }
-        }
-      }
-    },
     "nav.settings" : {
       "localizations" : {
         "en" : {
@@ -3147,6 +3512,7 @@
       }
     },
     "Scan" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3216,88 +3582,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le scanner a besoin de l'appareil photo"
-          }
-        }
-      }
-    },
-    "search.error" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unable to fetch results."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de récupérer les résultats."
-          }
-        }
-      }
-    },
-    "search.friends_inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In your friends' inventory"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dans l'inventaire de tes amis"
-          }
-        }
-      }
-    },
-    "search.placeholder" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search for an edition"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechercher une édition"
-          }
-        }
-      }
-    },
-    "search.remote_results" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On [inventaire.io](https://inventaire.io)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Sur [inventaire.io](https://inventaire.io)"
-          }
-        }
-      }
-    },
-    "search.remote.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No search results"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas de résultat "
           }
         }
       }
@@ -3523,6 +3807,108 @@
         }
       }
     },
+    "sort.tip.drag.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick up a book here and drop it onto a shelf. The same gesture the other way takes it back off."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prenez un livre ici et déposez-le sur une étagère. Le geste inverse l'en retire."
+          }
+        }
+      }
+    },
+    "sort.tip.drag.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag to file"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glissez pour ranger"
+          }
+        }
+      }
+    },
+    "sort.tip.nothingSaved.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your shelves only change once you tap “Save this arrangement”. The line just below says what will be saved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos étagères ne changent qu’après « Appliquer le rangement ». La phrase juste en dessous dit ce qui sera enregistré."
+          }
+        }
+      }
+    },
+    "sort.tip.nothingSaved.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is saved yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n’est encore enregistré"
+          }
+        }
+      }
+    },
+    "sort.tip.propose.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone reads the titles and the genres, and fills the shelves. You correct its suggestion before anything is saved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre iPhone lit les titres et les genres, et remplit les étagères. À vous de corriger avant d’appliquer."
+          }
+        }
+      }
+    },
+    "sort.tip.propose.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let it suggest an arrangement"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laissez proposer un rangement"
+          }
+        }
+      }
+    },
     "Supprimer cette étagère ?" : {
 
     },
@@ -3606,22 +3992,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réglages"
-          }
-        }
-      }
-    },
-    "tab.search" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche"
           }
         }
       }

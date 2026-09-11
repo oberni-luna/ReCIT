@@ -42,6 +42,11 @@ struct ManualSortActionBar: View {
                 .buttonStyle(.primary())
                 .disabled(actions.hasPendingChanges == false || actions.isBusy)
                 .accessibilityIdentifier("e2e.sort.apply")
+                // The bar is the only thing that knows where this button is: it closes up
+                // around a proposal control that is absent on an ineligible device, and the
+                // round buttons grow with the body text. It says so once, here, and SORT-2's
+                // pointer is laid out on it (issue 0079).
+                .alignmentGuide(.sortApply) { $0[HorizontalAlignment.center] }
 
             ManualSortProposalButton(
                 entryPoint: actions.entryPoint,
@@ -49,6 +54,10 @@ struct ManualSortActionBar: View {
                 isApplying: actions.isApplying,
                 onPropose: actions.onPropose
             )
+            // And the same for the wand, for the same reason: where it sits depends on the
+            // width « Appliquer » took beside it, so the bar is the only thing that can say
+            // it. SORT-3's pointer is laid out on it (issue 0080).
+            .alignmentGuide(.sortProposal) { $0[HorizontalAlignment.center] }
         }
         .frame(maxWidth: .infinity)
     }

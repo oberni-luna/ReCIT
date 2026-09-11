@@ -73,11 +73,50 @@ final class SortSessionModel {
     /// guard cannot be written for the apply and forgotten for the proposal.
     var isBusy: Bool { isApplying || isProposing }
 
+    /// How many books this session has taken out of « Livres à ranger » and filed onto an
+    /// étagère. Counted for one reason: it is the gesture the surface's first astuce teaches,
+    /// and "has done it once" has to be a fact of the model rather than of a view (PRD 0013).
+    ///
+    /// **Only accepted moves count.** A drop onto the section a book already sits in records
+    /// no change, and a drop made while a run owns the stack records nothing at all — neither
+    /// taught the user anything, and a view watching for gestures rather than for changes
+    /// would count both.
+    ///
+    /// A counter rather than a flag, so it reads the same way as `proposalsLanded` and so a
+    /// future reader can tell one drop from twenty. Not persisted: what an account has
+    /// *learned* belongs to `TipsStore`, and this is only the session's account of it.
+    private(set) var booksFiledFromUnshelved: Int = 0
+
+    /// How many runs this session has started. Counted for the same reason as
+    /// `booksFiledFromUnshelved`: it is the gesture the surface's second astuce teaches —
+    /// « Appliquer » is what writes — and "has done it once" has to be a fact of the model
+    /// rather than of a view (PRD 0013).
+    ///
+    /// **Launched, not landed.** Pressing the button is what teaches what it does; whether
+    /// the run then succeeds, fails halfway or finds a stack that coalesces to nothing
+    /// changes what the screen reports, not what the user has learned. Only a press the model
+    /// *accepted* counts, so a tap on a busy screen teaches nothing.
+    ///
+    /// Not persisted: what an account has *learned* belongs to `TipsStore`, and this is only
+    /// the session's account of it.
+    private(set) var appliesLaunched: Int = 0
+
     /// How many proposals have landed on the stack. The surface watches it to play the
     /// arrival: a proposal fills several étagères at once, and without motion the screen just
     /// jumps from one library to another (PRD 0009). A counter rather than a flag, so two
     /// proposals in a row are two arrivals.
     private(set) var proposalsLanded: Int = 0
+
+    /// How many proposals this session has asked the model for. Counted for the same reason
+    /// as `booksFiledFromUnshelved` and `appliesLaunched`: asking for one is the gesture the
+    /// surface's third astuce teaches, and "has done it once" has to be a fact of the model
+    /// rather than of a view (PRD 0013).
+    ///
+    /// **Asked, not landed**, which is why this is not `proposalsLanded`: what teaches the
+    /// user what the wand does is the asking, whatever the model then finds — a run that
+    /// comes back with nothing to propose has still shown what the button is for. And only a
+    /// press the model took counts: a tap on a screen already busy returns above this line.
+    private(set) var proposalsRequested: Int = 0
 
     /// The run's ledger, or `nil` before one has been started. Kept after the run
     /// settles: it is the account of what landed, and a user who left mid-apply has to
@@ -258,6 +297,12 @@ final class SortSessionModel {
 
         guard let change = SortChange.move(bookId: bookId, from: origin, to: destination) else { return }
         changes.append(change)
+
+        // Counted after the change is accepted, and only for the one direction the astuce
+        // teaches: out of the pile, onto an étagère.
+        if origin == .unshelved, destination != .unshelved {
+            booksFiledFromUnshelved += 1
+        }
     }
 
     /// Throws the stack away and hands the screen back its snapshot. The other half of
@@ -303,6 +348,7 @@ final class SortSessionModel {
         guard isBusy == false, phase == .ready else { return }
 
         isProposing = true
+        proposalsRequested += 1
         defer { isProposing = false }
 
         let plan: AutoSortPlan = await autoSortModel.proposePlan(
@@ -341,6 +387,11 @@ final class SortSessionModel {
         modelContext: ModelContext
     ) {
         guard isBusy == false, phase == .ready else { return }
+
+        // Counted here, on the accepted press, and before the plan is weighed: what the user
+        // has learned is what the button is for, and a stack that reduces to no work teaches
+        // that just as well as one that writes six étagères.
+        appliesLaunched += 1
 
         let plan: SortWritePlan = writePlan
         guard plan.hasWork else {

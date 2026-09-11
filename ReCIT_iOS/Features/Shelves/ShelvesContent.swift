@@ -4,8 +4,8 @@
 //
 //  The synced state of the bookshelf: a horizontal, snapping carousel of étagères
 //  (A→Z) over a vertical list of all the user's books. Both are `@Query`-driven so
-//  they stay reactive across syncs. Focusing the search hides the shelves and shows
-//  the flat filtered list. See ADR 0003 / PRD 0001.
+//  they stay reactive across syncs. Focusing the search hides the shelves and gives the
+//  screen to the merged search surface. See ADR 0003 / PRD 0001 / PRD 0012.
 //
 
 import SwiftUI
@@ -13,7 +13,12 @@ import SwiftData
 
 struct ShelvesContent: View {
     let user: User
-    let searchText: String
+    /// What is in the field, owned by `ShelvesView`. A binding because tapping a recent search
+    /// puts its query back in the field (issue 0072).
+    @Binding var searchText: String
+    /// The search that has been sent, if one has — owned by `ShelvesView`, because the
+    /// keyboard's « rechercher » key only reaches the field from above `.searchable`.
+    @Binding var submission: SearchSuggestion?
     @Binding var path: NavigationPath
 
     @Environment(SortFlowPresentation.self) private var sortFlow
@@ -25,19 +30,21 @@ struct ShelvesContent: View {
     /// header is the manual route, and it is the reason the card is free to lead elsewhere.
     @State private var isCreatingShelf: Bool = false
 
-    /// Presents the batch scanner, from the empty-state card when the inventory is empty.
-    /// A cover rather than a push, on `MainSearchView`'s pattern: the scanner owns its own
-    /// navigation stack, and leaving it comes back here rather than unwinding this tab's path.
-
     @Query private var shelves: [Shelf]
     @Query private var myItems: [InventoryItem]
 
     private let horizontalPadding: CGFloat = 12
     private let gutter: CGFloat = 14
 
-    init(user: User, searchText: String, path: Binding<NavigationPath>) {
+    init(
+        user: User,
+        searchText: Binding<String>,
+        submission: Binding<SearchSuggestion?>,
+        path: Binding<NavigationPath>
+    ) {
         self.user = user
-        self.searchText = searchText
+        self._searchText = searchText
+        self._submission = submission
         self._path = path
 
         let ownerId: String = user._id
@@ -55,15 +62,15 @@ struct ShelvesContent: View {
 
     var body: some View {
         if isSearching {
-            List {
-                InventoryListContent(
-                    user: user,
-                    searchText: searchText,
-                    filterParameter: .userInventory,
-                    sortParameter: .alphabetical
-                )
-            }
-            .listStyle(.plain)
+            // The field used to filter this user's own books and stop there, which is how a
+            // book two streets away came back as an empty list. It now opens the merged search
+            // surface: my copies and my friends', past three characters, and the three ways on
+            // to inventaire.io under them. See PRD 0012.
+            InventorySearchContent(
+                user: user,
+                searchText: $searchText,
+                submission: $submission
+            )
         } else {
             GeometryReader { geo in
                 let cardWidth: CGFloat = geo.size.width * 0.86

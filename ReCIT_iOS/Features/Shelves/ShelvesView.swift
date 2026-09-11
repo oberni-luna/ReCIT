@@ -16,6 +16,13 @@ struct ShelvesView: View {
     @State private var searchText: String = ""
     @State private var path: NavigationPath = .init()
 
+    /// The search that has been sent — the query and the entity types it asked inventaire.io
+    /// for. It lives here rather than in the search surface because `.onSubmit(of: .search)`
+    /// only reaches the field from the view that carries `.searchable`, or from above it.
+    /// Nothing clears it: a query edited afterwards stops matching what was sent, and that is
+    /// what takes the screen back out of its results (`SearchPhase`).
+    @State private var submission: SearchSuggestion?
+
     var body: some View {
         NavigationStack(path: $path) {
             Group {
@@ -23,7 +30,12 @@ struct ShelvesView: View {
                     if user.lastInventorySync == nil {
                         SyncingPlaceholderView()
                     } else {
-                        ShelvesContent(user: user, searchText: searchText, path: $path)
+                        ShelvesContent(
+                            user: user,
+                            searchText: $searchText,
+                            submission: $submission,
+                            path: $path
+                        )
                     }
                 } else {
                     SyncingPlaceholderView()
@@ -54,6 +66,16 @@ struct ShelvesView: View {
                 }
             }
             .searchable(text: $searchText)
+            // The keyboard's « rechercher » key sends the query against both books and people
+            // — the same thing the third suggestion does, and the same value, so the two
+            // gestures cannot end up asking inventaire.io for different things. Below three
+            // characters it sends nothing: `SearchSuggestion` reads the threshold rather than
+            // keeping a second copy of it.
+            .onSubmit(of: .search) {
+                if let everything = SearchSuggestion.everything(for: searchText) {
+                    submission = everything
+                }
+            }
         }
     }
 }

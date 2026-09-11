@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 @main
 struct ReCIT: App {
@@ -24,6 +25,7 @@ struct ReCIT: App {
         UITestHooks.prepareLaunch()
 
         DesignSystem.start()
+        Self.startTips()
         _authModel = State(initialValue: .init(authService: .init(config: .init())))
         sharedModelContainer = Self.isRunningTests ? nil : Self.makeModelContainer()
     }
@@ -40,6 +42,22 @@ struct ReCIT: App {
                 EmptyView()
             }
         }
+    }
+
+    /// Opens TipKit's datastore, once per launch, beside the design system's own start-up.
+    ///
+    /// `.immediate` rather than a cooldown: the surface's astuces are already rationed by
+    /// `SortTipGate` and by the `TipGroup` they sit in — one card at a time, each ended for
+    /// good by the gesture it teaches — so a frequency rule on top of that would only be a
+    /// second, invisible opinion about when the first one may be shown (PRD 0013).
+    ///
+    /// Failures are swallowed. A datastore that will not open costs the user an astuce; it
+    /// must not cost them the app.
+    private static func startTips() {
+        try? Tips.configure([
+            .displayFrequency(.immediate),
+            .datastoreLocation(.applicationDefault)
+        ])
     }
 
     private static var isRunningTests: Bool {

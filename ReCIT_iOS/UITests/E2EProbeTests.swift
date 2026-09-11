@@ -57,18 +57,19 @@ final class E2EProbeTests: XCTestCase {
             print("PROBE tab \(index): id=\(button.identifier) label=\(button.label) frame=\(button.frame) hittable=\(button.isHittable)")
         }
 
-        print("PROBE ==== trying to reach the search tab ====")
-        let search: XCUIElement = app.tabBars.buttons["Recherche"]
-        print("PROBE search exists=\(search.exists) hittable=\(search.isHittable) frame=\(search.frame)")
+        // The search used to be a tab of its own; since issue 0074 it is the inventory's field.
+        print("PROBE ==== trying to reach the inventory's search field ====")
+        let inventory: XCUIElement = app.tabBars.buttons["Inventaire"]
+        print("PROBE inventory exists=\(inventory.exists) hittable=\(inventory.isHittable) frame=\(inventory.frame)")
 
         print("PROBE nav bar before = \(app.navigationBars.firstMatch.identifier)")
-        tapAbsolute(search, in: app)
+        tapAbsolute(inventory, in: app)
         settle(app, seconds: 4)
         print("PROBE nav bar after = \(app.navigationBars.firstMatch.identifier)")
         print("PROBE all nav bars = \((0..<app.navigationBars.count).map { app.navigationBars.element(boundBy: $0).identifier })")
 
         print("PROBE ==== after absolute tap ====")
-        print("PROBE searchFields=\(app.searchFields.count) scanExists=\(app.descendants(matching: .any)["e2e.search.scan"].exists)")
+        print("PROBE searchFields=\(app.searchFields.count) scanExists=\(app.descendants(matching: .any)["e2e.shelves.scan"].exists)")
         print(app.debugDescription)
     }
 

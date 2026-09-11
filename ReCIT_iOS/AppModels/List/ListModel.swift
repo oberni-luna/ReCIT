@@ -67,16 +67,65 @@ final class ListModel: OptimisticMutating {
         }
     }
 
-    func createList(modelContext: ModelContext, name: String, description: String, type: String, visibility: [String]) async throws {
+    /// Creates a list server-side and inserts the list the server answers with.
+    ///
+    /// - Returns: the inserted list, carrying its **server** id — which is what lets a caller
+    ///   chain a second write onto it. An answerless response throws rather than returning
+    ///   nothing: a caller that goes on to file something into the list would otherwise have no
+    ///   way of knowing there is no list to file into.
+    @discardableResult
+    func createList(modelContext: ModelContext, name: String, description: String, type: String, visibility: [String]) async throws -> EntityList {
         let newList: NewListResponseDTO? = try await apiService.send(
             toEndpoint: "/api/lists",
             payload: NewListDTO(id: nil, name: name, description: description, visibility: visibility, type: type)
         )
 
-        if let newList {
-            modelContext.insert(EntityList(listDTO: newList.list, baseUrl: apiService.baseUrl()))
-            try modelContext.save()
-        }
+        guard let newList else { throw NetworkError.badResponse }
+
+        let list: EntityList = .init(listDTO: newList.list, baseUrl: apiService.baseUrl())
+        modelContext.insert(list)
+        try modelContext.save()
+        return list
+    }
+
+    /// Creates a list and files a work into it — the « Ajouter à une nouvelle liste » line of
+    /// the "…" menus (PRD 0014). The order of the two calls, and the difference of optimism
+    /// between them, live here and nowhere else: the form calls this and knows neither.
+    ///
+    /// Creation is **awaited**, because filing needs the list's server id and must never post
+    /// toward an optimistic one. Filing is then **optimistic**, as it is everywhere else: if it
+    /// fails, it undoes itself and reports through the shared channel — the list stays. A
+    /// container the user has watched being born is never destroyed to make up for a second
+    /// request that failed.
+    ///
+    /// The type is not a parameter: a list made to hold a book's work is a works list.
+    ///
+    /// - Throws: only what creation throws, so a failing creation leaves nothing behind and
+    ///   lets the caller keep its sheet open.
+    /// - Returns: the created list, so the caller can name it back to the user.
+    @discardableResult
+    func createListAndAddWork(
+        modelContext: ModelContext,
+        name: String,
+        description: String,
+        visibility: [String],
+        workUri: String
+    ) async throws -> EntityList {
+        let list: EntityList = try await createList(
+            modelContext: modelContext,
+            name: name,
+            description: description,
+            type: EntityListType.work.rawValue,
+            visibility: visibility
+        )
+
+        addEntitiesToList(
+            modelContext: modelContext,
+            list: list,
+            entityUris: [workUri]
+        )
+
+        return list
     }
 
     /// Optimistically adds entities to a list: placeholders appear immediately,

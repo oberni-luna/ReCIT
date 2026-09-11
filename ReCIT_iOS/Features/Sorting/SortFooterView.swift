@@ -15,8 +15,9 @@
 //  It has no fixed height on purpose. The panel is anchored to the bottom of the screen, so
 //  a four-line stopped report grows *upwards* and the grid shrinks by that much — which is
 //  what lets the account of a half-written library be read without a tap, on a screen whose
-//  design allots it two lines. What keeps the panel steady between `idle` and `recap` is that
-//  both readings are two lines of prose, not a height reserved for them.
+//  design allots it two lines. Nothing is reserved for any reading: `idle` is one sentence
+//  since SORT-1 took its instruction over (PRD 0013), so the panel is a line shorter before
+//  the first drag than after it — and a line is the honest cost of not lecturing everyone.
 //
 
 import SwiftUI
@@ -29,6 +30,9 @@ struct SortFooterView: View {
             switch footer {
             case .idle:
                 Text("manual_sort.footer.idle")
+
+            case .idleWithoutShelves:
+                Text("manual_sort.footer.idle.no_shelf")
 
             case .recap(let plan):
                 ManualSortRecapView(plan: plan)

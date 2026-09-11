@@ -28,6 +28,9 @@ struct BookDetailView: View {
     @State private var nextEntityDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
     @State private var showDeleteConfirmation: Bool = false
+    /// What the "…" menu asks to create. Held by the screen rather than by the menu: a
+    /// `.sheet` placed inside a `Menu`'s content does not present reliably.
+    @State private var creationRequest: ContainerCreationRequest?
 
     @Binding var path: NavigationPath
 
@@ -97,6 +100,7 @@ struct BookDetailView: View {
                 )
             }
         }
+        .containerCreationSheet($creationRequest)
         .confirmationDialog(
             "inventory.item.delete_confirm",
             isPresented: $showDeleteConfirmation,
@@ -147,7 +151,7 @@ struct BookDetailView: View {
     private func menuContent(edition: Edition) -> some View {
         if let myItem = iOwn(edition) {
             // Étagères hold a specific copy, so filing is offered only on mine.
-            BookShelfMenu(item: myItem)
+            BookShelfMenu(item: myItem, creationRequest: $creationRequest)
             listMenu(edition: edition)
 
             Button("inventory.item.remove_from_inventory", systemImage: "trash") {
@@ -180,11 +184,16 @@ struct BookDetailView: View {
     }
 
     /// Listes hold works, not editions. An edition standing behind several works would have to
-    /// file them all, which is not what the menu says it does, so it offers nothing there.
+    /// file them all, which is not what the menu says it does, so it offers nothing there —
+    /// including its creation line, which would be as ambiguous as the rest.
     @ViewBuilder
     private func listMenu(edition: Edition) -> some View {
         if edition.workUris.count == 1, let workUri = edition.workUris.first {
-            EntityListMenu(entityUri: workUri, identifier: "e2e.book.addToList")
+            EntityListMenu(
+                entityUri: workUri,
+                identifier: "e2e.book.addToList",
+                creationRequest: $creationRequest
+            )
         }
     }
 

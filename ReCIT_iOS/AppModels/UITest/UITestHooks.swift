@@ -107,7 +107,9 @@ final class UITestHooks {
 
         let defaults: UserDefaults = .standard
         for key in defaults.dictionaryRepresentation().keys
-        where key.hasPrefix("OnboardingStore.") || key.hasPrefix("SyncStatusStore.") {
+        where key.hasPrefix("OnboardingStore.")
+            || key.hasPrefix("SyncStatusStore.")
+            || key.hasPrefix("TipsStore.") {
             defaults.removeObject(forKey: key)
         }
 

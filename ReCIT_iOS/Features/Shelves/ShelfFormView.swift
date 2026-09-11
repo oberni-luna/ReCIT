@@ -17,14 +17,25 @@
 //  cannot be half-set, and `submit()` reads it first: there is no path from drafting into
 //  a write.
 //
+//  **A fourth mode creates then files.** Handed the id of a copy, the same form creates the
+//  étagère and puts that copy on it, which is what the "…" menu's « Ajouter à une nouvelle
+//  étagère » opens (PRD 0014). Its shape is the draft mode's — one optional value, so the
+//  modes cannot be half-set — but not its field-hiding: drafting hides description and
+//  visibility because it would throw them away, whereas here they are really written, so
+//  they stay. The sequencing of the two server calls is `ShelfModel`'s, not this form's —
+//  see `createShelfAndAddItem`. Its button is the only one here that waits on the server
+//  and shows its progress; the carousel's create stays optimistic and instant.
+//
 
 import SwiftUI
+import LBSnackBar
 
 struct ShelfFormView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(ShelfModel.self) private var shelfModel
     @Environment(UserModel.self) private var userModel
+    @Environment(\.snackBar) private var snackBar
 
     /// `nil` when creating; an existing shelf when editing.
     private let shelf: Shelf?
@@ -37,6 +48,12 @@ struct ShelfFormView: View {
     /// note at the top of the file.
     private let draft: ShelfDraftRequest?
 
+    /// The copy to file onto the étagère once it exists, and the only thing that tells the
+    /// create-then-file mode from plain creation. `nil` in the three modes that existed
+    /// before. An id rather than the model itself: the copy can be deleted while the sheet
+    /// is open, so it is resolved at the last moment. See issue 0065.
+    private let itemIDToFile: String?
+
     @State private var name: String
     @State private var shelfDescription: String
     @State private var visibility: FormVisibility
@@ -46,6 +63,7 @@ struct ShelfFormView: View {
         self.shelf = shelf
         self.onDeleted = onDeleted
         draft = nil
+        itemIDToFile = nil
         _name = State(initialValue: shelf?.name ?? "")
         _shelfDescription = State(initialValue: shelf?.shelfDescription ?? "")
         _visibility = State(initialValue: FormVisibility(raw: shelf?.visibility ?? []))
@@ -57,6 +75,20 @@ struct ShelfFormView: View {
         shelf = nil
         onDeleted = nil
         self.draft = draft
+        itemIDToFile = nil
+        _name = State(initialValue: "")
+        _shelfDescription = State(initialValue: "")
+        _visibility = State(initialValue: .private)
+    }
+
+    /// The create-then-file form, opened from a book's "…" menu. There is nothing to edit
+    /// and nothing to delete: the étagère does not exist yet. Description and visibility are
+    /// asked for and written, unlike in the draft mode above.
+    init(fileItemOntoNewShelf itemID: String) {
+        shelf = nil
+        onDeleted = nil
+        draft = nil
+        itemIDToFile = itemID
         _name = State(initialValue: "")
         _shelfDescription = State(initialValue: "")
         _visibility = State(initialValue: .private)
@@ -64,6 +96,7 @@ struct ShelfFormView: View {
 
     private var isEditing: Bool { shelf != nil }
     private var isDrafting: Bool { draft != nil }
+    private var isFilingOntoNewShelf: Bool { itemIDToFile != nil }
 
     /// Why the typed name cannot be created, or `nil` when it can. Only drafting asks:
     /// the server does not enforce unique shelf names, so refusing one on the carousel
@@ -124,14 +157,7 @@ struct ShelfFormView: View {
 
                 Section {} footer: {
                     VStack {
-                        Button {
-                            submit()
-                        } label: {
-                            Text(isEditing ? "Enregistrer" : "Créer").frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.primary())
-                        .disabled(!canSubmit)
-                        .accessibilityIdentifier("e2e.shelfForm.submit")
+                        submitButton
 
                         // Edit only. There is nothing to delete while creating, and a
                         // destructive button standing next to "Créer" would read as the
@@ -173,6 +199,37 @@ struct ShelfFormView: View {
         }
     }
 
+    /// Two buttons rather than one, because only the create-then-file mode waits on the
+    /// server: the other three write optimistically or not at all, and turning their button
+    /// asynchronous would cost the carousel its instant close for nothing. Both carry the
+    /// same accessibility identifier — it is one button to whoever reads the screen.
+    @ViewBuilder
+    private var submitButton: some View {
+        if isFilingOntoNewShelf {
+            AsyncButton(action: {
+                await submitFilingOntoNewShelf()
+            },
+                        actionOptions: [.showProgressView],
+                        label: {
+                Text("list.form.create_and_add").frame(maxWidth: .infinity)
+            })
+            .buttonStyle(.primary())
+            .disabled(!canSubmit)
+            .accessibilityIdentifier("e2e.shelfForm.submit")
+        } else {
+            Button {
+                submit()
+            } label: {
+                Text(isEditing ? "Enregistrer" : "Créer").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.primary())
+            .disabled(!canSubmit)
+            .accessibilityIdentifier("e2e.shelfForm.submit")
+        }
+    }
+
+    /// The three modes that do not wait on the server. The create-then-file mode has its own
+    /// entry point below and never reaches here.
     private func submit() {
         guard canSubmit else { return }
         let trimmedName: String = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -204,6 +261,37 @@ struct ShelfFormView: View {
             )
         }
         dismiss()
+    }
+
+    /// Creates the étagère, files the copy onto it, and goes.
+    ///
+    /// A failing creation leaves the sheet open with what was typed — the étagère does not
+    /// exist and the user can try again without retyping. A failing *filing* never reaches
+    /// here: it is optimistic, reverts itself and reports through the shared channel, and the
+    /// étagère the user has just watched being born stays.
+    private func submitFilingOntoNewShelf() async {
+        guard canSubmit, let itemIDToFile else { return }
+
+        do {
+            let created: Shelf = try await shelfModel.createShelfAndAddItem(
+                modelContext: modelContext,
+                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+                description: shelfDescription.trimmingCharacters(in: .whitespacesAndNewlines),
+                visibility: visibility.raw,
+                itemID: itemIDToFile
+            )
+            // Nothing on the book screen shows its étagères, so the SnackBar is the only
+            // thing saying where the book has landed.
+            snackBar.show {
+                SnackBarView(
+                    title: String(localized: "list.added_to_named \(created.name)"),
+                    onDismiss: nil
+                )
+            }
+            dismiss()
+        } catch {
+            snackBar.show { SnackBarView.error(error) }
+        }
     }
 
     /// The write is optimistic and model-owned, so the sheet can go straight away — the

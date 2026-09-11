@@ -367,6 +367,51 @@ final class ShelfModel: OptimisticMutating {
         return shelf
     }
 
+    /// Creates an étagère and files a copy onto it — the « Ajouter à une nouvelle étagère »
+    /// line of the "…" menus (PRD 0014). The order of the two calls, and the difference of
+    /// optimism between them, live here and nowhere else: the form calls this and knows
+    /// neither.
+    ///
+    /// Creation is **awaited**, because filing needs the étagère's server id and must never
+    /// post toward an optimistic one — `createShelfAwaitingServer` inserts the shelf the
+    /// server answered with, so `shelf._id` below is always a real document id. Filing is
+    /// then **optimistic**, as it is everywhere else: if it fails, it undoes itself and
+    /// reports through the shared channel — the étagère stays. A container the user has
+    /// watched being born is never destroyed to make up for a second request that failed.
+    ///
+    /// The copy is named by id rather than handed over, and resolved here, because it can be
+    /// deleted while the sheet is open and again during the creation round-trip. A row that
+    /// has gone leaves the new étagère standing and empty rather than crashing on a read of
+    /// an invalidated model — the fetch may still answer with a copy deleted but not yet
+    /// saved, which is what `isStillInTheStore` catches. See issue 0065.
+    ///
+    /// - Throws: only what creation throws, so a failing creation leaves nothing behind and
+    ///   lets the caller keep its sheet open.
+    /// - Returns: the created étagère, so the caller can name it back to the user.
+    @discardableResult
+    func createShelfAndAddItem(
+        modelContext: ModelContext,
+        name: String,
+        description: String,
+        visibility: [String],
+        itemID: String
+    ) async throws -> Shelf {
+        let shelf: Shelf = try await createShelfAwaitingServer(
+            name: name,
+            description: description,
+            visibility: visibility,
+            modelContext: modelContext
+        )
+
+        guard let item = localItems(ids: [itemID], modelContext: modelContext).first,
+              item.isStillInTheStore else {
+            return shelf
+        }
+
+        addItem(item, to: shelf, modelContext: modelContext)
+        return shelf
+    }
+
     /// Files several items onto an étagère in one `add-items` call and **waits** for the
     /// server's answer.
     ///

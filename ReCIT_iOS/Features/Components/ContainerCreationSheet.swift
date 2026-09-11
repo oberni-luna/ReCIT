@@ -31,11 +31,8 @@ struct ContainerCreationSheet: ViewModifier {
                 switch request {
                 case .list(let workUri):
                     ListFormView(fileWorkIntoNewList: workUri)
-                case .shelf:
-                    // The étagère half is issue 0084: nothing writes `.shelf` yet, so this
-                    // case is unreachable rather than deliberately empty. It mounts the
-                    // étagère form there, and no other file has to change.
-                    EmptyView()
+                case .shelf(let itemID):
+                    ShelfFormView(fileItemOntoNewShelf: itemID)
                 }
             }
     }

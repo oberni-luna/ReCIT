@@ -150,7 +150,7 @@ struct BookDetailView: View {
     private func menuContent(edition: Edition) -> some View {
         if let myItem = iOwn(edition) {
             // Étagères hold a specific copy, so filing is offered only on mine.
-            BookShelfMenu(item: myItem)
+            BookShelfMenu(item: myItem, creationRequest: $creationRequest)
             listMenu(edition: edition)
 
             Button("inventory.item.remove_from_inventory", systemImage: "trash") {

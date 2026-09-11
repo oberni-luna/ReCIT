@@ -11,6 +11,12 @@
 //  new rather than an empty section, which is the whole point of the threshold living in
 //  `SearchPhase`: the silence is a decision, not an accident.
 //
+//  **The one phase that can have nothing to say draws an absence rather than a blank.** With
+//  the field open and no search ever sent — first launch, or after « Effacer » — the surface
+//  drops the `List` entirely and mounts `EmptyStateView`, the app's first reusable one
+//  (issue 0073). Dropping the list is not a detail: it is what puts the block in the middle of
+//  the band the keyboard leaves visible instead of the middle of the frame.
+//
 //  **Every submission passes through one place here**, which is what makes the recent searches
 //  a list of things actually sent. The keyboard's « rechercher » key, a tap on a suggestion and
 //  a tap on a recent all end up setting `submission`, and recording hangs off that change
@@ -118,37 +124,74 @@ struct InventorySearchContent: View {
         return submission
     }
 
+    /// The recents the screen would draw right now — the displayed three, or nothing at all
+    /// when the field is past the threshold and the recents have given the screen away.
+    private var recentSearches: [String] {
+        guard case .recents = phase else { return [] }
+
+        return recentSearchStore.recentSearches(userId: user._id)
+    }
+
+    /// Whether the screen has nothing but an absence to show: the field is open, empty, and no
+    /// search has ever been sent from this account on this device. First launch, and the state
+    /// « Effacer » comes back to.
+    private var showsEmptyRecents: Bool {
+        if case .recents = phase {
+            recentSearches.isEmpty
+        } else {
+            false
+        }
+    }
+
     var body: some View {
-        List {
-            if case .recents = phase {
-                InventorySearchRecentsSection(
-                    searches: recentSearchStore.recentSearches(userId: user._id),
-                    onSelect: select(recent:),
-                    onClear: { recentSearchStore.clear(userId: user._id) }
+        Group {
+            if showsEmptyRecents {
+                // Not in a `List`. A scroll view keeps its full height under the keyboard and
+                // insets its content instead, so a row centred in it would land behind the
+                // keys; a plain container is laid out inside the safe area, and the keyboard
+                // *is* a safe-area inset. Filling that container and centring in it therefore
+                // centres the block in the band the keyboard leaves visible — the maquette's
+                // 177 pt block at y=225 is exactly the middle of the 111 → 516 band, so the
+                // arithmetic is the geometry, not an offset to hand-tune.
+                EmptyStateView(
+                    glyph: "magnifyingglass",
+                    title: "inventory.search.recents.empty.title",
+                    message: "inventory.search.recents.empty.message"
                 )
-            }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.backgroundSecondary)
+                .accessibilityIdentifier("e2e.searchRecents.empty")
+            } else {
+                List {
+                    InventorySearchRecentsSection(
+                        searches: recentSearches,
+                        onSelect: select(recent:),
+                        onClear: { recentSearchStore.clear(userId: user._id) }
+                    )
 
-            if let localQuery {
-                InventorySearchLocalSection(
-                    query: localQuery,
-                    ownerId: user._id,
-                    myItems: myItems,
-                    friendsItems: friendsItems
-                )
-            }
+                    if let localQuery {
+                        InventorySearchLocalSection(
+                            query: localQuery,
+                            ownerId: user._id,
+                            myItems: myItems,
+                            friendsItems: friendsItems
+                        )
+                    }
 
-            if case .suggesting(let query) = phase {
-                InventorySearchSuggestionsSection(query: query) { suggestion in
-                    submission = suggestion
+                    if case .suggesting(let query) = phase {
+                        InventorySearchSuggestionsSection(query: query) { suggestion in
+                            submission = suggestion
+                        }
+                    }
+
+                    if case .results = phase {
+                        InventorySearchResultsSection(results: remoteResults)
+                    }
                 }
-            }
-
-            if case .results = phase {
-                InventorySearchResultsSection(results: remoteResults)
+                .listStyle(.plain)
+                .applyListBackground()
             }
         }
-        .listStyle(.plain)
-        .applyListBackground()
         .task(id: activeSubmission) {
             await search()
         }

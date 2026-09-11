@@ -16,10 +16,12 @@
 //  three rows to one tap target each — the band between the field and the keyboard is about
 //  516 pt tall, and it has the suggestions to fit as well.
 //
-//  Nothing is drawn when the history is empty. What to say instead is issue 0073's question,
-//  which is also where the app gets its first reusable empty state.
+//  Nothing is drawn when the history is empty — the section yields the screen whole rather
+//  than leaving a header over nothing. What stands there instead is `EmptyStateView`, mounted
+//  by `InventorySearchContent`: the block has to be centred in the band between the field and
+//  the keyboard, which no row of a `List` can be.
 //
-//  See PRD 0012 and issue 0072.
+//  See PRD 0012 and issues 0072 and 0073.
 //
 
 import SwiftUI

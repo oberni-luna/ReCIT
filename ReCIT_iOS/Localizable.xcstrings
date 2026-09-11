@@ -1122,6 +1122,40 @@
         }
       }
     },
+    "inventory.search.recents.empty.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your recent searches will appear here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos recherches récentes apparaîtront ici."
+          }
+        }
+      }
+    },
+    "inventory.search.recents.empty.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No recent searches"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune recherche récente"
+          }
+        }
+      }
+    },
     "inventory.search.recents_section" : {
       "extractionState" : "manual",
       "localizations" : {

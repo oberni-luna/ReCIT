@@ -56,6 +56,7 @@ struct UserDetailView: View {
             }
         }
         .navigationTitle("nav.user")
+        .toolbar { toolbarContent }
         .sheet(item: $borrowFromItem) { item in
             if let owner = item.owner, let me = userModel.myUser {
                 TransactionFormView(
@@ -74,6 +75,30 @@ struct UserDetailView: View {
                     ),
                     transition: TransactionStateMachine.requestTransition
                 )
+            }
+        }
+    }
+
+    /// A "…" holding, for now, the one thing one can do *about* someone rather than with them.
+    /// Hidden on my own profile: there is nobody to report there.
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .confirmationAction) {
+            if user._id != userModel.myUser?._id {
+                Menu {
+                    ReportButton(
+                        draft: .init(
+                            reportedUsername: user.username,
+                            reportedUserId: user._id,
+                            reporterUsername: userModel.myUser?.username
+                        )
+                    )
+                    .tint(.foregroundDefault)
+                    .accessibilityIdentifier("e2e.user.report")
+                } label: {
+                    Label("action.more", systemImage: "ellipsis")
+                }
+                .accessibilityIdentifier("e2e.user.menu")
             }
         }
     }

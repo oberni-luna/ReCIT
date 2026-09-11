@@ -74,8 +74,35 @@ struct TransactionDetailView: View {
             }
         }
         .applyListBackground()
+        .toolbar { toolbarContent }
         .sheet(isPresented: $showMessageForm) {
             TransactionFormView(transaction: transaction, transition: nil)
+        }
+    }
+
+    /// A "…" that outlives the action bar: the bar disappears once the transaction is
+    /// finished, but a message exchange stays readable — and so must stay reportable.
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .confirmationAction) {
+            if let me = userModel.myUser {
+                let other: User = transaction.otherUser(for: me)
+                Menu {
+                    ReportButton(
+                        draft: .init(
+                            reportedUsername: other.username,
+                            reportedUserId: other._id,
+                            transactionId: transaction._id,
+                            reporterUsername: me.username
+                        )
+                    )
+                    .tint(.foregroundDefault)
+                    .accessibilityIdentifier("e2e.transaction.report")
+                } label: {
+                    Label("action.more", systemImage: "ellipsis")
+                }
+                .accessibilityIdentifier("e2e.transaction.menu")
+            }
         }
     }
 

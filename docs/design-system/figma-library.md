@@ -4,6 +4,11 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-09-12 — `Réseau · Ajouter des amis lecteurs`** : le parcours d'ajout d'un ami lecteur, dans les
+  deux sens. Section `Réseau · Ajouter des amis lecteurs` (`407:10422`) sur la page `Screens` : 11 frames en clair
+  seul, deux composants nouveaux (`Cell / Relation`, `Cell / Invitation`) et un panneau `Spec · Réseau`
+  (`412:11330`). **Rien n'est implémenté** — c'est une proposition, et le contrat serveur a été vérifié le jour même
+  contre `api_specs.json`. Détail en fin de fichier.
 - **Passe du 2026-09-11 (2) — `Édition · Actions mises en avant`** : quatre **propositions** pour sortir du menu
   « … » les trois actions d'entrée de la fiche livre — ajouter à l'inventaire, emprunter à un ami, ajouter à une
   liste. Section `Édition · Actions mises en avant` (`362:9924`), clair seul. Rien de tout cela n'existe en Swift :
@@ -1928,3 +1933,108 @@ rechercher dans le « … ».
 Factorisation, sur les 4 frames : **0 dessin brut**, les `▢` de tête sont `list group` et `action row`, mode épinglé
 sur chacune, 25 à 28 instances par frame. Les deux sections de la journée ne se chevauchent pas
 (`Œuvre & édition` va jusqu'à `y = -1377`, `Édition · Actions mises en avant` commence à `-1177`).
+
+
+---
+
+# Réseau · Ajouter des amis lecteurs — proposition du 2026-09-12
+
+**Proposition, pas une réplication.** Aucun de ces écrans n'existe dans le code. Section
+`Réseau · Ajouter des amis lecteurs` (`407:10422`) sur la page `Screens`, **clair seul** — tout est bâti sur des
+tokens, le mode sombre suit sans redessin.
+
+Le besoin : la section `Réseau` du Profil liste des amis sans jamais permettre d'en ajouter un, et rien dans l'app
+ne dit qu'une invitation est arrivée. La maquette part du bouton « Ajouter des amis lecteurs » de la frame
+`Profil · Light` (`400:10441`) et va jusqu'au retrait d'un ami.
+
+## Les onze frames
+
+| Frame | id | Ce qu'elle montre |
+|---|---|---|
+| `N1 · Profil · Réseau (entrée)` | `407:10423` | Le Profil tel qu'il est maquetté, avec « Ajouter des amis lecteurs » sous les deux amis |
+| `N2 · Rechercher des lecteurs · Repos` | `407:10451` | Le champ vide et ce que la recherche cherche (`Empty State` centré) |
+| `N3 · Rechercher des lecteurs · Résultats` | `408:10585` | Trois résultats, un par état : à ajouter, demande envoyée, déjà ami |
+| `N4 · Profil lecteur · Non-ami` | `408:10733` | `User Header`, « Ajouter au réseau » en primaire, inventaire fermé |
+| `N5a · Demande d'ajout · Sans message` | `409:10740` | La feuille de confirmation — la seule implémentable telle quelle |
+| `N5b · Demande d'ajout · Avec message` | `409:10770` | La même, avec un champ `Field` que le serveur n'accepte pas |
+| `N6 · Profil lecteur · Demande envoyée` | `410:10880` | Bouton désactivé + « Annuler la demande » (`Row / Link` Destructive) |
+| `N7 · Profil · Invitation reçue` | `410:11046` | Une section `Invitations` sous l'en-tête, deux `Cell / Invitation` |
+| `N8 · Invitations · Écran dédié` | `410:11240` | L'autre piste : un écran qui porte les deux sens, reçues **et** envoyées |
+| `N9 · Profil lecteur · Demande reçue` | `410:10971` | Accepter en primaire, Refuser en secondaire, jamais en destructif |
+| `N10 · Profil lecteur · Ami (menu ouvert)` | `411:11215` | L'inventaire ouvert, et « Retirer du réseau » dans le « … » |
+| `Spec · Réseau` | `412:11330` | Le parcours, le contrat serveur, les quatre états, les arbitrages |
+
+## Ce que le serveur sait faire — vérifié le 2026-09-12
+
+Contre `https://inventaire.io/public/api_specs.json`, la source de vérité (voir la note de mémoire sur les sources
+d'API) :
+
+| Besoin | Endpoint | Paramètres |
+|---|---|---|
+| Les quatre états, en un appel | `GET /api/relations` | — ; renvoie `friends`, `userRequested`, `otherRequested`, `network` |
+| Demander | `POST /api/relations/request` | `user` — **et rien d'autre** |
+| Accepter / Refuser | `POST /api/relations/accept` · `/discard` | `user` |
+| Annuler / Retirer | `POST /api/relations/cancel` · `/unfriend` | `user` |
+| Chercher un lecteur | `GET /search?types=users&search=…&limit=…` | public ; pas d'autre recherche floue de lecteurs |
+
+Deux conséquences de fond :
+
+- **Aucune demande ne porte de message.** `request` ne prend qu'un identifiant. `N5b` dessine donc un champ sans
+  destination — c'est la première chose à trancher, pas un détail de copie.
+- **Le serveur ne prévient personne.** Il n'y a pas de notification : une invitation ne se découvre qu'en ouvrant
+  l'app. C'est ce qui rend le choix entre `N7` et `N8` structurel, et pas cosmétique.
+
+## Les quatre états, et ce qu'ils donnent à voir
+
+| État serveur | Dans une liste | Sur le profil du lecteur | Geste |
+|---|---|---|---|
+| Inconnu | `Cell / Relation State=Add` | « Ajouter au réseau » (primaire) | `request` |
+| `userRequested` | `Cell / Relation State=Sent` | bouton désactivé + « Annuler la demande » | `cancel` |
+| `otherRequested` | `Cell / Invitation` | « Accepter la demande » + « Refuser » | `accept` / `discard` |
+| `friends` | `Cell / User` nu | l'inventaire s'ouvre, « Retirer du réseau » dans le « … » | `unfriend` |
+
+## Composants ajoutés — `Screens · Components`
+
+| Composant | node id | Variantes | Propriétés | Note |
+|---|---|---|---|---|
+| `Cell / Relation` | `403:10499` | State ∈ {Add, Sent} | `Username`, `Item count` | Clone de `Cell / User` (393 × 69) dont le bloc de textes passe en `FILL` ; `Add` porte un `Action / Pill` Tinted, `Sent` un `Tag` Secondary. **Pas de variante `Friend`** : un ami est un `Cell / User` nu |
+| `Cell / Invitation` | `405:374` | — | `Username`, `Item count` | Le même clone retourné en vertical (393 × 120) : la rangée du lecteur, puis deux `Action / Pill` en `FILL`, glyphe éteint. Accepter est `Prominent`, Refuser `Tinted` — **jamais `Destructive`** : refuser ne détruit rien, et le rouge ferait de l'expéditeur une menace |
+
+Consommés sans modification : les quatre `Chrome`, `Chrome / Search Field` (`Idle`, `Typed`), `Section Header`,
+`Empty State`, `User Header`, `Button / Large` (Primary, Secondary, Secondary+Disabled), `Row / Link` Destructive,
+`Note`, `Field`, `Action / Pill`, `Cell / Book`, `Chrome / Menu Scrim` + `Menu Panel`, `Separator`.
+
+## Ce qu'il faut trancher avant de coder
+
+- **Le message de la demande.** `N5a` (sans) est implémentable ; `N5b` (avec) demande de faire passer le texte
+  ailleurs, ou de renoncer. Le dessiner sans le dire aurait promis une fonction que le serveur refuse.
+- **Où vivent les invitations.** `N7` les pose dans le Profil, vues sans détour, mais elles poussent transactions et
+  réseau vers le bas (+293 pt ici, pour deux invitations). `N8` leur donne un écran qui porte aussi les envoyées —
+  plus propre, mais invisible tant que le Profil ne porte pas de compteur.
+- **Le badge.** Sans notification serveur, un compteur sur l'onglet `Réglages` est le minimum. Il n'est pas
+  maquetté.
+- **Les confirmations.** « Refuser » et « Retirer du réseau » agissent directement dans ces frames. `unfriend`
+  défait une relation qu'il faudra redemander.
+
+## Écarts assumés
+
+- **Clair seul**, et mode épinglé sur les onze frames.
+- **Glyphes empruntés**, faute d'équivalents dans `Icon` : `plus` pour « ajouter » (il n'y a pas de
+  `person.badge.plus`), `clock` pour l'attente, `person` et `exclamationmark.circle` dans le menu. Ajouter les vrais
+  symboles voudrait dire dessiner trois vecteurs de plus, avec les contraintes `SCALE`.
+- Aucun état de chargement ni d'erreur réseau n'est dessiné.
+
+## Divergences code ↔ Figma
+
+| # | Où | Constat |
+|---|---|---|
+| R1 | `UserModel.syncUserNetwork` | Lit `/api/relations` mais **ne garde que `network`** : `userRequested` et `otherRequested` sont jetés. Les deux listes dont vit toute cette maquette existent déjà dans la réponse |
+| R2 | `UserDetailView` | Le « … » ne porte que `ReportButton`. Aucun geste de relation n'existe dans le code |
+| R3 | `ProfileView` | La section `Réseau` liste `allUsers` moins moi — donc tout utilisateur tombé dans le store, pas les amis au sens du serveur. Sans les quatre listes, la distinction n'est pas faite |
+
+## Audit
+
+Factorisation, sur les 11 frames : **0 dessin brut** — chaque `▢` de tête est un conteneur nommé (`scroll` hérité du
+gabarit, `list group`, `Invitations`, `sheet`, `body`, `actions`), mode épinglé sur chacune. Le panneau
+`Spec · Réseau` est de la doc, donc hors audit de factorisation. La section (`4666`, `16200`, 4200 × 3400) ne
+chevauche ni `Profil` (`400:10440`, qui finit à `y = 16027`) ni `Ranger mes livres`.

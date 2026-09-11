@@ -41,6 +41,7 @@
 		098A61E02E54CA160032185B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		098A61E32E54CA160032185B /* ReCIT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReCIT.swift; sourceTree = "<group>"; };
 		09ACF44D2E5E07EB00D59BC0 /* Env.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
+		09E2FF4630545DC8003A3B82 /* ReCIT-iOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "ReCIT-iOS-Info.plist"; sourceTree = "<group>"; };
 		AA00111100000000000000AA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -116,6 +117,7 @@
 		094FD1932E4A38D40023705A = {
 			isa = PBXGroup;
 			children = (
+				09E2FF4630545DC8003A3B82 /* ReCIT-iOS-Info.plist */,
 				098A61E32E54CA160032185B /* ReCIT.swift */,
 				09ACF44D2E5E07EB00D59BC0 /* Env.swift */,
 				098A61E02E54CA160032185B /* Assets.xcassets */,
@@ -471,7 +473,9 @@
 				DEVELOPMENT_TEAM = VH79XGK7M2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ReCIT-iOS-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Ex-libris";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We use camera to scan barcodes";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -509,7 +513,9 @@
 				DEVELOPMENT_TEAM = VH79XGK7M2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ReCIT-iOS-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Ex-libris";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We use camera to scan barcodes";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

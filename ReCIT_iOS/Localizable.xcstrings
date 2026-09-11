@@ -1790,6 +1790,23 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Nothing to apply for now."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à appliquer pour le moment."
+          }
+        }
+      }
+    },
+    "manual_sort.footer.idle.no_shelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "Drag and drop books onto the shelves to file them. Nothing to apply for now."
           }
         },

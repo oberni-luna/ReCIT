@@ -153,7 +153,15 @@ struct ManualSortView: View {
                 onFile: { bookId, sectionId in
                     _ = file(bookId, into: sectionId, within: projection)
                 },
-                footer: .init(plan: plan, progress: session.applyProgress, notice: notice),
+                footer: .init(
+                    plan: plan,
+                    progress: session.applyProgress,
+                    notice: notice,
+                    // Drafts count: an étagère named on the stack accepts drops straight away,
+                    // so the moment one exists the gesture has somewhere to land and the
+                    // footer stops spelling it out.
+                    hasShelves: projection.sections.contains { $0.isUnshelved == false }
+                ),
                 actions: actions,
                 tip: {
                     // Nothing at all when nothing is due — not an empty view, which a stack

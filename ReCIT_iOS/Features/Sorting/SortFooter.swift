@@ -3,14 +3,16 @@
 //  ReCIT_iOS
 //
 //  What the line under the buttons says, and the rule that decides which of its readings is
-//  on screen. One slot, four readings — the sorting surface's footer is an *emplacement*,
+//  on screen. One slot, several readings — the sorting surface's footer is an *emplacement*,
 //  not a sentence, and it grows upward against the grid when it has more to say (PRD 0009).
 //
 //  **The slot is never empty.** A session nobody has touched yet used to render nothing, so
 //  the panel was shorter before the first drag than after it and the buttons moved down the
-//  moment anything was done. `idle` says what to do and that there is nothing to save — which
-//  is the same two-line shape the recap has, so the panel keeps its height across the change
-//  (design `160:6659` / `185:7804`, both footers 113 pt).
+//  moment anything was done. `idle` says there is nothing to save, and that is now all it
+//  says: the instruction it used to open with is SORT-1's, said once, at the first opening,
+//  pointing at the book it talks about rather than standing under the buttons for someone who
+//  has filed two hundred (PRD 0013). The one collection where it stays written is the one with
+//  no étagère at all — `idleWithoutShelves` (design `160:6659` / `185:7804`).
 //
 //  The order of the cases is the rule: a finished run's account outranks the recap, because
 //  the recap in the present tense next to a report in the past tense reads as a screen
@@ -27,9 +29,14 @@
 import Foundation
 
 enum SortFooter: Equatable {
-    /// Nothing pending and nothing done. Not silence: an untouched session is the one moment
-    /// the surface has to say how it is used, and the one reading that has no numbers in it.
+    /// Nothing pending and nothing done. Not silence, but not an instruction either: the one
+    /// reading that has no numbers in it says only that there is nothing to save, because the
+    /// astuce says the gesture better — once, and aimed at a book.
     case idle
+    /// The same state, on a collection that has no étagère at all. Here the instruction stays:
+    /// SORT-1 points at a book to drag, and a book with nowhere to land teaches nothing — so
+    /// the one reader the astuce cannot serve is the one who keeps it in writing.
+    case idleWithoutShelves
     /// What saving would do — and, during a run, what is left of it.
     case recap(SortWritePlan)
     /// What a settled run did, in full: all landed, nothing to save, or the three-part
@@ -39,10 +46,15 @@ enum SortFooter: Equatable {
     case notice(SortNotice)
 
     /// The reading the screen is owed, given the session's state.
+    ///
+    /// `hasShelves` only ever separates the two idle readings: with something to save or
+    /// something to report, what the screen owes is that, whether or not there is an étagère
+    /// to put a book on.
     init(
         plan: SortWritePlan,
         progress: SortApplyLedger?,
-        notice: SortNotice?
+        notice: SortNotice?,
+        hasShelves: Bool
     ) {
         if let notice {
             self = .notice(notice)
@@ -50,8 +62,10 @@ enum SortFooter: Equatable {
             self = .report(progress)
         } else if plan.hasPendingChanges {
             self = .recap(plan)
-        } else {
+        } else if hasShelves {
             self = .idle
+        } else {
+            self = .idleWithoutShelves
         }
     }
 }

@@ -18,6 +18,10 @@ final class UserModel: OptimisticMutating {
     /// Shared channel used to surface a background optimistic failure to the UI.
     var errorReporter: AppErrorReporter?
 
+    /// Injected at launch, and used for one thing: pulling a new friend's books the moment
+    /// their invitation is accepted.
+    private var inventoryModel: InventoryModel?
+
     /// The most recent background task spawned by an optimistic relation write. Exposed so
     /// tests can await completion; not observed by the UI.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
@@ -25,6 +29,10 @@ final class UserModel: OptimisticMutating {
     init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
         self.errorReporter = errorReporter
+    }
+
+    func start(inventoryModel: InventoryModel) {
+        self.inventoryModel = inventoryModel
     }
 
     func syncMyUser(modelContext: ModelContext) async throws {
@@ -173,13 +181,37 @@ final class UserModel: OptimisticMutating {
         changeRelation(user, to: .none, action: "cancel", modelContext: modelContext)
     }
 
+    /// Lets a reader into my network, and pulls their books straight away.
+    ///
+    /// The inventory sync is the `reconcile` half rather than a second call from the view: a
+    /// new friend whose books only arrive at the next launch is a friend whose profile, opened
+    /// on the spot, says « Oh, c'est vide ici ».
+    func acceptRelation(with user: User, modelContext: ModelContext) {
+        changeRelation(
+            user,
+            to: .friend,
+            action: "accept",
+            modelContext: modelContext,
+            reconcile: { [weak self, weak user] in
+                guard let user, user.isStillInTheStore else { return }
+                try await self?.inventoryModel?.syncInventory(forUser: user, modelContext: modelContext)
+            }
+        )
+    }
+
+    /// Turns a request down. The other side is not told, and nothing stops them asking again.
+    func discardRelation(with user: User, modelContext: ModelContext) {
+        changeRelation(user, to: .none, action: "discard", modelContext: modelContext)
+    }
+
     /// The shape shared by every relation write: one local state change, one POST carrying the
     /// user id, and the previous state put back if the server refuses.
     private func changeRelation(
         _ user: User,
         to newRelation: UserRelation,
         action: String,
-        modelContext: ModelContext
+        modelContext: ModelContext,
+        reconcile: @escaping () async throws -> Void = {}
     ) {
         let previousRelation: UserRelation = user.relation
         let userId: String = user._id
@@ -190,7 +222,8 @@ final class UserModel: OptimisticMutating {
             revert: { user.relation = previousRelation },
             request: { [weak self] in
                 try await self?.postRelation(action: action, userId: userId)
-            }
+            },
+            reconcile: reconcile
         )
     }
 

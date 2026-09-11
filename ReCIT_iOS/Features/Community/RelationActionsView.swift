@@ -51,7 +51,22 @@ struct RelationActionsView: View {
 
                 note("network.request.no_notification \(user.username)")
 
-            case .requestReceived, .friend:
+            case .requestReceived:
+                Button("network.invitation.accept_request") {
+                    userModel.acceptRelation(with: user, modelContext: modelContext)
+                }
+                .buttonStyle(.primary())
+                .accessibilityIdentifier("e2e.user.acceptRequest")
+
+                Button("network.invitation.refuse") {
+                    userModel.discardRelation(with: user, modelContext: modelContext)
+                }
+                .buttonStyle(.secondary())
+                .accessibilityIdentifier("e2e.user.refuseRequest")
+
+                note("network.invitation.explanation \(user.username)")
+
+            case .friend:
                 EmptyView()
             }
         }

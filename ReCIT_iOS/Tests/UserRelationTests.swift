@@ -277,3 +277,68 @@ struct UserModelReaderSearchTests {
         #expect(mock.recordedRequests.count == 1)
     }
 }
+
+@MainActor
+@Suite("UserModel invitation answers", .serialized)
+struct UserModelInvitationTests {
+
+    private func makeStore() throws -> (ModelContext, User, User) {
+        let context: ModelContext = try TestStore.makeContext()
+        let me: User = Fixture.user(id: "me", username: "me")
+        let asker: User = Fixture.user(id: "other", username: "Camille")
+        asker.relation = .requestReceived
+        context.insert(me)
+        context.insert(asker)
+        try context.save()
+        return (context, me, asker)
+    }
+
+    @Test("Accepting makes a friend, on /accept")
+    func acceptMakesAFriend() async throws {
+        let (context, me, asker): (ModelContext, User, User) = try makeStore()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/accept", json: #"{"ok":true}"#)
+        mock.stub("/api/items", json: #"{"items":[]}"#)
+        let model: UserModel = .init(apiService: mock)
+        model.myUser = me
+
+        model.acceptRelation(with: asker, modelContext: context)
+        #expect(asker.relation == .friend)
+
+        await model.inFlightTask?.value
+        #expect(asker.relation == .friend)
+        #expect(mock.recordedRequests.first?.endpoint == "/api/relations/accept")
+        #expect(model.friends(modelContext: context).map(\._id) == ["other"])
+    }
+
+    @Test("A refused acceptance leaves the invitation standing")
+    func acceptRevertsOnFailure() async throws {
+        let (context, me, asker): (ModelContext, User, User) = try makeStore()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/accept", error: NetworkError.badResponse)
+        let reporter: AppErrorReporter = .init()
+        let model: UserModel = .init(apiService: mock, errorReporter: reporter)
+        model.myUser = me
+
+        model.acceptRelation(with: asker, modelContext: context)
+        await model.inFlightTask?.value
+
+        #expect(asker.relation == .requestReceived)
+        #expect(reporter.lastFailure != nil)
+    }
+
+    @Test("Declining sends /discard and leaves nobody behind")
+    func discardClearsTheInvitation() async throws {
+        let (context, me, asker): (ModelContext, User, User) = try makeStore()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/discard", json: #"{"ok":true}"#)
+        let model: UserModel = .init(apiService: mock)
+        model.myUser = me
+
+        model.discardRelation(with: asker, modelContext: context)
+        await model.inFlightTask?.value
+
+        #expect(asker.relation == .none)
+        #expect(mock.recordedRequests.last?.endpoint == "/api/relations/discard")
+    }
+}

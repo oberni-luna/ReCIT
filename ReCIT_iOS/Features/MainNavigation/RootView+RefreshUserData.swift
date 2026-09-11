@@ -29,6 +29,9 @@ extension RootView {
 
             guard let myUser = userModel.myUser else { return }
             inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
+            // Accepting an invitation pulls the new friend's books on the spot, which is the
+            // one thing `UserModel` needs the inventory for.
+            userModel.start(inventoryModel: inventoryModel)
             transactionModel.start(userModel: userModel, inventoryModel: inventoryModel, errorReporter: errorReporter)
 
             // Shelves must sync BEFORE inventory so items can resolve their shelf

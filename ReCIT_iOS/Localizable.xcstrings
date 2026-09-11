@@ -39,6 +39,54 @@
         }
       }
     },
+    "network.invitation.accept" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accepter"
+          }
+        }
+      }
+    },
+    "network.invitation.accept_request" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept the request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accepter la demande"
+          }
+        }
+      }
+    },
+    "network.invitation.explanation %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ asked to join networks with you. Declining does not tell them, and does not stop them asking again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vous a demandé de rejoindre son réseau. Refuser ne le prévient pas et ne l’empêche pas de redemander."
+          }
+        }
+      }
+    },
     "network.invitation.received" : {
       "localizations" : {
         "en" : {
@@ -51,6 +99,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Invitation reçue"
+          }
+        }
+      }
+    },
+    "network.invitation.refuse" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Decline"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refuser"
           }
         }
       }
@@ -291,6 +355,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trouvez vos amis lecteurs"
+          }
+        }
+      }
+    },
+    "profile.invitations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
           }
         }
       }

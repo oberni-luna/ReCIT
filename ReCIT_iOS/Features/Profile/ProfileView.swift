@@ -44,6 +44,13 @@ struct ProfileView: View {
         allUsers.filter { $0._id != userModel.myUser?._id && $0.relation == .friend }
     }
 
+    /// The readers waiting on an answer from me. inventaire.io notifies nobody, so an
+    /// invitation is only ever discovered by opening the app — which is why it surfaces here,
+    /// high on the first screen one lands on, and not only in a screen one has to think of.
+    var invitations: [User] {
+        allUsers.filter { $0.relation == .requestReceived }
+    }
+
     var body: some View {
         NavigationStack(path: $path) {
             Group {
@@ -65,6 +72,20 @@ struct ProfileView: View {
         List {
             Section {
                 UserHeaderView(user: user)
+            }
+
+            if invitations.isEmpty == false {
+                Section {
+                    ForEach(invitations) { invitation in
+                        InvitationRowView(user: invitation) {
+                            path.append(NavigationDestination.user(user: invitation))
+                        }
+                    }
+                } header: {
+                    Text("profile.invitations")
+                        .textStyle(.action200)
+                        .foregroundStyle(.foregroundSecondary)
+                }
             }
 
             Section {

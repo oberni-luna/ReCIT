@@ -3608,6 +3608,40 @@
         }
       }
     },
+    "sort.tip.drag.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick up a book here and drop it onto a shelf. The same gesture the other way takes it back off."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prenez un livre ici et déposez-le sur une étagère. Le geste inverse l'en retire."
+          }
+        }
+      }
+    },
+    "sort.tip.drag.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag to file"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glissez pour ranger"
+          }
+        }
+      }
+    },
     "Supprimer cette étagère ?" : {
 
     },

@@ -37,6 +37,7 @@ struct ManualSortView: View {
     @Environment(InventoryModel.self) private var inventoryModel
     @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(AppErrorReporter.self) private var errorReporter
+    @Environment(TipsStore.self) private var tipsStore
     @Environment(\.modelContext) private var modelContext
 
     @Environment(SortSessionModel.self) private var session
@@ -74,6 +75,12 @@ struct ManualSortView: View {
     /// the session: it is about a button that was pressed here, and it must not outlive the
     /// next change to the stack.
     @State private var notice: SortNotice?
+
+    /// The astuces put away with their cross on this visit. **Not** persisted and not
+    /// recorded as learned: a cross is "not now", so the card is owed again next time the
+    /// screen is opened. What ends an astuce for good is the gesture it teaches, which is
+    /// `TipsStore`'s business and not this screen's (PRD 0013).
+    @State private var closedTips: Set<SortTip> = []
 
     /// What the screen has to say before anyone has pressed anything here — set when the
     /// arrival itself is the outcome, which is the case for a run started on the bilan and
@@ -140,7 +147,14 @@ struct ManualSortView: View {
                     _ = file(bookId, into: sectionId, within: projection)
                 },
                 footer: .init(plan: plan, progress: session.applyProgress, notice: notice),
-                actions: actions
+                actions: actions,
+                tip: {
+                    // Nothing at all when nothing is due — not an empty view, which a stack
+                    // still spaces around, but no child, which costs no height.
+                    if dueTip(unshelvedBookCount: projection.unshelved.books.count) != nil {
+                        SortTipBanner(metrics: metrics, onClose: closeTip)
+                    }
+                }
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -152,6 +166,25 @@ struct ManualSortView: View {
             proxy.size.width
         } action: { width in
             containerWidth = width
+        }
+        // The astuce's parameter, set from the pure gate and from nowhere else. TipKit is left
+        // holding the order and the one-card-at-a-time rule; what is *due* is decided here,
+        // where it can be read (PRD 0013).
+        .onChange(of: dueTip(unshelvedBookCount: projection.unshelved.books.count), initial: true) { _, tip in
+            SortDragToFileTip.isDue = tip == .dragToFile
+            // Said out loud on arrival: a card that fades in over a carousel is nothing at all
+            // to someone who is not looking at it.
+            guard let tip else { return }
+            let spoken: String = Self.announcement(for: tip)
+            guard spoken.isEmpty == false else { return }
+            AccessibilityNotification.Announcement(spoken).post()
+        }
+        // **The invalidation is a fact of the session, not of the view.** The first drop the
+        // model *accepted* out of « Livres à ranger » is the gesture the astuce teaches; a
+        // refused drop teaches nothing, and only the model knows the difference.
+        .onChange(of: session.booksFiledFromUnshelved) { _, count in
+            guard count > 0, let userId = userModel.myUser?._id else { return }
+            tipsStore.markLearned(.dragToFile, userId: userId)
         }
         .navigationTitle("manual_sort.title")
         .navigationBarTitleDisplayMode(.inline)
@@ -226,6 +259,50 @@ struct ManualSortView: View {
             onApply: apply,
             onPropose: propose
         )
+    }
+
+    /// Which astuce the surface owes right now, if any.
+    ///
+    /// The whole rule is `SortTipGate`'s — this only hands it what it asks for and subtracts
+    /// the cards already put away on this visit, which is a fact about *this appearance* of
+    /// the screen and therefore has no business being persisted with the learned ones.
+    ///
+    /// `containerWidth` counts as part of "ready": the card's pointer is placed off the book
+    /// column's width, and a surface that has not been measured yet would aim it at the edge.
+    private func dueTip(unshelvedBookCount: Int) -> SortTip? {
+        guard let userId = userModel.myUser?._id else { return nil }
+
+        let due: SortTip? = SortTipGate.dueTip(
+            isReady: session.phase == .ready && containerWidth > 0,
+            unshelvedBookCount: unshelvedBookCount,
+            hasPendingChanges: session.hasPendingChanges,
+            proposalEntryPoint: .init(availability: autoSortModel.availability),
+            isApplying: session.isApplying,
+            isProposing: session.isProposing,
+            learnedTips: tipsStore.learnedTips(userId: userId)
+        )
+        guard let due, closedTips.contains(due) == false else { return nil }
+
+        return due
+    }
+
+    /// Puts the card showing away for this visit. It teaches nothing: the account's record is
+    /// untouched, so the astuce is owed again the next time the screen is opened.
+    private func closeTip() {
+        guard let closing = dueTip(unshelvedBookCount: session.projection.unshelved.books.count) else { return }
+        closedTips.insert(closing)
+    }
+
+    /// What VoiceOver is told when a card arrives — the same two lines the card shows, read as
+    /// one sentence, off the tip's own resources so the two cannot drift apart.
+    private static func announcement(for tip: SortTip) -> String {
+        switch tip {
+        case .dragToFile:
+            "\(String(localized: SortDragToFileTip.titleKey)) \(String(localized: SortDragToFileTip.messageKey))"
+        // Issues 0079 and 0080: neither astuce is ever due yet, so neither has copy to read.
+        case .nothingSavedYet, .letItPropose:
+            ""
+        }
     }
 
     /// Records the étagère the form just named, with the dropped book on it when the tile was

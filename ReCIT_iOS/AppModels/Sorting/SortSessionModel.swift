@@ -73,6 +73,20 @@ final class SortSessionModel {
     /// guard cannot be written for the apply and forgotten for the proposal.
     var isBusy: Bool { isApplying || isProposing }
 
+    /// How many books this session has taken out of « Livres à ranger » and filed onto an
+    /// étagère. Counted for one reason: it is the gesture the surface's first astuce teaches,
+    /// and "has done it once" has to be a fact of the model rather than of a view (PRD 0013).
+    ///
+    /// **Only accepted moves count.** A drop onto the section a book already sits in records
+    /// no change, and a drop made while a run owns the stack records nothing at all — neither
+    /// taught the user anything, and a view watching for gestures rather than for changes
+    /// would count both.
+    ///
+    /// A counter rather than a flag, so it reads the same way as `proposalsLanded` and so a
+    /// future reader can tell one drop from twenty. Not persisted: what an account has
+    /// *learned* belongs to `TipsStore`, and this is only the session's account of it.
+    private(set) var booksFiledFromUnshelved: Int = 0
+
     /// How many proposals have landed on the stack. The surface watches it to play the
     /// arrival: a proposal fills several étagères at once, and without motion the screen just
     /// jumps from one library to another (PRD 0009). A counter rather than a flag, so two
@@ -258,6 +272,12 @@ final class SortSessionModel {
 
         guard let change = SortChange.move(bookId: bookId, from: origin, to: destination) else { return }
         changes.append(change)
+
+        // Counted after the change is accepted, and only for the one direction the astuce
+        // teaches: out of the pile, onto an étagère.
+        if origin == .unshelved, destination != .unshelved {
+            booksFiledFromUnshelved += 1
+        }
     }
 
     /// Throws the stack away and hands the screen back its snapshot. The other half of

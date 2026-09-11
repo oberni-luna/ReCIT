@@ -37,7 +37,7 @@
 
 import SwiftUI
 
-struct SortUnshelvedPanelView: View {
+struct SortUnshelvedPanelView<Tip: View>: View {
     let books: [AutoSortBook]
     let metrics: SortGridMetrics
     /// Whether the opening sync is still running. The panel is drawn and inert, rather than
@@ -56,6 +56,11 @@ struct SortUnshelvedPanelView: View {
     let onFile: (String, SortSection.ID) -> Void
     let footer: SortFooter
     let actions: SortActions
+    /// The astuce owed to whoever is looking at this carousel, or nothing. Handed in rather
+    /// than built here: the panel draws the books, it does not decide what the screen has to
+    /// teach — and a `nil` one must cost no space at all, which a passed-in view gives for
+    /// free and a flag would not.
+    @ViewBuilder let tip: () -> Tip
 
     /// Whether a dragged book is hovering the row of books. The **whole row** is the target,
     /// header included: the order in here is arrival order, so aiming at a slot between two
@@ -124,6 +129,10 @@ struct SortUnshelvedPanelView: View {
     private var dropZone: some View {
         VStack(alignment: .leading, spacing: .sMedium) {
             ShelfSectionHeader(title: header)
+
+            // Between the header and the covers: the card's pointer has to fall on the first
+            // one, and nothing the user is about to drag — or drop onto — may be under it.
+            tip()
 
             if isLoading {
                 DesignSystem.Color.clear.color

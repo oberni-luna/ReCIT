@@ -18,7 +18,7 @@
 //  breathing under a run the user is watching. Both are one guard rather than a clause
 //  repeated per astuce, so a future fourth astuce cannot forget them.
 //
-//  See PRD 0013 and issue 0077.
+//  See PRD 0013 and issues 0077 and 0079.
 //
 
 /// The rule that decides which astuce the sorting surface owes the user.
@@ -37,7 +37,7 @@ enum SortTipGate {
     ///   - unshelvedBookCount: how many books sit in « Livres à ranger ». SORT-1 aims at the
     ///     first of them, so with none there is nothing to aim at.
     ///   - hasPendingChanges: whether the stack holds work that « Appliquer » would write.
-    ///     SORT-2's own clause (issue 0079).
+    ///     SORT-2's own clause: the astuce speaks about a button that has something to do.
     ///   - proposalEntryPoint: the shape the proposal control takes on this device, derived
     ///     from `AutoSortModel.availability` exactly as the button itself derives it — so
     ///     the astuce and the control it describes cannot disagree. SORT-3's own clause
@@ -66,10 +66,13 @@ enum SortTipGate {
                 if unshelvedBookCount > 0 { return tip }
 
             case .nothingSavedYet:
-                // SORT-2 waits for work worth saving, and therefore for SORT-1 to have
-                // served. Wired by issue 0079; until then it is never due, which is why
-                // `hasPendingChanges` is read by nothing yet.
-                continue
+                // The screen's most important decision — nothing leaves before « Appliquer »
+                // — said once it concerns the reader, and not a moment before: with an empty
+                // stack there is nothing at stake and the card would point at an inert
+                // button. It is the same clause that silences it again when everything is
+                // discarded. Work worth saving also means SORT-1 has served, so the two
+                // cannot compete for the same visit.
+                if hasPendingChanges { return tip }
 
             case .letItPropose:
                 // SORT-3 only exists where the control it describes is drawn, and only once

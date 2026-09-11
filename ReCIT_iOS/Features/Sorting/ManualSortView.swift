@@ -94,6 +94,10 @@ struct ManualSortView: View {
         let projection: SortProjection = session.projection
         let plan: SortWritePlan = session.writePlan
         let metrics: SortGridMetrics = .init(containerWidth: containerWidth)
+        // Asked once per render, and read by the two places a card can be mounted and by the
+        // parameters the tips are driven with — so one render cannot answer the question two
+        // different ways and put two cards on the screen.
+        let due: SortTip? = dueTip(unshelvedBookCount: projection.unshelved.books.count)
 
         return Group {
             if session.phase == .syncing || containerWidth == 0 {
@@ -151,10 +155,19 @@ struct ManualSortView: View {
                 tip: {
                     // Nothing at all when nothing is due — not an empty view, which a stack
                     // still spaces around, but no child, which costs no height.
-                    if dueTip(unshelvedBookCount: projection.unshelved.books.count) != nil {
-                        SortTipBanner(metrics: metrics, onClose: closeTip)
+                    if due == .dragToFile {
+                        SortTipBanner(aim: .firstUnshelvedBook(metrics), onClose: closeTip)
                     }
-                }
+                },
+                applyTip: {
+                    // The same card, mounted where it can point at the button it talks about.
+                    // The two places are exclusive by construction: the gate returns one
+                    // astuce, so at most one of these two conditions can hold.
+                    if due == .nothingSavedYet {
+                        SortTipBanner(aim: .applyButton, onClose: closeTip)
+                    }
+                },
+                isApplyTipShowing: due == .nothingSavedYet
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -170,8 +183,9 @@ struct ManualSortView: View {
         // The astuce's parameter, set from the pure gate and from nowhere else. TipKit is left
         // holding the order and the one-card-at-a-time rule; what is *due* is decided here,
         // where it can be read (PRD 0013).
-        .onChange(of: dueTip(unshelvedBookCount: projection.unshelved.books.count), initial: true) { _, tip in
+        .onChange(of: due, initial: true) { _, tip in
             SortDragToFileTip.isDue = tip == .dragToFile
+            SortNothingSavedYetTip.isDue = tip == .nothingSavedYet
             // Said out loud on arrival: a card that fades in over a carousel is nothing at all
             // to someone who is not looking at it.
             guard let tip else { return }
@@ -185,6 +199,13 @@ struct ManualSortView: View {
         .onChange(of: session.booksFiledFromUnshelved) { _, count in
             guard count > 0, let userId = userModel.myUser?._id else { return }
             tipsStore.markLearned(.dragToFile, userId: userId)
+        }
+        // And the same for SORT-2: the first run this session *launched*. Learning what
+        // « Appliquer » does by pressing it is enough, whatever the run then reports — and
+        // the press the model refused, on a screen already busy, is not a press.
+        .onChange(of: session.appliesLaunched) { _, count in
+            guard count > 0, let userId = userModel.myUser?._id else { return }
+            tipsStore.markLearned(.nothingSavedYet, userId: userId)
         }
         .navigationTitle("manual_sort.title")
         .navigationBarTitleDisplayMode(.inline)
@@ -299,8 +320,10 @@ struct ManualSortView: View {
         switch tip {
         case .dragToFile:
             "\(String(localized: SortDragToFileTip.titleKey)) \(String(localized: SortDragToFileTip.messageKey))"
-        // Issues 0079 and 0080: neither astuce is ever due yet, so neither has copy to read.
-        case .nothingSavedYet, .letItPropose:
+        case .nothingSavedYet:
+            "\(String(localized: SortNothingSavedYetTip.titleKey)) \(String(localized: SortNothingSavedYetTip.messageKey))"
+        // Issue 0080: SORT-3 is never due yet, so it has no copy to read.
+        case .letItPropose:
             ""
         }
     }

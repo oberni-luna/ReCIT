@@ -26,8 +26,8 @@ enum SortTip: String, CaseIterable, Hashable, Sendable {
     /// SORT-1 — take a book from « Livres à ranger » and drop it on an étagère, and the
     /// gesture that puts it back. Learned by the first accepted move out of the carousel.
     case dragToFile = "sort.dragToFile"
-    /// SORT-2 — nothing is written until « Appliquer ». Learned by the first apply.
-    /// Not yet due: see issue 0079.
+    /// SORT-2 — nothing is written until « Appliquer ». Due as soon as there is something
+    /// to save, learned by the first apply launched.
     case nothingSavedYet = "sort.nothingSavedYet"
     /// SORT-3 — the iPhone can fill the étagères on its own. Learned by the first proposal
     /// asked for. Not yet due: see issue 0080.

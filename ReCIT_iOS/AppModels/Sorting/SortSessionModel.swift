@@ -87,6 +87,20 @@ final class SortSessionModel {
     /// *learned* belongs to `TipsStore`, and this is only the session's account of it.
     private(set) var booksFiledFromUnshelved: Int = 0
 
+    /// How many runs this session has started. Counted for the same reason as
+    /// `booksFiledFromUnshelved`: it is the gesture the surface's second astuce teaches —
+    /// « Appliquer » is what writes — and "has done it once" has to be a fact of the model
+    /// rather than of a view (PRD 0013).
+    ///
+    /// **Launched, not landed.** Pressing the button is what teaches what it does; whether
+    /// the run then succeeds, fails halfway or finds a stack that coalesces to nothing
+    /// changes what the screen reports, not what the user has learned. Only a press the model
+    /// *accepted* counts, so a tap on a busy screen teaches nothing.
+    ///
+    /// Not persisted: what an account has *learned* belongs to `TipsStore`, and this is only
+    /// the session's account of it.
+    private(set) var appliesLaunched: Int = 0
+
     /// How many proposals have landed on the stack. The surface watches it to play the
     /// arrival: a proposal fills several étagères at once, and without motion the screen just
     /// jumps from one library to another (PRD 0009). A counter rather than a flag, so two
@@ -361,6 +375,11 @@ final class SortSessionModel {
         modelContext: ModelContext
     ) {
         guard isBusy == false, phase == .ready else { return }
+
+        // Counted here, on the accepted press, and before the plan is weighed: what the user
+        // has learned is what the button is for, and a stack that reduces to no work teaches
+        // that just as well as one that writes six étagères.
+        appliesLaunched += 1
 
         let plan: SortWritePlan = writePlan
         guard plan.hasWork else {

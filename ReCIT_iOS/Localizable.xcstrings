@@ -3744,6 +3744,40 @@
         }
       }
     },
+    "sort.tip.nothingSaved.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your shelves only change once you tap “Save this arrangement”. The line just below says what will be saved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos étagères ne changent qu’après « Appliquer le rangement ». La phrase juste en dessous dit ce qui sera enregistré."
+          }
+        }
+      }
+    },
+    "sort.tip.nothingSaved.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing is saved yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n’est encore enregistré"
+          }
+        }
+      }
+    },
     "Supprimer cette étagère ?" : {
 
     },

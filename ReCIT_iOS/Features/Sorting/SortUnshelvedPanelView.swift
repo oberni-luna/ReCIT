@@ -34,10 +34,18 @@
 //  share the panel but are not somewhere a book can be let go, and the outline that shows the
 //  target says so — it stops at the rule above them.
 //
+//  **Two places an astuce can stand, because two things get pointed at** (PRD 0013): the card
+//  about the drag goes inside the drop zone, above the first cover, and the card about
+//  « Appliquer » goes over the block of controls, above the button. Both are handed in as
+//  views — the panel draws books and buttons, it does not decide what the screen has to teach
+//  — and both cost no height at all when nothing is owed. Neither ever lies over a control,
+//  which is also what keeps the end-to-end scenario's `e2e.sort.apply` and `e2e.sortBook`
+//  reachable.
+//
 
 import SwiftUI
 
-struct SortUnshelvedPanelView<Tip: View>: View {
+struct SortUnshelvedPanelView<Tip: View, ApplyTip: View>: View {
     let books: [AutoSortBook]
     let metrics: SortGridMetrics
     /// Whether the opening sync is still running. The panel is drawn and inert, rather than
@@ -61,6 +69,18 @@ struct SortUnshelvedPanelView<Tip: View>: View {
     /// teach — and a `nil` one must cost no space at all, which a passed-in view gives for
     /// free and a flag would not.
     @ViewBuilder let tip: () -> Tip
+    /// The astuce owed about « Appliquer », or nothing. It stands over the block of controls
+    /// rather than in the carousel, because that is what it is about — and above the button
+    /// rather than on it, because a card over « Appliquer » would hide the control it is
+    /// explaining, and the e2e scenario's `e2e.sort.apply` with it.
+    @ViewBuilder let applyTip: () -> ApplyTip
+    /// Whether that astuce is up, and therefore whether the pointer aimed at « Appliquer » is
+    /// drawn above the bar. A flag beside the slot, and not a look at the slot's content,
+    /// because SwiftUI cannot be asked whether a `ViewBuilder` built anything — and because
+    /// the pointer is a **layout sibling** of the bar rather than part of the card: it rides
+    /// the guide the bar publishes (`HorizontalAlignment.sortApply`), which a full-width card
+    /// cannot do without dragging the whole column sideways.
+    let isApplyTipShowing: Bool
 
     /// Whether a dragged book is hovering the row of books. The **whole row** is the target,
     /// header included: the order in here is arrival order, so aiming at a slot between two
@@ -72,10 +92,23 @@ struct SortUnshelvedPanelView<Tip: View>: View {
         VStack(alignment: .leading, spacing: .sMedium) {
             dropZone
 
-            VStack(alignment: .leading, spacing: .sMedium) {
-                ManualSortActionBar(actions: actions)
+            VStack(alignment: .leading, spacing: .zero) {
+                // Nothing at all when no astuce is owed: an absent card and an absent pointer
+                // cost no height, which is why the spacing here is zero and the recap carries
+                // its own gap. With one owed, the card stands directly on its pointer and the
+                // pointer directly on the bar, as the mockup has it.
+                applyTip()
+
+                VStack(alignment: .sortApply, spacing: .zero) {
+                    if isApplyTipShowing {
+                        TipPointerView()
+                    }
+
+                    ManualSortActionBar(actions: actions)
+                }
 
                 SortFooterView(footer: footer)
+                    .padding(.top, .sMedium)
             }
             .padding(.horizontal, .medium)
             .padding(.top, .medium)

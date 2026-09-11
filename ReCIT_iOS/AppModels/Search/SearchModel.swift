@@ -42,12 +42,29 @@ final class SearchModel {
         }
     }
 
-    func searchEntity(query: String, lang: String? = "fr", limit: Int = 15, offset: Int = 0) async throws -> [SearchResult] {
+    /// Searches inventaire.io for the entity types asked for — `SearchSuggestion` carries them,
+    /// so the row a user tapped and the request that goes out name the same thing. The default
+    /// is both, which is what a query with no suggestion behind it means.
+    func searchEntity(
+        query: String,
+        entityTypes: [SearchResultType] = [.humans, .works],
+        lang: String? = "fr",
+        limit: Int = 15,
+        offset: Int = 0
+    ) async throws -> [SearchResult] {
         let trimmedQuery: String = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedQuery.isEmpty == false else { return [] }
 
+        let types: String = entityTypes.isEmpty
+            ? "humans|works"
+            : entityTypes.map(\.rawValue).joined(separator: "|")
+        // A title can hold an ampersand or a plus, both of which end a query parameter and
+        // would truncate the search rather than fail it.
+        let search: String = trimmedQuery.addingPercentEncoding(
+            withAllowedCharacters: .urlQueryAllowed.subtracting(.init(charactersIn: "&+=?#"))
+        ) ?? trimmedQuery
         let language: String = lang ?? "fr"
-        let endpoint: String = "/api/search?types=humans|works&search=\(trimmedQuery)&lang=\(language)&limit=\(limit)&offset=\(offset)&exact=false"
+        let endpoint: String = "/api/search?types=\(types)&search=\(search)&lang=\(language)&limit=\(limit)&offset=\(offset)&exact=false"
 
         let response: SearchResultsDTO? = try await apiService.fetchData(fromEndpoint: endpoint, debug: true)
 

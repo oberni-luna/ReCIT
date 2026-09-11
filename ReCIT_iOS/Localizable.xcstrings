@@ -1105,6 +1105,108 @@
         }
       }
     },
+    "inventory.search.remote_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher sur inventaire.io"
+          }
+        }
+      }
+    },
+    "inventory.search.results.humans %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authors · %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur·ices · %lld"
+          }
+        }
+      }
+    },
+    "inventory.search.results.works %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books · %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres · %lld"
+          }
+        }
+      }
+    },
+    "inventory.search.suggestion.everything %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search %@ on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher %@ sur inventaire.io"
+          }
+        }
+      }
+    },
+    "inventory.search.suggestion.humans %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authors containing %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur·ices contenant %@"
+          }
+        }
+      }
+    },
+    "inventory.search.suggestion.works %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books containing %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres contenant %@"
+          }
+        }
+      }
+    },
     "list.added_to_named %@" : {
       "extractionState" : "manual",
       "localizations" : {

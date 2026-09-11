@@ -14,6 +14,9 @@ import SwiftData
 struct ShelvesContent: View {
     let user: User
     let searchText: String
+    /// The search that has been sent, if one has — owned by `ShelvesView`, because the
+    /// keyboard's « rechercher » key only reaches the field from above `.searchable`.
+    @Binding var submission: SearchSuggestion?
     @Binding var path: NavigationPath
 
     @Environment(SortFlowPresentation.self) private var sortFlow
@@ -35,9 +38,15 @@ struct ShelvesContent: View {
     private let horizontalPadding: CGFloat = 12
     private let gutter: CGFloat = 14
 
-    init(user: User, searchText: String, path: Binding<NavigationPath>) {
+    init(
+        user: User,
+        searchText: String,
+        submission: Binding<SearchSuggestion?>,
+        path: Binding<NavigationPath>
+    ) {
         self.user = user
         self.searchText = searchText
+        self._submission = submission
         self._path = path
 
         let ownerId: String = user._id
@@ -57,8 +66,13 @@ struct ShelvesContent: View {
         if isSearching {
             // The field used to filter this user's own books and stop there, which is how a
             // book two streets away came back as an empty list. It now opens the merged search
-            // surface: my copies and my friends', past three characters. See PRD 0012.
-            InventorySearchContent(user: user, searchText: searchText)
+            // surface: my copies and my friends', past three characters, and the three ways on
+            // to inventaire.io under them. See PRD 0012.
+            InventorySearchContent(
+                user: user,
+                searchText: searchText,
+                submission: $submission
+            )
         } else {
             GeometryReader { geo in
                 let cardWidth: CGFloat = geo.size.width * 0.86

@@ -7,15 +7,25 @@
 //  driven by `SearchPhase`, which is what lets the field stop meaning "filter my shelves" and
 //  start meaning "find this book".
 //
-//  This first slice renders one of the four phases. Under three characters the screen shows
+//  Three of the four phases draw something now. Under three characters the screen still shows
 //  nothing new rather than an empty section, which is the whole point of the threshold living
-//  in `SearchPhase`: the silence is a decision, not an accident. `recents` and `results` are
-//  computed here already and deliberately draw nothing until issues 0072 and 0071 give them
-//  something to draw.
+//  in `SearchPhase`: the silence is a decision, not an accident. `recents` waits for the
+//  recent-search store (issue 0072).
 //
 //  Both `@Query`s are the reactive ones ADR 0001 asks for — mine by owner id, my friends' by
 //  its negation — and the matching happens in memory over what they already hold. No fetch, no
-//  server call, nothing persisted: searching is a read.
+//  server call, nothing persisted: searching my own shelves is a read.
+//
+//  **The local section stays on screen once a search has been sent.** It is the half of the
+//  answer this device already has, so a call that is still in flight — or one that failed —
+//  never blanks the books the user could already see. That is also why a failure goes out
+//  through `AppErrorReporter`, the app's one channel for background failures, instead of
+//  becoming a row where results should be.
+//
+//  The remote call is the one piece of state this view owns, and it owns it because nothing
+//  about it is persisted: `.task(id:)` keyed on the submission runs it, and **the same key
+//  cancels it** — editing the query takes the screen out of `results`, which makes the active
+//  submission `nil`, which cancels the call in flight and clears what it had brought back.
 //
 //  See PRD 0012.
 //
@@ -26,18 +36,35 @@ import SwiftUI
 struct InventorySearchContent: View {
     let user: User
     let searchText: String
+    /// What has been sent, and what it asked for. A suggestion rather than a string, because
+    /// the keyboard's « rechercher » key and a tap on a row are the same gesture with different
+    /// entity types — see `SearchSuggestion`.
+    @Binding var submission: SearchSuggestion?
 
     @Environment(\.isSearching) private var isSearching
+    @Environment(SearchModel.self) private var searchModel
+    @Environment(AppErrorReporter.self) private var errorReporter
 
     @Query private var myItems: [InventoryItem]
     @Query private var friendsItems: [InventoryItem]
 
+    /// What inventaire.io answered, for as long as the screen is showing that answer. Not
+    /// persisted, and not `SearchModel`'s business: it is one screen's view of one query, and
+    /// an app-scoped model holding it would outlive the question.
+    @State private var remoteResults: [SearchResult] = []
+
+    /// How long a submission waits before it leaves. Two submissions in a row — the keyboard
+    /// key, then a suggestion — cost one call rather than two.
+    private let debounce: Duration = .milliseconds(250)
+
     init(
         user: User,
-        searchText: String
+        searchText: String,
+        submission: Binding<SearchSuggestion?>
     ) {
         self.user = user
         self.searchText = searchText
+        self._submission = submission
 
         let ownerId: String = user._id
         _myItems = Query(
@@ -52,19 +79,34 @@ struct InventorySearchContent: View {
         )
     }
 
-    /// Nothing has been submitted yet: the keyboard's « rechercher » key and the inventaire.io
-    /// suggestions arrive with issue 0071, and until they do no query can reach `results`.
     private var phase: SearchPhase? {
         SearchPhase.current(
             isFocused: isSearching,
             query: searchText,
-            submittedQuery: nil
+            submittedQuery: submission?.query
         )
     }
 
-    /// The query the local section searches for — set only past the threshold.
+    /// The query the local section searches for — set past the threshold, and kept while the
+    /// remote results are showing: what I own is part of the answer either way.
     private var localQuery: String? {
-        if case .suggesting(let query) = phase { query } else { nil }
+        switch phase {
+        case .suggesting(let query), .results(let query):
+            query
+        default:
+            nil
+        }
+    }
+
+    /// The submission the screen is currently showing results for, or `nil` — the query has
+    /// been edited since, or nothing was ever sent. It is the `.task` key, so it is also what
+    /// cancels a call whose query the user has already replaced.
+    private var activeSubmission: SearchSuggestion? {
+        guard case .results(let query) = phase, let submission, submission.query == query else {
+            return nil
+        }
+
+        return submission
     }
 
     var body: some View {
@@ -77,8 +119,46 @@ struct InventorySearchContent: View {
                     friendsItems: friendsItems
                 )
             }
+
+            if case .suggesting(let query) = phase {
+                InventorySearchSuggestionsSection(query: query) { suggestion in
+                    submission = suggestion
+                }
+            }
+
+            if case .results = phase {
+                InventorySearchResultsSection(results: remoteResults)
+            }
         }
         .listStyle(.plain)
         .applyListBackground()
+        .task(id: activeSubmission) {
+            await search()
+        }
+    }
+
+    /// Runs the submitted search, or clears what the last one brought back when there is no
+    /// longer one to run. Never throws: a failure here is a background failure like any other,
+    /// and the user reads it in the SnackBar `MainTabView` observes.
+    private func search() async {
+        remoteResults = []
+        guard let activeSubmission else { return }
+
+        // A cancelled sleep is a query that moved on, not an error.
+        try? await Task.sleep(for: debounce)
+        guard !Task.isCancelled else { return }
+
+        do {
+            remoteResults = try await searchModel.searchEntity(
+                query: activeSubmission.query,
+                entityTypes: activeSubmission.entityTypes
+            )
+        } catch {
+            // `URLSession` reports a cancelled request as an error of its own rather than as a
+            // `CancellationError`, and a query the user has already replaced is nothing to
+            // report.
+            guard !Task.isCancelled else { return }
+            errorReporter.report(error)
+        }
     }
 }

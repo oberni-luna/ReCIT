@@ -94,6 +94,28 @@ struct SearchPhaseTests {
         #expect(phase("monte crist", submitted: "monte cristo") == .suggesting(query: "monte crist"))
     }
 
+    @Test("Deleting back under the threshold after a search leaves the results too")
+    func editingUnderTheThresholdAfterSubmitLeavesResults() {
+        #expect(phase("mo", submitted: "monte cristo") == .typing(query: "mo"))
+        #expect(phase("", submitted: "monte cristo") == .recents)
+    }
+
+    @Test("Typing the sent query back reaches its results again rather than a third state")
+    func retypingTheSubmittedQueryReturnsToResults() {
+        #expect(phase("monte crist", submitted: "monte cristo") == .suggesting(query: "monte crist"))
+        #expect(phase("monte cristo", submitted: "monte cristo") == .results(query: "monte cristo"))
+    }
+
+    @Test("Padding typed around a sent query is not an edit")
+    func paddingDoesNotLeaveTheResults() {
+        #expect(phase("  monte cristo ", submitted: "monte cristo") == .results(query: "monte cristo"))
+    }
+
+    @Test("A search sent for something else does not claim the query being typed")
+    func anUnrelatedSubmissionDoesNotClaimTheQuery() {
+        #expect(phase("hugo", submitted: "monte cristo") == .suggesting(query: "hugo"))
+    }
+
     // MARK: - Focus
 
     @Test("Losing the focus with nothing sent closes the search surface")

@@ -4,8 +4,8 @@
 //
 //  The synced state of the bookshelf: a horizontal, snapping carousel of étagères
 //  (A→Z) over a vertical list of all the user's books. Both are `@Query`-driven so
-//  they stay reactive across syncs. Focusing the search hides the shelves and shows
-//  the flat filtered list. See ADR 0003 / PRD 0001.
+//  they stay reactive across syncs. Focusing the search hides the shelves and gives the
+//  screen to the merged search surface. See ADR 0003 / PRD 0001 / PRD 0012.
 //
 
 import SwiftUI
@@ -55,15 +55,10 @@ struct ShelvesContent: View {
 
     var body: some View {
         if isSearching {
-            List {
-                InventoryListContent(
-                    user: user,
-                    searchText: searchText,
-                    filterParameter: .userInventory,
-                    sortParameter: .alphabetical
-                )
-            }
-            .listStyle(.plain)
+            // The field used to filter this user's own books and stop there, which is how a
+            // book two streets away came back as an empty list. It now opens the merged search
+            // surface: my copies and my friends', past three characters. See PRD 0012.
+            InventorySearchContent(user: user, searchText: searchText)
         } else {
             GeometryReader { geo in
                 let cardWidth: CGFloat = geo.size.width * 0.86

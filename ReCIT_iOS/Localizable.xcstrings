@@ -1054,6 +1054,23 @@
         }
       }
     },
+    "inventory.search.local_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In my books and my friends’"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans mes livres et chez mes amis"
+          }
+        }
+      }
+    },
     "list.empty" : {
       "localizations" : {
         "en" : {

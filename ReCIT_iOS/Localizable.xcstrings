@@ -3812,6 +3812,40 @@
         }
       }
     },
+    "sort.tip.propose.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone reads the titles and the genres, and fills the shelves. You correct its suggestion before anything is saved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre iPhone lit les titres et les genres, et remplit les étagères. À vous de corriger avant d’appliquer."
+          }
+        }
+      }
+    },
+    "sort.tip.propose.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let it suggest an arrangement"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laissez proposer un rangement"
+          }
+        }
+      }
+    },
     "Supprimer cette étagère ?" : {
 
     },

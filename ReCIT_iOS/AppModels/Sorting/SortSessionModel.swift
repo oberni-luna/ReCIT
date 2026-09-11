@@ -107,6 +107,17 @@ final class SortSessionModel {
     /// proposals in a row are two arrivals.
     private(set) var proposalsLanded: Int = 0
 
+    /// How many proposals this session has asked the model for. Counted for the same reason
+    /// as `booksFiledFromUnshelved` and `appliesLaunched`: asking for one is the gesture the
+    /// surface's third astuce teaches, and "has done it once" has to be a fact of the model
+    /// rather than of a view (PRD 0013).
+    ///
+    /// **Asked, not landed**, which is why this is not `proposalsLanded`: what teaches the
+    /// user what the wand does is the asking, whatever the model then finds — a run that
+    /// comes back with nothing to propose has still shown what the button is for. And only a
+    /// press the model took counts: a tap on a screen already busy returns above this line.
+    private(set) var proposalsRequested: Int = 0
+
     /// The run's ledger, or `nil` before one has been started. Kept after the run
     /// settles: it is the account of what landed, and a user who left mid-apply has to
     /// find it on their return — which is the whole reason this model is app-scoped.
@@ -337,6 +348,7 @@ final class SortSessionModel {
         guard isBusy == false, phase == .ready else { return }
 
         isProposing = true
+        proposalsRequested += 1
         defer { isProposing = false }
 
         let plan: AutoSortPlan = await autoSortModel.proposePlan(

@@ -7,12 +7,12 @@
 //  (PRD 0013).
 //
 //  It exists because the two aims are placed by two different mechanisms, and the difference
-//  is worth naming rather than leaving as two call sites that look alike: the first cover of
-//  a carousel is at a measured inset the surface can compute, whereas « Appliquer » is
-//  wherever the action bar's own layout puts it and can only be found through the alignment
-//  guide that bar publishes.
+//  is worth naming rather than leaving as call sites that look alike: the first cover of a
+//  carousel is at a measured inset the surface can compute, whereas the two buttons are
+//  wherever the action bar's own layout puts them and can only be found through the alignment
+//  guides that bar publishes.
 //
-//  See issues 0077 and 0079.
+//  See issues 0077, 0079 and 0080.
 //
 
 import SwiftUI
@@ -29,6 +29,12 @@ enum SortTipAim {
     /// the whole column sideways.
     case applyButton
 
+    /// The proposal control — the wand in a circle at the end of the same bar. Its pointer is
+    /// laid out the same way « Appliquer »'s is, on `HorizontalAlignment.sortProposal`: the
+    /// bar closes up around this control when the device cannot run the model, so nobody else
+    /// knows where it lands.
+    case proposalButton
+
     /// How far in the pointer sits, for the aims that place it under the card themselves.
     /// `nil` where the pointer is someone else's business.
     var pointerInset: CGFloat? {
@@ -40,8 +46,19 @@ enum SortTipAim {
 
             return max(0, firstBookCentre - TipPointerView.size.width / 2)
 
-        case .applyButton:
+        case .applyButton, .proposalButton:
             return nil
+        }
+    }
+
+    /// The guide the pointer rides when the action bar is the one placing it, and `nil` for
+    /// the aims that carry their own pointer under the card. It is what tells the panel both
+    /// whether to draw a pointer above the bar and which control to aim it at.
+    var barPointerAlignment: HorizontalAlignment? {
+        switch self {
+        case .firstUnshelvedBook: nil
+        case .applyButton: .sortApply
+        case .proposalButton: .sortProposal
         }
     }
 
@@ -51,7 +68,7 @@ enum SortTipAim {
     var cardInset: DesignSystem.Spacing {
         switch self {
         case .firstUnshelvedBook: .medium
-        case .applyButton: .zero
+        case .applyButton, .proposalButton: .zero
         }
     }
 }

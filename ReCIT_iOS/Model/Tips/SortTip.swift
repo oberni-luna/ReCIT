@@ -29,7 +29,8 @@ enum SortTip: String, CaseIterable, Hashable, Sendable {
     /// SORT-2 — nothing is written until « Appliquer ». Due as soon as there is something
     /// to save, learned by the first apply launched.
     case nothingSavedYet = "sort.nothingSavedYet"
-    /// SORT-3 — the iPhone can fill the étagères on its own. Learned by the first proposal
-    /// asked for. Not yet due: see issue 0080.
+    /// SORT-3 — the iPhone can fill the étagères on its own, and its proposal is corrected
+    /// before it is applied. Due only where the control is live and once SORT-1 has served,
+    /// learned by the first proposal asked for.
     case letItPropose = "sort.letItPropose"
 }

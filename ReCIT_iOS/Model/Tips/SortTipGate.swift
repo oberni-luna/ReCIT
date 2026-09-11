@@ -18,7 +18,7 @@
 //  breathing under a run the user is watching. Both are one guard rather than a clause
 //  repeated per astuce, so a future fourth astuce cannot forget them.
 //
-//  See PRD 0013 and issues 0077 and 0079.
+//  See PRD 0013 and issues 0077, 0079 and 0080.
 //
 
 /// The rule that decides which astuce the sorting surface owes the user.
@@ -40,8 +40,7 @@ enum SortTipGate {
     ///     SORT-2's own clause: the astuce speaks about a button that has something to do.
     ///   - proposalEntryPoint: the shape the proposal control takes on this device, derived
     ///     from `AutoSortModel.availability` exactly as the button itself derives it — so
-    ///     the astuce and the control it describes cannot disagree. SORT-3's own clause
-    ///     (issue 0080).
+    ///     the astuce and the control it describes cannot disagree. SORT-3's own clause.
     ///   - isApplying: whether a run is writing right now.
     ///   - isProposing: whether the on-device model is working out a rangement right now.
     ///   - learnedTips: what this account has already been taught, by doing the gesture.
@@ -75,11 +74,19 @@ enum SortTipGate {
                 if hasPendingChanges { return tip }
 
             case .letItPropose:
-                // SORT-3 only exists where the control it describes is drawn, and only once
-                // the drag has been learned — the proposal is help with a gesture, not a way
-                // round it. Wired by issue 0080, which is why `proposalEntryPoint` is read
-                // by nothing yet.
-                continue
+                // SORT-3 only exists where the control it describes can be pressed, and only
+                // once the drag has been learned — the proposal is help with a gesture, not a
+                // way round it, and offering it first would teach the user never to file
+                // anything themselves.
+                //
+                // `isEnabled` rather than `isVisible`: a greyed button explains itself with
+                // its own alert, and a card promising that the iPhone reads the titles would
+                // be promising something the device cannot do right now. Switching Apple
+                // Intelligence on, or finishing the download, therefore brings the astuce and
+                // the live button together — the caller derives this entry point from the
+                // observable `AutoSortModel.availability` in its body, so neither waits for a
+                // relaunch.
+                if proposalEntryPoint.isEnabled, learnedTips.contains(.dragToFile) { return tip }
             }
         }
 

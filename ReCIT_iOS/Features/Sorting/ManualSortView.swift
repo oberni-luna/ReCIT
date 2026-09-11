@@ -98,6 +98,9 @@ struct ManualSortView: View {
         // parameters the tips are driven with — so one render cannot answer the question two
         // different ways and put two cards on the screen.
         let due: SortTip? = dueTip(unshelvedBookCount: projection.unshelved.books.count)
+        // Read once too, and for the same reason: the slot over the controls and the pointer
+        // riding the bar's guide have to be told the same thing about the same card.
+        let barAim: SortTipAim? = Self.barAim(for: due)
 
         return Group {
             if session.phase == .syncing || containerWidth == 0 {
@@ -159,15 +162,16 @@ struct ManualSortView: View {
                         SortTipBanner(aim: .firstUnshelvedBook(metrics), onClose: closeTip)
                     }
                 },
-                applyTip: {
-                    // The same card, mounted where it can point at the button it talks about.
-                    // The two places are exclusive by construction: the gate returns one
-                    // astuce, so at most one of these two conditions can hold.
-                    if due == .nothingSavedYet {
-                        SortTipBanner(aim: .applyButton, onClose: closeTip)
+                barTip: {
+                    // The same card, mounted where it can point at the button it talks about
+                    // — « Appliquer » or the wand. The two places are exclusive by
+                    // construction: the gate returns one astuce, so a card in the carousel and
+                    // a card over the controls can never both be built.
+                    if let barAim {
+                        SortTipBanner(aim: barAim, onClose: closeTip)
                     }
                 },
-                isApplyTipShowing: due == .nothingSavedYet
+                barTipAim: barAim
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -186,6 +190,7 @@ struct ManualSortView: View {
         .onChange(of: due, initial: true) { _, tip in
             SortDragToFileTip.isDue = tip == .dragToFile
             SortNothingSavedYetTip.isDue = tip == .nothingSavedYet
+            SortLetItProposeTip.isDue = tip == .letItPropose
             // Said out loud on arrival: a card that fades in over a carousel is nothing at all
             // to someone who is not looking at it.
             guard let tip else { return }
@@ -206,6 +211,14 @@ struct ManualSortView: View {
         .onChange(of: session.appliesLaunched) { _, count in
             guard count > 0, let userId = userModel.myUser?._id else { return }
             tipsStore.markLearned(.nothingSavedYet, userId: userId)
+        }
+        // And the same for SORT-3: the first proposal this session *asked for*. Asking is the
+        // gesture — what the model then finds changes what the screen reports, not what the
+        // user has learned about the wand — and a press on a busy screen the model refused is
+        // not a press.
+        .onChange(of: session.proposalsRequested) { _, count in
+            guard count > 0, let userId = userModel.myUser?._id else { return }
+            tipsStore.markLearned(.letItPropose, userId: userId)
         }
         .navigationTitle("manual_sort.title")
         .navigationBarTitleDisplayMode(.inline)
@@ -322,9 +335,23 @@ struct ManualSortView: View {
             "\(String(localized: SortDragToFileTip.titleKey)) \(String(localized: SortDragToFileTip.messageKey))"
         case .nothingSavedYet:
             "\(String(localized: SortNothingSavedYetTip.titleKey)) \(String(localized: SortNothingSavedYetTip.messageKey))"
-        // Issue 0080: SORT-3 is never due yet, so it has no copy to read.
         case .letItPropose:
-            ""
+            "\(String(localized: SortLetItProposeTip.titleKey)) \(String(localized: SortLetItProposeTip.messageKey))"
+        }
+    }
+
+    /// Where the astuce due right now stands, and therefore what its pointer aims at — or
+    /// `nil` when there is none, or when it is SORT-1, which is mounted in the carousel and
+    /// carries its own pointer.
+    ///
+    /// One place rather than a condition per slot: the card over the controls and the pointer
+    /// riding the bar's guide are two views that must never disagree about which button is
+    /// being talked about.
+    private static func barAim(for tip: SortTip?) -> SortTipAim? {
+        switch tip {
+        case .nothingSavedYet: .applyButton
+        case .letItPropose: .proposalButton
+        case .dragToFile, nil: nil
         }
     }
 

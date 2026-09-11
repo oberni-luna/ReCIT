@@ -7,23 +7,24 @@
 //
 //  **Two places on the screen, one card.** SORT-1 sits between the carousel's header and the
 //  covers, inside the anchored panel, so its pointer lands exactly above the first cover and
-//  the card covers nothing the user is about to drag or drop onto. SORT-2 sits over the block
-//  of controls, directly above « Appliquer », for the same reason: it must point at the
-//  button it is about, and it must not lie over it. In both cases the panel grows and the
-//  grid scrolls in what is left, which is what it does anyway.
+//  the card covers nothing the user is about to drag or drop onto. SORT-2 and SORT-3 sit over
+//  the block of controls, directly above the button each is about — « Appliquer » for one,
+//  the wand for the other — for the same reason: they must point at their control without
+//  lying over it. In every case the panel grows and the grid scrolls in what is left, which
+//  is what it does anyway.
 //
 //  **The pointer is not always drawn here.** Aimed at a book it is, at an inset this screen
-//  can measure. Aimed at « Appliquer » it is not: only `ManualSortActionBar` knows where its
-//  middle button sits, so the pointer is laid out by the panel on the guide the bar
-//  publishes — see `SortTipAim` and `HorizontalAlignment.sortApply`.
+//  can measure. Aimed at a button of the action bar it is not: only `ManualSortActionBar`
+//  knows where its middle button and its wand sit, so the pointer is laid out by the panel on
+//  the guide the bar publishes — see `SortTipAim`, `HorizontalAlignment.sortApply` and
+//  `.sortProposal`.
 //
-//  **The `TipGroup(.ordered)` is what guarantees one card at a time.** It holds SORT-1 and
-//  SORT-2 today and gains SORT-3 (issue 0080); TipKit shows the first eligible one and no
-//  more. Which of them is *eligible* is not TipKit's business — `SortTipGate` decides it and
+//  **The `TipGroup(.ordered)` is what guarantees one card at a time.** It holds all three
+//  astuces, and TipKit shows the first eligible one and no more. Which of them is *eligible* is not TipKit's business — `SortTipGate` decides it and
 //  the screen sets each tip's parameter from the answer, so at most one of them is ever true
 //  and the two mounting places cannot both draw a card.
 //
-//  See PRD 0013 and issues 0077 and 0079.
+//  See PRD 0013 and issues 0077, 0079 and 0080.
 //
 
 import SwiftUI
@@ -44,6 +45,7 @@ struct SortTipBanner: View {
     @State private var tips: TipGroup = .init(.ordered) {
         SortDragToFileTip()
         SortNothingSavedYetTip()
+        SortLetItProposeTip()
     }
 
     var body: some View {

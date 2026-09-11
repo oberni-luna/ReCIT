@@ -54,6 +54,10 @@ struct ManualSortActionBar: View {
                 isApplying: actions.isApplying,
                 onPropose: actions.onPropose
             )
+            // And the same for the wand, for the same reason: where it sits depends on the
+            // width « Appliquer » took beside it, so the bar is the only thing that can say
+            // it. SORT-3's pointer is laid out on it (issue 0080).
+            .alignmentGuide(.sortProposal) { $0[HorizontalAlignment.center] }
         }
         .frame(maxWidth: .infinity)
     }

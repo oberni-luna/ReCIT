@@ -77,6 +77,25 @@ struct InventorySearchRankingTests {
         #expect(outcome.totalCount == 1)
     }
 
+    @Test("« Tout voir » asks the same function for everything, and gets the same order")
+    func noLimitReturnsEveryMatch() {
+        let capped: InventorySearchRanking.Outcome = InventorySearchRanking.rank(
+            library,
+            matching: "monte"
+        )
+        let full: InventorySearchRanking.Outcome = InventorySearchRanking.rank(
+            library,
+            matching: "monte",
+            limit: InventorySearchRanking.noLimit
+        )
+
+        #expect(full.matches.count == full.totalCount)
+        #expect(full.totalCount == capped.totalCount)
+        // The screen behind « Tout voir » opens on the three books the section was showing,
+        // in the order it was showing them, and carries on from there.
+        #expect(full.matches.prefix(capped.matches.count).map(\.id) == capped.matches.map(\.id))
+    }
+
     // MARK: - The order
 
     @Test("My books come before my friends', most recently added first inside each group")

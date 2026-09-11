@@ -1670,11 +1670,21 @@ Compteurs après la passe : **35 composants** sur `Screens · Components`, `Icon
 | Combien de récentes sont stockées ? | **Toutes** | Trois sont affichées, le stock n'est pas plafonné. La suppression unitaire est remise à plus tard ; « Effacer » vide tout |
 | Que fait « Annuler » ? | **Referme le mode recherche** | Retour à `R1`, requête perdue. Ce n'est pas le bouton qui vide le champ — c'est le `xmark.circle` dans le champ qui fait ça |
 | Les récentes vides ? | **Un état vide**, à la manière d'Apple Music | `R2b` : `Empty State` (`204:263`) `Layout=Centered`, glyphe `magnifyingglass` 40, `Show action` éteint, bloc de 177 posé à `y=225` — centré entre le bas du champ (111) et le haut du clavier (516). Aucun composant nouveau |
+| Où mène « Tout voir » ? | **Un écran poussé dédié** (tranché par le propriétaire, issue 0075) | « Dans mes livres et chez mes amis » : tous les résultats locaux de la requête, dans l'ordre de la section plafonnée. C'est l'option cohérente avec les résultats distants — un tap pour entrer, un pour revenir, le champ et ses suggestions toujours là. L'option « inventaire déjà filtré » perdait les suggestions et les livres des amis ; l'option « déplier sur place » repoussait la route vers inventaire.io sous le clavier, ce que le plafond de trois existe précisément pour éviter. Coût, anticipé : un cas de `NavigationDestination` (`localSearchResults(query:)`) et une passe Figma |
 
 ## Reste à trancher — recherche unifiée
 
-1. **La tab bar à 3 onglets.** L'onglet Recherche est caché en surcharge d'instance ; il faudra une variante de
-   `Chrome / Tab Bar` quand ça se code. C'est le seul raccourci de cette passe, et le seul point ouvert.
+Plus rien à trancher : le dernier point ouvert de la passe (« Tout voir ») l'a été le 2026-09-11, ci-dessus.
+
+## Passes Figma dues — recherche unifiée (au 2026-09-11)
+
+1. **La tab bar à 3 onglets.** L'onglet Recherche était caché en surcharge d'instance ; il est **supprimé du code**
+   depuis l'issue 0074. La variante de `Chrome / Tab Bar` à trois onglets est maintenant due, ce n'est plus un
+   raccourci mais un écart.
+2. **L'écran « Tout voir ».** La section `Recherche unifiée` (`334:8624`) n'a pas de frame pour lui. Il en faut une :
+   barre de navigation avec retour et titre en ligne « Dans mes livres et chez mes amis », liste simple de rangées
+   `Cell / Inventory` (l'exemplaire d'un ami nommant son propriétaire), plus la variante d'en-tête de section portant
+   l'action « Tout voir » en fin de ligne — affichée seulement au-delà de trois résultats. Clair et sombre.
 
 ## Ce qui n'est pas maquetté — recherche unifiée
 

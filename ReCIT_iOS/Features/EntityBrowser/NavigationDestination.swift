@@ -18,6 +18,11 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case allTransactions
     case entityList(id: String)
     case shelf(id: String)
+    /// Every copy on this device that answers a search — mine and my friends' — uncapped.
+    /// Where « Tout voir » leads from the merged search's local section (issue 0075). The
+    /// query is the whole payload: the search field stays on the screen below, so the
+    /// destination has to carry what it answers.
+    case localSearchResults(query: String)
     var id: String {
         switch self {
         case .author(let uri):
@@ -36,6 +41,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "entityList:\(id)"
         case .shelf(let id):
             return "shelf:\(id)"
+        case .localSearchResults(let query):
+            return "localSearchResults:\(query)"
         }
     }
 
@@ -89,6 +96,8 @@ extension NavigationDestination {
           EntityListDetail(listId: id, path: path)
       case .shelf(let id):
           ShelfDetailView(shelfId: id, path: path)
+      case .localSearchResults(let query):
+          InventorySearchAllLocalView(query: query)
       }
     }
 }

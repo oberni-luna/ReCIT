@@ -1105,6 +1105,23 @@
         }
       }
     },
+    "inventory.search.see_all" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See all"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout voir"
+          }
+        }
+      }
+    },
     "inventory.search.recents.clear" : {
       "extractionState" : "manual",
       "localizations" : {

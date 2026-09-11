@@ -61,6 +61,12 @@ enum InventorySearchRanking {
     /// roughly 516 pt and a fourth row would push the road to inventaire.io under it.
     static let displayLimit: Int = 3
 
+    /// No cap at all — what « Tout voir » asks for (issue 0075). The screen behind that action
+    /// lists every match, and it asks this same function for them rather than sorting by hand:
+    /// a second ordering would be a second chance for the full list and the capped section to
+    /// disagree about which book comes first.
+    static let noLimit: Int = .max
+
     /// The matches for `query`, mine first and most recently added first within each group,
     /// capped at `limit` — with the uncapped total alongside.
     ///

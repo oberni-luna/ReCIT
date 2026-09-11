@@ -4774,7 +4774,14 @@
 
     },
     "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée."
+          }
+        }
+      }
     },
     "welcome.app_name" : {
       "extractionState" : "manual",
@@ -4805,7 +4812,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les couvertures sont celles des derniers livres partagés sur [inventaire.io](https://inventaire.io/) : la base ouverte, qui héberge votre compte et vos livres."
+            "value" : "Les derniers livres partagés sur [inventaire.io](https://inventaire.io/) : la base open data, qui héberge votre compte et vos livres."
           }
         }
       }
@@ -4822,7 +4829,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Organisez vos livres et partagez-les avec vos proches."
+            "value" : "Organisez vos livres, partagez-les avec vos proches."
           }
         }
       }
@@ -4839,7 +4846,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos livres, et ceux qui circulent."
+            "value" : "Vos livres, et ceux qui voyagent."
           }
         }
       }

@@ -247,3 +247,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0016 Creating a list or an étagère from a book](docs/features/0016-create-a-list-or-shelf-from-a-book.md) — the "…" menu stops going silent when you own nothing yet
 - [0017 Supprimer son compte, depuis le bas du Profil](docs/features/0017-deleting-your-account.md) — `DELETE /api/user` behind a screen that counts what it costs and an alert that acts; the local store is wiped whole, and only after the server says `ok`
 - [0017 Signaler un membre ou un échange](docs/features/0017-report-user-generated-content.md) — a « … » on a profile and on a transaction opens a pre-filled report mail; the blocking half of guideline 1.2 is still owed
+- [0018 Se faire un réseau de lecteurs](docs/features/0018-reader-network.md) — chercher un lecteur, lui demander, répondre à une invitation, retirer un ami ; les quatre états de `/api/relations`

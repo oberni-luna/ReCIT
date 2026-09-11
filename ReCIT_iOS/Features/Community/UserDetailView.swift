@@ -9,9 +9,11 @@ import SwiftUI
 
 struct UserDetailView: View {
     @Environment(UserModel.self) private var userModel
+    @Environment(\.modelContext) private var modelContext
 
     @State private var nextNavigationDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
+    @State private var isConfirmingRemoval: Bool = false
 
     let user: User
     @Binding var path: NavigationPath
@@ -51,6 +53,20 @@ struct UserDetailView: View {
         }
         .navigationTitle("nav.user")
         .toolbar { toolbarContent }
+        // The maquette draws no confirmation, and this adds one: unfriending is the only
+        // gesture of the whole flow that loses something — the relation has to be asked for
+        // again, and the books go with it. Every other destructive action in the app asks
+        // first (« Supprimer de mon inventaire », deleting a shelf), so this one does too.
+        .confirmationDialog(
+            "network.remove.confirm \(user.username)",
+            isPresented: $isConfirmingRemoval,
+            titleVisibility: .visible
+        ) {
+            Button("network.remove", role: .destructive) {
+                userModel.unfriend(user, modelContext: modelContext)
+            }
+            Button("action.cancel", role: .cancel) {}
+        }
         .sheet(item: $borrowFromItem) { item in
             if let owner = item.owner, let me = userModel.myUser {
                 TransactionFormView(
@@ -109,13 +125,20 @@ struct UserDetailView: View {
         }
     }
 
-    /// A "…" holding, for now, the one thing one can do *about* someone rather than with them.
-    /// Hidden on my own profile: there is nobody to report there.
+    /// A "…" holding what one can do *about* someone rather than with them.
+    /// Hidden on my own profile: there is nobody to report, and nobody to remove.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
             if user._id != userModel.myUser?._id {
                 Menu {
+                    if user.relation == .friend {
+                        Button("network.remove", systemImage: "person.badge.minus", role: .destructive) {
+                            isConfirmingRemoval = true
+                        }
+                        .accessibilityIdentifier("e2e.user.removeFromNetwork")
+                    }
+
                     ReportButton(
                         draft: .init(
                             reportedUsername: user.username,

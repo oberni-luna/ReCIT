@@ -204,6 +204,30 @@ final class UserModel: OptimisticMutating {
         changeRelation(user, to: .none, action: "discard", modelContext: modelContext)
     }
 
+    /// Undoes a friendship, and takes the books with it.
+    ///
+    /// Their copies are dropped **after** the server has agreed, never before: unlike a
+    /// relation, a deleted inventory cannot be put back by a revert, and a failed call would
+    /// have emptied the inventory search of books that are still perfectly borrowable.
+    /// `lastInventorySync` goes back to `nil` with them, so a relation made again shows the
+    /// syncing row rather than an inventory that looks empty.
+    func unfriend(_ user: User, modelContext: ModelContext) {
+        changeRelation(
+            user,
+            to: .none,
+            action: "unfriend",
+            modelContext: modelContext,
+            reconcile: { [weak user] in
+                guard let user, user.isStillInTheStore else { return }
+                for item in user.items {
+                    modelContext.delete(item)
+                }
+                user.items = []
+                user.lastInventorySync = nil
+            }
+        )
+    }
+
     /// The shape shared by every relation write: one local state change, one POST carrying the
     /// user id, and the previous state put back if the server refuses.
     private func changeRelation(

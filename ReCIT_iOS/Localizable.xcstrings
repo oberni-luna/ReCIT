@@ -263,6 +263,38 @@
         }
       }
     },
+    "network.remove" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer du réseau"
+          }
+        }
+      }
+    },
+    "network.remove.confirm %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@ from your network? Their books leave your inventory, and the relation has to be asked for again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@ de votre réseau ? Ses livres quittent votre inventaire, et la relation devra être redemandée."
+          }
+        }
+      }
+    },
     "network.request.cancel" : {
       "localizations" : {
         "en" : {

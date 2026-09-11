@@ -342,3 +342,56 @@ struct UserModelInvitationTests {
         #expect(mock.recordedRequests.last?.endpoint == "/api/relations/discard")
     }
 }
+
+@MainActor
+@Suite("UserModel.unfriend", .serialized)
+struct UserModelUnfriendTests {
+
+    private func makeStore() throws -> (ModelContext, User, User) {
+        let context: ModelContext = try TestStore.makeContext()
+        let me: User = Fixture.user(id: "me", username: "me")
+        let friend: User = Fixture.user(id: "other", username: "Camille")
+        friend.relation = .friend
+        friend.lastInventorySync = 1
+        context.insert(me)
+        context.insert(friend)
+        let edition: Edition = Fixture.edition(uri: "isbn:9782072965821", title: "Test Book")
+        let item: InventoryItem = Fixture.inventoryItem(id: "item-1", ownerId: "other", edition: edition)
+        context.insert(item)
+        friend.items = [item]
+        try context.save()
+        return (context, me, friend)
+    }
+
+    @Test("Removing a friend takes their books with it")
+    func removalClearsTheInventory() async throws {
+        let (context, me, friend): (ModelContext, User, User) = try makeStore()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/unfriend", json: #"{"ok":true}"#)
+        let model: UserModel = .init(apiService: mock)
+        model.myUser = me
+
+        model.unfriend(friend, modelContext: context)
+        await model.inFlightTask?.value
+
+        #expect(friend.relation == .none)
+        #expect(friend.lastInventorySync == nil)
+        #expect(try context.fetch(FetchDescriptor<InventoryItem>()).isEmpty)
+        #expect(mock.recordedRequests.last?.endpoint == "/api/relations/unfriend")
+    }
+
+    @Test("A refused removal keeps both the friend and their books")
+    func refusedRemovalKeepsEverything() async throws {
+        let (context, me, friend): (ModelContext, User, User) = try makeStore()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/unfriend", error: NetworkError.badResponse)
+        let model: UserModel = .init(apiService: mock, errorReporter: .init())
+        model.myUser = me
+
+        model.unfriend(friend, modelContext: context)
+        await model.inFlightTask?.value
+
+        #expect(friend.relation == .friend)
+        #expect(try context.fetch(FetchDescriptor<InventoryItem>()).count == 1)
+    }
+}

@@ -30,6 +30,10 @@ struct RootView: View {
     /// shared model, and injected below — the astuces belong to the person signed in, so the
     /// store has to outlive the screen that shows them.
     @State var tipsStore: TipsStore
+    /// What each account has actually searched for (PRD 0012). Built here like every other
+    /// shared model, and injected below — the history belongs to the person signed in, so it
+    /// has to outlive the field that writes it.
+    @State var recentSearchStore: RecentSearchStore
     /// The welcome screen's wall of covers (PRD 0011). Built here like every other model, and
     /// injected into the signed-out branch — it is the one model that runs before there is a
     /// user, so it is also the one that never reaches `MainTabView`.
@@ -75,6 +79,7 @@ struct RootView: View {
         _syncStatus = State(initialValue: SyncStatusStore())
         _onboardingStore = State(initialValue: OnboardingStore())
         _tipsStore = State(initialValue: TipsStore())
+        _recentSearchStore = State(initialValue: RecentSearchStore())
         _coverWallModel = State(initialValue: CoverWallModel(apiService: publicAPIService))
     }
 
@@ -130,6 +135,7 @@ struct RootView: View {
                 .environment(syncStatus)
                 .environment(onboardingStore)
                 .environment(tipsStore)
+                .environment(recentSearchStore)
                 .environment(authModel)
                 .onAppear {
                     refreshUserData()

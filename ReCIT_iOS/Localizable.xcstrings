@@ -1105,6 +1105,40 @@
         }
       }
     },
+    "inventory.search.recents.clear" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer"
+          }
+        }
+      }
+    },
+    "inventory.search.recents_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent searches"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherches récentes"
+          }
+        }
+      }
+    },
     "inventory.search.remote_section" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -13,7 +13,9 @@ import SwiftData
 
 struct ShelvesContent: View {
     let user: User
-    let searchText: String
+    /// What is in the field, owned by `ShelvesView`. A binding because tapping a recent search
+    /// puts its query back in the field (issue 0072).
+    @Binding var searchText: String
     /// The search that has been sent, if one has — owned by `ShelvesView`, because the
     /// keyboard's « rechercher » key only reaches the field from above `.searchable`.
     @Binding var submission: SearchSuggestion?
@@ -40,12 +42,12 @@ struct ShelvesContent: View {
 
     init(
         user: User,
-        searchText: String,
+        searchText: Binding<String>,
         submission: Binding<SearchSuggestion?>,
         path: Binding<NavigationPath>
     ) {
         self.user = user
-        self.searchText = searchText
+        self._searchText = searchText
         self._submission = submission
         self._path = path
 
@@ -70,7 +72,7 @@ struct ShelvesContent: View {
             // to inventaire.io under them. See PRD 0012.
             InventorySearchContent(
                 user: user,
-                searchText: searchText,
+                searchText: $searchText,
                 submission: $submission
             )
         } else {

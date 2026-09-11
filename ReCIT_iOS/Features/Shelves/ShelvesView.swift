@@ -32,7 +32,7 @@ struct ShelvesView: View {
                     } else {
                         ShelvesContent(
                             user: user,
-                            searchText: searchText,
+                            searchText: $searchText,
                             submission: $submission,
                             path: $path
                         )

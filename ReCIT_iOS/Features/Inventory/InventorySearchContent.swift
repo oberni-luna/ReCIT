@@ -7,10 +7,15 @@
 //  driven by `SearchPhase`, which is what lets the field stop meaning "filter my shelves" and
 //  start meaning "find this book".
 //
-//  Three of the four phases draw something now. Under three characters the screen still shows
-//  nothing new rather than an empty section, which is the whole point of the threshold living
-//  in `SearchPhase`: the silence is a decision, not an accident. `recents` waits for the
-//  recent-search store (issue 0072).
+//  All four phases draw something now. Under three characters the screen still shows nothing
+//  new rather than an empty section, which is the whole point of the threshold living in
+//  `SearchPhase`: the silence is a decision, not an accident.
+//
+//  **Every submission passes through one place here**, which is what makes the recent searches
+//  a list of things actually sent. The keyboard's « rechercher » key, a tap on a suggestion and
+//  a tap on a recent all end up setting `submission`, and recording hangs off that change
+//  rather than off each of the three gestures — three call sites would be three chances for one
+//  of them to forget.
 //
 //  Both `@Query`s are the reactive ones ADR 0001 asks for — mine by owner id, my friends' by
 //  its negation — and the matching happens in memory over what they already hold. No fetch, no
@@ -35,7 +40,10 @@ import SwiftUI
 
 struct InventorySearchContent: View {
     let user: User
-    let searchText: String
+    /// What is in the field. A binding rather than a value, because tapping a recent search has
+    /// to put its query back in the field — the phase is computed from what the field holds, so
+    /// a recent that only set `submission` would leave the screen on its own recents.
+    @Binding var searchText: String
     /// What has been sent, and what it asked for. A suggestion rather than a string, because
     /// the keyboard's « rechercher » key and a tap on a row are the same gesture with different
     /// entity types — see `SearchSuggestion`.
@@ -44,6 +52,7 @@ struct InventorySearchContent: View {
     @Environment(\.isSearching) private var isSearching
     @Environment(SearchModel.self) private var searchModel
     @Environment(AppErrorReporter.self) private var errorReporter
+    @Environment(RecentSearchStore.self) private var recentSearchStore
 
     @Query private var myItems: [InventoryItem]
     @Query private var friendsItems: [InventoryItem]
@@ -59,11 +68,11 @@ struct InventorySearchContent: View {
 
     init(
         user: User,
-        searchText: String,
+        searchText: Binding<String>,
         submission: Binding<SearchSuggestion?>
     ) {
         self.user = user
-        self.searchText = searchText
+        self._searchText = searchText
         self._submission = submission
 
         let ownerId: String = user._id
@@ -111,6 +120,14 @@ struct InventorySearchContent: View {
 
     var body: some View {
         List {
+            if case .recents = phase {
+                InventorySearchRecentsSection(
+                    searches: recentSearchStore.recentSearches(userId: user._id),
+                    onSelect: select(recent:),
+                    onClear: { recentSearchStore.clear(userId: user._id) }
+                )
+            }
+
             if let localQuery {
                 InventorySearchLocalSection(
                     query: localQuery,
@@ -134,6 +151,26 @@ struct InventorySearchContent: View {
         .applyListBackground()
         .task(id: activeSubmission) {
             await search()
+        }
+        // The one place a sent search becomes a remembered one. Hung off the submission rather
+        // than off the three gestures that set it, so a fourth way to submit cannot arrive
+        // without its query joining the recents.
+        .onChange(of: submission) { _, newValue in
+            guard let newValue else { return }
+            recentSearchStore.record(query: newValue.query, userId: user._id)
+        }
+    }
+
+    /// Runs a recent search again. It fills the field as well as submitting, because the phase
+    /// is computed from what the field holds: a submission alone would send the call and leave
+    /// the screen showing the recents it was tapped from.
+    ///
+    /// Everything in the history was sent from above the threshold, so `everything(for:)` never
+    /// comes back empty here — and if it ever did, the field would simply keep what was tapped.
+    private func select(recent query: String) {
+        searchText = query
+        if let everything = SearchSuggestion.everything(for: query) {
+            submission = everything
         }
     }
 

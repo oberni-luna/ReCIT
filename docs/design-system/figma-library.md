@@ -4,6 +4,15 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-09-11 (2) — `Édition · Actions mises en avant`** : quatre **propositions** pour sortir du menu
+  « … » les trois actions d'entrée de la fiche livre — ajouter à l'inventaire, emprunter à un ami, ajouter à une
+  liste. Section `Édition · Actions mises en avant` (`362:9924`), clair seul. Rien de tout cela n'existe en Swift :
+  c'est une exploration, pas une réplication. Arbitrage à rendre, détail en fin de fichier.
+- **Passe du 2026-09-11 — `Œuvre & édition`** : le détail d'une œuvre et celui d'une édition, tels que
+  l'[ADR 0002](../adr/0002-unified-book-detail.md) les a refaits. Section `Œuvre & édition` (`351:9412`) sur la page
+  `Screens` : 5 frames en **clair seul** et un panneau de spécification. Quatre composants nouveaux, `Row / Summary`
+  étendu, trois glyphes de plus dans `Icon`. Les frames `Fiche livre` (`42:1125` / `42:1219`) sont **conservées telles
+  quelles** : elles datent de l'ancien `EditionDetailView`. Détail en fin de fichier.
 - **Dernière passe** : 2026-09-05 — `B3 · Accueil · Plein écran illustré` (`265:7532`) est la **maquette retenue**
   et est implémentée ([feature 0013](../features/0013-welcome-cover-wall.md)). Divergences code ↔ Figma constatées à
   l'implémentation, le code faisant foi :
@@ -1587,3 +1596,199 @@ relisant.
 
 Rappel : D51 (la case « ☐ » de la note d'étagère) et D52 (le bouton de tri au-dessus d'une bibliothèque
 vide) restent ouvertes côté code, sans rapport avec cette feature.
+
+---
+
+# Œuvre & édition — passe du 2026-09-11
+
+Réplication des deux écrans que l'[ADR 0002](../adr/0002-unified-book-detail.md) a laissés derrière lui : le détail
+d'une **œuvre**, devenu une passerelle vers les éditions, et le détail d'une **édition**, qui a absorbé « mon
+exemplaire ». Section `Œuvre & édition` (`351:9412`) sur la page `Screens`. **Clair seul** — tout est bâti sur les
+tokens, le sombre suit sans redessin, comme à la passe `Astuces · TipKit`.
+
+Ce que l'ADR a changé, et que le fichier ne montrait pas :
+
+| Avant | Après |
+|---|---|
+| `WorkDetailView` — un écran d'œuvre | `WorkEditionGatewayView` — une **passerelle** : une seule édition → la fiche livre rendue en ligne, plusieurs → `WorkEditionPicker` |
+| `EditionDetailView` + `InventoryItemDetailView` | `BookDetailView` seul, ancré sur une `Edition`, « Dans mon inventaire » plié dedans |
+
+## Table des écrans
+
+| Écran | Clair | Source Swift |
+|---|---|---|
+| **Œuvre · Choix de l'édition** | `351:9413` | `EntityBrowser/Work/WorkEditionPicker.swift` (via `WorkEditionGatewayView.swift`) |
+| **Édition · Je ne possède pas** | `352:9493` | `Book/BookDetailView.swift` |
+| **Édition · Je possède** (défilée) | `353:9571` | idem + `Book/BookMyCopySection.swift` |
+| **Menu · Je ne possède pas** | `353:9828` | `BookDetailView.menuContent`, branche « pas à moi » |
+| **Menu · Je possède** | `353:9964` | `BookDetailView.menuContent`, branche « à moi » |
+| `Spec · Œuvre & édition` | `354:9973` | — |
+
+**L'œuvre à une seule édition n'a pas de frame** : la passerelle rend `BookDetailView` en ligne, donc cet écran
+n'existe pas dans ce cas. C'est le comportement, pas un oubli.
+
+Les frames `Fiche livre` (`42:1125` / `42:1219`) du 2026-08-18 restent en place et gardent leur nom : elles
+répliquent l'ancien `EditionDetailView`, d'avant les genres (issue 0035), « Autres éditions » et « Dans mon
+inventaire ». Les lire comme un état antérieur, pas comme la fiche courante.
+
+## Composants ajoutés — `Screens · Components`
+
+| Composant | node id | Variantes | Propriétés | Source Swift |
+|---|---|---|---|---|
+| `Cell / Owner Item` | `348:278` | — | `Username`, `Since`, `Details`, `Show details` | `Inventory/InventoryItemDetail/UserItemCellView.swift` |
+| `Row / Transaction Picker` | `348:292` | — | `Date`, `Value` | `Book/BookMyCopySection.swift` |
+| `Chrome / Menu Row` | `349:303` | Theme ∈ {Light, Dark} | `Label`, `Glyph` (INSTANCE_SWAP), `Show chevron` | le `Menu { … }` de la barre |
+| `Chrome / Menu Panel` | `350:363` | Theme ∈ {Light, Dark} | `Show row 2`, `Show row 3` | idem |
+| `Chrome / Menu Scrim` | `350:366` | Theme ∈ {Light, Dark} | — | le voile posé par iOS derrière un menu ouvert |
+
+`Cell / Owner Item` remplace l'usage que `Fiche livre` faisait de `Cell / User` : la vraie rangée de communauté porte
+« Depuis le … » et la pastille de transaction, que `Cell / User` n'a pas.
+
+## Composants étendus
+
+`Row / Summary` (`38:201`) gagne `Label#347:0` (TEXT) et `Show meta#347:1` (BOOLEAN). Le libellé était figé sur
+« Résumé » alors que c'est le même `withLabel(label:)` côté Swift : la même rangée sert donc « Ce que j'en pense »
+dans « Dans mon inventaire ». `Show meta` éteint la ligne de pastilles, absente du picker d'édition.
+
+`Icon` (`21:60`) passe à **25 variantes** : `trash` (`346:278`), `list.clipboard` (`346:285`) et
+`chevron.up.chevron.down` (`346:292`) — vecteurs au trait 1,8 bindés à `foreground/default`, contraintes `SCALE`,
+comme les 22 précédents.
+
+## Recette de composition
+
+- **Un écran défilé se fait avec un conteneur `scroll`, pas avec des `y` négatifs.** Le chrome de ce fichier est
+  transparent (`Chrome / Status Bar` est « 393 × 59, sans fond ») : un contenu remonté par coordonnées se met à
+  peindre par-dessus l'heure et la batterie. Un frame `scroll` à `y = 103`, haut de 666, `clipsContent = true`,
+  écrête proprement — et reste un conteneur de mise en page, donc l'audit de factorisation le tolère.
+- **Un menu contextuel** = `Chrome / Menu Scrim` plein écran + `Chrome / Menu Panel` à 12 du bord droit et 8 sous la
+  barre. Ordre des enfants : contenu · tab bar · voile · **nav** · status bar · home indicator · panneau. La barre de
+  navigation passe **au-dessus** du voile pour que le « … » qui a ouvert le menu reste net et l'ancre ; la tab bar,
+  elle, se laisse assombrir.
+- Le panneau applique le **patron des slots** : les rangs 2 et 3 sont enveloppés dans un groupe qui porte son filet
+  **en tête**, si bien qu'un rang éteint emporte son séparateur.
+
+## Ce qui n'est pas maquetté
+
+| Absent | Pourquoi |
+|---|---|
+| `.loadingWork`, `.loadingEditions`, `.loading` | Des `ProgressView` — le fichier ne maquette pas les contrôles vivants |
+| `.error`, `.noResult` (« Cette édition n'existe pas sur inventaire.io ») | Le code n'y met qu'un `Text` brut sans habillage : il n'y a rien à répliquer, seulement à proposer |
+| La confirmation de suppression | `confirmationDialog` iOS, chrome système |
+| Les sous-menus dépliés (`Étagère`, `Liste`, `Emprunter à`) | Le chevron dit qu'il y en a un ; les ouvrir demanderait une frame par sous-menu |
+| La feuille `TransactionFormView` | Hors périmètre, comme les autres feuilles |
+| Les glyphes de transaction | `lending`, `giving`, `selling`, `inventorying` sont des **SVG du dépôt**, pas des SF Symbols, et sont remplis noir/blanc là où tout `Icon` est au trait bindé. Les pastilles sont donc posées `Show glyph=false`, et le picker n'en porte pas |
+| `books.vertical.fill` | Toujours absent du jeu, comme à la passe TipKit → `Icon/book` |
+| Le placeholder « Écrire un commentaire » | La note est montrée remplie ; le champ vide demanderait `foreground/placeholder` en override d'instance |
+
+## Divergences relevées dans le code — passe œuvre & édition
+
+Suite des tables précédentes. **Statut « ouverte » = rien n'a été changé côté code.**
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| D64 | `Book/BookViewModel.swift` + `Book/BookDetailView.swift` | `ownedItemsPredicate` se présente comme « le prédicat du `@Query` de la vue », et l'ADR 0002 promet un `myItems: [InventoryItem]` sourcé réactivement. **La vue ne l'appelle jamais** : elle lit `edition.items` dans `iOwn(_:)`. Le prédicat n'est exercé que par les tests | ouverte — soit câbler le `@Query`, soit retirer le prédicat et le commentaire qui le vend |
+| D65 | `Book/BookDetailView.swift`, `Book/BookViewModel.swift` | En-têtes périmés : la vue annonce un overlay « read-only here — folding in item editing (notes, transactions) is P3 » alors que P3 est livré ; le modèle dit calquer `EditionDetailView.loadEdition`, supprimé en P5 | ouverte — commentaires à réécrire |
+| D66 | `EntityBrowser/EntityHeaderView.swift`, `EntityImageView.swift`, `EntityAuthorsView.swift` | Trois en-têtes ne portent pas le nom de leur fichier : `EntityHeaderView.swift` se déclare `WorkHeaderView.swift`, `EntityImageView.swift` se déclare `EntityHeaderView.swift`, `EntityAuthorsView.swift` se déclare `EditionAuthorsView.swift` | ouverte — trivial, mais c'est ce qui fait chercher un fichier qui n'existe pas |
+| D67 | `EntityBrowser/Work/WorkEditionPicker.swift` | Chaque édition est empaquetée dans un `SearchResult` de `type: .works` — pour une **édition** — uniquement pour réutiliser `SearchResultCell` ; `score: 0` est inventé au passage | ouverte — extraire la cellule, ou lui donner un modèle propre |
+| D68 | `WorkEditionPicker.swift`, `BookDetailView.swift` | Les deux listes enveloppent un `Button` autour d'un `NavigationLink(value: UUID())` : le lien ne sert qu'à **dessiner le chevron**, la navigation passant par `path.append`. La valeur de destination est un `UUID()` neuf à chaque rendu | ouverte — antérieure à cette passe, vue en la répliquant |
+
+## Audit
+
+Factorisation, sur les 5 frames : **0 dessin brut**, chaque `▢` de tête est un conteneur nommé et assumé (`scroll`,
+`list group`), mode épinglé sur chacune, 22 à 41 instances par frame.
+
+Design system : 0 variable en `ALL_SCOPES`, 0 nom de composant dupliqué, 0 texte sans style dans les composants de
+cette passe. Les 5 peintures non bindées relevées sont **antérieures** — `Icon/magic` (×2), `Icon/undo`, et les
+contours de sélection de deux `COMPONENT_SET` (`Livre`, `image 1`). Le fichier après la passe : 5 pages,
+113 variables, 10 styles de texte, 7 styles d'effet, 46 composants.
+
+## Ce que la construction a appris
+
+- **Le chrome de ce fichier est transparent.** Tant que le contenu commence à `y = 103`, personne ne le voit ; dès
+  qu'on simule un défilement, le texte remonte et peint sur l'heure et la batterie. Le conteneur `scroll` est la
+  réponse, et il fallait le prévoir : le corriger après coup a coûté deux passes de reprise.
+- **Un menu ouvert n'assombrit pas la barre qui l'a ouvert.** Poser le voile au-dessus de tout laisse le panneau
+  flotter sans ancre. Remonter la seule barre de navigation au-dessus du voile suffit à rattacher le menu au « … ».
+- **Une ligne de menu doit huguer en hauteur.** « Supprimer de mon inventaire » passe à deux lignes dans 250 de
+  large ; figée à 44, la ligne la serrait. `counterAxisSizingMode = 'AUTO'` + padding 11 donne 45 sur une ligne et
+  suit sur deux.
+- `SearchResultCell.workCell` et `OtherEditionsCell` sont **la même vue écrite deux fois** — même `CellThumbnail`,
+  même `content400Bold` + `content300`, mêmes écarts. Une seule instance de `Cell / Entity Type=Work` les sert
+  toutes les deux ; c'est D67 vu depuis Figma.
+
+---
+
+# Édition · Actions mises en avant — propositions du 2026-09-11
+
+**Exploration, pas une réplication.** Aucune de ces quatre dispositions n'existe dans le code : aujourd'hui les trois
+actions vivent dans le menu « … » de `BookDetailView`. Section `Édition · Actions mises en avant` (`362:9924`) sur la
+page `Screens`, clair seul.
+
+Le besoin : les trois actions d'**entrée** — ajouter à l'inventaire, emprunter à un ami, ajouter à une liste — sont
+enterrées derrière un « … » de 24 pt dans le coin haut droit, alors que ce sont elles qui font qu'on ouvre la fiche.
+Le menu garde ce qui relève de la gestion : `Étagère` et « Supprimer de mon inventaire ».
+
+Les quatre frames sont montées sur **« Je ne possède pas »** : les trois actions n'existent que de ce côté de la
+ligne de possession (`BookDetailView.menuContent`).
+
+## « Emprunter à un ami » est conditionnel
+
+`BookDetailView.borrowableItems(_:)` ne retient que les exemplaires qui sont **d'autrui**, **encore en base**
+(`isStillInTheStore`), dont le **propriétaire est connu** et dont le mode n'est **pas « Inventorié »** — cinq
+propriétaires distincts au plus. Liste vide : le bouton **disparaît**, il n'est pas désactivé.
+
+C'est porté par `Show borrow` sur `Action Bar / Attached`. Sur les trois autres pistes, c'est un élément en moins
+dans la rangée — et B2 se replie alors sur une seule ligne, ce qui est un argument pour elle.
+
+## Les quatre propositions
+
+| Frame | id | Ce qu'elle propose |
+|---|---|---|
+| `A1 · Footer · Barre attachée` | `362:9925` | `Action Bar / Attached`, 393 × 80 contre la barre d'onglets : primaire pleine largeur entre deux ronds |
+| `A2 · Footer · Barre flottante` | `362:10020` | `Bottom Action Bar` — le composant de l'écran de tri — 361 × 56 à 16 du bas, ombre `Shadow/Light` |
+| `B1 · Sous la couverture · Ronds` | `363:10119` | Trois `Action / Circular` centrés à 16 sous le titre, façon fiche contact iOS |
+| `B2 · Sous la couverture · Pilules` | `363:10218` | Rangée d'`Action / Pill` qui passe à la ligne, libellés entiers |
+| `Spec · Actions mises en avant` | `364:10317` | L'arbitrage |
+
+| Piste | Pour | Contre |
+|---|---|---|
+| **A1** attachée | Toujours atteignable, quel que soit le défilement. Le primaire a toute la largeur | **Deux barres empilées** en bas : 197 pt de chrome sur 852, et 80 pt de moins pour le contenu. Y échapper voudrait dire masquer la barre d'onglets sur cette destination — ce que l'app ne fait nulle part |
+| **A2** flottante | Plus légère, laisse voir le contenu défiler dessous, et **réutilise un composant existant** (`114:231`) | Elle flotte sur la liste : son contraste dépend de ce qui passe dessous. Et elle sort `Bottom Action Bar` du seul écran où il vivait |
+| **B1** ronds | Lisible d'un coup d'œil, zéro dessin nouveau (le cercle est `Button / Circular Icon`), c'est un motif qu'iOS a déjà appris aux gens | Chaque légende doit tenir en **un mot** : « Inventaire » n'est pas « Ajouter à l'inventaire ». Et la rangée **part au défilement** |
+| **B2** pilules | Les libellés sont entiers, la hiérarchie est explicite (`Prominent` / `Tinted`), et la rangée se replie toute seule quand « Emprunter » disparaît | Deux lignes à trois actions, 126 pt poussés au contenu, et elle **part au défilement** elle aussi |
+
+Le vrai partage est là : **A reste, B part**. Une action d'entrée qu'on ne retrouve plus une fois arrivé à « Dans la
+communauté » — c'est-à-dire au moment précis où on voit qui pourrait nous le prêter — est une action qu'on ira
+rechercher dans le « … ».
+
+## Composants ajoutés — `Screens · Components`
+
+| Composant | node id | Variantes | Propriétés | Note |
+|---|---|---|---|---|
+| `Action / Pill` | `358:357` | Style ∈ {Prominent, Tinted} | `Label`, `Glyph` (INSTANCE_SWAP), `Show glyph` | Glyphe 20 + `Action/action300`, `radius/full`. Mêmes couples de tokens que `Button / Large` Primary et que `Button / Circular Icon` |
+| `Action / Circular` | `360:351` | — | `Label` | Une instance de `Button / Circular Icon` (56) + une légende `Caption/caption200`. Le cercle est une **instance exposée** : son glyphe se règle depuis la rangée |
+| `Action Bar / Attached` | `361:354` | — | `Show borrow`, `Show list` | 393 × 80, `background/default` + filet haut `border/default`. Trois contrôles du design system, rien de redessiné |
+
+`Bottom Action Bar` (`114:231`) est réutilisé tel quel pour A2 — c'est déjà « rond · bouton · rond ».
+
+## Ce qu'il faut trancher avant de coder
+
+- `Action / Pill` **n'est pas** `Button / Large` : celui-ci n'a pas de glyphe et impose 55 de haut. Retenir B2, c'est
+  ajouter un glyphe à `LargeButtonStyle` ou écrire un style à part. Le choisir sans le dire ferait naître un
+  deuxième bouton primaire dans le design system.
+- Retenir B1, c'est écrire **trois libellés d'un mot** — et accepter qu'« Inventaire » soit ambigu avec l'onglet du
+  même nom.
+- Retenir A1, c'est accepter les deux barres empilées, ou masquer la barre d'onglets sur cette destination.
+- Dans les quatre cas, le menu « … » reste, avec `Étagère` et « Supprimer de mon inventaire ». Il ne disparaît pas.
+
+## Divergence Figma relevée en cours de passe
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| F1 | `Entity Header` (`32:179`) | Le nœud `cover` a gagné une **peinture d'image** depuis la passe du matin : toutes les instances affichent maintenant la même couverture (« Le chaos qui vient »), y compris sous un titre qui dit « Le Comte de Monte-Cristo ». C'est une divergence **interne à Figma**, pas code ↔ Figma | ouverte — à décider : remplissage de démonstration assumé, ou propriété d'échange pour que chaque frame montre son livre |
+
+## Audit
+
+Factorisation, sur les 4 frames : **0 dessin brut**, les `▢` de tête sont `list group` et `action row`, mode épinglé
+sur chacune, 25 à 28 instances par frame. Les deux sections de la journée ne se chevauchent pas
+(`Œuvre & édition` va jusqu'à `y = -1377`, `Édition · Actions mises en avant` commence à `-1177`).

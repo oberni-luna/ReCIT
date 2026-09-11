@@ -81,6 +81,15 @@ struct ProfileView: View {
                             path.append(NavigationDestination.user(user: invitation))
                         }
                     }
+
+                    // The rest of the waiting — the requests I sent — lives one screen away,
+                    // since it has nothing to be answered here.
+                    NavigationLink(value: NavigationDestination.invitations) {
+                        Text("network.invitations.all")
+                            .textStyle(.action300)
+                            .foregroundStyle(.foregroundTinted)
+                    }
+                    .accessibilityIdentifier("e2e.profile.invitations")
                 } header: {
                     Text("profile.invitations")
                         .textStyle(.action200)

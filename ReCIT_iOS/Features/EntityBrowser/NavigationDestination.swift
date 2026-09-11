@@ -26,6 +26,9 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// Looking a reader up by name on inventaire.io, to ask them into my network. Pushed from
     /// the Profil's « Réseau » section; it carries nothing, the query lives in the screen.
     case addFriends
+    /// Both directions of the waiting: invitations received, and requests sent. Pushed from
+    /// the Profil's « Invitations » section, which shows the received ones inline.
+    case invitations
     /// The screen that says what deleting the account costs, before the alert that does it.
     /// Pushed from the Profil's last row; it reads the signed-in user off `UserModel`, so the
     /// case carries nothing.
@@ -52,6 +55,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "localSearchResults:\(query)"
         case .addFriends:
             return "addFriends"
+        case .invitations:
+            return "invitations"
         case .deleteAccount:
             return "deleteAccount"
         }
@@ -111,6 +116,8 @@ extension NavigationDestination {
           InventorySearchAllLocalView(query: query)
       case .addFriends:
           ReaderSearchView(path: path)
+      case .invitations:
+          InvitationsView(path: path)
       case .deleteAccount:
           DeleteAccountView()
       }

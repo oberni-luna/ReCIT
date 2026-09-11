@@ -10,13 +10,21 @@ import SwiftData
 
 @MainActor
 @Observable
-final class UserModel {
+final class UserModel: OptimisticMutating {
 
     private let apiService: APIServicing
     var myUser: User?
 
-    init(apiService: APIServicing) {
+    /// Shared channel used to surface a background optimistic failure to the UI.
+    var errorReporter: AppErrorReporter?
+
+    /// The most recent background task spawned by an optimistic relation write. Exposed so
+    /// tests can await completion; not observed by the UI.
+    @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
+
+    init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
+        self.errorReporter = errorReporter
     }
 
     func syncMyUser(modelContext: ModelContext) async throws {
@@ -100,6 +108,50 @@ final class UserModel {
         myUser.relation = .none
 
         try modelContext.save()
+    }
+
+    // MARK: - Relation writes
+
+    /// Asks to join `user`'s network. Optimistic: the row says « envoyée » before the server
+    /// has answered, and goes back to what it was if the call fails (ADR 0001).
+    ///
+    /// No message travels with it — `POST /api/relations/request` takes a user id and nothing
+    /// else, which is why the sheet that raises this only confirms.
+    func requestRelation(with user: User, modelContext: ModelContext) {
+        changeRelation(user, to: .requestSent, action: "request", modelContext: modelContext)
+    }
+
+    /// Takes back a request I sent. The other side never learns it existed.
+    func cancelRelation(with user: User, modelContext: ModelContext) {
+        changeRelation(user, to: .none, action: "cancel", modelContext: modelContext)
+    }
+
+    /// The shape shared by every relation write: one local state change, one POST carrying the
+    /// user id, and the previous state put back if the server refuses.
+    private func changeRelation(
+        _ user: User,
+        to newRelation: UserRelation,
+        action: String,
+        modelContext: ModelContext
+    ) {
+        let previousRelation: UserRelation = user.relation
+        let userId: String = user._id
+
+        inFlightTask = optimistic(
+            modelContext,
+            apply: { user.relation = newRelation },
+            revert: { user.relation = previousRelation },
+            request: { [weak self] in
+                try await self?.postRelation(action: action, userId: userId)
+            }
+        )
+    }
+
+    private func postRelation(action: String, userId: String) async throws {
+        let _: OkStatusDTO? = try await apiService.send(
+            toEndpoint: "/api/relations/\(action)",
+            payload: RelationActionPayload(user: userId)
+        )
     }
 
     /// The readers this account is actually close to — the only ones whose inventory is worth

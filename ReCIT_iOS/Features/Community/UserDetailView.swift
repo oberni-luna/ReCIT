@@ -16,43 +16,37 @@ struct UserDetailView: View {
     let user: User
     @Binding var path: NavigationPath
 
+    /// Mine, or a friend's: the two cases where there are books to show. Everyone else's
+    /// inventory is closed until the relation is, which is what the empty state says.
+    private var showsInventory: Bool {
+        user._id == userModel.myUser?._id || user.relation == .friend
+    }
+
     var body: some View {
         List {
             Section {
                 UserHeaderView(user: user)
             }
 
-            Section {
-                if user.lastInventorySync == nil {
-                    SyncingInlineRow()
-                } else if user.items.isEmpty {
-                    Text("inventory.empty")
-                } else {
-                    ForEach(user.items) { item in
-                        Button {
-                            path.append(NavigationDestination.book(anchor: .item(item)))
-                        } label: {
-                            InventoryCell(item: item, filterParameter: .userInventory)
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            if item.ownerId != userModel.myUser?._id {
-                                if item.transaction == .inventorying {
-                                    Button("community.owner_not_lending \(user.username)", systemImage: "hand.raised.slash") { }
-                                        .disabled(true)
-                                } else {
-                                    Button("action.borrow_from_user \(user.username)", systemImage: "hand.wave") {
-                                        borrowFromItem = item
-                                    }
-                                }
-                            }
-                        }
-                    }
+            if showsInventory {
+                inventorySection
+            } else {
+                Section {
+                    RelationActionsView(user: user)
                 }
-            } header: {
-                Text("user.inventory.header \(user.username)")
-                    .textStyle(.action200)
-                    .foregroundStyle(.foregroundSecondary)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+
+                Section {
+                    EmptyStateView(
+                        glyph: "person",
+                        title: "network.private_inventory.title",
+                        message: "network.private_inventory.message \(user.username)"
+                    )
+                    .padding(.vertical, .large)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
         }
         .navigationTitle("nav.user")
@@ -76,6 +70,42 @@ struct UserDetailView: View {
                     transition: TransactionStateMachine.requestTransition
                 )
             }
+        }
+    }
+
+    @ViewBuilder
+    private var inventorySection: some View {
+        Section {
+            if user.lastInventorySync == nil {
+                SyncingInlineRow()
+            } else if user.items.isEmpty {
+                Text("inventory.empty")
+            } else {
+                ForEach(user.items) { item in
+                    Button {
+                        path.append(NavigationDestination.book(anchor: .item(item)))
+                    } label: {
+                        InventoryCell(item: item, filterParameter: .userInventory)
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        if item.ownerId != userModel.myUser?._id {
+                            if item.transaction == .inventorying {
+                                Button("community.owner_not_lending \(user.username)", systemImage: "hand.raised.slash") { }
+                                    .disabled(true)
+                            } else {
+                                Button("action.borrow_from_user \(user.username)", systemImage: "hand.wave") {
+                                    borrowFromItem = item
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } header: {
+            Text("user.inventory.header \(user.username)")
+                .textStyle(.action200)
+                .foregroundStyle(.foregroundSecondary)
         }
     }
 

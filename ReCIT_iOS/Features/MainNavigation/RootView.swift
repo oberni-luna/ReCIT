@@ -55,7 +55,7 @@ struct RootView: View {
     ) {
         let errorReporter: AppErrorReporter = .init()
         _errorReporter = State(initialValue: errorReporter)
-        _userModel = State(initialValue: UserModel(apiService: apiService))
+        _userModel = State(initialValue: UserModel(apiService: apiService, errorReporter: errorReporter))
         _listModel = State(initialValue: ListModel(apiService: apiService, errorReporter: errorReporter))
         let entityModel: EntityModel = .init(apiService: apiService)
         _entityModel = State(initialValue: entityModel)

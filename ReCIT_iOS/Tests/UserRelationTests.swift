@@ -140,3 +140,82 @@ struct UserModelRelationsTests {
         #expect(model.getAllOtherUsers(modelContext: context).count == 2)
     }
 }
+
+@MainActor
+@Suite("UserModel relation writes", .serialized)
+struct UserModelRelationWritesTests {
+
+    private func makeStore() throws -> (ModelContext, User, User) {
+        let context: ModelContext = try TestStore.makeContext()
+        let me: User = Fixture.user(id: "me", username: "me")
+        let other: User = Fixture.user(id: "other", username: "Camille")
+        context.insert(me)
+        context.insert(other)
+        try context.save()
+        return (context, me, other)
+    }
+
+    @Test("Asking flips the state before the server answers, and posts the documented body")
+    func requestIsOptimistic() async throws {
+        let (context, me, other): (ModelContext, User, User) = try makeStore()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/request", json: #"{"ok":true}"#)
+        let model: UserModel = .init(apiService: mock)
+        model.myUser = me
+
+        model.requestRelation(with: other, modelContext: context)
+        #expect(other.relation == .requestSent)
+
+        await model.inFlightTask?.value
+        #expect(other.relation == .requestSent)
+        #expect(mock.recordedRequests.last?.endpoint == "/api/relations/request")
+        #expect(mock.recordedRequests.last?.method == "POST")
+    }
+
+    @Test("A refused request puts the previous state back, and says so")
+    func requestRevertsOnFailure() async throws {
+        let (context, me, other): (ModelContext, User, User) = try makeStore()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/request", error: NetworkError.badResponse)
+        let reporter: AppErrorReporter = .init()
+        let model: UserModel = .init(apiService: mock, errorReporter: reporter)
+        model.myUser = me
+
+        model.requestRelation(with: other, modelContext: context)
+        await model.inFlightTask?.value
+
+        #expect(other.relation == .none)
+        #expect(reporter.lastFailure != nil)
+    }
+
+    @Test("Cancelling takes the request back to nothing, on /cancel")
+    func cancelUndoesTheRequest() async throws {
+        let (context, me, other): (ModelContext, User, User) = try makeStore()
+        other.relation = .requestSent
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/cancel", json: #"{"ok":true}"#)
+        let model: UserModel = .init(apiService: mock)
+        model.myUser = me
+
+        model.cancelRelation(with: other, modelContext: context)
+        #expect(other.relation == .none)
+
+        await model.inFlightTask?.value
+        #expect(mock.recordedRequests.last?.endpoint == "/api/relations/cancel")
+    }
+
+    @Test("A refused cancellation leaves the request standing")
+    func cancelRevertsOnFailure() async throws {
+        let (context, me, other): (ModelContext, User, User) = try makeStore()
+        other.relation = .requestSent
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/cancel", error: NetworkError.badResponse)
+        let model: UserModel = .init(apiService: mock, errorReporter: .init())
+        model.myUser = me
+
+        model.cancelRelation(with: other, modelContext: context)
+        await model.inFlightTask?.value
+
+        #expect(other.relation == .requestSent)
+    }
+}

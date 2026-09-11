@@ -110,6 +110,53 @@ final class UserModel: OptimisticMutating {
         try modelContext.save()
     }
 
+    // MARK: - Finding readers
+
+    /// The readers `inventaire.io` knows by that name, best match first, as `User`s of the local
+    /// store.
+    ///
+    /// Two calls, and both are needed. `/api/search?types=users` answers with ids, labels and
+    /// pictures — no item count, and nothing about where I stand with any of them — so the ids
+    /// go straight to `/api/users/by-ids`, which is also what puts them in the store. A reader
+    /// has to be there to be pushed as a destination and to carry a relation at all.
+    ///
+    /// Strangers therefore accumulate in the store, which is deliberate and harmless as long as
+    /// nothing mistakes the store for the network: since issue 0083 the Profil lists
+    /// `relation == .friend`, and only friends' inventories are synced.
+    func searchReaders(
+        query: String,
+        modelContext: ModelContext,
+        limit: Int = 15
+    ) async throws -> [User] {
+        let trimmedQuery: String = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedQuery.isEmpty == false else { return [] }
+
+        // A username can hold a plus or an ampersand, both of which would end the query
+        // parameter and truncate the search rather than fail it.
+        let search: String = trimmedQuery.addingPercentEncoding(
+            withAllowedCharacters: .urlQueryAllowed.subtracting(.init(charactersIn: "&+=?#"))
+        ) ?? trimmedQuery
+
+        let response: UserSearchResultsDTO? = try await apiService.fetchData(
+            fromEndpoint: "/api/search?types=users&search=\(search)&limit=\(limit)"
+        )
+
+        let userIds: [String] = (response?.results ?? [])
+            .sorted { ($0.score ?? 0) > ($1.score ?? 0) }
+            .map(\.id)
+            .filter { $0 != myUser?._id }
+        guard userIds.isEmpty == false else { return [] }
+
+        let users: [User] = try await getOrFetchUsers(modelContext: modelContext, userIds: userIds)
+        let byID: [String: User] = .init(
+            users.map { ($0._id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        // Back into the server's order: `by-ids` answers a dictionary, and the ranking is the
+        // one thing the search had to say that the fetch does not.
+        return userIds.compactMap { byID[$0] }
+    }
+
     // MARK: - Relation writes
 
     /// Asks to join `user`'s network. Optimistic: the row says « envoyée » before the server

@@ -98,14 +98,26 @@ struct ProfileView: View {
             Section {
                 if syncStatus.shouldShowPlaceholder(.community) {
                     SyncingInlineRow()
-                } else if otherUsers.isEmpty {
-                    Text("profile.network.empty")
                 } else {
-                    ForEach(otherUsers) { otherUser in
-                        NavigationLink(value: NavigationDestination.user(user: otherUser)) {
-                            UserCellView(user: otherUser)
+                    if otherUsers.isEmpty {
+                        Text("profile.network.empty")
+                    } else {
+                        ForEach(otherUsers) { otherUser in
+                            NavigationLink(value: NavigationDestination.user(user: otherUser)) {
+                                UserCellView(user: otherUser)
+                            }
                         }
                     }
+
+                    // The way in, and the only one: the network is otherwise built on the
+                    // website. Kept below the friends and present even when there are none —
+                    // an empty network is exactly when one needs it.
+                    NavigationLink(value: NavigationDestination.addFriends) {
+                        Text("network.add_friends")
+                            .textStyle(.action300)
+                            .foregroundStyle(.foregroundTinted)
+                    }
+                    .accessibilityIdentifier("e2e.profile.addFriends")
                 }
             } header : {
                 Text("profile.network")

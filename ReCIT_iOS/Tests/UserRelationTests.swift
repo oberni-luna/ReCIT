@@ -219,3 +219,61 @@ struct UserModelRelationWritesTests {
         #expect(other.relation == .requestSent)
     }
 }
+
+@MainActor
+@Suite("UserModel.searchReaders", .serialized)
+struct UserModelReaderSearchTests {
+
+    /// The shape `/api/search?types=users` really answers with — no `uri`, and a leading
+    /// underscore on the score. Taken from a live call on 2026-09-12.
+    private let searchJSON: String = """
+    {"results":[
+      {"id":"b","type":"users","label":"OlivierMesnil","_score":323.8},
+      {"id":"a","type":"users","label":"Olivier","image":"/img/users/abc","_score":414.7}
+    ]}
+    """
+
+    private func makeModel() throws -> (UserModel, ModelContext, MockAPIService) {
+        let context: ModelContext = try TestStore.makeContext()
+        let me: User = Fixture.user(id: "me", username: "me")
+        context.insert(me)
+        try context.save()
+
+        let mock: MockAPIService = .init()
+        let model: UserModel = .init(apiService: mock)
+        model.myUser = me
+        return (model, context, mock)
+    }
+
+    @Test("Results come back best match first, and land in the store")
+    func rankedAndPersisted() async throws {
+        let (model, context, mock): (UserModel, ModelContext, MockAPIService) = try makeModel()
+        mock.stub("types=users", json: searchJSON)
+        mock.stub("/api/users/by-ids", json: #"""
+        {"users":{"a":{"_id":"a","username":"Olivier","email":null,"position":null,"picture":null,"language":null,"snapshot":null},"b":{"_id":"b","username":"OlivierMesnil","email":null,"position":null,"picture":null,"language":null,"snapshot":null}}}
+        """#)
+
+        let readers: [User] = try await model.searchReaders(query: "olivier", modelContext: context)
+
+        #expect(readers.map(\._id) == ["a", "b"])
+        #expect(try context.fetch(FetchDescriptor<User>()).count == 3)
+        #expect(readers.allSatisfy { $0.relation == .none })
+    }
+
+    @Test("An empty query never leaves the device")
+    func emptyQueryDoesNotSearch() async throws {
+        let (model, context, mock): (UserModel, ModelContext, MockAPIService) = try makeModel()
+
+        #expect(try await model.searchReaders(query: "   ", modelContext: context).isEmpty)
+        #expect(mock.recordedRequests.isEmpty)
+    }
+
+    @Test("I am never a result of my own search")
+    func myselfIsFilteredOut() async throws {
+        let (model, context, mock): (UserModel, ModelContext, MockAPIService) = try makeModel()
+        mock.stub("types=users", json: #"{"results":[{"id":"me","type":"users","label":"me","_score":10}]}"#)
+
+        #expect(try await model.searchReaders(query: "me", modelContext: context).isEmpty)
+        #expect(mock.recordedRequests.count == 1)
+    }
+}

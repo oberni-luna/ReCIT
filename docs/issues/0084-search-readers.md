@@ -23,7 +23,9 @@ pousse un écran de recherche.
   Toucher la rangée pousse le profil du lecteur.
 - Un résultat inconnu du store est inséré à la volée pour pouvoir être poussé et porter son état.
 
-Le geste d'ajout lui-même est l'issue 0085 : ici, « Ajouter » pousse le profil.
+Le geste d'ajout lui-même vient de l'issue 0085, faite avant celle-ci : la pilule « Ajouter » de
+la rangée appelle `requestRelation`, elle ne navigue pas. Une rangée est donc deux cibles — le nom
+ouvre le profil, la pilule agit.
 
 ## Acceptance criteria
 
@@ -37,3 +39,4 @@ Le geste d'ajout lui-même est l'issue 0085 : ici, « Ajouter » pousse le profi
 ## Blocked by
 
 - `docs/issues/0083-relations-four-states.md`
+- `docs/issues/0085-request-and-cancel.md` — la rangée porte le geste, donc il existe avant elle

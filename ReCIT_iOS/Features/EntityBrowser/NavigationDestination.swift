@@ -23,6 +23,9 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// query is the whole payload: the search field stays on the screen below, so the
     /// destination has to carry what it answers.
     case localSearchResults(query: String)
+    /// Looking a reader up by name on inventaire.io, to ask them into my network. Pushed from
+    /// the Profil's « Réseau » section; it carries nothing, the query lives in the screen.
+    case addFriends
     /// The screen that says what deleting the account costs, before the alert that does it.
     /// Pushed from the Profil's last row; it reads the signed-in user off `UserModel`, so the
     /// case carries nothing.
@@ -47,6 +50,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "shelf:\(id)"
         case .localSearchResults(let query):
             return "localSearchResults:\(query)"
+        case .addFriends:
+            return "addFriends"
         case .deleteAccount:
             return "deleteAccount"
         }
@@ -104,6 +109,8 @@ extension NavigationDestination {
           ShelfDetailView(shelfId: id, path: path)
       case .localSearchResults(let query):
           InventorySearchAllLocalView(query: query)
+      case .addFriends:
+          ReaderSearchView(path: path)
       case .deleteAccount:
           DeleteAccountView()
       }

@@ -7,6 +7,22 @@
     ", " : {
 
     },
+    "network.add_friends" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add reader friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter des amis lecteurs"
+          }
+        }
+      }
+    },
     "network.add_to_network" : {
       "localizations" : {
         "en" : {
@@ -19,6 +35,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter au réseau"
+          }
+        }
+      }
+    },
+    "network.invitation.received" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation received"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation reçue"
           }
         }
       }
@@ -163,6 +195,102 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Demande d’ajout"
+          }
+        }
+      }
+    },
+    "network.search.explanation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look a reader up by their inventaire.io username, then send them a request. Their inventory joins yours as soon as they accept it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cherchez un lecteur par son nom d’utilisateur sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès qu’il l’aura acceptée."
+          }
+        }
+      }
+    },
+    "network.search.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Readers"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecteurs"
+          }
+        }
+      }
+    },
+    "network.search.no_results" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No reader by that name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun lecteur de ce nom"
+          }
+        }
+      }
+    },
+    "network.search.no_results.message %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nobody on inventaire.io answers to “%@”."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personne sur inventaire.io ne répond à « %@ »."
+          }
+        }
+      }
+    },
+    "network.search.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Username"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom d’utilisateur"
+          }
+        }
+      }
+    },
+    "network.search.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find your reader friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouvez vos amis lecteurs"
           }
         }
       }

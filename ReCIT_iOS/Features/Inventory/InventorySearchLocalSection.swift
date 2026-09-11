@@ -15,8 +15,8 @@
 //  not a nil. See `PersistentModel+StillInTheStore` and issue 0065.
 //
 //  The header is first-person — « Dans mes livres et chez mes amis » — rather than the
-//  catalogue's `search.friends_inventory`, which is its only tutoiement and dies with
-//  `SearchView` at issue 0074.
+//  catalogue's `search.friends_inventory`, which was the only tutoiement in it and went with
+//  the search tab at issue 0074.
 //
 //  See PRD 0012.
 //

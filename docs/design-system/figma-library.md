@@ -50,6 +50,16 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   n'en porte qu'une) ; le glyphe de `Ranger` est `Icon/book`, faute d'un `books.vertical.fill` dans le jeu ; et la
   section est en `Light` seulement — la carte est bâtie sur des tokens, le mode sombre suit sans redessin.
   **Rien de tout cela n'est implémenté** : aucune astuce TipKit n'existe dans le code à ce jour.
+- **Passe du 2026-09-11** — la recherche unifiée, section `Recherche unifiée` (`334:8624`) sur la page `Screens`.
+  Quatre écrans en clair et sombre (`R1 · Repos` → `R4 · Résultats`) qui fondent le champ de l'inventaire et
+  l'onglet Recherche en une recherche à trois temps, à la manière de Mail sur iOS, plus le panneau
+  `Spec · Recherche unifiée` (`340:9412`). Deux composants nouveaux (`Search / Query Row` `331:255`,
+  `Search / Scope Card` `333:274`, ce dernier parqué), trois étendus (`Icon` → 22 variantes avec `feather` et
+  `xmark.circle`, `Chrome / Search Field` → 6 avec `State=Typed`, `Cell / Book` → propriété `Show tag`).
+  Révisée deux fois le même jour : le carrousel de portées sort de R2, l'écran des récentes vides (`R2b`) arrive,
+  et les huit arbitrages sont rendus — il ne reste que la tab bar à 3 onglets. **Rien n'est implémenté** : c'est
+  une proposition. Détail complet en fin de fichier.
+
 - **Passe du 2026-09-09** — le repère du scanner, section `Scan · Repère` (`313:7880`) sur la page `Screens`.
   Trois frames, mode `Dark` épinglé, toutes clonées de `Batch Add` (`57:2401`) — même photo de caméra, même voile,
   même chrome :
@@ -646,7 +656,7 @@ retoucher un seul nœud.
 | `Tokens` | `0:1` | 6 sections, 9 planches de tokens |
 | `Components` | `20:2` | Les 3 composants qui **miroitent le package** design system |
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
-| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification, puis les sections `Onboarding` (`73:2829`) et `Ranger mes livres` (`97:3755`), puis `Scan · Repère` (`313:7880`) |
+| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification, puis les sections `Onboarding` (`73:2829`) et `Ranger mes livres` (`97:3755`), puis `Scan · Repère` (`313:7880`) et `Recherche unifiée` (`334:8624`) |
 
 La séparation entre `Components` et `Screens · Components` est intentionnelle : `Components` ne contient que ce qui
 existe dans `DesignSystem/` côté Swift (les deux `ButtonStyle`, le `LabelStyle` de tag). Tout le reste — le chrome iOS
@@ -866,10 +876,10 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D15 | `Book/BookDetailView.swift:8`, `Book/BookViewModel.swift:16` | Les deux renvoient à `EditionDetailView`, qui n'existe plus | ouverte |
 | D16 | `Lists/EntityListView.swift:2`, `Works/WorkListView.swift:2` | En-têtes annonçant `MyInventoryView.swift` ; `#Preview` au corps commenté | ouverte |
 | D17 | `EntityListView.swift:27`, `WorkListView.swift:22`, `CommunityView.swift:23` | `range(of:options:.caseInsensitive)` sur du texte saisi, là où `CLAUDE.md` impose `localizedStandardContains()`. `InventoryListContent` le fait correctement — trois points d'entrée, deux méthodes | ouverte |
-| D18 | `SearchView.swift:41` et `:118`, `EntityListView.swift:50`, `InventoryListContent.swift:81`, `SyncingPlaceholderView.swift:26`, `SyncingInlineRow.swift:25` | `.red` / `.secondary` **système** là où `.foregroundError` / `.foregroundSecondary` existent. Six occurrences | ouverte |
-| D19 | `SearchView.swift:71` | `"loading more results..."` en dur, non localisé, dans une app entièrement en `Localizable.xcstrings` — et un `HStack(spacing: 12)` littéral | ouverte |
+| D18 | ~~`SearchView.swift:41` et `:118`~~, `EntityListView.swift:50`, `InventoryListContent.swift:81`, `SyncingPlaceholderView.swift:26`, `SyncingInlineRow.swift:25` | `.red` / `.secondary` **système** là où `.foregroundError` / `.foregroundSecondary` existent. Six occurrences | ouverte — **quatre** depuis le 2026-09-11 : les deux de `SearchView` sont parties avec le fichier (issue 0074) |
+| D19 | ~~`SearchView.swift:71`~~ | `"loading more results..."` en dur, non localisé, dans une app entièrement en `Localizable.xcstrings` — et un `HStack(spacing: 12)` littéral | **résolue** le 2026-09-11 (issue 0074) — la chaîne est partie avec `SearchView`, et `grep` ne trouve plus aucun `HStack(spacing: 12)` dans l'app : fermée franchement, pas déplacée |
 | D20 | `Localizable.xcstrings` | 9 littéraux français de la feature Étagères sont entrés dans le catalogue **comme clés**, sans traduction `fr` : « Cette étagère est vide », « Créer », « Description (optionnel) », « Enregistrer », « Fermer », « Modifier l'étagère », « Nom de l'étagère », « Nouvelle étagère », « Visibilité ». La langue source étant l'anglais, un utilisateur anglophone voit du français. Une clé vide `""` traîne aussi | ouverte |
-| D21 | `search.friends_inventory` | « Dans l'inventaire de **tes** amis » — le SEUL tutoiement du catalogue. Les 21 autres chaînes à la deuxième personne vouvoient | ouverte |
+| D21 | ~~`search.friends_inventory`~~ | « Dans l'inventaire de **tes** amis » — le SEUL tutoiement du catalogue. Les 21 autres chaînes à la deuxième personne vouvoient | **résolue** le 2026-09-11 (issue 0074) — la clé est supprimée du catalogue avec `SearchView`. La section locale de la recherche unifiée dit « Dans mes livres et chez mes amis » |
 | D22 | `SearchResultCell.workCell` vs `OtherEditionsCell` | Même layout, dupliqué. Les deux écrivent `HStack(spacing: 12)` et `VStack(spacing: 4)` en **littéraux** alors que les nombres valent exactement `.sMedium` / `.xSmall`. Le commentaire d'`OtherEditionsCell` dit qu'il « mirrors the book-list cover cell » — il le miroite par copie | ouverte |
 | D23 | `CellThumbnail` — points d'appel | La même couverture reçoit un rayon et une taille différents selon l'entrée : `.minimal` / 48 dans `InventoryCell` et `TransactionCellView`, les **défauts** `.medium` / 36 dans `SearchResultCell` et `OtherEditionsCell` | ouverte |
 | D24 | `TransactionCellView.swift:47-51` | `TransactionStateLabel` est enveloppé dans `.textStyle(.content300).foregroundStyle(.foregroundSecondary)` : les deux sont morts, `TagLabelStyle` repose son propre style et ses fills en aval. Le `HStack(spacing: .xSmall)` qui l'entoure n'a qu'un enfant | ouverte |
@@ -1587,3 +1597,119 @@ relisant.
 
 Rappel : D51 (la case « ☐ » de la note d'étagère) et D52 (le bouton de tri au-dessus d'une bibliothèque
 vide) restent ouvertes côté code, sans rapport avec cette feature.
+
+---
+
+# Recherche unifiée — proposition (passe du 2026-09-11)
+
+Une seule recherche, dans l'onglet Inventaire, en trois temps — le modèle de **Mail sur iOS**. Elle remplace le champ
+de l'inventaire (`ShelvesView.searchable`) **et** l'onglet Recherche (`MainSearchView` → `SearchView`), qui disparaît.
+
+Section `Recherche unifiée` (`334:8624`) sur la page `Screens`, à droite de `Astuces · TipKit`. **10 frames** de
+393 × 852 (cinq écrans × clair / sombre, mode épinglé) + 1 panneau.
+
+## Table des écrans
+
+| Écran | Clair | Sombre | Ce qu'il montre |
+|---|---|---|---|
+| **R1 · Repos** | `334:8625` | `334:8773` | L'inventaire tel quel, champ `State=Idle`. Cloné des frames `Étagères`, **onglet Recherche caché** |
+| **R2 · Focus** | `336:8840` | `336:8956` | Temps 1 : le champ monte en haut (la grande nav se replie), les 3 dernières recherches. Rien d'autre |
+| **R2b · Aucune récente** | `365:10364` | `365:10450` | Premier lancement, ou après « Effacer » : `Empty State` centré entre le champ et le clavier |
+| **R3 · Trois caractères** | `338:9018` | `338:9182` | Temps 2 : local (mes livres + ceux de mes amis) plafonné à 3, puis 3 suggestions inventaire.io |
+| **R4 · Résultats** | `339:9250` | `339:9361` | Temps 3 : après envoi, les résultats complets groupés par type |
+| Panneau | `340:9412` | — | `Spec · Recherche unifiée`, au format des sept autres |
+
+## Composants ajoutés — `Screens · Components`
+
+| Composant | node id | Variantes | Propriétés |
+|---|---|---|---|
+| `Search / Query Row` | `331:255` | — | `Glyph#331:0` (INSTANCE_SWAP), `Label#331:1` |
+| `Search / Scope Card` | `333:274` | `State ∈ {Default, Selected}` | `Glyph#333:8`, `Title#333:9`, `Count#333:10`, `Show count#333:11` — **parqué, zéro instance** |
+
+`Search / Query Row` sert les **deux** listes du temps 2 : une recherche récente (glyphe `clock`, libellé nu) et une
+suggestion inventaire.io (glyphe `book` / `feather` / `magnifyingglass`, requête en gras posée à la main sur
+l'instance). C'est la même rangée, pas deux composants — 393 × 47, `spacing/medium` de retrait, `spacing/s-medium`
+de gouttière.
+
+`Search / Scope Card` : 156 × 124 à l'écran (dessiné à 168, les instances étaient réduites), `radius/rounded`,
+bord `sizing/border/hairline`, `Show count` éteint quand le compte n'est pas connu. **Le carrousel a été retiré de
+R2 le jour même** : la portée est un point d'entrée, pas un filtre, et le temps 1 se réduit aux récentes. Le
+composant reste dans la bibliothèque sans aucune instance — sa description le dit, pour qu'il ne se lise pas comme
+un oubli d'audit.
+
+## Composants étendus
+
+| Composant | Ce qui change | Pourquoi c'est sans risque |
+|---|---|---|
+| `Icon` (`21:60`) | **22 variantes** : `feather` (`330:258`, l'auteur·ice) et `xmark.circle` (`330:264`, effacer la saisie) | Ajout de variantes, les 20 autres intactes. La grille a été recalée sur 64 pt au passage — `magic` était à y=195 |
+| `Chrome / Search Field` (`27:172`) | **6 variantes** : troisième état `State=Typed` en clair (`334:264`) et sombre (`334:277`) — texte en encre, `xmark.circle` dans le champ | `Idle` et `Active` ne bougent pas. Le placeholder des six variantes passe en **une ligne, troncature `ENDING`**, comme iOS |
+| `Cell / Book` (`29:154`) | Propriété `Show tag#338:0`, **allumée par défaut** | Les 16 frames existants sont inchangés ; seuls les résultats de recherche l'éteignent |
+
+Compteurs après la passe : **35 composants** sur `Screens · Components`, `Icon` à 22 variantes,
+`Chrome / Search Field` à 6.
+
+## Décisions de design, et leur revers
+
+| Décision | Revers |
+|---|---|
+| Les récentes et les suggestions partagent **une** rangée | Le jour où une suggestion veut un chevron ou un compte, il faudra une variante — pas un second composant |
+| **Pas de carrousel de portées** au temps 1 : le champ, les récentes, rien de plus | Le temps 1 ne dit plus où l'on cherche, et n'a plus rien à montrer quand aucune recherche n'a encore été faite (état non dessiné) |
+| « Effacer » vit dans l'en-tête de section, pas sur chaque rangée | Pas de suppression unitaire : « Effacer » vide **tout** le stock et ramène à `R2b`. Assumé pour l'instant |
+| Les libellés parlent à la **première personne** (« Mes livres », « Chez mes amis ») | Contourne la seule chaîne tutoyante du catalogue (`search.friends_inventory`) au lieu de la corriger — voir D-R4 |
+| L'onglet Recherche est caché en **surcharge d'instance** | `Chrome / Tab Bar` garde sa variante `Active=Recherche`, désormais morte. Une version à 3 onglets reste à faire |
+
+## Tranché le 2026-09-11
+
+| Question | Réponse | Ce qui en découle |
+|---|---|---|
+| La portée : point d'entrée ou filtre persistant ? | **Point d'entrée** | Aucun rappel de portée sur R3/R4, pas de segmenté à la Mail. La maquette est complète telle quelle |
+| « Sur inventaire.io » en carte double-t-elle les suggestions ? | **Sans objet** | Le carrousel sort de R2, la question tombe avec lui |
+| Le seuil : 2 ou 3 caractères ? | **3**, comme le code | Rien à changer dans `SearchView.isRemoteSectionVisible`. La maquette s'aligne : R3 s'appelle désormais « Trois caractères ». **D-R2 close** |
+| Où vivent les récentes ? | **Local seulement**, jamais remontées avec le compte | Écrites **à l'envoi** : touche « rechercher » du clavier, ou tap sur une suggestion. Une requête tapée puis abandonnée ne laisse aucune trace |
+| Où va le scan ? | **Il reste où il est**, dans l'écran d'inventaire | Rien à déplacer, rien à maquetter |
+| Combien de récentes sont stockées ? | **Toutes** | Trois sont affichées, le stock n'est pas plafonné. La suppression unitaire est remise à plus tard ; « Effacer » vide tout |
+| Que fait « Annuler » ? | **Referme le mode recherche** | Retour à `R1`, requête perdue. Ce n'est pas le bouton qui vide le champ — c'est le `xmark.circle` dans le champ qui fait ça |
+| Les récentes vides ? | **Un état vide**, à la manière d'Apple Music | `R2b` : `Empty State` (`204:263`) `Layout=Centered`, glyphe `magnifyingglass` 40, `Show action` éteint, bloc de 177 posé à `y=225` — centré entre le bas du champ (111) et le haut du clavier (516). Aucun composant nouveau |
+
+## Reste à trancher — recherche unifiée
+
+1. **La tab bar à 3 onglets.** L'onglet Recherche est caché en surcharge d'instance ; il faudra une variante de
+   `Chrome / Tab Bar` quand ça se code. C'est le seul raccourci de cette passe, et le seul point ouvert.
+
+## Ce qui n'est pas maquetté — recherche unifiée
+
+| Absent | Raison |
+|---|---|
+| Le clavier | Rien dans ce fichier ne le reproduit. Sur R2/R2b/R3/R4 il mange tout sous ~516 pt : le tiers bas n'est vide **que** sur la maquette |
+| Chargement, **aucun résultat pour une requête**, erreur réseau | `Empty State` (`204:263`) les couvre déjà ; reste à choisir lequel va où. `R2b` ne traite que les récentes **vides**, pas une recherche sans résultat |
+| La tab bar à 3 onglets | Surcharge d'instance ici, variante à créer quand ça se code |
+
+## Divergences relevées dans le code — passe recherche unifiée
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| D-R1 | ~~`AppModels/Search/SearchModel.swift:20`~~ | `searchLocalInventory(query:modelContext:)` n'est **appelé par personne**. Le temps 2 de cette maquette est exactement son emploi | **résolue** le 2026-09-11 (issue 0074) — supprimée plutôt que ressuscitée : la section locale lit les `@Query` de l'inventaire via `InventorySearchRanking`, une seconde requête aurait cassé la réactivité qu'ADR 0001 demande |
+| D-R2 | `Features/Search/SearchView.swift:34` | Le seuil distant est à **3** caractères ; la maquette proposait 2 | **close** le 2026-09-11 — le code fait foi, la maquette passe à 3 |
+| D-R3 | ~~`Features/Search/SearchView.swift:67-72`~~ | Doublon de **D19** (chaîne non localisée + `HStack(spacing: 12)` littéral) | **résolue** le 2026-09-11 (issue 0074) — voir D19 |
+| D-R4 | ~~`Localizable.xcstrings` — `search.friends_inventory`~~ | « Dans l'inventaire de **tes** amis » est le seul tutoiement du catalogue | **résolue** le 2026-09-11 (issue 0074) — voir D21 : la clé n'existe plus |
+| D-R5 | ~~`Features/Search/SearchView.swift:101`~~ — mais aussi `EntityListDetail.swift:146,232`, `EntityAuthorsView.swift:22`, `AuthorDetailView.swift:71`, `WorkEditionPicker.swift:101`, `TransactionDetailView.swift:44`, `BookDetailView.swift:245,270` | Un `Button` qui enveloppe un `NavigationLink(value: UUID())` : le lien n'existe que pour le chevron, la navigation passe par `onNavigate` | **ouverte** — l'issue 0074 annonçait sa mort avec `SearchView`, à tort : le motif survit dans **huit** autres endroits. Deux d'entre eux (`AuthorDetailView`, `WorkEditionPicker`) sont exactement les rangées que `E2EScenarioTests.push(_:listIdentifier:driver:)` documente comme demandant deux points de visée, parce qu'un tap au centre tombe sur le lien mort. Re-cadrée sur ces fichiers le 2026-09-11 |
+
+## Ce que la construction a appris
+
+- **`componentPropertyReferences` s'écrase en entier.** Deux affectations successives (`{ characters }` puis
+  `{ visible }`) laissent une seule référence : le texte de `Count` restait figé sur sa valeur par défaut sans
+  qu'aucune erreur ne le dise. Toujours poser l'objet **complet** en une fois.
+- **Une surcharge de visibilité survit à un changement de variante** — l'onglet Recherche caché est resté caché
+  après le passage en `Theme=Dark` sur le clone — mais le `findOne` qui la repose, non : retrouver le nœud depuis
+  l'instance de tab bar, jamais depuis la frame.
+- **Éteindre `Show tag` ne raccourcit pas la cellule** : la rangée `meta` garde ses 24 pt. Il faut éteindre `meta`
+  aussi, et alors la cellule hugge (118 → 90 avec sous-titre, 64 sans).
+- **`resizeWithoutConstraints` sur une `SECTION`** est le seul moyen de la faire grandir : le panneau de spec fait
+  1535 pt, soit plus haut que les deux rangées d'écrans réunies.
+- **Cacher un nœud dans Figma ne le cache que là où on a cliqué.** Le carrousel avait été masqué sur
+  `R2 · Focus · Light` (regroupé en `Group 2`, `visible = false`) et était resté visible sur le sombre. Une paire
+  clair / sombre se modifie des deux côtés, ou l'un des deux ment. Les deux frames sont nettoyées — le groupe et
+  les instances sont **supprimés**, pas masqués.
+- **Les titres de section se répètent d'une passe à l'autre** (`## À trancher avant de coder`, `## Ce qui n'est pas
+  maquetté`). Un script qui édite ce fichier par recherche de titre attrape la passe d'août, pas la sienne : les
+  titres de cette passe portent leur suffixe, et toute édition se fait sur une chaîne unique.

@@ -8,8 +8,9 @@
 //  driven by values in a test instead of by a keyboard.
 //
 //  **It owns the three-character threshold**, which is written nowhere else. Before this type
-//  the number lived in `SearchView.isRemoteSectionVisible`, far from the view that had to stay
-//  silent below it, which is how the screen came to look broken between one and two characters:
+//  the number lived in `SearchView.isRemoteSectionVisible` — the search tab's own screen, gone
+//  at issue 0074 — far from the view that had to stay silent below it, which is how the screen
+//  came to look broken between one and two characters:
 //  the network waited for three, the screen did not, and an empty section sat under the field.
 //  One type answers both questions now, so they cannot disagree.
 //

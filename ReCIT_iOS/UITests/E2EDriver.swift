@@ -403,18 +403,18 @@ final class E2EDriver {
 
     // MARK: - Navigation
 
-    /// The four tabs the scenario visits.
+    /// The three tabs the scenario visits.
     ///
-    /// `Recherche` is a `Tab(role: .search)`, and on iOS 26 that does not merely select: it
-    /// dissolves the tab bar into a search field at the foot of the screen and **withdraws the
-    /// navigation bar entirely**, toolbar included. So the search tab is recognised by its field
-    /// together with the *absence* of a navigation bar — and the scan action that screen's
-    /// toolbar declares is not reachable from there at all, which is why the scenario opens the
-    /// scanner from the accueil or from the empty shelf instead.
+    /// **There were four until issue 0074.** `Recherche` was a `Tab(role: .search)`, and on
+    /// iOS 26 that does not merely select: it dissolves the tab bar into a search field at the
+    /// foot of the screen and **withdraws the navigation bar entirely**, toolbar included — so
+    /// the scan action that tab's toolbar declared was not reachable from it at all, which is
+    /// what pushed the scanner's entry point into the inventory's navigation bar and the
+    /// scenario's into the accueil. The search now lives in the inventory's own field, the bar
+    /// shows three places rather than four, and none of that behaviour is in the run any more.
     enum Tab: String {
         case inventory = "Inventaire"
         case lists = "Listes"
-        case search = "Recherche"
         case settings = "Réglages"
     }
 
@@ -444,8 +444,6 @@ final class E2EDriver {
             exists("e2e.lists.add")
         case .settings:
             exists("e2e.profile.logout")
-        case .search:
-            app.navigationBars.count == 0 && app.searchFields.count > 0
         }
     }
 

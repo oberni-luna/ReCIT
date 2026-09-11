@@ -5,7 +5,6 @@
 //  Created by Olivier Berni on 12/03/2026.
 //
 
-import SwiftData
 import Foundation
 
 @MainActor
@@ -15,31 +14,6 @@ final class SearchModel {
 
     init(apiService: APIServicing) {
         self.apiService = apiService
-    }
-
-    func searchLocalInventory(query: String, modelContext: ModelContext) -> [SearchResult] {
-        let cleanQuery: String = query.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        let predicate: Predicate<InventoryItem> = #Predicate { item in
-            item.searchIndex.localizedStandardContains(cleanQuery)
-        }
-        let items: [InventoryItem] = (try? modelContext.fetch(.init(predicate: predicate))) ?? []
-
-        var seenUris: Set<String> = []
-        return items.compactMap { item in
-            guard let edition = item.edition else { return nil }
-            guard seenUris.insert(edition.uri).inserted else { return nil }
-            return .init(
-                id: edition.uri,
-                uri: edition.uri,
-                title: edition.title,
-                description: edition.authorNames.joined(separator: ", "),
-                imageUrl: edition.image,
-                score: 0,
-                type: .inventoryItem,
-                localItem: item
-            )
-        }
     }
 
     /// Searches inventaire.io for the entity types asked for — `SearchSuggestion` carries them,

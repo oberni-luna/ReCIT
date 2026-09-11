@@ -1456,16 +1456,6 @@
         }
       }
     },
-    "loading more results..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "je regarde plus loin…"
-          }
-        }
-      }
-    },
     "login.button.create_account" : {
       "localizations" : {
         "en" : {
@@ -2931,22 +2921,6 @@
         }
       }
     },
-    "nav.search" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche"
-          }
-        }
-      }
-    },
     "nav.settings" : {
       "localizations" : {
         "en" : {
@@ -3492,88 +3466,6 @@
         }
       }
     },
-    "search.error" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unable to fetch results."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de récupérer les résultats."
-          }
-        }
-      }
-    },
-    "search.friends_inventory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In your friends' inventory"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dans l'inventaire de tes amis"
-          }
-        }
-      }
-    },
-    "search.placeholder" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search for an edition"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechercher une édition"
-          }
-        }
-      }
-    },
-    "search.remote_results" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On [inventaire.io](https://inventaire.io)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Sur [inventaire.io](https://inventaire.io)"
-          }
-        }
-      }
-    },
-    "search.remote.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No search results"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas de résultat "
-          }
-        }
-      }
-    },
     "shelf.empty.note.scan" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3980,22 +3872,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réglages"
-          }
-        }
-      }
-    },
-    "tab.search" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche"
           }
         }
       }

@@ -30,10 +30,6 @@ struct ShelvesContent: View {
     /// header is the manual route, and it is the reason the card is free to lead elsewhere.
     @State private var isCreatingShelf: Bool = false
 
-    /// Presents the batch scanner, from the empty-state card when the inventory is empty.
-    /// A cover rather than a push, on `MainSearchView`'s pattern: the scanner owns its own
-    /// navigation stack, and leaving it comes back here rather than unwinding this tab's path.
-
     @Query private var shelves: [Shelf]
     @Query private var myItems: [InventoryItem]
 

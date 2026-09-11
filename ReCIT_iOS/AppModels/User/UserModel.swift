@@ -71,16 +71,41 @@ final class UserModel {
         return users
     }
 
-    func syncUserNetwork(modelContext: ModelContext) async throws {
+    /// Reads `GET /api/relations` and writes the four states it answers onto the store.
+    ///
+    /// One call carries everything: `friends`, `userRequested`, `otherRequested` and `network`.
+    /// Until issue 0083 only `network` was kept, so the app fetched the users but knew nothing
+    /// of where it stood with any of them — the whole add-a-friend flow lives in the three
+    /// lists that were being dropped.
+    ///
+    /// The write is exhaustive, not incremental: every stored user that the answer does not
+    /// name falls back to `.none`. That is what makes a relation undone elsewhere — on the
+    /// website, or by the other side refusing — disappear here, instead of surviving as a
+    /// friend nobody can see any more.
+    func syncRelations(modelContext: ModelContext) async throws {
         guard let myUser else { return }
 
         let userNetwork: UserNetworkDTO? = try await apiService.fetchData(fromEndpoint: "/api/relations")
         guard let userNetwork else { return }
-        
-        let userIds = Array(Set(userNetwork.network).filter { $0 != myUser._id })
-        if userIds.isEmpty { return }
-        
-        _ = try await getOrFetchUsers(modelContext: modelContext, userIds: userIds)
+
+        let states: [String: UserRelation] = UserRelation.byUserID(from: userNetwork)
+        let userIds: [String] = Array(Set(userNetwork.network + Array(states.keys))).filter { $0 != myUser._id }
+        if userIds.isEmpty == false {
+            _ = try await getOrFetchUsers(modelContext: modelContext, userIds: userIds)
+        }
+
+        for user in try modelContext.fetch(FetchDescriptor<User>()) where user._id != myUser._id {
+            user.relation = states[user._id] ?? .none
+        }
+        myUser.relation = .none
+
+        try modelContext.save()
+    }
+
+    /// The readers this account is actually close to — the only ones whose inventory is worth
+    /// syncing, and the only ones the Profil calls « Réseau ».
+    func friends(modelContext: ModelContext) -> [User] {
+        getAllOtherUsers(modelContext: modelContext).filter { $0.relation == .friend }
     }
 
     func getAllOtherUsers(modelContext: ModelContext) -> [User] {

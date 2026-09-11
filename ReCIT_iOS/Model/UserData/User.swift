@@ -27,6 +27,11 @@ public class User: Identifiable, Equatable {
     /// user's inventory has never been synced. Used to show a syncing placeholder
     /// instead of an ambiguous empty inventory.
     var lastInventorySync: Double?
+    /// Where I stand with this reader, as of the last `GET /api/relations`. Server state,
+    /// rewritten whole at every sync — see `UserRelation`. Never merged from a user payload:
+    /// `/api/users/by-ids` knows nothing of relations, and a sparse answer must not demote a
+    /// friend to a stranger.
+    var relation: UserRelation = UserRelation.none
     @Relationship(deleteRule: .cascade, inverse: \InventoryItem.owner) var items: [InventoryItem] = []
 
     init(_id: String, _rev: String, username: String, email: String?, position: Coordinates?, avatarURLValue: String?, itemCount: Int, lastItemAdded: Double = 0) {

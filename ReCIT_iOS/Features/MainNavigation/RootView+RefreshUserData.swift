@@ -50,8 +50,12 @@ extension RootView {
             // Each domain drives its own first-sync marker so an unsynced screen
             // shows a placeholder, and one domain failing doesn't block the others.
             await sync(.community) {
-                try await userModel.syncUserNetwork(modelContext: modelContext)
-                for user in userModel.getAllOtherUsers(modelContext: modelContext) {
+                try await userModel.syncRelations(modelContext: modelContext)
+                // Friends only: a stranger met in a transaction, or looked up in the reader
+                // search, is in the store too, and syncing their inventory would be both a
+                // request for nothing and a pile of books in the inventory search that nobody
+                // can borrow.
+                for user in userModel.friends(modelContext: modelContext) {
                     try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
                 }
             }

@@ -36,8 +36,12 @@ struct ProfileView: View {
     }
 
     /// Friends, sourced reactively from SwiftData (excludes the logged-in user).
+    ///
+    /// `relation == .friend`, not "every user that is not me": the store also holds the
+    /// owners met in a transaction and the readers looked up in the search, and this section
+    /// called all of them my network until issue 0083.
     var otherUsers: [User] {
-        allUsers.filter { $0._id != userModel.myUser?._id }
+        allUsers.filter { $0._id != userModel.myUser?._id && $0.relation == .friend }
     }
 
     var body: some View {

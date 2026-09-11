@@ -14,6 +14,9 @@ import SwiftData
 
 struct WorkEditionPicker: View {
     @State private var nextEntityDestination: NavigationDestination?
+    /// What the "…" menu asks to create. Held by the screen rather than by the menu: a
+    /// `.sheet` placed inside a `Menu`'s content does not present reliably.
+    @State private var creationRequest: ContainerCreationRequest?
 
     let work: Work
     let editions: [Edition]
@@ -31,6 +34,7 @@ struct WorkEditionPicker: View {
         .toolbar {
             toolbarContent
         }
+        .containerCreationSheet($creationRequest)
         .onChange(of: nextEntityDestination) { _, destination in
             if let destination {
                 path.append(destination)
@@ -44,8 +48,12 @@ struct WorkEditionPicker: View {
         ToolbarItem(placement: .confirmationAction) {
             Menu {
                 // Glyphs in the label colour rather than the app's green — see BookDetailView.
-                EntityListMenu(entityUri: work.uri, identifier: "e2e.work.addToList")
-                    .tint(.foregroundDefault)
+                EntityListMenu(
+                    entityUri: work.uri,
+                    identifier: "e2e.work.addToList",
+                    creationRequest: $creationRequest
+                )
+                .tint(.foregroundDefault)
             } label: {
                 Label("action.more", systemImage: "ellipsis")
             }

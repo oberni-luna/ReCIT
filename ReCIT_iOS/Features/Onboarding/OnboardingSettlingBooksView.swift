@@ -75,7 +75,6 @@ struct OnboardingSettlingBooksView: View {
     }
 
     private var metrics: ShelfCardMetrics { .init(width: width) }
-    private var layout: ShelfBooksLayout { .init(books: books, metrics: metrics) }
 
     var body: some View {
         Color.clear
@@ -85,33 +84,49 @@ struct OnboardingSettlingBooksView: View {
                 width = measured
             }
             .overlay(alignment: .bottom) {
-                // Nothing until the band has been measured wide enough to lay a book out in: a
-                // book sized against a width of zero would have to be resized the moment the real
-                // one arrived, which is the one thing the arrival must never do.
-                if layout.width > 0, books.isEmpty == false {
-                    ZStack {
-                        ForEach(books.enumerated(), id: \.element.id) { index, item in
-                            OnboardingSettlingBookView(
-                                item: item,
-                                frame: layout.bookFrame(at: index),
-                                presentation: presentation(at: index),
-                                leaning: layout.isLeaning(at: index),
-                                hasSettled: hasSettled,
-                                delay: stagger * Double(index)
-                            )
-                        }
-                    }
-                    .frame(width: layout.width, height: layout.zoneHeight)
-                    // Sit the books a touch into the plank, exactly as a real étagère does.
-                    .offset(y: ShelfBooksView.booksOffset)
-                    .onAppear(perform: settle)
+                plank(carrying: books)
+            }
+    }
+
+    /// The plank's books, indexed and laid out from **one** reading of the store.
+    ///
+    /// That single reading is the whole reason this is a function taking the books rather than a
+    /// pair of computed properties. `books` filters a live `@Query` on a SwiftData relationship,
+    /// and the screen pushed over this one writes that relationship: « Appliquer le rangement »
+    /// assigns `shelf.items` wholesale, which files these very books and so takes them out of
+    /// this query — while the plank underneath is still drawing them. Read twice in one pass,
+    /// once for the indices and once for the geometry, the two readings could disagree, and an
+    /// index from the longer list then asked the shorter layout for a book it no longer had.
+    @ViewBuilder
+    private func plank(carrying books: [InventoryItem]) -> some View {
+        let layout: ShelfBooksLayout = .init(books: books, metrics: metrics)
+        // Nothing until the band has been measured wide enough to lay a book out in: a
+        // book sized against a width of zero would have to be resized the moment the real
+        // one arrived, which is the one thing the arrival must never do.
+        if layout.width > 0, books.isEmpty == false {
+            ZStack {
+                ForEach(books.enumerated(), id: \.element.id) { index, item in
+                    OnboardingSettlingBookView(
+                        item: item,
+                        frame: layout.bookFrame(at: index),
+                        presentation: presentation(at: index, in: layout),
+                        leaning: layout.isLeaning(at: index),
+                        hasSettled: hasSettled,
+                        delay: stagger * Double(index)
+                    )
                 }
             }
+            .frame(width: layout.width, height: layout.zoneHeight)
+            // Sit the books a touch into the plank, exactly as a real étagère does.
+            .offset(y: ShelfBooksView.booksOffset)
+            .onAppear(perform: settle)
+        }
     }
 
     /// How this run dresses the book at `index` — the shelf's own answer, so the illustration
     /// shows a lone book face-on and a crowded shelf as spines and a pile, like everywhere else.
-    private func presentation(at index: Int) -> ShelfFocusModel.Presentation {
+    /// The layout is passed in rather than rebuilt, for the reason `plank(carrying:)` gives.
+    private func presentation(at index: Int, in layout: ShelfBooksLayout) -> ShelfFocusModel.Presentation {
         switch layout.mode {
         case .singleCover: .cover
         case .allVertical: .standing

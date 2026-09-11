@@ -52,6 +52,11 @@ struct SortPileView: View {
                 ForEach(pile.covers.reversed()) { cover in
                     coverView(cover)
                 }
+                // The fan steps downwards only, so drawn about the band's centre it would
+                // hang off the bottom of it and over the card's title. Lifted by half its
+                // drop, it reaches as far above the front cover as below, and the band holds
+                // the whole of it. An étagère drawing one cover has no fan and no lift.
+                .offset(y: pile.isSingleCover ? 0 : -SortGridMetrics.pileVerticalInset(width: width))
             }
         }
         .frame(width: width, height: SortGridMetrics.artHeight)
@@ -86,13 +91,10 @@ struct SortPileView: View {
     static let landingStagger: Double = 0.08
 
     /// One cover's frame. Narrow enough that a fan of five still shows five spines' worth of
-    /// colour, tall enough to keep the book's own proportions.
+    /// colour, tall enough to keep the book's own proportions — until the fan's own drop and
+    /// lean leave it less room than that, which `SortGridMetrics` is what decides.
     private var coverSize: CGSize {
-        let coverWidth: CGFloat = pile.isSingleCover ? width * 0.52 : width * 0.46
-        return .init(
-            width: coverWidth,
-            height: min(SortGridMetrics.artHeight, coverWidth / SortGridMetrics.coverAspectRatio)
-        )
+        SortGridMetrics.pileCoverSize(width: width, isSingleCover: pile.isSingleCover)
     }
 
     /// Where a cover sits relative to the front one, which stays put in the middle of the card.
@@ -104,12 +106,12 @@ struct SortPileView: View {
     /// looking handled.
     private func offset(for cover: SortPile.Cover) -> CGSize {
         guard pile.isSingleCover == false, cover.depth > 0 else { return .zero }
-        let step: CGFloat = width * 0.075
+        let step: CGFloat = width * SortGridMetrics.pileFanStep
         let rank: CGFloat = .init((cover.depth + 1) / 2)
         let side: CGFloat = cover.depth.isMultiple(of: 2) ? -1 : 1
         return .init(
             width: side * rank * step,
-            height: rank * step * 0.5
+            height: rank * step * SortGridMetrics.pileFanVerticalShare
         )
     }
 }
@@ -126,9 +128,12 @@ struct SortEmptyPileView: View {
                 DesignSystem.Color.borderDefault.color,
                 style: .init(lineWidth: 1, dash: [4, 4])
             )
-            .frame(
-                width: width * 0.46,
-                height: min(SortGridMetrics.artHeight, width * 0.46 / SortGridMetrics.coverAspectRatio)
-            )
+            .frame(width: size.width, height: size.height)
+    }
+
+    /// The same frame a piled cover gets, so the hole and the books that will fill it are
+    /// drawn at one size.
+    private var size: CGSize {
+        SortGridMetrics.pileCoverSize(width: width, isSingleCover: false)
     }
 }

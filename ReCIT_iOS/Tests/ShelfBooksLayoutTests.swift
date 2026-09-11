@@ -277,4 +277,44 @@ import Testing
         let l = ShelfBooksLayout(pageCounts: [], width: 300, zoneHeight: 120)
         #expect(l.tallestBookHeight == 0)
     }
+
+    // MARK: - A stale index
+
+    // A shelf's book list is live, so a view built one pass ago can ask a layout rebuilt from a
+    // shorter list for a book that has since left the run. Every indexed accessor has to answer
+    // that with zero geometry — a book with no size — rather than trap. This is what took the app
+    // down on « Appliquer le rangement »: filing the books stripped them out of the bilan's query
+    // while the plank underneath was still drawing them.
+
+    @Test func aStaleIndexGetsNoGeometryFromAStandingShelf() {
+        let l = ShelfBooksLayout(pageCounts: [200, 400, 600], width: 300, zoneHeight: 120)
+        #expect(l.mode == .allVertical)
+        #expect(l.spineSize(at: 3) == .zero)
+        #expect(l.spineFrame(at: 3) == .zero)
+        #expect(l.bookFrame(at: 3) == .zero)
+        #expect(l.bookFrame(at: 99) == .zero)
+    }
+
+    @Test func aStaleIndexGetsNoGeometryFromAMixedShelf() {
+        let l = ShelfBooksLayout(pageCounts: Array(repeating: 600, count: 20), width: 300, zoneHeight: 120)
+        guard case .mixed = l.mode else {
+            Issue.record("expected a mixed shelf")
+            return
+        }
+        #expect(l.pileBarSize(at: 20, availableWidth: 150) == .zero)
+        #expect(l.pileBarFrame(at: 20) == .zero)
+        #expect(l.bookFrame(at: 20) == .zero)
+        // A standing index handed to the pile is just as stale: the pile never held it.
+        #expect(l.pileBarFrame(at: 0) == .zero)
+    }
+
+    @Test func aStaleIndexGetsNoGeometryFromALoneBookOrAnEmptyShelf() {
+        let lone = ShelfBooksLayout(pageCounts: [200], width: 300, zoneHeight: 120)
+        #expect(lone.bookFrame(at: 0) == lone.coverFrame)
+        #expect(lone.bookFrame(at: 1) == .zero)
+
+        let empty = ShelfBooksLayout(pageCounts: [], width: 300, zoneHeight: 120)
+        #expect(empty.bookFrame(at: 0) == .zero)
+        #expect(empty.spineSize(at: 0) == .zero)
+    }
 }

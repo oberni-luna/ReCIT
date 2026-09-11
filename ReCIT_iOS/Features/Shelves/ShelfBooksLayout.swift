@@ -8,6 +8,15 @@
 //  renderer over this. Kept free of SwiftData/SwiftUI so it can be unit-tested in
 //  isolation. See ADR 0003.
 //
+//  **Every indexed accessor is total: an index past the end answers with zero geometry
+//  rather than trapping.** Not defensiveness for its own sake — a shelf's book list is
+//  live. A view built in one pass can be asked for its geometry against a layout rebuilt
+//  from a shorter list, and a book that has just left the run is a book with no size, which
+//  is exactly what `.zero` says. A trap there took the app down on « Appliquer le
+//  rangement », where filing books strips them out of the bilan's query under the plank
+//  still drawing them. The snapshot discipline that keeps the two in step belongs to the
+//  callers (see `OnboardingSettlingBooksView`); this is the floor under them.
+//
 
 import CoreGraphics
 import Foundation
@@ -60,8 +69,11 @@ struct ShelfBooksLayout: Equatable {
 
     // MARK: - Vertical spine geometry
 
+    /// The standing spine's size, or `.zero` for an index past the end of the run — see the
+    /// file header on why that is an answer and not a bug.
     func spineSize(at index: Int) -> CGSize {
-        .init(width: Self.spineWidth(pages: pages[index]), height: Self.spineHeight(index: index, zoneHeight: zoneHeight))
+        guard pages.indices.contains(index) else { return .zero }
+        return .init(width: Self.spineWidth(pages: pages[index]), height: Self.spineHeight(index: index, zoneHeight: zoneHeight))
     }
 
     /// Whether the book at `index` is the leaning one — only in the all-vertical case
@@ -91,7 +103,8 @@ struct ShelfBooksLayout: Equatable {
     }
 
     func pileBarSize(at index: Int, availableWidth: CGFloat) -> CGSize {
-        .init(
+        guard pages.indices.contains(index) else { return .zero }
+        return .init(
             width: availableWidth * Self.vary(index + 2, 0.72, 0.98),
             height: Self.rawThickness(pages: pages[index]) * pileScale
         )
@@ -130,6 +143,7 @@ struct ShelfBooksLayout: Equatable {
     /// Frame of the standing spine at `index`, in the books zone's coordinates (origin
     /// top-left, books sitting on the bottom edge).
     func spineFrame(at index: Int) -> CGRect {
+        guard pages.indices.contains(index) else { return .zero }
         let leading: CGFloat = (0..<index).reduce(standingRunStartX) {
             $0 + Self.spineWidth(pages: pages[$1]) + Self.spacing
         }
@@ -146,6 +160,7 @@ struct ShelfBooksLayout: Equatable {
     /// Frame of the pile bar at `index`, in the books zone's coordinates. The pile is
     /// bottom-aligned in the right half, each bar overlapping the one below by 1pt.
     func pileBarFrame(at index: Int) -> CGRect {
+        guard pileRange.contains(index) else { return .zero }
         let heights: [CGFloat] = pileRange.map {
             pileBarSize(at: $0, availableWidth: pileColumnWidth).height
         }
@@ -201,6 +216,7 @@ struct ShelfBooksLayout: Equatable {
     /// Where the book at `index` sits, whatever form this shelf gives it. In the books zone's
     /// coordinates — the focus overlay redraws the pressed book there.
     func bookFrame(at index: Int) -> CGRect {
+        guard pages.indices.contains(index) else { return .zero }
         switch mode {
         case .singleCover:
             return coverFrame

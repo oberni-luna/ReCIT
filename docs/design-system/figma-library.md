@@ -1370,7 +1370,7 @@ La section existait déjà, vide, avant cette passe.
 |---|---|---|---|---|---|---|
 | **A · Collection vide** | `209:5967` | `209:6110` | `209:6301` | `209:6438` | `215:7151` | `Shelves/ShelvesContent.swift:79` |
 | **B · Livres sans étagère** | `210:6233` | `210:6374` | — | — | `215:7163` | `Shelves/ShelvesContent.swift:79` |
-| **C · Recherche sans résultat** | `211:6475` | `211:6538` | `211:6605` | `211:6686` | `215:7171` | `Inventory/InventoryListContent.swift:65` |
+| **C · Recherche sans résultat** | `211:6475` | `211:6538` | `211:6605` | `211:6686` | `215:7171` | `Inventory/InventorySearchRemoteSection.swift` — **proposition implémentée le 2026-09-11 (issue 0076)** : les frames `211:6605` / `211:6686` sont adoptées dans la recherche unifiée, via `EmptyStateView` (`Empty State` `204:263`, `Layout=Centered`), là où l'état se produit réellement — une réponse vide d'inventaire.io. `InventoryListContent:65`, contre lequel la maquette avait été dessinée, garde son `Text` centré : c'est l'inventaire filtré, pas une requête sans résultat. **D55 reste ouverte** |
 | **E · Aucune liste** | `212:6707` | `212:6773` | `212:6839` | `212:6921` | `215:7181` | `Lists/EntityListView.swift:41` |
 | **H · Liste ouverte, vide** | `213:6935` | `213:7015` | `213:7095` | `213:7168` | `215:7191` | `Lists/EntityListDetail.swift:88` / `:173` |
 
@@ -1691,7 +1691,7 @@ Plus rien à trancher : le dernier point ouvert de la passe (« Tout voir ») l'
 | Absent | Raison |
 |---|---|
 | Le clavier | Rien dans ce fichier ne le reproduit. Sur R2/R2b/R3/R4 il mange tout sous ~516 pt : le tiers bas n'est vide **que** sur la maquette |
-| Chargement, **aucun résultat pour une requête**, erreur réseau | `Empty State` (`204:263`) les couvre déjà ; reste à choisir lequel va où. `R2b` ne traite que les récentes **vides**, pas une recherche sans résultat |
+| Chargement, **aucun résultat pour une requête**, erreur réseau | **Résolu dans le code le 2026-09-11 (issue 0076)** — trois états tenus à part par `RemoteSearchState.sign`, qui n'en rend jamais qu'un : chargement = `SyncingInlineRow` (`inventory.search.loading`), aucun résultat = `EmptyStateView` (proposition C), échec = `EmptyStateView` avec « Réessayer », la section locale restant affichée au-dessus. `R2b` ne traite toujours que les récentes **vides** : les deux copies sont distinctes et aucune ne sert pour l'autre. **Reste dû côté Figma** : des frames pour le chargement et pour l'échec, clair et sombre |
 | La tab bar à 3 onglets | Surcharge d'instance ici, variante à créer quand ça se code |
 
 ## Divergences relevées dans le code — passe recherche unifiée

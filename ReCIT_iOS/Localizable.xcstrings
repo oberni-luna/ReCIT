@@ -1207,6 +1207,108 @@
         }
       }
     },
+    "inventory.search.error.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io did not answer. Check your connection, then try again — your own books are still listed above."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io n'a pas répondu. Vérifiez votre connexion, puis réessayez — vos livres restent affichés au-dessus."
+          }
+        }
+      }
+    },
+    "inventory.search.error.retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "inventory.search.error.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The search did not go through"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La recherche n'a pas abouti"
+          }
+        }
+      }
+    },
+    "inventory.search.loading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searching inventaire.io…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche sur inventaire.io…"
+          }
+        }
+      }
+    },
+    "inventory.search.results.empty.message %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No book and no author matches “%@” on inventaire.io. Try another spelling, or fewer words."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun livre ni auteur·ice ne correspond à « %@ » sur inventaire.io. Essayez une autre orthographe, ou moins de mots."
+          }
+        }
+      }
+    },
+    "inventory.search.results.empty.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No result"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat"
+          }
+        }
+      }
+    },
     "inventory.search.results.humans %lld" : {
       "extractionState" : "manual",
       "localizations" : {

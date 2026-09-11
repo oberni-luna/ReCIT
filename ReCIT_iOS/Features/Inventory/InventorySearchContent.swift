@@ -30,13 +30,20 @@
 //  **The local section stays on screen once a search has been sent.** It is the half of the
 //  answer this device already has, so a call that is still in flight — or one that failed —
 //  never blanks the books the user could already see. That is also why a failure goes out
-//  through `AppErrorReporter`, the app's one channel for background failures, instead of
-//  becoming a row where results should be.
+//  through `AppErrorReporter`, the app's one channel for background failures, rather than only
+//  through the screen — and why it *also* stays on the screen, as a block that says so and
+//  offers to send the same query again: a SnackBar goes away, and a query that failed while the
+//  user was reading the local results would otherwise leave nothing behind (issue 0076).
 //
 //  The remote call is the one piece of state this view owns, and it owns it because nothing
-//  about it is persisted: `.task(id:)` keyed on the submission runs it, and **the same key
-//  cancels it** — editing the query takes the screen out of `results`, which makes the active
-//  submission `nil`, which cancels the call in flight and clears what it had brought back.
+//  about it is persisted: `.task(id:)` keyed on the attempt runs it, and **the same key cancels
+//  it** — editing the query takes the screen out of `results`, which makes the active
+//  submission `nil`, which cancels the call in flight and takes the screen back to `.idle`.
+//
+//  "Retry" is a second field of that key rather than a second entry point into the call: one
+//  place starts a remote search, and pressing the button only changes what identifies the
+//  attempt. There is exactly one way for a call to leave this screen, so there is exactly one
+//  place where loading, results, emptiness and failure are decided — `RemoteSearchState`.
 //
 //  See PRD 0012.
 //
@@ -63,10 +70,18 @@ struct InventorySearchContent: View {
     @Query private var myItems: [InventoryItem]
     @Query private var friendsItems: [InventoryItem]
 
-    /// What inventaire.io answered, for as long as the screen is showing that answer. Not
-    /// persisted, and not `SearchModel`'s business: it is one screen's view of one query, and
-    /// an app-scoped model holding it would outlive the question.
-    @State private var remoteResults: [SearchResult] = []
+    /// What inventaire.io is doing and what it answered, for as long as the screen is showing
+    /// that answer. Not persisted, and not `SearchModel`'s business: it is one screen's view of
+    /// one query, and an app-scoped model holding it would outlive the question.
+    ///
+    /// One value rather than a list plus two flags, so "loading", "nothing found" and "it
+    /// failed" cannot be true at the same time — see `RemoteSearchState`.
+    @State private var remoteState: RemoteSearchState = .idle
+
+    /// How many times the standing query has been sent. Bumped by « Réessayer », and part of
+    /// the `.task` key, which is how a retry re-runs a call the submission alone could not:
+    /// the submission has not changed, so nothing else about the screen has to pretend it did.
+    @State private var attempt: Int = 0
 
     /// How long a submission waits before it leaves. Two submissions in a row — the keyboard
     /// key, then a suggestion — cost one call rather than two.
@@ -122,6 +137,15 @@ struct InventorySearchContent: View {
         }
 
         return submission
+    }
+
+    /// The call the screen wants running right now: the standing submission, and which go at it
+    /// this is. `nil` when there is nothing to send — which is also what cancels a call in
+    /// flight, since it is the `.task` key.
+    private var activeAttempt: SearchAttempt? {
+        guard let activeSubmission else { return nil }
+
+        return .init(submission: activeSubmission, count: attempt)
     }
 
     /// The recents the screen would draw right now — the displayed three, or nothing at all
@@ -184,15 +208,19 @@ struct InventorySearchContent: View {
                         }
                     }
 
-                    if case .results = phase {
-                        InventorySearchResultsSection(results: remoteResults)
+                    if case .results(let query) = phase {
+                        InventorySearchRemoteSection(
+                            state: remoteState,
+                            query: query,
+                            onRetry: { attempt += 1 }
+                        )
                     }
                 }
                 .listStyle(.plain)
                 .applyListBackground()
             }
         }
-        .task(id: activeSubmission) {
+        .task(id: activeAttempt) {
             await search()
         }
         // The one place a sent search becomes a remembered one. Hung off the submission rather
@@ -217,28 +245,49 @@ struct InventorySearchContent: View {
         }
     }
 
-    /// Runs the submitted search, or clears what the last one brought back when there is no
+    /// Runs the submitted search, or forgets what the last one brought back when there is no
     /// longer one to run. Never throws: a failure here is a background failure like any other,
-    /// and the user reads it in the SnackBar `MainTabView` observes.
+    /// and the user reads it in the SnackBar `MainTabView` observes — *and* in the block this
+    /// leaves on screen, which is the half of the answer a SnackBar cannot give, because it
+    /// goes away and a retry has to stay.
+    ///
+    /// The loading state is set **before** the debounce rather than after it: the sign is there
+    /// to say that the tap was heard, so it cannot wait a quarter of a second to appear.
     private func search() async {
-        remoteResults = []
-        guard let activeSubmission else { return }
+        guard let activeAttempt else {
+            remoteState = .idle
+            return
+        }
+
+        remoteState = .loading
 
         // A cancelled sleep is a query that moved on, not an error.
         try? await Task.sleep(for: debounce)
         guard !Task.isCancelled else { return }
 
         do {
-            remoteResults = try await searchModel.searchEntity(
-                query: activeSubmission.query,
-                entityTypes: activeSubmission.entityTypes
+            let results: [SearchResult] = try await searchModel.searchEntity(
+                query: activeAttempt.submission.query,
+                entityTypes: activeAttempt.submission.entityTypes
             )
+            remoteState = .loaded(results)
         } catch {
             // `URLSession` reports a cancelled request as an error of its own rather than as a
             // `CancellationError`, and a query the user has already replaced is nothing to
-            // report.
+            // report — nor anything to offer a retry for.
             guard !Task.isCancelled else { return }
+            remoteState = .failed
             errorReporter.report(error)
         }
+    }
+}
+
+extension InventorySearchContent {
+    /// One go at one query. It is the `.task` key, and it holds the attempt count so that
+    /// « Réessayer » — which changes nothing about what is being searched for — still reads as
+    /// a different call to run.
+    struct SearchAttempt: Equatable, Sendable {
+        let submission: SearchSuggestion
+        let count: Int
     }
 }

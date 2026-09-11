@@ -10,9 +10,10 @@
 //  Each header states its count, so a query that came back with forty books says so before the
 //  scroll does.
 //
-//  There is deliberately nothing here for "loading", "nothing found" or "the call failed": the
-//  first belongs to the field, the failure goes out through `AppErrorReporter` like every other
-//  background failure in the app, and what to *say* in the other two is issue 0076's question.
+//  There is deliberately nothing here for "loading", "nothing found" or "the call failed". Those
+//  three are not results, and a view that drew both would have to decide, on every branch, which
+//  of them wins. They belong to `InventorySearchRemoteSection`, which mounts this one only when
+//  `RemoteSearchState` says there are results to draw (issue 0076).
 //
 //  See PRD 0012.
 //

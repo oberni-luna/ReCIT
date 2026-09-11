@@ -84,41 +84,37 @@ struct ModelMappingTests {
         #expect(try context.fetch(FetchDescriptor<EntityListItem>()).count == 1)
     }
 
-    @Test("User.update applies changes only when the revision differs")
-    func userUpdateHonoursRevision() {
+    @Test("User.update merges every sync, since user payloads carry no revision")
+    func userUpdateMergesWithoutRevision() {
         let user: User = .init(
             _id: "u1",
-            _rev: "rev-1",
+            _rev: "",
             username: "old",
-            email: nil,
+            email: "old@example.org",
             position: nil,
-            avatarURLValue: nil,
-            itemCount: 0
+            avatarURLValue: "https://example.org/old.png",
+            itemCount: 3
         )
 
-        let sameRev: User = .init(
+        // What `/api/user` and `/api/users/by-ids` actually return: no `_rev`, and no email
+        // or picture for anyone but oneself. The count still has to move.
+        let fresher: User = .init(
             _id: "u1",
-            _rev: "rev-1",
-            username: "changed",
-            email: nil,
-            position: nil,
-            avatarURLValue: nil,
-            itemCount: 5
-        )
-        user.update(with: sameRev)
-        #expect(user.username == "old")
-
-        let newRev: User = .init(
-            _id: "u1",
-            _rev: "rev-2",
+            _rev: "",
             username: "new",
             email: nil,
             position: nil,
             avatarURLValue: nil,
-            itemCount: 5
+            itemCount: 5,
+            lastItemAdded: 42
         )
-        user.update(with: newRev)
+        user.update(with: fresher)
+
         #expect(user.username == "new")
         #expect(user.itemCount == 5)
+        #expect(user.lastItemAdded == 42)
+        // A sparse payload must not wipe good local data (ADR 0001).
+        #expect(user.email == "old@example.org")
+        #expect(user.avatarURLValue == "https://example.org/old.png")
     }
 }

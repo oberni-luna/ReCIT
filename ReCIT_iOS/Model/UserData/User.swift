@@ -44,17 +44,34 @@ public class User: Identifiable, Equatable {
         lhs._id == rhs._id && lhs._rev == rhs._rev
     }
 
+    /// Merges a freshly fetched user into this one, in place.
+    ///
+    /// The merge used to be gated on `_rev` changing, and so never ran: inventaire's user
+    /// payloads (`/api/user`, `/api/users/by-ids`) carry no `_rev` at all, so both sides read
+    /// `""` and every sync was a no-op. A user stored once was frozen for good — which is why
+    /// the profile's item count stayed put even across a relaunch, and why `lastItemAdded`
+    /// never moved, leaving `InventoryModel.syncInventory` convinced there was nothing new to
+    /// fetch after the first sync.
+    ///
+    /// Fields the server omits are left alone (ADR 0001): a sparse payload must not wipe good
+    /// local data. `itemCount` and `lastItemAdded` are always written, because an absent
+    /// snapshot genuinely means "no items visible to you".
     public func update(with user: User) {
-        if self._rev != user._rev {
-            self._id = user._id
+        if user._rev.isEmpty == false {
             self._rev = user._rev
-            self.username = user.username
-            self.email = user.email
-            self.position = user.position
-            self.avatarURLValue = user.avatarURLValue
-            self.itemCount = user.itemCount
-            self.lastItemAdded = user.lastItemAdded
         }
+        self.username = user.username
+        if let email = user.email {
+            self.email = email
+        }
+        if let position = user.position {
+            self.position = position
+        }
+        if let avatarURLValue = user.avatarURLValue {
+            self.avatarURLValue = avatarURLValue
+        }
+        self.itemCount = user.itemCount
+        self.lastItemAdded = user.lastItemAdded
     }
 
     convenience init(userDTO: UserDTO, baseUrl: String) {

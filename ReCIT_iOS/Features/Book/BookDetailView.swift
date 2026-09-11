@@ -22,6 +22,7 @@ struct BookDetailView: View {
     @Environment(GenreEnrichmentModel.self) private var genreEnrichmentModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
+    @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel: BookViewModel
     @State private var nextEntityDestination: NavigationDestination?
@@ -321,9 +322,17 @@ struct BookDetailView: View {
         }
     }
 
-    /// Removes my copy of the edition after confirmation. No dismiss — the book
-    /// screen stays; the "my copy" section drops and the add-to-inventory action
-    /// reappears reactively once the item is gone.
+    /// Removes my copy of the edition after confirmation, then leaves the screen.
+    ///
+    /// The back is part of the action. The screen used to stay, on the grounds that it stays
+    /// truthful — the "my copy" section drops and "ajouter à mon inventaire" comes back — but
+    /// truthful is not the same as useful: what is left is the record of a book one has just
+    /// said one no longer owns, and the place where the deletion is legible is the list it was
+    /// deleted from, one book shorter. So the screen pops, and the snack bar carries the
+    /// confirmation back with it.
+    ///
+    /// Only on success. A failed delete keeps the screen and the copy, with the reason in the
+    /// snack bar — popping there would look like it had worked.
     @MainActor
     private func deleteOwnedItem() async {
         guard case .loaded(let edition) = viewModel.viewState, let item = iOwn(edition) else { return }
@@ -333,6 +342,7 @@ struct BookDetailView: View {
             snackBar.show {
                 SnackBarView(title: String(localized: "inventory.item.deleted"), onDismiss: nil)
             }
+            dismiss()
         } catch {
             snackBar.show { SnackBarView.error(error) }
         }

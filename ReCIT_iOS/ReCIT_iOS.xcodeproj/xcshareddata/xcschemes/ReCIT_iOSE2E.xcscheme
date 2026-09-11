@@ -31,8 +31,7 @@
       shouldAutocreateTestPlan = "YES">
       <Testables>
          <TestableReference
-            skipped = "NO"
-            parallelizable = "NO">
+            skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "094FD1B42E4A38D60023705A"
@@ -42,13 +41,13 @@
             </BuildableReference>
             <SkippedTests>
                <Test
+                  Identifier = "E2EProbeTests">
+               </Test>
+               <Test
                   Identifier = "ReCIT_iOSUITests">
                </Test>
                <Test
                   Identifier = "ReCIT_iOSUITestsLaunchTests">
-               </Test>
-               <Test
-                  Identifier = "E2EProbeTests">
                </Test>
             </SkippedTests>
          </TestableReference>

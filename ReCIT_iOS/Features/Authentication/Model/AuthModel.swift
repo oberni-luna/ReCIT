@@ -78,4 +78,15 @@ public class AuthModel {
         self.isAuthenticated = false
         self.username = ""
     }
+
+    /// Drops the session this app is holding without telling the server.
+    ///
+    /// The counterpart of `logout()` for a session the server has already closed on its own —
+    /// today, after it has deleted the account. Same end state, one fewer request that could
+    /// only come back a `401`.
+    func forgetSession() {
+        authService.forgetSession()
+        self.isAuthenticated = false
+        self.username = ""
+    }
 }

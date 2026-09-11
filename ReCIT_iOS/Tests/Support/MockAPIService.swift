@@ -52,6 +52,15 @@ final class MockAPIService: APIServicing {
         return try decodeStub(for: endpoint)
     }
 
+    func send<U: Codable>(
+        toEndpoint endpoint: String,
+        method: String,
+        debug: Bool
+    ) async throws -> U? {
+        recordedRequests.append((endpoint, method))
+        return try decodeStub(for: endpoint)
+    }
+
     func fetchData<T: Codable>(
         fromEndpoint endpoint: String,
         debug: Bool

@@ -156,6 +156,20 @@ struct ProfileView: View {
                 .accessibilityIdentifier("e2e.profile.logout")
             }
 
+            // Its own section, below signing out and away from it: one row ends a session, the
+            // other ends an account, and they should not be two adjacent red lines under the
+            // same thumb. Last of the real screen, which is where a door of this kind belongs —
+            // and where Apple expects to find it (App Review 5.1.1(v): an app that creates
+            // accounts must let them be deleted from inside the app).
+            Section {
+                NavigationLink(value: NavigationDestination.deleteAccount) {
+                    Text("profile.delete_account")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundError)
+                }
+                .accessibilityIdentifier("e2e.profile.deleteAccount")
+            }
+
             // Scaffolding, and last on the screen so it reads as such. Both onboarding
             // screens are meant to be seen once, which leaves no way to look at them again
             // without one. Absent from Release builds — see `ProfileDebugSection`.

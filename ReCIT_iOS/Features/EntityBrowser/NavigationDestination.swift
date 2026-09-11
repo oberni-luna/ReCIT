@@ -23,6 +23,10 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// query is the whole payload: the search field stays on the screen below, so the
     /// destination has to carry what it answers.
     case localSearchResults(query: String)
+    /// The screen that says what deleting the account costs, before the alert that does it.
+    /// Pushed from the Profil's last row; it reads the signed-in user off `UserModel`, so the
+    /// case carries nothing.
+    case deleteAccount
     var id: String {
         switch self {
         case .author(let uri):
@@ -43,6 +47,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "shelf:\(id)"
         case .localSearchResults(let query):
             return "localSearchResults:\(query)"
+        case .deleteAccount:
+            return "deleteAccount"
         }
     }
 
@@ -98,6 +104,8 @@ extension NavigationDestination {
           ShelfDetailView(shelfId: id, path: path)
       case .localSearchResults(let query):
           InventorySearchAllLocalView(query: query)
+      case .deleteAccount:
+          DeleteAccountView()
       }
     }
 }

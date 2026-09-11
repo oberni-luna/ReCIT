@@ -242,3 +242,6 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0011 Ex-libris — pre-login welcome and native account flow](docs/features/0011-ex-libris-pre-login-onboarding.md) — the app says what it is for before asking who you are
 - [0012 The end-to-end scenario, and the compte-rendu it leaves behind](docs/features/0012-end-to-end-scenario.md) — `scripts/e2e.sh` plays the whole app on a simulator and reports every step with a screenshot and an OK / KO
 - [0013 The welcome screen's wall of covers](docs/features/0013-welcome-cover-wall.md) — the pre-login screen opens on a drifting wall of the books inventaire.io just published, painted jackets underneath, dark in both appearances
+- [0014 Unified search, in the inventory screen](docs/features/0014-unified-inventory-search.md) — one field for my books, my friends' and inventaire.io; the Recherche tab retires
+- [0015 The tips of « Ranger mes livres »](docs/features/0015-sorting-tips.md) — three TipKit cards, each killed by the gesture it teaches; device pass still owed
+- [0016 Creating a list or an étagère from a book](docs/features/0016-create-a-list-or-shelf-from-a-book.md) — the "…" menu stops going silent when you own nothing yet

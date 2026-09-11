@@ -236,5 +236,8 @@ is built. It is compiled out of Release entirely.
 ## See also
 
 - [Feature 0011 — Ex-libris, the pre-login welcome and the native account flow](../features/0011-ex-libris-pre-login-onboarding.md) — the screens, and why they are shaped that way.
-- [Issue 0068 — a signed-out app launches signed in](../issues/0068-a-signed-out-app-launches-signed-in.md).
-- [Issue 0069 — every launch asks for the password again](../issues/0069-every-launch-asks-for-the-password-again.md).
+- Issue 0068 — a signed-out app launches signed in. Shipped, so its write-up was deleted on
+  2026-09-11; git has it (`git log --diff-filter=D -- docs/issues/0068-*`). What it settled is
+  in this ADR.
+- Issue 0069 — every launch asks for the password again. Same: shipped and deleted on the same
+  day, and the rule it left behind is the one above about a cookie that names a user.

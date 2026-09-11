@@ -3853,7 +3853,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos étagères ne changent qu’après « Appliquer le rangement ». La phrase juste en dessous dit ce qui sera enregistré."
+            "value" : "Vous n’avez plus qu’à appliquer vos changements pour qu’ils se répercutent."
           }
         }
       }
@@ -3870,7 +3870,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rien n’est encore enregistré"
+            "value" : "Une fois le rangement fini"
           }
         }
       }

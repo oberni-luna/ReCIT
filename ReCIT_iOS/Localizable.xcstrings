@@ -1575,6 +1575,23 @@
         }
       }
     },
+    "list.removed_from_named %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removed from %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retiré de %@"
+          }
+        }
+      }
+    },
     "login.button.create_account" : {
       "localizations" : {
         "en" : {

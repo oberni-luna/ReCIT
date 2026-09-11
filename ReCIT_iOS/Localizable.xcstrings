@@ -67,6 +67,40 @@
         }
       }
     },
+    "action.add_to_new_list" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to a new list"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à une nouvelle liste"
+          }
+        }
+      }
+    },
+    "action.add_to_new_shelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to a new shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à une nouvelle étagère"
+          }
+        }
+      }
+    },
     "action.borrow_from" : {
       "localizations" : {
         "en" : {
@@ -1071,6 +1105,23 @@
         }
       }
     },
+    "list.added_to_named %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added to %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouté à %@"
+          }
+        }
+      }
+    },
     "list.empty" : {
       "localizations" : {
         "en" : {
@@ -1100,6 +1151,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erreur lors du chargement de la liste : %@"
+          }
+        }
+      }
+    },
+    "list.form.create_and_add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create and add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer et ajouter"
           }
         }
       }

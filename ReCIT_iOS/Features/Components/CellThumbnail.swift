@@ -10,6 +10,7 @@ import SwiftUI
 enum ThumbnailSize {
     case xsmall, small, medium, large
 
+    /// The thumbnail's width. The height follows from the shape.
     var sizeInPt: CGFloat {
         switch self {
         case .xsmall: return 24
@@ -20,15 +21,36 @@ enum ThumbnailSize {
     }
 }
 
+/// A thumbnail is square when it stands for a person — an avatar or an author, usually under a
+/// `.full` corner radius — and 3:4 portrait when it stands for a book, because that is the shape
+/// a cover actually has. Width is what `ThumbnailSize` fixes; portrait grows downwards from it.
+enum ThumbnailShape {
+    case square, portrait
+
+    func height(forWidth width: CGFloat) -> CGFloat {
+        switch self {
+        case .square: return width
+        case .portrait: return (width * 4 / 3).rounded()
+        }
+    }
+}
+
 struct CellThumbnail: View {
     let imageUrl: String?
     let cornerRadius: DesignSystem.CornerRadius
-    let size: CGFloat
+    let width: CGFloat
+    let height: CGFloat
 
-    init(imageUrl: String?, cornerRadius: DesignSystem.CornerRadius = .medium, size:ThumbnailSize = .small) {
+    init(
+        imageUrl: String?,
+        cornerRadius: DesignSystem.CornerRadius = .medium,
+        size: ThumbnailSize = .small,
+        shape: ThumbnailShape = .square
+    ) {
         self.imageUrl = imageUrl
         self.cornerRadius = cornerRadius
-        self.size = size.sizeInPt
+        self.width = size.sizeInPt
+        self.height = shape.height(forWidth: size.sizeInPt)
     }
 
     var body: some View {
@@ -44,9 +66,8 @@ struct CellThumbnail: View {
                 }
             }
         }
-        .frame(width: size, height: size)
+        .frame(width: width, height: height)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         .shadow(color: .black.opacity(0.1), radius: 2)
     }
 }
-

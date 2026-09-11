@@ -24,7 +24,7 @@ struct ListItemCellView: View {
     @ViewBuilder
     var workCell: some View {
         HStack(alignment: .center, spacing: 12) {
-            CellThumbnail(imageUrl: entity.image)
+            CellThumbnail(imageUrl: entity.image, shape: .portrait)
 
             textsCell
         }

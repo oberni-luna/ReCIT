@@ -37,7 +37,7 @@ struct CommunityView: View {
                         ForEach(filteredItems) { edition in
                             NavigationLink(value: edition) {
                                 HStack(alignment: .top, spacing: 8) {
-                                    CellThumbnail(imageUrl: edition.image)
+                                    CellThumbnail(imageUrl: edition.image, shape: .portrait)
 
                                     VStack(alignment: .leading) {
                                         Text(edition.title)

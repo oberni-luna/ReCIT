@@ -114,6 +114,16 @@ s'y voyait. La recherche de lecteurs l'a rendu visible ; les dix-sept autres éc
 secondary l'avaient aussi. Seul le fond déborde : `ignoresSafeArea(.keyboard)` sur la liste
 elle-même ferait glisser ses rangées sous le clavier.
 
+La recherche de lecteurs porte en plus
+`searchPresentationToolbarBehavior(.avoidHidingContent)`. Au repos sa barre fait deux rangées —
+le titre inline avec sa flèche de retour, et le tiroir de recherche — et activer le champ
+escamotait la première, à la façon d'UIKit
+(`UISearchController.hidesNavigationBarDuringPresentation`) : l'encart haut de la liste perdait
+une barre entière et tout l'écran sautait de 54 pt, puis redescendait. Ici l'escamotage n'achète
+rien, le champ étant déjà à l'écran, et il coûte la flèche de retour. Les autres `.searchable`
+de l'app sont des racines d'onglet à grand titre, où la place gagnée est réelle : ils gardent le
+comportement par défaut.
+
 ## Ce que le code a tranché autrement que la maquette
 
 | Point | Figma | Code |

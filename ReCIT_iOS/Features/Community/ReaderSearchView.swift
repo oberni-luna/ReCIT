@@ -105,6 +105,15 @@ struct ReaderSearchView: View {
             placement: .navigationBarDrawer(displayMode: .always),
             prompt: Text("network.search.prompt")
         )
+        // At rest the bar is two rows: the inline title with its back button, and the search
+        // drawer under it. Activating the field used to take the first row away — UIKit's
+        // `hidesNavigationBarDuringPresentation` — so the list's top inset lost exactly one bar
+        // and the whole screen jumped 54 pt up, then back down on dismissal. On a screen whose
+        // content is two rows tall, a 54 pt lurch each way is most of what one sees.
+        //
+        // Nothing here needs the room that hiding the title was buying: the field is already on
+        // screen, and the reader still has to be able to leave.
+        .searchPresentationToolbarBehavior(.avoidHidingContent)
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .task(id: query) {

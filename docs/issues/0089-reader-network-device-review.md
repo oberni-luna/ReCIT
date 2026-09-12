@@ -15,9 +15,9 @@ corps de texte, ni en anglais, ni sur un vrai compte.
 La fiche de passage, sur appareil, avec deux comptes de test qui peuvent se demander l'un l'autre :
 
 - La recherche : au repos, pendant la frappe, sans résultat, avec un résultat de chaque état.
-- Le clavier, sur la recherche : le faire monter et redescendre. Le fond secondary est censé
-  tenir sous lui et pendant l'animation depuis l'issue 0092 — le correctif n'a pas pu être vu à
-  l'écran, le simulateur de vérification refusant d'afficher le clavier logiciel.
+- Le clavier, sur la recherche : le faire monter et redescendre. Vérifié en sombre le 2026-09-12
+  — le fond tient pendant toute l'animation, dans les deux sens (issues 0092 et 0093). Reste à
+  refaire en clair.
 - La demande : la feuille, l'envoi, le retour au profil, l'annulation.
 - La réception : l'invitation dans le Profil, l'écran dédié, accepter (les livres arrivent-ils ?),
   refuser.

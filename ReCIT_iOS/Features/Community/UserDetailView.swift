@@ -51,6 +51,7 @@ struct UserDetailView: View {
                 .listRowSeparator(.hidden)
             }
         }
+        .applyListBackground()
         .navigationTitle("nav.user")
         .toolbar { toolbarContent }
         // The maquette draws no confirmation, and this adds one: unfriending is the only

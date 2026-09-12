@@ -97,6 +97,14 @@ inversement.
 la passe Figma : les mêmes couples de tokens que `LargeButtonStyle`, à la taille qu'un contrôle de
 fin de rangée peut tenir (55 pt de haut n'entrent pas dans une rangée de 69).
 
+`applyListBackground()` pose désormais sa couleur dans un fond qui ignore **toutes** les régions
+de zone sûre, clavier compris. Une `List` sous un clavier voit sa zone sûre rognée par l'encart :
+le fond, dimensionné sur ce cadre rétréci, laissait la bande que le clavier occupe — et, le temps
+de l'animation, celle qu'il vient de libérer — à personne, et c'était le blanc de la fenêtre qui
+s'y voyait. La recherche de lecteurs l'a rendu visible ; les dix-sept autres écrans à fond
+secondary l'avaient aussi. Seul le fond déborde : `ignoresSafeArea(.keyboard)` sur la liste
+elle-même ferait glisser ses rangées sous le clavier.
+
 ## Ce que le code a tranché autrement que la maquette
 
 | Point | Figma | Code |

@@ -42,6 +42,22 @@ struct E2EFailure: Error {
     }
 }
 
+/// Thrown by a step whose **subject does not exist on this run** — not by one that failed.
+///
+/// The « Autres éditions » step has nothing to traverse when the book it opened is the only
+/// edition of its work; that is inventaire.io's catalogue, not a defect, and reporting it as KO
+/// would blame the app for it. Reporting it as OK would claim a coverage the run does not have.
+///
+/// A step that throws this has already put the app back where it found it — `step` records the
+/// outcome, it does not navigate.
+struct E2ENotPlayed: Error {
+    let reason: String
+
+    init(_ reason: String) {
+        self.reason = reason
+    }
+}
+
 @MainActor
 final class E2EDriver {
     let app: XCUIApplication
@@ -67,6 +83,23 @@ final class E2EDriver {
     /// what it actually acted on — because most of it is only known once the step has run: the
     /// title of the book that came back, the name the shelf ended up with.
     @discardableResult
+    /// Records a step as **not played**, with the reason.
+    ///
+    /// For a step whose subject does not exist on this run rather than one that failed: the
+    /// « Autres éditions » traversal has nothing to traverse when the book the search happened to
+    /// return is the only edition of its work. Reporting that as OK would claim a coverage the
+    /// run does not have; reporting it as KO would blame the app for inventaire.io's catalogue.
+    func skip(_ title: String, because reason: String) {
+        report.record(
+            title: title,
+            detail: "",
+            status: .skipped,
+            message: reason,
+            duration: 0,
+            screenshot: screenshot()
+        )
+    }
+
     func step(
         _ title: String,
         critical: Bool = true,
@@ -91,6 +124,16 @@ final class E2EDriver {
                 title: title,
                 detail: detail,
                 status: .ok,
+                duration: Date.now.timeIntervalSince(started),
+                screenshot: screenshot()
+            )
+            return true
+        } catch let notPlayed as E2ENotPlayed {
+            report.record(
+                title: title,
+                detail: "",
+                status: .skipped,
+                message: notPlayed.reason,
                 duration: Date.now.timeIntervalSince(started),
                 screenshot: screenshot()
             )

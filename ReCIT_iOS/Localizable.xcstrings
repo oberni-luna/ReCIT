@@ -531,6 +531,74 @@
         }
       }
     },
+    "book.no_edition.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No edition for this book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune édition pour ce livre"
+          }
+        }
+      }
+    },
+    "book.no_edition.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io knows this title but has no edition to show for it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io connaît ce titre, mais n’a aucune édition à en montrer."
+          }
+        }
+      }
+    },
+    "book.resolve.error.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t open this book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d’ouvrir ce livre"
+          }
+        }
+      }
+    },
+    "book.resolve.error.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The connection to inventaire.io failed."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connexion à inventaire.io a échoué."
+          }
+        }
+      }
+    },
     "book.other_editions %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3104,18 +3172,18 @@
         }
       }
     },
-    "nav.work" : {
+    "nav.editions" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Work"
+            "value" : "Editions"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Œuvre"
+            "value" : "Éditions"
           }
         }
       }

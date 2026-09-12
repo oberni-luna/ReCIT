@@ -39,10 +39,23 @@ final class BookViewModel {
         self.anchor = anchor
     }
 
-    /// The edition URI this screen presents, resolved from the anchor.
+    /// The edition URI this screen presents, resolved from the anchor. `nil` for
+    /// `.bestEditionOfWork` until `load` has resolved it — see `resolvedEditionUri`.
     var editionUri: String? {
         anchor.editionUri
     }
+
+    /// What the screen wears while an anchor that needs the network resolves: the
+    /// work's title and cover, as the search result gave them. `nil` for the anchors
+    /// that resolve instantly.
+    var placeholder: BookAnchor.Placeholder? {
+        anchor.placeholder
+    }
+
+    /// The edition `.bestEditionOfWork` resolved to, once it has. Held rather than
+    /// recomputed because the anchor cannot answer it: the question is a network call,
+    /// not a property.
+    private var resolvedEditionUri: String?
 
     /// Shows the cached edition immediately (if any), then revalidates it in the
     /// background and upserts in place. When a cached copy is already on screen,
@@ -52,6 +65,18 @@ final class BookViewModel {
         entityModel: EntityModel,
         modelContext: ModelContext
     ) async {
+        // `.bestEditionOfWork` has no edition uri to give — it names a work, and which
+        // edition that means is a network call. So it is resolved here, **before** the
+        // guard below, which would otherwise read its `nil` as "no such book".
+        if case .bestEditionOfWork(let workUri, _, _) = anchor {
+            await resolveBestEdition(
+                workUri: workUri,
+                entityModel: entityModel,
+                modelContext: modelContext
+            )
+            return
+        }
+
         guard let editionUri else {
             viewState = .noResult
             return
@@ -78,6 +103,38 @@ final class BookViewModel {
 
         if let resolved {
             await loadOtherEditions(for: resolved, entityModel: entityModel, modelContext: modelContext)
+        }
+    }
+
+    /// Picks the edition to show for a work and shows it. The work itself is never
+    /// rendered: a work is not a book you can hold, and the search offering one was the
+    /// last place in the app where that distinction leaked (ADR 0002, Move 3).
+    ///
+    /// The three outcomes are three different sentences on screen, and the view needs to
+    /// tell them apart: an edition, a work that has none at all, and a call that failed.
+    private func resolveBestEdition(
+        workUri: String,
+        entityModel: EntityModel,
+        modelContext: ModelContext
+    ) async {
+        do {
+            guard let edition = try await entityModel.resolveBestEdition(
+                modelContext: modelContext,
+                workUri: workUri
+            ) else {
+                viewState = .noResult
+                return
+            }
+
+            resolvedEditionUri = edition.uri
+            viewState = .loaded(edition: edition)
+            await loadOtherEditions(
+                for: edition,
+                entityModel: entityModel,
+                modelContext: modelContext
+            )
+        } catch {
+            viewState = .error(error: error)
         }
     }
 

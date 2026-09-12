@@ -29,7 +29,10 @@ struct WorkEditionPicker: View {
         }
         .listStyle(.insetGrouped)
         .applyListBackground()
-        .navigationTitle("nav.work")
+        // « Éditions », not « Œuvre »: this screen is now reached only from a book, through
+        // « Autres éditions », and the word two moves of ADR 0002 spent hiding has no reason to
+        // reappear in a navigation bar. What the screen shows is unchanged.
+        .navigationTitle("nav.editions")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             toolbarContent

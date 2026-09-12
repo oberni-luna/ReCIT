@@ -102,10 +102,14 @@ struct ProfileDebugSection: View {
                 isPresentingWelcome = true
             }
             .foregroundStyle(.foregroundTinted)
-            // The end-to-end scenario's fallback way into the scanner. Every other entry point
-            // depends on the state of the library — the accueil needs an empty one, the empty
-            // étagère's note changes errand once there are books, and the search tab's toolbar
-            // is not drawn at all on iOS 26. See `docs/features/0012-end-to-end-scenario.md`.
+            // A tester's way of replaying the accueil without emptying their library. It was
+            // also the end-to-end scenario's fallback into the scanner, back when the only other
+            // toolbar carrying the scan action belonged to the search tab — which
+            // `Tab(role: .search)` withdrew from the screen. Issue 0074 deleted that tab and the
+            // inventory inherited the toolbar, so the scenario now opens the scanner from
+            // `e2e.shelves.scan` like a user would, and no longer passes through here. The
+            // identifier stays: it costs nothing and it is still the only way to reach the
+            // accueil on a full library.
             .accessibilityIdentifier("e2e.debug.scanOnboarding")
 
             Button("Ouvrir l'onboarding auto-sort") {

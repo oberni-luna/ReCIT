@@ -37,6 +37,16 @@ public class Work: Identifiable, Entity {
     /// existed reads as revision 0 and is therefore re-asked once.
     var genresRevision: Int = 0
 
+    /// The edition the app opens for this work when a search result is tapped, `nil` until a
+    /// tap has resolved one. Local and derived — the server has no opinion about it — in the
+    /// company of `genres` and `Edition.dominantColorHex`, and optional so SwiftData migrates
+    /// lightly.
+    ///
+    /// It is what makes the same gesture open the same book: the ranking is deterministic for a
+    /// given corpus, but the corpus moves, and a work whose editions changed overnight would
+    /// otherwise open somewhere else. See ADR 0002, Move 3.
+    var preferredEditionUri: String?
+
     @Relationship(inverse: \Author.works) var authors: [Author] = []
     @Relationship(inverse: \Edition.works) var editions: [Edition] = []
 

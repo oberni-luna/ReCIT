@@ -126,6 +126,29 @@ path the host can see, so the report is written to the runner's container and pu
 afterwards. `xcresulttool` would have been the other route; it changes shape between Xcode
 versions, and a folder of PNGs beside a JSON does not.
 
+## What Move 3 moved (2026-09-11)
+
+ADR 0002's third move made a search result resolve straight to an edition, which changed two
+things under the scenario's feet and added one step.
+
+- **Step 5 opens the scanner from the inventory's toolbar** (`e2e.shelves.scan`) when the accueil
+  is not presented, instead of the detour through the debug section. See the third bullet of
+  *What iOS 26 cost* for why the detour existed and why its premise is gone.
+- **`reachBookScreen` returns on the first look, most of the time.** A search result no longer
+  lands on `WorkEditionPicker`; it lands on the book. The list-walking in that helper is now for
+  the author screen and for the picker reached from a book — not for search.
+- **A work with no edition backs out at once.** It draws `e2e.book.noEdition` instead of spinning
+  forever, so the helper abandons that branch immediately rather than spending its full 18 s of
+  `patience` on it.
+- **A new step, « Autres éditions d'un livre ».** Since search stopped crossing the picker,
+  nothing exercised `WorkEditionPicker` at all. The step opens the first book of the inventory,
+  enters `e2e.book.otherEditions`, and counts the `e2e.workEdition` rows behind it. Not critical,
+  and it reports **non joué** — through the new `E2EDriver.skip(_:because:)` — when the book on
+  hand is the only edition of its work: that is inventaire.io's catalogue, not a defect.
+
+Identifiers added for it: `e2e.book.otherEditions` (`BookDetailView`) and `e2e.book.noEdition`
+(`BookAbsenceView`).
+
 ## What iOS 26 cost
 
 Four of the platform's own behaviours shaped the driver more than the app did, and they are
@@ -137,12 +160,22 @@ worth knowing before touching a step that looks over-defensive:
 - **Such a tap is sometimes swallowed** — the accueil's « Plus tard » needs two about half the
   time. Every tap that changes screen therefore goes through `tap(_:until:)`: tap, look, tap
   again, up to three times, and say so if the screen never changed.
-- **`Tab(role: .search)` dissolves the tab bar into a search field at the foot of the screen and
-  withdraws the navigation bar entirely** — toolbar included. The scan action `MainSearchView`
-  declares in its toolbar is therefore not reachable from that tab at all, which is why the
-  scenario opens the scanner from the accueil (and from the debug section as a fallback) rather
-  than from there. The search tab is recognised by its field *plus* the absence of a navigation
-  bar.
+- **`Tab(role: .search)` dissolved the tab bar into a search field at the foot of the screen and
+  withdrew the navigation bar entirely** — toolbar included. The scan action `MainSearchView`
+  declared in its toolbar was therefore unreachable from that tab, which is why the scenario
+  opened the scanner from the accueil, with the debug section as a fallback. The search tab is
+  recognised by its field *plus* the absence of a navigation bar.
+
+  **That premise is gone, and the detour went with it (2026-09-11).** Issue 0074 deleted the
+  search tab; the inventory inherited a toolbar of its own, always drawn, carrying
+  `e2e.shelves.scan`. Step 5 now opens the scanner from there when the accueil is not presented —
+  the way a user with a non-empty library actually does it. The old fallback had quietly stopped
+  working, and nothing noticed until a run needed it: the accueil only appears on an empty
+  inventory, so for as long as the account started clean the detour was never walked. The run of
+  2026-09-11 found four books left over from an earlier one, took the fallback for the first time
+  in a long time, and failed with « "Scanner mes livres" est introuvable » — carrying the other
+  22 steps down with it. A path only exercised when something else has already gone wrong is a
+  path that rots unobserved.
 - **Asking `isHittable` about an element that is off screen fails the whole test** rather than
   answering `false`: "Activation point invalid and no suggested hit points based on element
   frame". The étagères carousel is where this bites — the second card sits three quarters past

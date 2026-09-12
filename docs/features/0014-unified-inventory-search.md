@@ -78,6 +78,22 @@ optimistic. ADR 0001 is untouched.
   keys. A plain container is laid out inside the safe area, and the keyboard *is* a bottom
   safe-area inset — which lands on the mock's placement with no magic number.
 - **Retry re-keys the existing `.task`** rather than opening a second path to the network.
+- **An answered query is not asked again** (2026-09-11). SwiftUI cancels a `.task` when its view
+  goes off screen and runs it again when the view comes back, so opening a result and pressing
+  Back re-entered `search()`: the screen discarded an answer it already had, showed the loading
+  row, and asked inventaire.io the same thing a second time. Every book looked at cost a round
+  trip, and the list flickered on the way back. `InventorySearchContent.answered` records the
+  attempt whose answer is on screen — results, emptiness and failure alike — and `search()`
+  returns early when the standing attempt is that one. Verified on the simulator against the
+  live server by counting `GET /api/search` in the app's `asso.recits:network` log: a
+  search → book → Back cycle logs **0** requests, a new query logs **1**.
+- **Refreshing became a gesture, because it had stopped being an accident.** With the line above
+  in place there was no way left to ask the same question twice: re-sending an identical query
+  produces an identical attempt, and « Réessayer » only appears on failure. The results list
+  therefore carries its own `.refreshable`, which bumps the attempt — innermost of the app's two,
+  so a pull *on the search results* refreshes the search rather than the shelves that
+  `RootView`'s one refreshes. It does not call out itself: there is exactly one place a call
+  leaves this screen. Verified the same way — one pull, one request.
 - **`e2e.searchResult` still names a remote result**, so compte-rendus stay comparable across the
   merge. The new rows carry their own identifiers.
 

@@ -178,21 +178,26 @@ final class E2EScenarioTests: XCTestCase {
                 return "Session de scan ouverte depuis l'accueil"
             }
 
-            // No accueil — the inventory was not empty, which happens when a previous run left
-            // books behind. The debug section replays the same accueil on demand, and it is the
-            // only entry into the scanner that does not depend on the state of the library.
-            try driver.openTab(.settings)
+            // No accueil — the inventory was not empty, which happens whenever a previous run
+            // left books behind, and is therefore the common case rather than the exception.
+            //
+            // **The inventory's own toolbar carries the scanner, and it is always drawn.** That
+            // is the way in a real user takes when their library is not empty, and it depends on
+            // nothing: not on the accueil's conditions, not on the debug section, not on how many
+            // books the account holds. The fallback used to be the debug row « Ouvrir
+            // l'onboarding scan », chosen back when the scan action lived in the search tab's
+            // toolbar — which `Tab(role: .search)` withdrew from the screen entirely. Issue 0074
+            // deleted that tab and the inventory inherited its toolbar, so the premise the
+            // detour was built on is gone. The detour went with it on 2026-09-11, after a run
+            // failed here: `scripts/e2e.sh` reported « "Scanner mes livres" est introuvable » and
+            // stopped the other 22 steps with it.
+            try driver.openTab(.inventory)
             try driver.tap(
-                driver.any("e2e.debug.scanOnboarding"),
-                "la ligne debug « Ouvrir l'onboarding scan »",
-                until: { driver.exists("e2e.onboarding.primary") }
-            )
-            try driver.tap(
-                driver.any("e2e.onboarding.primary"),
-                "« Scanner mes livres »",
+                driver.any("e2e.shelves.scan"),
+                "le bouton scanner de la barre d'outils de l'inventaire",
                 until: { driver.exists("e2e.scan.finish") }
             )
-            return "Session de scan ouverte depuis la section debug (pas d'accueil)"
+            return "Session de scan ouverte depuis la barre d'outils de l'inventaire"
         }
 
         // MARK: 6–7. Scan the two books
@@ -254,7 +259,62 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 12. The sorting surface
+        // MARK: 12. The other editions of a book
+
+        // **What Move 3 took off the search's path, and the only thing that still walks it.**
+        // A search result used to land on `WorkEditionPicker` and the scenario crossed it on
+        // every query; it now resolves straight to an edition, so nothing exercised the picker
+        // any more. This step is that coverage, taken where a user actually takes it: from a
+        // book, through « Autres éditions ».
+        //
+        // It is not critical, and it throws `E2ENotPlayed` rather than failing when the book it
+        // opened is the only edition of its work: the section is absent then, by design, and that
+        // is inventaire.io's catalogue rather than a defect.
+        //
+        // **It puts the app back on the inventory whatever happens**, including on the way out of
+        // a not-played run — the step that follows opens the sorting surface from the étagères
+        // toolbar and needs the tab's root, not a screen two pushes deep.
+        //
+        // The book it takes is whichever the inventory lists first, and the report names it: with
+        // `E2E_RESET_ACCOUNT=1` that is one of the books this run just added, and without it, it
+        // is whatever an earlier run left behind. Saying which is the difference between a
+        // compte-rendu that can be read next week and one that cannot.
+        let otherEditionsStep: String = "Autres éditions d'un livre"
+        try? driver.openTab(.inventory)
+        if driver.all("e2e.inventoryBook").count > 0 {
+            driver.step(otherEditionsStep, critical: false) {
+                let first: XCUIElement = driver.all("e2e.inventoryBook").element(boundBy: 0)
+                try driver.tap(first, "le premier livre de l'inventaire", until: {
+                    driver.exists("e2e.book.menu")
+                })
+                let title: String = driver.any("e2e.entityTitle").label
+
+                guard driver.any("e2e.book.otherEditions").waitForExistence(timeout: 20) else {
+                    Self.returnToInventoryRoot(driver: driver)
+                    throw E2ENotPlayed(
+                        "« \(title) » est la seule édition de son œuvre : pas de section "
+                        + "« Autres éditions » à traverser."
+                    )
+                }
+
+                try driver.tap(
+                    driver.any("e2e.book.otherEditions"),
+                    "« Autres éditions »",
+                    until: { driver.all("e2e.workEdition").count > 0 }
+                )
+                let count: Int = driver.all("e2e.workEdition").count
+                Self.returnToInventoryRoot(driver: driver)
+                return "« \(title) » → le picker liste \(count) édition(s)"
+            }
+        } else {
+            driver.skip(
+                otherEditionsStep,
+                because: "Aucun livre dans l'inventaire à ouvrir — les étapes qui en ajoutent "
+                    + "n'ont rien laissé."
+            )
+        }
+
+        // MARK: 13. The sorting surface
 
         driver.step("Ouverture de l'écran de tri") {
             try driver.openTab(.inventory)
@@ -813,9 +873,16 @@ final class E2EScenarioTests: XCTestCase {
     /// down to the book screen, which is the only one that can add a copy.
     ///
     /// **It backtracks.** Which work a search returns first is inventaire.io's business and it
-    /// changes; some of them have no edition at all, and their gateway sits on a spinner
-    /// forever. So a branch that leads nowhere inside `patience` is abandoned — back one
-    /// screen, next entry in the list — rather than reported as a broken app.
+    /// changes; some of them have no edition at all. Those used to sit on a spinner forever and
+    /// cost this loop a full `patience` each; since ADR 0002 Move 3 they draw
+    /// `e2e.book.noEdition` and the branch is abandoned at once. A branch that leads nowhere is
+    /// abandoned either way — back one screen, next entry in the list — rather than reported as
+    /// a broken app.
+    ///
+    /// **Since Move 3 the common case is that there is nothing to walk at all**: a search result
+    /// resolves straight to an edition, so `e2e.book.menu` is there on the first look and this
+    /// returns immediately. The list-walking below is what remains for the author screen and for
+    /// the picker reached from « Autres éditions ».
     @MainActor
     private static func reachBookScreen(driver: E2EDriver) throws {
         /// How long a pushed screen is given to produce something to act on before its branch
@@ -828,6 +895,16 @@ final class E2EScenarioTests: XCTestCase {
 
         while Date.now < deadline {
             if driver.exists("e2e.book.menu") { return }
+
+            // A work inventaire.io lists no edition for — a ghost duplicate of *Americanah* is
+            // one, and the search returns it. The book screen now says so instead of spinning
+            // (ADR 0002, Move 3), so this branch is dead the moment the block appears rather
+            // than after the full `patience`.
+            if driver.exists("e2e.book.noEdition") {
+                guard goBack(driver: driver) else { break }
+                candidate += 1
+                continue
+            }
 
             let editions: XCUIElementQuery = driver.all("e2e.workEdition")
             if editions.count > 0 {
@@ -857,11 +934,12 @@ final class E2EScenarioTests: XCTestCase {
                 continue
             }
 
-            // Nothing to act on: either the screen is still loading, or this branch is a work
-            // with no edition behind it. Wait once, then back out and take the next entry.
+            // Nothing to act on yet: the screen is still loading. A work with no edition behind
+            // it no longer lands here — it draws its own block, caught above.
             let arrived: Bool = driver.holds(
                 {
                     driver.exists("e2e.book.menu")
+                        || driver.exists("e2e.book.noEdition")
                         || driver.all("e2e.workEdition").count > 0
                         || driver.all("e2e.authorWork").count > 0
                 },
@@ -905,6 +983,21 @@ final class E2EScenarioTests: XCTestCase {
         guard driver.isReachable(row) else { return opened() }
         row.coordinate(withNormalizedOffset: .init(dx: 0.3, dy: 0.5)).tap()
         return driver.holds(opened, within: 12)
+    }
+
+    /// Pops until the inventory's own root is showing again.
+    ///
+    /// A step that pushed twice has to unwind twice, and the step after it starts from the tab's
+    /// root: the sorting surface opens from the étagères toolbar, which is not drawn over a
+    /// pushed screen. Counting the pops by hand is how a step that changes depth later breaks the
+    /// one after it, so this pops until the back button is gone rather than a fixed number of
+    /// times.
+    @MainActor
+    private static func returnToInventoryRoot(driver: E2EDriver) {
+        for _ in 0..<4 {
+            guard driver.app.navigationBars.buttons["BackButton"].exists else { return }
+            guard goBack(driver: driver) else { return }
+        }
     }
 
     /// One step back up the stack, or `false` when there is nowhere to go.

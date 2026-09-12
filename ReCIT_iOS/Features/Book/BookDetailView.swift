@@ -28,6 +28,11 @@ struct BookDetailView: View {
     @State private var nextEntityDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
     @State private var showDeleteConfirmation: Bool = false
+    /// How many times this screen has been asked to load. Bumped by « Réessayer », and the
+    /// `.task` key — which is how a retry re-runs a call that nothing else about the screen has
+    /// changed. One way in, so loading, the book, the two absences and the failure are decided
+    /// in one place. Same shape as `InventorySearchContent`'s.
+    @State private var attempt: Int = 0
     /// What the "…" menu asks to create. Held by the screen rather than by the menu: a
     /// `.sheet` placed inside a `Menu`'s content does not present reliably.
     @State private var creationRequest: ContainerCreationRequest?
@@ -55,7 +60,14 @@ struct BookDetailView: View {
         VStack {
             switch viewModel.viewState {
             case .loading:
-                ProgressView()
+                // An anchor that resolves over the network opens on the work's own header
+                // rather than on a blank screen — see `BookResolvingView`. The others resolve
+                // instantly and have nothing to stand in for.
+                if let placeholder = viewModel.placeholder {
+                    BookResolvingView(placeholder: placeholder)
+                } else {
+                    ProgressView()
+                }
             case .loaded(let edition):
                 List {
                     headerSection(edition: edition)
@@ -70,10 +82,10 @@ struct BookDetailView: View {
                 .task(id: edition.works.map(\.uri).sorted()) {
                     await enrichGenres(for: edition)
                 }
-            case .error(let error):
-                Text("error.with_message \(error.localizedDescription)")
+            case .error:
+                BookAbsenceView(absence: .failed) { attempt += 1 }
             case .noResult:
-                Text("edition.no_result")
+                BookAbsenceView(absence: .noEdition)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -114,7 +126,7 @@ struct BookDetailView: View {
             .accessibilityIdentifier("e2e.book.confirmRemove")
             Button("action.cancel", role: .cancel) { }
         }
-        .task {
+        .task(id: attempt) {
             await viewModel.load(entityModel: entityModel, modelContext: modelContext)
         }
         .onChange(of: nextEntityDestination) { _, destination in
@@ -245,6 +257,10 @@ struct BookDetailView: View {
                     } label: {
                         NavigationLink(value: UUID()) {
                             OtherEditionsCell(work: work)
+                                // The end-to-end scenario's way to the picker. Since Move 3 the
+                                // search no longer passes through it, so this row is the only
+                                // path left that exercises `WorkEditionPicker` at all.
+                                .accessibilityIdentifier("e2e.book.otherEditions")
                         }
                     }
                     .buttonStyle(.plain)

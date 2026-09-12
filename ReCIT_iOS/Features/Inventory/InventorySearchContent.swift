@@ -83,6 +83,18 @@ struct InventorySearchContent: View {
     /// the submission has not changed, so nothing else about the screen has to pretend it did.
     @State private var attempt: Int = 0
 
+    /// The attempt whose answer `remoteState` is holding — results, emptiness or failure alike.
+    ///
+    /// **It exists because looking at a book is not a new question.** SwiftUI cancels a `.task`
+    /// when its view goes off screen and runs it again when the view comes back, so opening a
+    /// result and pressing Back re-entered `search()`: the screen threw away an answer it
+    /// already had, showed the loading row, and asked inventaire.io the same thing a second
+    /// time. Every book looked at cost a round trip, and the list flickered on the way back.
+    ///
+    /// Refreshing is a gesture — « Réessayer », or sending the query again — and both change
+    /// the attempt, so both still go out. What no longer goes out is a call nobody asked for.
+    @State private var answered: SearchAttempt?
+
     /// How long a submission waits before it leaves. Two submissions in a row — the keyboard
     /// key, then a suggestion — cost one call rather than two.
     private let debounce: Duration = .milliseconds(250)
@@ -218,6 +230,20 @@ struct InventorySearchContent: View {
                 }
                 .listStyle(.plain)
                 .applyListBackground()
+                // The only way to ask inventaire.io the same question twice, now that coming
+                // back from a book no longer does it by accident. Innermost of the app's two
+                // `.refreshable`s — `RootView` puts one on `MainTabView` for the inventory —
+                // so a pull *on the search results* refreshes the search rather than the
+                // shelves, which is what the gesture means where it is made.
+                //
+                // It bumps the attempt rather than calling out itself: there is exactly one
+                // place a call leaves this screen, and a second entry point would be a second
+                // chance for the two to disagree about what is loading. The control's spinner
+                // therefore retracts before the answer lands, and `SyncingInlineRow` carries
+                // the wait from there.
+                .refreshable {
+                    attempt += 1
+                }
             }
         }
         .task(id: activeAttempt) {
@@ -259,6 +285,10 @@ struct InventorySearchContent: View {
             return
         }
 
+        // This exact attempt already has its answer on screen. Coming back from a book is not a
+        // reason to ask again — see `answered`.
+        guard answered != activeAttempt else { return }
+
         remoteState = .loading
 
         // A cancelled sleep is a query that moved on, not an error.
@@ -271,12 +301,16 @@ struct InventorySearchContent: View {
                 entityTypes: activeAttempt.submission.entityTypes
             )
             remoteState = .loaded(results)
+            answered = activeAttempt
         } catch {
             // `URLSession` reports a cancelled request as an error of its own rather than as a
             // `CancellationError`, and a query the user has already replaced is nothing to
             // report — nor anything to offer a retry for.
             guard !Task.isCancelled else { return }
             remoteState = .failed
+            // A failure is an answer too: the block that says so carries « Réessayer », and
+            // coming back from another screen must not silently re-run the call behind it.
+            answered = activeAttempt
             errorReporter.report(error)
         }
     }

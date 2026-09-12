@@ -61,7 +61,19 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     static func destinationForSearchResult(_ result: SearchResult) -> NavigationDestination? {
         switch result.type {
         case .works:
-            return .work(uri: result.uri)
+            // The server answered with a work because `/api/search` cannot return
+            // editions — but a work is not a book, and asking which of its 66 editions
+            // the user meant is a question they have no way to answer. So the tap goes
+            // to the book screen, which picks the edition itself (ADR 0002, Move 3).
+            // `.work` stays what « Autres éditions », the lists and the author screen
+            // push; this is the one site that changed.
+            return .book(
+                anchor: .bestEditionOfWork(
+                    uri: result.uri,
+                    title: result.title,
+                    imageUrl: result.imageUrl
+                )
+            )
         case .humans:
             return .author(uri: result.uri)
         case .inventoryItem:

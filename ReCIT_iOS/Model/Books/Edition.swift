@@ -69,7 +69,10 @@ public class Edition: Identifiable, Entity {
     convenience init(entityDto: EntityResultDTO, apiService: APIServicing) {
         self.init(
             uri: entityDto.uri,
-            title: entityDto.labels["fromclaims"] ?? "Unknown",
+            // Through `EditionTitle`, not `labels["fromclaims"]` alone: an edition mirrored from
+            // Wikidata carries its title under `mul`, and reading only `fromclaims` is what used
+            // to name 13 % of a work's editions `Unknown` on screen.
+            title: EditionTitle.resolve(labels: entityDto.labels, claims: entityDto.claims) ?? "Unknown",
             subtitle: entityDto.descriptions?["fromclaims"],
             lang: entityDto.originalLang,
             authorNames: [],
@@ -82,7 +85,7 @@ public class Edition: Identifiable, Entity {
     /// server response never wipes data we already have. The `works`
     /// relationship is handled by the caller.
     func update(entityDto: EntityResultDTO, apiService: APIServicing) {
-        if let title = entityDto.labels["fromclaims"], !title.isEmpty {
+        if let title = EditionTitle.resolve(labels: entityDto.labels, claims: entityDto.claims) {
             self.title = title
         }
         if let subtitle = entityDto.descriptions?["fromclaims"] {

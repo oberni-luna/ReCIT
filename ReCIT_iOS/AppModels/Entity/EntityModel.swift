@@ -110,6 +110,140 @@ final class EntityModel {
         return edition
     }
 
+    // MARK: - Best edition of a work (ADR 0002, Move 3)
+
+    /// The edition to open for `workUri`, resolved over the network and upserted in place — or
+    /// `nil` when the work has no edition at all, which is a thing that exists and which the
+    /// caller renders rather than swallows.
+    ///
+    /// This is the search's route to a book: `/api/search` cannot return editions, so a tapped
+    /// result names a work and the app picks the edition. It ranks over DTOs through
+    /// `WorkEditionResolver` and **persists only the winner** — going through `getWorkEditions`
+    /// would insert every edition the work has, 127 of them for *1984*, on one tap.
+    ///
+    /// `heldEditionUris` is read here rather than inside the resolver: the ranking must not know
+    /// what a `ModelContext` is.
+    func resolveBestEdition(modelContext: ModelContext, workUri: String) async throws -> Edition? {
+        // A second tap opens from the store and pays nothing. The edition is then revalidated
+        // in the background and the ranking replayed: the screen already on display never
+        // changes *book* under the reader's eyes, but the book it shows is brought up to date in
+        // place (ADR 0001, invariant 2), and a ranking that has moved is recorded for the next
+        // visit.
+        if let work = localWork(modelContext: modelContext, uri: workUri),
+           let preferred = work.preferredEditionUri,
+           let edition = localEdition(modelContext: modelContext, uri: preferred) {
+            revalidatePreferredEdition(modelContext: modelContext, workUri: workUri)
+            return edition
+        }
+
+        guard let uri = try await rankBestEditionUri(modelContext: modelContext, workUri: workUri) else {
+            return nil
+        }
+
+        let edition: Edition? = try await refreshEdition(modelContext: modelContext, uri: uri)
+        rememberPreferredEdition(uri, forWorkUri: workUri, modelContext: modelContext)
+        return edition
+    }
+
+    /// Runs the ladder and answers the winning uri, or `nil` when the work has no edition.
+    private func rankBestEditionUri(modelContext: ModelContext, workUri: String) async throws -> String? {
+        let resolver: WorkEditionResolver = .init(apiService: apiService)
+
+        return try await resolver.bestEditionUri(
+            forWorkUri: workUri,
+            originalLang: localWork(modelContext: modelContext, uri: workUri)?.originalLang,
+            heldEditionUris: heldEditionUris(modelContext: modelContext)
+        )
+    }
+
+    /// Writes the preference onto the work, **looking it up again** rather than writing through
+    /// a reference held across the two round trips this follows — that is the shape of the crash
+    /// in issue 0067.
+    ///
+    /// The lookup is also why this is called after `refreshEdition` and not before: the search
+    /// persists nothing, so until the edition's `wdt:P629` has been resolved there is no `Work`
+    /// row to write to. Fetching the work earlier would be a third request for nothing.
+    private func rememberPreferredEdition(
+        _ editionUri: String,
+        forWorkUri workUri: String,
+        modelContext: ModelContext
+    ) {
+        guard let work = localWork(modelContext: modelContext, uri: workUri),
+              work.preferredEditionUri != editionUri else {
+            return
+        }
+
+        work.preferredEditionUri = editionUri
+        try? modelContext.save()
+    }
+
+    /// The background half of a cached open: it refreshes the edition that was just handed to
+    /// the screen, and then replays the ladder in case the corpus moved.
+    ///
+    /// **Refreshing the shown edition is not optional, and leaving it out was a bug.** The first
+    /// draft only called `refreshEdition` when the ranking landed on a *different* uri — which is
+    /// almost never — so an edition opened from the preference was returned from the store and
+    /// never revalidated again. Whatever that row happened to hold was permanent: the Harry
+    /// Potter edition `wd:Q58464836`, cached as `Unknown` by the title mapping that preceded
+    /// `EditionTitle`, kept that name on every visit however many times it was opened. That is
+    /// precisely the cache-first-then-upsert-in-place ADR 0001 asks for, skipped while claiming
+    /// to follow it (invariant 2).
+    ///
+    /// Failures are swallowed: the user is looking at a book either way, and a stale field is
+    /// better than a stuck screen.
+    ///
+    /// One pass per work at a time — a reader who taps, goes back and taps again should not
+    /// stack three identical re-rankings.
+    private func revalidatePreferredEdition(modelContext: ModelContext, workUri: String) {
+        guard revalidatingWorkUris.contains(workUri) == false else { return }
+        revalidatingWorkUris.insert(workUri)
+
+        Task { [weak self] in
+            defer { self?.revalidatingWorkUris.remove(workUri) }
+            await self?.performRevalidation(modelContext: modelContext, workUri: workUri)
+        }
+    }
+
+    /// The revalidation itself, awaitable.
+    ///
+    /// Split out from the fire-and-forget wrapper above so a test can drive it: a detached
+    /// `Task` is exactly the shape a regression hides in, and this code path has already grown
+    /// one bug that only a user could see.
+    func performRevalidation(modelContext: ModelContext, workUri: String) async {
+        // The edition the screen is showing, revalidated whatever the ladder then says. It was
+        // opened without a round trip; this is that round trip.
+        if let shown = localWork(modelContext: modelContext, uri: workUri)?.preferredEditionUri {
+            _ = try? await refreshEdition(modelContext: modelContext, uri: shown)
+        }
+
+        guard let uri = try? await rankBestEditionUri(modelContext: modelContext, workUri: workUri),
+              uri != localWork(modelContext: modelContext, uri: workUri)?.preferredEditionUri
+        else {
+            return
+        }
+
+        _ = try? await refreshEdition(modelContext: modelContext, uri: uri)
+        rememberPreferredEdition(uri, forWorkUri: workUri, modelContext: modelContext)
+    }
+
+    /// The works whose preference is being re-ranked right now.
+    private var revalidatingWorkUris: Set<String> = []
+
+    /// The editions this device already holds a copy of — mine and my friends'. A free signal:
+    /// the items are already in the store, synced, and nothing here goes to the network.
+    ///
+    /// `isStillInTheStore` guards the relationship read, because a copy deleted a moment ago can
+    /// still be reachable from a fetch and reading a persisted property off it traps rather than
+    /// returning nil (issue 0065).
+    private func heldEditionUris(modelContext: ModelContext) -> Set<String> {
+        let items: [InventoryItem] = (try? modelContext.fetch(FetchDescriptor<InventoryItem>())) ?? []
+
+        return .init(items.compactMap { item in
+            guard item.isStillInTheStore else { return nil }
+            return item.edition?.uri
+        })
+    }
+
     // MARK: - Authors
 
     func getOrFetchAuthors(modelContext: ModelContext, uris: [String]) async throws -> [Author]? {

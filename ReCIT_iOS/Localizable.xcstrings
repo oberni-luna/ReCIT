@@ -329,6 +329,23 @@
         }
       }
     },
+    "network.request.awaiting" : {
+      "comment" : "Inert full-width button on a reader's profile, standing alone: it has to name what was sent.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Request sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demande envoyée"
+          }
+        }
+      }
+    },
     "network.request.cancel" : {
       "localizations" : {
         "en" : {
@@ -394,17 +411,18 @@
       }
     },
     "network.request.sent" : {
+      "comment" : "Tag at the end of a reader row: this request is still waiting. Sits under a header that has already said these are requests, so it does not repeat the word.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Request sent"
+            "value" : "Sent"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Demande envoyée"
+            "value" : "Envoyée"
           }
         }
       }
@@ -421,6 +439,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Demande d’ajout"
+          }
+        }
+      }
+    },
+    "network.requests.pending" : {
+      "comment" : "Section header on the add-a-reader screen, at rest: the requests I have sent and nobody has answered yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pending requests"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demandes en cours"
           }
         }
       }

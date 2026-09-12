@@ -12,9 +12,18 @@ ni voir qu'une invitation était arrivée. Le réseau se constituait sur le site
 **Demander.** Sous la section « Réseau » — y compris quand elle est vide, qui est précisément le
 moment où on en a besoin — « Ajouter des amis lecteurs » pousse une recherche par nom
 d'utilisateur. Chaque résultat porte l'état de la relation en fin de ligne : une pilule
-« Ajouter » pour un inconnu, une étiquette « Demande envoyée » pour ce qui est déjà parti,
+« Ajouter » pour un inconnu, une étiquette « Envoyée » pour ce qui est déjà parti,
 « Invitation reçue » pour qui nous a devancés, rien du tout pour un ami. Le nom ouvre le profil,
 la pilule agit : deux cibles, parce qu'un bouton « Ajouter » qui navigue ment sur ce qu'il fait.
+
+Au repos, l'écran montre aussi ce qui est déjà parti : « Demandes en cours » liste les demandes
+envoyées qui attendent encore une réponse, là où on les a produites plutôt que seulement sur
+l'écran des invitations. Envoyées seulement — une invitation *reçue* demande deux boutons, et
+l'écran qui les porte existe. Au repos seulement, aussi : dès le premier caractère tapé la
+section s'efface, sans quoi un lecteur déjà sollicité qui ressort dans les résultats tiendrait
+deux cellules identiques sur le même écran. Quand il y a des demandes en cours, l'état vide
+« Trouvez vos amis lecteurs » cède la place : on ne relit pas le mode d'emploi d'une chose qu'on
+a déjà réussie.
 
 Sur le profil d'un lecteur, « Ajouter au réseau » ouvre une feuille qui confirme — qui, ce que ça
 fait, et que rien ne sera visible tant que ce n'est pas accepté. Une fois envoyée, le bouton

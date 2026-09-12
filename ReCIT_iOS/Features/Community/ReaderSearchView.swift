@@ -10,6 +10,16 @@
 //  position — a permission, and a screen this feature does not have. So the screen at rest says
 //  what it searches, rather than pretending to offer discovery.
 //
+//  At rest it also says what is already in flight: the requests I have sent and that nobody has
+//  answered yet, under « Demandes en cours ». They belong here rather than only on the
+//  invitations screen because here is where they were produced. Sent only — an invitation
+//  *received* asks for two buttons, and the screen that carries them exists; duplicating it in a
+//  search field would put an « Accepter » where one came to look somebody up.
+//
+//  The section is for the resting screen alone. From the first character typed it goes, or a
+//  reader I have already asked would stand twice on the same screen, in two cells wearing the
+//  same tag and nothing to tell them apart.
+//
 
 import SwiftUI
 import SwiftData
@@ -18,6 +28,12 @@ struct ReaderSearchView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(\.modelContext) private var modelContext
 
+    /// Every reader the store knows, filtered in Swift rather than in the fetch: `relation` is
+    /// computed from `relationRawValue` and a `#Predicate` cannot see it. Same shape as
+    /// `InvitationsView`, and a `@Query` for the same reason — cancelling a request from the
+    /// reader's own profile has to empty the section behind it, with nothing to reload.
+    @Query(sort: \User.username) private var allUsers: [User]
+
     @Binding var path: NavigationPath
 
     @State private var query: String = ""
@@ -25,15 +41,45 @@ struct ReaderSearchView: View {
     @State private var isSearching: Bool = false
     @State private var hasSearched: Bool = false
 
+    /// True from the first character typed, and not from the first result: the section has to go
+    /// as the field fills, not once the server has answered.
+    private var isQuerying: Bool {
+        query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+    }
+
+    private var pendingRequests: [User] {
+        guard isQuerying == false else { return [] }
+        return allUsers.filter { $0.relation == .requestSent }
+    }
+
     var body: some View {
         List {
-            if results.isEmpty {
+            if pendingRequests.isEmpty == false {
                 Section {
-                    placeholder
-                        .padding(.vertical, .large)
+                    ForEach(pendingRequests) { user in
+                        ReaderRowView(user: user) {
+                            path.append(NavigationDestination.user(user: user))
+                        }
+                    }
+                } header: {
+                    Text("network.requests.pending")
+                        .textStyle(.action200)
+                        .foregroundStyle(.foregroundSecondary)
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
+            }
+
+            if results.isEmpty {
+                // The explanation gives way to the requests: one does not re-read the
+                // instructions for something one has already managed. With nothing in flight it
+                // is the whole screen, as before.
+                if pendingRequests.isEmpty {
+                    Section {
+                        placeholder
+                            .padding(.vertical, .large)
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
             } else {
                 Section {
                     ForEach(results) { user in

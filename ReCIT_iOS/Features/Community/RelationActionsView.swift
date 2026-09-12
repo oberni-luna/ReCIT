@@ -45,7 +45,11 @@ struct RelationActionsView: View {
             case .requestSent:
                 // Inert on purpose: the state is not a gesture. The way back is the button
                 // under it, which is the one that acts.
-                Button("network.request.sent") {}
+                //
+                // Its own string rather than the row's tag: « Envoyée » works at the end of a
+                // line, under a header that has already said what was sent, and says nothing at
+                // all across a full-width button standing on its own.
+                Button("network.request.awaiting") {}
                     .buttonStyle(.secondary())
                     .disabled(true)
 

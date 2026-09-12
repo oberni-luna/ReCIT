@@ -5821,6 +5821,23 @@
         }
       }
     },
+    "user.member_since %@" : {
+      "comment" : "Second line of a reader cell: when their inventaire.io account was opened. %@ is a month and a year, already formatted for the locale.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Member since %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Membre depuis %@"
+          }
+        }
+      }
+    },
     "Visibilité" : {
 
     },

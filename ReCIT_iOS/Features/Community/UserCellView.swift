@@ -2,7 +2,17 @@
 //  UserCellView.swift
 //  ReCIT_iOS
 //
-//  Created by Olivier Berni on 09/02/2026.
+//  A reader in a list: who they are, and since when.
+//
+//  Under the name used to sit « N éléments », read from the user's `snapshot`. For a stranger
+//  that number is almost always `0` — the snapshot the server serves is of what *I* am allowed
+//  to see, and I see nothing of the inventory of someone outside my network. The cell was
+//  announcing an empty shelf about readers who own three hundred books. Not a missing figure: a
+//  wrong one.
+//
+//  The date the account was opened is served on the same call, is the same for everyone, and
+//  says something true. Missing, it draws nothing rather than falling back on the count it
+//  replaced.
 //
 import SwiftUI
 
@@ -16,8 +26,10 @@ struct UserCellView: View {
             VStack(alignment: .leading, spacing: .xSmall) {
                 Text(user.username)
                     .textStyle(.content400Bold)
-                Text("user.item_count \(user.itemCount)")
-                    .textStyle(.content300)
+                if let createdDate = user.createdDate {
+                    Text("user.member_since \(createdDate.formatted(.dateTime.month(.wide).year()))")
+                        .textStyle(.content300)
+                }
             }
             // Left to itself, `List` picks the separator's inset from whatever the row happens
             // to hold, so a row ending in « Ajouter » and a row ending in a tag drew two

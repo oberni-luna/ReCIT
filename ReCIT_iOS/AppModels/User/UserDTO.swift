@@ -21,6 +21,12 @@ struct UserDTO: Codable {
     let picture: String?
     let language: String?
     let snapshot: [String:ItemCountDTO]?
+    /// When the account was opened, in milliseconds — inventaire's own epoch for user documents.
+    ///
+    /// Served on `/api/users/by-ids` for anyone, without a session, alongside the fields the
+    /// cell already reads. Optional because the soft-deleted users the server keeps around to
+    /// hold a username are the one shape that might not carry it.
+    let created: Double?
 }
 
 //"snapshot": {

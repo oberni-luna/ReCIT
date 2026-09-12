@@ -113,6 +113,7 @@ elle-même ferait glisser ses rangées sous le clavier.
 | Feuille de demande avec message (`N5b`) | dessinée | non implémentée — le serveur n'a pas de champ pour la porter |
 | Dates (« Envoyée le 11 septembre ») | dessinées | absentes : `/api/relations` ne renvoie que des identifiants, aucune date |
 | Rangée d'une demande envoyée | pilule « Envoyée » | étiquette `Tag` secondaire — c'est un état, pas un geste ; l'annulation est sur le profil |
+| Deuxième ligne d'une cellule de lecteur | « N livres » | « Membre depuis <mois> <année> » — le `snapshot` d'un inconnu est celui de ce que j'ai le droit de voir, donc `0` pour presque tout le monde ; `created` est vrai pour tous et vient du même appel |
 | Glyphes | `plus`, `clock`, `person` empruntés | SF Symbols réels (`plus`, `clock`, `envelope`, `person.badge.minus`) : la contrainte était Figma, pas iOS |
 
 ## Ce qui n'est pas fait

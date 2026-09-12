@@ -51,7 +51,14 @@ struct ReaderSearchView: View {
         .applyListBackground()
         .navigationTitle("network.add_friends")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: Text("network.search.prompt"))
+        // Inline title and a list that does not scroll: left to its own devices the drawer
+        // stays collapsed and the screen opens with no field at all. `.always` keeps it on
+        // screen, which is the whole point of the screen.
+        .searchable(
+            text: $query,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: Text("network.search.prompt")
+        )
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .task(id: query) {

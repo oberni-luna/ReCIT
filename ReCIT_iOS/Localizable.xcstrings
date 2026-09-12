@@ -71,6 +71,40 @@
         }
       }
     },
+    "network.invitation.accepted %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ has joined your network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ fait maintenant partie de votre réseau"
+          }
+        }
+      }
+    },
+    "network.invitation.refused %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation from %@ declined"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation de %@ refusée"
+          }
+        }
+      }
+    },
     "network.invitation.explanation %@" : {
       "localizations" : {
         "en" : {

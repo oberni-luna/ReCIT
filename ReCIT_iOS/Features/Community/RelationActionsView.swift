@@ -13,16 +13,22 @@
 //  by `UserModel`, and a refusal puts the previous state back and speaks through the snack bar.
 //
 
+import LBSnackBar
 import SwiftUI
 import SwiftData
 
 struct RelationActionsView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.snackBar) private var snackBar
 
     let user: User
 
     @State private var isConfirmingRequest: Bool = false
+
+    private var answer: InvitationAnswer {
+        .init(userModel: userModel, modelContext: modelContext, snackBar: snackBar)
+    }
 
     var body: some View {
         VStack(spacing: .medium) {
@@ -53,13 +59,13 @@ struct RelationActionsView: View {
 
             case .requestReceived:
                 Button("network.invitation.accept_request") {
-                    userModel.acceptRelation(with: user, modelContext: modelContext)
+                    answer.accept(user)
                 }
                 .buttonStyle(.primary())
                 .accessibilityIdentifier("e2e.user.acceptRequest")
 
                 Button("network.invitation.refuse") {
-                    userModel.discardRelation(with: user, modelContext: modelContext)
+                    answer.refuse(user)
                 }
                 .buttonStyle(.secondary())
                 .accessibilityIdentifier("e2e.user.refuseRequest")

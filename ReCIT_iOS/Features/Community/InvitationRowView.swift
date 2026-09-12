@@ -12,16 +12,22 @@
 //  a threat.
 //
 
+import LBSnackBar
 import SwiftUI
 import SwiftData
 
 struct InvitationRowView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.snackBar) private var snackBar
 
     let user: User
     /// Opening the reader's profile, when the list this sits in offers it.
     var onOpen: (() -> Void)? = nil
+
+    private var answer: InvitationAnswer {
+        .init(userModel: userModel, modelContext: modelContext, snackBar: snackBar)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: .sMedium) {
@@ -38,13 +44,13 @@ struct InvitationRowView: View {
 
             HStack(spacing: .small) {
                 Button("network.invitation.accept") {
-                    userModel.acceptRelation(with: user, modelContext: modelContext)
+                    answer.accept(user)
                 }
                 .buttonStyle(.pill(.prominent))
                 .accessibilityIdentifier("e2e.invitation.accept")
 
                 Button("network.invitation.refuse") {
-                    userModel.discardRelation(with: user, modelContext: modelContext)
+                    answer.refuse(user)
                 }
                 .buttonStyle(.pill())
                 .accessibilityIdentifier("e2e.invitation.refuse")

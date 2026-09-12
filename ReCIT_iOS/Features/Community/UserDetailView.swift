@@ -125,6 +125,25 @@ struct UserDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private var menuContent: some View {
+        if user.relation == .friend {
+            Button("network.remove", systemImage: "person.badge.minus") {
+                isConfirmingRemoval = true
+            }
+            .accessibilityIdentifier("e2e.user.removeFromNetwork")
+        }
+
+        ReportButton(
+            draft: .init(
+                reportedUsername: user.username,
+                reportedUserId: user._id,
+                reporterUsername: userModel.myUser?.username
+            )
+        )
+        .accessibilityIdentifier("e2e.user.report")
+    }
+
     /// A "…" holding what one can do *about* someone rather than with them.
     /// Hidden on my own profile: there is nobody to report, and nobody to remove.
     @ToolbarContentBuilder
@@ -132,22 +151,11 @@ struct UserDetailView: View {
         ToolbarItem(placement: .confirmationAction) {
             if user._id != userModel.myUser?._id {
                 Menu {
-                    if user.relation == .friend {
-                        Button("network.remove", systemImage: "person.badge.minus", role: .destructive) {
-                            isConfirmingRemoval = true
-                        }
-                        .accessibilityIdentifier("e2e.user.removeFromNetwork")
-                    }
-
-                    ReportButton(
-                        draft: .init(
-                            reportedUsername: user.username,
-                            reportedUserId: user._id,
-                            reporterUsername: userModel.myUser?.username
-                        )
-                    )
-                    .tint(.foregroundDefault)
-                    .accessibilityIdentifier("e2e.user.report")
+                    // Same neutral menu as a book's « … »: glyphs in the label colour rather
+                    // than the app's green, and no red line of its own — the confirmation
+                    // behind « Retirer du réseau » is what guards it. See `BookDetailView`.
+                    menuContent
+                        .tint(.foregroundDefault)
                 } label: {
                     Label("action.more", systemImage: "ellipsis")
                 }

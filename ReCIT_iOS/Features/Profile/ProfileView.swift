@@ -11,10 +11,8 @@ import LBSnackBar
 
 struct ProfileView: View {
     @Environment(AuthModel.self) private var authModel
-    @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(UserModel.self) private var userModel
     @Environment(TransactionModel.self) private var transactionModel
-    @Environment(AutoSortModel.self) private var autoSortModel
     @Environment(SyncStatusStore.self) private var syncStatus
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
@@ -25,14 +23,6 @@ struct ProfileView: View {
 
     var currentTransactions: [UserTransaction] {
         allTransactions.filter(\.isCurrent)
-    }
-
-    /// Auto-sort's entry point here, derived on every render. Reading it inside the body
-    /// is what keeps it live: the availability behind it reads an observable
-    /// `SystemLanguageModel`, so switching Apple Intelligence on and coming back to the
-    /// app reveals the row with no relaunch.
-    private var autoSortEntryPoint: AutoSortEntryPoint {
-        .init(availability: autoSortModel.availability)
     }
 
     /// Friends, sourced reactively from SwiftData (excludes the logged-in user).
@@ -153,40 +143,6 @@ struct ProfileView: View {
                 Text("profile.network")
                     .textStyle(.action200)
                     .foregroundStyle(.foregroundSecondary)
-            }
-
-            // Auto-sort's settings entry point. Since PRD 0008 it opens the sorting
-            // surface, which is the app's only screen for creating étagères and filling
-            // them — the review screen it used to open has been retired.
-            //
-            // The availability rule is kept, because this row is the offer of the
-            // *automatic* rangement: on a device that cannot run Apple Intelligence it
-            // would promise something the surface does not have, and the user can do
-            // nothing about that, so an explanation here would be a nag rather than
-            // information. Sorting by hand is not lost with it — the étagères screen's
-            // own toolbar leads to the same surface on any device. See PRD 0006 / 0008.
-            if autoSortEntryPoint.isVisible {
-                Section {
-                    if autoSortEntryPoint.isEnabled {
-                        // A button rather than a link: the surface is a modal flow now, not a
-                        // screen in this tab's stack (PRD 0009).
-                        Button {
-                            sortFlow.presentSorting()
-                        } label: {
-                            Text("profile.auto_sort")
-                                .textStyle(.action300)
-                                .foregroundStyle(.foregroundTinted)
-                        }
-                    } else {
-                        // Named but inert, with the reason under it. A row that simply
-                        // did nothing would read as a bug, and one that pushed into the
-                        // flow would push into a wall.
-                        Text("profile.auto_sort")
-                            .textStyle(.action300)
-                            .foregroundStyle(.foregroundSecondary)
-                        AutoSortUnavailableView(entryPoint: autoSortEntryPoint)
-                    }
-                }
             }
 
             Section {

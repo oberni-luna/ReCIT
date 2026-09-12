@@ -27,11 +27,28 @@ public class User: Identifiable, Equatable {
     /// user's inventory has never been synced. Used to show a syncing placeholder
     /// instead of an ambiguous empty inventory.
     var lastInventorySync: Double?
+    /// Backing store for `relation`, and the reason it is a `String?` rather than the enum.
+    ///
+    /// SwiftData does not write a property's Swift default into the store when a lightweight
+    /// migration adds that property to an existing database: the rows already there get a NULL,
+    /// and the next read force-casts it to the enum and traps with « Could not cast value of
+    /// type 'Swift.Optional<Any>' to 'UserRelation' ». Every install that predates issue 0083
+    /// crashed on the first save after launch. An optional raw value is legally NULL, so the
+    /// old rows load, and `relation` turns the missing value into `.none` — which is also what
+    /// the next `GET /api/relations` would have written anyway.
+    private var relationRawValue: String?
+
     /// Where I stand with this reader, as of the last `GET /api/relations`. Server state,
     /// rewritten whole at every sync — see `UserRelation`. Never merged from a user payload:
     /// `/api/users/by-ids` knows nothing of relations, and a sparse answer must not demote a
     /// friend to a stranger.
-    var relation: UserRelation = UserRelation.none
+    ///
+    /// Computed, so it is not itself persisted — filter and sort in Swift, never in a
+    /// `#Predicate`, which can only see `relationRawValue`.
+    var relation: UserRelation {
+        get { relationRawValue.flatMap(UserRelation.init(rawValue:)) ?? UserRelation.none }
+        set { relationRawValue = newValue.rawValue }
+    }
     @Relationship(deleteRule: .cascade, inverse: \InventoryItem.owner) var items: [InventoryItem] = []
 
     init(_id: String, _rev: String, username: String, email: String?, position: Coordinates?, avatarURLValue: String?, itemCount: Int, lastItemAdded: Double = 0) {

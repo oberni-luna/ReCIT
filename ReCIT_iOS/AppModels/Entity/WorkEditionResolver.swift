@@ -34,7 +34,12 @@ import Foundation
 struct WorkEditionResolver {
     /// The language the app reads in. Hard-coded, like the twelve other `"fr"` in this codebase;
     /// a real preferred-language setting is a feature of its own (PRD 0014, Out of Scope).
-    static let preferredLang: String = "fr"
+    ///
+    /// `nonisolated` because it is the default value of a parameter, and a default is evaluated
+    /// at the call site — which is not necessarily on the main actor, and which Swift 6 rejects
+    /// outright. A constant `String` has no state to protect, so there is nothing for the actor
+    /// to be guarding here.
+    nonisolated static let preferredLang: String = "fr"
 
     /// How many uris `by-uris` takes at once — the same batch size `EntityModel.fetchEntities`
     /// uses, so the two never disagree about what the server accepts.

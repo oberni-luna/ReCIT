@@ -91,8 +91,11 @@ struct InventorySearchContent: View {
     /// already had, showed the loading row, and asked inventaire.io the same thing a second
     /// time. Every book looked at cost a round trip, and the list flickered on the way back.
     ///
-    /// Refreshing is a gesture — « Réessayer », or sending the query again — and both change
-    /// the attempt, so both still go out. What no longer goes out is a call nobody asked for.
+    /// Refreshing is a gesture — « Réessayer », or a pull on the results — and both change the
+    /// attempt, so both still go out. What no longer goes out is a call nobody asked for.
+    ///
+    /// It is cleared the moment there is no active attempt, i.e. the moment the results leave
+    /// the screen: it records what `remoteState` is holding, so it cannot outlive it.
     @State private var answered: SearchAttempt?
 
     /// How long a submission waits before it leaves. Two submissions in a row — the keyboard
@@ -282,6 +285,11 @@ struct InventorySearchContent: View {
     private func search() async {
         guard let activeAttempt else {
             remoteState = .idle
+            // The answer goes with the results. Forgetting it here is what keeps the two in
+            // step: editing the query drops the remote section back to `.idle`, and an attempt
+            // still remembered as answered would make an identical query — the same suggestion,
+            // the same go at it — return early against a screen that has nothing on it.
+            answered = nil
             return
         }
 

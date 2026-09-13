@@ -79,10 +79,6 @@ final class E2EDriver {
 
     // MARK: - Steps
 
-    /// Runs one step and files its line in the report. The body returns the step's `detail` —
-    /// what it actually acted on — because most of it is only known once the step has run: the
-    /// title of the book that came back, the name the shelf ended up with.
-    @discardableResult
     /// Records a step as **not played**, with the reason.
     ///
     /// For a step whose subject does not exist on this run rather than one that failed: the
@@ -100,6 +96,10 @@ final class E2EDriver {
         )
     }
 
+    /// Runs one step and files its line in the report. The body returns the step's `detail` —
+    /// what it actually acted on — because most of it is only known once the step has run: the
+    /// title of the book that came back, the name the shelf ended up with.
+    @discardableResult
     func step(
         _ title: String,
         critical: Bool = true,

@@ -4,10 +4,14 @@ Shipped on 2026-08-28 from PRD `docs/prd/0010-ex-libris-pre-login-onboarding.md`
 
 ## What it does
 
-A logged-out launch now opens on a welcome screen that says what the app is for — inventory your books,
-keep track of what you lend, borrow from people you know — instead of a form and a sentence telling you
-to go and register on a website. From there you sign in, create an account, or ask for a new password,
-all inside the app.
+A logged-out launch now opens on a welcome screen that says what the app is for — organise your books,
+share them with the people close to you — instead of a form and a sentence telling you to go and
+register on a website. From there you sign in, create an account, or ask for a new password, all
+inside the app.
+
+That promise was three value rows here, then one three-clause sentence, and is now two verbs; the
+wording it settled on lives in `docs/features/0013-welcome-cover-wall.md`, which owns this screen
+since the cover wall landed on it.
 
 The app is called **Ex-libris**.
 

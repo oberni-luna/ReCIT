@@ -1,0 +1,173 @@
+//
+//  ReaderSearchView.swift
+//  ReCIT_iOS
+//
+//  Looking somebody up on inventaire.io by their username — frames `N2` (at rest) and `N3`
+//  (results) of the « Réseau » pass.
+//
+//  By username, and by nothing else: `GET /api/search?types=users` is the only reader search
+//  the server has. `/users/by-usernames` wants the name exactly, and `/users/nearby` wants a
+//  position — a permission, and a screen this feature does not have. So the screen at rest says
+//  what it searches, rather than pretending to offer discovery.
+//
+//  At rest it also says what is already in flight: the requests I have sent and that nobody has
+//  answered yet, under « Demandes en cours ». They belong here rather than only on the
+//  invitations screen because here is where they were produced. Sent only — an invitation
+//  *received* asks for two buttons, and the screen that carries them exists; duplicating it in a
+//  search field would put an « Accepter » where one came to look somebody up.
+//
+//  The section is for the resting screen alone. From the first character typed it goes, or a
+//  reader I have already asked would stand twice on the same screen, in two cells wearing the
+//  same tag and nothing to tell them apart.
+//
+
+import SwiftUI
+import SwiftData
+
+struct ReaderSearchView: View {
+    @Environment(UserModel.self) private var userModel
+    @Environment(\.modelContext) private var modelContext
+
+    /// Every reader the store knows, filtered in Swift rather than in the fetch: `relation` is
+    /// computed from `relationRawValue` and a `#Predicate` cannot see it. Same shape as
+    /// `InvitationsView`, and a `@Query` for the same reason — cancelling a request from the
+    /// reader's own profile has to empty the section behind it, with nothing to reload.
+    @Query(sort: \User.username) private var allUsers: [User]
+
+    @Binding var path: NavigationPath
+
+    @State private var query: String = ""
+    @State private var results: [User] = []
+    @State private var isSearching: Bool = false
+    @State private var hasSearched: Bool = false
+
+    /// True from the first character typed, and not from the first result: the section has to go
+    /// as the field fills, not once the server has answered.
+    private var isQuerying: Bool {
+        query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+    }
+
+    private var pendingRequests: [User] {
+        guard isQuerying == false else { return [] }
+        return allUsers.filter { $0.relation == .requestSent }
+    }
+
+    var body: some View {
+        List {
+            if pendingRequests.isEmpty == false {
+                Section {
+                    ForEach(pendingRequests) { user in
+                        ReaderRowView(user: user) {
+                            path.append(NavigationDestination.user(user: user))
+                        }
+                    }
+                } header: {
+                    Text("network.requests.pending")
+                        .textStyle(.action200)
+                        .foregroundStyle(.foregroundSecondary)
+                }
+            }
+
+            if results.isEmpty {
+                // The explanation gives way to the requests: one does not re-read the
+                // instructions for something one has already managed. With nothing in flight it
+                // is the whole screen, as before.
+                if pendingRequests.isEmpty {
+                    Section {
+                        placeholder
+                            .padding(.vertical, .large)
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+            } else {
+                Section {
+                    ForEach(results) { user in
+                        ReaderRowView(user: user) {
+                            path.append(NavigationDestination.user(user: user))
+                        }
+                    }
+                } header: {
+                    Text("network.search.header")
+                        .textStyle(.action200)
+                        .foregroundStyle(.foregroundSecondary)
+                }
+            }
+        }
+        .applyListBackground()
+        .navigationTitle("network.add_friends")
+        .navigationBarTitleDisplayMode(.inline)
+        // Inline title and a list that does not scroll: left to its own devices the drawer
+        // stays collapsed and the screen opens with no field at all. `.always` keeps it on
+        // screen, which is the whole point of the screen.
+        .searchable(
+            text: $query,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: Text("network.search.prompt")
+        )
+        // At rest the bar is two rows: the inline title with its back button, and the search
+        // drawer under it. Activating the field used to take the first row away — UIKit's
+        // `hidesNavigationBarDuringPresentation` — so the list's top inset lost exactly one bar
+        // and the whole screen jumped 54 pt up, then back down on dismissal. On a screen whose
+        // content is two rows tall, a 54 pt lurch each way is most of what one sees.
+        //
+        // Nothing here needs the room that hiding the title was buying: the field is already on
+        // screen, and the reader still has to be able to leave.
+        .searchPresentationToolbarBehavior(.avoidHidingContent)
+        .autocorrectionDisabled()
+        .textInputAutocapitalization(.never)
+        .task(id: query) {
+            await search()
+        }
+    }
+
+    @ViewBuilder
+    private var placeholder: some View {
+        if isSearching {
+            ProgressView()
+                .frame(maxWidth: .infinity)
+        } else if hasSearched {
+            EmptyStateView(
+                glyph: "magnifyingglass",
+                title: "network.search.no_results",
+                message: "network.search.no_results.message \(query)"
+            )
+        } else {
+            EmptyStateView(
+                glyph: "magnifyingglass",
+                title: "network.search.title",
+                message: "network.search.explanation"
+            )
+        }
+    }
+
+    /// Runs on every change of the query, after a pause: `.task(id:)` cancels the previous one,
+    /// so a reader typing eight letters makes one request rather than eight.
+    private func search() async {
+        let trimmedQuery: String = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedQuery.isEmpty == false else {
+            results = []
+            hasSearched = false
+            return
+        }
+
+        do {
+            try await Task.sleep(for: .milliseconds(350))
+        } catch {
+            return
+        }
+
+        isSearching = true
+        defer { isSearching = false }
+        do {
+            results = try await userModel.searchReaders(query: trimmedQuery, modelContext: modelContext)
+            hasSearched = true
+        } catch {
+            // Nothing found and nothing claimed: the placeholder says the search came back
+            // empty, which is what the reader sees either way, and a failed lookup is not
+            // worth a snack bar over a screen whose whole content is the answer.
+            results = []
+            hasSearched = true
+        }
+    }
+}

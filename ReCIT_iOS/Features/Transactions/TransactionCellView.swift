@@ -24,7 +24,7 @@ struct TransactionCellView: View {
     var body: some View {
         if let edition = transaction.item.edition {
             HStack(alignment: .top, spacing: .sMedium) {
-                CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: .medium)
+                CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: .medium, shape: .portrait)
 
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Group {

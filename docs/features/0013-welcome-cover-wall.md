@@ -26,10 +26,24 @@ sous le texte, et l'œil atterrit sur « Se connecter » — ce pour quoi la plu
 l'app. Trois groupes, `spacing/large` d'écart : le titre, les deux actions, la mention.
 
 Les **trois lignes de valeur** (un glyphe, un titre, une phrase) ont disparu avec ce déplacement,
-remplacées par la seule phrase qu'elles disaient à trois : « Scannez vos livres, gardez la trace de
-ceux que vous prêtez, et voyez ce que vos proches ont chez eux. » Neuf lignes de pitch sur une image,
-c'est une page de texte avec un mur derrière ; une phrase, c'est une promesse. `WelcomeValueRow` et
-ses six chaînes ont été supprimés avec elles.
+remplacées par la seule phrase qu'elles disaient à trois. Neuf lignes de pitch sur une image, c'est
+une page de texte avec un mur derrière ; une phrase, c'est une promesse. `WelcomeValueRow` et ses
+six chaînes ont été supprimés avec elles.
+
+Cette phrase a été raccourcie une seconde fois le 2026-09-12. Elle disait « Scannez vos livres,
+gardez la trace de ceux que vous prêtez, et voyez ce que vos proches ont chez eux. » — trois
+clauses, c'est-à-dire encore les trois lignes de valeur, mises bout à bout. Elle dit maintenant :
+
+| Clé | Français | Anglais |
+|---|---|---|
+| `welcome.app_name` | Ex-libris | Ex-libris |
+| `welcome.tagline` | Vos livres, et ceux qui voyagent. | Your books, and the ones going around. |
+| `welcome.pitch` | Organisez vos livres, partagez-les avec vos proches. | Organise your books, share them with the people close to you. |
+
+Deux verbes au lieu de trois clauses, et le prêt n'est plus nommé : « partagez » le contient, et
+l'écran d'accueil n'a pas à faire le tour de la fonctionnalité — il a à donner une raison d'ouvrir
+un compte. L'anglais était resté sur l'ancienne phrase pendant que le français avançait ; remis en
+phase le 2026-09-13.
 
 Avant la première réponse — et pour de bon si le serveur ne répond jamais — le mur est **peint** :
 des jaquettes à plat dans les teintes de la marque, avec un pli, un bandeau et deux lignes de titre.

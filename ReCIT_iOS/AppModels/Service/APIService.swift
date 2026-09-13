@@ -68,6 +68,35 @@ final class APIService: APIServicing {
         }
     }
 
+    /// The same request without a body, for the endpoints that take none.
+    ///
+    /// No `Content-Type` either: there is no content to type. `DELETE /api/user` is the first
+    /// caller — its sanitization on the server is the empty object, and the spec documents no
+    /// parameter, so anything sent here would be noise the server has to ignore.
+    func send<U: Codable>(
+        toEndpoint endpoint: String,
+        method: String,
+        debug: Bool = false
+    ) async throws -> U? {
+        guard let url = URL(string: "\(env.apiBaseUrl)\(endpoint)") else {
+            throw NetworkError.badUrl
+        }
+
+        var request: URLRequest = .init(url: url)
+        request.httpMethod = method
+
+        log(request: url, method: method, debug: debug)
+
+        let responseData: Data = try await perform(request: request, debug: debug)
+
+        do {
+            return try JSONDecoder().decode(U.self, from: responseData)
+        } catch {
+            Self.logger.error("Decoding failed for \(url, privacy: .public): \(error, privacy: .public)")
+            throw NetworkError.failedToDecodeResponse(underlying: error)
+        }
+    }
+
     func fetchData<T: Codable>(
         fromEndpoint endpoint: String,
         debug: Bool = false

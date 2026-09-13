@@ -7,6 +7,571 @@
     ", " : {
 
     },
+    "network.add_friends" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add reader friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter des amis lecteurs"
+          }
+        }
+      }
+    },
+    "network.add_to_network" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter au réseau"
+          }
+        }
+      }
+    },
+    "network.invitation.accept" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accepter"
+          }
+        }
+      }
+    },
+    "network.invitation.accept_request" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept the request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accepter la demande"
+          }
+        }
+      }
+    },
+    "network.invitation.accepted %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ has joined your network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ fait maintenant partie de votre réseau"
+          }
+        }
+      }
+    },
+    "network.invitation.refused %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation from %@ declined"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation de %@ refusée"
+          }
+        }
+      }
+    },
+    "network.invitation.explanation %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ asked to join networks with you. Declining does not tell them, and does not stop them asking again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vous a demandé de rejoindre son réseau. Refuser ne le prévient pas et ne l’empêche pas de redemander."
+          }
+        }
+      }
+    },
+    "network.invitation.received" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation received"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation reçue"
+          }
+        }
+      }
+    },
+    "network.invitation.refuse" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Decline"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refuser"
+          }
+        }
+      }
+    },
+    "network.invitations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
+          }
+        }
+      }
+    },
+    "network.invitations.all" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All invitations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les invitations"
+          }
+        }
+      }
+    },
+    "network.invitations.empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing waiting"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien en attente"
+          }
+        }
+      }
+    },
+    "network.invitations.empty.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requests you have sent and invitations you have received will show up here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les demandes que vous avez envoyées et les invitations reçues s’afficheront ici."
+          }
+        }
+      }
+    },
+    "network.invitations.received" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Received"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reçues"
+          }
+        }
+      }
+    },
+    "network.invitations.sent" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyées"
+          }
+        }
+      }
+    },
+    "network.private_inventory.message %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s books will appear here once the request is accepted."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les livres de %@ apparaîtront ici une fois la demande acceptée."
+          }
+        }
+      }
+    },
+    "network.private_inventory.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private inventory"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventaire privé"
+          }
+        }
+      }
+    },
+    "network.reciprocal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once the request is accepted, you will see their books and they will see yours. inventaire.io knows no one-way street: a network is mutual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une fois la demande acceptée, vous verrez ses livres et il verra les vôtres. inventaire.io ne connaît pas de sens unique : le réseau est réciproque."
+          }
+        }
+      }
+    },
+    "network.remove" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer du réseau"
+          }
+        }
+      }
+    },
+    "network.remove.confirm %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@ from your network? Their books leave your inventory, and the relation has to be asked for again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@ de votre réseau ? Ses livres quittent votre inventaire, et la relation devra être redemandée."
+          }
+        }
+      }
+    },
+    "network.request.awaiting" : {
+      "comment" : "Inert full-width button on a reader's profile, standing alone: it has to name what was sent.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Request sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demande envoyée"
+          }
+        }
+      }
+    },
+    "network.request.cancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel the request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler la demande"
+          }
+        }
+      }
+    },
+    "network.request.explanation %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ will find your request among their invitations. Until it is accepted, neither of you sees the other's inventory."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ trouvera votre demande dans ses invitations. Tant qu’elle n’est pas acceptée, aucun de vous deux ne voit l’inventaire de l’autre."
+          }
+        }
+      }
+    },
+    "network.request.no_notification %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gets no notification: the request will be seen the next time they open the app."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ne reçoit aucune notification : la demande sera vue à la prochaine ouverture de l’app."
+          }
+        }
+      }
+    },
+    "network.request.send" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send the request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer la demande"
+          }
+        }
+      }
+    },
+    "network.request.sent" : {
+      "comment" : "Tag at the end of a reader row: this request is still waiting. Sits under a header that has already said these are requests, so it does not repeat the word.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyée"
+          }
+        }
+      }
+    },
+    "network.request.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friend request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demande d’ajout"
+          }
+        }
+      }
+    },
+    "network.requests.pending" : {
+      "comment" : "Section header on the add-a-reader screen, at rest: the requests I have sent and nobody has answered yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pending requests"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demandes en cours"
+          }
+        }
+      }
+    },
+    "network.search.explanation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look a reader up by their inventaire.io username, then send them a request. Their inventory joins yours as soon as they accept it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cherchez un lecteur par son nom d’utilisateur sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès qu’il l’aura acceptée."
+          }
+        }
+      }
+    },
+    "network.search.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Readers"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecteurs"
+          }
+        }
+      }
+    },
+    "network.search.no_results" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No reader by that name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun lecteur de ce nom"
+          }
+        }
+      }
+    },
+    "network.search.no_results.message %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nobody on inventaire.io answers to “%@”."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personne sur inventaire.io ne répond à « %@ »."
+          }
+        }
+      }
+    },
+    "network.search.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Username"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom d’utilisateur"
+          }
+        }
+      }
+    },
+    "network.search.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find your reader friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouvez vos amis lecteurs"
+          }
+        }
+      }
+    },
+    "profile.invitations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
+          }
+        }
+      }
+    },
     "🥲" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -656,6 +1221,340 @@
     },
     "Description (optionnel)" : {
 
+    },
+    "delete_account.button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer mon compte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete my account"
+          }
+        }
+      }
+    },
+    "delete_account.confirm.delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        }
+      }
+    },
+    "delete_account.confirm.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres, étagères, listes et échanges seront supprimés. Cette action ne peut pas être annulée."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your books, shelves, lists and transactions will be deleted. This cannot be undone."
+          }
+        }
+      }
+    },
+    "delete_account.confirm.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer définitivement ?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete permanently?"
+          }
+        }
+      }
+    },
+    "delete_account.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre compte et tout ce qu'il contient seront supprimés."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account and everything in it will be deleted."
+          }
+        }
+      }
+    },
+    "delete_account.hosting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre compte est hébergé par inventaire.io. Le supprimer ici le supprime aussi sur le site."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account is hosted by inventaire.io. Deleting it here deletes it on the website too."
+          }
+        }
+      }
+    },
+    "delete_account.intro" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette action est définitive. En supprimant votre compte :"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This cannot be undone. Deleting your account means:"
+          }
+        }
+      }
+    },
+    "delete_account.line.books %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld livre sera retiré de votre inventaire"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld livres seront retirés de votre inventaire"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld book will be removed from your inventory"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld books will be removed from your inventory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "delete_account.line.lists %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld liste sera supprimée"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld listes seront supprimées"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld list will be deleted"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld lists will be deleted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "delete_account.line.shelves %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld étagère sera supprimée"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld étagères seront supprimées"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld shelf will be deleted"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld shelves will be deleted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "delete_account.line.transactions %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld échange en cours sera annulé"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld échanges en cours seront annulés"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld transaction in progress will be cancelled"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld transactions in progress will be cancelled"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "delete_account.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer mon compte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete my account"
+          }
+        }
+      }
+    },
+    "delete_account.transactions_warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les personnes concernées perdront le fil de la discussion, sans autre avertissement que la disparition de l'échange."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The people involved will lose the conversation, with no warning other than the transaction disappearing."
+          }
+        }
+      }
+    },
+    "delete_account.username_kept" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre nom d'utilisateur restera réservé et ne pourra pas servir à un nouveau compte."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your username stays reserved and cannot be used for a new account."
+          }
+        }
+      }
     },
     "edition.add_to_inventory" : {
       "extractionState" : "stale",
@@ -1639,6 +2538,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chargement des éléments..."
+          }
+        }
+      }
+    },
+    "list.removed_from_named %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removed from %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retiré de %@"
           }
         }
       }
@@ -3445,6 +4361,23 @@
         }
       }
     },
+    "profile.delete_account" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer mon compte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete my account"
+          }
+        }
+      }
+    },
     "profile.logout" : {
       "localizations" : {
         "en" : {
@@ -3490,6 +4423,159 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun ami pour le moment"
+          }
+        }
+      }
+    },
+    "report.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signalement"
+          }
+        }
+      }
+    },
+    "report.body.intro" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Describe below what you are reporting. We look at every report and answer as soon as we can."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décrivez ci-dessous ce que vous signalez. Nous lisons chaque signalement et répondons dès que possible."
+          }
+        }
+      }
+    },
+    "report.body.reporter %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reported by: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signalé par : %@"
+          }
+        }
+      }
+    },
+    "report.body.transaction %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exchange: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échange : %@"
+          }
+        }
+      }
+    },
+    "report.body.user %@ %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reported member: %1$@ (%2$@)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Membre signalé : %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "report.body.version %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App version: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version de l'app : %@"
+          }
+        }
+      }
+    },
+    "report.mail_unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No mail app could be opened. Write to us at:"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune application e-mail n'a pu s'ouvrir. Écrivez-nous à :"
+          }
+        }
+      }
+    },
+    "report.subject.transaction %@ %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report: %1$@ — %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signalement : %1$@ — %2$@"
+          }
+        }
+      }
+    },
+    "report.subject.user %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signalement : %@"
           }
         }
       }
@@ -3921,7 +5007,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos étagères ne changent qu’après « Appliquer le rangement ». La phrase juste en dessous dit ce qui sera enregistré."
+            "value" : "Vous n’avez plus qu’à appliquer vos changements pour qu’ils se répercutent."
           }
         }
       }
@@ -3938,7 +5024,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rien n’est encore enregistré"
+            "value" : "Une fois le rangement fini"
           }
         }
       }
@@ -4059,7 +5145,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Réglages"
+            "value" : "Profil"
           }
         }
       }
@@ -4838,11 +5924,35 @@
         }
       }
     },
+    "user.member_since %@" : {
+      "comment" : "Second line of a reader cell: when their inventaire.io account was opened. %@ is a month and a year, already formatted for the locale.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Member since %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Membre depuis %@"
+          }
+        }
+      }
+    },
     "Visibilité" : {
 
     },
     "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée."
+          }
+        }
+      }
     },
     "welcome.app_name" : {
       "extractionState" : "manual",
@@ -4873,7 +5983,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les couvertures sont celles des derniers livres partagés sur [inventaire.io](https://inventaire.io/) : la base ouverte, qui héberge votre compte et vos livres."
+            "value" : "Les derniers livres partagés sur [inventaire.io](https://inventaire.io/) : la base open data, qui héberge votre compte et vos livres."
           }
         }
       }
@@ -4884,13 +5994,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scan your books, keep track of the ones you lend, and see what the people close to you have at home."
+            "value" : "Organise your books, share them with the people close to you."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Organisez vos livres et partagez-les avec vos proches."
+            "value" : "Organisez vos livres, partagez-les avec vos proches."
           }
         }
       }
@@ -4907,7 +6017,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos livres, et ceux qui circulent."
+            "value" : "Vos livres, et ceux qui voyagent."
           }
         }
       }

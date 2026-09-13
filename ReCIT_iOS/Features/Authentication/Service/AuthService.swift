@@ -359,6 +359,20 @@ final class AuthService {
         deleteCookiesFromKeychain()
     }
 
+    /// Forgets the session locally, with no call to the server.
+    ///
+    /// For the one case where the server has already closed it and telling it again would be
+    /// talking to nobody: `DELETE /api/user` logs the session out as its last act, so the
+    /// `POST /auth/logout` that `logout()` sends would arrive on a session that no longer
+    /// exists — a `401` we would then have to explain in a comment rather than avoid.
+    ///
+    /// It is here, and not in the model that deletes the account, because of ADR 0008: the jar
+    /// and the keychain belong to this service and nothing outside it may touch them.
+    func forgetSession() {
+        clearSessionCookies()
+        deleteCookiesFromKeychain()
+    }
+
     // MARK: - Cookies
 
     /// Reads `Set-Cookie` off the response into our own jar.

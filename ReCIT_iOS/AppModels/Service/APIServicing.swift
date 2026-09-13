@@ -20,6 +20,18 @@ protocol APIServicing {
         debug: Bool
     ) async throws -> U?
 
+    /// A verb with no body at all — `DELETE /api/user` is the first of them.
+    ///
+    /// Separate from `send(toEndpoint:method:payload:debug:)` rather than a nil payload: the
+    /// endpoints that take nothing take *nothing*, and an empty JSON object sent to one is a
+    /// body the server never asked for. Nothing is written to `httpBody`, so the request on the
+    /// wire is the one the spec describes.
+    func send<U: Codable>(
+        toEndpoint endpoint: String,
+        method: String,
+        debug: Bool
+    ) async throws -> U?
+
     func fetchData<T: Codable>(
         fromEndpoint endpoint: String,
         debug: Bool
@@ -50,6 +62,13 @@ extension APIServicing {
         payload: T
     ) async throws -> U? {
         try await send(toEndpoint: endpoint, method: method, payload: payload, debug: false)
+    }
+
+    func send<U: Codable>(
+        toEndpoint endpoint: String,
+        method: String
+    ) async throws -> U? {
+        try await send(toEndpoint: endpoint, method: method, debug: false)
     }
 
     func fetchData<T: Codable>(fromEndpoint endpoint: String) async throws -> T? {

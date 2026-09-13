@@ -120,4 +120,56 @@ struct SortGridMetricsTests {
 
         #expect(abs(size.height - 90) < 0.01)
     }
+
+    // MARK: - The pile inside its band
+
+    /// The regression this geometry exists for: on the two-column grid a fan of five ran past
+    /// the art band and painted over the card's title. Checked at every width, and on both
+    /// column counts, because it is the *narrow* grid — wide cards, and therefore a wide fan —
+    /// that overflowed while three columns looked fine.
+    @Test func aFullFanStaysInsideTheArtBand() {
+        for width in widths {
+            let metrics: SortGridMetrics = .init(containerWidth: width)
+
+            for columns in [2, SortGridMetrics.columnCount] {
+                let cardWidth: CGFloat = metrics.shelfColumnWidth(columns: columns)
+                let cover: CGSize = SortGridMetrics.pileCoverSize(width: cardWidth, isSingleCover: false)
+                let tilt: CGFloat = .init(SortPile.tiltAmplitude * .pi / 180)
+                let leaning: CGFloat = cover.width * sin(tilt) + cover.height * cos(tilt)
+                let claimed: CGFloat = SortGridMetrics.pileFanDrop(width: cardWidth) + leaning
+
+                #expect(claimed <= SortGridMetrics.artHeight + 0.01)
+            }
+        }
+    }
+
+    /// The single cover has no fan to make room for, so it is allowed to be taller than a
+    /// piled one — but it leans too, and must still fit.
+    @Test func aLoneCoverFitsAndIsTallerThanAPiledOne() {
+        for width in widths {
+            let cardWidth: CGFloat = SortGridMetrics(containerWidth: width).shelfColumnWidth(columns: 2)
+            let lone: CGSize = SortGridMetrics.pileCoverSize(width: cardWidth, isSingleCover: true)
+            let piled: CGSize = SortGridMetrics.pileCoverSize(width: cardWidth, isSingleCover: false)
+            let tilt: CGFloat = .init(SortPile.tiltAmplitude * .pi / 180)
+
+            #expect(lone.width * sin(tilt) + lone.height * cos(tilt) <= SortGridMetrics.artHeight + 0.01)
+            #expect(lone.height > piled.height)
+        }
+    }
+
+    /// A cover small enough to fit keeps the book's own proportions — the clamp must not
+    /// squash every pile, only the ones that would overflow.
+    @Test func aCoverThatFitsKeepsItsTwoToThreeShape() {
+        let cover: CGSize = SortGridMetrics.pileCoverSize(width: 60, isSingleCover: false)
+
+        #expect(abs(cover.height - cover.width / SortGridMetrics.coverAspectRatio) < 0.01)
+    }
+
+    /// Half the drop, so the fan reaches as far above the front cover as below it.
+    @Test func theFanIsLiftedByHalfItsDrop() {
+        let inset: CGFloat = SortGridMetrics.pileVerticalInset(width: 172.5)
+
+        #expect(abs(inset - SortGridMetrics.pileFanDrop(width: 172.5) / 2) < 0.01)
+        #expect(inset > 0)
+    }
 }

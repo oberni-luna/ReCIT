@@ -10,13 +10,29 @@ import SwiftData
 
 @MainActor
 @Observable
-final class UserModel {
+final class UserModel: OptimisticMutating {
 
     private let apiService: APIServicing
     var myUser: User?
 
-    init(apiService: APIServicing) {
+    /// Shared channel used to surface a background optimistic failure to the UI.
+    var errorReporter: AppErrorReporter?
+
+    /// Injected at launch, and used for one thing: pulling a new friend's books the moment
+    /// their invitation is accepted.
+    private var inventoryModel: InventoryModel?
+
+    /// The most recent background task spawned by an optimistic relation write. Exposed so
+    /// tests can await completion; not observed by the UI.
+    @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
+
+    init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
+        self.errorReporter = errorReporter
+    }
+
+    func start(inventoryModel: InventoryModel) {
+        self.inventoryModel = inventoryModel
     }
 
     func syncMyUser(modelContext: ModelContext) async throws {
@@ -71,16 +87,181 @@ final class UserModel {
         return users
     }
 
-    func syncUserNetwork(modelContext: ModelContext) async throws {
+    /// Reads `GET /api/relations` and writes the four states it answers onto the store.
+    ///
+    /// One call carries everything: `friends`, `userRequested`, `otherRequested` and `network`.
+    /// Until issue 0083 only `network` was kept, so the app fetched the users but knew nothing
+    /// of where it stood with any of them — the whole add-a-friend flow lives in the three
+    /// lists that were being dropped.
+    ///
+    /// The write is exhaustive, not incremental: every stored user that the answer does not
+    /// name falls back to `.none`. That is what makes a relation undone elsewhere — on the
+    /// website, or by the other side refusing — disappear here, instead of surviving as a
+    /// friend nobody can see any more.
+    func syncRelations(modelContext: ModelContext) async throws {
         guard let myUser else { return }
 
         let userNetwork: UserNetworkDTO? = try await apiService.fetchData(fromEndpoint: "/api/relations")
         guard let userNetwork else { return }
-        
-        let userIds = Array(Set(userNetwork.network).filter { $0 != myUser._id })
-        if userIds.isEmpty { return }
-        
-        _ = try await getOrFetchUsers(modelContext: modelContext, userIds: userIds)
+
+        let states: [String: UserRelation] = UserRelation.byUserID(from: userNetwork)
+        let userIds: [String] = Array(Set(userNetwork.network + Array(states.keys))).filter { $0 != myUser._id }
+        if userIds.isEmpty == false {
+            _ = try await getOrFetchUsers(modelContext: modelContext, userIds: userIds)
+        }
+
+        for user in try modelContext.fetch(FetchDescriptor<User>()) where user._id != myUser._id {
+            user.relation = states[user._id] ?? .none
+        }
+        myUser.relation = .none
+
+        try modelContext.save()
+    }
+
+    // MARK: - Finding readers
+
+    /// The readers `inventaire.io` knows by that name, best match first, as `User`s of the local
+    /// store.
+    ///
+    /// Two calls, and both are needed. `/api/search?types=users` answers with ids, labels and
+    /// pictures — no item count, and nothing about where I stand with any of them — so the ids
+    /// go straight to `/api/users/by-ids`, which is also what puts them in the store. A reader
+    /// has to be there to be pushed as a destination and to carry a relation at all.
+    ///
+    /// Strangers therefore accumulate in the store, which is deliberate and harmless as long as
+    /// nothing mistakes the store for the network: since issue 0083 the Profil lists
+    /// `relation == .friend`, and only friends' inventories are synced.
+    func searchReaders(
+        query: String,
+        modelContext: ModelContext,
+        limit: Int = 15
+    ) async throws -> [User] {
+        let trimmedQuery: String = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedQuery.isEmpty == false else { return [] }
+
+        // A username can hold a plus or an ampersand, both of which would end the query
+        // parameter and truncate the search rather than fail it.
+        let search: String = trimmedQuery.addingPercentEncoding(
+            withAllowedCharacters: .urlQueryAllowed.subtracting(.init(charactersIn: "&+=?#"))
+        ) ?? trimmedQuery
+
+        let response: UserSearchResultsDTO? = try await apiService.fetchData(
+            fromEndpoint: "/api/search?types=users&search=\(search)&limit=\(limit)"
+        )
+
+        let userIds: [String] = (response?.results ?? [])
+            .sorted { ($0.score ?? 0) > ($1.score ?? 0) }
+            .map(\.id)
+            .filter { $0 != myUser?._id }
+        guard userIds.isEmpty == false else { return [] }
+
+        let users: [User] = try await getOrFetchUsers(modelContext: modelContext, userIds: userIds)
+        let byID: [String: User] = .init(
+            users.map { ($0._id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        // Back into the server's order: `by-ids` answers a dictionary, and the ranking is the
+        // one thing the search had to say that the fetch does not.
+        return userIds.compactMap { byID[$0] }
+    }
+
+    // MARK: - Relation writes
+
+    /// Asks to join `user`'s network. Optimistic: the row says « envoyée » before the server
+    /// has answered, and goes back to what it was if the call fails (ADR 0001).
+    ///
+    /// No message travels with it — `POST /api/relations/request` takes a user id and nothing
+    /// else, which is why the sheet that raises this only confirms.
+    func requestRelation(with user: User, modelContext: ModelContext) {
+        changeRelation(user, to: .requestSent, action: "request", modelContext: modelContext)
+    }
+
+    /// Takes back a request I sent. The other side never learns it existed.
+    func cancelRelation(with user: User, modelContext: ModelContext) {
+        changeRelation(user, to: .none, action: "cancel", modelContext: modelContext)
+    }
+
+    /// Lets a reader into my network, and pulls their books straight away.
+    ///
+    /// The inventory sync is the `reconcile` half rather than a second call from the view: a
+    /// new friend whose books only arrive at the next launch is a friend whose profile, opened
+    /// on the spot, says « Oh, c'est vide ici ».
+    func acceptRelation(with user: User, modelContext: ModelContext) {
+        changeRelation(
+            user,
+            to: .friend,
+            action: "accept",
+            modelContext: modelContext,
+            reconcile: { [weak self, weak user] in
+                guard let user, user.isStillInTheStore else { return }
+                try await self?.inventoryModel?.syncInventory(forUser: user, modelContext: modelContext)
+            }
+        )
+    }
+
+    /// Turns a request down. The other side is not told, and nothing stops them asking again.
+    func discardRelation(with user: User, modelContext: ModelContext) {
+        changeRelation(user, to: .none, action: "discard", modelContext: modelContext)
+    }
+
+    /// Undoes a friendship, and takes the books with it.
+    ///
+    /// Their copies are dropped **after** the server has agreed, never before: unlike a
+    /// relation, a deleted inventory cannot be put back by a revert, and a failed call would
+    /// have emptied the inventory search of books that are still perfectly borrowable.
+    /// `lastInventorySync` goes back to `nil` with them, so a relation made again shows the
+    /// syncing row rather than an inventory that looks empty.
+    func unfriend(_ user: User, modelContext: ModelContext) {
+        changeRelation(
+            user,
+            to: .none,
+            action: "unfriend",
+            modelContext: modelContext,
+            reconcile: { [weak user] in
+                guard let user, user.isStillInTheStore else { return }
+                for item in user.items {
+                    modelContext.delete(item)
+                }
+                user.items = []
+                user.lastInventorySync = nil
+            }
+        )
+    }
+
+    /// The shape shared by every relation write: one local state change, one POST carrying the
+    /// user id, and the previous state put back if the server refuses.
+    private func changeRelation(
+        _ user: User,
+        to newRelation: UserRelation,
+        action: String,
+        modelContext: ModelContext,
+        reconcile: @escaping () async throws -> Void = {}
+    ) {
+        let previousRelation: UserRelation = user.relation
+        let userId: String = user._id
+
+        inFlightTask = optimistic(
+            modelContext,
+            apply: { user.relation = newRelation },
+            revert: { user.relation = previousRelation },
+            request: { [weak self] in
+                try await self?.postRelation(action: action, userId: userId)
+            },
+            reconcile: reconcile
+        )
+    }
+
+    private func postRelation(action: String, userId: String) async throws {
+        let _: OkStatusDTO? = try await apiService.send(
+            toEndpoint: "/api/relations/\(action)",
+            payload: RelationActionPayload(user: userId)
+        )
+    }
+
+    /// The readers this account is actually close to — the only ones whose inventory is worth
+    /// syncing, and the only ones the Profil calls « Réseau ».
+    func friends(modelContext: ModelContext) -> [User] {
+        getAllOtherUsers(modelContext: modelContext).filter { $0.relation == .friend }
     }
 
     func getAllOtherUsers(modelContext: ModelContext) -> [User] {
@@ -101,6 +282,70 @@ final class UserModel {
 
     func logout(modelContext: ModelContext) throws {
         try clearUserData(modelContext: modelContext)
+    }
+
+    /// Deletes the account on inventaire.io, then leaves this device with nothing of it.
+    ///
+    /// **Server first, always.** The local wipe runs only after the server has answered `ok`:
+    /// an app that erased its copy on a failed call would leave the user believing an account
+    /// is gone while it is still live on inventaire.io — the one lie this screen cannot afford.
+    /// A failure therefore throws with the store untouched, and the caller says so.
+    ///
+    /// **What the server does with it** (`server/controllers/user/delete.ts`): the user document
+    /// is soft-deleted — only `_id`, `_rev`, `created`, `username`, `stableUsername` and
+    /// `anonymizableId` survive, so the username stays taken — and the relations, group
+    /// memberships, active transactions, notifications, shelves, listings and items all go. It
+    /// then closes the session itself, which is why the caller pairs this with
+    /// `AuthModel.forgetSession()` rather than a logout.
+    ///
+    /// **Why the whole store, and not just this user's rows.** The account that owned this
+    /// device's cache no longer exists, and every row here was fetched under it: friends and
+    /// their inventories, the entities their books point at, the étagères and the lists. Left
+    /// in place they would surface under the *next* account signed in on this phone, which is
+    /// not a stale cache but someone else's data on the wrong screen.
+    func deleteAccount(modelContext: ModelContext) async throws {
+        guard let response: OkStatusDTO = try await apiService.send(
+            toEndpoint: "/api/user",
+            method: "DELETE"
+        ), response.ok else {
+            throw NetworkError.badResponse
+        }
+
+        myUser = nil
+        try wipeLocalStore(modelContext: modelContext)
+    }
+
+    /// Empties every model in the container's schema, in one save.
+    ///
+    /// Spelled out type by type rather than looped: the list is the only thing that fails loudly
+    /// when a new `@Model` is added to `ReCIT.makeModelContainer` and forgotten here — a silent
+    /// survivor would be the bug. Owned rows come first, then the entities they point at, then
+    /// the users that own them, so nothing is deleted out from under a relationship.
+    ///
+    /// **Fetched and deleted one by one, not `delete(model:)`.** The batch form skips the object
+    /// graph, and `InventoryItem.edition` is a mandatory to-one: SwiftData answers a batch delete
+    /// with `Constraint trigger violation: Batch delete failed due to mandatory OTO nullify
+    /// inverse on InventoryItem/edition` and nothing is deleted at all. Per-object deletion runs
+    /// the relationship rules, which is what a store of this shape needs.
+    private func wipeLocalStore(modelContext: ModelContext) throws {
+        try deleteAll(InventoryItem.self, in: modelContext)
+        try deleteAll(Shelf.self, in: modelContext)
+        try deleteAll(EntityListItem.self, in: modelContext)
+        try deleteAll(EntityList.self, in: modelContext)
+        try deleteAll(TransactionMessage.self, in: modelContext)
+        try deleteAll(UserTransaction.self, in: modelContext)
+        try deleteAll(WpExtract.self, in: modelContext)
+        try deleteAll(Edition.self, in: modelContext)
+        try deleteAll(Work.self, in: modelContext)
+        try deleteAll(Author.self, in: modelContext)
+        try deleteAll(User.self, in: modelContext)
+        try modelContext.save()
+    }
+
+    private func deleteAll<T: PersistentModel>(_ type: T.Type, in modelContext: ModelContext) throws {
+        for object in try modelContext.fetch(FetchDescriptor<T>()) {
+            modelContext.delete(object)
+        }
     }
 
 }

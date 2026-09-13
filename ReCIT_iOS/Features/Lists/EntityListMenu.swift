@@ -13,11 +13,13 @@
 
 import SwiftUI
 import SwiftData
+import LBSnackBar
 
 struct EntityListMenu: View {
     @Environment(ListModel.self) private var listModel
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.snackBar) private var snackBar
 
     /// The entity the menu files — a work uri.
     let entityUri: String
@@ -65,10 +67,16 @@ struct EntityListMenu: View {
 
     /// Adding is optimistic in the model; removing is not, so it runs in a task of its own and
     /// surfaces its failure through the shared reporter — the same SnackBar either way.
+    ///
+    /// The confirming SnackBar follows the same line: nothing on the screens carrying this menu
+    /// shows the entity's listes, so it is the only thing saying where the book has landed — or
+    /// left. It goes up with the local mutation for the optimistic direction, and only once the
+    /// server has answered for the removal, which is when the liste actually loses the element.
     private func toggle(_ entry: MembershipMenuEntry) {
         guard let list = lists.first(where: { $0._id == entry.id }) else { return }
 
         if entry.isMember {
+            let name: String = list.name
             Task {
                 do {
                     try await listModel.deleteElementsInList(
@@ -76,6 +84,7 @@ struct EntityListMenu: View {
                         listId: list._id,
                         elementIds: [entityUri]
                     )
+                    show(String(localized: "list.removed_from_named \(name)"))
                 } catch {
                     errorReporter.report(error)
                 }
@@ -86,6 +95,13 @@ struct EntityListMenu: View {
                 list: list,
                 entityUris: [entityUri]
             )
+            show(String(localized: "list.added_to_named \(list.name)"))
+        }
+    }
+
+    private func show(_ title: String) {
+        snackBar.show {
+            SnackBarView(title: title, onDismiss: nil)
         }
     }
 }

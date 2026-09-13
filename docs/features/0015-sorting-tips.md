@@ -71,6 +71,17 @@ A refused drop and a press on a busy screen teach nothing. The view observes; it
   a direct consequence of shortening the footer. No reserved height was invented; if the jump reads
   badly on device, that is the follow-up.
 
+## Fixes since
+
+- **2026-09-11 — SORT-2 and SORT-3 never appeared.** The `TipGroup` was built `.ordered`, and an
+  ordered group does not move past a tip until that tip is **invalidated**. This feature
+  deliberately never invalidates anything (a close is "not now", a learned gesture is
+  `TipsStore`'s record), so the group stayed on SORT-1 for good. What showed on screen was the
+  pointer above « Appliquer » with no card over it: the panel places the pointer from
+  `SortTipGate`'s answer while the card comes from TipKit's. The group is now
+  `.firstAvailable`; the order the astuces are offered in was always `SortTip`'s declaration
+  order enforced by the gate, so nothing was lost.
+
 ## What is still owed — issue 0082
 
 The PRD takes **no automated suite** for this feature; the recette is manual and deliberate.

@@ -23,13 +23,51 @@ public class User: Identifiable, Equatable {
     var avatarURLValue: String?
     var lastItemAdded: Double = 0
     var itemCount: Int = 0
+    /// When the account was opened, in milliseconds, or `nil` if the server has not said.
+    ///
+    /// Optional for the same reason as `relationRawValue` below: a lightweight migration does
+    /// not write a Swift default into the rows already in the store, so a non-optional property
+    /// added here would trap on the first read of every existing install.
+    var created: Double?
     /// Timestamp (ms) of the last successful inventory sync, or `nil` if this
     /// user's inventory has never been synced. Used to show a syncing placeholder
     /// instead of an ambiguous empty inventory.
     var lastInventorySync: Double?
+    /// Backing store for `relation`, and the reason it is a `String?` rather than the enum.
+    ///
+    /// SwiftData does not write a property's Swift default into the store when a lightweight
+    /// migration adds that property to an existing database: the rows already there get a NULL,
+    /// and the next read force-casts it to the enum and traps with « Could not cast value of
+    /// type 'Swift.Optional<Any>' to 'UserRelation' ». Every install that predates issue 0083
+    /// crashed on the first save after launch. An optional raw value is legally NULL, so the
+    /// old rows load, and `relation` turns the missing value into `.none` — which is also what
+    /// the next `GET /api/relations` would have written anyway.
+    private var relationRawValue: String?
+
+    /// Where I stand with this reader, as of the last `GET /api/relations`. Server state,
+    /// rewritten whole at every sync — see `UserRelation`. Never merged from a user payload:
+    /// `/api/users/by-ids` knows nothing of relations, and a sparse answer must not demote a
+    /// friend to a stranger.
+    ///
+    /// Computed, so it is not itself persisted — filter and sort in Swift, never in a
+    /// `#Predicate`, which can only see `relationRawValue`.
+    var relation: UserRelation {
+        get { relationRawValue.flatMap(UserRelation.init(rawValue:)) ?? UserRelation.none }
+        set { relationRawValue = newValue.rawValue }
+    }
     @Relationship(deleteRule: .cascade, inverse: \InventoryItem.owner) var items: [InventoryItem] = []
 
-    init(_id: String, _rev: String, username: String, email: String?, position: Coordinates?, avatarURLValue: String?, itemCount: Int, lastItemAdded: Double = 0) {
+    init(
+        _id: String,
+        _rev: String,
+        username: String,
+        email: String?,
+        position: Coordinates?,
+        avatarURLValue: String?,
+        itemCount: Int,
+        lastItemAdded: Double = 0,
+        created: Double? = nil
+    ) {
         self._id = _id
         self._rev = _rev
         self.username = username
@@ -38,6 +76,13 @@ public class User: Identifiable, Equatable {
         self.avatarURLValue = avatarURLValue
         self.itemCount = itemCount
         self.lastItemAdded = lastItemAdded
+        self.created = created
+    }
+
+    /// The day the account was opened, for a view to format. `nil` when the server has not said
+    /// — which is what makes the cell draw one line rather than invent a date.
+    var createdDate: Date? {
+        created.map { Date(timeIntervalSince1970: $0 / 1000) }
     }
 
     public static func == (lhs: User, rhs: User) -> Bool {
@@ -70,6 +115,9 @@ public class User: Identifiable, Equatable {
         if let avatarURLValue = user.avatarURLValue {
             self.avatarURLValue = avatarURLValue
         }
+        if let created = user.created {
+            self.created = created
+        }
         self.itemCount = user.itemCount
         self.lastItemAdded = user.lastItemAdded
     }
@@ -87,7 +135,8 @@ public class User: Identifiable, Equatable {
             position: position,
             avatarURLValue: userDTO.picture != nil ? "\(baseUrl)\(userDTO.picture ?? "")" : nil,
             itemCount: userDTO.snapshot?.values.map { $0.`items:count` }.max() ?? 0,
-            lastItemAdded: userDTO.snapshot?.values.map { $0.`items:last-add` ?? 0 }.max() ?? 0
+            lastItemAdded: userDTO.snapshot?.values.map { $0.`items:last-add` ?? 0 }.max() ?? 0,
+            created: userDTO.created
         )
     }
 }

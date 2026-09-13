@@ -64,7 +64,17 @@ struct ShelfRowView: View {
 
     private var metrics: ShelfCardMetrics { .init(width: width) }
     private var books: [InventoryItem] { ShelfDrawnBooks.from(shelf.items) }
-    private var layout: ShelfBooksLayout { .init(books: books, metrics: metrics) }
+
+    /// The books and the geometry that indexes them, always taken together.
+    ///
+    /// `shelf.items` is live — a sync or an apply rewrites it wholesale — so an index and a
+    /// layout read from two separate visits to it can disagree, and the index then names a book
+    /// the layout no longer has. Everything here that needs both takes this pair once and works
+    /// from it; nothing rebuilds one of the two on its own. See `ShelfBooksLayout`'s header.
+    private var drawn: (books: [InventoryItem], layout: ShelfBooksLayout) {
+        let drawn: [InventoryItem] = books
+        return (drawn, .init(books: drawn, metrics: metrics))
+    }
 
     /// How far the wash extends below the plank (kept small), so the wash isn't cropped.
     private let washBelow: CGFloat = 16
@@ -114,7 +124,9 @@ struct ShelfRowView: View {
     }
 
     private var shelfStack: some View {
-        ZStack(alignment: .bottom) {
+        // One reading of the shelf, shared by the books and their geometry — see `drawn`.
+        let drawn: (books: [InventoryItem], layout: ShelfBooksLayout) = drawn
+        return ZStack(alignment: .bottom) {
             // Wash centred vertically on the plank: constrained to a plank-height box
             // pinned to the bottom, so the (taller) blob overflows equally above the
             // books and below the shelf, with its centre on the plank.
@@ -127,9 +139,9 @@ struct ShelfRowView: View {
                 .allowsHitTesting(false)
             VStack(spacing: 0) {
                 ShelfBooksView(
-                    books: books,
+                    books: drawn.books,
                     metrics: metrics,
-                    layout: layout
+                    layout: drawn.layout
                 )
                 // Books always render in FRONT of the plank so they sit on top of the
                 // shelf (and a zoomed book stays above it, never behind/under).
@@ -172,7 +184,9 @@ struct ShelfRowView: View {
             x: location.x - ShelfCardMetrics.horizontalMargin,
             y: location.y
         )
-        guard let index = layout.nearestIndex(to: point), books.indices.contains(index) else { return nil }
+        let drawn: (books: [InventoryItem], layout: ShelfBooksLayout) = drawn
+        guard let index = drawn.layout.nearestIndex(to: point),
+              drawn.books.indices.contains(index) else { return nil }
         return index
     }
 
@@ -183,22 +197,23 @@ struct ShelfRowView: View {
     /// Only the frame within the card is computed here, so nothing has to run again when the
     /// page scrolls: from then on the origin alone moves, and `onGeometryChange` publishes it.
     private func publish(_ index: Int?) {
-        guard let index, books.indices.contains(index) else {
+        let drawn: (books: [InventoryItem], layout: ShelfBooksLayout) = drawn
+        guard let index, drawn.books.indices.contains(index) else {
             focus.book = nil
             return
         }
         focus.cardOrigin = cardFrame.origin
         focus.book = .init(
-            item: books[index],
-            frameInCard: layout.bookFrame(at: index)
+            item: drawn.books[index],
+            frameInCard: drawn.layout.bookFrame(at: index)
                 .offsetBy(dx: ShelfCardMetrics.horizontalMargin, dy: ShelfBooksView.booksOffset),
-            presentation: presentation(at: index),
-            leaning: layout.isLeaning(at: index)
+            presentation: presentation(at: index, in: drawn.layout),
+            leaning: drawn.layout.isLeaning(at: index)
         )
         ownsFocus = true
     }
 
-    private func presentation(at index: Int) -> ShelfFocusModel.Presentation {
+    private func presentation(at index: Int, in layout: ShelfBooksLayout) -> ShelfFocusModel.Presentation {
         switch layout.mode {
         case .singleCover: .cover
         case .allVertical: .standing
@@ -312,8 +327,9 @@ struct ShelfRowView: View {
         // this one, and an overlay unwinding on top of it reads as a leftover.
         ownsFocus = false
         focus.reset()
-        guard let index, books.indices.contains(index) else { return }
-        path.append(NavigationDestination.book(anchor: .item(books[index])))
+        let drawn: [InventoryItem] = books
+        guard let index, drawn.indices.contains(index) else { return }
+        path.append(NavigationDestination.book(anchor: .item(drawn[index])))
     }
 
     /// The press ended without opening anything. How long it takes to come apart depends on

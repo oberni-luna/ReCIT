@@ -20,10 +20,12 @@
 
 import SwiftUI
 import SwiftData
+import LBSnackBar
 
 struct BookShelfMenu: View {
     @Environment(ShelfModel.self) private var shelfModel
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.snackBar) private var snackBar
 
     /// The current user's own copy of the book.
     let item: InventoryItem
@@ -89,13 +91,27 @@ struct BookShelfMenu: View {
     }
 
     /// The entry always names one of `shelves`, since that is what built it.
+    ///
+    /// Both writes are optimistic and model-owned, so the SnackBar goes up with the local
+    /// mutation rather than after a round-trip: nothing on this screen shows the book's
+    /// étagères, so it is the only thing saying where the copy has landed — or left. A write
+    /// that then fails is reverted by the model and reported through the shared reporter,
+    /// which draws its own SnackBar.
     private func toggle(_ entry: MembershipMenuEntry) {
         guard let shelf = shelves.first(where: { $0._id == entry.id }) else { return }
 
         if entry.isMember {
             shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
+            show(String(localized: "list.removed_from_named \(shelf.name)"))
         } else {
             shelfModel.addItem(item, to: shelf, modelContext: modelContext)
+            show(String(localized: "list.added_to_named \(shelf.name)"))
+        }
+    }
+
+    private func show(_ title: String) {
+        snackBar.show {
+            SnackBarView(title: title, onDismiss: nil)
         }
     }
 }

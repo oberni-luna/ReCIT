@@ -10,7 +10,7 @@
 //  It was `AutoSortBookRow`, under `Features/AutoSort/`, and moved here when PRD 0008
 //  retired the review screen it was written for.
 //
-//  Measurements are the design's own (`Tri manuel · Light`, node `115:3278`): a 36 pt
+//  Measurements are the design’s own (`Tri manuel · Light`, node `115:3278`): a 36 pt-wide
 //  cover, 12 pt between the columns, 4 pt between title and author.
 //
 //  Since PRD 0009 its only reader is `SortShelfDetailView` — the surface itself draws books as
@@ -31,7 +31,7 @@ struct SortBookRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: .sMedium) {
-            CellThumbnail(imageUrl: book.coverImageUrl, cornerRadius: .minimal, size: .small)
+            CellThumbnail(imageUrl: book.coverImageUrl, cornerRadius: .minimal, size: .small, shape: .portrait)
 
             VStack(alignment: .leading, spacing: .xSmall) {
                 Text(book.title)

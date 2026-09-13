@@ -24,7 +24,7 @@ struct SearchResultCell: View {
     @ViewBuilder
     var workCell: some View {
         HStack(alignment: .top, spacing: 12) {
-            CellThumbnail(imageUrl: result.imageUrl)
+            CellThumbnail(imageUrl: result.imageUrl, shape: .portrait)
 
             textsCell
         }
@@ -42,7 +42,7 @@ struct SearchResultCell: View {
     @ViewBuilder
     var inventoryItemCell: some View {
         HStack(alignment: .top, spacing: 12) {
-            CellThumbnail(imageUrl: result.imageUrl)
+            CellThumbnail(imageUrl: result.imageUrl, shape: .portrait)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(result.title)

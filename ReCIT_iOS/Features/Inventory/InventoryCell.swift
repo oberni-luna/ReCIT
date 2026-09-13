@@ -19,7 +19,7 @@ struct InventoryCell: View {
         // `PersistentModel+StillInTheStore`.
         if item.isStillInTheStore, let edition = item.edition {
             HStack(alignment: .top, spacing: .sMedium) {
-                CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: .medium)
+                CellThumbnail(imageUrl: edition.image, cornerRadius: .minimal, size: .medium, shape: .portrait)
 
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Group {

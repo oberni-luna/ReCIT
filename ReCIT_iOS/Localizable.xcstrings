@@ -5941,6 +5941,23 @@
         }
       }
     },
+    "user.shelves.header %@" : {
+      "comment" : "Header of the étagères band on a reader's profile. %@ is their username.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s shelves"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étagères de %@"
+          }
+        }
+      }
+    },
     "Visibilité" : {
 
     },

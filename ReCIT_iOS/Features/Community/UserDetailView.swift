@@ -10,6 +10,8 @@ import SwiftUI
 struct UserDetailView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(\.modelContext) private var modelContext
+    /// Only so the list can hold still while a book is being picked off an étagère.
+    @Environment(ShelfFocusModel.self) private var shelfFocus
 
     @State private var nextNavigationDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
@@ -31,6 +33,10 @@ struct UserDetailView: View {
             }
 
             if showsInventory {
+                // Their étagères sit between who they are and what they own, which is the
+                // order the two are read in: a shelf says how the library is arranged, the
+                // list below says what is in it.
+                UserShelvesSection(user: user, path: $path)
                 inventorySection
             } else {
                 Section {
@@ -52,6 +58,9 @@ struct UserDetailView: View {
             }
         }
         .applyListBackground()
+        // Frozen while a book is being picked off an étagère, so the slide moves the
+        // selection and not the page — the same rule the inventory's own carousel follows.
+        .scrollDisabled(shelfFocus.isArmed)
         .navigationTitle("nav.user")
         .toolbar { toolbarContent }
         // The maquette draws no confirmation, and this adds one: unfriending is the only

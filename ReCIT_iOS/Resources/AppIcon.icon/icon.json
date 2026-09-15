@@ -19,28 +19,14 @@
     {
       "layers" : [
         {
-          "glass" : true,
-          "hidden" : true,
-          "image-name" : "Image 3.png",
-          "name" : "Image 3",
-          "position" : {
-            "scale" : 0.5,
-            "translation-in-points" : [
-              0,
-              0
-            ]
-          }
-        },
-        {
           "glass" : false,
-          "hidden" : false,
-          "image-name" : "Image 2.png",
-          "name" : "Image 2",
+          "image-name" : "BooksOnShelf.png",
+          "name" : "Books",
           "position" : {
-            "scale" : 0.5,
+            "scale" : 0.75,
             "translation-in-points" : [
               0,
-              0
+              -20.75
             ]
           }
         }

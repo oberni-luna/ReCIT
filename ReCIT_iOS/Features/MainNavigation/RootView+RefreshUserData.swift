@@ -29,9 +29,10 @@ extension RootView {
 
             guard let myUser = userModel.myUser else { return }
             inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
-            // Accepting an invitation pulls the new friend's books on the spot, which is the
-            // one thing `UserModel` needs the inventory for.
-            userModel.start(inventoryModel: inventoryModel)
+            // Accepting an invitation pulls the new friend's books, and the étagères they
+            // share, on the spot — which is the one thing `UserModel` needs either of these
+            // two for.
+            userModel.start(inventoryModel: inventoryModel, shelfModel: shelfModel)
             transactionModel.start(userModel: userModel, inventoryModel: inventoryModel, errorReporter: errorReporter)
 
             // Shelves must sync BEFORE inventory so items can resolve their shelf
@@ -59,6 +60,19 @@ extension RootView {
                 // request for nothing and a pile of books in the inventory search that nobody
                 // can borrow.
                 for user in userModel.friends(modelContext: modelContext) {
+                    // Their étagères first, for the same reason mine are: an item resolves
+                    // its shelf membership against `Shelf` objects that must already exist.
+                    // The server decides what a friend shares — `by-owners` answers with
+                    // exactly the shelves it will let me see — so nothing is filtered here.
+                    //
+                    // Caught per friend rather than left to the domain's own catch: a friend
+                    // whose shelves fail is not a reason to stop pulling anyone's books,
+                    // theirs included.
+                    do {
+                        try await shelfModel.syncShelves(forUser: user, modelContext: modelContext)
+                    } catch {
+                        print("⚠️⚠️⚠️⚠️⚠️ Error during shelves sync for \(user.username): \(error)")
+                    }
                     try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
                 }
             }

@@ -22,6 +22,11 @@ final class UserModel: OptimisticMutating {
     /// their invitation is accepted.
     private var inventoryModel: InventoryModel?
 
+    /// Injected alongside it, for the other half of that same moment: the étagères the new
+    /// friend shares. A profile opened on the spot shows the books *and* the shelves they
+    /// sit on, or it shows a band that is missing until the next launch.
+    private var shelfModel: ShelfModel?
+
     /// The most recent background task spawned by an optimistic relation write. Exposed so
     /// tests can await completion; not observed by the UI.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
@@ -31,8 +36,9 @@ final class UserModel: OptimisticMutating {
         self.errorReporter = errorReporter
     }
 
-    func start(inventoryModel: InventoryModel) {
+    func start(inventoryModel: InventoryModel, shelfModel: ShelfModel) {
         self.inventoryModel = inventoryModel
+        self.shelfModel = shelfModel
     }
 
     func syncMyUser(modelContext: ModelContext) async throws {
@@ -181,11 +187,15 @@ final class UserModel: OptimisticMutating {
         changeRelation(user, to: .none, action: "cancel", modelContext: modelContext)
     }
 
-    /// Lets a reader into my network, and pulls their books straight away.
+    /// Lets a reader into my network, and pulls their books — and the étagères they share —
+    /// straight away.
     ///
-    /// The inventory sync is the `reconcile` half rather than a second call from the view: a
-    /// new friend whose books only arrive at the next launch is a friend whose profile, opened
+    /// The syncs are the `reconcile` half rather than a second call from the view: a new
+    /// friend whose books only arrive at the next launch is a friend whose profile, opened
     /// on the spot, says « Oh, c'est vide ici ».
+    ///
+    /// Shelves first, for the reason they are first everywhere else: an item resolves its
+    /// membership against `Shelf` objects that have to exist already. See ADR 0003.
     func acceptRelation(with user: User, modelContext: ModelContext) {
         changeRelation(
             user,
@@ -194,6 +204,7 @@ final class UserModel: OptimisticMutating {
             modelContext: modelContext,
             reconcile: { [weak self, weak user] in
                 guard let user, user.isStillInTheStore else { return }
+                try await self?.shelfModel?.syncShelves(forUser: user, modelContext: modelContext)
                 try await self?.inventoryModel?.syncInventory(forUser: user, modelContext: modelContext)
             }
         )
@@ -204,13 +215,19 @@ final class UserModel: OptimisticMutating {
         changeRelation(user, to: .none, action: "discard", modelContext: modelContext)
     }
 
-    /// Undoes a friendship, and takes the books with it.
+    /// Undoes a friendship, and takes the books — and the étagères they were filed on —
+    /// with it.
     ///
     /// Their copies are dropped **after** the server has agreed, never before: unlike a
     /// relation, a deleted inventory cannot be put back by a revert, and a failed call would
     /// have emptied the inventory search of books that are still perfectly borrowable.
     /// `lastInventorySync` goes back to `nil` with them, so a relation made again shows the
     /// syncing row rather than an inventory that looks empty.
+    ///
+    /// Their étagères have to go here or nowhere: `syncShelves` is what prunes an owner's
+    /// shelves, and it is never called again for someone who has left my network. Left
+    /// behind, they would sit in the store for good — and reappear whole on their profile
+    /// the day the relation is made again, before any sync has had a word to say about it.
     func unfriend(_ user: User, modelContext: ModelContext) {
         changeRelation(
             user,
@@ -224,8 +241,19 @@ final class UserModel: OptimisticMutating {
                 }
                 user.items = []
                 user.lastInventorySync = nil
+                for shelf in Self.localShelves(ownedBy: user._id, modelContext: modelContext) {
+                    modelContext.delete(shelf)
+                }
             }
         )
+    }
+
+    /// Every étagère the store holds for one owner. A fetch rather than a relationship:
+    /// `Shelf` hangs off its owner by id only, which is what lets a friend's shelves be
+    /// pruned without `User` having to carry a relation it never reads.
+    private static func localShelves(ownedBy ownerId: String, modelContext: ModelContext) -> [Shelf] {
+        let descriptor: FetchDescriptor<Shelf> = .init(predicate: #Predicate { $0.ownerId == ownerId })
+        return (try? modelContext.fetch(descriptor)) ?? []
     }
 
     /// The shape shared by every relation write: one local state change, one POST carrying the

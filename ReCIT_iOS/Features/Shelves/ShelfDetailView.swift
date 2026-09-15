@@ -17,12 +17,19 @@
 //  shelf is looked up by id, so afterwards it resolves to nothing and this screen has
 //  nothing left to show. It leaves with the sheet. See issue 0021.
 //
+//  The same screen opens a friend's étagère, reached from the carousel on their profile, and
+//  there it is read-only: neither of the two writing gestures above makes sense on someone
+//  else's shelf, and the server would refuse them anyway. They are *absent* rather than
+//  greyed out — a disabled button asks « pourquoi ? » and this screen has no answer to give
+//  that the title and the route here have not already given. See issue 0093.
+//
 
 import SwiftUI
 import SwiftData
 
 struct ShelfDetailView: View {
     @Environment(ShelfModel.self) private var shelfModel
+    @Environment(UserModel.self) private var userModel
     @Environment(\.modelContext) private var modelContext
 
     let shelfId: String
@@ -43,6 +50,17 @@ struct ShelfDetailView: View {
     }
 
     private var shelf: Shelf? { shelves.first }
+
+    /// Whether this screen may write to the étagère it shows.
+    ///
+    /// Derived from the shelf's owner rather than passed in as a flag: a third caller added
+    /// later can pass a flag wrongly, and a shelf cannot lie about whose it is. An étagère
+    /// that has not resolved — deleted, or not synced yet — is not mine either, which keeps
+    /// the gate closed on a screen that has nothing to act on.
+    private var isMine: Bool {
+        guard let shelf else { return false }
+        return shelf.ownerId == userModel.myUser?._id
+    }
 
     /// This étagère's books, newest first.
     ///
@@ -79,9 +97,15 @@ struct ShelfDetailView: View {
                     //
                     // The label names the étagère instead of saying "a shelf" — the screen
                     // already stands for one, and a long name simply truncates.
+                    //
+                    // Offered only on my own étagère: taking a book off someone else's
+                    // shelf is not a gesture that exists, and a swipe that reveals an
+                    // action only to refuse it is worse than no swipe at all.
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button("action.remove_from_shelf_named \(shelf.name)", systemImage: "tray.and.arrow.up") {
-                            shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
+                        if isMine {
+                            Button("action.remove_from_shelf_named \(shelf.name)", systemImage: "tray.and.arrow.up") {
+                                shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
+                            }
                         }
                     }
                 }
@@ -99,7 +123,11 @@ struct ShelfDetailView: View {
             // "Done/Save" for a modal and renders prominent, which is the wrong weight for a
             // secondary action on a pushed screen. Title alongside the icon so a pencil on a
             // shelf of books isn't mistaken for annotating a book.
-            if shelf != nil {
+            //
+            // And gated on ownership: `isMine` is false for an étagère that did not
+            // resolve, so the same test covers both — a shelf that is not mine, and a
+            // shelf that is not there.
+            if isMine {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Modifier", systemImage: "pencil") { editing = true }
                         .labelStyle(.titleAndIcon)

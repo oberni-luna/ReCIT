@@ -489,13 +489,18 @@ final class ShelfModel: OptimisticMutating {
         guard let response else { return }
 
         let dtos: [ShelfDTO] = Array(response.shelves.values)
+        // Scoped to the owner being synced. `by-owners` only ever answers for the owners it
+        // was asked about, so an unscoped `deleteMissing` would read every *other* owner's
+        // étagères as gone — syncing a friend's shelves would delete mine.
+        let ownerId: String = forUser._id
         try modelContext.upsert(
             dtos,
             dtoID: { $0._id },
             modelID: { (shelf: Shelf) in shelf._id },
             make: { Shelf(dto: $0) },
             update: { shelf, dto in shelf.update(from: dto) },
-            deleteMissing: true
+            deleteMissing: true,
+            scope: { (shelf: Shelf) in shelf.ownerId == ownerId }
         )
         try modelContext.save()
 

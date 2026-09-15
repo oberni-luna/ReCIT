@@ -20,7 +20,16 @@ extension ModelContext {
     ///   - make: Builds a new model for a DTO with no local match.
     ///   - update: Merges a DTO into its existing local model in place.
     ///   - deleteMissing: When true, deletes local models absent from `dtos`.
+    ///   - scope: Which local models this merge is allowed to delete. Everything by
+    ///     default, which is the historical behaviour. A sync that only ever brings back
+    ///     part of the store — one owner's shelves, and not the other owners' — passes the
+    ///     predicate describing its own share here, otherwise `deleteMissing` deletes what
+    ///     it was never in charge of.
     /// - Returns: The models corresponding to `dtos`, in order.
+    ///
+    /// The scope narrows the *deletion* pass only. The id lookup stays global on purpose: a
+    /// document found under an existing `_id` has to be updated in place whatever the scope,
+    /// or `@Attribute(.unique)` refuses the duplicate insert.
     ///
     /// Note: `make` is synchronous, so this fits models whose mapping needs no
     /// async relationship resolution. Models that must fetch related entities
@@ -32,7 +41,8 @@ extension ModelContext {
         modelID: (M) -> String,
         make: (DTO) -> M,
         update: (M, DTO) -> Void,
-        deleteMissing: Bool = false
+        deleteMissing: Bool = false,
+        scope: (M) -> Bool = { _ in true }
     ) throws -> [M] {
         let existing: [M] = try fetch(FetchDescriptor<M>())
         var byID: [String: M] = .init(minimumCapacity: existing.count)
@@ -57,7 +67,7 @@ extension ModelContext {
         }
 
         if deleteMissing {
-            for model in existing where !seen.contains(modelID(model)) {
+            for model in existing where scope(model) && !seen.contains(modelID(model)) {
                 delete(model)
             }
         }

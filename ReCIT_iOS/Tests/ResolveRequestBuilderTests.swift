@@ -19,10 +19,13 @@ struct ResolveRequestBuilderTests {
     private func draft(
         isbn: String = "978-2-38019-274-1",
         title: String = "La Main gauche de la nuit",
-        author: String = "Ursula K. Le Guin"
+        author: String = "Ursula K. Le Guin",
+        language: EditionLanguage? = nil
     ) -> NewBookDraft {
-        .init(isbn: isbn, title: title, authorName: author)
+        .init(isbn: isbn, title: title, authorName: author, language: language)
     }
+
+    private let french: EditionLanguage = .init(uri: "wd:Q150", code: "fr")
 
     @Test("The ISBN travels without its separators")
     func isbnIsNormalized() {
@@ -109,6 +112,43 @@ struct ResolveRequestBuilderTests {
         )
 
         #expect(request.entries.first?.works?.first?.labels?.keys.first == "en")
+    }
+
+    // MARK: - The language the ISBN answered
+
+    @Test("The language the ISBN gave becomes a claim on the edition")
+    func languageBecomesAClaim() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(language: french),
+            create: true,
+            language: "en"
+        )
+
+        #expect(request.entries.first?.edition.claims?["wdt:P407"] == ["wd:Q150"])
+    }
+
+    /// A wrong language on a public edition reads, ever after, as something somebody checked.
+    @Test("No language means no claim, not a guessed one")
+    func absentLanguageIsOmitted() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.entries.first?.edition.claims?["wdt:P407"] == nil)
+    }
+
+    /// The ISBN knows the book's language; the phone only knows the reader's.
+    @Test("Labels follow the book's language rather than the phone's")
+    func labelsFollowTheBookNotThePhone() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(language: french),
+            create: true,
+            language: "en"
+        )
+
+        #expect(request.entries.first?.works?.first?.labels?.keys.first == "fr")
     }
 
     /// Optional fields are omitted rather than sent null: the server reads a present key as an

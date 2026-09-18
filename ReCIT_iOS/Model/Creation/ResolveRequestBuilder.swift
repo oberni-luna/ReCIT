@@ -26,12 +26,12 @@ enum ResolveRequestBuilder {
     private enum Property {
         static let isbn13: String = "wdt:P212"
         static let editionTitle: String = "wdt:P1476"
+        static let language: String = "wdt:P407"
     }
 
-    /// The language the labels are written in. Overridden by what the ISBN says about the book
-    /// once that is known (issue 0092); until then, the language the reader is reading the app
-    /// in is the best guess available, and a wrong label language is a nuisance rather than a
-    /// falsehood.
+    /// The language the labels are written in when the ISBN has not answered. The language the
+    /// reader is reading the app in is the best guess available then, and a wrong label
+    /// language is a nuisance rather than a falsehood.
     static var defaultLabelLanguage: String {
         Locale.current.language.languageCode?.identifier ?? "fr"
     }
@@ -43,21 +43,32 @@ enum ResolveRequestBuilder {
         create: Bool,
         language: String = defaultLabelLanguage
     ) -> EntityResolveRequest {
-        let edition: EntityResolveRequest.Seed = .init(
-            claims: [
-                Property.isbn13: [draft.normalizedISBN],
-                Property.editionTitle: [draft.trimmedTitle]
-            ]
-        )
+        // What the ISBN says wins over what the phone is set to: the group of an ISBN is handed
+        // out by language area, so it knows the book's language and the phone only knows the
+        // reader's.
+        let labelLanguage: String = draft.language?.code ?? language
+
+        var editionClaims: [String: [String]] = [
+            Property.isbn13: [draft.normalizedISBN],
+            Property.editionTitle: [draft.trimmedTitle]
+        ]
+
+        // Omitted rather than guessed. A wrong language on a public edition is read by everyone
+        // afterwards as a fact somebody checked.
+        if let languageUri = draft.language?.uri {
+            editionClaims[Property.language] = [languageUri]
+        }
+
+        let edition: EntityResolveRequest.Seed = .init(claims: editionClaims)
 
         let work: EntityResolveRequest.Seed = .described(
             label: draft.trimmedTitle,
-            language: language
+            language: labelLanguage
         )
 
         let author: EntityResolveRequest.Seed = .described(
             label: draft.trimmedAuthorName,
-            language: language
+            language: labelLanguage
         )
 
         return .init(

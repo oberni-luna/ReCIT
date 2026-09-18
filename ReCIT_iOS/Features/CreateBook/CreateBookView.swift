@@ -55,9 +55,20 @@ struct CreateBookView: View {
                         .accessibilityIdentifier("e2e.createBook.isbn")
                         .withLabel(label: "create_book.isbn")
                 } footer: {
-                    Text("create_book.public_notice")
-                        .textStyle(.footnote200)
-                        .foregroundStyle(.foregroundSecondary)
+                    VStack(alignment: .leading, spacing: .xSmall) {
+                        // Only when the ISBN has answered. Saying nothing is the honest state
+                        // when the group has no language or the call did not come back.
+                        if let language = draft.language?.localizedName {
+                            Text("create_book.language \(language)")
+                                .textStyle(.footnote200)
+                                .foregroundStyle(.foregroundSecondary)
+                                .accessibilityIdentifier("e2e.createBook.language")
+                        }
+
+                        Text("create_book.public_notice")
+                            .textStyle(.footnote200)
+                            .foregroundStyle(.foregroundSecondary)
+                    }
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
@@ -101,6 +112,11 @@ struct CreateBookView: View {
             .applyListBackground()
             .navigationTitle(String(localized: "create_book.title"))
             .navigationBarTitleDisplayMode(.inline)
+            .task {
+                // Asked once, as the form opens, and never blocking: the reader can type the
+                // whole book before the answer lands, and publish whether or not it does.
+                draft.language = await creationModel.editionLanguage(isbn: isbn)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.close", systemImage: "xmark") {

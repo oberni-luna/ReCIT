@@ -25,9 +25,35 @@ import Foundation
 @Observable
 final class EntityCreationModel {
     private let apiService: APIServicing
+    /// The cookieless service, for the one call here that is made about a book rather than
+    /// about a reader. `GET /api/data/isbn` is public; sending a session to it would have
+    /// inventaire.io hand one back for nothing (issue 0068).
+    private let publicAPIService: APIServicing
 
-    init(apiService: APIServicing) {
+    init(apiService: APIServicing, publicAPIService: APIServicing) {
         self.apiService = apiService
+        self.publicAPIService = publicAPIService
+    }
+
+    /// What the ISBN says about the language of the book.
+    ///
+    /// The registration group of an ISBN is handed out by language area — `978-2` is the
+    /// French-language group — so this is a fact, not a guess, and it saves the form a
+    /// question. Answers `nil` when the server does not know, when the call fails, or when the
+    /// group has no language: the edition is then published **without** a language claim. A
+    /// wrong language on a public edition reads, ever after, as something somebody checked.
+    func editionLanguage(isbn: String) async -> EditionLanguage? {
+        let normalized: String = isbn.uppercased().filter { $0.isNumber || $0 == "X" }
+        guard normalized.isEmpty == false else { return nil }
+
+        let facts: IsbnFactsDTO? = try? await publicAPIService.fetchData(
+            fromEndpoint: "/api/data/isbn?isbn=\(normalized)",
+            debug: false
+        )
+
+        guard let uri = facts?.groupLangUri, let code = facts?.groupLang else { return nil }
+
+        return .init(uri: uri, code: code)
     }
 
     /// Creates the edition — and, as needed, its work and its author — and answers with the

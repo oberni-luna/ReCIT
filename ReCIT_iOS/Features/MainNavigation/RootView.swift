@@ -67,7 +67,7 @@ struct RootView: View {
         let shelfModel: ShelfModel = .init(apiService: apiService, errorReporter: errorReporter)
         _shelfModel = State(initialValue: shelfModel)
         _transactionModel = State(initialValue: TransactionModel(apiService: apiService, errorReporter: errorReporter))
-        _entityCreationModel = State(initialValue: EntityCreationModel(apiService: apiService))
+        _entityCreationModel = State(initialValue: EntityCreationModel(apiService: apiService, publicAPIService: publicAPIService))
         let genreEnrichmentModel: GenreEnrichmentModel = .init(apiService: apiService, entityModel: entityModel, errorReporter: errorReporter)
         _genreEnrichmentModel = State(initialValue: genreEnrichmentModel)
         _autoSortModel = State(

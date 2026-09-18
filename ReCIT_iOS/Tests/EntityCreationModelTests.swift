@@ -23,6 +23,47 @@ struct EntityCreationModelTests {
         authorName: "Ursula K. Le Guin"
     )
 
+    // MARK: - What the ISBN says about the language
+
+    @Test("The ISBN's registration group answers the language question")
+    func languageComesFromTheIsbn() async throws {
+        let mock: MockAPIService = .init()
+        let publicMock: MockAPIService = .init()
+        publicMock.stub("/api/data/isbn", json: """
+        { "groupLang": "fr", "groupLangUri": "wd:Q150", "isValid": true }
+        """)
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: publicMock)
+        let language: EditionLanguage? = await model.editionLanguage(isbn: "978-2-38019-274-1")
+
+        #expect(language == .init(uri: "wd:Q150", code: "fr"))
+        // Public endpoint, public service: the session has no business here.
+        #expect(mock.recordedRequests.isEmpty)
+        #expect(publicMock.recordedRequests.first?.endpoint == "/api/data/isbn?isbn=9782380192741")
+    }
+
+    @Test("A group with no language answers nothing rather than guessing")
+    func groupWithoutLanguageAnswersNothing() async throws {
+        let mock: MockAPIService = .init()
+        let publicMock: MockAPIService = .init()
+        publicMock.stub("/api/data/isbn", json: #"{ "groupLang": null, "groupLangUri": null, "isValid": true }"#)
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: publicMock)
+
+        #expect(await model.editionLanguage(isbn: "9782380192741") == nil)
+    }
+
+    @Test("A failed lookup answers nothing, and does not fail the publication")
+    func failedLanguageLookupIsSwallowed() async throws {
+        let mock: MockAPIService = .init()
+        let publicMock: MockAPIService = .init()
+        publicMock.stub("/api/data/isbn", error: NetworkError.badStatus(code: 500, message: nil))
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: publicMock)
+
+        #expect(await model.editionLanguage(isbn: "9782380192741") == nil)
+    }
+
     @Test("Creating an edition answers with the canonical uri the server gave it")
     func createReturnsTheCanonicalUri() async throws {
         let mock: MockAPIService = .init()
@@ -38,7 +79,7 @@ struct EntityCreationModelTests {
         }
         """)
 
-        let model: EntityCreationModel = .init(apiService: mock)
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
         let uri: String = try await model.createEdition(draft: draft)
 
         #expect(uri == "inv:af24decad82f4699a4092ca6dfc6f2c9")
@@ -55,7 +96,7 @@ struct EntityCreationModelTests {
         { "entries": [ { "edition": { "uri": "inv:already", "resolved": true } } ] }
         """)
 
-        let model: EntityCreationModel = .init(apiService: mock)
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
 
         #expect(try await model.createEdition(draft: draft) == "inv:already")
     }
@@ -65,7 +106,7 @@ struct EntityCreationModelTests {
         let mock: MockAPIService = .init()
         mock.stub("/api/entities/resolve", json: #"{ "entries": [ { "edition": { "resolved": false } } ] }"#)
 
-        let model: EntityCreationModel = .init(apiService: mock)
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
 
         await #expect(throws: NetworkError.self) {
             try await model.createEdition(draft: self.draft)
@@ -77,7 +118,7 @@ struct EntityCreationModelTests {
         let mock: MockAPIService = .init()
         mock.stub("/api/entities/resolve", error: NetworkError.badStatus(code: 401, message: nil))
 
-        let model: EntityCreationModel = .init(apiService: mock)
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
 
         await #expect(throws: NetworkError.self) {
             try await model.createEdition(draft: self.draft)

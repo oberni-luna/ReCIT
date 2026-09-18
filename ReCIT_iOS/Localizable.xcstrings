@@ -39,6 +39,22 @@
         }
       }
     },
+    "create_book.language %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language, from the ISBN: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langue, d\u00e9duite de l\u2019ISBN\u00a0: %@"
+          }
+        }
+      }
+    },
     "create_book.public_notice" : {
       "localizations" : {
         "en" : {

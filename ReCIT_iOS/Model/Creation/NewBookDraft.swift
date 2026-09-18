@@ -27,6 +27,11 @@ struct NewBookDraft: Equatable, Sendable {
     /// nothing at all, once an existing author has been chosen (issue 0093).
     var authorName: String = ""
 
+    /// What the ISBN says about the language of the book, once the server has been asked.
+    /// `nil` until then, and `nil` for good if the call fails — in which case the edition is
+    /// published without a language claim rather than with a guessed one.
+    var language: EditionLanguage?
+
     /// The ISBN without its separators, which is the form inventaire.io keys editions by.
     /// `X` survives, being a legitimate ISBN-10 check character.
     var normalizedISBN: String {

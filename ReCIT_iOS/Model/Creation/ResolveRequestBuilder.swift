@@ -66,10 +66,14 @@ enum ResolveRequestBuilder {
             language: labelLanguage
         )
 
-        let author: EntityResolveRequest.Seed = .described(
-            label: draft.trimmedAuthorName,
-            language: labelLanguage
-        )
+        // Named, not described, as soon as the reader has picked someone who exists. Sending a
+        // description where a uri was available is how a database of this kind fills with
+        // twins, and merging two authors is not something a phone can undo.
+        let author: EntityResolveRequest.Seed = if let uri = draft.authorUri {
+            .named(uri)
+        } else {
+            .described(label: draft.trimmedAuthorName, language: labelLanguage)
+        }
 
         return .init(
             entries: [.init(edition: edition, works: [work], authors: [author])],

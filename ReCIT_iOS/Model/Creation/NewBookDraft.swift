@@ -27,6 +27,14 @@ struct NewBookDraft: Equatable, Sendable {
     /// nothing at all, once an existing author has been chosen (issue 0093).
     var authorName: String = ""
 
+    /// The uri of an author inventaire.io already has, once one has been chosen. `nil` means
+    /// the author is being created: the seed then carries labels instead. That single
+    /// distinction is what keeps the base free of twin authors.
+    var authorUri: String?
+
+    /// What told this author apart from a namesake, kept only to show it back in the form.
+    var authorDescription: String?
+
     /// What the ISBN says about the language of the book, once the server has been asked.
     /// `nil` until then, and `nil` for good if the call fails — in which case the edition is
     /// published without a language claim rather than with a guessed one.

@@ -20,9 +20,10 @@ struct ResolveRequestBuilderTests {
         isbn: String = "978-2-38019-274-1",
         title: String = "La Main gauche de la nuit",
         author: String = "Ursula K. Le Guin",
+        authorUri: String? = nil,
         language: EditionLanguage? = nil
     ) -> NewBookDraft {
-        .init(isbn: isbn, title: title, authorName: author, language: language)
+        .init(isbn: isbn, title: title, authorName: author, authorUri: authorUri, language: language)
     }
 
     private let french: EditionLanguage = .init(uri: "wd:Q150", code: "fr")
@@ -112,6 +113,36 @@ struct ResolveRequestBuilderTests {
         )
 
         #expect(request.entries.first?.works?.first?.labels?.keys.first == "en")
+    }
+
+    // MARK: - An author who already exists
+
+    /// Sending a description where a uri was available is how a database of this kind fills
+    /// with twins, and merging two authors is not something a phone can undo.
+    @Test("An author who was chosen is named by uri, and not described")
+    func chosenAuthorIsNamed() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(authorUri: "wd:Q182589"),
+            create: true,
+            language: "fr"
+        )
+
+        let author: EntityResolveRequest.Seed = try #require(request.entries.first?.authors?.first)
+        #expect(author.uri == "wd:Q182589")
+        #expect(author.labels == nil)
+    }
+
+    @Test("An author being created is described, and names nothing")
+    func newAuthorIsDescribed() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        let author: EntityResolveRequest.Seed = try #require(request.entries.first?.authors?.first)
+        #expect(author.uri == nil)
+        #expect(author.labels == ["fr": "Ursula K. Le Guin"])
     }
 
     // MARK: - The language the ISBN answered

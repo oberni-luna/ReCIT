@@ -7,6 +7,86 @@
     ", " : {
 
     },
+    "create_book.author.choose" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir l\u2019auteur"
+          }
+        }
+      }
+    },
+    "create_book.author.create %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create \u00ab %@ \u00bb"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cr\u00e9er \u00ab %@ \u00bb"
+          }
+        }
+      }
+    },
+    "create_book.author.existing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D\u00e9j\u00e0 sur inventaire.io"
+          }
+        }
+      }
+    },
+    "create_book.author.no_result" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No author of that name on inventaire.io yet."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun auteur de ce nom sur inventaire.io pour l\u2019instant."
+          }
+        }
+      }
+    },
+    "create_book.author.why_existing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick the author who is already there if you recognise them: that is what keeps the database free of duplicates."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prenez l\u2019auteur d\u00e9j\u00e0 pr\u00e9sent si vous le reconnaissez\u00a0: c\u2019est ce qui \u00e9vite un doublon dans la base."
+          }
+        }
+      }
+    },
     "create_book.author_field" : {
       "localizations" : {
         "en" : {

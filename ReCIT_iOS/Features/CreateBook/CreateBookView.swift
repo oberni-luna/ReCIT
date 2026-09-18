@@ -80,11 +80,12 @@ struct CreateBookView: View {
                         .foregroundStyle(.foregroundDefault)
                         .withLabel(label: "create_book.title_field")
 
-                    TextField("create_book.author_field", text: $draft.authorName)
-                        .accessibilityIdentifier("e2e.createBook.author")
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundDefault)
-                        .withLabel(label: "create_book.author_field")
+                    NavigationLink {
+                        AuthorPickerView(draft: $draft)
+                    } label: {
+                        CreateBookAuthorRow(draft: draft)
+                    }
+                    .accessibilityIdentifier("e2e.createBook.author")
                 } footer: {
                     Text("create_book.title_help")
                         .textStyle(.footnote200)
@@ -163,5 +164,40 @@ struct CreateBookView: View {
         } catch {
             snackBar.show { SnackBarView.error(error) }
         }
+    }
+}
+
+/// The author line of the form: who has been chosen, or an invitation to choose.
+///
+/// A row rather than a text field, since issue 0093. Typing a name straight in is what makes a
+/// second « Ursula K. Le Guin »; going through a screen that shows the existing ones first is
+/// what does not.
+private struct CreateBookAuthorRow: View {
+    let draft: NewBookDraft
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: .xxSmall) {
+            Text("create_book.author_field")
+                .textStyle(.footnote200)
+                .foregroundStyle(.foregroundSecondary)
+
+            if draft.trimmedAuthorName.isEmpty {
+                Text("create_book.author.choose")
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundPlaceholder)
+            } else {
+                Text(draft.trimmedAuthorName)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundDefault)
+
+                if let description = draft.authorDescription, description.isEmpty == false {
+                    Text(description)
+                        .textStyle(.footnote200)
+                        .foregroundStyle(.foregroundSecondary)
+                        .lineLimit(2)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

@@ -22,6 +22,7 @@ struct ResolveRequestBuilderTests {
         author: String = "Ursula K. Le Guin",
         authorUri: String? = nil,
         workUri: String? = nil,
+        coverImageUrl: String? = nil,
         language: EditionLanguage? = nil
     ) -> NewBookDraft {
         .init(
@@ -29,6 +30,7 @@ struct ResolveRequestBuilderTests {
             title: title,
             authorName: author,
             authorUri: authorUri,
+            coverImageUrl: coverImageUrl,
             workUri: workUri,
             language: language
         )
@@ -151,6 +153,35 @@ struct ResolveRequestBuilderTests {
         let author: EntityResolveRequest.Seed = try #require(request.entries.first?.authors?.first)
         #expect(author.uri == nil)
         #expect(author.labels == ["fr": "Ursula K. Le Guin"])
+    }
+
+    // MARK: - The cover
+
+    @Test("An uploaded cover is offered to the edition")
+    func uploadedCoverIsOffered() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(coverImageUrl: "https://inventaire.io/img/entities/abc123"),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.entries.first?.edition.image == "https://inventaire.io/img/entities/abc123")
+    }
+
+    /// Without one, `enrich` goes looking for a cover from the ISBN — which is why a failed
+    /// upload must not stop anything.
+    @Test("No photograph means no image field at all")
+    func noCoverMeansNoImageField() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.entries.first?.edition.image == nil)
+
+        let body: String = String(decoding: try JSONEncoder().encode(request), as: UTF8.self)
+        #expect(body.contains("image") == false)
     }
 
     // MARK: - A work that already exists

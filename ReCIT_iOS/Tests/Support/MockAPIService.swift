@@ -18,6 +18,11 @@ final class MockAPIService: APIServicing {
     }
 
     private var stubs: [(match: String, stub: Stub)] = []
+    /// What an upload answers, and how it fails. Kept apart from `stubs`, which decode JSON
+    /// into a `Codable`: an upload answers one url.
+    var uploadedImageUrl: String?
+    var uploadFailure: Error?
+    private(set) var uploadedImageSizes: [Int] = []
     private(set) var recordedRequests: [(endpoint: String, method: String)] = []
     var baseURLValue: String = "https://test.local"
 
@@ -67,6 +72,20 @@ final class MockAPIService: APIServicing {
     ) async throws -> T? {
         recordedRequests.append((endpoint, "GET"))
         return try decodeStub(for: endpoint)
+    }
+
+    func upload(
+        imageData: Data,
+        fileName: String,
+        fieldName: String,
+        container: String,
+        debug: Bool
+    ) async throws -> String? {
+        recordedRequests.append(("/api/images/upload?container=\(container)", "POST"))
+        uploadedImageSizes.append(imageData.count)
+
+        if let uploadFailure { throw uploadFailure }
+        return uploadedImageUrl
     }
 
     // MARK: - Helpers

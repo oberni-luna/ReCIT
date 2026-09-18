@@ -118,6 +118,52 @@ final class APIService: APIServicing {
         }
     }
 
+    /// Sends one image as `multipart/form-data` and answers the url the server filed it under.
+    ///
+    /// Hand-built rather than reached for through a library: it is one part, one file, and the
+    /// whole body fits in memory — a cover is a few hundred kilobytes. The server reads the
+    /// **form field name** as the image's id and indexes its answer by it, so the url comes
+    /// back under the name we sent.
+    ///
+    /// See PRD 0015.
+    func upload(
+        imageData: Data,
+        fileName: String,
+        fieldName: String,
+        container: String,
+        debug: Bool = false
+    ) async throws -> String? {
+        guard let url = URL(string: "\(env.apiBaseUrl)/api/images/upload?container=\(container)") else {
+            throw NetworkError.badUrl
+        }
+
+        let boundary: String = "Boundary-\(UUID().uuidString)"
+
+        var request: URLRequest = .init(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body: Data = .init()
+        body.append(Data("--\(boundary)\r\n".utf8))
+        body.append(Data("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n".utf8))
+        body.append(Data("Content-Type: image/jpeg\r\n\r\n".utf8))
+        body.append(imageData)
+        body.append(Data("\r\n--\(boundary)--\r\n".utf8))
+        request.httpBody = body
+
+        log(request: url, method: "POST", debug: debug)
+
+        let responseData: Data = try await perform(request: request, debug: debug)
+
+        do {
+            let urlsByFieldName: [String: String] = try JSONDecoder().decode([String: String].self, from: responseData)
+            return urlsByFieldName[fieldName]
+        } catch {
+            Self.logger.error("Decoding failed for \(url, privacy: .public): \(error, privacy: .public)")
+            throw NetworkError.failedToDecodeResponse(underlying: error)
+        }
+    }
+
     // MARK: - Private helpers
 
     /// Performs the request using the injected session and validates the HTTP

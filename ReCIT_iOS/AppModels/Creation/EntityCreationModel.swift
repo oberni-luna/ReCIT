@@ -56,6 +56,25 @@ final class EntityCreationModel {
         return .init(uri: uri, code: code)
     }
 
+    /// Sends the cover the reader photographed, and answers the url inventaire.io filed it
+    /// under — or `nil`, which is not a failure worth stopping for.
+    ///
+    /// The image is an ornament; the book is the point. `enrich` already goes looking for a
+    /// cover from the ISBN, so an upload that does not land costs a picture and nothing else.
+    /// That is why this answers an optional instead of throwing: the caller has no decision to
+    /// make about it.
+    func uploadCover(imageData: Data) async -> String? {
+        try? await apiService.upload(
+            imageData: imageData,
+            fileName: "cover.jpg",
+            // The server indexes what it answers by the form field name it was given, so this
+            // string is also the key the url comes back under.
+            fieldName: "cover",
+            container: "entities",
+            debug: false
+        )
+    }
+
     /// Asks inventaire.io what it already knows about this book, **without writing anything**.
     ///
     /// The answer that matters is the work: *La Main gauche de la nuit* exists, and it is this

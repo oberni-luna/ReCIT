@@ -35,6 +35,14 @@ struct NewBookDraft: Equatable, Sendable {
     /// What told this author apart from a namesake, kept only to show it back in the form.
     var authorDescription: String?
 
+    /// The cover the reader photographed, as JPEG bytes, before it has been sent anywhere.
+    var coverImageData: Data?
+
+    /// Where that photograph ended up once uploaded. `nil` when there was no photograph, and
+    /// `nil` when the upload failed — in which case the book is published without it and the
+    /// server goes looking for a cover from the ISBN.
+    var coverImageUrl: String?
+
     /// The uri of a work inventaire.io already has, when the reader has agreed that this book
     /// is one more edition of it. `nil` means a work is being created alongside the edition.
     var workUri: String?

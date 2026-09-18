@@ -64,6 +64,33 @@ struct EntityCreationModelTests {
         #expect(await model.editionLanguage(isbn: "9782380192741") == nil)
     }
 
+    // MARK: - The cover
+
+    @Test("The cover is sent to the entities container and answers its url")
+    func coverUploadAnswersItsUrl() async throws {
+        let mock: MockAPIService = .init()
+        mock.uploadedImageUrl = "https://inventaire.io/img/entities/abc123"
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+        let url: String? = await model.uploadCover(imageData: Data("jpeg".utf8))
+
+        #expect(url == "https://inventaire.io/img/entities/abc123")
+        #expect(mock.recordedRequests.first?.endpoint == "/api/images/upload?container=entities")
+        #expect(mock.recordedRequests.first?.method == "POST")
+    }
+
+    /// The image is an ornament; the book is the point. `enrich` covers the books nobody
+    /// photographed, so a failed upload costs a picture and nothing else.
+    @Test("A cover that will not upload answers nothing, and throws nothing")
+    func failedCoverUploadIsNotAFailure() async throws {
+        let mock: MockAPIService = .init()
+        mock.uploadFailure = NetworkError.badStatus(code: 500, message: nil)
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+
+        #expect(await model.uploadCover(imageData: Data("jpeg".utf8)) == nil)
+    }
+
     // MARK: - The reconnaissance pass
 
     @Test("A work the server recognised is answered, so the reader can be asked about it")

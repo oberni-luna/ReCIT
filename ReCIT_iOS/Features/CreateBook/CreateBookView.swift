@@ -43,6 +43,10 @@ struct CreateBookView: View {
     /// on it rather than publishing straight away is the whole of issue 0094.
     @State private var recognisedWorkUri: String?
 
+    /// Whether the camera is up. The cover is the one thing in this form that is taken rather
+    /// than typed.
+    @State private var isCapturingCover: Bool = false
+
     init(isbn: String, onCreated: @escaping (ScannedBook) -> Void) {
         self.isbn = isbn
         self.onCreated = onCreated
@@ -53,11 +57,21 @@ struct CreateBookView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text(isbn)
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundDefault)
-                        .accessibilityIdentifier("e2e.createBook.isbn")
-                        .withLabel(label: "create_book.isbn")
+                    HStack(alignment: .top, spacing: .medium) {
+                        Button {
+                            isCapturingCover = true
+                        } label: {
+                            CreateBookCoverSlot(imageData: draft.coverImageData)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("e2e.createBook.cover")
+
+                        Text(isbn)
+                            .textStyle(.content300)
+                            .foregroundStyle(.foregroundDefault)
+                            .accessibilityIdentifier("e2e.createBook.isbn")
+                            .withLabel(label: "create_book.isbn")
+                    }
                 } footer: {
                     VStack(alignment: .leading, spacing: .xSmall) {
                         // Only when the ISBN has answered. Saying nothing is the honest state
@@ -117,6 +131,15 @@ struct CreateBookView: View {
             .applyListBackground()
             .navigationTitle(String(localized: "create_book.title"))
             .navigationBarTitleDisplayMode(.inline)
+            .fullScreenCover(isPresented: $isCapturingCover) {
+                CoverCaptureView { data in
+                    draft.coverImageData = data
+                    // A new photograph invalidates the one already uploaded, if the reader is
+                    // retrying after a failure: the next publication sends this one.
+                    draft.coverImageUrl = nil
+                }
+                .ignoresSafeArea()
+            }
             .navigationDestination(item: $recognisedWorkUri) { uri in
                 WorkMatchView(workUri: uri, draft: $draft, onPublish: create)
             }
@@ -160,6 +183,13 @@ struct CreateBookView: View {
     /// failure a proper face; until then it is said on the shared snack bar.
     private func create() async {
         guard let user = userModel.myUser else { return }
+
+        // Before the publication, because the url goes in the same request — and never in its
+        // way: an upload that does not land costs a picture, not a book. `enrich` covers the
+        // books nobody photographed anyway.
+        if let imageData = draft.coverImageData, draft.coverImageUrl == nil {
+            draft.coverImageUrl = await creationModel.uploadCover(imageData: imageData)
+        }
 
         do {
             let uri: String = try await creationModel.createEdition(draft: draft)
@@ -222,5 +252,51 @@ private struct CreateBookAuthorRow: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// The cover slot: a photograph taken, or a dashed frame inviting one.
+///
+/// Facultative, and drawn so: a dashed outline rather than a filled control, because the book
+/// is published with or without it. What it is for is written under it, since a camera glyph
+/// alone in a form about a book could as easily mean the barcode.
+private struct CreateBookCoverSlot: View {
+    let imageData: Data?
+
+    var body: some View {
+        slot
+            .frame(width: 88, height: 132)
+            .background(.backgroundSecondary)
+            .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.medium))
+            .overlay {
+                if imageData == nil {
+                    RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.medium)
+                        .strokeBorder(
+                            DesignSystem.Color.borderDefault.color,
+                            style: .init(lineWidth: 1, dash: [4, 4])
+                        )
+                }
+            }
+            .accessibilityLabel(Text("create_book.cover.take"))
+    }
+
+    @ViewBuilder
+    private var slot: some View {
+        if let imageData, let image = UIImage(data: imageData) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+        } else {
+            VStack(spacing: .small) {
+                Image(systemName: "camera")
+                    .foregroundStyle(.foregroundTinted)
+
+                Text("create_book.cover.take")
+                    .textStyle(.caption200)
+                    .foregroundStyle(.foregroundSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.all, .small)
+        }
     }
 }

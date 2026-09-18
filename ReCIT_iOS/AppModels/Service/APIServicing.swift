@@ -36,6 +36,20 @@ protocol APIServicing {
         fromEndpoint endpoint: String,
         debug: Bool
     ) async throws -> T?
+
+    /// Sends one image as `multipart/form-data`, and answers the url the server filed it
+    /// under. The only request in the app that is not JSON.
+    ///
+    /// `POST /api/images/upload` indexes what it answers **by the form field name** it was
+    /// given, which is why the caller names the field and gets one url back rather than a
+    /// dictionary to rummage through.
+    func upload(
+        imageData: Data,
+        fileName: String,
+        fieldName: String,
+        container: String,
+        debug: Bool
+    ) async throws -> String?
 }
 
 // MARK: - Convenience overloads (default arguments)

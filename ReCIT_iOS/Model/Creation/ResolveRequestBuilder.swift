@@ -67,7 +67,12 @@ enum ResolveRequestBuilder {
             editionClaims[Property.editionOf] = [workUri]
         }
 
-        let edition: EntityResolveRequest.Seed = .init(claims: editionClaims)
+        // An uploaded cover is offered, never required: `enrich` is what covers the books
+        // nobody photographed, and a failed upload must not cost a contribution.
+        let edition: EntityResolveRequest.Seed = .init(
+            claims: editionClaims,
+            image: draft.coverImageUrl
+        )
 
         let works: [EntityResolveRequest.Seed]? = draft.workUri == nil
             ? [.described(label: draft.trimmedTitle, language: labelLanguage)]

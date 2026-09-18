@@ -45,6 +45,10 @@ struct EntityResolveRequest: Codable, Equatable, Sendable {
         var uri: String?
         var labels: [String: String]?
         var claims: [String: [String]]?
+        /// Only an edition seed carries one: the url of a cover the server should attach. Ours
+        /// is the one it has just been handed by the upload; without it, `enrich` goes looking
+        /// for one from the ISBN.
+        var image: String?
 
         static func named(_ uri: String) -> Seed {
             .init(uri: uri)

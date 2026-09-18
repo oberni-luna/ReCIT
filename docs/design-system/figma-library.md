@@ -4,6 +4,16 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-09-18 — `Créer un livre absent`** : ce qu'il advient d'un scan qui ne trouve rien. Section
+  `Créer un livre absent` (`433:11445`) sur la page `Screens` : 8 frames — `C1` scan sans résultat, `C2` formulaire,
+  `C3` auteur, `C4` l'œuvre existe déjà, `C5` publié, `C6` la même absence vue de la recherche, `C7` l'échec,
+  `C8` trois variantes de l'appel à créer — plus `Spec · Créer un livre absent` (`441:11659`). **Aucun composant ni
+  token nouveau** : tout est instancié depuis `Field`, `Note`, `Cell / Entity`, `Empty State`, `Onboarding / Value
+  Row`, `Search / Query Row`, `Section Header`, `Row / Link`, `Button / Large`, `Button / Circular Icon`, `Icon` et
+  le chrome. `C1` et `C5` sont des clones de `S0 · Existant · Livre reconnu`, tab bar retirée (le scanner est un
+  `fullScreenCover`). Ce qui manque au système est listé dans le panneau : pas de glyphe `book.badge.plus`, pas de
+  chrome de feuille modale, `Field` sans état erreur ni lecture seule. **Rien n'est implémenté** — c'est une
+  proposition, et l'arbitrage A/B/C reste à rendre.
 - **Passe du 2026-09-12 — `Réseau · Ajouter des amis lecteurs`** : le parcours d'ajout d'un ami lecteur, dans les
   deux sens. Section `Réseau · Ajouter des amis lecteurs` (`407:10422`) sur la page `Screens` : 11 frames en clair
   seul, deux composants nouveaux (`Cell / Relation`, `Cell / Invitation`) et un panneau `Spec · Réseau`
@@ -670,7 +680,7 @@ retoucher un seul nœud.
 | `Tokens` | `0:1` | 6 sections, 9 planches de tokens |
 | `Components` | `20:2` | Les 3 composants qui **miroitent le package** design system |
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
-| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification, puis les sections `Onboarding` (`73:2829`) et `Ranger mes livres` (`97:3755`), puis `Scan · Repère` (`313:7880`) et `Recherche unifiée` (`334:8624`) |
+| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification, puis les sections `Onboarding` (`73:2829`) et `Ranger mes livres` (`97:3755`), puis `Scan · Repère` (`313:7880`), `Recherche unifiée` (`334:8624`) et `Créer un livre absent` (`433:11445`) |
 
 La séparation entre `Components` et `Screens · Components` est intentionnelle : `Components` ne contient que ce qui
 existe dans `DesignSystem/` côté Swift (les deux `ButtonStyle`, le `LabelStyle` de tag). Tout le reste — le chrome iOS

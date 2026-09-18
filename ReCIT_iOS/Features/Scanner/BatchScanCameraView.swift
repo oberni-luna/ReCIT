@@ -48,6 +48,12 @@ struct BatchScanCameraView: View {
 
     @State private var cameraAccess: CameraAccess = .current
 
+    /// The unknown book the user has asked to create, and nothing else: the sheet presents on
+    /// it and clears it on the way out, so asking twice for the same barcode presents twice.
+    /// The scanner stays deaf meanwhile — the machine is still holding `.notFound`, which is
+    /// what refuses every barcode the camera keeps reading behind the sheet.
+    @State private var creationRequest: CreateBookRequest?
+
     var body: some View {
         ZStack(alignment: .bottom) {
             // Under the feed rather than instead of it, so the moment before the prompt
@@ -86,7 +92,8 @@ struct BatchScanCameraView: View {
                         ScanResultRowView(
                             state: viewModel.state,
                             onOpen: onOpenBook,
-                            onAdd: addPendingBook
+                            onAdd: addPendingBook,
+                            onCreate: askToCreateBook
                         )
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     } else {
@@ -105,6 +112,9 @@ struct BatchScanCameraView: View {
             } else if cameraAccess.needsExplanation {
                 ScannerPermissionView(access: cameraAccess)
             }
+        }
+        .sheet(item: $creationRequest) { request in
+            CreateBookView(isbn: request.isbn)
         }
         .animation(.snappy, value: viewModel.state)
         // The simulated camera's page turn: a book the session is done with — filed, unknown,
@@ -155,6 +165,15 @@ struct BatchScanCameraView: View {
             userModel: userModel,
             modelContext: modelContext
         )
+    }
+
+    /// Opens the creation form for the edition inventaire.io does not have. Reads the code off
+    /// the state rather than being handed it: the row draws what the machine holds, and the
+    /// two must not be free to disagree about which book is being created.
+    private func askToCreateBook() {
+        guard case .notFound(let code) = viewModel.state else { return }
+
+        creationRequest = .init(isbn: code)
     }
 
     private func addPendingBook() {

@@ -13,10 +13,10 @@
 //  carries plausible strings that are never meant to be read.
 //
 //  What each outcome says is `ScanResultLabelView`'s; what can be done about it is this
-//  view's — the add is dropped outright for an unknown edition and disabled for a book
-//  already owned.
+//  view's — an unknown edition offers to be created rather than filed, and a book already
+//  owned has its add disabled.
 //
-//  See PRD 0005.
+//  See PRD 0005, and PRD 0015 for the create action.
 //
 
 import SwiftUI
@@ -25,6 +25,7 @@ struct ScanResultRowView: View {
     let state: BatchScanState
     let onOpen: (ScannedBook) -> Void
     let onAdd: () -> Void
+    let onCreate: () -> Void
 
     var body: some View {
         HStack(spacing: .sMedium) {
@@ -43,9 +44,12 @@ struct ScanResultRowView: View {
             .accessibilityIdentifier("e2e.scan.row")
             .disabled(opensBook == false)
 
-            // An edition inventaire does not have is the one row with no action at all:
-            // there is nothing to file, and a disabled "+" would invite tapping at it.
-            if offersAdd {
+            // An edition inventaire does not have has an action of its own since issue 0090 —
+            // creating the book in the open database — and it sits where the add sits, so the
+            // row never changes shape between outcomes.
+            if case .notFound = state {
+                ScanCreateButton(action: onCreate)
+            } else {
                 ScanAddButton(state: state, action: onAdd)
             }
         }
@@ -73,13 +77,5 @@ struct ScanResultRowView: View {
     /// book already owned, where looking it up is the obvious next thing to want.
     private var opensBook: Bool {
         displayedBook.uri.isEmpty == false
-    }
-
-    private var offersAdd: Bool {
-        if case .notFound = state {
-            false
-        } else {
-            true
-        }
     }
 }

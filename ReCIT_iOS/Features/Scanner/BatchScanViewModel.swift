@@ -205,9 +205,14 @@ final class BatchScanViewModel {
 
     // MARK: - Private helpers
 
-    /// Puts up an outcome the user cannot act on, then takes it down again. The row is what
-    /// stops the next barcode being accepted, so every one of these has to end by itself —
-    /// there is no action on it for the user to end it with.
+    /// Puts up an outcome of a lookup, and takes it down again when there is nothing to be
+    /// done about it.
+    ///
+    /// A book the inventory already holds ends by itself: the row is what stops the next
+    /// barcode being accepted, and there is no action on it for the user to end it with. An
+    /// **unknown edition does not** — since issue 0090 it carries the offer to create the book,
+    /// and an offer that vanishes after three seconds is worse than no offer at all. What ends
+    /// it instead is the next book: the state machine lets a *different* barcode take the row.
     private func showNotice(_ event: BatchScanEvent, haptic: Haptics.Notification) {
         guard machine.apply(event) else { return }
 
@@ -217,6 +222,9 @@ final class BatchScanViewModel {
 
         lookupTask?.cancel()
         noticeTask?.cancel()
+
+        guard machine.state.holdsUntilActedOn == false else { return }
+
         noticeTask = Task { [weak self] in
             try? await Task.sleep(for: BatchScanViewModel.noticeDuration)
             guard !Task.isCancelled else { return }

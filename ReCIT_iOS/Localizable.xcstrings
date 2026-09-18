@@ -7,6 +7,54 @@
     ", " : {
 
     },
+    "create_book.isbn" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN, read from the barcode"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN, lu sur le code-barres"
+          }
+        }
+      }
+    },
+    "create_book.public_notice" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This book will join inventaire.io, the open database: what you write here will be public, and editable by other readers."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce livre rejoindra inventaire.io, la base ouverte\u00a0: ce que vous \u00e9crivez ici sera public, et modifiable par les autres lecteurs."
+          }
+        }
+      }
+    },
+    "create_book.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau livre"
+          }
+        }
+      }
+    },
     "network.add_friends" : {
       "localizations" : {
         "en" : {
@@ -568,6 +616,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Invitations"
+          }
+        }
+      }
+    },
+    "scanner.action.create_book" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create this book on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cr\u00e9er ce livre sur inventaire.io"
           }
         }
       }

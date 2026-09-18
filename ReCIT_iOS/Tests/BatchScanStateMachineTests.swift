@@ -328,8 +328,48 @@ struct BatchScanStateMachineTests {
         #expect(machine.state == .notFound(code: firstCode))
     }
 
-    @Test("A notice the user cannot act on still holds the screen against the next book")
-    func noticeRowsBlockTheNextScan() {
+    @Test("A book already in the inventory still holds the screen against the next book")
+    func alreadyOwnedRowBlocksTheNextScan() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupResolvedAlreadyOwned(book(firstCode)))
+
+        clock.advance(by: 0.4)
+        let duringNotice: Bool = machine.apply(.codeSeen(secondCode))
+        #expect(duringNotice == false)
+
+        // Which is why that row has to clear itself — see `BatchScanViewModel`'s notice hold.
+        machine.apply(.cleared)
+        let afterNotice: Bool = machine.apply(.codeSeen(secondCode))
+        #expect(afterNotice == true)
+        #expect(machine.state == .lookingUp(code: secondCode))
+    }
+
+    // MARK: - The unknown edition, which now waits to be acted on
+
+    /// Since issue 0090 an unknown edition offers to be created, so nothing takes its row down
+    /// by itself. What keeps the flow moving is this: the next book takes the row.
+    @Test("Aiming at a different book replaces an unknown edition")
+    func differentCodeEvictsAnUnknownEdition() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupFailed(code: firstCode))
+        #expect(machine.state == .notFound(code: firstCode))
+
+        clock.advance(by: 0.4)
+        let replaced: Bool = machine.apply(.codeSeen(secondCode))
+        #expect(replaced == true)
+        #expect(machine.state == .lookingUp(code: secondCode))
+    }
+
+    /// The other half of the same rule: the book that could not be found is still in frame,
+    /// and re-offering it every tenth of a second is exactly what the gate exists to prevent.
+    @Test("The same unknown book, still in frame, does not restart a lookup")
+    func sameCodeDoesNotReplaceAnUnknownEdition() {
         let clock: TestClock = .init()
         var machine: BatchScanStateMachine = makeMachine(clock: clock)
 
@@ -337,15 +377,29 @@ struct BatchScanStateMachineTests {
         machine.apply(.lookupFailed(code: firstCode))
 
         clock.advance(by: 0.4)
-        let duringNotice: Bool = machine.apply(.codeSeen(secondCode))
-        #expect(duringNotice == false)
+        let again: Bool = machine.apply(.codeSeen(firstCode))
+        #expect(again == false)
         #expect(machine.state == .notFound(code: firstCode))
+    }
 
-        // Which is why the row has to clear itself — see `BatchScanViewModel`'s notice hold.
-        machine.apply(.cleared)
-        let afterNotice: Bool = machine.apply(.codeSeen(secondCode))
-        #expect(afterNotice == true)
-        #expect(machine.state == .lookingUp(code: secondCode))
+    /// A book waiting to be filed is not an offer that can be walked away from: a second
+    /// barcode drifting through the frame must not take its place.
+    @Test("A book waiting to be filed is not replaced by another barcode")
+    func resolvedRowIsNotEvictable() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupResolved(book(firstCode)))
+
+        clock.advance(by: 0.4)
+        let replaced: Bool = machine.apply(.codeSeen(secondCode))
+        #expect(replaced == false)
+        #expect(machine.state == .resolved(book: book(firstCode)))
+
+        machine.apply(.addStarted)
+        let duringAdd: Bool = machine.apply(.codeSeen(secondCode))
+        #expect(duringAdd == false)
     }
 
     // MARK: - A failed add

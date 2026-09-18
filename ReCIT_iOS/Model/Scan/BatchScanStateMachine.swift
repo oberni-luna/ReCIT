@@ -124,7 +124,7 @@ struct BatchScanStateMachine {
     private mutating func accept(code: String) -> Bool {
         let timestamp: Date = now()
 
-        guard state == .idle else {
+        guard isReplaceable(by: code) else {
             // Nothing may start while a result is pending — but a code still in frame keeps
             // its place in the gate, or it would be re-offered the instant the row clears.
             if gatedCode == code { gatedCodeLastSeen = timestamp }
@@ -142,5 +142,29 @@ struct BatchScanStateMachine {
         gatedCodeLastSeen = timestamp
         state = .lookingUp(code: code)
         return true
+    }
+
+    /// Whether the row may be given away to `code`.
+    ///
+    /// `.idle` always may. `.notFound` may too — and it is the only pending result that may,
+    /// which is what keeps rule 1 true where it matters. An unknown edition now *stays* on
+    /// screen, because it carries an action (creating the book on inventaire.io, see issue
+    /// 0090); nothing takes it down by itself any more. Without an eviction, a user who does
+    /// not want to create is stranded on their own offer, and the next book never gets a
+    /// lookup. A **different** book is exactly the way to say « not this one » — the same code,
+    /// still in frame, is not.
+    ///
+    /// `.resolved` and `.adding` are never replaceable: there a book is waiting to be filed, or
+    /// already on its way to the server, and a second barcode drifting through the frame must
+    /// not take its place.
+    private func isReplaceable(by code: String) -> Bool {
+        switch state {
+        case .idle:
+            true
+        case .notFound(let pending):
+            pending != code
+        case .lookingUp, .resolved, .alreadyOwned, .adding, .added:
+            false
+        }
     }
 }

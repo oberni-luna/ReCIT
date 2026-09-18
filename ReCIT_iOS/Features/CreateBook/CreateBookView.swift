@@ -14,30 +14,39 @@
 //  no more — see `NewBookDraft` for why those two.
 //
 //  Publishing waits for the server and the sheet stays open until it answers. Nothing about
-//  this write is optimistic; `EntityCreationModel` says why at length.
+//  this write is optimistic; `EntityCreationModel` says why at length. A failure is said here,
+//  in the sheet, rather than on the shared snack bar: the draft is still on screen, and what
+//  the reader needs to know — that nothing was created, so trying again makes no twin — belongs
+//  beside the button that will try again.
 //
 //  See PRD 0015.
 //
 
 import SwiftUI
 import SwiftData
-import LBSnackBar
 
 struct CreateBookView: View {
     @Environment(EntityCreationModel.self) private var creationModel
     @Environment(InventoryModel.self) private var inventoryModel
     @Environment(UserModel.self) private var userModel
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.snackBar) private var snackBar
     @Environment(\.dismiss) private var dismiss
-
-    let isbn: String
 
     /// Handed the book that now exists, so the row behind the sheet can confirm it and the
     /// session can count it. Called before the dismissal, and only on a full success.
     let onCreated: (ScannedBook) -> Void
 
+    /// Handed what was typed, whatever takes the form away. A publication that failed must not
+    /// cost the reader their typing: the session keeps the draft, and the same barcode reopens
+    /// on it.
+    let onKeepDraft: (NewBookDraft) -> Void
+
     @State private var draft: NewBookDraft
+
+    /// What went wrong last time, in the reader's terms. `nil` until something does.
+    @State private var failure: CreateBookFailure?
+
+    private var isbn: String { draft.isbn }
 
     /// The work inventaire.io recognised, once the reconnaissance pass has found one. Pushing
     /// on it rather than publishing straight away is the whole of issue 0094.
@@ -47,15 +56,27 @@ struct CreateBookView: View {
     /// than typed.
     @State private var isCapturingCover: Bool = false
 
-    init(isbn: String, onCreated: @escaping (ScannedBook) -> Void) {
-        self.isbn = isbn
+    init(
+        draft: NewBookDraft,
+        onCreated: @escaping (ScannedBook) -> Void,
+        onKeepDraft: @escaping (NewBookDraft) -> Void
+    ) {
         self.onCreated = onCreated
-        _draft = State(initialValue: .init(isbn: isbn))
+        self.onKeepDraft = onKeepDraft
+        _draft = State(initialValue: draft)
     }
 
     var body: some View {
         NavigationStack {
             Form {
+                if let failure {
+                    Section {
+                        CreateBookFailureBanner(failure: failure)
+                    }
+                    .listRowSeparator(.hidden)
+                    .listSectionSeparator(.hidden)
+                }
+
                 Section {
                     HStack(alignment: .top, spacing: .medium) {
                         Button {
@@ -113,17 +134,29 @@ struct CreateBookView: View {
                 .listSectionSeparator(.hidden)
 
                 Section {} footer: {
-                    AsyncButton(
-                        action: publish,
-                        actionOptions: [.showProgressView],
-                        label: {
-                            Text("create_book.publish")
-                                .frame(maxWidth: .infinity)
+                    VStack(spacing: .small) {
+                        AsyncButton(
+                            action: publish,
+                            actionOptions: [.showProgressView],
+                            label: {
+                                Text(failure?.isWorthRetrying == true ? "create_book.retry" : "create_book.publish")
+                                    .frame(maxWidth: .infinity)
+                            }
+                        )
+                        .buttonStyle(.primary())
+                        .disabled(draft.isPublishable == false)
+                        .accessibilityIdentifier("e2e.createBook.publish")
+
+                        // Only once something has failed: before that, closing is closing, and
+                        // a second way out would be one too many.
+                        if failure != nil {
+                            Button("create_book.keep_draft") {
+                                dismiss()
+                            }
+                            .buttonStyle(.secondary())
+                            .accessibilityIdentifier("e2e.createBook.keepDraft")
                         }
-                    )
-                    .buttonStyle(.primary())
-                    .disabled(draft.isPublishable == false)
-                    .accessibilityIdentifier("e2e.createBook.publish")
+                    }
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
@@ -156,6 +189,11 @@ struct CreateBookView: View {
                     .accessibilityIdentifier("e2e.createBook.close")
                 }
             }
+        }
+        .onDisappear {
+            // Whatever took the form away — the close button, a swipe, a publication that
+            // failed and a reader who walked off — what was typed stays with the session.
+            onKeepDraft(draft)
         }
     }
 
@@ -191,6 +229,8 @@ struct CreateBookView: View {
             draft.coverImageUrl = await creationModel.uploadCover(imageData: imageData)
         }
 
+        failure = nil
+
         do {
             let uri: String = try await creationModel.createEdition(draft: draft)
 
@@ -215,7 +255,12 @@ struct CreateBookView: View {
             )
             dismiss()
         } catch {
-            snackBar.show { SnackBarView.error(error) }
+            // Said here rather than on the shared snack bar: the sheet is what the reader is
+            // looking at, the draft is still in it, and the one thing they need to know — that
+            // nothing was created, so trying again makes no twin — belongs beside the button
+            // that will try again.
+            failure = .init(error: error)
+            Haptics.Notification.error.play()
         }
     }
 }
@@ -298,5 +343,37 @@ private struct CreateBookCoverSlot: View {
             }
             .padding(.all, .small)
         }
+    }
+}
+
+/// What a failed publication says, in the reader's terms.
+///
+/// The first line of every one of them is the same fact: nothing was created on inventaire.io.
+/// A contributor who fears having made a duplicate will not press the button again, and the
+/// book stays in their hand for nothing.
+private struct CreateBookFailureBanner: View {
+    let failure: CreateBookFailure
+
+    var body: some View {
+        HStack(alignment: .top, spacing: .small) {
+            Image(systemName: "exclamationmark.triangle")
+                .foregroundStyle(.foregroundError)
+
+            VStack(alignment: .leading, spacing: .xSmall) {
+                Text(String(localized: failure.title))
+                    .textStyle(.content400Bold)
+                    .foregroundStyle(.foregroundError)
+
+                Text(String(localized: failure.explanation))
+                    .textStyle(.footnote200)
+                    .foregroundStyle(.foregroundDefault)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.all, .sMedium)
+        .background(.backgroundError)
+        .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.medium))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("e2e.createBook.failure")
     }
 }

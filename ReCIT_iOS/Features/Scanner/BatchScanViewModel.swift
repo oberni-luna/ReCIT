@@ -176,6 +176,28 @@ final class BatchScanViewModel {
 
     // MARK: - Creating
 
+    /// Drafts of books being created, by ISBN. The sheet is short-lived and the session is not:
+    /// a publication that failed leaves what was typed here, so closing the form and coming
+    /// back to the same barcode finds it again rather than asking for it twice (issue 0096).
+    @ObservationIgnored private var drafts: [String: NewBookDraft] = [:]
+
+    /// What the form opens on for this barcode: the draft left from a previous attempt, or a
+    /// blank one.
+    func draft(forISBN isbn: String) -> NewBookDraft {
+        drafts[isbn] ?? .init(isbn: isbn)
+    }
+
+    /// Keeps what was typed. Called as the form goes, whatever took it away.
+    func remember(_ draft: NewBookDraft) {
+        drafts[draft.isbn] = draft
+    }
+
+    /// Forgets a draft that has become a book. Nothing else clears one: a session's worth of
+    /// abandoned drafts is a few hundred bytes, and losing one is worse than keeping it.
+    func forgetDraft(forISBN isbn: String) {
+        drafts[isbn] = nil
+    }
+
     /// Confirms the book the reader has just created on inventaire.io, which is already in
     /// their inventory: the form does both writes and hands the result back here.
     ///
@@ -184,6 +206,8 @@ final class BatchScanViewModel {
     /// machine, for the same reason it does there: it is the one type that knows the event was
     /// real. See PRD 0015.
     func bookCreated(_ book: ScannedBook) {
+        forgetDraft(forISBN: book.code)
+
         guard machine.apply(.creationFinished(book)) else { return }
 
         Haptics.Notification.success.play()

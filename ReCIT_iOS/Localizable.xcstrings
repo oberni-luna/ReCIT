@@ -119,6 +119,102 @@
         }
       }
     },
+    "create_book.failure.account.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your inventaire.io session has expired. Nothing was created. Sign in again, and publish this book then."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre session inventaire.io a expir\u00e9. Rien n\u2019a \u00e9t\u00e9 cr\u00e9\u00e9. Reconnectez-vous, puis publiez ce livre."
+          }
+        }
+      }
+    },
+    "create_book.failure.account.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contributing needs an account"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contribuer demande un compte"
+          }
+        }
+      }
+    },
+    "create_book.failure.network.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io did not answer. Nothing was created there, and nothing is lost here: what you wrote is kept, and trying again makes no duplicate."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io n\u2019a pas r\u00e9pondu. Rien n\u2019a \u00e9t\u00e9 cr\u00e9\u00e9 l\u00e0-bas, et rien n\u2019est perdu ici\u00a0: ce que vous avez \u00e9crit est gard\u00e9, et r\u00e9essayer ne fait pas de doublon."
+          }
+        }
+      }
+    },
+    "create_book.failure.network.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The publication did not go through"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La publication n\u2019est pas pass\u00e9e"
+          }
+        }
+      }
+    },
+    "create_book.failure.refused.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing was created. The ISBN or the title may not be accepted as they are \u2014 this book can be added on inventaire.io itself."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n\u2019a \u00e9t\u00e9 cr\u00e9\u00e9. L\u2019ISBN ou le titre ne sont peut-\u00eatre pas accept\u00e9s tels quels\u00a0\u2014 ce livre peut \u00eatre ajout\u00e9 sur inventaire.io m\u00eame."
+          }
+        }
+      }
+    },
+    "create_book.failure.refused.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refused this book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io a refus\u00e9 ce livre"
+          }
+        }
+      }
+    },
     "create_book.isbn" : {
       "localizations" : {
         "en" : {
@@ -131,6 +227,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ISBN, lu sur le code-barres"
+          }
+        }
+      }
+    },
+    "create_book.keep_draft" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep the draft and go back"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder le brouillon et revenir"
           }
         }
       }
@@ -179,6 +291,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Publier et ajouter \u00e0 mes livres"
+          }
+        }
+      }
+    },
+    "create_book.retry" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "R\u00e9essayer"
           }
         }
       }

@@ -382,6 +382,42 @@ struct BatchScanStateMachineTests {
         #expect(machine.state == .notFound(code: firstCode))
     }
 
+    /// A book created from the row is filed like any other, so it confirms like any other and
+    /// counts like any other.
+    @Test("Creating the missing edition confirms on the row and counts in the session")
+    func creationConfirmsAndCounts() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+        let created: ScannedBook = book(firstCode, title: "La Main gauche de la nuit")
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupFailed(code: firstCode))
+
+        let confirmed: Bool = machine.apply(.creationFinished(created))
+        #expect(confirmed == true)
+        #expect(machine.state == .added(book: created))
+        #expect(machine.addedBookCount == 1)
+    }
+
+    /// The sheet can outlive the row that opened it — a different barcode may have taken it
+    /// meanwhile. What comes back then belongs to nobody, and must not confirm over the book
+    /// now on screen.
+    @Test("A creation landing for a book the row has moved on from is dropped")
+    func creationForAnotherBookIsDropped() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupFailed(code: firstCode))
+        clock.advance(by: 0.4)
+        machine.apply(.codeSeen(secondCode))
+
+        let confirmed: Bool = machine.apply(.creationFinished(book(firstCode)))
+        #expect(confirmed == false)
+        #expect(machine.state == .lookingUp(code: secondCode))
+        #expect(machine.addedBookCount == 0)
+    }
+
     /// A book waiting to be filed is not an offer that can be walked away from: a second
     /// barcode drifting through the frame must not take its place.
     @Test("A book waiting to be filed is not replaced by another barcode")

@@ -174,6 +174,28 @@ final class BatchScanViewModel {
         }
     }
 
+    // MARK: - Creating
+
+    /// Confirms the book the reader has just created on inventaire.io, which is already in
+    /// their inventory: the form does both writes and hands the result back here.
+    ///
+    /// Same ending as an add — the green row, held as proof, then the screen given back to the
+    /// camera — because from the reader's side the two are the same act. The tally moves in the
+    /// machine, for the same reason it does there: it is the one type that knows the event was
+    /// real. See PRD 0015.
+    func bookCreated(_ book: ScannedBook) {
+        guard machine.apply(.creationFinished(book)) else { return }
+
+        Haptics.Notification.success.play()
+
+        addTask?.cancel()
+        addTask = Task { [weak self] in
+            try? await Task.sleep(for: BatchScanViewModel.confirmationDuration)
+            guard !Task.isCancelled else { return }
+            self?.machine.apply(.cleared)
+        }
+    }
+
     // MARK: - Lifecycle
 
     /// Drops the pending row and the work behind it — on leaving the flow, or when the user

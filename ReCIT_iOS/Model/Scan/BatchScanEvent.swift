@@ -26,6 +26,11 @@ enum BatchScanEvent: Equatable {
     case addStarted
     case addFinished
     case addFailed
+    /// The reader created the edition inventaire.io was missing, and it landed in their
+    /// inventory. Its own event rather than `lookupResolved` + `addFinished`: the row it
+    /// answers is `.notFound`, which no add ever starts from, and what it reports is a book
+    /// that went straight from unknown to filed. See PRD 0015.
+    case creationFinished(ScannedBook)
     /// The row has said what it had to say and gives the screen back to the camera.
     case cleared
 }

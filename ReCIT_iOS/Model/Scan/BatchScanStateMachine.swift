@@ -112,6 +112,16 @@ struct BatchScanStateMachine {
             state = .resolved(book: book)
             return true
 
+        case .creationFinished(let book):
+            // Only from the row that offered the creation, and only for the book it was about:
+            // a sheet left open while the row was evicted by another barcode must not confirm
+            // over whatever took its place.
+            guard case .notFound(let pending) = state, pending == book.code else { return false }
+            state = .added(book: book)
+            // A created book is filed like any other, so the bilan counts it like any other.
+            addedBookCount += 1
+            return true
+
         case .cleared:
             guard state != .idle else { return false }
             state = .idle

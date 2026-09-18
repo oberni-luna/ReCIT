@@ -7,6 +7,22 @@
     ", " : {
 
     },
+    "create_book.author_field" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur"
+          }
+        }
+      }
+    },
     "create_book.isbn" : {
       "localizations" : {
         "en" : {
@@ -39,6 +55,22 @@
         }
       }
     },
+    "create_book.publish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publish and add to my books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publier et ajouter \u00e0 mes livres"
+          }
+        }
+      }
+    },
     "create_book.title" : {
       "localizations" : {
         "en" : {
@@ -51,6 +83,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouveau livre"
+          }
+        }
+      }
+    },
+    "create_book.title_field" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title of this edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titre de cette \u00e9dition"
+          }
+        }
+      }
+    },
+    "create_book.title_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The title as printed on the cover, and the author who wrote it. Nothing else is required."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le titre tel qu\u2019il est imprim\u00e9 sur la couverture, et l\u2019auteur qui l\u2019a \u00e9crit. Rien d\u2019autre n\u2019est demand\u00e9."
           }
         }
       }

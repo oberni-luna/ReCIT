@@ -114,7 +114,7 @@ struct BatchScanCameraView: View {
             }
         }
         .sheet(item: $creationRequest) { request in
-            CreateBookView(isbn: request.isbn)
+            CreateBookView(isbn: request.isbn, onCreated: viewModel.bookCreated)
         }
         .animation(.snappy, value: viewModel.state)
         // The simulated camera's page turn: a book the session is done with — filed, unknown,

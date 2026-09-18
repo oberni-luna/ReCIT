@@ -1,0 +1,129 @@
+//
+//  ResolveRequestBuilderTests.swift
+//  ReCIT_iOSTests
+//
+//  The body that creates a book on inventaire.io, asserted where it is decided rather than
+//  where it is sent. Pure and network-free: the builder is the module that carries the rules
+//  a duplicate would come from, so it is the module worth pinning down.
+//
+//  See PRD 0015.
+//
+
+import Foundation
+import Testing
+@testable import ReCIT_iOS
+
+@Suite("ResolveRequestBuilder")
+struct ResolveRequestBuilderTests {
+
+    private func draft(
+        isbn: String = "978-2-38019-274-1",
+        title: String = "La Main gauche de la nuit",
+        author: String = "Ursula K. Le Guin"
+    ) -> NewBookDraft {
+        .init(isbn: isbn, title: title, authorName: author)
+    }
+
+    @Test("The ISBN travels without its separators")
+    func isbnIsNormalized() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.entries.first?.edition.claims?["wdt:P212"] == ["9782380192741"])
+    }
+
+    @Test("The edition carries the title that is printed on this cover")
+    func editionCarriesItsOwnTitle() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.entries.first?.edition.claims?["wdt:P1476"] == ["La Main gauche de la nuit"])
+    }
+
+    @Test("Whitespace typed around a title or a name does not reach the server")
+    func fieldsAreTrimmed() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(title: "  Les Dépossédés \n", author: " Ursula K. Le Guin "),
+            create: true,
+            language: "fr"
+        )
+
+        let entry: EntityResolveRequest.Entry = try #require(request.entries.first)
+        #expect(entry.edition.claims?["wdt:P1476"] == ["Les Dépossédés"])
+        #expect(entry.works?.first?.labels == ["fr": "Les Dépossédés"])
+        #expect(entry.authors?.first?.labels == ["fr": "Ursula K. Le Guin"])
+    }
+
+    @Test("A book being created is described, and names no entity")
+    func newEntitiesAreDescribedNotNamed() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        let entry: EntityResolveRequest.Entry = try #require(request.entries.first)
+        #expect(entry.authors?.first?.uri == nil)
+        #expect(entry.works?.first?.uri == nil)
+        #expect(entry.edition.uri == nil)
+    }
+
+    /// Half an entry is worse than none: a work created without its edition leaves an orphan
+    /// on a public website that only a human can clean up.
+    @Test("The creating request asks for creation, enrichment and strictness")
+    func creatingRequestCarriesItsFlags() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.create == true)
+        #expect(request.enrich == true)
+        #expect(request.strict == true)
+    }
+
+    @Test("The reconnaissance request writes nothing")
+    func dryRunCreatesNothing() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: false,
+            language: "fr"
+        )
+
+        #expect(request.create == false)
+    }
+
+    @Test("Labels are written in the language they are asked for")
+    func labelsFollowTheLanguage() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "en"
+        )
+
+        #expect(request.entries.first?.works?.first?.labels?.keys.first == "en")
+    }
+
+    /// Optional fields are omitted rather than sent null: the server reads a present key as an
+    /// intention, and `"uri": null` is not one.
+    @Test("An absent uri is absent from the encoded body, not null")
+    func encodingOmitsAbsentFields() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        let body: String = String(decoding: try JSONEncoder().encode(request), as: UTF8.self)
+
+        #expect(body.contains("\"uri\"") == false)
+        #expect(body.contains("null") == false)
+    }
+}

@@ -17,6 +17,9 @@ struct RootView: View {
     @State var inventoryModel: InventoryModel
     @State var shelfModel: ShelfModel
     @State var transactionModel: TransactionModel
+    /// Writing into inventaire.io's open database (PRD 0015). Shared like every other model,
+    /// and reached from inside the sorting flow's cover, where the scanner lives.
+    @State var entityCreationModel: EntityCreationModel
     @State var genreEnrichmentModel: GenreEnrichmentModel
     @State var autoSortModel: AutoSortModel
     @State var sortSessionModel: SortSessionModel
@@ -64,6 +67,7 @@ struct RootView: View {
         let shelfModel: ShelfModel = .init(apiService: apiService, errorReporter: errorReporter)
         _shelfModel = State(initialValue: shelfModel)
         _transactionModel = State(initialValue: TransactionModel(apiService: apiService, errorReporter: errorReporter))
+        _entityCreationModel = State(initialValue: EntityCreationModel(apiService: apiService))
         let genreEnrichmentModel: GenreEnrichmentModel = .init(apiService: apiService, entityModel: entityModel, errorReporter: errorReporter)
         _genreEnrichmentModel = State(initialValue: genreEnrichmentModel)
         _autoSortModel = State(
@@ -127,6 +131,7 @@ struct RootView: View {
                 .environment(inventoryModel)
                 .environment(shelfModel)
                 .environment(transactionModel)
+                .environment(entityCreationModel)
                 .environment(genreEnrichmentModel)
                 .environment(autoSortModel)
                 .environment(sortSessionModel)

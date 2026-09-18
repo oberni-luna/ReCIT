@@ -39,6 +39,10 @@ struct CreateBookView: View {
 
     @State private var draft: NewBookDraft
 
+    /// The work inventaire.io recognised, once the reconnaissance pass has found one. Pushing
+    /// on it rather than publishing straight away is the whole of issue 0094.
+    @State private var recognisedWorkUri: String?
+
     init(isbn: String, onCreated: @escaping (ScannedBook) -> Void) {
         self.isbn = isbn
         self.onCreated = onCreated
@@ -113,6 +117,9 @@ struct CreateBookView: View {
             .applyListBackground()
             .navigationTitle(String(localized: "create_book.title"))
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(item: $recognisedWorkUri) { uri in
+                WorkMatchView(workUri: uri, draft: $draft, onPublish: create)
+            }
             .task {
                 // Asked once, as the form opens, and never blocking: the reader can type the
                 // whole book before the answer lands, and publish whether or not it does.
@@ -129,13 +136,29 @@ struct CreateBookView: View {
         }
     }
 
+    /// What the publish button does: ask before writing.
+    ///
+    /// The reconnaissance pass writes nothing and can recognise a work this book is an edition
+    /// of — in which case the reader is shown it and decides, and the publication happens from
+    /// that screen. Asked at most once: a reader who answered « no, it is another book » is not
+    /// asked again on a retry.
+    private func publish() async {
+        if draft.hasAnsweredWorkQuestion == false,
+           let uri = await creationModel.recogniseWork(draft: draft) {
+            recognisedWorkUri = uri
+            return
+        }
+
+        await create()
+    }
+
     /// Creates the book on inventaire.io, then files it — in that order, because the second
     /// needs the canonical uri the first answers with.
     ///
     /// A failure leaves the sheet exactly as it is, with everything typed still there: nothing
     /// was created on the server, so trying again makes no duplicate. Issue 0096 gives that
     /// failure a proper face; until then it is said on the shared snack bar.
-    private func publish() async {
+    private func create() async {
         guard let user = userModel.myUser else { return }
 
         do {

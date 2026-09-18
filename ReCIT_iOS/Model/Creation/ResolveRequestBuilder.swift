@@ -27,6 +27,7 @@ enum ResolveRequestBuilder {
         static let isbn13: String = "wdt:P212"
         static let editionTitle: String = "wdt:P1476"
         static let language: String = "wdt:P407"
+        static let editionOf: String = "wdt:P629"
     }
 
     /// The language the labels are written in when the ISBN has not answered. The language the
@@ -59,12 +60,18 @@ enum ResolveRequestBuilder {
             editionClaims[Property.language] = [languageUri]
         }
 
+        // A work the reader recognised is pointed at, not described a second time: the edition
+        // claims to be an edition *of it*, and no second work is seeded. Describing it again
+        // would offer the server a work to create next to the one it just found.
+        if let workUri = draft.workUri {
+            editionClaims[Property.editionOf] = [workUri]
+        }
+
         let edition: EntityResolveRequest.Seed = .init(claims: editionClaims)
 
-        let work: EntityResolveRequest.Seed = .described(
-            label: draft.trimmedTitle,
-            language: labelLanguage
-        )
+        let works: [EntityResolveRequest.Seed]? = draft.workUri == nil
+            ? [.described(label: draft.trimmedTitle, language: labelLanguage)]
+            : nil
 
         // Named, not described, as soon as the reader has picked someone who exists. Sending a
         // description where a uri was available is how a database of this kind fills with
@@ -76,7 +83,7 @@ enum ResolveRequestBuilder {
         }
 
         return .init(
-            entries: [.init(edition: edition, works: [work], authors: [author])],
+            entries: [.init(edition: edition, works: works, authors: [author])],
             create: create,
             // Even when nothing is being created: a reconnaissance pass that comes back with a
             // cover has told us something worth keeping.

@@ -35,6 +35,15 @@ struct NewBookDraft: Equatable, Sendable {
     /// What told this author apart from a namesake, kept only to show it back in the form.
     var authorDescription: String?
 
+    /// The uri of a work inventaire.io already has, when the reader has agreed that this book
+    /// is one more edition of it. `nil` means a work is being created alongside the edition.
+    var workUri: String?
+
+    /// Whether the question « inventaire knows this work — is it yours? » has been put. Asked
+    /// at most once per draft: a reader who answered « no, it is another book » must not be
+    /// asked again on the retry.
+    var hasAnsweredWorkQuestion: Bool = false
+
     /// What the ISBN says about the language of the book, once the server has been asked.
     /// `nil` until then, and `nil` for good if the call fails — in which case the edition is
     /// published without a language claim rather than with a guessed one.

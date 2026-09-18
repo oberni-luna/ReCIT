@@ -64,6 +64,52 @@ struct EntityCreationModelTests {
         #expect(await model.editionLanguage(isbn: "9782380192741") == nil)
     }
 
+    // MARK: - The reconnaissance pass
+
+    @Test("A work the server recognised is answered, so the reader can be asked about it")
+    func recognisedWorkIsAnswered() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/resolve", json: """
+        {
+          "entries": [
+            {
+              "edition": { "resolved": false },
+              "works": [ { "uri": "wd:Q1130619", "resolved": true } ]
+            }
+          ]
+        }
+        """)
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+
+        #expect(await model.recogniseWork(draft: draft) == "wd:Q1130619")
+    }
+
+    /// A work the server says it *would create* is not a work that exists: asking the reader
+    /// about it would be asking them to confirm their own typing.
+    @Test("A work the server would merely create is not offered as a match")
+    func createdWorkIsNotAMatch() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/resolve", json: """
+        { "entries": [ { "edition": { "resolved": false }, "works": [ { "created": true } ] } ] }
+        """)
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+
+        #expect(await model.recogniseWork(draft: draft) == nil)
+    }
+
+    /// A reconnaissance pass is worth a screen, not a blocked contribution.
+    @Test("A failed reconnaissance asks nothing and blocks nothing")
+    func failedReconnaissanceIsSilent() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/resolve", error: NetworkError.badStatus(code: 500, message: nil))
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+
+        #expect(await model.recogniseWork(draft: draft) == nil)
+    }
+
     @Test("Creating an edition answers with the canonical uri the server gave it")
     func createReturnsTheCanonicalUri() async throws {
         let mock: MockAPIService = .init()

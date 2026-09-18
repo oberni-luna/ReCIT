@@ -56,6 +56,30 @@ final class EntityCreationModel {
         return .init(uri: uri, code: code)
     }
 
+    /// Asks inventaire.io what it already knows about this book, **without writing anything**.
+    ///
+    /// The answer that matters is the work: *La Main gauche de la nuit* exists, and it is this
+    /// edition of it that is missing. Knowing that before publishing is what lets the reader
+    /// add an edition to a work instead of creating a second work of the same name — the kind
+    /// of duplicate that splits a bibliography and needs merge rights to repair.
+    ///
+    /// Answers the uri of a work the server **resolved**, never one it says it would create.
+    /// A call that fails answers `nil`: the question is then not put, the publication goes
+    /// ahead, and the server dedupes on its own side as best it can. A reconnaissance pass is
+    /// worth a screen, not a blocked contribution.
+    func recogniseWork(draft: NewBookDraft) async -> String? {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(for: draft, create: false)
+
+        let response: EntityResolveResponse? = try? await apiService.send(
+            toEndpoint: "/api/entities/resolve",
+            method: "POST",
+            payload: request,
+            debug: false
+        )
+
+        return response?.resolvedWorkUri
+    }
+
     /// Creates the edition — and, as needed, its work and its author — and answers with the
     /// **canonical** uri of the edition.
     ///

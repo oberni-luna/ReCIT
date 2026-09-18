@@ -32,6 +32,13 @@ struct EntityResolveResponse: Codable, Equatable, Sendable {
         let created: Bool?
     }
 
+    /// The uri of a work the server **recognised** — not one it created, and not one it merely
+    /// echoed back. This is what the reconnaissance pass is run for: a work already on
+    /// inventaire.io means the book being added is one more edition of it.
+    var resolvedWorkUri: String? {
+        entries.first?.works?.first(where: { $0.resolved == true })?.uri
+    }
+
     /// The canonical uri of the edition this request was about, whether the server created it
     /// or found it already there — a reader publishing a book somebody else added a minute ago
     /// gets the existing one, which is the right answer and not an error.

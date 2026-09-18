@@ -21,9 +21,17 @@ struct ResolveRequestBuilderTests {
         title: String = "La Main gauche de la nuit",
         author: String = "Ursula K. Le Guin",
         authorUri: String? = nil,
+        workUri: String? = nil,
         language: EditionLanguage? = nil
     ) -> NewBookDraft {
-        .init(isbn: isbn, title: title, authorName: author, authorUri: authorUri, language: language)
+        .init(
+            isbn: isbn,
+            title: title,
+            authorName: author,
+            authorUri: authorUri,
+            workUri: workUri,
+            language: language
+        )
     }
 
     private let french: EditionLanguage = .init(uri: "wd:Q150", code: "fr")
@@ -143,6 +151,48 @@ struct ResolveRequestBuilderTests {
         let author: EntityResolveRequest.Seed = try #require(request.entries.first?.authors?.first)
         #expect(author.uri == nil)
         #expect(author.labels == ["fr": "Ursula K. Le Guin"])
+    }
+
+    // MARK: - A work that already exists
+
+    /// Describing the work again would offer the server a second one to create, next to the
+    /// one it has just recognised.
+    @Test("A recognised work is claimed by the edition, and seeded nowhere")
+    func recognisedWorkBecomesAClaim() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(workUri: "wd:Q1130619"),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.entries.first?.edition.claims?["wdt:P629"] == ["wd:Q1130619"])
+        #expect(request.entries.first?.works == nil)
+    }
+
+    @Test("Without a recognised work, one is described and nothing is claimed")
+    func unrecognisedWorkIsSeeded() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(),
+            create: true,
+            language: "fr"
+        )
+
+        let entry: EntityResolveRequest.Entry = try #require(request.entries.first)
+        #expect(entry.edition.claims?["wdt:P629"] == nil)
+        #expect(entry.works?.first?.labels == ["fr": "La Main gauche de la nuit"])
+    }
+
+    /// The title typed is the one printed on this cover; the work it belongs to may be called
+    /// something else, and that is exactly what the recognition screen is about.
+    @Test("Attaching to a known work does not change the edition's own title")
+    func editionKeepsItsTitleWhenAttached() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(title: "La Main gauche de la nuit", workUri: "wd:Q1130619"),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.entries.first?.edition.claims?["wdt:P1476"] == ["La Main gauche de la nuit"])
     }
 
     // MARK: - The language the ISBN answered

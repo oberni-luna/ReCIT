@@ -215,6 +215,150 @@
         }
       }
     },
+    "create_book.work.another_book" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No, this is another book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non, c\u2019est un autre livre"
+          }
+        }
+      }
+    },
+    "create_book.work.another_book_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a separate work as well \u2014 only if the text itself differs, not if it is the cover that changed."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cr\u00e9er aussi une \u0153uvre \u00e0 part \u2014 seulement si le texte diff\u00e8re, pas si c\u2019est la couverture qui change."
+          }
+        }
+      }
+    },
+    "create_book.work.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur inventaire.io"
+          }
+        }
+      }
+    },
+    "create_book.work.lead" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io knows this work, but not this edition of it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io conna\u00eet cette \u0153uvre, mais pas cette \u00e9dition."
+          }
+        }
+      }
+    },
+    "create_book.work.one_more_edition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One more edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une \u00e9dition de plus"
+          }
+        }
+      }
+    },
+    "create_book.work.one_more_edition_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your book is attached to the work above. Neither the work nor its author is duplicated."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre livre est rattach\u00e9 \u00e0 l\u2019\u0153uvre ci-dessus. Ni l\u2019\u0153uvre ni son auteur ne sont dupliqu\u00e9s."
+          }
+        }
+      }
+    },
+    "create_book.work.publish_edition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publish this edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publier cette \u00e9dition"
+          }
+        }
+      }
+    },
+    "create_book.work.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This book is known"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce livre est connu"
+          }
+        }
+      }
+    },
+    "create_book.work.what_you_create" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you are creating"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que vous cr\u00e9ez"
+          }
+        }
+      }
+    },
     "network.add_friends" : {
       "localizations" : {
         "en" : {

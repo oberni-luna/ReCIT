@@ -4,6 +4,23 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-09-22 — `Inventaire vide · Première étape`** : trois propositions pour la note de l'étagère
+  vide quand l'inventaire est vide (`ShelfEmptyStateErrand.scan`). Section `Inventaire vide · Première étape`
+  (`460:11692`) sur la page `Screens`, mode sombre seul, quatre clones de `A · Collection vide · Tel quel · Dark`
+  (`209:6110`) : `0 · Tel quel` (`460:11693`), `A · Note étendue sur l'étagère` (`460:11703`) — l'étiquette papier
+  devient une note (titre, phrase, deux `Action / Pill` Tinted) posée sur la planche ; `B · Étiquette + consigne
+  sous la planche` (`460:11713`) — l'étiquette garde sa forme (« Première étape / Ajouter vos livres »), la phrase et
+  les deux pastilles passent sous la planche ; `C · Deux étiquettes, deux gestes` (`460:11723`) — la phrase au-dessus,
+  et deux étiquettes papier « Scanner » / « Rechercher » posées sur la planche, chacune une action. **Aucun composant
+  ni token nouveau** : `Action / Pill`, `Icon`, `shelf/label/*`, `Shadow/Light`, styles `Content/*` et `Footnote/*`.
+  Notes papier épinglées en `Light` (îlot clair, comme les champs de `Se connecter · Vert`). L'étiquette d'origine est
+  masquée par override (`name row` invisible), pas détachée. Chrome hérité du clone : tab bar à 4 onglets et une seule
+  action de barre, en retard sur l'app. **C et D retenues et implémentées** le 2026-09-22 ([feature 0021](../features/0021-empty-shelf-first-steps.md)) ; divergences — inclinaison ±1° dérivée du texte, glyphe `books.vertical.fill` pour Ranger — listées dans la feature. Seconde rangée, même
+  langage que C pour l'autre errand (`ShelfEmptyStateErrand.sort`, des livres mais aucune étagère) :
+  `0 · Livres sans étagère · Tel quel` (`461:11937`, clone de `210:6374`) et `D · Livres sans étagère · Une étiquette`
+  (`461:11950`) — phrase « Étape suivante : ranger vos livres » au-dessus, une seule étiquette papier « Ranger mes
+  livres · à la main, ou avec un peu d'aide » posée sur la planche, glyphe `Icon/book` (faute de
+  `books.vertical.fill`, comme pour les astuces TipKit).
 - **Passe du 2026-09-18 — `Créer un livre absent`** : ce qu'il advient d'un scan qui ne trouve rien. Section
   `Créer un livre absent` (`433:11445`) sur la page `Screens` : 8 frames — `C1` scan sans résultat, `C2` formulaire,
   `C3` auteur, `C4` l'œuvre existe déjà, `C5` publié, `C6` la même absence vue de la recherche, `C7` l'échec,

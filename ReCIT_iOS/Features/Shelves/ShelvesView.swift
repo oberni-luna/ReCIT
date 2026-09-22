@@ -22,6 +22,9 @@ struct ShelvesView: View {
     /// Nothing clears it: a query edited afterwards stops matching what was sent, and that is
     /// what takes the screen back out of its results (`SearchPhase`).
     @State private var submission: SearchSuggestion?
+    /// Whether the search field is up. Held so the empty shelf's « Rechercher » tag can raise it:
+    /// `.searchable` only takes that from a binding.
+    @State private var isSearchPresented: Bool = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -34,7 +37,8 @@ struct ShelvesView: View {
                             user: user,
                             searchText: $searchText,
                             submission: $submission,
-                            path: $path
+                            path: $path,
+                            onSearch: { isSearchPresented = true }
                         )
                     }
                 } else {
@@ -65,7 +69,10 @@ struct ShelvesView: View {
                     .accessibilityIdentifier("e2e.shelves.scan")
                 }
             }
-            .searchable(text: $searchText)
+            .searchable(
+                text: $searchText,
+                isPresented: $isSearchPresented
+            )
             // The keyboard's « rechercher » key sends the query against both books and people
             // — the same thing the third suggestion does, and the same value, so the two
             // gestures cannot end up asking inventaire.io for different things. Below three

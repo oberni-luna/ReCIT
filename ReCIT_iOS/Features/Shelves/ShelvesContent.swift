@@ -20,6 +20,9 @@ struct ShelvesContent: View {
     /// keyboard's « rechercher » key only reaches the field from above `.searchable`.
     @Binding var submission: SearchSuggestion?
     @Binding var path: NavigationPath
+    /// Opens the inventory's search field — owned by `ShelvesView`, because only the view that
+    /// carries `.searchable` can present it. The empty shelf's « Rechercher » tag is its caller.
+    let onSearch: () -> Void
 
     @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(\.isSearching) private var isSearching
@@ -40,12 +43,14 @@ struct ShelvesContent: View {
         user: User,
         searchText: Binding<String>,
         submission: Binding<SearchSuggestion?>,
-        path: Binding<NavigationPath>
+        path: Binding<NavigationPath>,
+        onSearch: @escaping () -> Void
     ) {
         self.user = user
         self._searchText = searchText
         self._submission = submission
         self._path = path
+        self.onSearch = onSearch
 
         let ownerId: String = user._id
         _shelves = Query(
@@ -87,7 +92,7 @@ struct ShelvesContent: View {
                         ShelfEmptyStateView(
                             width: cardWidth,
                             errand: emptyShelfErrand,
-                            onTap: tapEmptyShelf
+                            onAction: perform
                         )
                             .accessibilityIdentifier("e2e.shelves.emptyCard")
                             // Parked where the carousel's first card would be, so the
@@ -111,9 +116,9 @@ struct ShelvesContent: View {
         }
     }
 
-    /// What the empty card's note asks for — and, through the switch in `tapEmptyShelf`, where
-    /// its press goes. The label and the destination both read this one property, so they are a
-    /// single decision rather than two that have to be kept in step.
+    /// What the empty card asks for — its sentence and its tags. Where each tag's press goes is
+    /// the switch in `perform`, over the tag's own `ShelfEmptyStateAction`, so a tag's wording and
+    /// its destination are a single decision rather than two that have to be kept in step.
     ///
     /// The card only appears when the user has no étagère, so the inventory is the whole
     /// question: no books, nothing to arrange yet. Reading an empty `@Query` as "empty" is only
@@ -124,10 +129,10 @@ struct ShelvesContent: View {
         .init(ownsBooks: !myItems.isEmpty)
     }
 
-    /// The empty shelf's note states the next useful thing, and pressing it does that thing:
-    /// with an empty inventory, scanning books in; with books already owned and no étagère to
-    /// put them on, arranging them. Both are the same promise kept — the note is read, then
-    /// acted on. See PRD 0007.
+    /// The empty shelf states the next useful thing, and each of its tags does one way of doing
+    /// it: with an empty inventory, scanning books in or looking them up; with books already
+    /// owned and no étagère to put them on, arranging them. Each is the same promise kept — the
+    /// tag is read, then acted on. See PRD 0007 and docs/features/0021.
     ///
     /// **This card had a second destination once and it was deliberately removed, so putting
     /// one back has to say how it differs.** What PRD 0006 took out was a *silent* substitution
@@ -145,18 +150,20 @@ struct ShelvesContent: View {
     /// (`ManualSortProposalButton`) — still stated, one layer further in, and now next to a
     /// screen that works.
     ///
-    /// What is different here is that the note changes with the state, so the affordance is
-    /// stated before it is used. Nothing is substituted behind the label; the label *is* the
-    /// state, and it and this switch come from the same `emptyShelfErrand`, so they cannot
-    /// disagree. The rule that survives from 0006 is the one that mattered all along: a card
-    /// must never open something other than what its label promises.
+    /// What is different here is that the tags change with the state, so the affordance is
+    /// stated before it is used. Nothing is substituted behind a label; each tag *is* the action
+    /// it names, and it and this switch come from the same `ShelfEmptyStateAction`, so they
+    /// cannot disagree. The rule that survives from 0006 is the one that mattered all along: a
+    /// tag must never open something other than what it promises.
     ///
     /// The manual route is untouched either way — the section header's "Ajouter" creates an
     /// étagère by hand.
-    private func tapEmptyShelf() {
-        switch emptyShelfErrand {
+    private func perform(_ action: ShelfEmptyStateAction) {
+        switch action {
         case .scan:
             sortFlow.presentScanning()
+        case .search:
+            onSearch()
         case .sort:
             sortFlow.presentSorting()
         }

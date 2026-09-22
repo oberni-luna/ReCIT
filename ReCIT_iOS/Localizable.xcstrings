@@ -5252,36 +5252,172 @@
         }
       }
     },
-    "shelf.empty.note.scan" : {
+    "shelf.empty.action.scan.detail" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Todo\n☐ Scan my books"
+            "value" : "a book\u2019s barcode"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Todo\n☐ Scanner mes livres"
+            "value" : "le code-barres d\u2019un livre"
           }
         }
       }
     },
-    "shelf.empty.note.sort" : {
+    "shelf.empty.action.scan.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Todo\n☐ Sort my books"
+            "value" : "Scan"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Todo\n☐ Ranger mes livres"
+            "value" : "Scanner"
+          }
+        }
+      }
+    },
+    "shelf.empty.action.search.detail" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "by title or author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "par titre ou auteur"
+          }
+        }
+      }
+    },
+    "shelf.empty.action.search.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher"
+          }
+        }
+      }
+    },
+    "shelf.empty.action.sort.detail" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "by hand, or with a little help"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\u00e0 la main, ou avec un peu d\u2019aide"
+          }
+        }
+      }
+    },
+    "shelf.empty.action.sort.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort my books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ranger mes livres"
+          }
+        }
+      }
+    },
+    "shelf.empty.scan.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan the ones you have at hand, or look them up by title."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scannez ceux que vous avez en main, ou cherchez-les par leur titre."
+          }
+        }
+      }
+    },
+    "shelf.empty.scan.heading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First step: add your books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premi\u00e8re \u00e9tape : ajouter vos livres"
+          }
+        }
+      }
+    },
+    "shelf.empty.sort.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your books are here. Now give them a place on your shelves."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres sont l\u00e0. Il reste \u00e0 leur faire une place sur des \u00e9tag\u00e8res."
+          }
+        }
+      }
+    },
+    "shelf.empty.sort.heading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next step: shelve your books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\u00c9tape suivante : ranger vos livres"
           }
         }
       }

@@ -340,6 +340,9 @@ private struct CreateBookCoverSlot: View {
                     .textStyle(.caption200)
                     .foregroundStyle(.foregroundSecondary)
                     .multilineTextAlignment(.center)
+                    // 88 points is narrower than a long French word: without this, « photo-
+                    // graphier » broke across two lines mid-syllable.
+                    .minimumScaleFactor(0.8)
             }
             .padding(.all, .small)
         }

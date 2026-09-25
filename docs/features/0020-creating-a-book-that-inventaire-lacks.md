@@ -19,6 +19,43 @@ en lecture seule, la langue est déduite de son préfixe, la couverture se photo
 On publie, le serveur répond, le livre existe pour tout le monde et il est dans l'inventaire. La
 caméra reprend la main pour le suivant.
 
+## Avant tout cela : laisser le serveur créer le livre lui-même
+
+Ajouté le 2026-09-25, et c'est ce qui rend le formulaire rare.
+
+inventaire.io a un service de renseignements — fermé, assumé comme tel dans son code comme
+« a blackboxed service getting some basic facts on books from the web » — qui connaît des
+centaines de milliers d'ISBN que la base, elle, n'a pas encore. Le site s'en sert sans le dire :
+son scanner demande l'entité avec **`autocreate=true`**, et le serveur, plutôt que de répondre
+« je n'ai rien », **écrit l'édition** à partir de ce que son service lui rend.
+
+L'app demandait sans ce paramètre. D'où l'asymétrie : le même code-barres donnait un livre complet
+sur le site et « Cette édition n'existe pas » dans l'app.
+
+```
+GET /api/entities/by-uris?uris=isbn:9782707355263&autocreate=true
+→ inv:2078ee8e… · titre « Liberté » · date · éditeur · langue · œuvre wd:Q3237838 · couverture
+```
+
+C'est **public**, c'est un seul paramètre, et le chemin serveur est explicite
+(`get_entities_by_isbns.ts`) : les ISBN manquants passent par
+`enrichAndGetEditionEntityFromIsbn`, et **ceux que le service ne connaît pas retombent dans
+`notFound`**. Aucune fiche vide n'est créée.
+
+Donc : la recherche du scanner le demande, la plupart des scans « inconnus » d'hier se résolvent
+maintenant tout seuls, avec couverture et auteur, et **`.notFound` veut désormais dire ce qu'il
+prétend** — ni la base, ni Wikidata, ni le service de renseignements ne connaissent ce livre. C'est
+là, et seulement là, que le formulaire de création sert.
+
+Le reste de l'app continue de demander sans `autocreate` : c'est une écriture, et seule la
+recherche du scanner a une raison d'en demander une.
+
+**Une réserve, à garder en tête** : `autocreate` **n'est pas dans le spec OpenAPI publié**. Il est
+dans la sanitisation du contrôleur (`by_uris_get.ts`) et dans le client officiel, donc c'est un
+chemin soutenu, pas un bricolage — mais un paramètre non documenté peut disparaître sans
+dépréciation. S'il disparaissait, le scanner retomberait exactement sur le comportement d'avant :
+`.notFound`, et le formulaire.
+
 ## Les deux règles qui ont changé dans le scanner
 
 La rangée `.notFound` n'avait pas de minuteur par hasard : c'était la seule façon de ne pas laisser
@@ -30,8 +67,12 @@ règles d'un coup.
   reconnu qui attend d'être rangé.
 - **Un code-barres *différent* l'évince.** C'est la contrepartie obligatoire : viser le livre
   suivant est la façon de dire « pas celui-là ». Le **même** code, resté en vue, ne relance rien —
-  la barrière anti-répétition n'a pas bougé. `.resolved` et `.adding` restent inévinçables : là un
-  livre attend d'être rangé, ou est déjà parti vers le serveur.
+  la barrière anti-répétition n'a pas bougé.
+
+Corrigé le 2026-09-25 : **`.resolved` s'évince de la même façon**. Une rangée qui propose de
+ranger un livre est une offre comme l'autre, et elle n'avait pas de sortie — il fallait ajouter le
+livre pour pouvoir scanner le suivant, même quand on possédait déjà cet exemplaire ailleurs.
+`.adding` reste inévinçable : l'écriture est partie vers le serveur.
 
 C'est la seule exception à la règle « un seul résultat en attente à la fois », et elle est écrite
 là où elle se décide, dans `BatchScanStateMachine.isReplaceable(by:)`.

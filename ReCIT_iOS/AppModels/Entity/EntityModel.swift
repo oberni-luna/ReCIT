@@ -87,8 +87,20 @@ final class EntityModel {
     /// Fetches the edition remotely and merges the fresh values into the cached
     /// entity in place (inserting it if absent), also resolving its works.
     /// If the remote call yields no entity, the current cached value is returned.
-    func refreshEdition(modelContext: ModelContext, uri: String) async throws -> Edition? {
-        guard let editionDto = try await fetchEntities(modelContext: modelContext, uris: [uri])?.first else {
+    ///
+    /// `autocreate` is for the scanner, and only for it: asked with an `isbn:` uri, the server
+    /// will create the edition from its own book-facts service rather than answer that it has
+    /// none. See `fetchEntities`.
+    func refreshEdition(
+        modelContext: ModelContext,
+        uri: String,
+        autocreate: Bool = false
+    ) async throws -> Edition? {
+        guard let editionDto = try await fetchEntities(
+            modelContext: modelContext,
+            uris: [uri],
+            autocreate: autocreate
+        )?.first else {
             return try? getLocalEdition(modelContext: modelContext, uri: uri)
         }
 
@@ -454,11 +466,28 @@ final class EntityModel {
         return (try? await getOrFetchWorks(modelContext: modelContext, uris: workUris)) ?? []
     }
 
-    func fetchEntities(modelContext: ModelContext, uris: [String], debug: Bool = false) async throws -> [EntityResultDTO]? {
+    /// Fetches entities by uri.
+    ///
+    /// `autocreate` asks inventaire.io to **make the entity rather than answer that it has
+    /// none**, which it can do for an `isbn:` uri: the server goes to its own book-facts
+    /// service and, when that service knows the ISBN, writes a complete edition — title,
+    /// publication date, publisher, language, the work it belongs to, and a cover — then
+    /// returns it like any other. That is why the website's scanner almost never has to ask
+    /// anybody to fill in a form. Off by default: it is a *write*, and only the scanner's
+    /// lookup has a reason to ask for one. See PRD 0015 and feature 0020.
+    func fetchEntities(
+        modelContext: ModelContext,
+        uris: [String],
+        autocreate: Bool = false,
+        debug: Bool = false
+    ) async throws -> [EntityResultDTO]? {
         var results: [EntityResultDTO] = []
 
         for uriBatch in uris.splitInSubArrays(of: 50) {
-            let entityUrl: String = "/api/entities/by-uris?uris=\(uriBatch.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
+            var entityUrl: String = "/api/entities/by-uris?uris=\(uriBatch.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
+            if autocreate {
+                entityUrl += "&autocreate=true"
+            }
             let resultsDto: EntityResultsDTO? = try await apiService.fetchData(fromEndpoint: entityUrl, debug: debug)
             results.append(contentsOf: resultsDto.map { Array($0.entities.values) } ?? [])
         }

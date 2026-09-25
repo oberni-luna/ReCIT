@@ -128,6 +128,28 @@ struct EntityModelTests {
         #expect(edition.lang == "fr")
     }
 
+    // MARK: - Letting inventaire.io create the edition it is missing
+
+    /// The scanner's lookup, and nothing else, asks the server to *make* the edition from its
+    /// own book-facts service rather than answer that it has none. It is a write, so it is not
+    /// the default.
+    @Test("An edition may be asked for with autocreate, which the ordinary fetch does not")
+    func autocreateIsAskedForOnlyWhenRequested() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/by-uris", json: editionJSON(uri: "inv:ed1", title: "Liberté", subtitle: nil))
+        let model: EntityModel = .init(apiService: mock)
+
+        _ = try await model.refreshEdition(modelContext: context, uri: "isbn:9782707355263", autocreate: true)
+        _ = try await model.refreshEdition(modelContext: context, uri: "inv:ed1")
+
+        let endpoints: [String] = mock.recordedRequests.map(\.endpoint)
+        #expect(endpoints.count == 2)
+        #expect(endpoints[0].contains("autocreate=true"))
+        #expect(endpoints[0].contains("uris=isbn:9782707355263"))
+        #expect(endpoints[1].contains("autocreate") == false)
+    }
+
     // MARK: - Upsert in place (the sparse-forever bug fix)
 
     @Test("refreshWork updates the cached work in place instead of duplicating it")

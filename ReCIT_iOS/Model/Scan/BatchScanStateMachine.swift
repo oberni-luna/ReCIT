@@ -8,8 +8,11 @@
 //
 //  Two rules carry the feature, and neither is visible in the design:
 //
-//  1. **One pending result at a time.** A second barcode drifting through the frame must not
-//     replace the book the user is about to file.
+//  1. **One pending result at a time, unless the reader points at another book.** A second
+//     barcode drifting through the frame must not replace what is on the row — except when
+//     the row holds an *offer* (a book to file, an unknown edition to create), which the next
+//     book is allowed to withdraw. Otherwise answering the offer would be the only way to keep
+//     scanning. See `isReplaceable(by:)`.
 //  2. **The repeat-scan gate.** `CodeScannerView` fires for as long as a barcode stays in
 //     frame, so the book just added is still in frame a frame later. The machine remembers
 //     the code it last accepted and refuses it until either a *different* code is seen (one
@@ -156,24 +159,28 @@ struct BatchScanStateMachine {
 
     /// Whether the row may be given away to `code`.
     ///
-    /// `.idle` always may. `.notFound` may too — and it is the only pending result that may,
-    /// which is what keeps rule 1 true where it matters. An unknown edition now *stays* on
-    /// screen, because it carries an action (creating the book on inventaire.io, see issue
-    /// 0090); nothing takes it down by itself any more. Without an eviction, a user who does
-    /// not want to create is stranded on their own offer, and the next book never gets a
-    /// lookup. A **different** book is exactly the way to say « not this one » — the same code,
-    /// still in frame, is not.
+    /// Two states are offers, and an offer must be refusable: `.notFound`, which proposes
+    /// creating the book on inventaire.io, and `.resolved`, which proposes filing it. Neither
+    /// takes itself down — one has no timer at all, the other waits for a tap — so without an
+    /// eviction the reader is *obliged* to answer before the next book can be scanned: obliged
+    /// to create a book they did not want to create, obliged to add a book they already have
+    /// on another shelf, or obliged to leave the flow.
     ///
-    /// `.resolved` and `.adding` are never replaceable: there a book is waiting to be filed, or
-    /// already on its way to the server, and a second barcode drifting through the frame must
-    /// not take its place.
+    /// A **different** barcode is exactly the way to say « not this one ». The **same** one,
+    /// still in frame, is not: that is what the repeat-scan gate exists to refuse, and it keeps
+    /// refusing it here.
+    ///
+    /// `.adding` is never replaceable — the write is already on its way to the server. Nor is
+    /// `.lookingUp`, whose answer is seconds away, nor the two rows that clear themselves.
     private func isReplaceable(by code: String) -> Bool {
         switch state {
         case .idle:
             true
         case .notFound(let pending):
             pending != code
-        case .lookingUp, .resolved, .alreadyOwned, .adding, .added:
+        case .resolved(let book):
+            book.code != code
+        case .lookingUp, .alreadyOwned, .adding, .added:
             false
         }
     }

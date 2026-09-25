@@ -108,9 +108,17 @@ final class BatchScanViewModel {
         do {
             // `isbn:` is the uri we can *ask* with; what comes back is keyed by inventaire's
             // own canonical id, and that is what the item has to be created from.
+            //
+            // **Asked with `autocreate`**, which is what the website's own scanner does: for an
+            // ISBN its book-facts service knows, inventaire.io writes the edition itself —
+            // title, date, publisher, language, work and cover — and hands it back as if it had
+            // always been there. Most barcodes that used to land on « this edition does not
+            // exist » now simply resolve. What is left over, the ISBNs nothing knows, is what
+            // the creation form is for. See feature 0020.
             guard let edition = try await entityModel.refreshEdition(
                 modelContext: modelContext,
-                uri: "isbn:\(code)"
+                uri: "isbn:\(code)",
+                autocreate: true
             ) else {
                 showNotice(.lookupFailed(code: code), haptic: .error)
                 return

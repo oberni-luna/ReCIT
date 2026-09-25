@@ -101,23 +101,26 @@ struct BatchScanStateMachineTests {
 
     // MARK: - One pending result at a time
 
-    @Test("A second code arriving while one is pending is ignored")
+    @Test("A second code is ignored while a lookup runs, and while an add is in flight")
     func secondCodeWhilePendingIsIgnored() {
         let clock: TestClock = .init()
         var machine: BatchScanStateMachine = makeMachine(clock: clock)
 
         machine.apply(.codeSeen(firstCode))
 
-        // Still looking the first one up.
+        // Still looking the first one up: the answer is a second away, and taking the row from
+        // under it would throw that round-trip away.
         let duringLookup: Bool = machine.apply(.codeSeen(secondCode))
         #expect(duringLookup == false)
         #expect(machine.state == .lookingUp(code: firstCode))
 
-        // And still, once it is resolved and waiting for the user's tap.
+        // Once it is resolved, the row is an *offer* and the next book withdraws it — see
+        // `differentCodeEvictsAResolvedBook`. What stays closed is the add already in flight.
         machine.apply(.lookupResolved(book(firstCode)))
-        let whileOffered: Bool = machine.apply(.codeSeen(secondCode))
-        #expect(whileOffered == false)
-        #expect(machine.state == .resolved(book: book(firstCode)))
+        machine.apply(.addStarted)
+        let duringAdd: Bool = machine.apply(.codeSeen(secondCode))
+        #expect(duringAdd == false)
+        #expect(machine.state == .adding(book: book(firstCode)))
     }
 
     @Test("A lookup landing for a code the row is no longer waiting for is dropped")
@@ -418,10 +421,11 @@ struct BatchScanStateMachineTests {
         #expect(machine.addedBookCount == 0)
     }
 
-    /// A book waiting to be filed is not an offer that can be walked away from: a second
-    /// barcode drifting through the frame must not take its place.
-    @Test("A book waiting to be filed is not replaced by another barcode")
-    func resolvedRowIsNotEvictable() {
+    /// An offer must be refusable. A book waiting to be filed is one — the reader may already
+    /// have that copy on another shelf, or simply not want it — so pointing at the next book
+    /// withdraws it, rather than obliging an add to get the scanner moving again.
+    @Test("Aiming at a different book replaces a book waiting to be filed")
+    func differentCodeEvictsAResolvedBook() {
         let clock: TestClock = .init()
         var machine: BatchScanStateMachine = makeMachine(clock: clock)
 
@@ -430,12 +434,41 @@ struct BatchScanStateMachineTests {
 
         clock.advance(by: 0.4)
         let replaced: Bool = machine.apply(.codeSeen(secondCode))
-        #expect(replaced == false)
-        #expect(machine.state == .resolved(book: book(firstCode)))
+        #expect(replaced == true)
+        #expect(machine.state == .lookingUp(code: secondCode))
+    }
 
+    /// The book being offered is still in frame while the reader decides, and re-offering it
+    /// ten times a second is what the gate exists to prevent.
+    @Test("The same book, still in frame, does not restart its own lookup")
+    func sameCodeDoesNotReplaceAResolvedBook() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupResolved(book(firstCode)))
+
+        clock.advance(by: 0.4)
+        let again: Bool = machine.apply(.codeSeen(firstCode))
+        #expect(again == false)
+        #expect(machine.state == .resolved(book: book(firstCode)))
+    }
+
+    /// An add on its way to the server is not an offer any more: the write is in flight, and a
+    /// barcode drifting through the frame must not take the row from under it.
+    @Test("A book being filed is not replaced by another barcode")
+    func addingRowIsNotEvictable() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupResolved(book(firstCode)))
         machine.apply(.addStarted)
+
+        clock.advance(by: 0.4)
         let duringAdd: Bool = machine.apply(.codeSeen(secondCode))
         #expect(duringAdd == false)
+        #expect(machine.state == .adding(book: book(firstCode)))
     }
 
     // MARK: - A failed add

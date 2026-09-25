@@ -32,7 +32,9 @@ enum BatchScanState: Equatable {
     /// thing, and both are answered by offering to create the book — or by pointing at the
     /// next one, which is what takes this row down.
     case notFound(code: String)
-    /// The edition came back and the user can file it.
+    /// The edition came back and the user can file it. An offer, so the next book withdraws
+    /// it: filing is not compulsory — the copy may be one the reader already has elsewhere, or
+    /// simply not one they want.
     case resolved(book: ScannedBook)
     /// The edition came back and the user already has a copy. The row says so and refuses the
     /// add; a genuine second copy is still addable from the book screen. The match is on the

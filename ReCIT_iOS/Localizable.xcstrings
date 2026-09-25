@@ -7,1083 +7,6 @@
     ", " : {
 
     },
-    "create_book.author.choose" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose the author"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir l\u2019auteur"
-          }
-        }
-      }
-    },
-    "create_book.author.create %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create \u00ab %@ \u00bb"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cr\u00e9er \u00ab %@ \u00bb"
-          }
-        }
-      }
-    },
-    "create_book.author.existing" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Already on inventaire.io"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "D\u00e9j\u00e0 sur inventaire.io"
-          }
-        }
-      }
-    },
-    "create_book.author.no_result" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No author of that name on inventaire.io yet."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun auteur de ce nom sur inventaire.io pour l\u2019instant."
-          }
-        }
-      }
-    },
-    "create_book.author.why_existing" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick the author who is already there if you recognise them: that is what keeps the database free of duplicates."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prenez l\u2019auteur d\u00e9j\u00e0 pr\u00e9sent si vous le reconnaissez\u00a0: c\u2019est ce qui \u00e9vite un doublon dans la base."
-          }
-        }
-      }
-    },
-    "create_book.author_field" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Author"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auteur"
-          }
-        }
-      }
-    },
-    "create_book.cover.take" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Photograph the cover"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Photographier la couverture"
-          }
-        }
-      }
-    },
-    "create_book.failure.account.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your inventaire.io session has expired. Nothing was created. Sign in again, and publish this book then."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre session inventaire.io a expir\u00e9. Rien n\u2019a \u00e9t\u00e9 cr\u00e9\u00e9. Reconnectez-vous, puis publiez ce livre."
-          }
-        }
-      }
-    },
-    "create_book.failure.account.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contributing needs an account"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contribuer demande un compte"
-          }
-        }
-      }
-    },
-    "create_book.failure.network.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "inventaire.io did not answer. Nothing was created there, and nothing is lost here: what you wrote is kept, and trying again makes no duplicate."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "inventaire.io n\u2019a pas r\u00e9pondu. Rien n\u2019a \u00e9t\u00e9 cr\u00e9\u00e9 l\u00e0-bas, et rien n\u2019est perdu ici\u00a0: ce que vous avez \u00e9crit est gard\u00e9, et r\u00e9essayer ne fait pas de doublon."
-          }
-        }
-      }
-    },
-    "create_book.failure.network.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The publication did not go through"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La publication n\u2019est pas pass\u00e9e"
-          }
-        }
-      }
-    },
-    "create_book.failure.refused.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing was created. The ISBN or the title may not be accepted as they are \u2014 this book can be added on inventaire.io itself."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rien n\u2019a \u00e9t\u00e9 cr\u00e9\u00e9. L\u2019ISBN ou le titre ne sont peut-\u00eatre pas accept\u00e9s tels quels\u00a0\u2014 ce livre peut \u00eatre ajout\u00e9 sur inventaire.io m\u00eame."
-          }
-        }
-      }
-    },
-    "create_book.failure.refused.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "inventaire.io refused this book"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "inventaire.io a refus\u00e9 ce livre"
-          }
-        }
-      }
-    },
-    "create_book.isbn" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ISBN, read from the barcode"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ISBN, lu sur le code-barres"
-          }
-        }
-      }
-    },
-    "create_book.keep_draft" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep the draft and go back"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Garder le brouillon et revenir"
-          }
-        }
-      }
-    },
-    "create_book.language %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Language, from the ISBN: %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Langue, d\u00e9duite de l\u2019ISBN\u00a0: %@"
-          }
-        }
-      }
-    },
-    "create_book.public_notice" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This book will join inventaire.io, the open database: what you write here will be public, and editable by other readers."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce livre rejoindra inventaire.io, la base ouverte\u00a0: ce que vous \u00e9crivez ici sera public, et modifiable par les autres lecteurs."
-          }
-        }
-      }
-    },
-    "create_book.publish" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Publish and add to my books"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Publier et ajouter \u00e0 mes livres"
-          }
-        }
-      }
-    },
-    "create_book.retry" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try again"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "R\u00e9essayer"
-          }
-        }
-      }
-    },
-    "create_book.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New book"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouveau livre"
-          }
-        }
-      }
-    },
-    "create_book.title_field" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Title of this edition"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Titre de cette \u00e9dition"
-          }
-        }
-      }
-    },
-    "create_book.title_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The title as printed on the cover, and the author who wrote it. Nothing else is required."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le titre tel qu\u2019il est imprim\u00e9 sur la couverture, et l\u2019auteur qui l\u2019a \u00e9crit. Rien d\u2019autre n\u2019est demand\u00e9."
-          }
-        }
-      }
-    },
-    "create_book.work.another_book" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No, this is another book"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Non, c\u2019est un autre livre"
-          }
-        }
-      }
-    },
-    "create_book.work.another_book_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create a separate work as well \u2014 only if the text itself differs, not if it is the cover that changed."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cr\u00e9er aussi une \u0153uvre \u00e0 part \u2014 seulement si le texte diff\u00e8re, pas si c\u2019est la couverture qui change."
-          }
-        }
-      }
-    },
-    "create_book.work.header" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On inventaire.io"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sur inventaire.io"
-          }
-        }
-      }
-    },
-    "create_book.work.lead" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "inventaire.io knows this work, but not this edition of it."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "inventaire.io conna\u00eet cette \u0153uvre, mais pas cette \u00e9dition."
-          }
-        }
-      }
-    },
-    "create_book.work.one_more_edition" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One more edition"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une \u00e9dition de plus"
-          }
-        }
-      }
-    },
-    "create_book.work.one_more_edition_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your book is attached to the work above. Neither the work nor its author is duplicated."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre livre est rattach\u00e9 \u00e0 l\u2019\u0153uvre ci-dessus. Ni l\u2019\u0153uvre ni son auteur ne sont dupliqu\u00e9s."
-          }
-        }
-      }
-    },
-    "create_book.work.publish_edition" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Publish this edition"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Publier cette \u00e9dition"
-          }
-        }
-      }
-    },
-    "create_book.work.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This book is known"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce livre est connu"
-          }
-        }
-      }
-    },
-    "create_book.work.what_you_create" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What you are creating"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce que vous cr\u00e9ez"
-          }
-        }
-      }
-    },
-    "network.add_friends" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add reader friends"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter des amis lecteurs"
-          }
-        }
-      }
-    },
-    "network.add_to_network" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to network"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter au réseau"
-          }
-        }
-      }
-    },
-    "network.invitation.accept" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accept"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accepter"
-          }
-        }
-      }
-    },
-    "network.invitation.accept_request" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accept the request"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accepter la demande"
-          }
-        }
-      }
-    },
-    "network.invitation.accepted %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ has joined your network"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ fait maintenant partie de votre réseau"
-          }
-        }
-      }
-    },
-    "network.invitation.refused %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invitation from %@ declined"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invitation de %@ refusée"
-          }
-        }
-      }
-    },
-    "network.invitation.explanation %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ asked to join networks with you. Declining does not tell them, and does not stop them asking again."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ vous a demandé de rejoindre son réseau. Refuser ne le prévient pas et ne l’empêche pas de redemander."
-          }
-        }
-      }
-    },
-    "network.invitation.received" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invitation received"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invitation reçue"
-          }
-        }
-      }
-    },
-    "network.invitation.refuse" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Decline"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refuser"
-          }
-        }
-      }
-    },
-    "network.invitations" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invitations"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invitations"
-          }
-        }
-      }
-    },
-    "network.invitations.all" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All invitations"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toutes les invitations"
-          }
-        }
-      }
-    },
-    "network.invitations.empty" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing waiting"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rien en attente"
-          }
-        }
-      }
-    },
-    "network.invitations.empty.message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requests you have sent and invitations you have received will show up here."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les demandes que vous avez envoyées et les invitations reçues s’afficheront ici."
-          }
-        }
-      }
-    },
-    "network.invitations.received" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Received"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reçues"
-          }
-        }
-      }
-    },
-    "network.invitations.sent" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sent"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Envoyées"
-          }
-        }
-      }
-    },
-    "network.private_inventory.message %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@'s books will appear here once the request is accepted."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les livres de %@ apparaîtront ici une fois la demande acceptée."
-          }
-        }
-      }
-    },
-    "network.private_inventory.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Private inventory"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventaire privé"
-          }
-        }
-      }
-    },
-    "network.reciprocal" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Once the request is accepted, you will see their books and they will see yours. inventaire.io knows no one-way street: a network is mutual."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une fois la demande acceptée, vous verrez ses livres et il verra les vôtres. inventaire.io ne connaît pas de sens unique : le réseau est réciproque."
-          }
-        }
-      }
-    },
-    "network.remove" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove from network"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirer du réseau"
-          }
-        }
-      }
-    },
-    "network.remove.confirm %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove %@ from your network? Their books leave your inventory, and the relation has to be asked for again."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirer %@ de votre réseau ? Ses livres quittent votre inventaire, et la relation devra être redemandée."
-          }
-        }
-      }
-    },
-    "network.request.awaiting" : {
-      "comment" : "Inert full-width button on a reader's profile, standing alone: it has to name what was sent.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Request sent"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demande envoyée"
-          }
-        }
-      }
-    },
-    "network.request.cancel" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel the request"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annuler la demande"
-          }
-        }
-      }
-    },
-    "network.request.explanation %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ will find your request among their invitations. Until it is accepted, neither of you sees the other's inventory."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ trouvera votre demande dans ses invitations. Tant qu’elle n’est pas acceptée, aucun de vous deux ne voit l’inventaire de l’autre."
-          }
-        }
-      }
-    },
-    "network.request.no_notification %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ gets no notification: the request will be seen the next time they open the app."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ ne reçoit aucune notification : la demande sera vue à la prochaine ouverture de l’app."
-          }
-        }
-      }
-    },
-    "network.request.send" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Send the request"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Envoyer la demande"
-          }
-        }
-      }
-    },
-    "network.request.sent" : {
-      "comment" : "Tag at the end of a reader row: this request is still waiting. Sits under a header that has already said these are requests, so it does not repeat the word.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sent"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Envoyée"
-          }
-        }
-      }
-    },
-    "network.request.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Friend request"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demande d’ajout"
-          }
-        }
-      }
-    },
-    "network.requests.pending" : {
-      "comment" : "Section header on the add-a-reader screen, at rest: the requests I have sent and nobody has answered yet.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pending requests"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demandes en cours"
-          }
-        }
-      }
-    },
-    "network.search.explanation" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Look a reader up by their inventaire.io username, then send them a request. Their inventory joins yours as soon as they accept it."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cherchez un lecteur par son nom d’utilisateur sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès qu’il l’aura acceptée."
-          }
-        }
-      }
-    },
-    "network.search.header" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Readers"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lecteurs"
-          }
-        }
-      }
-    },
-    "network.search.no_results" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No reader by that name"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun lecteur de ce nom"
-          }
-        }
-      }
-    },
-    "network.search.no_results.message %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nobody on inventaire.io answers to “%@”."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Personne sur inventaire.io ne répond à « %@ »."
-          }
-        }
-      }
-    },
-    "network.search.prompt" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Username"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nom d’utilisateur"
-          }
-        }
-      }
-    },
-    "network.search.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Find your reader friends"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trouvez vos amis lecteurs"
-          }
-        }
-      }
-    },
-    "profile.invitations" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invitations"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invitations"
-          }
-        }
-      }
-    },
-    "scanner.action.create_book" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create this book on inventaire.io"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cr\u00e9er ce livre sur inventaire.io"
-          }
-        }
-      }
-    },
     "🥲" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1608,23 +531,6 @@
         }
       }
     },
-    "book.no_edition.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No edition for this book"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune édition pour ce livre"
-          }
-        }
-      }
-    },
     "book.no_edition.message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1642,36 +548,19 @@
         }
       }
     },
-    "book.resolve.error.title" : {
+    "book.no_edition.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Couldn’t open this book"
+            "value" : "No edition for this book"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Impossible d’ouvrir ce livre"
-          }
-        }
-      }
-    },
-    "book.resolve.error.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The connection to inventaire.io failed."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connexion à inventaire.io a échoué."
+            "value" : "Aucune édition pour ce livre"
           }
         }
       }
@@ -1709,6 +598,40 @@
         }
       }
     },
+    "book.resolve.error.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The connection to inventaire.io failed."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connexion à inventaire.io a échoué."
+          }
+        }
+      }
+    },
+    "book.resolve.error.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t open this book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d’ouvrir ce livre"
+          }
+        }
+      }
+    },
     "Cette étagère est vide" : {
 
     },
@@ -1728,25 +651,519 @@
         }
       }
     },
-    "Créer" : {
-
+    "create_book.author_field" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur"
+          }
+        }
+      }
     },
-    "Description (optionnel)" : {
+    "create_book.author.choose" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir l’auteur"
+          }
+        }
+      }
+    },
+    "create_book.author.create %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create « %@ »"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer « %@ »"
+          }
+        }
+      }
+    },
+    "create_book.author.existing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà sur inventaire.io"
+          }
+        }
+      }
+    },
+    "create_book.author.no_result" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No author of that name on inventaire.io yet."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun auteur de ce nom sur inventaire.io pour l’instant."
+          }
+        }
+      }
+    },
+    "create_book.author.why_existing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick the author who is already there if you recognise them: that is what keeps the database free of duplicates."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prenez l’auteur déjà présent si vous le reconnaissez : c’est ce qui évite un doublon dans la base."
+          }
+        }
+      }
+    },
+    "create_book.cover.take" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cover photo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo de couverture"
+          }
+        }
+      }
+    },
+    "create_book.failure.account.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your inventaire.io session has expired. Nothing was created. Sign in again, and publish this book then."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre session inventaire.io a expiré. Rien n’a été créé. Reconnectez-vous, puis publiez ce livre."
+          }
+        }
+      }
+    },
+    "create_book.failure.account.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contributing needs an account"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contribuer demande un compte"
+          }
+        }
+      }
+    },
+    "create_book.failure.network.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io did not answer. Nothing was created there, and nothing is lost here: what you wrote is kept, and trying again makes no duplicate."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io n’a pas répondu. Rien n’a été créé là-bas, et rien n’est perdu ici : ce que vous avez écrit est gardé, et réessayer ne fait pas de doublon."
+          }
+        }
+      }
+    },
+    "create_book.failure.network.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The publication did not go through"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La publication n’est pas passée"
+          }
+        }
+      }
+    },
+    "create_book.failure.refused.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing was created. The ISBN or the title may not be accepted as they are — this book can be added on inventaire.io itself."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n’a été créé. L’ISBN ou le titre ne sont peut-être pas acceptés tels quels — ce livre peut être ajouté sur inventaire.io même."
+          }
+        }
+      }
+    },
+    "create_book.failure.refused.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refused this book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io a refusé ce livre"
+          }
+        }
+      }
+    },
+    "create_book.isbn" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN, read from the barcode"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN, lu sur le code-barres"
+          }
+        }
+      }
+    },
+    "create_book.keep_draft" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep the draft and go back"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder le brouillon et revenir"
+          }
+        }
+      }
+    },
+    "create_book.language %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language, from the ISBN: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langue, déduite de l’ISBN : %@"
+          }
+        }
+      }
+    },
+    "create_book.public_notice" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This book will join inventaire.io, the open database: what you write here will be public, and editable by other readers."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce livre rejoindra inventaire.io, la base ouverte : ce que vous écrivez ici sera public, et modifiable par les autres lecteurs."
+          }
+        }
+      }
+    },
+    "create_book.publish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publish and add to my books"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publier et ajouter à mes livres"
+          }
+        }
+      }
+    },
+    "create_book.retry" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "create_book.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau livre"
+          }
+        }
+      }
+    },
+    "create_book.title_field" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title of this edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titre de cette édition"
+          }
+        }
+      }
+    },
+    "create_book.title_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The title as printed on the cover, and the author who wrote it. Nothing else is required."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le titre tel qu’il est imprimé sur la couverture, et l’auteur qui l’a écrit. Rien d’autre n’est demandé."
+          }
+        }
+      }
+    },
+    "create_book.work.another_book" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No, this is another book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non, c’est un autre livre"
+          }
+        }
+      }
+    },
+    "create_book.work.another_book_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a separate work as well — only if the text itself differs, not if it is the cover that changed."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer aussi une œuvre à part — seulement si le texte diffère, pas si c’est la couverture qui change."
+          }
+        }
+      }
+    },
+    "create_book.work.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur inventaire.io"
+          }
+        }
+      }
+    },
+    "create_book.work.lead" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io knows this work, but not this edition of it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io connaît cette œuvre, mais pas cette édition."
+          }
+        }
+      }
+    },
+    "create_book.work.one_more_edition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One more edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une édition de plus"
+          }
+        }
+      }
+    },
+    "create_book.work.one_more_edition_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your book is attached to the work above. Neither the work nor its author is duplicated."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre livre est rattaché à l’œuvre ci-dessus. Ni l’œuvre ni son auteur ne sont dupliqués."
+          }
+        }
+      }
+    },
+    "create_book.work.publish_edition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publish this edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publier cette édition"
+          }
+        }
+      }
+    },
+    "create_book.work.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This book is known"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce livre est connu"
+          }
+        }
+      }
+    },
+    "create_book.work.what_you_create" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you are creating"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que vous créez"
+          }
+        }
+      }
+    },
+    "Créer" : {
 
     },
     "delete_account.button" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer mon compte"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete my account"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer mon compte"
           }
         }
       }
@@ -1754,16 +1171,16 @@
     "delete_account.confirm.delete" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
           }
         }
       }
@@ -1771,16 +1188,16 @@
     "delete_account.confirm.message" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vos livres, étagères, listes et échanges seront supprimés. Cette action ne peut pas être annulée."
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your books, shelves, lists and transactions will be deleted. This cannot be undone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres, étagères, listes et échanges seront supprimés. Cette action ne peut pas être annulée."
           }
         }
       }
@@ -1788,16 +1205,16 @@
     "delete_account.confirm.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer définitivement ?"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete permanently?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer définitivement ?"
           }
         }
       }
@@ -1805,16 +1222,16 @@
     "delete_account.empty" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre compte et tout ce qu'il contient seront supprimés."
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your account and everything in it will be deleted."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre compte et tout ce qu'il contient seront supprimés."
           }
         }
       }
@@ -1822,16 +1239,16 @@
     "delete_account.hosting" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre compte est hébergé par inventaire.io. Le supprimer ici le supprime aussi sur le site."
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your account is hosted by inventaire.io. Deleting it here deletes it on the website too."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre compte est hébergé par inventaire.io. Le supprimer ici le supprime aussi sur le site."
           }
         }
       }
@@ -1839,16 +1256,16 @@
     "delete_account.intro" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette action est définitive. En supprimant votre compte :"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "This cannot be undone. Deleting your account means:"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette action est définitive. En supprimant votre compte :"
           }
         }
       }
@@ -1856,24 +1273,6 @@
     "delete_account.line.books %lld" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livre sera retiré de votre inventaire"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livres seront retirés de votre inventaire"
-                }
-              }
-            }
-          }
-        },
         "en" : {
           "variations" : {
             "plural" : {
@@ -1891,30 +1290,30 @@
               }
             }
           }
-        }
-      }
-    },
-    "delete_account.line.lists %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
+        },
         "fr" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld liste sera supprimée"
+                  "value" : "%lld livre sera retiré de votre inventaire"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld listes seront supprimées"
+                  "value" : "%lld livres seront retirés de votre inventaire"
                 }
               }
             }
           }
-        },
+        }
+      }
+    },
+    "delete_account.line.lists %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
         "en" : {
           "variations" : {
             "plural" : {
@@ -1932,30 +1331,30 @@
               }
             }
           }
-        }
-      }
-    },
-    "delete_account.line.shelves %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
+        },
         "fr" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld étagère sera supprimée"
+                  "value" : "%lld liste sera supprimée"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld étagères seront supprimées"
+                  "value" : "%lld listes seront supprimées"
                 }
               }
             }
           }
-        },
+        }
+      }
+    },
+    "delete_account.line.shelves %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
         "en" : {
           "variations" : {
             "plural" : {
@@ -1973,30 +1372,30 @@
               }
             }
           }
-        }
-      }
-    },
-    "delete_account.line.transactions %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
+        },
         "fr" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld échange en cours sera annulé"
+                  "value" : "%lld étagère sera supprimée"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld échanges en cours seront annulés"
+                  "value" : "%lld étagères seront supprimées"
                 }
               }
             }
           }
-        },
+        }
+      }
+    },
+    "delete_account.line.transactions %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
         "en" : {
           "variations" : {
             "plural" : {
@@ -2014,22 +1413,40 @@
               }
             }
           }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld échange en cours sera annulé"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld échanges en cours seront annulés"
+                }
+              }
+            }
+          }
         }
       }
     },
     "delete_account.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer mon compte"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete my account"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer mon compte"
           }
         }
       }
@@ -2037,16 +1454,16 @@
     "delete_account.transactions_warning" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les personnes concernées perdront le fil de la discussion, sans autre avertissement que la disparition de l'échange."
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "The people involved will lose the conversation, with no warning other than the transaction disappearing."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les personnes concernées perdront le fil de la discussion, sans autre avertissement que la disparition de l'échange."
           }
         }
       }
@@ -2054,19 +1471,22 @@
     "delete_account.username_kept" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre nom d'utilisateur restera réservé et ne pourra pas servir à un nouveau compte."
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your username stays reserved and cannot be used for a new account."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre nom d'utilisateur restera réservé et ne pourra pas servir à un nouveau compte."
+          }
         }
       }
+    },
+    "Description (optionnel)" : {
+
     },
     "edition.add_to_inventory" : {
       "extractionState" : "stale",
@@ -4488,6 +3908,22 @@
         }
       }
     },
+    "nav.editions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Éditions"
+          }
+        }
+      }
+    },
     "nav.inventory" : {
       "localizations" : {
         "en" : {
@@ -4600,18 +4036,551 @@
         }
       }
     },
-    "nav.editions" : {
+    "network.add_friends" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Editions"
+            "value" : "Add reader friends"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Éditions"
+            "value" : "Ajouter des amis lecteurs"
+          }
+        }
+      }
+    },
+    "network.add_to_network" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter au réseau"
+          }
+        }
+      }
+    },
+    "network.invitation.accept" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accepter"
+          }
+        }
+      }
+    },
+    "network.invitation.accept_request" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept the request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accepter la demande"
+          }
+        }
+      }
+    },
+    "network.invitation.accepted %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ has joined your network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ fait maintenant partie de votre réseau"
+          }
+        }
+      }
+    },
+    "network.invitation.explanation %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ asked to join networks with you. Declining does not tell them, and does not stop them asking again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vous a demandé de rejoindre son réseau. Refuser ne le prévient pas et ne l’empêche pas de redemander."
+          }
+        }
+      }
+    },
+    "network.invitation.received" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation received"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation reçue"
+          }
+        }
+      }
+    },
+    "network.invitation.refuse" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Decline"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refuser"
+          }
+        }
+      }
+    },
+    "network.invitation.refused %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation from %@ declined"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation de %@ refusée"
+          }
+        }
+      }
+    },
+    "network.invitations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
+          }
+        }
+      }
+    },
+    "network.invitations.all" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All invitations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les invitations"
+          }
+        }
+      }
+    },
+    "network.invitations.empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing waiting"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien en attente"
+          }
+        }
+      }
+    },
+    "network.invitations.empty.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requests you have sent and invitations you have received will show up here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les demandes que vous avez envoyées et les invitations reçues s’afficheront ici."
+          }
+        }
+      }
+    },
+    "network.invitations.received" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Received"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reçues"
+          }
+        }
+      }
+    },
+    "network.invitations.sent" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyées"
+          }
+        }
+      }
+    },
+    "network.private_inventory.message %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s books will appear here once the request is accepted."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les livres de %@ apparaîtront ici une fois la demande acceptée."
+          }
+        }
+      }
+    },
+    "network.private_inventory.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private inventory"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventaire privé"
+          }
+        }
+      }
+    },
+    "network.reciprocal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once the request is accepted, you will see their books and they will see yours. inventaire.io knows no one-way street: a network is mutual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une fois la demande acceptée, vous verrez ses livres et il verra les vôtres. inventaire.io ne connaît pas de sens unique : le réseau est réciproque."
+          }
+        }
+      }
+    },
+    "network.remove" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer du réseau"
+          }
+        }
+      }
+    },
+    "network.remove.confirm %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@ from your network? Their books leave your inventory, and the relation has to be asked for again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@ de votre réseau ? Ses livres quittent votre inventaire, et la relation devra être redemandée."
+          }
+        }
+      }
+    },
+    "network.request.awaiting" : {
+      "comment" : "Inert full-width button on a reader's profile, standing alone: it has to name what was sent.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Request sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demande envoyée"
+          }
+        }
+      }
+    },
+    "network.request.cancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel the request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler la demande"
+          }
+        }
+      }
+    },
+    "network.request.explanation %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ will find your request among their invitations. Until it is accepted, neither of you sees the other's inventory."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ trouvera votre demande dans ses invitations. Tant qu’elle n’est pas acceptée, aucun de vous deux ne voit l’inventaire de l’autre."
+          }
+        }
+      }
+    },
+    "network.request.no_notification %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gets no notification: the request will be seen the next time they open the app."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ne reçoit aucune notification : la demande sera vue à la prochaine ouverture de l’app."
+          }
+        }
+      }
+    },
+    "network.request.send" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send the request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer la demande"
+          }
+        }
+      }
+    },
+    "network.request.sent" : {
+      "comment" : "Tag at the end of a reader row: this request is still waiting. Sits under a header that has already said these are requests, so it does not repeat the word.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyée"
+          }
+        }
+      }
+    },
+    "network.request.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friend request"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demande d’ajout"
+          }
+        }
+      }
+    },
+    "network.requests.pending" : {
+      "comment" : "Section header on the add-a-reader screen, at rest: the requests I have sent and nobody has answered yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pending requests"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demandes en cours"
+          }
+        }
+      }
+    },
+    "network.search.explanation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look a reader up by their inventaire.io username, then send them a request. Their inventory joins yours as soon as they accept it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cherchez un lecteur par son nom d’utilisateur sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès qu’il l’aura acceptée."
+          }
+        }
+      }
+    },
+    "network.search.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Readers"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecteurs"
+          }
+        }
+      }
+    },
+    "network.search.no_results" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No reader by that name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun lecteur de ce nom"
+          }
+        }
+      }
+    },
+    "network.search.no_results.message %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nobody on inventaire.io answers to “%@”."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personne sur inventaire.io ne répond à « %@ »."
+          }
+        }
+      }
+    },
+    "network.search.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Username"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom d’utilisateur"
+          }
+        }
+      }
+    },
+    "network.search.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find your reader friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouvez vos amis lecteurs"
           }
         }
       }
@@ -4876,16 +4845,32 @@
     "profile.delete_account" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete my account"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer mon compte"
           }
-        },
+        }
+      }
+    },
+    "profile.invitations" : {
+      "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete my account"
+            "value" : "Invitations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations"
           }
         }
       }
@@ -5184,6 +5169,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scanner"
+          }
+        }
+      }
+    },
+    "scanner.action.create_book" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create this book on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer ce livre sur inventaire.io"
           }
         }
       }

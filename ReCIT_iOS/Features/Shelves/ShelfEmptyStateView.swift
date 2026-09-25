@@ -5,7 +5,9 @@
 //  What a user with no étagère sees where the carousel would be: one empty shelf — wash
 //  and plank, no books — with the step they are at written above it and one paper tag per
 //  thing to do resting on it. Sized from `ShelfCardMetrics` like a real shelf, so the day
-//  the first étagère replaces this card the plank doesn't move.
+//  the first étagère replaces this card the plank stays at the same height. It is centred on
+//  the screen rather than parked where the carousel's first card sits, so that one step is
+//  sideways.
 //
 //  Everything stands in the band where books would be: the sentence at the top of it, the
 //  tags at the bottom, on the plank. Nothing is added above or below the card, which is what

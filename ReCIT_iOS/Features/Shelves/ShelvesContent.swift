@@ -95,10 +95,11 @@ struct ShelvesContent: View {
                             onAction: perform
                         )
                             .accessibilityIdentifier("e2e.shelves.emptyCard")
-                            // Parked where the carousel's first card would be, so the
-                            // first real étagère appears exactly here.
-                            .padding(.horizontal, horizontalPadding)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            // Centred: alone on the screen, a card parked where the
+                            // carousel's first one would be read as off-centre. The
+                            // first real étagère lands a little further left, at the
+                            // same height — a sideways step, not a jump.
+                            .frame(maxWidth: .infinity)
                     } else {
                         shelvesCarousel(cardWidth: cardWidth)
                     }

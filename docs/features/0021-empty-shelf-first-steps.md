@@ -24,7 +24,7 @@ action on it:
 - **`ShelfEmptyStateErrand`** keeps deciding the state (`init(ownsBooks:)`), and now carries the heading,
   the sentence and the ordered list of actions instead of a single note string.
 - **`ShelfEmptyStateAction`** (`scan` / `search` / `sort`) — one tag: title, detail, SF Symbol,
-  accessibility identifier. `ShelvesContent.perform(_:)` is the one switch from an action to its
+  accessibility identifier. Both lines are centred on the tag. `ShelvesContent.perform(_:)` is the one switch from an action to its
   destination.
 - **`ShelfActionTag`** — the tag itself, a `Button` on paper. **`ShelfEmptyStateCaption`** — the two lines
   above the plank.
@@ -45,8 +45,9 @@ action on it:
   than what the label says — is kept per tag. The card itself is no longer a button: with two tags side by
   side, a press on the card would have to guess.
 - **Nothing is added outside the card.** The sentence and the tags stand in the books' band of
-  `ShelfCardMetrics`, so the card keeps a populated shelf's height and the plank does not move when the first
-  étagère replaces it. Consequence: at the largest Dynamic Type sizes the band can run out of room.
+  `ShelfCardMetrics`, so the card keeps a populated shelf's height and the plank stays at the same height when
+  the first étagère replaces it. The card is centred on the screen rather than parked where the carousel's first
+  card sits — alone, the parked card read as off-centre — so that replacement is a small step sideways. Consequence: at the largest Dynamic Type sizes the band can run out of room.
 - **The tags may use the plank's width**, not the books' — two tags inside the 24 pt book margins leave too
   little for either on a small phone. Titles shrink to 80 % before truncating; details wrap to two lines.
 - **Rechercher opens the existing field, not a new screen.** The unified search (feature 0014) is where a

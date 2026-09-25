@@ -19,7 +19,7 @@ struct ShelfActionTag: View {
 
     var body: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: .xSmall) {
+            VStack(spacing: .xSmall) {
                 Label {
                     Text(action.title)
                         .textStyle(.content400Bold)
@@ -34,6 +34,7 @@ struct ShelfActionTag: View {
                     .textStyle(.footnote200)
                     .foregroundStyle(ShelfPalette.labelInk)
                     .lineLimit(2)
+                    .multilineTextAlignment(.center)
                     .accessibilityHidden(true)
             }
             .padding(.horizontal, .medium)

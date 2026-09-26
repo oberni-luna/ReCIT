@@ -23,6 +23,15 @@ enum EntityListType: String, Codable, CaseIterable {
         case .publisher: "list.type.publisher"
         }
     }
+
+    /// How many elements a list of this type holds, in words: « 12 œuvres », « 1 auteur·ice ».
+    func countLabel(_ count: Int) -> LocalizedStringResource {
+        switch self {
+        case .work: "list.count.work \(count)"
+        case .author: "list.count.author \(count)"
+        case .publisher: "list.count.publisher \(count)"
+        }
+    }
 }
 
 @Model

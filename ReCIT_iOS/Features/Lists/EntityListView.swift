@@ -23,12 +23,7 @@ struct EntityListView: View {
         if searchText.isEmpty {
             return allLists
         } else {
-            let filteredItems = allLists.compactMap { list in
-                let nameContainQuery = list.name.range(of: searchText, options: .caseInsensitive) != nil
-
-                return nameContainQuery ? list : nil
-            }
-            return filteredItems
+            return allLists.filter { $0.name.localizedStandardContains(searchText) }
         }
     }
 
@@ -45,22 +40,15 @@ struct EntityListView: View {
                     List {
                         ForEach(filteredLists) { list in
                             NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
-                                VStack(alignment: .leading) {
-                                    Text(list.name)
-                                        .textStyle(.content400Bold)
-
-                                    Text(list.explanation)
-                                        .textStyle(.content300)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .swipeActions {
-                                    Button("action.delete", systemImage: "trash") {
-                                        Task {
-                                            try? await listModel.deleteList(modelContext: modelContext, list: list)
+                                ListRowView(list: list)
+                                    .swipeActions {
+                                        Button("action.delete", systemImage: "trash") {
+                                            Task {
+                                                try? await listModel.deleteList(modelContext: modelContext, list: list)
+                                            }
                                         }
+                                        .tint(.red)
                                     }
-                                    .tint(.red)
-                                }
                             }
                             .accessibilityIdentifier("e2e.listRow")
                         }

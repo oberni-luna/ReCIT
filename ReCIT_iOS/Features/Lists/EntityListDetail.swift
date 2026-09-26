@@ -235,6 +235,12 @@ private struct WorkListItemRow: View {
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("e2e.listItemRow")
+            // The editions picker's "…" menu, on a long press, so a row in one list can be
+            // filed in another without opening it first.
+            .workActions(
+                workUri: work.uri,
+                placement: .contextMenu
+            )
             .swipeActions(edge: .trailing) {
                 Button("action.delete", systemImage: "trash") {
                     Task {

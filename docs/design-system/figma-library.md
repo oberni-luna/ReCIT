@@ -4,6 +4,21 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-09-26 — `Listes · Propositions`** : cinq pistes pour l'onglet Listes **peuplé**, mode clair seul.
+  Section `Listes · Propositions` (`464:12392`) sur la page `Screens`, six clones de `Listes · Light` (`40:309`) :
+  `0 · Tel quel` (`464:12393`) ; deux pistes sobres — `A · Encart enrichi` (`464:12460`, trois couvertures en
+  éventail, nom, explication, « 12 œuvres ») et `B · Rangées par type` (`464:12527`, sections Œuvres / Auteur·ices,
+  compteur en pastille `background/tinted`) ; trois pistes dans le langage des étagères — `C · Pochettes papier`
+  (`464:12594`, grille de pochettes `shelf/label/paper` d'où dépassent les couvertures), `D · Rayonnages de couvertures`
+  (`464:12661`, une planche par liste, couvertures **de face** — une étagère montre des dos, une liste des
+  couvertures — et l'étiquette papier sous la planche) et `E · Tiroir à fiches` (`464:12728`, fiches de bibliothèque
+  empilées, la dernière ouverte). **Cinq composants locaux** posés sous les écrans, faits d'instances existantes
+  (`Thumbnail`, `Icon`, `Separator`, `Section Header`) : `Proposition A / List Row` (`466:12852`, Type ∈ {Work, Author}),
+  `Proposition B / List Row` (`466:13000`), `Proposition C / Pocket` (`467:12852`), `Proposition D / Display Shelf`
+  (`467:12967`), `Proposition E / Index Card` (`468:13036`, Tab ∈ {Left, Center, Right}) — à ne pas publier.
+  **A retenue et implémentée** le 2026-09-26 ([feature 0024](../features/0024-list-rows-show-their-covers.md)) ;
+  divergences listées dans la feature. **Aucun token nouveau.** Couvertures : les trois images déjà dans le fichier, posées
+  en fill de `Thumbnail` (le `Livre` imbriqué masqué). Chrome hérité du clone (4 onglets), en retard sur l'app.
 - **Passe du 2026-09-26 — `Listes vides · Étiquette`** : l'onglet Listes sans aucune liste (D54), dans le langage
   de l'étagère vide. Section `Listes vides · Étiquette` (`462:12178`) sur la page `Screens`, mode sombre seul, trois
   clones de `E · Aucune liste · Tel quel · Dark` (`212:6773`) : `0 · Aucune liste · Tel quel` (`462:12179`),
@@ -926,8 +941,8 @@ Suite de la table des tokens. **Statut « ouverte » = rien n'a été changé c�
 | D14 | `Search/MainSearchView.swift` | Le fichier porte un nom (`MainSearchView`) qu'aucun type n'utilise — il contient `AddInventoryItemSearchView` — et son en-tête annonce un troisième nom (`AddInventoryItemView.swift`) | ouverte |
 | D15 | `Book/BookDetailView.swift:8`, `Book/BookViewModel.swift:16` | Les deux renvoient à `EditionDetailView`, qui n'existe plus | ouverte |
 | D16 | `Lists/EntityListView.swift:2`, `Works/WorkListView.swift:2` | En-têtes annonçant `MyInventoryView.swift` ; `#Preview` au corps commenté | ouverte |
-| D17 | `EntityListView.swift:27`, `WorkListView.swift:22`, `CommunityView.swift:23` | `range(of:options:.caseInsensitive)` sur du texte saisi, là où `CLAUDE.md` impose `localizedStandardContains()`. `InventoryListContent` le fait correctement — trois points d'entrée, deux méthodes | ouverte |
-| D18 | ~~`SearchView.swift:41` et `:118`~~, `EntityListView.swift:50`, `InventoryListContent.swift:81`, `SyncingPlaceholderView.swift:26`, `SyncingInlineRow.swift:25` | `.red` / `.secondary` **système** là où `.foregroundError` / `.foregroundSecondary` existent. Six occurrences | ouverte — **quatre** depuis le 2026-09-11 : les deux de `SearchView` sont parties avec le fichier (issue 0074) |
+| D17 | `EntityListView.swift:27`, `WorkListView.swift:22`, `CommunityView.swift:23` | `range(of:options:.caseInsensitive)` sur du texte saisi, là où `CLAUDE.md` impose `localizedStandardContains()`. `InventoryListContent` le fait correctement — trois points d'entrée, deux méthodes | ouverte — **deux** depuis le 2026-09-26 : `EntityListView` corrigé (feature 0024) |
+| D18 | ~~`SearchView.swift:41` et `:118`~~, `EntityListView.swift:50`, `InventoryListContent.swift:81`, `SyncingPlaceholderView.swift:26`, `SyncingInlineRow.swift:25` | `.red` / `.secondary` **système** là où `.foregroundError` / `.foregroundSecondary` existent. Six occurrences | ouverte — **quatre** depuis le 2026-09-11 : les deux de `SearchView` sont parties avec le fichier (issue 0074) ; **trois** depuis le 2026-09-26 : le `.secondary` d'`EntityListView` est parti avec `ListRowView` (feature 0024) |
 | D19 | ~~`SearchView.swift:71`~~ | `"loading more results..."` en dur, non localisé, dans une app entièrement en `Localizable.xcstrings` — et un `HStack(spacing: 12)` littéral | **résolue** le 2026-09-11 (issue 0074) — la chaîne est partie avec `SearchView`, et `grep` ne trouve plus aucun `HStack(spacing: 12)` dans l'app : fermée franchement, pas déplacée |
 | D20 | `Localizable.xcstrings` | 9 littéraux français de la feature Étagères sont entrés dans le catalogue **comme clés**, sans traduction `fr` : « Cette étagère est vide », « Créer », « Description (optionnel) », « Enregistrer », « Fermer », « Modifier l'étagère », « Nom de l'étagère », « Nouvelle étagère », « Visibilité ». La langue source étant l'anglais, un utilisateur anglophone voit du français. Une clé vide `""` traîne aussi | ouverte |
 | D21 | ~~`search.friends_inventory`~~ | « Dans l'inventaire de **tes** amis » — le SEUL tutoiement du catalogue. Les 21 autres chaînes à la deuxième personne vouvoient | **résolue** le 2026-09-11 (issue 0074) — la clé est supprimée du catalogue avec `SearchView`. La section locale de la recherche unifiée dit « Dans mes livres et chez mes amis » |

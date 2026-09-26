@@ -253,3 +253,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0021 The empty shelf says what the first step is](docs/features/0021-empty-shelf-first-steps.md) — a sentence above the plank, and one paper tag per way in: scan, search, or sort
 - [0022 The empty Lists tab says what a list is for](docs/features/0022-empty-lists-tab-explains-a-list.md) — a paper tag setting a list beside an étagère, and one that creates the first list
 - [0023 A list's type, named in words](docs/features/0023-list-type-labels.md) — the list form's picker says Œuvre, Auteur·ice, Maison d'édition instead of inventaire.io's raw values
+- [0024 A list's row shows what it holds](docs/features/0024-list-rows-show-their-covers.md) — the Lists tab fans out each list's first covers and counts its elements in words

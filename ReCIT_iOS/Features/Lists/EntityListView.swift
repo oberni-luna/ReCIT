@@ -37,6 +37,10 @@ struct EntityListView: View {
             Group {
                 if syncStatus.shouldShowPlaceholder(.lists) {
                     SyncingPlaceholderView()
+                } else if allLists.isEmpty && searchText.isEmpty {
+                    ListsEmptyStateView {
+                        showNewListModal = true
+                    }
                 } else {
                     List {
                         ForEach(filteredLists) { list in

@@ -2491,6 +2491,125 @@
         }
       }
     },
+    "lists.empty.action.create.detail" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "to read, to buy, to give"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\u00e0 lire, \u00e0 acheter, \u00e0 offrir"
+          }
+        }
+      }
+    },
+    "lists.empty.action.create.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a list"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cr\u00e9er une liste"
+          }
+        }
+      }
+    },
+    "lists.empty.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your reading wishes have their place here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos envies de lecture ont leur place ici."
+          }
+        }
+      }
+    },
+    "lists.empty.explain.list" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**A list** keeps in mind the ones you don\u2019t have: the ones you\u2019d like to buy, the ones you\u2019d like to read, the ones someone recommended\u2026"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Une liste** garde en m\u00e9moire ceux que vous n\u2019avez pas : ceux que vous aimeriez acheter, ceux que vous aimeriez lire, ceux qu\u2019on vous a conseill\u00e9s\u2026"
+          }
+        }
+      }
+    },
+    "lists.empty.explain.shelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**A shelf** holds the books you own."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Une \u00e9tag\u00e8re** range les livres que vous avez."
+          }
+        }
+      }
+    },
+    "lists.empty.explain.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List or shelf?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste ou \u00e9tag\u00e8re ?"
+          }
+        }
+      }
+    },
+    "lists.empty.heading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No list yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore de liste"
+          }
+        }
+      }
+    },
     "login.button.create_account" : {
       "localizations" : {
         "en" : {

@@ -49,6 +49,12 @@ struct InventoryCell: View {
                     }
                 }
             }
+            // The book screen's "…" menu, on a long press — every list of books carries it
+            // through this cell. The edition is read here, under the store guard above.
+            .bookActions(
+                edition: edition,
+                placement: .contextMenu
+            )
         }
     }
 }

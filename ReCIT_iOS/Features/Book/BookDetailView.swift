@@ -13,29 +13,22 @@
 
 import SwiftUI
 import SwiftData
-import LBSnackBar
 
 struct BookDetailView: View {
     @Environment(EntityModel.self) private var entityModel
-    @Environment(InventoryModel.self) private var inventoryModel
     @Environment(UserModel.self) private var userModel
     @Environment(GenreEnrichmentModel.self) private var genreEnrichmentModel
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.snackBar) private var snackBar
     @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel: BookViewModel
     @State private var nextEntityDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
-    @State private var showDeleteConfirmation: Bool = false
     /// How many times this screen has been asked to load. Bumped by « Réessayer », and the
     /// `.task` key — which is how a retry re-runs a call that nothing else about the screen has
     /// changed. One way in, so loading, the book, the two absences and the failure are decided
     /// in one place. Same shape as `InventorySearchContent`'s.
     @State private var attempt: Int = 0
-    /// What the "…" menu asks to create. Held by the screen rather than by the menu: a
-    /// `.sheet` placed inside a `Menu`'s content does not present reliably.
-    @State private var creationRequest: ContainerCreationRequest?
 
     @Binding var path: NavigationPath
 
@@ -45,6 +38,13 @@ struct BookDetailView: View {
     ) {
         _viewModel = State(initialValue: .init(anchor: anchor))
         _path = path
+    }
+
+    private var loadedEdition: Edition? {
+        if case .loaded(let edition) = viewModel.viewState {
+            return edition
+        }
+        return nil
     }
 
     /// My copy of this edition, if I have one.
@@ -89,9 +89,15 @@ struct BookDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            toolbarContent
-        }
+        // Popping after a removal is part of the action. The screen used to stay, on the
+        // grounds that it stays truthful, but what is left is the record of a book one has just
+        // said one no longer owns; the place where the deletion is legible is the list it was
+        // deleted from, one book shorter. The snack bar carries the confirmation back.
+        .bookActions(
+            edition: loadedEdition,
+            placement: .toolbar,
+            onRemoved: { dismiss() }
+        )
         .sheet(item: $borrowFromItem) { item in
             if let owner = item.owner, let me = userModel.myUser {
                 TransactionFormView(
@@ -112,20 +118,6 @@ struct BookDetailView: View {
                 )
             }
         }
-        .containerCreationSheet($creationRequest)
-        .confirmationDialog(
-            "inventory.item.delete_confirm",
-            isPresented: $showDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("inventory.item.remove_from_inventory", role: .destructive) {
-                Task {
-                    await deleteOwnedItem()
-                }
-            }
-            .accessibilityIdentifier("e2e.book.confirmRemove")
-            Button("action.cancel", role: .cancel) { }
-        }
         .task(id: attempt) {
             await viewModel.load(entityModel: entityModel, modelContext: modelContext)
         }
@@ -135,90 +127,6 @@ struct BookDetailView: View {
                 nextEntityDestination = nil
             }
         }
-    }
-
-    @ToolbarContentBuilder
-    var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .confirmationAction) {
-            if case .loaded(let edition) = viewModel.viewState {
-                Menu {
-                    // Glyphs in the label colour rather than the app's green, and titles
-                    // already are: the framework's own menus read that way, and an accent on
-                    // the icons alone made every line look like a link. See `foregroundDefault`.
-                    menuContent(edition: edition)
-                        .tint(.foregroundDefault)
-                } label: {
-                    Label("action.more", systemImage: "ellipsis")
-                }
-                .accessibilityIdentifier("e2e.book.menu")
-            }
-        }
-    }
-
-    /// Two menus, one per side of the ownership line: what I can do to my own copy, and what
-    /// I can do about someone else's. Nothing carries a colour of its own: a red « Supprimer »
-    /// among five black lines shouted, and the confirmation behind it is what actually guards
-    /// the deletion.
-    @ViewBuilder
-    private func menuContent(edition: Edition) -> some View {
-        if let myItem = iOwn(edition) {
-            // Étagères hold a specific copy, so filing is offered only on mine.
-            BookShelfMenu(item: myItem, creationRequest: $creationRequest)
-            listMenu(edition: edition)
-
-            Button("inventory.item.remove_from_inventory", systemImage: "trash") {
-                showDeleteConfirmation = true
-            }
-            .accessibilityIdentifier("e2e.book.remove")
-        } else {
-            let lenders: [InventoryItem] = borrowableItems(edition)
-            if !lenders.isEmpty {
-                Menu("action.borrow_from", systemImage: "hand.wave") {
-                    ForEach(lenders) { item in
-                        if let owner = item.owner {
-                            Button(owner.username) {
-                                borrowFromItem = item
-                            }
-                        }
-                    }
-                }
-            }
-
-            listMenu(edition: edition)
-
-            Button("action.add_to_inventory", systemImage: "plus") {
-                Task {
-                    await addToInventory(edition: edition)
-                }
-            }
-            .accessibilityIdentifier("e2e.book.addToInventory")
-        }
-    }
-
-    /// Listes hold works, not editions. An edition standing behind several works would have to
-    /// file them all, which is not what the menu says it does, so it offers nothing there —
-    /// including its creation line, which would be as ambiguous as the rest.
-    @ViewBuilder
-    private func listMenu(edition: Edition) -> some View {
-        if edition.workUris.count == 1, let workUri = edition.workUris.first {
-            EntityListMenu(
-                entityUri: workUri,
-                identifier: "e2e.book.addToList",
-                creationRequest: $creationRequest
-            )
-        }
-    }
-
-    /// The first five distinct other owners of this edition — the people I could
-    /// ask to borrow it from. (ADR 0002 follow-up: the request-to-borrow flow.)
-    private func borrowableItems(_ edition: Edition) -> [InventoryItem] {
-        var seenOwners: Set<String> = []
-        return edition.items
-            .filter { $0.isStillInTheStore }
-            .filter { $0.ownerId != userModel.myUser?._id && $0.owner != nil && $0.transaction != .inventorying }
-            .filter { seenOwners.insert($0.ownerId).inserted }
-            .prefix(5)
-            .map { $0 }
     }
 
     @ViewBuilder
@@ -344,53 +252,6 @@ struct BookDetailView: View {
     private func enrichGenres(for edition: Edition) async {
         for work in edition.works {
             await genreEnrichmentModel.enrichWorkIfNeeded(work, modelContext: modelContext)
-        }
-    }
-
-    /// Removes my copy of the edition after confirmation, then leaves the screen.
-    ///
-    /// The back is part of the action. The screen used to stay, on the grounds that it stays
-    /// truthful — the "my copy" section drops and "ajouter à mon inventaire" comes back — but
-    /// truthful is not the same as useful: what is left is the record of a book one has just
-    /// said one no longer owns, and the place where the deletion is legible is the list it was
-    /// deleted from, one book shorter. So the screen pops, and the snack bar carries the
-    /// confirmation back with it.
-    ///
-    /// Only on success. A failed delete keeps the screen and the copy, with the reason in the
-    /// snack bar — popping there would look like it had worked.
-    @MainActor
-    private func deleteOwnedItem() async {
-        guard case .loaded(let edition) = viewModel.viewState, let item = iOwn(edition) else { return }
-
-        do {
-            try await inventoryModel.removeItem(item, modelContext: modelContext)
-            snackBar.show {
-                SnackBarView(title: String(localized: "inventory.item.deleted"), onDismiss: nil)
-            }
-            dismiss()
-        } catch {
-            snackBar.show { SnackBarView.error(error) }
-        }
-    }
-
-    @MainActor
-    private func addToInventory(edition: Edition) async {
-        guard let user = userModel.myUser else {
-            snackBar.show { SnackBarView(title: String(localized: "edition.error.no_user"), onDismiss: nil) }
-            return
-        }
-
-        do {
-            _ = try await inventoryModel.postNewItem(
-                modelContext: modelContext,
-                entityUri: edition.uri,
-                transaction: .inventorying,
-                visibility: [.friends],
-                forUser: user
-            )
-            snackBar.show { SnackBarView(title: String(localized: "edition.added_to_inventory"), onDismiss: nil) }
-        } catch {
-            snackBar.show { SnackBarView.error(error) }
         }
     }
 }

@@ -180,7 +180,12 @@ final class InventoryModel: OptimisticMutating {
         inFlightTask = optimistic(
             modelContext,
             apply: { item.details = details },
-            revert: { item.details = previous },
+            revert: {
+                // Autosave can queue several writes; a stale failure must not clobber a newer note.
+                if item.details == details {
+                    item.details = previous
+                }
+            },
             request: { [weak self] in
                 let response: UpdateItemsResponseDTO? = try await self?.updateItems(ids: [item._id], attribute: "details", value: details)
                 guard response?.ok == true else { throw NetworkError.badResponse }

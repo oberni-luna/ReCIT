@@ -8,7 +8,8 @@
 //  P3). Folds the editable content of the old InventoryItemDetailView — notes
 //  and the transaction-mode picker — onto a `@Bindable` item so the two-way
 //  picker binding and the optimistic writes (ADR 0001, invariant 3) survive the
-//  merge into BookDetailView. Notes are edited in place (no sheet); deletion
+//  merge into BookDetailView. Notes are edited in place (no sheet) and saved
+//  automatically as the user types; deletion
 //  lives in the screen's toolbar menu.
 //
 
@@ -23,6 +24,9 @@ struct BookMyCopySection: View {
 
     @State private var draftDetails: String
     @FocusState private var notesFocused: Bool
+
+    /// How long typing must pause before the note is saved.
+    static let autosaveDelay: Duration = .seconds(1)
 
     init(item: InventoryItem) {
         _item = Bindable(item)
@@ -53,6 +57,17 @@ struct BookMyCopySection: View {
                 if !focused {
                     commitNotes()
                 }
+            }
+            .task(id: draftDetails) {
+                // Autosave: a vertical field has no return key to end editing, so waiting
+                // for focus loss alone left the note unsaved. Each keystroke restarts the wait.
+                try? await Task.sleep(for: Self.autosaveDelay)
+                guard !Task.isCancelled else { return }
+                commitNotes()
+            }
+            .onDisappear {
+                // Leaving the screen cancels the pending autosave; flush it.
+                commitNotes()
             }
             .onChange(of: item.details) { _, newValue in
                 // Keep the field in sync with background syncs / optimistic
@@ -87,10 +102,10 @@ struct BookMyCopySection: View {
         }
     }
 
-    /// Persists the edited note optimistically when the field loses focus, but
-    /// only when it actually changed.
+    /// Persists the edited note optimistically — after a pause in typing, on focus
+    /// loss, or on leaving the screen — but only when it actually changed.
     private func commitNotes() {
-        guard draftDetails != item.details else { return }
+        guard item.isStillInTheStore, draftDetails != item.details else { return }
         inventoryModel.updateItemDetailsOptimistic(
             item: item,
             details: draftDetails,

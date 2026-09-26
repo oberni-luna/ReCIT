@@ -251,3 +251,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0019 Les étagères qu'un ami partage](docs/features/0019-a-friends-shared-shelves.md) — le carrousel du profil d'un ami, posé sur rien, consultable et pas modifiable ; et la portée de suppression qui manquait à `upsert`
 - [0020 Créer un livre qu'inventaire.io n'a pas](docs/features/0020-creating-a-book-that-inventaire-lacks.md) — un scan sans résultat devient une contribution : titre, auteur, couverture photographiée, et deux écrans qui empêchent le doublon d'auteur et d'œuvre
 - [0021 The empty shelf says what the first step is](docs/features/0021-empty-shelf-first-steps.md) — a sentence above the plank, and one paper tag per way in: scan, search, or sort
+- [0022 The empty Lists tab says what a list is for](docs/features/0022-empty-lists-tab-explains-a-list.md) — a paper tag setting a list beside an étagère, and one that creates the first list

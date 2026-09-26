@@ -4,6 +4,16 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-09-26 — `Listes vides · Étiquette`** : l'onglet Listes sans aucune liste (D54), dans le langage
+  de l'étagère vide. Section `Listes vides · Étiquette` (`462:12178`) sur la page `Screens`, mode sombre seul, trois
+  clones de `E · Aucune liste · Tel quel · Dark` (`212:6773`) : `0 · Aucune liste · Tel quel` (`462:12179`),
+  `A · Une étiquette qui explique` (`462:12186`) — consigne « Pas encore de liste », une étiquette papier « Liste ou
+  étagère ? » (une étagère range les livres qu'on a ; une liste garde en mémoire ceux qu'on n'a pas — à acheter, à
+  lire, conseillés), puis une étiquette « Créer une liste » ; `B · Deux étiquettes côte à côte` (`462:12365`) — la
+  même différence dite par deux étiquettes « Étagère » / « Liste », puis « Créer une liste ». Pas de planche : une
+  liste n'est pas un meuble. **Aucun composant ni token nouveau** (clones de l'étiquette `461:11989`, `Icon`, styles
+  existants). Étiquettes pinées en `Light`. Chrome hérité du clone (4 onglets). **A retenue et implémentée** le
+  2026-09-26 ([feature 0022](../features/0022-empty-lists-tab-explains-a-list.md)) ; divergences listées dans la feature.
 - **Passe du 2026-09-22 — `Inventaire vide · Première étape`** : trois propositions pour la note de l'étagère
   vide quand l'inventaire est vide (`ShelfEmptyStateErrand.scan`). Section `Inventaire vide · Première étape`
   (`460:11692`) sur la page `Screens`, mode sombre seul, quatre clones de `A · Collection vide · Tel quel · Dark`
@@ -1477,7 +1487,7 @@ Compte à jour : **30 composants** sur `Screens · Components` (+`Empty State`),
 | D51 | `ShelfEmptyStateErrand.noteText` | Le code imprime une case **« ☐ »** en tête de seconde ligne (`"Todo\n☐ Scanner mes livres"`). La maquette ne la rend pas : Alegreya n'a pas U+2610, et un tofu dans une note manuscrite se verrait plus que son absence | ouverte côté Figma — écart assumé. Côté code, vérifier ce que l'appareil rend réellement |
 | D52 | `ShelvesView.swift:41-48` | Le commentaire annonce que le bouton de tri n'apparaît qu'« une fois l'inventaire synchronisé, car trier une bibliothèque vide ne trie rien » — mais la garde ne teste que `lastInventorySync != nil`, jamais le **nombre** de livres. Avec zéro livre le bouton s'affiche quand même, et ouvre une surface qui n'a rien à ranger. Le commentaire décrit une intention que le code n'applique pas | ouverte |
 | D53 | `Lists/EntityListDetail.swift:37`, `:56`, `:89`, `:173` | La clé **`list.empty`** (« Cette liste est vide ») sert **trois sens différents** : la liste est vide, la liste est **introuvable** (`ContentUnavailableView` ligne 54), et le type `publisher` n'est **pas implémenté** (ligne 37, qui rend ce texte quel que soit le contenu). Une liste d'éditeurs pleine affiche donc « Cette liste est vide » | ouverte |
-| D54 | `Lists/EntityListView.swift:41` | L'onglet Listes n'a **aucun état vide** : sans liste, la `List` ne rend aucun rang et rien ne la remplace — un écran gris, sans phrase et sans issue, à l'endroit exact où l'utilisateur arrive la première fois. Le « + » de la barre de navigation est la seule sortie, et rien ne l'indique. Même écran pour une recherche sans résultat | ouverte — c'est le frame `212:6707` |
+| D54 | `Lists/EntityListView.swift:41` | L'onglet Listes n'a **aucun état vide** : sans liste, la `List` ne rend aucun rang et rien ne la remplace — un écran gris, sans phrase et sans issue, à l'endroit exact où l'utilisateur arrive la première fois. Le « + » de la barre de navigation est la seule sortie, et rien ne l'indique. Même écran pour une recherche sans résultat | **fermée pour « aucune liste »** le 2026-09-26 (feature 0022, frame `462:12186`) · ouverte pour la recherche sans résultat |
 | D55 | `Inventory/InventoryListContent.swift:65-83` | Deux défauts dans la même branche. **(a)** Le message « Oh, c'est vide ici » décrit un inventaire vide, alors que la branche sert aussi — et surtout — la **recherche sans résultat** : un utilisateur qui a 300 livres et cherche « Vercors » lit qu'il n'a rien. **(b)** `emptyView` est un `VStack` sans `frame(maxWidth:maxHeight:)` : le texte se pose en haut à gauche du premier rang de la `List`, pas au centre de l'écran — donc il se lit comme un résultat plutôt que comme une absence | ouverte |
 | D56 | `Localizable.xcstrings`, clé `inventory.empty` | La valeur `fr` finit par une **espace** : `"Oh, c'est vide ici "`. (`search.remote.empty` a le même défaut : `"Pas de résultat "`) | ouverte |
 | D35 | `Section Header` (`28:164`) | Le composant n'avait ni action ni variante pour en porter une, alors que l'en-tête « Étagères » a gagné un bouton **Ajouter** tinté à l'issue 0010 | **résolue** — `Action label` + `Show action` ajoutés, métriques et cible de ~31pt documentées dans la description |

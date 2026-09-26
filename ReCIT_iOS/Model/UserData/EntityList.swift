@@ -14,6 +14,15 @@ enum EntityListType: String, Codable, CaseIterable {
     case work
     case author
     case publisher
+
+    /// What the user reads. The raw value is inventaire.io's word and stays on the wire.
+    var label: LocalizedStringResource {
+        switch self {
+        case .work: "list.type.work"
+        case .author: "list.type.author"
+        case .publisher: "list.type.publisher"
+        }
+    }
 }
 
 @Model

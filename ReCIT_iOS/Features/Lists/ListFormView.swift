@@ -74,7 +74,7 @@ struct ListFormView: View {
                     Section {
                         Picker("list.form.type", selection: $list.type) {
                             ForEach(EntityListType.allCases, id: \.self) { type in
-                                Text(type.rawValue).tag(type)
+                                Text(type.label).tag(type)
                             }
                         }
                         .foregroundStyle(.foregroundDefault)

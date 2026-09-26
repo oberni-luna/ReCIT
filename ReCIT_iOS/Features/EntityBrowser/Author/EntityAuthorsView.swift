@@ -15,7 +15,12 @@ struct EntityAuthorsView: View {
     @Binding var entityDestination: NavigationDestination?
 
     var body: some View {
-        if authors.count == 1, let author = authors.first {
+        if authors.isEmpty {
+            // Some editions carry no author claim; an empty row read as a loading glitch.
+            Text("author.unknown")
+                .textStyle(.content400Bold)
+                .foregroundStyle(.foregroundSecondary)
+        } else if authors.count == 1, let author = authors.first {
             Button {
                 entityDestination = NavigationDestination.author(uri: author.uri)
             } label: {

@@ -515,6 +515,22 @@
         }
       }
     },
+    "author.unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur inconnu"
+          }
+        }
+      }
+    },
     "author.works.header %@" : {
       "localizations" : {
         "en" : {

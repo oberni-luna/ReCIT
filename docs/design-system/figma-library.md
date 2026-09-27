@@ -4,6 +4,21 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-09-27 — `Profil · inventaire.io`** : une étiquette papier **fermable** (croix en haut à droite)
+  qui dit que l'app est branchée sur inventaire.io et que chaque livre ajouté enrichit ses données ouvertes
+  (data.inventaire.io). Section `Profil · inventaire.io` (`492:13079`) sur la page `Screens`, mode clair seul, quatre
+  clones de `Profil · Light` (`400:10441`) : `0 · Tel quel` (`492:13080`) ; `A · Étiquette sous l'en-tête`
+  (`492:13108`) — pleine largeur, inclinée −1°, glyphe `feather`, deux paragraphes (commun libre / données ouvertes)
+  et deux liens texte « Découvrir inventaire.io » / « Explorer les données ouvertes » ; `B · Étiquette qui compte`
+  (`492:13136`) — compacte, **au-dessus** de l'en-tête, inclinée +1°, « Vos 128 livres, en commun », un
+  `Action / Pill` Tinted « Explorer les données » et un lien « inventaire.io » ; `C · Étiquette accrochée au compte`
+  (`492:13164`) — l'étiquette chevauche le bas de `User Header` (conteneur `header + étiquette`, espacement −20),
+  inclinée +2°, « Un compte inventaire.io » : le compte de l'app *est* un compte inventaire.io. La croix est une
+  instance `Icon` `xmark.circle` en position absolue. **Aucun composant ni token nouveau** (`Icon`, `Action / Pill`,
+  `shelf/label/*`, `Shadow/Light`, `Content/*`, `Action/action300`, `foreground/tinted`). Étiquettes pinées en
+  `Light`. Chrome hérité du clone (4 onglets). **A retenue** — retouchée par l'utilisateur : croix dans la ligne de
+  titre, un lien souligné sous chaque paragraphe — **et implémentée** le 2026-09-27
+  ([feature 0026](../features/0026-profile-says-it-is-inventaire.md)) ; divergences listées dans la feature.
 - **Passe du 2026-09-26 — `Listes · Propositions`** : cinq pistes pour l'onglet Listes **peuplé**, mode clair seul.
   Section `Listes · Propositions` (`464:12392`) sur la page `Screens`, six clones de `Listes · Light` (`40:309`) :
   `0 · Tel quel` (`464:12393`) ; deux pistes sobres — `A · Encart enrichi` (`464:12460`, trois couvertures en

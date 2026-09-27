@@ -255,3 +255,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0023 A list's type, named in words](docs/features/0023-list-type-labels.md) — the list form's picker says Œuvre, Auteur·ice, Maison d'édition instead of inventaire.io's raw values
 - [0024 A list's row shows what it holds](docs/features/0024-list-rows-show-their-covers.md) — the Lists tab fans out each list's first covers and counts its elements in words
 - [0025 Signing out forgets the user, and keeps the books](docs/features/0025-sign-out-forgets-the-user.md) — every way a session ends empties users, items, étagères, lists and transactions; editions, works and authors stay
+- [0026 The Profil says the app is inventaire.io underneath](docs/features/0026-profile-says-it-is-inventaire.md) — a dismissable paper tag under the account, linking inventaire.io and its open data

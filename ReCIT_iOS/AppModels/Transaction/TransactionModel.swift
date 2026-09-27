@@ -342,10 +342,6 @@ final class TransactionModel: OptimisticMutating {
         let descriptor = FetchDescriptor(predicate: predicate)
         return try modelContext.fetch(descriptor).first
     }
-
-    func deleteLocalTransactions(modelContext: ModelContext) throws {
-        try modelContext.delete(model: UserTransaction.self)
-    }
 }
 
 enum TransactionError: LocalizedError {

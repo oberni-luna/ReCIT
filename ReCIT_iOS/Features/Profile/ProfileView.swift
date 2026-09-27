@@ -7,15 +7,11 @@
 
 import SwiftUI
 import SwiftData
-import LBSnackBar
 
 struct ProfileView: View {
     @Environment(AuthModel.self) private var authModel
     @Environment(UserModel.self) private var userModel
-    @Environment(TransactionModel.self) private var transactionModel
     @Environment(SyncStatusStore.self) private var syncStatus
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.snackBar) private var snackBar
 
     @State private var path: NavigationPath = .init()
     @Query private var allTransactions: [UserTransaction]
@@ -216,19 +212,15 @@ struct ProfileView: View {
         .applyListBackground()
     }
 
-    /// Drops the session and everything local that belonged to it.
+    /// Drops the session.
     ///
     /// One method for the two buttons that need it: the sign-out row, and the sign-in button on
     /// `anonymousView` — which reaches the login flow *through* a sign-out, since a session the
     /// server no longer honours has to go before a new one can be opened.
+    ///
+    /// Nothing local is deleted here: `RootView` does it for every way a session ends, this one
+    /// included — see `RootView.forgetSignedOutUser()`.
     private func signOut() async {
         await authModel.logout()
-        await Task.yield()
-        do {
-            try transactionModel.deleteLocalTransactions(modelContext: modelContext)
-            try userModel.logout(modelContext: modelContext)
-        } catch {
-            snackBar.show { SnackBarView.error(error) }
-        }
     }
 }

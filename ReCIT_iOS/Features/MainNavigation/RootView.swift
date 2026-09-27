@@ -96,55 +96,63 @@ struct RootView: View {
     }
 
     var body: some View {
-        if !authModel.isAuthenticated {
-            // The signed-out branch owns its own navigation stack (PRD 0010): the welcome
-            // screen is its root, so a logged-out launch opens on what the app is for rather
-            // than on a form. Signing out lands back here for the same reason.
-            AuthFlowView(authModel: authModel, coverWall: coverWallModel)
-        } else {
-            MainTabView(authModel: authModel)
-                // **Innermost of the three, on purpose.** Pull-to-refresh belongs to the tabs
-                // and to nothing else: an action set here reaches every `ScrollView` *inside*
-                // `MainTabView`, and stops short of the cover declared above it. Applied
-                // outside the cover it would reach the sorting flow's scroll views too, where a
-                // downward drag is a book being filed and not a refresh — and
-                // `EnvironmentValues.refresh` is read-only, so it cannot be cleared from within.
-                .refreshable {
-                    refreshUserData()
-                }
-                // The sorting flow: **above the refreshable, below the models.** Above, so the
-                // flow's scroll views keep their downward drags; below, so its screens actually
-                // find the models — a cover's content inherits what its ancestors inject, and a
-                // cover attached outside the `.environment` calls sees none of them (which is a
-                // crash, not a degradation).
-                //
-                // One presentation for every entry point (PRD 0009): the étagères toolbar, the
-                // empty-shelf card, the settings row and its debug twin open it at the surface,
-                // the scan buttons open it at the camera, all through one app-scoped flag.
-                .fullScreenCover(isPresented: presentsSortFlow) {
-                    SortFlowView(start: sortFlowPresentation.start)
-                }
-                .environment(userModel)
-                .environment(listModel)
-                .environment(entityModel)
-                .environment(searchModel)
-                .environment(inventoryModel)
-                .environment(shelfModel)
-                .environment(transactionModel)
-                .environment(entityCreationModel)
-                .environment(genreEnrichmentModel)
-                .environment(autoSortModel)
-                .environment(sortSessionModel)
-                .environment(sortFlowPresentation)
-                .environment(errorReporter)
-                .environment(syncStatus)
-                .environment(onboardingStore)
-                .environment(tipsStore)
-                .environment(recentSearchStore)
-                .environment(authModel)
-                .onAppear {
-                    refreshUserData()
-                }
+        Group {
+            if !authModel.isAuthenticated {
+                // The signed-out branch owns its own navigation stack (PRD 0010): the welcome
+                // screen is its root, so a logged-out launch opens on what the app is for rather
+                // than on a form. Signing out lands back here for the same reason.
+                AuthFlowView(authModel: authModel, coverWall: coverWallModel)
+            } else {
+                MainTabView(authModel: authModel)
+                    // **Innermost of the three, on purpose.** Pull-to-refresh belongs to the tabs
+                    // and to nothing else: an action set here reaches every `ScrollView` *inside*
+                    // `MainTabView`, and stops short of the cover declared above it. Applied
+                    // outside the cover it would reach the sorting flow's scroll views too, where a
+                    // downward drag is a book being filed and not a refresh — and
+                    // `EnvironmentValues.refresh` is read-only, so it cannot be cleared from within.
+                    .refreshable {
+                        refreshUserData()
+                    }
+                    // The sorting flow: **above the refreshable, below the models.** Above, so the
+                    // flow's scroll views keep their downward drags; below, so its screens actually
+                    // find the models — a cover's content inherits what its ancestors inject, and a
+                    // cover attached outside the `.environment` calls sees none of them (which is a
+                    // crash, not a degradation).
+                    //
+                    // One presentation for every entry point (PRD 0009): the étagères toolbar, the
+                    // empty-shelf card, the settings row and its debug twin open it at the surface,
+                    // the scan buttons open it at the camera, all through one app-scoped flag.
+                    .fullScreenCover(isPresented: presentsSortFlow) {
+                        SortFlowView(start: sortFlowPresentation.start)
+                    }
+                    .environment(userModel)
+                    .environment(listModel)
+                    .environment(entityModel)
+                    .environment(searchModel)
+                    .environment(inventoryModel)
+                    .environment(shelfModel)
+                    .environment(transactionModel)
+                    .environment(entityCreationModel)
+                    .environment(genreEnrichmentModel)
+                    .environment(autoSortModel)
+                    .environment(sortSessionModel)
+                    .environment(sortFlowPresentation)
+                    .environment(errorReporter)
+                    .environment(syncStatus)
+                    .environment(onboardingStore)
+                    .environment(tipsStore)
+                    .environment(recentSearchStore)
+                    .environment(authModel)
+                    .onAppear {
+                        refreshUserData()
+                    }
+            }
+        }
+        // `initial`, so a launch that finds no session empties the store as a sign-out would:
+        // a session can end while the app is not running to see it go.
+        .onChange(of: authModel.isAuthenticated, initial: true) { _, isAuthenticated in
+            guard isAuthenticated == false else { return }
+            Task { await forgetSignedOutUser() }
         }
     }
 }

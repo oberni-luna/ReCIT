@@ -301,15 +301,25 @@ final class UserModel: OptimisticMutating {
         }
     }
 
-    func clearUserData(modelContext: ModelContext) throws {
-        guard let myUser else { return }
-        self.myUser = nil
-        modelContext.delete(myUser)
+    /// Leaves this device with nothing that belongs to a person, and keeps the books.
+    ///
+    /// Called whenever the app is signed out — the sign-out row, a session the server stopped
+    /// honouring, a launch without one — from `RootView`, which is the one place that sees all
+    /// three. Everything here was fetched under the account that has just gone: *my* étagères,
+    /// lists and books, but also my friends, their inventories and their shelves, and the
+    /// transactions with strangers. Left behind, the next account signed in on this phone
+    /// would find them under its own name — friends it never made, lists it never wrote.
+    ///
+    /// **The bibliographic cache stays**: `Edition`, `Work`, `Author`, `WpExtract`. It is
+    /// inventaire.io's open data, the same for whoever asks, and throwing it away would only
+    /// make the next sign-in refetch every cover. Deleting the items nullifies
+    /// `Edition.items`, so no edition is left pointing at a book that is gone.
+    ///
+    /// Idempotent: on an empty store it deletes nothing and saves nothing worth the name.
+    func wipeUserData(modelContext: ModelContext) throws {
+        myUser = nil
+        try deleteUserOwnedRows(in: modelContext)
         try modelContext.save()
-    }
-
-    func logout(modelContext: ModelContext) throws {
-        try clearUserData(modelContext: modelContext)
     }
 
     /// Deletes the account on inventaire.io, then leaves this device with nothing of it.
@@ -356,18 +366,27 @@ final class UserModel: OptimisticMutating {
     /// inverse on InventoryItem/edition` and nothing is deleted at all. Per-object deletion runs
     /// the relationship rules, which is what a store of this shape needs.
     private func wipeLocalStore(modelContext: ModelContext) throws {
-        try deleteAll(InventoryItem.self, in: modelContext)
-        try deleteAll(Shelf.self, in: modelContext)
-        try deleteAll(EntityListItem.self, in: modelContext)
-        try deleteAll(EntityList.self, in: modelContext)
-        try deleteAll(TransactionMessage.self, in: modelContext)
-        try deleteAll(UserTransaction.self, in: modelContext)
+        try deleteUserOwnedRows(in: modelContext)
         try deleteAll(WpExtract.self, in: modelContext)
         try deleteAll(Edition.self, in: modelContext)
         try deleteAll(Work.self, in: modelContext)
         try deleteAll(Author.self, in: modelContext)
-        try deleteAll(User.self, in: modelContext)
         try modelContext.save()
+    }
+
+    /// Every model that belongs to a person, whoever it is — the half of the schema a sign-out
+    /// empties (`wipeUserData`) and an account deletion empties along with the rest
+    /// (`wipeLocalStore`). Same ordering rule as there: owned rows first, the users that own
+    /// them last. A new `@Model` that belongs to someone goes here; one that describes a book
+    /// goes in `wipeLocalStore`.
+    private func deleteUserOwnedRows(in modelContext: ModelContext) throws {
+        try deleteAll(TransactionMessage.self, in: modelContext)
+        try deleteAll(UserTransaction.self, in: modelContext)
+        try deleteAll(InventoryItem.self, in: modelContext)
+        try deleteAll(Shelf.self, in: modelContext)
+        try deleteAll(EntityListItem.self, in: modelContext)
+        try deleteAll(EntityList.self, in: modelContext)
+        try deleteAll(User.self, in: modelContext)
     }
 
     private func deleteAll<T: PersistentModel>(_ type: T.Type, in modelContext: ModelContext) throws {

@@ -62,6 +62,14 @@ extension RootView {
                 try await userModel.syncRelations(modelContext: modelContext)
             }
 
+            // After the relations, which fetch the members of my groups along with my friends
+            // (`network`): most of the names the groups need are in the store by then.
+            do {
+                try await groupModel.syncMyGroups(myUserId: myUser._id, modelContext: modelContext)
+            } catch {
+                print("⚠️⚠️⚠️⚠️⚠️ Error during groups sync: \(error)")
+            }
+
             await sync(.lists) {
                 try await listModel.syncLists(forUser: myUser, modelContext: modelContext)
             }

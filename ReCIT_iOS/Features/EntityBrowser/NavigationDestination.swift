@@ -33,6 +33,11 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// Pushed from the Profil's last row; it reads the signed-in user off `UserModel`, so the
     /// case carries nothing.
     case deleteAccount
+    /// One group of readers, by id — mine, or one found by name. The screen reads it afresh
+    /// on arrival, so the id is the whole payload (PRD 0016).
+    case group(id: String)
+    /// Looking a group up by name. Pushed from Réseau › Groupes.
+    case findGroups
     var id: String {
         switch self {
         case .author(let uri):
@@ -59,6 +64,10 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "invitations"
         case .deleteAccount:
             return "deleteAccount"
+        case .group(let id):
+            return "group:\(id)"
+        case .findGroups:
+            return "findGroups"
         }
     }
 
@@ -132,6 +141,10 @@ extension NavigationDestination {
           InvitationsView(path: path)
       case .deleteAccount:
           DeleteAccountView()
+      case .group(let id):
+          GroupDetailView(groupId: id, path: path)
+      case .findGroups:
+          FindGroupsView(path: path)
       }
     }
 }

@@ -77,20 +77,7 @@ final class UserModel: OptimisticMutating {
 
         guard let usersDTO = usersDTO?.users, !usersDTO.isEmpty else { return [] }
 
-        var users: [User] = []
-        for userDTO in usersDTO {
-            let otherUser = User(userDTO: userDTO.value, baseUrl: apiService.baseUrl())
-            if let user = try getLocalUser(modelContext: modelContext, _id: otherUser._id) {
-                user.update(with: otherUser)
-                users.append(user)
-            } else {
-                modelContext.insert(otherUser)
-                users.append(otherUser)
-            }
-        }
-        try modelContext.save()
-
-        return users
+        return try User.upsert(Array(usersDTO.values), baseUrl: apiService.baseUrl(), in: modelContext)
     }
 
     /// Reads `GET /api/relations` and writes the four states it answers onto the store.

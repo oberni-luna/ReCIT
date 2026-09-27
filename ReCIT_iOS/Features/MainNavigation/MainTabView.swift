@@ -12,6 +12,7 @@ import LBSnackBar
 
 struct MainTabView: View {
     @Environment(UserModel.self) private var userModel
+    @Environment(GroupModel.self) private var groupModel
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.snackBar) private var snackBar
     let authModel: AuthModel
@@ -82,7 +83,7 @@ struct MainTabView: View {
     /// What the Réseau tab's badge counts: everything there that waits on an answer from me.
     /// inventaire.io notifies nobody, so without it an invitation is only found by chance.
     private var networkBadgeCount: Int {
-        allUsers.filter { $0.relation == .requestReceived }.count
+        allUsers.filter { $0.relation == .requestReceived }.count + groupModel.pendingCount
     }
 
     var body: some View {

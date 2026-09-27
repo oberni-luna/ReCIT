@@ -31,6 +31,7 @@ extension RootView {
         await Task.yield()
         sortSessionModel.discardChanges()
         syncStatus.reset()
+        groupModel.reset()
         do {
             try userModel.wipeUserData(modelContext: modelContext)
         } catch {

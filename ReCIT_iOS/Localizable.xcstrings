@@ -1757,6 +1757,38 @@
         }
       }
     },
+    "groups.empty.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A group brings together readers who share their books: a club, a family, a building. Join one, or start your own."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un groupe réunit des lecteurs qui mettent leurs livres en commun : un club, une famille, un immeuble. Rejoignez-en un, ou créez le vôtre."
+          }
+        }
+      }
+    },
+    "groups.empty.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No group yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun groupe pour l’instant"
+          }
+        }
+      }
+    },
     "inventory.empty" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4265,6 +4297,22 @@
         }
       }
     },
+    "nav.network" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réseau"
+          }
+        }
+      }
+    },
     "nav.profile" : {
       "localizations" : {
         "en" : {
@@ -4373,6 +4421,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter au réseau"
+          }
+        }
+      }
+    },
+    "network.friends" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amis"
           }
         }
       }
@@ -4890,6 +4954,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trouvez vos amis lecteurs"
+          }
+        }
+      }
+    },
+    "network.segment" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réseau"
+          }
+        }
+      }
+    },
+    "network.segment.friends" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amis"
+          }
+        }
+      }
+    },
+    "network.segment.groups" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Groups"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Groupes"
           }
         }
       }
@@ -6253,13 +6365,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Community"
+            "value" : "Network"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Communauté"
+            "value" : "Réseau"
           }
         }
       }

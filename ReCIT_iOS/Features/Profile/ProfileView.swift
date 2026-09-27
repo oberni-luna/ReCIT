@@ -15,29 +15,12 @@ struct ProfileView: View {
 
     @State private var path: NavigationPath = .init()
     @Query private var allTransactions: [UserTransaction]
-    @Query(sort: \User.username) private var allUsers: [User]
     /// Whether the inventaire.io tag has been put away. Kept on the device, not on the account:
     /// it speaks of the app, so signing out and in again does not bring it back.
     @AppStorage("profile.inventaireNotice.dismissed") private var isInventaireNoticeDismissed: Bool = false
 
     var currentTransactions: [UserTransaction] {
         allTransactions.filter(\.isCurrent)
-    }
-
-    /// Friends, sourced reactively from SwiftData (excludes the logged-in user).
-    ///
-    /// `relation == .friend`, not "every user that is not me": the store also holds the
-    /// owners met in a transaction and the readers looked up in the search, and this section
-    /// called all of them my network until issue 0083.
-    var otherUsers: [User] {
-        allUsers.filter { $0._id != userModel.myUser?._id && $0.relation == .friend }
-    }
-
-    /// The readers waiting on an answer from me. inventaire.io notifies nobody, so an
-    /// invitation is only ever discovered by opening the app — which is why it surfaces here,
-    /// high on the first screen one lands on, and not only in a screen one has to think of.
-    var invitations: [User] {
-        allUsers.filter { $0.relation == .requestReceived }
     }
 
     var body: some View {
@@ -63,31 +46,9 @@ struct ProfileView: View {
                 UserHeaderView(user: user)
             }
 
-            if invitations.isEmpty == false {
-                Section {
-                    ForEach(invitations) { invitation in
-                        InvitationRowView(user: invitation) {
-                            path.append(NavigationDestination.user(user: invitation))
-                        }
-                    }
-
-                    // The rest of the waiting — the requests I sent — lives one screen away,
-                    // since it has nothing to be answered here.
-                    NavigationLink(value: NavigationDestination.invitations) {
-                        Text("network.invitations.all")
-                            .textStyle(.action300)
-                            .foregroundStyle(.foregroundTinted)
-                    }
-                    .accessibilityIdentifier("e2e.profile.invitations")
-                } header: {
-                    Text("profile.invitations")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
-                }
-            }
-
-            // Below the invitations, which wait on an answer, and above everything else: the one
-            // place the app says out loud that it is inventaire.io underneath. See feature 0026.
+            // Right under the account: the one place the app says out loud that it is
+            // inventaire.io underneath. See feature 0026. The invitations that used to sit above
+            // it moved to the Réseau tab with the rest of the network (PRD 0016).
             if isInventaireNoticeDismissed == false {
                 Section {
                     InventaireNoticeTag {
@@ -126,36 +87,6 @@ struct ProfileView: View {
                 }
             } header : {
                 Text("profile.current_transactions")
-                    .textStyle(.action200)
-                    .foregroundStyle(.foregroundSecondary)
-            }
-
-            Section {
-                if syncStatus.shouldShowPlaceholder(.community) {
-                    SyncingInlineRow()
-                } else {
-                    if otherUsers.isEmpty {
-                        Text("profile.network.empty")
-                    } else {
-                        ForEach(otherUsers) { otherUser in
-                            NavigationLink(value: NavigationDestination.user(user: otherUser)) {
-                                UserCellView(user: otherUser)
-                            }
-                        }
-                    }
-
-                    // The way in, and the only one: the network is otherwise built on the
-                    // website. Kept below the friends and present even when there are none —
-                    // an empty network is exactly when one needs it.
-                    NavigationLink(value: NavigationDestination.addFriends) {
-                        Text("network.add_friends")
-                            .textStyle(.action300)
-                            .foregroundStyle(.foregroundTinted)
-                    }
-                    .accessibilityIdentifier("e2e.profile.addFriends")
-                }
-            } header : {
-                Text("profile.network")
                     .textStyle(.action200)
                     .foregroundStyle(.foregroundSecondary)
             }

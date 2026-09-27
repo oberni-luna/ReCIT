@@ -175,3 +175,74 @@ struct GroupModelTests {
         #expect(results.first?.description == "d")
     }
 }
+
+@MainActor
+@Suite("GroupModel · administration")
+struct GroupModelAdministrationTests {
+
+    private func makeLedger() -> GroupRequestLedger {
+        .init(defaults: UserDefaults(suiteName: "group-admin-tests-\(UUID().uuidString)") ?? .standard)
+    }
+
+    private static let adminGroups: String = #"""
+    {"groups":[{"_id":"g","name":"Club","open":false,"searchable":true,
+      "admins":[{"user":"me","invitor":null,"timestamp":1}],
+      "members":[{"user":"m","invitor":null,"timestamp":1}],
+      "invited":[],"declined":[],"requested":[{"user":"r","invitor":null,"timestamp":1}]}]}
+    """#
+
+    private func syncedModel(_ mock: MockAPIService, reporter: AppErrorReporter? = nil) async throws -> (GroupModel, ModelContext) {
+        let context: ModelContext = try TestStore.makeContext()
+        mock.stub("/api/users/by-ids", json: #"{"users":{}}"#)
+        mock.stub("/api/groups", json: Self.adminGroups)
+        let model: GroupModel = .init(apiService: mock, errorReporter: reporter, ledger: makeLedger())
+        try await model.syncMyGroups(myUserId: "me", modelContext: context)
+        return (model, context)
+    }
+
+    @Test("Accepting a request makes a member, and the gesture names them")
+    func acceptRequest() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/groups/accept-request", json: #"{"ok":true}"#)
+        let (model, context) = try await syncedModel(mock)
+
+        model.perform(.acceptRequest, on: "g", target: "r", modelContext: context)
+        #expect(model.group(id: "g")?.role(of: "r") == .member)
+        #expect(model.requestsToReview == 0)
+
+        await model.inFlightTask?.value
+        #expect(mock.recordedRequests.contains { $0.endpoint == "/api/groups/accept-request" })
+    }
+
+    @Test("A setting is shown at once, and put back if refused")
+    func settingReverts() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/groups/update-settings", error: NetworkError.badStatus(code: 400, message: "spam"))
+        let reporter: AppErrorReporter = .init()
+        let (model, context) = try await syncedModel(mock, reporter: reporter)
+
+        model.update(.name("Polars"), on: "g", modelContext: context)
+        #expect(model.group(id: "g")?.name == "Polars")
+
+        await model.inFlightTask?.value
+        #expect(model.group(id: "g")?.name == "Club")
+        #expect(reporter.lastFailure != nil)
+    }
+
+    @Test("A created group is one of mine, as its admin")
+    func create() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub(
+            "/api/groups",
+            json: #"{"_id":"new","name":"Polars","slug":"polars","open":true,"searchable":false,"admins":[{"user":"me","invitor":null,"timestamp":1}],"members":[],"invited":[],"declined":[],"requested":[]}"#
+        )
+        let model: GroupModel = .init(apiService: mock, ledger: makeLedger())
+
+        let group: ReaderGroup = try await model.createGroup(name: " Polars ", description: "", searchable: false, open: true)
+
+        #expect(group.id == "new")
+        #expect(group.open)
+        #expect(model.group(id: "new") != nil)
+        #expect(mock.recordedRequests.contains { $0.endpoint == "/api/groups" && $0.method == "POST" })
+    }
+}

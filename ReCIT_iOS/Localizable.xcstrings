@@ -330,6 +330,22 @@
         }
       }
     },
+    "action.save" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer"
+          }
+        }
+      }
+    },
     "action.scan" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1789,6 +1805,22 @@
         }
       }
     },
+    "groups.create" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a group"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un groupe"
+          }
+        }
+      }
+    },
     "groups.detail.load_failed" : {
       "localizations" : {
         "en" : {
@@ -1869,6 +1901,230 @@
         }
       }
     },
+    "groups.form.access" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who can come in"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui peut entrer"
+          }
+        }
+      }
+    },
+    "groups.form.address %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Address: inventaire.io/groups/%@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse : inventaire.io/groups/%@"
+          }
+        }
+      }
+    },
+    "groups.form.create" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create the group"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer le groupe"
+          }
+        }
+      }
+    },
+    "groups.form.create.failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io did not create the group. Check your connection and try again in a moment."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io n’a pas créé le groupe. Vérifiez votre connexion et réessayez dans un instant."
+          }
+        }
+      }
+    },
+    "groups.form.create.note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You will be its admin, and can invite your friends as soon as it exists."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous en serez l’admin. Vous pourrez inviter vos amis dès sa création."
+          }
+        }
+      }
+    },
+    "groups.form.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Description (optional)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Description (facultatif)"
+          }
+        }
+      }
+    },
+    "groups.form.name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom"
+          }
+        }
+      }
+    },
+    "groups.form.name.too_long %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A group name is %lld characters at most."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom d’un groupe fait %lld caractères au plus."
+          }
+        }
+      }
+    },
+    "groups.form.new" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New group"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau groupe"
+          }
+        }
+      }
+    },
+    "groups.form.open" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open to all"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvert à tous"
+          }
+        }
+      }
+    },
+    "groups.form.open.off" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off: every request waits for an admin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactivé : chaque demande attend l’accord d’un admin."
+          }
+        }
+      }
+    },
+    "groups.form.open.on" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anyone who asks comes in at once."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui le souhaite entre sans attendre."
+          }
+        }
+      }
+    },
+    "groups.form.searchable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visible in the search"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visible dans la recherche"
+          }
+        }
+      }
+    },
+    "groups.form.searchable.detail" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any inventaire.io reader can find the group."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout lecteur d’inventaire.io peut trouver le groupe."
+          }
+        }
+      }
+    },
     "groups.invitation.received" : {
       "localizations" : {
         "en" : {
@@ -1913,6 +2169,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Invitations"
+          }
+        }
+      }
+    },
+    "groups.invite" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invite friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inviter des amis"
+          }
+        }
+      }
+    },
+    "groups.invite.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invite"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inviter"
+          }
+        }
+      }
+    },
+    "groups.invite.already_member" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Member"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà membre"
+          }
+        }
+      }
+    },
+    "groups.invite.declined" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Declined"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A décliné"
+          }
+        }
+      }
+    },
+    "groups.invite.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any member can invite. The invitation appears in Network › Groups for the friend you invite."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout membre peut inviter. L’invitation apparaît dans Réseau › Groupes de l’ami invité."
+          }
+        }
+      }
+    },
+    "groups.invite.friends" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos amis"
+          }
+        }
+      }
+    },
+    "groups.invite.no_friends" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No friend to invite"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun ami à inviter"
+          }
+        }
+      }
+    },
+    "groups.invite.no_friends.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations go to your friends. Add some from Network › Friends."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les invitations vont à vos amis. Ajoutez-en depuis Réseau › Amis."
+          }
+        }
+      }
+    },
+    "groups.invite.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search your friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher parmi vos amis"
           }
         }
       }
@@ -2029,6 +2429,102 @@
         }
       }
     },
+    "groups.member.kick" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from the group"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer du groupe"
+          }
+        }
+      }
+    },
+    "groups.member.kick.confirm %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@ from the group?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@ du groupe ?"
+          }
+        }
+      }
+    },
+    "groups.member.kick.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To come back, this person will have to ask or be invited again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour revenir, cette personne devra le demander ou être invitée à nouveau."
+          }
+        }
+      }
+    },
+    "groups.member.make_admin" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make admin"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nommer admin"
+          }
+        }
+      }
+    },
+    "groups.member.make_admin.confirm %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make %@ an admin?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nommer %@ admin ?"
+          }
+        }
+      }
+    },
+    "groups.member.make_admin.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An admin accepts requests, changes the settings and removes members. It cannot be undone from the app."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un admin valide les demandes, change les réglages et retire des membres. Cela ne peut pas être défait depuis l’app."
+          }
+        }
+      }
+    },
     "groups.members" : {
       "localizations" : {
         "en" : {
@@ -2041,6 +2537,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Membres"
+          }
+        }
+      }
+    },
+    "groups.members.admins" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Admins"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Admins"
+          }
+        }
+      }
+    },
+    "groups.members.invited" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitations envoyées"
+          }
+        }
+      }
+    },
+    "groups.members.members" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Members"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Membres"
+          }
+        }
+      }
+    },
+    "groups.members.see_all %lld" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "See the member"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "See the %lld members"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Voir le membre"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Voir les %lld membres"
+                }
+              }
+            }
           }
         }
       }
@@ -2197,6 +2781,22 @@
         }
       }
     },
+    "groups.requests.to_review" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requests to review"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demandes à valider"
+          }
+        }
+      }
+    },
     "groups.role.admin" : {
       "localizations" : {
         "en" : {
@@ -2321,6 +2921,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trouver un groupe"
+          }
+        }
+      }
+    },
+    "groups.settings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group settings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglages du groupe"
           }
         }
       }

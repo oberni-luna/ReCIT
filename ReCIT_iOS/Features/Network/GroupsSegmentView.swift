@@ -19,6 +19,8 @@ struct GroupsSegmentView: View {
     @Query private var allUsers: [User]
 
     @Binding var path: NavigationPath
+    /// Opens the creation form, which `NetworkView` presents: the « + » of its bar opens it too.
+    let onCreate: () -> Void
 
     private var isEmpty: Bool {
         groupModel.myGroups.isEmpty && groupModel.invitations.isEmpty && groupModel.sentRequests.isEmpty
@@ -46,6 +48,10 @@ struct GroupsSegmentView: View {
                     }
                 )
                 .padding(.vertical, .large)
+
+                Button("groups.create", action: onCreate)
+                    .buttonStyle(.secondary())
+                    .accessibilityIdentifier("e2e.groups.create.empty")
             }
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
@@ -94,6 +100,11 @@ struct GroupsSegmentView: View {
                     link("groups.find")
                 }
                 .accessibilityIdentifier("e2e.groups.find")
+
+                Button(action: onCreate) {
+                    link("groups.create")
+                }
+                .accessibilityIdentifier("e2e.groups.create")
             }
         }
     }

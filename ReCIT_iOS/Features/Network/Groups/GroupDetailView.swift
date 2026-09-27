@@ -24,6 +24,7 @@ struct GroupDetailView: View {
 
     @State private var loadFailed: Bool = false
     @State private var isConfirmingLeave: Bool = false
+    @State private var isEditingSettings: Bool = false
 
     /// How many members the screen shows before « Voir les N membres ».
     private static let membersPreviewCount: Int = 5
@@ -74,6 +75,11 @@ struct GroupDetailView: View {
                 loadFailed = true
             }
         }
+        .sheet(isPresented: $isEditingSettings) {
+            if let group {
+                GroupSettingsView(group: group)
+            }
+        }
         .confirmationDialog(
             "groups.leave.confirm \(group?.name ?? "")",
             isPresented: $isConfirmingLeave,
@@ -98,6 +104,21 @@ struct GroupDetailView: View {
         .listRowBackground(Color.clear)
         .listRowSeparator(.hidden)
 
+        // First for an admin, since these wait on them and nothing else will say so.
+        if myRole == .admin && group.requested.isEmpty == false {
+            Section {
+                ForEach(group.requested.compactMap { usersByID[$0.user] }) { user in
+                    GroupRequestRowView(user: user, groupId: group.id) {
+                        path.append(NavigationDestination.user(user: user))
+                    }
+                }
+            } header: {
+                Text("groups.requests.to_review")
+                    .textStyle(.action200)
+                    .foregroundStyle(.foregroundSecondary)
+            }
+        }
+
         membersSection(for: group)
     }
 
@@ -113,11 +134,30 @@ struct GroupDetailView: View {
                     GroupMemberRowView(user: member.user, role: member.role)
                 }
             }
+
+            NavigationLink(value: NavigationDestination.groupMembers(id: group.id)) {
+                link("groups.members.see_all \(group.memberCount)")
+            }
+            .accessibilityIdentifier("e2e.group.members")
+
+            // Any member may invite, not only the admins.
+            if myRole?.belongs == true {
+                NavigationLink(value: NavigationDestination.inviteToGroup(id: group.id)) {
+                    link("groups.invite")
+                }
+                .accessibilityIdentifier("e2e.group.inviteFriends")
+            }
         } header: {
             Text("groups.members")
                 .textStyle(.action200)
                 .foregroundStyle(.foregroundSecondary)
         }
+    }
+
+    private func link(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .textStyle(.action300)
+            .foregroundStyle(.foregroundTinted)
     }
 
     private func invitorName(in group: ReaderGroup) -> String? {
@@ -132,6 +172,17 @@ struct GroupDetailView: View {
             if myRole?.belongs == true {
                 Menu {
                     Group {
+                        if myRole == .admin {
+                            Button("groups.settings", systemImage: "slider.horizontal.3") {
+                                isEditingSettings = true
+                            }
+                            .accessibilityIdentifier("e2e.group.settings")
+                        }
+
+                        Button("groups.invite", systemImage: "person.badge.plus") {
+                            path.append(NavigationDestination.inviteToGroup(id: groupId))
+                        }
+
                         Button("groups.leave", systemImage: "rectangle.portrait.and.arrow.right") {
                             isConfirmingLeave = true
                         }

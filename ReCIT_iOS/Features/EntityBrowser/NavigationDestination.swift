@@ -38,6 +38,10 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case group(id: String)
     /// Looking a group up by name. Pushed from Réseau › Groupes.
     case findGroups
+    /// Everyone in a group, by role; an admin's menu on each member.
+    case groupMembers(id: String)
+    /// My friends, to invite into a group.
+    case inviteToGroup(id: String)
     var id: String {
         switch self {
         case .author(let uri):
@@ -68,6 +72,10 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "group:\(id)"
         case .findGroups:
             return "findGroups"
+        case .groupMembers(let id):
+            return "groupMembers:\(id)"
+        case .inviteToGroup(let id):
+            return "inviteToGroup:\(id)"
         }
     }
 
@@ -145,6 +153,10 @@ extension NavigationDestination {
           GroupDetailView(groupId: id, path: path)
       case .findGroups:
           FindGroupsView(path: path)
+      case .groupMembers(let id):
+          GroupMembersView(groupId: id, path: path)
+      case .inviteToGroup(let id):
+          InviteToGroupView(groupId: id)
       }
     }
 }

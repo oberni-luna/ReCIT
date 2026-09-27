@@ -223,6 +223,53 @@ final class GroupModel: OptimisticMutating {
         )
     }
 
+    // MARK: - Creating and settings
+
+    /// Starts a group, with me as its only admin, and answers it once the server has.
+    ///
+    /// **Not optimistic**, unlike every other write here. The server limits creations (five in a
+    /// row, two seconds apart), runs a spam check on the name and the description, and makes up
+    /// the slug; a placeholder shown at once would too often have to be taken back, and the
+    /// screen the form leads to needs the id the server gives.
+    func createGroup(
+        name: String,
+        description: String,
+        searchable: Bool,
+        open: Bool
+    ) async throws -> ReaderGroup {
+        guard let dto: GroupDTO = try await apiService.send(
+            toEndpoint: "/api/groups",
+            payload: GroupCreationPayload(
+                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+                description: description.trimmingCharacters(in: .whitespacesAndNewlines),
+                searchable: searchable,
+                open: open
+            )
+        ) else {
+            throw NetworkError.badResponse
+        }
+        let group: ReaderGroup = makeGroup(dto)
+        groupsByID[group.id] = group
+        return group
+    }
+
+    /// Writes one setting, optimistically. `update-settings` takes one attribute per call, so a
+    /// form that changed two sends two.
+    func update(_ setting: GroupSetting, on groupId: String, modelContext: ModelContext) {
+        guard let current = groupsByID[groupId] else { return }
+        let next: ReaderGroup = setting.applied(to: current)
+        guard next != current else { return }
+
+        inFlightTask = optimistic(
+            modelContext,
+            apply: { [weak self] in self?.groupsByID[groupId] = next },
+            revert: { [weak self] in self?.groupsByID[groupId] = current },
+            request: { [weak self] in
+                try await self?.putSetting(setting, groupId: groupId)
+            }
+        )
+    }
+
     // MARK: - Signing out
 
     /// Leaves nothing of the last account's groups in memory. The ledger is keyed by account,
@@ -241,6 +288,14 @@ final class GroupModel: OptimisticMutating {
             toEndpoint: "/api/groups/\(action.rawValue)",
             method: "PUT",
             payload: GroupActionPayload(group: groupId, user: action.targetsAnotherUser ? target : nil)
+        )
+    }
+
+    private func putSetting(_ setting: GroupSetting, groupId: String) async throws {
+        let _: OkStatusDTO? = try await apiService.send(
+            toEndpoint: "/api/groups/update-settings",
+            method: "PUT",
+            payload: GroupSettingPayload(group: groupId, attribute: setting.attribute, value: setting.value)
         )
     }
 

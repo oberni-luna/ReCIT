@@ -19,6 +19,7 @@ import SwiftUI
 struct NetworkView: View {
     @State private var path: NavigationPath = .init()
     @State private var segment: NetworkSegment = .friends
+    @State private var isCreatingGroup: Bool = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -41,7 +42,9 @@ struct NetworkView: View {
                 case .friends:
                     FriendsSegmentView(path: $path)
                 case .groups:
-                    GroupsSegmentView(path: $path)
+                    GroupsSegmentView(path: $path) {
+                        isCreatingGroup = true
+                    }
                 }
             }
             .applyListBackground()
@@ -49,6 +52,11 @@ struct NetworkView: View {
             .toolbar { toolbarContent }
             .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
+            }
+            .sheet(isPresented: $isCreatingGroup) {
+                CreateGroupView { groupId in
+                    path.append(NavigationDestination.group(id: groupId))
+                }
             }
         }
     }
@@ -64,7 +72,10 @@ struct NetworkView: View {
                 }
                 .accessibilityIdentifier("e2e.network.add")
             case .groups:
-                EmptyView()
+                Button("groups.create", systemImage: "plus") {
+                    isCreatingGroup = true
+                }
+                .accessibilityIdentifier("e2e.network.createGroup")
             }
         }
     }

@@ -4,6 +4,19 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-09-27 (2) — `Synchronisation · Progression`** : les premières synchronisations avec une
+  progression **déterminée** (progrès = éléments d'inventaire reçus / total annoncé), mode clair seul. Section
+  `Synchronisation · Progression` (`495:13490`) sur la page `Screens` : `I-A · Inventaire · Encart`
+  (`495:13591`, clone de `R1 · Repos · Light` `334:8625`, encart sous la recherche) ; `I-B · Inventaire · Barre
+  compacte` (`495:13745`, barre fine + légende sous la recherche) ; `P · Profil · Amis en synchronisation`
+  (`495:13895`, clone de `492:13108` — Camille 40 %, Rémi déjà synchronisé, Inès 80 %, Paul « En attente ») ;
+  `F-A · Ami · Encart` (`495:14066`) et `F-B · Ami · Barre sous l'en-tête` (`495:14198`), clones de `N10`
+  (`411:11215`) sans menu ; panneau `Spec · Synchronisation` (`495:14280`). **Trois composants locaux** :
+  `Sync / Progress Bar` (`495:13535`, Progress ∈ {0…100} par pas de 5, remplissage en contrainte `SCALE` — un
+  enfant d'instance ne se redimensionne pas par l'API), `Sync / Banner` (`495:13584`, props `Title`, `Percent`,
+  `Detail`), `Cell / User · Syncing` (`495:13577`, clone de `Cell / User` avec barre). **Aucun token nouveau.**
+  **A retenue et implémentée** le 2026-09-27 ([feature 0027](../features/0027-first-sync-progress.md)) ;
+  B reste une proposition ; divergences listées dans la feature.
 - **Passe du 2026-09-27 — `Profil · inventaire.io`** : une étiquette papier **fermable** (croix en haut à droite)
   qui dit que l'app est branchée sur inventaire.io et que chaque livre ajouté enrichit ses données ouvertes
   (data.inventaire.io). Section `Profil · inventaire.io` (`492:13079`) sur la page `Screens`, mode clair seul, quatre

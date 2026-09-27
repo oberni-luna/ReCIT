@@ -256,3 +256,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0024 A list's row shows what it holds](docs/features/0024-list-rows-show-their-covers.md) — the Lists tab fans out each list's first covers and counts its elements in words
 - [0025 Signing out forgets the user, and keeps the books](docs/features/0025-sign-out-forgets-the-user.md) — every way a session ends empties users, items, étagères, lists and transactions; editions, works and authors stay
 - [0026 The Profil says the app is inventaire.io underneath](docs/features/0026-profile-says-it-is-inventaire.md) — a dismissable paper tag under the account, linking inventaire.io and its open data
+- [0027 How far a first sync has got](docs/features/0027-first-sync-progress.md) — a determinate bar over items received / announced for my inventory, each friend's cell and their profile; friends show before their books, which sync last, one by one

@@ -14,7 +14,9 @@ struct EntityResultsDTO: Codable {
 struct EntityResultDTO: Codable {
     let uri: String
     let lastrevid: Int?
-    let type: String
+    /// Absent when inventaire.io cannot map the entity's Wikidata `P31` to one of its types —
+    /// `wd:Q4233718` (« anonyme ») is one, and a required field failed a friend's whole sync.
+    let type: String?
     let originalLang: String?
     let labels: [String: String]
     let descriptions: [String: String]?

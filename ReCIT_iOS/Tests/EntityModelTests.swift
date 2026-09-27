@@ -114,6 +114,20 @@ struct EntityModelTests {
         #expect(author.dateOfBirth != nil)
     }
 
+    @Test("An author inventaire.io gives no type still decodes")
+    func authorWithoutTypeDecodes() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/by-uris", json: entityEnvelope("""
+        {"uri":"wd:Q4233718","lastrevid":10,"labels":{"fr":"anonyme"},"claims":{"wdt:P31":["wd:Q134261520"]}}
+        """))
+        let model: EntityModel = .init(apiService: mock)
+
+        let authors: [Author] = try #require(try await model.getOrFetchAuthors(modelContext: context, uris: ["wd:Q4233718"]))
+
+        #expect(authors.map(\.name) == ["anonyme"])
+    }
+
     @Test("refreshEdition inserts a new edition from the remote payload")
     func refreshEditionInsertsNew() async throws {
         let context: ModelContext = try TestStore.makeContext()

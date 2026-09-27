@@ -83,7 +83,9 @@ final class InventoryModel: OptimisticMutating {
                     modelContext.insert(Work(entityDTO: work, authors: [], apiService: apiService))
                 }
             } else {
-                guard let authors: [Author] = try await entityModel?.getOrFetchAuthors(modelContext: modelContext, uris: [authorUri]) else { continue }
+                // `try?` like the works above: one author the server answers badly must not
+                // stop the whole inventory — its works fall to the loop after this one.
+                guard let authors: [Author] = try? await entityModel?.getOrFetchAuthors(modelContext: modelContext, uris: [authorUri]) else { continue }
                 for work in workDTOs {
                     for author in authors {
                         author.works.append(Work(entityDTO: work, authors: authors, apiService: apiService))

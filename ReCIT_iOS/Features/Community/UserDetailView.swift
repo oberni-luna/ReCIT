@@ -12,6 +12,7 @@ struct UserDetailView: View {
     @Environment(\.modelContext) private var modelContext
     /// Only so the list can hold still while a book is being picked off an étagère.
     @Environment(ShelfFocusModel.self) private var shelfFocus
+    @Environment(InventoryModel.self) private var inventoryModel
 
     @State private var nextNavigationDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
@@ -101,10 +102,18 @@ struct UserDetailView: View {
 
     @ViewBuilder
     private var inventorySection: some View {
+        let syncState: InventoryFirstSyncState = inventoryModel.firstSyncState(for: user)
         Section {
-            if user.lastInventorySync == nil {
-                SyncingInlineRow()
-            } else if user.items.isEmpty {
+            // The same bar as their cell in the Profil, and the books already received under
+            // it: a friend's inventory is read as it arrives, not after.
+            if syncState != .synced {
+                InventorySyncBanner(
+                    title: "sync.inventory.friend.title \(user.username)",
+                    state: syncState
+                )
+                .padding(.vertical, .xSmall)
+            }
+            if syncState == .synced && user.items.isEmpty {
                 Text("inventory.empty")
             } else {
                 ForEach(user.items) { item in

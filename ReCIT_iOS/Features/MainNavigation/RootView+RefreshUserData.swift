@@ -53,28 +53,13 @@ extension RootView {
 
             // Each domain drives its own first-sync marker so an unsynced screen
             // shows a placeholder, and one domain failing doesn't block the others.
+            //
+            // The community domain is the relations and nothing more: it used to wait for every
+            // friend's books as well, so the Profil kept its friends behind a spinner until the
+            // last inventory had landed. The friends now show as soon as they are known, and
+            // their books follow below, each cell carrying its own bar.
             await sync(.community) {
                 try await userModel.syncRelations(modelContext: modelContext)
-                // Friends only: a stranger met in a transaction, or looked up in the reader
-                // search, is in the store too, and syncing their inventory would be both a
-                // request for nothing and a pile of books in the inventory search that nobody
-                // can borrow.
-                for user in userModel.friends(modelContext: modelContext) {
-                    // Their étagères first, for the same reason mine are: an item resolves
-                    // its shelf membership against `Shelf` objects that must already exist.
-                    // The server decides what a friend shares — `by-owners` answers with
-                    // exactly the shelves it will let me see — so nothing is filtered here.
-                    //
-                    // Caught per friend rather than left to the domain's own catch: a friend
-                    // whose shelves fail is not a reason to stop pulling anyone's books,
-                    // theirs included.
-                    do {
-                        try await shelfModel.syncShelves(forUser: user, modelContext: modelContext)
-                    } catch {
-                        print("⚠️⚠️⚠️⚠️⚠️ Error during shelves sync for \(user.username): \(error)")
-                    }
-                    try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
-                }
             }
 
             await sync(.lists) {
@@ -83,6 +68,43 @@ extension RootView {
 
             await sync(.transactions) {
                 try await transactionModel.syncTransactions(modelContext: modelContext)
+            }
+
+            await syncFriendsInventories()
+        }
+    }
+
+    /// Friends' étagères and books, one friend at a time — last, because each is the longest
+    /// sync of the launch and none of them is what the screen in front of the user waits for.
+    /// One at a time, so each bar fills in turn rather than all of them crawling together.
+    ///
+    /// Friends only: a stranger met in a transaction, or looked up in the reader search, is in
+    /// the store too, and syncing their inventory would be both a request for nothing and a
+    /// pile of books in the inventory search that nobody can borrow.
+    private func syncFriendsInventories() async {
+        // In the Profil's order, the never-synced first: they are the cells with a bar, and a
+        // friend already synced only has a refresh to wait for.
+        let friends: [User] = userModel.friends(modelContext: modelContext)
+            .sorted { $0.username.localizedStandardCompare($1.username) == .orderedAscending }
+        let queue: [User] = friends.filter { $0.lastInventorySync == nil } + friends.filter { $0.lastInventorySync != nil }
+        for user in queue {
+            // Their étagères first, for the same reason mine are: an item resolves its shelf
+            // membership against `Shelf` objects that must already exist. The server decides
+            // what a friend shares — `by-owners` answers with exactly the shelves it will let
+            // me see — so nothing is filtered here.
+            //
+            // Caught per friend: a friend whose shelves or books fail is not a reason to stop
+            // pulling anyone else's. Their cell goes back to waiting, and the next refresh
+            // tries again.
+            do {
+                try await shelfModel.syncShelves(forUser: user, modelContext: modelContext)
+            } catch {
+                print("⚠️⚠️⚠️⚠️⚠️ Error during shelves sync for \(user.username): \(error)")
+            }
+            do {
+                try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
+            } catch {
+                print("⚠️⚠️⚠️⚠️⚠️ Error during inventory sync for \(user.username): \(error)")
             }
         }
     }

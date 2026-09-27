@@ -27,6 +27,7 @@ struct ShelvesContent: View {
     @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(\.isSearching) private var isSearching
     @Environment(ShelfFocusModel.self) private var focus
+    @Environment(InventoryModel.self) private var inventoryModel
 
     /// Presents the create-shelf form, from the section header's "Ajouter" action — the only
     /// thing that opens it, now that the empty-state card runs an errand of its own. That
@@ -80,6 +81,18 @@ struct ShelvesContent: View {
             GeometryReader { geo in
                 let cardWidth: CGFloat = geo.size.width * 0.86
                 ScrollView {
+                    if syncState != .synced {
+                        InventorySyncBanner(title: "sync.inventory.mine.title", state: syncState)
+                            .padding(.all, .medium)
+                            // The inventory's page is white, so the card is the secondary
+                            // grey that lists sit on — the maquette's white on grey, inverted.
+                            .background(.backgroundSecondary)
+                            .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.medium))
+                            .padding(.horizontal, .medium)
+                            .padding(.top, .small)
+                            .accessibilityIdentifier("e2e.shelves.syncBanner")
+                    }
+
                     ShelfSectionHeader(
                         title: "Étagères",
                         actionTitle: "Ajouter",
@@ -89,17 +102,22 @@ struct ShelvesContent: View {
                     // One or the other, never both: with no étagère there is nothing to
                     // page through, so the empty shelf stands in place of the carousel.
                     if shelves.isEmpty {
-                        ShelfEmptyStateView(
-                            width: cardWidth,
-                            errand: emptyShelfErrand,
-                            onAction: perform
-                        )
-                            .accessibilityIdentifier("e2e.shelves.emptyCard")
-                            // Centred: alone on the screen, a card parked where the
-                            // carousel's first one would be read as off-centre. The
-                            // first real étagère lands a little further left, at the
-                            // same height — a sideways step, not a jump.
-                            .frame(maxWidth: .infinity)
+                        // Held back until the first sync is over: its errand reads the store,
+                        // and a store still filling would tell a reader with three hundred
+                        // books to go and scan them.
+                        if syncState == .synced {
+                            ShelfEmptyStateView(
+                                width: cardWidth,
+                                errand: emptyShelfErrand,
+                                onAction: perform
+                            )
+                                .accessibilityIdentifier("e2e.shelves.emptyCard")
+                                // Centred: alone on the screen, a card parked where the
+                                // carousel's first one would be read as off-centre. The
+                                // first real étagère lands a little further left, at the
+                                // same height — a sideways step, not a jump.
+                                .frame(maxWidth: .infinity)
+                        }
                     } else {
                         shelvesCarousel(cardWidth: cardWidth)
                     }
@@ -123,9 +141,15 @@ struct ShelvesContent: View {
     ///
     /// The card only appears when the user has no étagère, so the inventory is the whole
     /// question: no books, nothing to arrange yet. Reading an empty `@Query` as "empty" is only
-    /// honest because `ShelvesView` reaches this content once the inventory has synced at least
-    /// once — otherwise "empty" could as easily mean "not arrived yet", and the note would
-    /// invite a user with three hundred books to go and scan them.
+    /// honest because the card waits for the inventory to have synced at least once
+    /// (`syncState`) — otherwise "empty" could as easily mean "not arrived yet", and the note
+    /// would invite a user with three hundred books to go and scan them.
+    /// Where my inventory's first sync stands. Anything but `.synced` puts the banner up and
+    /// keeps the empty card down.
+    private var syncState: InventoryFirstSyncState {
+        inventoryModel.firstSyncState(for: user)
+    }
+
     private var emptyShelfErrand: ShelfEmptyStateErrand {
         .init(ownsBooks: !myItems.isEmpty)
     }

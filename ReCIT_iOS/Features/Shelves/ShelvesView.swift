@@ -30,17 +30,16 @@ struct ShelvesView: View {
         NavigationStack(path: $path) {
             Group {
                 if let user = userModel.myUser {
-                    if user.lastInventorySync == nil {
-                        SyncingPlaceholderView()
-                    } else {
-                        ShelvesContent(
-                            user: user,
-                            searchText: $searchText,
-                            submission: $submission,
-                            path: $path,
-                            onSearch: { isSearchPresented = true }
-                        )
-                    }
+                    // Reached before the first sync is over, too: the books arrive under the
+                    // sync's banner rather than behind a spinner. `ShelvesContent` holds back
+                    // what an empty store would say about a library that is still coming.
+                    ShelvesContent(
+                        user: user,
+                        searchText: $searchText,
+                        submission: $submission,
+                        path: $path,
+                        onSearch: { isSearchPresented = true }
+                    )
                 } else {
                     SyncingPlaceholderView()
                 }

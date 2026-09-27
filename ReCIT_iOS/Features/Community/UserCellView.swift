@@ -17,7 +17,19 @@
 import SwiftUI
 
 struct UserCellView: View {
+    @Environment(InventoryModel.self) private var inventoryModel
+
     let user: User
+
+    /// A friend's books are pulled in the background, one friend after another, once the
+    /// friends themselves are known. Until theirs have landed a first time, the cell says how
+    /// far along they are instead of when the account was opened. Friends only: nobody syncs a
+    /// stranger's inventory, so a stranger would wait for ever.
+    private var syncState: InventoryFirstSyncState? {
+        guard user.relation == .friend else { return nil }
+        let state: InventoryFirstSyncState = inventoryModel.firstSyncState(for: user)
+        return state == .synced ? nil : state
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: .sMedium) {
@@ -26,7 +38,11 @@ struct UserCellView: View {
             VStack(alignment: .leading, spacing: .xSmall) {
                 Text(user.username)
                     .textStyle(.content400Bold)
-                if let createdDate = user.createdDate {
+                if let syncState {
+                    InventorySyncProgressBar(state: syncState)
+                    InventorySyncCaption(state: syncState)
+                        .textStyle(.content300)
+                } else if let createdDate = user.createdDate {
                     Text("user.member_since \(createdDate.formatted(.dateTime.month(.wide).year()))")
                         .textStyle(.content300)
                 }

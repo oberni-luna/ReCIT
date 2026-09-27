@@ -95,7 +95,9 @@ struct ProfileView: View {
                             isInventaireNoticeDismissed = true
                         }
                     }
-                    .listRowInsets(top: .small, bottom: .small)
+                    // Inset on every side: the section clips its row to rounded corners, which
+                    // would otherwise cut the leaning paper's corners and its shadow.
+                    .listRowInsets(top: .small, leading: .small, bottom: .small, trailing: .small)
                     .listRowBackground(Color.clear)
                 }
             }

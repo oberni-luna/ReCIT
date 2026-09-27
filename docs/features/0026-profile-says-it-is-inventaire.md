@@ -40,6 +40,11 @@ The links open in Safari. The cross hides the tag, with an animation, and it nev
   codebase; no model was worth adding for one boolean read by one view.
 - **Below the invitations.** An invitation waits on an answer; the tag does not. Figma has no invitation, so the
   question did not arise there.
+- **Inset on every side.** The first device pass showed the section clipping the leaning paper's corners and
+  shadow; the row now has `spacing/small` all round.
+- **The paper's shadow is the paper's alone.** The same pass showed a shadow under every glyph and link: SwiftUI
+  was casting it per layer. `ShelfPaperModifier` now flattens with `compositingGroup()` before the shadow — which
+  also cleans the étagère name tags, the empty shelf's tags and the empty Lists tab.
 - **Its own link colour.** The paper is white in both modes; `foregroundTinted` is `green/200` in dark mode,
   invisible on it. Same reasoning as `labelInk`.
 - **No way to show it again.** Nothing in the request asked for one; the About-style home for it would be a
@@ -57,9 +62,8 @@ The links open in Safari. The cross hides the tag, with an animation, and it nev
 
 ## Not done / not verified
 
-- Not seen in the running app signed in: built, unit suite green, the tag rendered alone. A pass on a device is
-  still owed — in particular that tapping the paper outside the links and the cross does nothing, and the dismiss
-  animation inside the `List`.
+- Seen on a device, signed in, after the inset and shadow fixes. Not explicitly checked there: that tapping the
+  paper outside the links and the cross does nothing, and the dismiss animation inside the `List`.
 - The end-to-end scenario was not played (on request only).
 - « libre et sans publicité » and « que chacun peut réutiliser » are the frame's wording; the licence of
   inventaire.io's data was not checked against data.inventaire.io.

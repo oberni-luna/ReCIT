@@ -23,6 +23,9 @@ struct ShelfPaperModifier: ViewModifier {
             // The paper is the target, all of it — text, ornaments and padding alike — and
             // only it, so the empty part of the box around it doesn't swallow presses.
             .contentShape(RoundedRectangle(cornerRadius: .minimal))
+            // Flattened first, so the shadow is the paper's alone: without it SwiftUI casts one
+            // under every glyph and link written on the paper as well.
+            .compositingGroup()
             .shadow(.light)
             .rotationEffect(.degrees(ShelfLabelTilt.degrees(for: text)))
     }

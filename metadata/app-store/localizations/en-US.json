@@ -12,6 +12,6 @@
     "keywords": "books,reading,library,borrow,lend,inventory,share,friends,readers,comics",
     "supportUrl": "https://inventaire.io/",
     "marketingUrl": "https://inventaire.io/",
-    "whatsNew": null
+    "whatsNew": "What's new in 1.2:\n• The Lists tab shows each list's first covers and how many items it holds\n• A list's type is now spelled out: Work, Author, Publisher\n• When you have no list yet, the tab explains what a list is for and offers to create your first one\n• A long press on a book or a list row opens its menu right away\n• A book's note is saved as you type\n• \"Unknown author\" is shown when a book has no author\n• First sync: a progress bar shows how far your inventory has got, and friends appear without waiting for their books\n• Signing out removes your personal data from the device\n• The Profile now says the app is built on inventaire.io and its open data"
   }
 }

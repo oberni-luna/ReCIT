@@ -12,6 +12,6 @@
     "keywords": "livres,lecture,bibliothèque,emprunt,prêt,inventaire,partage,ami·es,romans,BD",
     "supportUrl": "https://inventaire.io/",
     "marketingUrl": "https://inventaire.io/",
-    "whatsNew": null
+    "whatsNew": "Nouveautés de la 1.2 :\n• L'onglet Listes montre les premières couvertures de chaque liste et le nombre d'éléments qu'elle contient\n• Le type d'une liste est nommé en toutes lettres : Œuvre, Auteur·ice, Maison d'édition\n• Quand tu n'as encore aucune liste, l'onglet explique à quoi elle sert et te propose d'en créer une\n• Un appui long sur un livre ou sur une ligne de liste ouvre directement son menu\n• La note d'un livre est enregistrée au fil de la frappe\n• « Auteur inconnu » s'affiche quand un livre n'a pas d'auteur\n• Première synchronisation : une barre indique où en est ton inventaire, et tes ami·es s'affichent sans attendre leurs livres\n• La déconnexion efface tes données personnelles de l'appareil\n• Le Profil rappelle que l'app repose sur inventaire.io et ses données ouvertes"
   }
 }

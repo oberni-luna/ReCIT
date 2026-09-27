@@ -4,6 +4,12 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Implémentation du 2026-09-27 — `Réseau · Onglet & Groupes`** (`499:14069`) : l'onglet Réseau et la
+  gestion des groupes sont implémentés ([feature 0028](../features/0028-network-tab-and-groups.md)). Écarts, le code
+  faisant foi : création et réglages en feuilles et non en écrans poussés ; pas de pilule « Rejoindre » dans la
+  recherche (le résultat ne dit pas si le groupe est ouvert) ; ni livres du groupe, ni photo, ni lieu, ni invitation
+  par e-mail, ni signalement ; « Quitter » dans le « … » de la fiche, pas dans les réglages ; tags de `Group Header`
+  avec glyphe. Détail dans la feature.
 - **Passe du 2026-09-27 (2) — `Synchronisation · Progression`** : les premières synchronisations avec une
   progression **déterminée** (progrès = éléments d'inventaire reçus / total annoncé), mode clair seul. Section
   `Synchronisation · Progression` (`495:13490`) sur la page `Screens` : `I-A · Inventaire · Encart`

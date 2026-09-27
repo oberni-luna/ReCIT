@@ -33,6 +33,9 @@ enum ShelfPalette {
     /// `foregroundSecondary` used to serve here and was the one thing on the paper that did
     /// invert: white at 60% onto white paper, which is to say nothing at all in dark mode.
     static let labelInkSecondary: Color = labelInk.opacity(0.5)
+    /// A link on the paper — `foregroundTinted`'s light value, held in both modes for the same
+    /// reason as the ink: its dark value, `green/200`, is next to invisible on white paper.
+    static let labelLink: Color = .init("color/green/700")
 
     /// The painted spine colour: the persisted hex pushed toward a punchier saturation
     /// so books read vivid on the shelf, with brightness clamped for legibility.

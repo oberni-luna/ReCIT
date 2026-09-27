@@ -16,6 +16,9 @@ struct ProfileView: View {
     @State private var path: NavigationPath = .init()
     @Query private var allTransactions: [UserTransaction]
     @Query(sort: \User.username) private var allUsers: [User]
+    /// Whether the inventaire.io tag has been put away. Kept on the device, not on the account:
+    /// it speaks of the app, so signing out and in again does not bring it back.
+    @AppStorage("profile.inventaireNotice.dismissed") private var isInventaireNoticeDismissed: Bool = false
 
     var currentTransactions: [UserTransaction] {
         allTransactions.filter(\.isCurrent)
@@ -80,6 +83,20 @@ struct ProfileView: View {
                     Text("profile.invitations")
                         .textStyle(.action200)
                         .foregroundStyle(.foregroundSecondary)
+                }
+            }
+
+            // Below the invitations, which wait on an answer, and above everything else: the one
+            // place the app says out loud that it is inventaire.io underneath. See feature 0026.
+            if isInventaireNoticeDismissed == false {
+                Section {
+                    InventaireNoticeTag {
+                        withAnimation {
+                            isInventaireNoticeDismissed = true
+                        }
+                    }
+                    .listRowInsets(top: .small, bottom: .small)
+                    .listRowBackground(Color.clear)
                 }
             }
 

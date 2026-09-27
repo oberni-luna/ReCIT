@@ -5168,6 +5168,108 @@
         }
       }
     },
+    "profile.inventaire.commons" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex-libris keeps your books on **inventaire.io**, a shared library, free and ad-free."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex-libris range vos livres sur **inventaire.io**, une biblioth\u00e8que commune, libre et sans publicit\u00e9."
+          }
+        }
+      }
+    },
+    "profile.inventaire.commons.link" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discover inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D\u00e9couvrir inventaire.io"
+          }
+        }
+      }
+    },
+    "profile.inventaire.data" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every book you add enriches its **open data**: titles, authors, editions, which anyone can reuse."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque livre que vous ajoutez enrichit ses **donn\u00e9es ouvertes** : titres, auteur\u00b7ices, \u00e9ditions, que chacun peut r\u00e9utiliser."
+          }
+        }
+      }
+    },
+    "profile.inventaire.data.link" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explore the open data"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorer les donn\u00e9es ouvertes"
+          }
+        }
+      }
+    },
+    "profile.inventaire.dismiss" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer"
+          }
+        }
+      }
+    },
+    "profile.inventaire.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plugged into inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Branch\u00e9 sur inventaire.io"
+          }
+        }
+      }
+    },
     "profile.invitations" : {
       "localizations" : {
         "en" : {

@@ -32,10 +32,43 @@ import Testing
     @Test func theScaleStaysWithinItsRange() {
         var zoom: CoverZoom = .init()
 
-        #expect(zoom.pinching(by: 0.2).scale == CoverZoom.scaleRange.lowerBound)
+        #expect(zoom.pinching(by: 0.2).scale == 1)
 
         zoom.endPinch(by: 10)
-        #expect(zoom.scale == CoverZoom.scaleRange.upperBound)
+        #expect(zoom.scale == CoverZoom.maximumPinchScale)
+    }
+
+    /// A cover fitted to 400 × 600 on a 400 × 900 screen touches its sides, and fills its height
+    /// at ×1.5.
+    @Test func fillsAtTheLargerOfTheTwoRatios() {
+        var zoom: CoverZoom = .init()
+        zoom.measure(fitted: .init(width: 400, height: 600), in: .init(width: 400, height: 900))
+
+        #expect(zoom.fillScale == 1.5)
+    }
+
+    @Test func aCoverWithTheScreensProportionsFillsWhenFitted() {
+        var zoom: CoverZoom = .init()
+        zoom.measure(fitted: .init(width: 400, height: 900), in: .init(width: 400, height: 900))
+
+        #expect(zoom.fillScale == 1)
+    }
+
+    @Test func anUnmeasuredCoverKeepsItsFillScale() {
+        var zoom: CoverZoom = .init()
+        zoom.measure(fitted: .init(width: 400, height: 600), in: .init(width: 400, height: 900))
+        zoom.measure(fitted: .zero, in: .init(width: 400, height: 900))
+
+        #expect(zoom.fillScale == 1.5)
+    }
+
+    /// A very narrow cover must still be able to fill the screen, even past the pinch limit.
+    @Test func aPinchCanReachTheFillScale() {
+        var zoom: CoverZoom = .init()
+        zoom.measure(fitted: .init(width: 80, height: 900), in: .init(width: 400, height: 900))
+        zoom.endPinch(by: 10)
+
+        #expect(zoom.scale == 5)
     }
 
     @Test func aFittedCoverDoesNotMove() {
@@ -63,13 +96,32 @@ import Testing
         #expect(zoom.offset == .zero)
     }
 
-    @Test func aDoubleTapMagnifiesThenFitsAgain() {
+    @Test func aDoubleTapFillsAFittedCover() {
         var zoom: CoverZoom = .init()
+        zoom.measure(fitted: .init(width: 400, height: 600), in: .init(width: 400, height: 900))
         zoom.toggle()
-        #expect(zoom.scale == CoverZoom.doubleTapScale)
 
+        #expect(zoom.scale == 1.5)
+        #expect(zoom.offset == .zero)
+    }
+
+    @Test func aDoubleTapFitsAFilledCover() {
+        var zoom: CoverZoom = .init()
+        zoom.measure(fitted: .init(width: 400, height: 600), in: .init(width: 400, height: 900))
+        zoom.toggle()
+        zoom.toggle()
+
+        #expect(zoom.scale == 1)
+    }
+
+    @Test func aDoubleTapFitsACoverZoomedAnywhereElse() {
+        var zoom: CoverZoom = .init()
+        zoom.measure(fitted: .init(width: 400, height: 600), in: .init(width: 400, height: 900))
+        zoom.endPinch(by: 3)
         zoom.endPan(by: .init(width: 12, height: 0))
         zoom.toggle()
-        #expect(zoom == .init())
+
+        #expect(zoom.scale == 1)
+        #expect(zoom.offset == .zero)
     }
 }

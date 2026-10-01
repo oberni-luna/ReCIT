@@ -258,4 +258,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0026 The Profil says the app is inventaire.io underneath](docs/features/0026-profile-says-it-is-inventaire.md) — a dismissable paper tag under the account, linking inventaire.io and its open data
 - [0027 How far a first sync has got](docs/features/0027-first-sync-progress.md) — a determinate bar over items received / announced for my inventory, each friend's cell and their profile; friends show before their books, which sync last, one by one
 - [0028 Un onglet Réseau, et les groupes d'inventaire.io](docs/features/0028-network-tab-and-groups.md) — Amis | Groupes in a fourth tab with a badge; join, answer, leave, invite, run and create groups, held in memory, every gesture optimistic but creation
-- [0029 A book's cover, full screen](docs/features/0029-full-screen-cover.md) — tap the header's cover to see it alone on black; pinch, double-tap, drag, swipe down to close
+- [0029 A book's cover, full screen](docs/features/0029-full-screen-cover.md) — tap the header's cover to see it fitted to the whole screen; double-tap between fit and fill, pinch, drag, swipe down to close

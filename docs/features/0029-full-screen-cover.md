@@ -5,10 +5,13 @@ summarised below.
 
 ## What it does
 
-The cover at the top of a book's screen was only a picture. A tap on it now opens the cover alone, on black, as
-large as the screen allows, zooming out of the header and back into it when closed.
+The cover at the top of a book's screen was only a picture. A tap on it now opens the cover alone, on black,
+fitted to the whole screen — under the Dynamic Island and the home indicator too — zooming out of the header and
+back into it when closed.
 
-- **Pinch** to magnify, between ×1 and ×4; **double-tap** jumps to ×2.5, and a second double-tap fits it again.
+- **Double-tap** a fitted cover to make it fill the screen; double-tap a filled one, or one pinched to any other
+  size, to fit it again.
+- **Pinch** to magnify, from fitted to ×4 — or further, up to filled, for a cover much narrower than the screen.
 - **Drag** moves a magnified cover around. A cover back at its fitted size is centred again.
 - **Swipe down** (the zoom transition's own gesture) or **« Fermer »**, top right, to go back. Swiping down is
   off while the cover is magnified, where it would fight the drag.
@@ -22,11 +25,13 @@ resolved, so their covers open the same way. A header with no image has nothing 
   label « Agrandir la couverture », identifier `e2e.entityCover`), the source of a `.matchedTransitionSource`, and
   presents a `fullScreenCover` with `.navigationTransition(.zoom(sourceID:in:))`. The blurred copy behind the
   header stays decoration.
-- **`FullScreenCoverView`** (`Features/Components/`) — `CachedAsyncImage` fitted to the screen, `MagnifyGesture`,
+- **`FullScreenCoverView`** (`Features/Components/`) — `CachedAsyncImage` fitted to the screen ignoring the safe
+  area, its fitted size and the screen's read with `onGeometryChange` (before `scaleEffect`), `MagnifyGesture`,
   a `DragGesture` enabled only when magnified, a double tap; a `.glass` icon-only « Fermer » button; dark scheme,
   status bar hidden. Identifier `e2e.fullScreenCover`, read by VoiceOver as one image, « Couverture ».
-- **`CoverZoom`** (`Features/Components/`) — the value type holding the scale and the offset between gestures:
-  `pinching(by:)` / `panning(by:)` for a gesture in flight, `endPinch(by:)` / `endPan(by:)` when it ends,
+- **`CoverZoom`** (`Features/Components/`) — the value type holding the scale and the offset between gestures.
+  Scale 1 is fitted; `measure(fitted:in:)` derives `fillScale`, the larger of the screen-to-cover ratios on each
+  axis. `pinching(by:)` / `panning(by:)` for a gesture in flight, `endPinch(by:)` / `endPan(by:)` when it ends,
   `toggle()` for the double tap. Covered by `CoverZoomTests`.
 
 ## Notable decisions
@@ -40,12 +45,15 @@ resolved, so their covers open the same way. A header with no image has nothing 
 - **The full-screen image is loaded at screen size.** `CachedAsyncImage` resizes to its frame, so a cover
   magnified ×4 is upscaled from a screen-sized bitmap. Covers on inventaire.io are rarely larger than that; if it
   shows, load the original for this view.
+- **The double tap goes between fit and fill, not to a fixed factor.** A fixed ×2.5 overshot a wide cover and
+  fell short of a narrow one; fill is the size that means something for any cover. Anything that is not fitted
+  goes back to fit, so the gesture always has a known way home.
 - **No offset bounds.** A magnified cover can be dragged past its edges; a double tap or a pinch back to fit
   recentres it.
 
 ## Not done, not verified
 
-- Built and unit suite green (718 passed, 1 skipped). **Never seen on a simulator or a device**: the zoom
+- Built and unit suite green. **Never seen on a simulator or a device**: the zoom
   transition, the gestures and the « Fermer » button are unchecked by eye.
 - Not in the end-to-end scenario, which was not run.
 - No Figma frame for this screen.

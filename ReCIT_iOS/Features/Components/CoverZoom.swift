@@ -9,23 +9,41 @@ import CoreGraphics
 
 /// How far a cover shown full screen is magnified, and where it has been dragged to.
 ///
+/// A scale of 1 is the cover fitted to the screen. `fillScale` is the scale at which it fills the
+/// screen instead — known only once the cover has been laid out, through `measure(fitted:in:)`.
+///
 /// A gesture in flight is applied on top of what the previous gestures left (`pinching(by:)`,
 /// `panning(by:)`), and folded into it when the finger lifts (`endPinch(by:)`, `endPan(by:)`).
 /// The scale never leaves `scaleRange`, and a cover back at its fitted size is centred again: an
 /// offset only means something while the cover is larger than the screen.
 struct CoverZoom: Equatable {
-    static let scaleRange: ClosedRange<CGFloat> = 1...4
-    /// The magnification a double tap jumps to from the fitted size.
-    static let doubleTapScale: CGFloat = 2.5
+    /// How far a pinch may go past the fitted size, whatever the cover's proportions.
+    static let maximumPinchScale: CGFloat = 4
 
     private(set) var scale: CGFloat = 1
     private(set) var offset: CGSize = .zero
+    private(set) var fillScale: CGFloat = 1
 
-    var isZoomed: Bool { scale > Self.scaleRange.lowerBound }
+    /// From fitted to whichever is larger: four times that, or filled — a cover much narrower than
+    /// the screen must still be able to fill it.
+    var scaleRange: ClosedRange<CGFloat> { 1...max(Self.maximumPinchScale, fillScale) }
+
+    var isZoomed: Bool { scale > scaleRange.lowerBound }
+
+    /// Records the cover's size once fitted to `container`, which gives the scale that fills it.
+    /// A cover with the screen's own proportions fills it at its fitted size.
+    mutating func measure(fitted: CGSize, in container: CGSize) {
+        guard fitted.width > 0, fitted.height > 0 else { return }
+        fillScale = max(
+            1,
+            container.width / fitted.width,
+            container.height / fitted.height
+        )
+    }
 
     func pinching(by magnification: CGFloat) -> CoverZoom {
         var zoom: CoverZoom = self
-        zoom.scale = Self.clamped(scale * magnification)
+        zoom.scale = clamped(scale * magnification)
         if zoom.isZoomed == false {
             zoom.offset = .zero
         }
@@ -50,12 +68,14 @@ struct CoverZoom: Equatable {
         self = panning(by: translation)
     }
 
-    /// A double tap magnifies a fitted cover, and brings a magnified one back to fit.
+    /// A double tap fills the screen with a fitted cover, and fits anything else back to it — a
+    /// filled cover as well as one pinched or dragged anywhere in between.
     mutating func toggle() {
-        self = isZoomed ? .init() : .init(scale: Self.doubleTapScale, offset: .zero)
+        scale = isZoomed ? scaleRange.lowerBound : fillScale
+        offset = .zero
     }
 
-    private static func clamped(_ scale: CGFloat) -> CGFloat {
+    private func clamped(_ scale: CGFloat) -> CGFloat {
         min(max(scale, scaleRange.lowerBound), scaleRange.upperBound)
     }
 }

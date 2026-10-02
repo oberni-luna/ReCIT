@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Shared strings: the shell, the account flow, and what more than one feature says.
+  French values of ReCIT_iOS/Localizable.xcstrings, keys with '.' turned into '_'.
+  A feature's own strings live in strings_<feature>.xml next to this file.
+-->
+<resources>
+    <string name="app_name">Ex-libris</string>
+
+    <!-- Tabs -->
+    <string name="tab_inventory">Inventaire</string>
+    <string name="tab_lists">Listes</string>
+    <string name="tab_community">Réseau</string>
+    <string name="tab_profile">Profil</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Retour</string>
+    <string name="action_more">Plus</string>
+    <string name="action_add">Ajouter</string>
+    <string name="action_edit">Modifier</string>
+    <string name="action_delete">Supprimer</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_close">Fermer</string>
+    <string name="action_submit">Envoyer</string>
+    <string name="action_save">Enregistrer</string>
+    <string name="action_retry">Réessayer</string>
+
+    <string name="error_generic">Une erreur s\'est produite</string>
+    <string name="error_with_message">Erreur : %1$s</string>
+    <string name="sync_loading">Synchronisation de vos données…</string>
+
+    <!-- Transaction types -->
+    <string name="transaction_type_lending">À prêter</string>
+    <string name="transaction_type_inventorying">Inventorié</string>
+    <string name="transaction_type_selling">À vendre</string>
+    <string name="transaction_type_giving">À donner</string>
+
+    <string name="inventory_owned_by_prefix">Appartient à</string>
+    <string name="user_member_since">Membre depuis %1$s</string>
+
+    <!-- List types -->
+    <string name="list_type_work">Œuvre</string>
+    <string name="list_type_author">Auteur·ice</string>
+    <string name="list_type_publisher">Maison d\'édition</string>
+
+    <!-- Welcome -->
+    <string name="welcome_app_name">Ex-libris</string>
+    <string name="welcome_tagline">Vos livres, et ceux qui voyagent.</string>
+    <string name="welcome_pitch">Organisez vos livres, partagez-les avec vos proches.</string>
+    <string name="welcome_footnote">Votre compte et vos livres sont hébergés par inventaire.io, la base open data.</string>
+
+    <!-- Sign in -->
+    <string name="login_button_signin">Se connecter</string>
+    <string name="login_button_create_account">Créer un compte</string>
+    <string name="login_subtitle">Connectez-vous à votre compte inventaire.io.</string>
+    <string name="login_username">Nom d\'utilisateur</string>
+    <string name="login_password">Mot de passe</string>
+    <string name="login_button_forgot_password">Mot de passe oublié ?</string>
+
+    <string name="auth_error_invalid_credentials">Nom d\'utilisateur ou mot de passe incorrect.</string>
+    <string name="auth_error_network">Impossible de joindre le serveur. Vérifiez votre connexion internet.</string>
+    <string name="auth_error_generic">Une erreur est survenue. Réessayez plus tard.</string>
+
+    <!-- Sign up -->
+    <string name="signup_subtitle">Vous créez un compte sur inventaire.io : c\'est là que vos livres seront hébergés.</string>
+    <string name="signup_email">Adresse e-mail</string>
+    <string name="signup_button_create">Créer mon compte</string>
+    <string name="signup_footnote">En continuant, vous acceptez les conditions d\'inventaire.io.</string>
+    <string name="signup_error_username_taken">Ce nom d\'utilisateur est déjà pris.</string>
+    <string name="signup_error_username_invalid">Ce nom d\'utilisateur ne peut pas être utilisé. Essayez-en un autre.</string>
+    <string name="signup_error_email_taken">Un compte utilise déjà cette adresse e-mail.</string>
+    <string name="signup_error_email_invalid">Cette adresse e-mail n\'est pas valide.</string>
+    <string name="signup_error_password_rejected">Ce mot de passe n\'a pas été accepté. Essayez-en un plus long.</string>
+
+    <!-- Reset password -->
+    <string name="reset_title">Mot de passe oublié</string>
+    <string name="reset_lead">Entrez l\'adresse e-mail de votre compte. Nous vous enverrons un lien pour choisir un nouveau mot de passe.</string>
+    <string name="reset_button_send">Envoyer le lien</string>
+    <string name="reset_sent_title">Vérifiez votre boîte mail</string>
+    <string name="reset_sent_body">Si un compte existe pour %1$s, un e-mail vient de partir avec un lien pour choisir un nouveau mot de passe.</string>
+</resources>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Réseau tab, friends only (feature 0018 and 0019). French values of ReCIT_iOS/Localizable.xcstrings,
+  keys with '.' turned into '_'. Keys outside the iOS `network.*` namespace carry a `network_` prefix
+  so they cannot clash with the same iOS key ported by another feature's strings file.
+-->
+<resources>
+    <string name="network_nav_network">Réseau</string>
+    <string name="network_nav_user">Utilisateur</string>
+
+    <string name="network_add_friends">Ajouter des amis lecteurs</string>
+    <string name="network_friends">Amis</string>
+    <string name="network_profile_invitations">Invitations</string>
+    <string name="network_profile_network_empty">Aucun ami pour le moment</string>
+
+    <!-- Invitations -->
+    <string name="network_invitation_accept">Accepter</string>
+    <string name="network_invitation_refuse">Refuser</string>
+    <string name="network_invitation_accepted">%1$s fait maintenant partie de votre réseau</string>
+    <string name="network_invitation_refused">Invitation de %1$s refusée</string>
+    <string name="network_invitation_received">Invitation reçue</string>
+    <string name="network_invitation_accept_request">Accepter la demande</string>
+    <string name="network_invitation_explanation">%1$s vous a demandé de rejoindre son réseau. Refuser ne le prévient pas et ne l’empêche pas de redemander.</string>
+    <string name="network_invitations">Invitations</string>
+    <string name="network_invitations_all">Toutes les invitations</string>
+    <string name="network_invitations_empty">Rien en attente</string>
+    <string name="network_invitations_empty_message">Les demandes que vous avez envoyées et les invitations reçues s’afficheront ici.</string>
+    <string name="network_invitations_received">Reçues</string>
+    <string name="network_invitations_sent">Envoyées</string>
+
+    <!-- Reader search -->
+    <string name="network_search_prompt">Nom d’utilisateur</string>
+    <string name="network_search_header">Lecteurs</string>
+    <string name="network_search_title">Trouvez vos amis lecteurs</string>
+    <string name="network_search_explanation">Cherchez un lecteur par son nom d’utilisateur sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès qu’il l’aura acceptée.</string>
+    <string name="network_search_no_results">Aucun lecteur de ce nom</string>
+    <string name="network_search_no_results_message">Personne sur inventaire.io ne répond à « %1$s ».</string>
+    <string name="network_search_clear">Effacer</string>
+    <string name="network_requests_pending">Demandes en cours</string>
+
+    <!-- Relations -->
+    <string name="network_add_to_network">Ajouter au réseau</string>
+    <string name="network_reciprocal">Une fois la demande acceptée, vous verrez ses livres et il verra les vôtres. inventaire.io ne connaît pas de sens unique : le réseau est réciproque.</string>
+    <string name="network_request_sent">Envoyée</string>
+    <string name="network_request_awaiting">Demande envoyée</string>
+    <string name="network_request_cancel">Annuler la demande</string>
+    <string name="network_request_no_notification">%1$s ne reçoit aucune notification : la demande sera vue à la prochaine ouverture de l’app.</string>
+    <string name="network_request_title">Demande d’ajout</string>
+    <string name="network_request_explanation">%1$s trouvera votre demande dans ses invitations. Tant qu’elle n’est pas acceptée, aucun de vous deux ne voit l’inventaire de l’autre.</string>
+    <string name="network_request_send">Envoyer la demande</string>
+    <string name="network_remove">Retirer du réseau</string>
+    <string name="network_remove_confirm">Retirer %1$s de votre réseau ? Ses livres quittent votre inventaire, et la relation devra être redemandée.</string>
+    <string name="network_private_inventory_title">Inventaire privé</string>
+    <string name="network_private_inventory_message">Les livres de %1$s apparaîtront ici une fois la demande acceptée.</string>
+
+    <!-- A user's profile -->
+    <plurals name="network_user_item_count">
+        <item quantity="one">%1$d élément</item>
+        <item quantity="many">%1$d éléments</item>
+        <item quantity="other">%1$d éléments</item>
+    </plurals>
+    <string name="network_user_shelves_header">Étagères de %1$s</string>
+    <string name="network_user_inventory_header">Inventaire de %1$s</string>
+    <string name="network_inventory_empty">Oh, c’est vide ici</string>
+
+    <!-- First sync of a friend's inventory (feature 0027) -->
+    <string name="network_sync_inventory_friend_title">L’inventaire de %1$s arrive</string>
+    <string name="network_sync_inventory_waiting">En attente</string>
+    <string name="network_sync_inventory_preparing">Préparation de la synchronisation…</string>
+    <string name="network_sync_inventory_count">%1$d livres sur %2$d</string>
+    <string name="network_sync_inventory_count_arriving">%1$d livres sur %2$d · ils apparaissent au fur et à mesure</string>
+</resources>

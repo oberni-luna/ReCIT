@@ -268,6 +268,10 @@ interface ShelfDao {
 
     @Query("DELETE FROM shelves")
     suspend fun deleteAll()
+
+    /** How many étagères [ownerId] owns — the account-deletion summary. */
+    @Query("SELECT COUNT(*) FROM shelves WHERE ownerId = :ownerId")
+    fun observeCountOf(ownerId: String): Flow<Int>
 }
 
 @Dao
@@ -306,4 +310,8 @@ interface ListDao {
 
     @Query("DELETE FROM lists")
     suspend fun deleteAll()
+
+    /** How many lists the store holds — only mine are ever synced. */
+    @Query("SELECT COUNT(*) FROM lists")
+    fun observeCount(): Flow<Int>
 }

@@ -130,4 +130,6 @@ class ListRepository(
     suspend fun updateElement(elementId: String, comment: String) {
         api.send<UpdateListElementDto, OkStatusDto>("/api/lists/update-element", method = "PUT", body = UpdateListElementDto(elementId, comment))
     }
+
+    fun observeCount(): Flow<Int> = dao.observeCount()
 }

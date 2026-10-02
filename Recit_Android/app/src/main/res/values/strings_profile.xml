@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Profil tab and the account-deletion screen: French values of ReCIT_iOS/Localizable.xcstrings,
+  keys with '.' turned into '_'. `**…**` marks the bold part of a sentence, as the iOS catalogue does.
+-->
+<resources>
+    <string name="nav_profile">Profil</string>
+
+    <plurals name="user_item_count">
+        <item quantity="one">%d élément</item>
+        <item quantity="many">%d éléments</item>
+        <item quantity="other">%d éléments</item>
+    </plurals>
+
+    <!-- The inventaire.io notice (feature 0026) -->
+    <string name="profile_inventaire_title">Branché sur inventaire.io</string>
+    <string name="profile_inventaire_dismiss">Masquer</string>
+    <string name="profile_inventaire_commons">Ex-libris range vos livres sur **inventaire.io**, une bibliothèque commune, libre et sans publicité.</string>
+    <string name="profile_inventaire_commons_link">Découvrir inventaire.io</string>
+    <string name="profile_inventaire_data">Chaque livre que vous ajoutez enrichit ses **données ouvertes** : titres, auteur·ices, éditions, que chacun peut réutiliser.</string>
+    <string name="profile_inventaire_data_link">Explorer les données ouvertes</string>
+
+    <string name="profile_logout">Se déconnecter</string>
+    <string name="profile_delete_account">Supprimer mon compte</string>
+
+    <!-- Deleting the account (feature 0017) -->
+    <string name="delete_account_title">Supprimer mon compte</string>
+    <string name="delete_account_intro">Cette action est définitive. En supprimant votre compte :</string>
+    <string name="delete_account_empty">Votre compte et tout ce qu\'il contient seront supprimés.</string>
+    <plurals name="delete_account_line_books">
+        <item quantity="one">%d livre sera retiré de votre inventaire</item>
+        <item quantity="many">%d livres seront retirés de votre inventaire</item>
+        <item quantity="other">%d livres seront retirés de votre inventaire</item>
+    </plurals>
+    <plurals name="delete_account_line_shelves">
+        <item quantity="one">%d étagère sera supprimée</item>
+        <item quantity="many">%d étagères seront supprimées</item>
+        <item quantity="other">%d étagères seront supprimées</item>
+    </plurals>
+    <plurals name="delete_account_line_lists">
+        <item quantity="one">%d liste sera supprimée</item>
+        <item quantity="many">%d listes seront supprimées</item>
+        <item quantity="other">%d listes seront supprimées</item>
+    </plurals>
+    <string name="delete_account_hosting">Votre compte est hébergé par inventaire.io. Le supprimer ici le supprime aussi sur le site.</string>
+    <string name="delete_account_username_kept">Votre nom d\'utilisateur restera réservé et ne pourra pas servir à un nouveau compte.</string>
+    <string name="delete_account_button">Supprimer mon compte</string>
+    <string name="delete_account_confirm_title">Supprimer définitivement ?</string>
+    <string name="delete_account_confirm_message">Vos livres, étagères, listes et échanges seront supprimés. Cette action ne peut pas être annulée.</string>
+    <string name="delete_account_confirm_delete">Supprimer</string>
+</resources>

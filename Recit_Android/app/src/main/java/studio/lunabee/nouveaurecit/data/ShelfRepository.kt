@@ -155,4 +155,6 @@ class ShelfRepository(
         val known: Set<String> = db.inventoryDao().get(serverItems).map { it.id }.toSet()
         if (dao.get(shelfId) != null) dao.replaceItems(shelfId, serverItems.filter { it in known })
     }
+
+    fun observeCountOf(ownerId: String): Flow<Int> = dao.observeCountOf(ownerId)
 }

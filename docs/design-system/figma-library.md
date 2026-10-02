@@ -1285,7 +1285,7 @@ conséquences visuelles sont ici.
 | Bouton | Style | Rôle |
 |---|---|---|
 | « Proposer un rangement » | Secondary | Empile les changements de l'IA. **N'écrit rien** |
-| « Appliquer le rangement » | Primary | Exécute la pile |
+| « Appliquer le rangement » | Primary | Exécute la pile — **« Enregistrer » dans le code depuis le 2026-10-02** ([feature 0032](../features/0032-sorting-save-and-leave.md)) ; le frame n'est pas mis à jour |
 | « Annuler » / « Terminer » | Secondary | Voir la règle ci-dessous |
 
 **Le libellé du troisième bouton est dérivé de `changes.isEmpty`**, pas d'un drapeau collant :

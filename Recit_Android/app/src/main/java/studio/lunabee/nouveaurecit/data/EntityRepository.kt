@@ -162,4 +162,24 @@ class EntityRepository(
         if (workUris.isEmpty()) return emptyList()
         return runCatching { getOrFetchWorks(workUris).map { it.uri } }.getOrDefault(emptyList())
     }
+
+    /**
+     * `by-uris` for `WorkEditionResolver`: the raw DTOs of a work's editions, keyed as the server
+     * keyed them, with `attributes=info|labels|claims|image` (`info` carries `originalLang`).
+     * Nothing is written to the store — ranking 127 editions must not persist 127 editions.
+     */
+    suspend fun fetchEditionCandidates(uris: List<String>): Map<String, EntityResultDto> {
+        if (uris.isEmpty()) return emptyMap()
+        val result: MutableMap<String, EntityResultDto> = linkedMapOf()
+        uris.distinct().chunked(50).forEach { batch ->
+            val response: EntityResultsDto = api.get(
+                "/api/entities/by-uris",
+                "uris" to batch.joinToString("|"),
+                "attributes" to "info|labels|claims|image",
+                "lang" to "fr",
+            )
+            response.entities.forEach { (key, value) -> result.putIfAbsent(key, value) }
+        }
+        return result
+    }
 }

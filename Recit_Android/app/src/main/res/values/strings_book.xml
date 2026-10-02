@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The book, work and author screens (issue 0104). French values of ReCIT_iOS/Localizable.xcstrings,
+  keys with '.' turned into '_'.
+-->
+<resources>
+    <!-- « … » menu -->
+    <string name="action_shelf">Étagère</string>
+    <string name="action_list">Liste</string>
+    <string name="action_add_to_named">Ajouter à %1$s</string>
+    <string name="action_remove_from_named">Retirer de %1$s</string>
+    <string name="action_add_to_new_shelf">Ajouter à une nouvelle étagère</string>
+    <string name="action_add_to_new_list">Ajouter à une nouvelle liste</string>
+    <string name="action_add_to_inventory">Ajouter à l\'inventaire</string>
+    <string name="list_removed_from_named">Retiré de %1$s</string>
+    <string name="inventory_item_remove_from_inventory">Supprimer de mon inventaire</string>
+    <string name="inventory_item_delete_confirm">Supprimer cet item de votre inventaire ?</string>
+    <string name="inventory_item_deleted">Supprimé !</string>
+    <string name="edition_added_to_inventory">Ajouté à votre inventaire</string>
+    <string name="edition_error_no_user">Pas d\'utilisateur connecté !</string>
+
+    <!-- States -->
+    <string name="book_resolve_error_title">Impossible d’ouvrir ce livre</string>
+    <string name="book_resolve_error_message">La connexion à inventaire.io a échoué.</string>
+    <string name="book_no_edition_title">Aucune édition pour ce livre</string>
+    <string name="book_no_edition_message">inventaire.io connaît ce titre, mais n’a aucune édition à en montrer.</string>
+
+    <!-- Sections -->
+    <string name="entity_summary_label">Résumé</string>
+    <string name="author_unknown">Auteur inconnu</string>
+    <string name="book_other_editions_subtitle">Autres éditions</string>
+    <string name="nav_community">Dans la communauté</string>
+    <string name="inventory_item_since_date">Depuis le %1$s</string>
+    <string name="edition_my_inventory">Dans mon inventaire</string>
+    <string name="inventory_item_write_notes">Écrire un commentaire</string>
+    <string name="inventory_item_my_notes">Ce que j\'en pense</string>
+    <string name="inventory_item_created_date">Créé le %1$s</string>
+    <string name="inventory_item_transaction_mode">Mode de transaction</string>
+
+    <!-- Work -->
+    <string name="nav_editions">Éditions</string>
+    <string name="work_editions_header">Éditions de %1$s</string>
+
+    <!-- Author -->
+    <string name="nav_author">Auteur</string>
+    <string name="author_loading">Chargement de l\'auteur...</string>
+    <string name="author_loading_works">Chargement des œuvres de %1$s</string>
+    <string name="author_birth_date">Né le %1$s</string>
+    <string name="author_works_header">Œuvres de %1$s</string>
+</resources>

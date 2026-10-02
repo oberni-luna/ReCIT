@@ -20,6 +20,10 @@ struct FullScreenCoverView: View {
     @GestureState private var pan: CGSize = .zero
     @State private var fittedSize: CGSize = .zero
     @State private var screenSize: CGSize = .zero
+    /// The black behind the cover, faded in rather than there from the first frame: present at
+    /// once, it was a dark card zooming out of the header around a cover not yet drawn — the
+    /// flash this screen opened with.
+    @State private var backdropOpacity: Double = 0
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -29,6 +33,9 @@ struct FullScreenCoverView: View {
                 .ignoresSafeArea()
 
             Button("Fermer", systemImage: "xmark") {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    backdropOpacity = 0
+                }
                 dismiss()
             }
             .labelStyle(.iconOnly)
@@ -37,7 +44,14 @@ struct FullScreenCoverView: View {
             .controlSize(.large)
             .padding(.all, .medium)
         }
-        .background(.black)
+        .background(.black.opacity(backdropOpacity))
+        // The presentation's own background stays clear, so the only black is the one above.
+        .presentationBackground(.clear)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.3)) {
+                backdropOpacity = 1
+            }
+        }
         .onChange(of: fittedSize) { measure() }
         .onChange(of: screenSize) { measure() }
         // Swiping down to close would fight the drag that moves a magnified cover.
@@ -69,15 +83,13 @@ struct FullScreenCoverView: View {
     }
 
     private var cover: some View {
-        CachedAsyncImage(url: url) { image in
+        FullScreenCoverImage(url: url) { image in
             image
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 // Measured before `scaleEffect`, which leaves layout alone: this is the fitted
                 // size whatever the current zoom.
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { fittedSize = $0 }
-        } placeholder: {
-            ProgressView()
         }
     }
 

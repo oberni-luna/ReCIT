@@ -117,12 +117,12 @@ extension CachedAsyncImage where Content == Image {
 
 // MARK: - ImageLoader
 
-private enum ImageLoaderError: Error, Equatable {
+enum ImageLoaderError: Error, Equatable {
     case canceled
     case undecodable
 }
 
-private actor ImageLoader {
+actor ImageLoader {
 
     static let shared: ImageLoader = ImageLoader()
 
@@ -159,6 +159,20 @@ private actor ImageLoader {
         inflateImage(processedImage)
 
         return processedImage
+    }
+
+    /// The image held in memory for `url`, at the size it was downloaded, without waiting —
+    /// what lets a screen opening on a cover already shown elsewhere draw it on its first frame.
+    nonisolated func memoryCachedImage(for url: URL) -> UIImage? {
+        pipeline.cache[ImageRequest(url: url)]?.image
+    }
+
+    /// The image at `url` as the server sent it, never resized to a frame: for a cover shown
+    /// full screen, where the frame a placeholder happened to have is the wrong size to ask for.
+    func loadOriginal(url: URL) async throws -> UIImage {
+        let image: UIImage = try await load(url: url, targetSize: nil)
+        inflateImage(image)
+        return image
     }
 
     private func getCachedImage(for request: ImageRequest) -> UIImage? {

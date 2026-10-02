@@ -429,6 +429,9 @@
         }
       }
     },
+    "Agrandir la couverture" : {
+
+    },
     "Annuler" : {
 
     },
@@ -682,6 +685,9 @@
           }
         }
       }
+    },
+    "Couverture" : {
+
     },
     "create_book.author_field" : {
       "localizations" : {
@@ -2541,6 +2547,46 @@
         }
       }
     },
+    "groups.members_count %lld" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld member"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld members"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld membre"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld membres"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "groups.members.admins" : {
       "localizations" : {
         "en" : {
@@ -2622,46 +2668,6 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "Voir les %lld membres"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "groups.members_count %lld" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld member"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld members"
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld membre"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld membres"
                 }
               }
             }
@@ -3877,7 +3883,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\u00e0 lire, \u00e0 acheter, \u00e0 offrir"
+            "value" : "à lire, à acheter, à offrir"
           }
         }
       }
@@ -3894,7 +3900,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cr\u00e9er une liste"
+            "value" : "Créer une liste"
           }
         }
       }
@@ -3922,13 +3928,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**A list** keeps in mind the ones you don\u2019t have: the ones you\u2019d like to buy, the ones you\u2019d like to read, the ones someone recommended\u2026"
+            "value" : "**A list** keeps in mind the ones you don’t have: the ones you’d like to buy, the ones you’d like to read, the ones someone recommended…"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Une liste** garde en m\u00e9moire ceux que vous n\u2019avez pas : ceux que vous aimeriez acheter, ceux que vous aimeriez lire, ceux qu\u2019on vous a conseill\u00e9s\u2026"
+            "value" : "**Une liste** garde en mémoire ceux que vous n’avez pas : ceux que vous aimeriez acheter, ceux que vous aimeriez lire, ceux qu’on vous a conseillés…"
           }
         }
       }
@@ -3945,7 +3951,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Une \u00e9tag\u00e8re** range les livres que vous avez."
+            "value" : "**Une étagère** range les livres que vous avez."
           }
         }
       }
@@ -3962,7 +3968,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Liste ou \u00e9tag\u00e8re ?"
+            "value" : "Liste ou étagère ?"
           }
         }
       }
@@ -6495,7 +6501,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ex-libris range vos livres sur **inventaire.io**, une biblioth\u00e8que commune, libre et sans publicit\u00e9."
+            "value" : "Ex-libris range vos livres sur **inventaire.io**, une bibliothèque commune, libre et sans publicité."
           }
         }
       }
@@ -6512,7 +6518,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "D\u00e9couvrir inventaire.io"
+            "value" : "Découvrir inventaire.io"
           }
         }
       }
@@ -6529,7 +6535,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chaque livre que vous ajoutez enrichit ses **donn\u00e9es ouvertes** : titres, auteur\u00b7ices, \u00e9ditions, que chacun peut r\u00e9utiliser."
+            "value" : "Chaque livre que vous ajoutez enrichit ses **données ouvertes** : titres, auteur·ices, éditions, que chacun peut réutiliser."
           }
         }
       }
@@ -6546,7 +6552,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Explorer les donn\u00e9es ouvertes"
+            "value" : "Explorer les données ouvertes"
           }
         }
       }
@@ -6580,7 +6586,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Branch\u00e9 sur inventaire.io"
+            "value" : "Branché sur inventaire.io"
           }
         }
       }
@@ -6618,6 +6624,7 @@
       }
     },
     "profile.network" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6985,13 +6992,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "a book\u2019s barcode"
+            "value" : "a book’s barcode"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "le code-barres d\u2019un livre"
+            "value" : "le code-barres d’un livre"
           }
         }
       }
@@ -7059,7 +7066,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\u00e0 la main, ou avec un peu d\u2019aide"
+            "value" : "à la main, ou avec un peu d’aide"
           }
         }
       }
@@ -7110,7 +7117,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Premi\u00e8re \u00e9tape : ajouter vos livres"
+            "value" : "Première étape : ajouter vos livres"
           }
         }
       }
@@ -7127,7 +7134,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos livres sont l\u00e0. Il reste \u00e0 leur faire une place sur des \u00e9tag\u00e8res."
+            "value" : "Vos livres sont là. Il reste à leur faire une place sur des étagères."
           }
         }
       }
@@ -7144,7 +7151,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\u00c9tape suivante : ranger vos livres"
+            "value" : "Étape suivante : ranger vos livres"
           }
         }
       }

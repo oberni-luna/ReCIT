@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Listes tab (issue 0105): French values of ReCIT_iOS/Localizable.xcstrings. -->
+<resources>
+    <string name="nav_lists">Listes</string>
+    <string name="lists_search_prompt">Rechercher</string>
+    <string name="lists_search_clear">Effacer</string>
+
+    <!-- Empty tab (feature 0022) -->
+    <string name="lists_empty_heading">Pas encore de liste</string>
+    <string name="lists_empty_body">Vos envies de lecture ont leur place ici.</string>
+    <string name="lists_empty_explain_title">Liste ou étagère ?</string>
+    <string name="lists_empty_explain_shelf">**Une étagère** range les livres que vous avez.</string>
+    <string name="lists_empty_explain_list">**Une liste** garde en mémoire ceux que vous n’avez pas : ceux que vous aimeriez acheter, ceux que vous aimeriez lire, ceux qu’on vous a conseillés…</string>
+    <string name="lists_empty_action_create_title">Créer une liste</string>
+    <string name="lists_empty_action_create_detail">à lire, à acheter, à offrir</string>
+
+    <!-- Row counts (feature 0024) -->
+    <plurals name="list_count_work">
+        <item quantity="one">%d œuvre</item>
+        <item quantity="many">%d œuvres</item>
+        <item quantity="other">%d œuvres</item>
+    </plurals>
+    <plurals name="list_count_author">
+        <item quantity="one">%d auteur·ice</item>
+        <item quantity="many">%d auteur·ices</item>
+        <item quantity="other">%d auteur·ices</item>
+    </plurals>
+    <plurals name="list_count_publisher">
+        <item quantity="one">%d maison d\'édition</item>
+        <item quantity="many">%d maisons d\'édition</item>
+        <item quantity="other">%d maisons d\'édition</item>
+    </plurals>
+
+    <!-- Detail -->
+    <string name="list_empty">Cette liste est vide</string>
+
+    <!-- Form -->
+    <string name="list_form_create_title">Créer une liste</string>
+    <string name="list_form_edit_title">Modifier la liste</string>
+    <string name="list_form_type">Type</string>
+    <string name="list_form_name">Nom</string>
+    <string name="list_form_description">Description</string>
+    <string name="list_form_create_and_add">Créer et ajouter</string>
+    <string name="list_form_delete">Supprimer la liste</string>
+    <string name="list_added_to_named">Ajouté à %1$s</string>
+</resources>

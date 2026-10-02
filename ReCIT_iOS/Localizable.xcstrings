@@ -4138,13 +4138,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save this arrangement"
+            "value" : "Save"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appliquer le rangement"
+            "value" : "Enregistrer"
           }
         }
       }
@@ -4308,13 +4308,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nothing to apply for now."
+            "value" : "Nothing to save for now."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rien à appliquer pour le moment."
+            "value" : "Rien à enregistrer pour le moment."
           }
         }
       }
@@ -4325,13 +4325,64 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Drag and drop books onto the shelves to file them. Nothing to apply for now."
+            "value" : "Drag and drop books onto the shelves to file them. Nothing to save for now."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Drag & drop les livres dans les étagères pour les ranger. Rien à appliquer pour le moment."
+            "value" : "Drag & drop les livres dans les étagères pour les ranger. Rien à enregistrer pour le moment."
+          }
+        }
+      }
+    },
+    "manual_sort.leave.confirm.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitter"
+          }
+        }
+      }
+    },
+    "manual_sort.leave.confirm.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your changes are not saved yet. You will find them here when you come back."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos changements ne sont pas encore enregistrés. Vous les retrouverez ici en revenant."
+          }
+        }
+      }
+    },
+    "manual_sort.leave.confirm.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave without saving?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitter sans enregistrer ?"
           }
         }
       }
@@ -5097,13 +5148,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Press “Save this arrangement” again to finish: what has already been saved will not be redone."
+            "value" : "Press “Save” again to finish: what has already been saved will not be redone."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appuyez à nouveau sur « Appliquer le rangement » pour terminer : ce qui a déjà été enregistré ne sera pas refait."
+            "value" : "Appuyez à nouveau sur « Enregistrer » pour terminer : ce qui a déjà été enregistré ne sera pas refait."
           }
         }
       }
@@ -7325,13 +7376,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your shelves only change once you tap “Save this arrangement”. The line just below says what will be saved."
+            "value" : "Your shelves only change once you tap “Save”. The line just below says what will be saved."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous n’avez plus qu’à appliquer vos changements pour qu’ils se répercutent."
+            "value" : "Vous n’avez plus qu’à enregistrer vos changements pour qu’ils se répercutent."
           }
         }
       }
@@ -7365,7 +7416,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre iPhone lit les titres et les genres, et remplit les étagères. À vous de corriger avant d’appliquer."
+            "value" : "Votre iPhone lit les titres et les genres, et remplit les étagères. À vous de corriger avant d’enregistrer."
           }
         }
       }

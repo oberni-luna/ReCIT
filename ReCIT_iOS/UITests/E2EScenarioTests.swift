@@ -398,9 +398,9 @@ final class E2EScenarioTests: XCTestCase {
         driver.step("Application du rangement", critical: false) {
             let apply: XCUIElement = try driver.waitForIdentifier(
                 "e2e.sort.apply",
-                "le bouton « Appliquer le rangement »"
+                "le bouton « Enregistrer »"
             )
-            try driver.tap(apply, "le bouton « Appliquer le rangement »")
+            try driver.tap(apply, "le bouton « Enregistrer »")
 
             // The footer's own account of the run, not the state of the button: every control
             // on this screen is disabled *while* a run is in flight, which is the same state as

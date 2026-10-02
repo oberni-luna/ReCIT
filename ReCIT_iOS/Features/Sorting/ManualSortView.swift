@@ -70,6 +70,10 @@ struct ManualSortView: View {
     /// icon button beside « Appliquer » is a "throw it all away" one thumb's width from "keep it
     /// all", and an hour of filing is not worth a mis-tap.
     @State private var isConfirmingDiscard: Bool = false
+    @State private var isConfirmingLeave: Bool = false
+    /// Set the first time the user answers « Quitter » to the leave question — after which it
+    /// is never asked again on this device (see `SortLeaveConfirmation`).
+    @AppStorage("sort.leaveWithoutSaving.acknowledged") private var isLeaveAcknowledged: Bool = false
 
     /// The one-off sentence the footer owes the user, if any. Held by the screen rather than
     /// the session: it is about a button that was pressed here, and it must not outlive the
@@ -244,7 +248,7 @@ struct ManualSortView: View {
         // place it is used, and one action does not get two controls on one screen (PRD 0009).
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button("action.close", systemImage: "xmark", action: onClose)
+                Button("action.close", systemImage: "xmark", action: close)
                     .labelStyle(.iconOnly)
                     .accessibilityIdentifier("e2e.sort.close")
             }
@@ -260,6 +264,21 @@ struct ManualSortView: View {
                 notice = nil
                 session.discardChanges()
             }
+        }
+        // Not destructive: closing keeps the draft. The question is whether the user knows it
+        // is not saved yet, so the answer is « Quitter », not « Abandonner ».
+        .confirmationDialog(
+            "manual_sort.leave.confirm.title",
+            isPresented: $isConfirmingLeave,
+            titleVisibility: .visible
+        ) {
+            Button("manual_sort.leave.confirm.action") {
+                isLeaveAcknowledged = true
+                onClose()
+            }
+            Button("action.cancel", role: .cancel) {}
+        } message: {
+            Text("manual_sort.leave.confirm.message")
         }
         // The form writes nothing. It hands back a name, the name becomes a draft on the
         // stack, and the draft is a section that accepts drops straight away — which is what
@@ -417,6 +436,21 @@ struct ManualSortView: View {
             return
         }
         isConfirmingDiscard = true
+    }
+
+    /// Leaves the flow — asking first if there are unsaved changes and the user has never
+    /// answered « Quitter » before.
+    private func close() {
+        let isNeeded: Bool = SortLeaveConfirmation.isNeeded(
+            hasPendingChanges: session.hasPendingChanges,
+            isApplying: session.isApplying,
+            isAcknowledged: isLeaveAcknowledged
+        )
+        guard isNeeded else {
+            onClose()
+            return
+        }
+        isConfirmingLeave = true
     }
 
     /// Fires the run and returns. The writes are owned by the session, so this screen can go

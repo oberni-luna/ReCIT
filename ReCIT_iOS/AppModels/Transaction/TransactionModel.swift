@@ -261,6 +261,7 @@ final class TransactionModel: OptimisticMutating {
 
         inFlightTask = optimistic(
             modelContext,
+            subjects: [transaction],
             apply: {
                 modelContext.insert(placeholder)
                 transaction.messages.append(placeholder)
@@ -298,6 +299,7 @@ final class TransactionModel: OptimisticMutating {
 
         inFlightTask = optimistic(
             modelContext,
+            subjects: [transaction],
             apply: {
                 transaction.state = newState
                 transaction.actions.append(.init(action: newState, timestamp: .now))

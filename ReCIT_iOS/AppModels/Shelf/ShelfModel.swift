@@ -122,6 +122,7 @@ final class ShelfModel: OptimisticMutating {
 
         inFlightTask = optimistic(
             modelContext,
+            subjects: [shelf],
             apply: {
                 shelf.name = name
                 shelf.shelfDescription = description
@@ -233,7 +234,7 @@ final class ShelfModel: OptimisticMutating {
             modelContext,
             action: "add-items",
             shelf: shelf,
-            itemId: itemId,
+            item: item,
             apply: { shelf.items.append(item) },
             revert: { shelf.items.removeAll { $0._id == itemId } }
         )
@@ -256,7 +257,7 @@ final class ShelfModel: OptimisticMutating {
             modelContext,
             action: "remove-items",
             shelf: shelf,
-            itemId: itemId,
+            item: item,
             apply: { shelf.items.removeAll { $0._id == itemId } },
             revert: { shelf.items.append(item) }
         )
@@ -274,14 +275,16 @@ final class ShelfModel: OptimisticMutating {
         _ modelContext: ModelContext,
         action: String,
         shelf: Shelf,
-        itemId: String,
+        item: InventoryItem,
         apply: () -> Void,
         revert: @escaping () -> Void
     ) {
         Self.raiseMembershipGate()
+        let itemId: String = item._id
 
         let cycle: Task<Void, Never> = optimistic(
             modelContext,
+            subjects: [shelf, item],
             apply: apply,
             revert: revert,
             request: { [weak self] in

@@ -125,8 +125,8 @@ final class GenreEnrichmentModel {
         }
 
         do {
-            for batch in pending.splitInSubArrays(of: Self.batchSize) {
-                try await enrich(batch: batch, modelContext: modelContext)
+            for batch in pending.map(\.uri).splitInSubArrays(of: Self.batchSize) {
+                try await enrich(workUris: batch, modelContext: modelContext)
                 worksProcessed += batch.count
             }
             coverage = .init(works: works)
@@ -166,11 +166,12 @@ final class GenreEnrichmentModel {
         guard GenreClaims.needsAsking(enrichedAt: work.genresEnrichedAt, revision: work.genresRevision) else {
             return
         }
-        guard worksInFlight.insert(work.uri).inserted else { return }
-        defer { worksInFlight.remove(work.uri) }
+        let workUri: String = work.uri
+        guard worksInFlight.insert(workUri).inserted else { return }
+        defer { worksInFlight.remove(workUri) }
 
         do {
-            try await enrich(batch: [work], modelContext: modelContext)
+            try await enrich(workUris: [workUri], modelContext: modelContext)
         } catch {
             // See above: silent on purpose. Nothing is stamped, so this retries next time.
         }
@@ -188,15 +189,16 @@ final class GenreEnrichmentModel {
     /// One batch: fetch the works' entities, resolve every genre uri they name,
     /// then write the labels back. Saved before returning so a later batch
     /// failing never costs this one.
-    private func enrich(batch: [Work], modelContext: ModelContext) async throws {
-        var worksByUri: [String: Work] = .init(minimumCapacity: batch.count)
-        for work in batch {
-            worksByUri[work.uri] = work
-        }
-
+    ///
+    /// **Uris across the awaits, never `Work`s.** Two round trips separate the ask from the
+    /// write, and a sync or a deletion runs over the same store meanwhile: a reference held
+    /// that long can have lost its row, and writing through it raised from inside CoreData
+    /// (issue 0067). Each work is looked up again once the answers are in, and skipped if it
+    /// has gone — it is not stamped, so whoever opens it next asks again.
+    private func enrich(workUris: [String], modelContext: ModelContext) async throws {
         let entities: [EntityResultDTO] = (try await entityModel.fetchEntities(
             modelContext: modelContext,
-            uris: batch.map(\.uri)
+            uris: workUris
         )) ?? []
 
         var genreUrisByWork: [String: [String]] = .init(minimumCapacity: entities.count)
@@ -218,7 +220,8 @@ final class GenreEnrichmentModel {
         try await resolveGenreLabels(uris: Array(urisToResolve))
 
         for (workUri, genreUris) in genreUrisByWork {
-            guard let work = worksByUri[workUri] else { continue }
+            guard let work = entityModel.localWork(modelContext: modelContext, uri: workUri),
+                  work.isStillInTheStore else { continue }
             work.applyEnrichedGenres(labels(for: genreUris))
         }
 

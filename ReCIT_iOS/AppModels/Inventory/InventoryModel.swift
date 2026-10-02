@@ -211,6 +211,7 @@ final class InventoryModel: OptimisticMutating {
     ) {
         inFlightTask = optimistic(
             modelContext,
+            subjects: [item],
             apply: { item.transaction = newValue },
             revert: { item.transaction = previous },
             request: { [weak self] in
@@ -230,6 +231,7 @@ final class InventoryModel: OptimisticMutating {
         let previous: String = item.details
         inFlightTask = optimistic(
             modelContext,
+            subjects: [item],
             apply: { item.details = details },
             revert: {
                 // Autosave can queue several writes; a stale failure must not clobber a newer note.

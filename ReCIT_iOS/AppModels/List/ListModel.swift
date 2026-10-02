@@ -140,6 +140,7 @@ final class ListModel: OptimisticMutating {
 
         inFlightTask = optimistic(
             modelContext,
+            subjects: [list],
             apply: {
                 for placeholder in placeholders {
                     modelContext.insert(placeholder)

@@ -257,6 +257,7 @@ final class UserModel: OptimisticMutating {
 
         inFlightTask = optimistic(
             modelContext,
+            subjects: [user],
             apply: { user.relation = newRelation },
             revert: { user.relation = previousRelation },
             request: { [weak self] in

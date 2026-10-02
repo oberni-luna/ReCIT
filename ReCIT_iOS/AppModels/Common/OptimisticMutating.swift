@@ -35,10 +35,17 @@ extension OptimisticMutating {
     ///   - revert: Undoes `apply` if the request fails.
     ///   - request: The web-service call.
     ///   - reconcile: Optional post-success alignment with server truth.
+    ///   - subjects: The models `revert` and `reconcile` write to. They are captured across the
+    ///     request's round trip, and the row behind one can be gone by the time it answers —
+    ///     the book deleted, the account signed out. Writing a persisted property of a model
+    ///     with no row is a trap, not a nil (issues 0065, 0067), so when any subject has left
+    ///     the store neither closure runs: there is nothing left to align, and nothing to put
+    ///     back. A failure is still reported.
     /// - Returns: The background task, so callers (and tests) can await completion.
     @discardableResult
     func optimistic(
         _ modelContext: ModelContext,
+        subjects: [any PersistentModel] = [],
         apply: () -> Void,
         revert: @escaping () -> Void,
         request: @escaping () async throws -> Void,
@@ -47,14 +54,21 @@ extension OptimisticMutating {
         apply()
         try? modelContext.save()
 
+        let subjectsAreStillThere: () -> Bool = {
+            subjects.allSatisfy { $0.isStillInTheStore }
+        }
+
         return Task { [weak self] in
             do {
                 try await request()
+                guard subjectsAreStillThere() else { return }
                 try await reconcile()
                 try? modelContext.save()
             } catch {
-                revert()
-                try? modelContext.save()
+                if subjectsAreStillThere() {
+                    revert()
+                    try? modelContext.save()
+                }
                 self?.errorReporter?.report(error)
             }
         }

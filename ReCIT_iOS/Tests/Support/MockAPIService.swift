@@ -25,6 +25,9 @@ final class MockAPIService: APIServicing {
     private(set) var uploadedImageSizes: [Int] = []
     private(set) var recordedRequests: [(endpoint: String, method: String)] = []
     var baseURLValue: String = "https://test.local"
+    /// Called with each fetched endpoint before its stub answers — the moment a test can change
+    /// the store under a model that is waiting on the network.
+    var onFetch: ((String) -> Void)?
 
     // MARK: - Stubbing
 
@@ -71,6 +74,7 @@ final class MockAPIService: APIServicing {
         debug: Bool
     ) async throws -> T? {
         recordedRequests.append((endpoint, "GET"))
+        onFetch?(endpoint)
         return try decodeStub(for: endpoint)
     }
 

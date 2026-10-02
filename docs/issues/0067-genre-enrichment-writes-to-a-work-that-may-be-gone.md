@@ -110,7 +110,9 @@ which looks the uri up and merges in place. PRD 0016, issue 0100.
 
 What is still inferred rather than reproduced: which path handed `GenreEnrichmentModel` a
 row-less twin rather than the surviving row. Issue 0101 makes the enrichment re-read each work by
-uri after its two round trips, so it no longer depends on the answer.
+uri after its two round trips, so it no longer depends on the answer. Its unit test deletes the
+work between the two requests and checks it is skipped; the e2e criteria below are still owed —
+`scripts/e2e.sh` has not been played since.
 
 ## Reproduce
 

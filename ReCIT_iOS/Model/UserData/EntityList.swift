@@ -70,7 +70,7 @@ public final class EntityList {
             _rev: listDTO._rev,
             name: listDTO.name,
             explanation: listDTO.description,
-            created: Date(timeIntervalSince1970: listDTO.created),
+            created: Date(timeIntervalSince1970: listDTO.created / 1000),
             updated: updatedDate,
             visibility: listDTO.visibility.compactMap { VisibilityAttributes(rawValue: $0) },
             elements: listDTO.elements?.compactMap {

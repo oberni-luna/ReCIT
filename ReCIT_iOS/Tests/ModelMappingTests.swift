@@ -117,4 +117,40 @@ struct ModelMappingTests {
         #expect(user.email == "old@example.org")
         #expect(user.avatarURLValue == "https://example.org/old.png")
     }
+    // MARK: - Dates read off the right claim, in the right unit
+
+    private func workDTO(claims: String) throws -> EntityResultDTO {
+        let json: String = """
+        {"uri":"wd:Q1","lastrevid":1,"type":"work","labels":{"fr":"Germinal"},"claims":\(claims)}
+        """
+        return try JSONDecoder().decode(EntityResultDTO.self, from: Data(json.utf8))
+    }
+
+    @Test("A work's publication date is its P577, not a date of death")
+    func workPublicationDateIsP577() throws {
+        let published: EntityResultDTO = try workDTO(claims: #"{"wdt:P577":["1885-03-02"]}"#)
+        let work: Work = .init(entityDTO: published, authors: [], apiService: MockAPIService())
+
+        let year: Int? = work.publicationDate.map { Calendar(identifier: .gregorian).component(.year, from: $0) }
+        #expect(year == 1885)
+
+        let deathOnly: EntityResultDTO = try workDTO(claims: #"{"wdt:P570":["1902-09-29"]}"#)
+        #expect(Work(entityDTO: deathOnly, authors: [], apiService: MockAPIService()).publicationDate == nil)
+
+        let fresh: Work = .init(uri: "wd:Q1", lastrevid: 0, title: "Germinal")
+        fresh.update(entityDTO: published, apiService: MockAPIService())
+        #expect(fresh.publicationDate == work.publicationDate)
+    }
+
+    @Test("A list's creation date is read from milliseconds")
+    func listCreatedIsMilliseconds() throws {
+        let json: String = """
+        {"_id":"l1","_rev":"1","name":"L","description":"","created":1700000000000,"visibility":[],"type":"work"}
+        """
+        let dto: ListDTO = try JSONDecoder().decode(ListDTO.self, from: Data(json.utf8))
+
+        let list: EntityList = .init(listDTO: dto, baseUrl: "")
+
+        #expect(list.created == Date(timeIntervalSince1970: 1_700_000_000))
+    }
 }

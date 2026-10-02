@@ -65,7 +65,7 @@ public class Work: Identifiable, Entity {
     convenience init (entityDTO: EntityResultDTO, authors: [Author], apiService: APIServicing) {
         let imageUrl: String? = apiService.absoluteImageUrl(entityDTO.image?.url)
 
-        let publicationDateString: String? = entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.getStringValue()
+        let publicationDateString: String? = entityDTO.claims[WikidataProperty.publicationDate.rawValue]?.first?.getStringValue()
 
         self.init(
             uri: entityDTO.uri,
@@ -85,7 +85,7 @@ public class Work: Identifiable, Entity {
     /// server response never wipes data we already have. Relationships
     /// (authors, editions) are handled by the caller.
     func update(entityDTO: EntityResultDTO, apiService: APIServicing) {
-        let publicationDateString: String? = entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.getStringValue()
+        let publicationDateString: String? = entityDTO.claims[WikidataProperty.publicationDate.rawValue]?.first?.getStringValue()
 
         lastrevid = entityDTO.lastrevid ?? lastrevid
         if let title = entityDTO.labels["fr"] ?? entityDTO.labels["en"] ?? entityDTO.labels.values.first, !title.isEmpty {

@@ -78,20 +78,21 @@ final class InventoryModel: OptimisticMutating {
             guard let authorWorkUris: [String] = result.worksTree.author[authorUri] else { continue }
             guard let workDTOs = try? await entityModel?.fetchEntities(modelContext: modelContext, uris: authorWorkUris) else { continue }
 
+            // Upserted, never built: a `Work` made afresh here on every sync used to empty the
+            // stored one's genres and preferred edition, and leave a row-less twin behind for
+            // whoever held it (issue 0067). A work under two authors arrives under each, and
+            // keeps both.
+            let authors: [Author]
             if authorUri == InventoryModel.unkownAuthorId {
-                for work in workDTOs {
-                    modelContext.insert(Work(entityDTO: work, authors: [], apiService: apiService))
-                }
+                authors = []
             } else {
                 // `try?` like the works above: one author the server answers badly must not
                 // stop the whole inventory — its works fall to the loop after this one.
-                guard let authors: [Author] = try? await entityModel?.getOrFetchAuthors(modelContext: modelContext, uris: [authorUri]) else { continue }
-                for work in workDTOs {
-                    for author in authors {
-                        author.works.append(Work(entityDTO: work, authors: authors, apiService: apiService))
-                        modelContext.insert(author)
-                    }
-                }
+                guard let fetched: [Author] = try? await entityModel?.getOrFetchAuthors(modelContext: modelContext, uris: [authorUri]) else { continue }
+                authors = fetched
+            }
+            for work in workDTOs {
+                try modelContext.upsertWork(work, authors: authors, apiService: apiService)
             }
 
             for workUri in authorWorkUris where !syncedWorkUris.contains(workUri) {
@@ -141,13 +142,12 @@ final class InventoryModel: OptimisticMutating {
                 // Upsert in place — keep identity so open item views stay reactive.
                 myItem.update(from: itemDTO, forUser: forUser, apiService: apiService)
                 if assignsShelves { myItem.shelves = shelves }
-                if myItem.edition?.works.filter({ $0.uri == relatedWork.uri }).count == 0 {
-                    myItem.edition?.works.append(relatedWork)
-                }
+                myItem.edition?.mergeWorks([relatedWork])
             } else {
-                let myItem: InventoryItem = .init(itemDTO: itemDTO, forUser: forUser, apiService: apiService)
+                let edition: Edition = try modelContext.edition(uri: itemDTO.entity, snapshot: itemDTO.snapshot, apiService: apiService)
+                let myItem: InventoryItem = .init(itemDTO: itemDTO, forUser: forUser, edition: edition)
                 myItem.shelves = shelves
-                myItem.edition?.works.append(relatedWork)
+                edition.mergeWorks([relatedWork])
                 modelContext.insert(myItem)
             }
         }
@@ -175,7 +175,8 @@ final class InventoryModel: OptimisticMutating {
             throw NetworkError.badResponse
         }
 
-        let newItem: InventoryItem = .init(itemDTO: response.item, forUser: forUser, apiService: apiService)
+        let edition: Edition = try modelContext.edition(uri: response.item.entity, snapshot: response.item.snapshot, apiService: apiService)
+        let newItem: InventoryItem = .init(itemDTO: response.item, forUser: forUser, edition: edition)
         modelContext.insert(newItem)
         try modelContext.save()
         return newItem

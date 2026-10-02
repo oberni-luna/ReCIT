@@ -105,6 +105,15 @@ public class Work: Identifiable, Entity {
         }
     }
 
+    /// Adds the authors this work does not list yet. By uri, so a work that arrives once under
+    /// each of its authors ends up with all of them, and none twice.
+    func mergeAuthors(_ newAuthors: [Author]) {
+        var known: Set<String> = .init(authors.map(\.uri))
+        for author in newAuthors where known.insert(author.uri).inserted {
+            authors.append(author)
+        }
+    }
+
     /// Records the outcome of a genre backfill pass, including the empty one:
     /// "asked, and Wikidata had nothing" is a result worth persisting, not a
     /// failure to retry on every run.

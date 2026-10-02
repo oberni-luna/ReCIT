@@ -80,6 +80,14 @@ public class Edition: Identifiable, Entity {
         )
     }
 
+    /// Adds the works this edition is not filed under yet. By uri, so asking twice adds nothing.
+    func mergeWorks(_ newWorks: [Work]) {
+        var known: Set<String> = .init(works.map(\.uri))
+        for work in newWorks where known.insert(work.uri).inserted {
+            works.append(work)
+        }
+    }
+
     /// Updates the stored fields in place from a freshly fetched DTO.
     /// Only non-empty remote values overwrite existing ones, so a sparse
     /// server response never wipes data we already have. The `works`

@@ -58,7 +58,10 @@ public final class InventoryItem{
         self.details = details
     }
 
-    convenience init(itemDTO: ItemDTO, forUser: User, apiService: APIServicing) {
+    /// `edition` is the one the store already holds for `itemDTO.entity`, or a new one — see
+    /// `ModelContext.edition(uri:snapshot:apiService:)`. Never built here: a second `Edition`
+    /// under a uri the store holds would empty the first one's works and colour.
+    convenience init(itemDTO: ItemDTO, forUser: User, edition: Edition) {
         let updatedDate: Date? = if let updated = itemDTO.updated {
             Date(timeIntervalSince1970: updated / 1000)
         } else {
@@ -75,7 +78,7 @@ public final class InventoryItem{
             updated: updatedDate,
             busy: itemDTO.busy,
             details: itemDTO.details ?? "",
-            edition: Edition(uri: itemDTO.entity, entitySnapshotDTO: itemDTO.snapshot, apiService: apiService, works: [])
+            edition: edition
         )
         self.owner = forUser
         self.searchIndex = InventoryItem.buildSearchIndex(

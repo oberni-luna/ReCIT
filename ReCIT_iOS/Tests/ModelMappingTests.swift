@@ -44,7 +44,8 @@ struct ModelMappingTests {
         let dto: ItemDTO = try JSONDecoder().decode(ItemDTO.self, from: Data(json.utf8))
         let owner: User = Fixture.user(username: "reader")
 
-        let item: InventoryItem = .init(itemDTO: dto, forUser: owner, apiService: MockAPIService())
+        let edition: Edition = .init(uri: dto.entity, entitySnapshotDTO: dto.snapshot, apiService: MockAPIService())
+        let item: InventoryItem = .init(itemDTO: dto, forUser: owner, edition: edition)
 
         #expect(item._id == "item-42")
         #expect(item.transaction == .giving)

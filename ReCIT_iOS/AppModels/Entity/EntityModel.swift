@@ -45,14 +45,7 @@ final class EntityModel {
             return try? getLocalAuthor(modelContext: modelContext, uri: uri)
         }
 
-        if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri) {
-            author.update(entityDTO: authorDto, apiService: apiService)
-            try modelContext.save()
-            return author
-        }
-
-        let author: Author = .init(entityDTO: authorDto, apiService: apiService)
-        modelContext.insert(author)
+        let author: Author? = try modelContext.upsertAuthors([authorDto], apiService: apiService).first
         try modelContext.save()
         return author
     }
@@ -69,17 +62,7 @@ final class EntityModel {
             .compactMap { $0.getStringValue() } ?? []
         let authors: [Author] = (try? await getOrFetchAuthors(modelContext: modelContext, uris: authorUris)) ?? []
 
-        if let work = try? getLocalWork(modelContext: modelContext, uri: uri) {
-            work.update(entityDTO: workDto, apiService: apiService)
-            if !authors.isEmpty {
-                work.authors = authors
-            }
-            try modelContext.save()
-            return work
-        }
-
-        let work: Work = .init(entityDTO: workDto, authors: authors, apiService: apiService)
-        modelContext.insert(work)
+        let work: Work = try modelContext.upsertWork(workDto, authors: authors, apiService: apiService)
         try modelContext.save()
         return work
     }
@@ -106,18 +89,7 @@ final class EntityModel {
 
         let works: [Work] = try await resolveEditionWorks(from: editionDto, modelContext: modelContext)
 
-        if let edition = try? getLocalEdition(modelContext: modelContext, uri: uri) {
-            edition.update(entityDto: editionDto, apiService: apiService)
-            if !works.isEmpty {
-                edition.works = works
-            }
-            try modelContext.save()
-            return edition
-        }
-
-        let edition: Edition = .init(entityDto: editionDto, apiService: apiService)
-        edition.works = works
-        modelContext.insert(edition)
+        let edition: Edition = try modelContext.upsertEdition(editionDto, works: works, apiService: apiService)
         try modelContext.save()
         return edition
     }
@@ -273,11 +245,9 @@ final class EntityModel {
             return authors
         }
 
-        authors.append(contentsOf: authorsDto.compactMap { authorDto in
-            let author: Author = .init(entityDTO: authorDto, apiService: apiService)
-            modelContext.insert(author)
-            return author
-        })
+        // Upserted: the server may answer a uri with the entity it now redirects to, which the
+        // store can hold already.
+        authors.append(contentsOf: try modelContext.upsertAuthors(authorsDto, apiService: apiService))
         try modelContext.save()
 
         return authors
@@ -293,8 +263,7 @@ final class EntityModel {
         }
 
         for work in works {
-            work.authors.append(author)
-            modelContext.insert(work)
+            work.mergeAuthors([author])
         }
 
         try modelContext.save()
@@ -323,9 +292,7 @@ final class EntityModel {
                 .compactMap { $0.getStringValue() } ?? []
             let authors: [Author] = (try? await getOrFetchAuthors(modelContext: modelContext, uris: authorUris)) ?? []
 
-            let work: Work = .init(entityDTO: workDto, authors: authors, apiService: apiService)
-            modelContext.insert(work)
-            works.append(work)
+            works.append(try modelContext.upsertWork(workDto, authors: authors, apiService: apiService))
         }
         return works
     }
@@ -340,8 +307,7 @@ final class EntityModel {
         }
 
         for edition in editions {
-            edition.works.append(work)
-            modelContext.insert(edition)
+            edition.mergeWorks([work])
         }
 
         try modelContext.save()
@@ -369,13 +335,11 @@ final class EntityModel {
         // Fetch new editions from the API and resolve their works and authors
         if let editionsDto = try await fetchEntities(modelContext: modelContext, uris: urisToFetch) {
             for editionDto in editionsDto {
-                let edition: Edition = .init(entityDto: editionDto, apiService: apiService)
-                edition.works = try await resolveEditionWorks(
+                let works: [Work] = try await resolveEditionWorks(
                     from: editionDto,
                     modelContext: modelContext
                 )
-                modelContext.insert(edition)
-                editions.append(edition)
+                editions.append(try modelContext.upsertEdition(editionDto, works: works, apiService: apiService))
             }
         }
 
@@ -385,10 +349,10 @@ final class EntityModel {
             if let editionDtos = try await fetchEntities(modelContext: modelContext, uris: urisToRefetch) {
                 for editionDto in editionDtos {
                     guard let edition = editionsNeedingWorks.first(where: { $0.uri == editionDto.uri }) else { continue }
-                    edition.works = try await resolveEditionWorks(
+                    edition.mergeWorks(try await resolveEditionWorks(
                         from: editionDto,
                         modelContext: modelContext
-                    )
+                    ))
                 }
             }
         }

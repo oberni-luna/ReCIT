@@ -87,6 +87,31 @@ opens the work asks again), and it is correct under every hypothesis above. It i
 if a sync really is deleting and reinserting works, because everything else holding one has the
 same problem.
 
+## What removes the row — found on 2026-10-02
+
+A sync was building works rather than upserting them. `InventoryModel.syncInventory` made a
+`Work(entityDTO:)` for every work of the inventory on every sync that ran — once per author for a
+work with several — and inserted it. `InventoryItem.init(itemDTO:)` did the same with an `Edition`,
+and `EntityModel.getOrFetch*` inserted whatever uri the server answered, a redirect included.
+
+`uri` is `@Attribute(.unique)`, and `UniqueCollisionTests` pins down what SwiftData does with a
+second insert under a uri it holds:
+
+- it keeps **one row**, the one already held, and pours the newcomer's values into it — so the
+  work's `genres`, `genresEnrichedAt` and `preferredEditionUri` came back empty on every sync;
+- the newcomer stays **registered, with a permanent id and no row behind it**. It still answers
+  `isStillInTheStore`, writes through it are silently lost, and once CoreData turns it back into
+  a fault, a write has to fault in a row that does not exist: `_PFFaultHandlerLookupRow`, the
+  exception in the stack above.
+
+Fixed at the sync, as the third criterion asks: every author, work and edition now goes through
+`ModelContext+Entities` (`upsertAuthors`, `upsertWork`, `upsertEdition`, `edition(uri:snapshot:)`),
+which looks the uri up and merges in place. PRD 0016, issue 0100.
+
+What is still inferred rather than reproduced: which path handed `GenreEnrichmentModel` a
+row-less twin rather than the surviving row. Issue 0101 makes the enrichment re-read each work by
+uri after its two round trips, so it no longer depends on the answer.
+
 ## Reproduce
 
 `scripts/e2e.sh`. It surfaced on the « Suppression des livres de l'inventaire » step, roughly
@@ -95,10 +120,10 @@ book screen opened repeatedly while a sync is running, not a single delete.
 
 ## Acceptance criteria
 
-- [ ] What removes the `Work`'s row is identified and written down here
+- [x] What removes the `Work`'s row is identified and written down here
 - [ ] Enriching genres from the book screen no longer aborts, with a stack or a reproduction to
       show the before
-- [ ] If a sync path is replacing works rather than upserting them, that is fixed at the sync —
+- [x] If a sync path is replacing works rather than upserting them, that is fixed at the sync —
       ADR 0001, invariant 2 — and not only guarded at this call site
 - [ ] `scripts/e2e.sh` runs its deletion step to the end twice in a row
 

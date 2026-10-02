@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Inventaire tab (issue 0103): shelves, the unified search, the shelf screen and form.
+  French values of ReCIT_iOS/Localizable.xcstrings, keys with '.' turned into '_'. Keys other
+  features may also need (the sync captions, « Retirer de », « Créer et ajouter », « Ajouté à »)
+  carry an `inventory_` / `shelf_` prefix so that no two strings_<feature>.xml define one name.
+  Strings iOS hard-codes in Swift (« Étagères », the shelf form) take a `shelves_` / `shelf_` key.
+-->
+<resources>
+    <!-- First sync banner (feature 0027) -->
+    <string name="inventory_sync_mine_title">Synchronisation de vos livres</string>
+    <string name="inventory_sync_count_arriving">%1$d livres sur %2$d · ils apparaissent au fur et à mesure</string>
+    <string name="inventory_sync_count">%1$d livres sur %2$d</string>
+    <string name="inventory_sync_waiting">En attente</string>
+    <string name="inventory_sync_preparing">Préparation de la synchronisation…</string>
+    <string name="inventory_sync_percent">%1$d %%</string>
+
+    <!-- Shelves section (literals on iOS) -->
+    <string name="shelves_section_title">Étagères</string>
+    <string name="shelves_section_add">Ajouter</string>
+    <string name="shelves_all_books">Tous les livres · %1$d</string>
+
+    <!-- Empty shelf (feature 0021) -->
+    <string name="shelf_empty_scan_heading">Première étape : ajouter vos livres</string>
+    <string name="shelf_empty_scan_body">Scannez ceux que vous avez en main, ou cherchez-les par leur titre.</string>
+    <string name="shelf_empty_sort_heading">Étape suivante : ranger vos livres</string>
+    <string name="shelf_empty_sort_body">Vos livres sont là. Il reste à leur faire une place sur des étagères.</string>
+    <string name="shelf_empty_action_search_title">Rechercher</string>
+    <string name="shelf_empty_action_search_detail">par titre ou auteur</string>
+
+    <!-- Unified search (feature 0014) -->
+    <string name="inventory_search_placeholder">Rechercher</string>
+    <string name="inventory_search_recents_section">Recherches récentes</string>
+    <string name="inventory_search_recents_clear">Effacer</string>
+    <string name="inventory_search_recents_empty_title">Aucune recherche récente</string>
+    <string name="inventory_search_recents_empty_message">Vos recherches récentes apparaîtront ici.</string>
+    <string name="inventory_search_local_section">Dans mes livres et chez mes amis</string>
+    <string name="inventory_search_see_all">Tout voir</string>
+    <string name="inventory_search_remote_section">Chercher sur inventaire.io</string>
+    <string name="inventory_search_suggestion_works">Livres contenant %1$s</string>
+    <string name="inventory_search_suggestion_humans">Auteur·ices contenant %1$s</string>
+    <string name="inventory_search_suggestion_everything">Chercher %1$s sur inventaire.io</string>
+    <string name="inventory_search_loading">Recherche sur inventaire.io…</string>
+    <string name="inventory_search_results_empty_title">Aucun résultat</string>
+    <string name="inventory_search_results_empty_message">Aucun livre ni auteur·ice ne correspond à « %1$s » sur inventaire.io. Essayez une autre orthographe, ou moins de mots.</string>
+    <string name="inventory_search_error_title">La recherche n\'a pas abouti</string>
+    <string name="inventory_search_error_message">inventaire.io n\'a pas répondu. Vérifiez votre connexion, puis réessayez — vos livres restent affichés au-dessus.</string>
+    <string name="inventory_search_error_retry">Réessayer</string>
+    <string name="inventory_search_results_works">Livres · %1$d</string>
+    <string name="inventory_search_results_humans">Auteur·ices · %1$d</string>
+
+    <!-- Shelf screen -->
+    <string name="shelf_detail_edit">Modifier</string>
+    <string name="shelf_detail_empty">Cette étagère est vide</string>
+    <string name="shelf_remove_from_named">Retirer de %1$s</string>
+
+    <!-- Shelf form (literals on iOS) -->
+    <string name="shelf_form_title_new">Nouvelle étagère</string>
+    <string name="shelf_form_title_edit">Modifier l\'étagère</string>
+    <string name="shelf_form_close">Fermer</string>
+    <string name="shelf_form_name">Nom de l\'étagère</string>
+    <string name="shelf_form_description">Description (optionnel)</string>
+    <string name="shelf_form_visibility">Visibilité</string>
+    <string name="shelf_form_visibility_private">Privé</string>
+    <string name="shelf_form_visibility_friends">Amis</string>
+    <string name="shelf_form_visibility_public">Public</string>
+    <string name="shelf_form_create">Créer</string>
+    <string name="shelf_form_save">Enregistrer</string>
+    <string name="shelf_form_create_and_add">Créer et ajouter</string>
+    <string name="shelf_form_delete">Supprimer l\'étagère</string>
+    <string name="shelf_form_delete_confirm_title">Supprimer cette étagère ?</string>
+    <string name="shelf_form_delete_confirm_message">Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l\'étagère est supprimée.</string>
+    <string name="shelf_form_cancel">Annuler</string>
+    <string name="shelf_added_to_named">Ajouté à %1$s</string>
+</resources>

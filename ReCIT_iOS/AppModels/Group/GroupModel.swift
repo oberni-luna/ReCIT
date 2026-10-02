@@ -85,7 +85,7 @@ final class GroupModel: OptimisticMutating {
 
     /// Requests waiting on me, in the groups I administer.
     var requestsToReview: Int {
-        groups(where: [.admin]).reduce(0) { $0 + $1.requested.count }
+        groups(where: [.admin]).reduce(0) { $0 + $1.requestsToReview(by: myUserId) }
     }
 
     /// Everything in the Groupes segment that waits on an answer from me — what the Réseau

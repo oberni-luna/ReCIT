@@ -46,6 +46,12 @@ struct ReaderGroup: Identifiable, Equatable, Sendable {
         return nil
     }
 
+    /// The requests to join waiting on `userId` — all of them if they administer the group, none
+    /// otherwise: only an admin can answer one.
+    func requestsToReview(by userId: String?) -> Int {
+        role(of: userId) == .admin ? requested.count : 0
+    }
+
     /// Admins first, then members: everyone the group's books are shared with.
     var memberIds: [String] {
         admins.map(\.user) + members.map(\.user)

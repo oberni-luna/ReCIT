@@ -72,6 +72,22 @@ struct ReaderGroupTests {
         #expect(group.role(of: "stranger") == nil)
     }
 
+    @Test("Requests to join wait on the admins, and on nobody else")
+    func requestsToReview() {
+        let club: ReaderGroup = group(members: ["member"], invited: ["guest"], requested: ["r1", "r2"])
+
+        #expect(club.requestsToReview(by: "admin") == 2)
+        #expect(club.requestsToReview(by: "member") == 0)
+        #expect(club.requestsToReview(by: "guest") == 0)
+        #expect(club.requestsToReview(by: "r1") == 0)
+        #expect(club.requestsToReview(by: nil) == 0)
+    }
+
+    @Test("A group nobody asked to join waits on no one")
+    func noRequestsToReview() {
+        #expect(group().requestsToReview(by: "admin") == 0)
+    }
+
     @Test("A request to a group on request waits; to an open group, it lets you in")
     func request() throws {
         #expect(try group().applying(.request, by: "me").role(of: "me") == .requested)

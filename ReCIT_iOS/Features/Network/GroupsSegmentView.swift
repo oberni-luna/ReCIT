@@ -75,7 +75,13 @@ struct GroupsSegmentView: View {
                 Section {
                     ForEach(groupModel.myGroups) { group in
                         NavigationLink(value: NavigationDestination.group(id: group.id)) {
-                            GroupRowView(cell: .init(group: group), role: group.role(of: groupModel.myUserId))
+                            GroupRowView(
+                                cell: .init(
+                                    group: group,
+                                    pendingCount: group.requestsToReview(by: groupModel.myUserId)
+                                ),
+                                role: group.role(of: groupModel.myUserId)
+                            )
                         }
                     }
                 } header: {

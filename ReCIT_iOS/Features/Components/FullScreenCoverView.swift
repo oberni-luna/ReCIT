@@ -56,7 +56,10 @@ struct FullScreenCoverView: View {
         .onChange(of: screenSize) { measure() }
         // Swiping down to close would fight the drag that moves a magnified cover.
         .interactiveDismissDisabled(zoom.isZoomed)
-        .preferredColorScheme(.dark)
+        // Dark for this screen alone. `preferredColorScheme` would carry it up to the window, and
+        // a light-mode app would turn dark behind the cover for the length of the zoom — the
+        // flash it opened with in light mode, and only there.
+        .environment(\.colorScheme, .dark)
         .statusBarHidden()
     }
 

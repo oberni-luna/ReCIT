@@ -12,6 +12,6 @@
     "keywords": "books,reading,library,borrow,lend,inventory,share,friends,readers,comics",
     "supportUrl": "https://inventaire.io/",
     "marketingUrl": "https://inventaire.io/",
-    "whatsNew": "What's new in 1.2:\n• The Lists tab shows each list's first covers and how many items it holds\n• A list's type is now spelled out: Work, Author, Publisher\n• When you have no list yet, the tab explains what a list is for and offers to create your first one\n• A long press on a book or a list row opens its menu right away\n• A book's note is saved as you type\n• \"Unknown author\" is shown when a book has no author\n• First sync: a progress bar shows how far your inventory has got, and friends appear without waiting for their books\n• Signing out removes your personal data from the device\n• The Profile now says the app is built on inventaire.io and its open data"
+    "whatsNew": "What's new in 1.3:\n• A new Network tab brings your friends and groups together, with a badge when something awaits your answer\n• inventaire.io groups come to the app: find a group, ask to join, invite members or start your own\n• A red dot marks the groups you administer that have requests waiting for you\n• Tap a book's cover to see it full screen: pinch to zoom, double-tap to fill the screen\n• \"Sort my books\": the button now says \"Save\", and the app checks with you before leaving unsaved changes\n• The app now opens on your Inventory\n• A work's publication date is now the right one\n• Fixes: a crash related to work genres, and a friend's sync that could fail"
   }
 }

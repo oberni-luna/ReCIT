@@ -73,6 +73,25 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   `Chrome / Glass Button` (`555:499`, 44 pt, prop `Glyph`). **SF Pro et les SF Symbols ne se rendent pas via le
   connecteur Figma** : `listAvailableFontsAsync` les liste, mais `hasMissingFont === true` et largeur 0 —
   `getSfSymbolCharacter` ne sert donc à rien ici. Inter et `Icon` en tiennent lieu, comme pour le reste du chrome.
+- **Passe du 2026-10-13 — `Profil`** (`588:17841`, page `Screens`, à droite des trois sections qu'elle fusionne, mode
+  clair seul) : la synthèse de `Profil · À propos, version & don` et de `Soutenir Ex-libris · Cartes`.
+  `P1 · Profil · Soutenir & À propos` (`588:17842`, clone de `Profil · Carte C · Vert nuit` `534:17027` — carte C
+  fermable en tête, « À propos d'inventaire.io », pied de page de version ; pastille de C reposée à 14 %).
+  `P2 · À propos d'inventaire.io · Fond blanc` (`588:17876`, V2 repassée sur `background/default`, nav et tab bar
+  comprises) : une étagère dessinée en tête — `ShelfWash`, `ShelfPlank`, dos peints aux couleurs de l'icône en
+  `GRADIENT_LINEAR` avec filets dorés, un ocre penché, une pile couchée — et l'étiquette papier « inventaire.io »
+  avec le logo sous la planche ; `Onboarding / Brand` réécrit « La bibliothèque derrière Ex-libris » ; glyphes des
+  valeurs dans une pastille `background/tinted` ; « Aller plus loin » cerclé de `border/default` ; pied centré avec
+  l'icône d'app. Trois paywalls sur fond blanc : `PA · L'étagère` (`588:17950`, illustration de l'icône sur lavis,
+  carte 50 / 50 à deux moitiés égales, trois pastilles de montant), `PB · Trois formats` (`588:17994`, le montant se
+  choisit sur une étagère — poche 3 €, grand format 5 €, beau livre 10 € en couvertures de face, étiquette de prix
+  sous chacune, « Offrir un grand format · 5 € »), `PC · Le mot de l'auteur` (`588:18038`, lettre signée sur papier
+  + lavis `shelf/parchment` à 22 %, cachet de l'icône en pointillés sur le coin, montants en liste à bouton radio).
+  Panneau `Spec · Profil` (`591:18178`). **Aucun composant ni token nouveau** ; nœuds bruts, illustrations en
+  couleurs littérales. La signature de PC est en Alegreya Medium Italic 30, hors échelle. Proposition, non
+  implémentée. Deux pièges du connecteur : les `id` de styles finissent par une virgule (`S:…,`) — sans elle,
+  `setTextStyleIdAsync` ne fait rien et le texte reste en Inter ; et `setBoundVariableForPaint` remet l'`opacity`
+  de la peinture à 1, à reposer après coup.
 - **Implémentation du 2026-09-27 — `Réseau · Onglet & Groupes`** (`499:14069`) : l'onglet Réseau et la
   gestion des groupes sont implémentés ([feature 0028](../features/0028-network-tab-and-groups.md)). Écarts, le code
   faisant foi : création et réglages en feuilles et non en écrans poussés ; pas de pilule « Rejoindre » dans la

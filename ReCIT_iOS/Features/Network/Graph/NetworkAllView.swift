@@ -9,6 +9,10 @@
 //  the groups they share with me, the readers tied to me alone close by — or the empty state E1
 //  when there is nobody and nothing to draw around me (Q39).
 //
+//  Touching a node opens its sheet; « Ouvrir le groupe » and « Voir le profil » push the group's
+//  page or the reader's profile onto the Réseau tab's own path, so going back returns to the
+//  graph (issue 0107).
+//
 //  Everything is read from the store through `@Query` (ADR 0001), the groups included since issue
 //  0103, so the segment is the same offline and from the moment the app opens.
 //
@@ -17,6 +21,8 @@ import SwiftUI
 import SwiftData
 
 struct NetworkAllView: View {
+    @Binding var path: NavigationPath
+
     @Environment(UserModel.self) private var userModel
     @Environment(GroupModel.self) private var groupModel
 
@@ -54,7 +60,9 @@ struct NetworkAllView: View {
                             groups: groups
                         )
                     )
-                )
+                ) { node in
+                    open(node)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -64,6 +72,21 @@ struct NetworkAllView: View {
         .background {
             DesignSystem.Color.backgroundDefault.color
                 .ignoresSafeArea()
+        }
+    }
+
+    /// Pushes the page of `node`: the group's, or the reader's profile — the reader looked up in
+    /// the store, which `UserDetailView` is built from.
+    private func open(_ node: NetworkNodeID) {
+        switch node {
+        case .group(let id):
+            path.append(NavigationDestination.group(id: id))
+        case .reader(let id):
+            guard let user = allUsers.first(where: { $0._id == id }) else { return }
+
+            path.append(NavigationDestination.user(user: user))
+        case .me:
+            break
         }
     }
 }

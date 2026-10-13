@@ -5995,6 +5995,220 @@
         }
       }
     },
+    "network.graph.open_group" : {
+      "comment" : "Button of the sheet of a group touched in the Réseau graph: opens the group's page.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open group"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir le groupe"
+          }
+        }
+      }
+    },
+    "network.graph.sheet.common_groups %lld %@" : {
+      "comment" : "Sheet of a friend touched in the Réseau graph: how many groups I share with them, then their names (%2$@, an already formatted list). Never said for zero.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@groups@: %2$@."
+          },
+          "substitutions" : {
+            "groups" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg group in common"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg groups in common"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@groups@ : %2$@."
+          },
+          "substitutions" : {
+            "groups" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg groupe en commun"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg groupes en commun"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.graph.sheet.group_friends %@ %lld %@" : {
+      "comment" : "Sheet of a group touched in the Réseau graph. %1$@ is my role and the members (« Admin · 12 membres »), %2$lld how many of my friends are in it, %3$@ their names (an already formatted list, « Inès, Léa et 3 autres »).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %#@friends@: %3$@."
+          },
+          "substitutions" : {
+            "friends" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "including %arg of your friends"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "including %arg of your friends"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %#@friends@ : %3$@."
+          },
+          "substitutions" : {
+            "friends" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "dont %arg de vos amis"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "dont %arg de vos amis"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.graph.sheet.group_members %@" : {
+      "comment" : "Sheet of a group touched in the Réseau graph, when none of my friends is in it: the sentence stops at my role and the members (« Admin · 12 membres »).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@."
+          }
+        }
+      }
+    },
+    "network.graph.sheet.others %lld" : {
+      "comment" : "Last item of a list of names in a sheet of the Réseau graph, for those left unnamed: « Inès, Léa, Rémi et 3 autres ». Always 2 or more.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld other"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld others"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld autre"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld autres"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.graph.view_profile" : {
+      "comment" : "Button of the sheet of a reader touched in the Réseau graph: opens their profile.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View profile"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir le profil"
+          }
+        }
+      }
+    },
     "network.invitation.accept" : {
       "localizations" : {
         "en" : {

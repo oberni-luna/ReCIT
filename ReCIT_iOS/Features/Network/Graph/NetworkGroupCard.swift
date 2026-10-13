@@ -10,14 +10,21 @@
 //  green hairline for one I belong to, white with a dashed border and a green detail for one that
 //  invited me — the dash every invitation of the graph is drawn with (Q32).
 //
+//  **Selected**, every card looks the same whatever my role — the sheet says the role (Q25): the
+//  fill and the edge in `backgroundTintedInverse`, name and detail in `foregroundInverse`, the
+//  fallback tile on `backgroundDefault` (`Graph / Group · Admin, Highlighted`, `512:16050`). The
+//  fonts do not change, so neither does the card's size.
+//
 //  Its anchor is its centre. Name and detail are cut on one line past a width that grows with the
-//  text (Q19). Not a button yet: touching a node comes with the sheets (issue 0107).
+//  text (Q19). Touched through the graph's own hit test (`GraphViewport.node(at:)`), not as a
+//  button.
 //
 
 import SwiftUI
 
 struct NetworkGroupCard: View {
     let group: NetworkGraphGroup
+    var isSelected: Bool = false
 
     @ScaledMetric(relativeTo: .footnote) private var textMaxWidth: CGFloat = NetworkGraphMetrics.groupTextMaxWidth
 
@@ -31,7 +38,7 @@ struct NetworkGroupCard: View {
                 .group,
                 imageUrl: group.pictureURL,
                 side: NetworkGraphMetrics.groupTileSide,
-                fallbackFill: group.role == .admin ? .backgroundDefault : .backgroundTinted
+                fallbackFill: isSelected || group.role == .admin ? .backgroundDefault : .backgroundTinted
             )
 
             NetworkNodeWidthLimit(maxWidth: textMaxWidth) {
@@ -39,7 +46,7 @@ struct NetworkGroupCard: View {
                     HStack(spacing: .xSmall) {
                         Text(verbatim: group.name)
                             .textStyle(.footnote200Bold)
-                            .foregroundStyle(.foregroundDefault)
+                            .foregroundStyle(nameColor)
                             .lineLimit(1)
                             .layoutPriority(1)
 
@@ -58,18 +65,28 @@ struct NetworkGroupCard: View {
         .padding(NetworkGraphMetrics.groupCardInsets)
         .background(fill.color, in: shape)
         .overlay {
-            NetworkGroupCardBorder(role: group.role)
+            NetworkGroupCardBorder(role: group.role, isSelected: isSelected)
         }
         .shadow(.light)
         .accessibilityElement(children: .combine)
     }
 
     private var fill: DesignSystem.Color {
-        group.role == .admin ? .backgroundTinted : .backgroundDefault
+        if isSelected {
+            return .backgroundTintedInverse
+        }
+        return group.role == .admin ? .backgroundTinted : .backgroundDefault
+    }
+
+    private var nameColor: DesignSystem.Color {
+        isSelected ? .foregroundInverse : .foregroundDefault
     }
 
     private var detailColor: DesignSystem.Color {
-        group.role == .invited ? .foregroundTinted : .foregroundSecondary
+        if isSelected {
+            return .foregroundInverse
+        }
+        return group.role == .invited ? .foregroundTinted : .foregroundSecondary
     }
 }
 
@@ -83,6 +100,10 @@ struct NetworkGroupCard: View {
         )
         NetworkGroupCard(
             group: .init(id: "c", name: "Lecteurs du 11e", role: .invited, memberIds: [], memberCount: 31, invitorUsername: "Camille")
+        )
+        NetworkGroupCard(
+            group: .init(id: "e", name: "Lecteurs du 11e", role: .invited, memberIds: [], memberCount: 31, invitorUsername: "Camille"),
+            isSelected: true
         )
         NetworkGroupCard(
             group: .init(id: "d", name: "Un nom de groupe vraiment beaucoup trop long pour la carte", role: .member, memberIds: [], memberCount: 3)

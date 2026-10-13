@@ -72,6 +72,32 @@ enum NetworkGraphMetrics {
     static let meToReaderLineWidth: CGFloat = 1
     static let meToReaderLineOpacity: Double = 0.3
 
+    // MARK: A node touched
+
+    /// What a node not lit by the selection fades to (R2).
+    static let dimmedNodeOpacity: Double = 0.3
+    /// What a line not lit by the selection fades to — replacing its own opacity, not on top of
+    /// it: under a node at 30 %, a line at 30 % would still read as a path (R2).
+    static let dimmedLineOpacity: Double = 0.12
+    /// A line lit by the selection, at full strength (R2).
+    static let litLineWidth: CGFloat = 2.5
+    /// The ring of a lit reader — `Graph / Friend · Highlighted` (`512:16012`).
+    static let highlightedFriendRingWidth: CGFloat = 2
+    /// How long the graph takes to light up or fade when a node is touched.
+    static let selectionDuration: TimeInterval = 0.2
+
+    // MARK: The sheet
+
+    /// The avatars of the friends a group's sheet names (`sheet · groupe`, `522:16837`).
+    static let sheetAvatarSide: CGFloat = 32
+    /// The white ring that keeps two overlapping avatars apart.
+    static let sheetAvatarRingWidth: CGFloat = 2
+    /// From one avatar to the next: 8 pt of each covered by the one after it.
+    static let sheetAvatarStep: CGFloat = 24
+    /// The sheet's detent before its content has been measured: a guess near R2's, replaced on the
+    /// first layout.
+    static let sheetPlaceholderHeight: CGFloat = 200
+
     // MARK: The whole
 
     /// The largest text size the graph follows (Q43). Past it the boxes would crowd the screen;

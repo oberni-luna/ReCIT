@@ -22,7 +22,7 @@ struct NetworkSegmentContent: View {
         switch segment {
         #if DEBUG
         case .all:
-            NetworkAllView()
+            NetworkAllView(path: $path)
         #endif
         case .friends:
             List {

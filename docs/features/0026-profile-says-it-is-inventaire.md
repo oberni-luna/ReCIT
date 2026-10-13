@@ -1,5 +1,8 @@
 # The Profil says the app is inventaire.io underneath
 
+> **Retired on 2026-10-13 by [feature 0034](0034-profile-about-and-support.md).** The tag left the Profil; its two
+> messages and its two links are rows of the À propos d'inventaire.io screen.
+
 Shipped on 2026-09-27, from the Figma section `Profil · inventaire.io` (`492:13079`), frame
 `A · Étiquette sous l'en-tête` (`492:13108`) as the user reworked it. No PRD and no issues: one slice, decided in
 an autopilot run whose decision log is summarised below.

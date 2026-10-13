@@ -4,6 +4,75 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-10-03 — `Profil · À propos & version`** (`528:16519`, page `Screens`, mode clair seul) :
+  `V1 · Profil · À propos & version` (`528:16520`, clone de `A0 · Profil · Sans Réseau` `499:14070`) — une entrée
+  `Row / Link` Tinted « À propos d'inventaire.io » entre les transactions et « Se déconnecter », et un pied de page
+  `Note` Footnote/Secondary centré « Ex-libris · Version 1.3.0 (10) » ; « Supprimer son compte » repassé en
+  Destructive, comme dans le code (A0 le montrait en Tinted). `V2 · À propos d'inventaire.io` (`528:16634`) — écran
+  poussé : `Onboarding / Brand`, quatre `Onboarding / Value Row`, une section « Aller plus loin » de quatre
+  `Row / Link` Tinted, une `Note` d'indépendance. Panneau `Spec · À propos & version` (`528:16850`).
+  **Aucun composant ni token nouveau.** Proposition, non implémentée. Section renommée
+  `Profil · À propos, version & don` au second temps, qui ajoute `V3 · Profil · Soutenir Ex-libris` (`530:16697`,
+  clone de V1 avec une étiquette papier fermable « Soutenir Ex-libris » tout en haut — clone de l'étiquette
+  inventaire.io, +1°, `Action / Pill` Prominent « Faire un don ») et `V4 · Paywall · Soutenir Ex-libris`
+  (`530:16834`, feuille : `Sync / Progress Bar` à 50 % pour le partage, trois `Onboarding / Value Row`, trois
+  `Search / Scope Card` pour 3 / 5 / 10 € — composant parqué, ressorti ici —, `Button / Large` Primary). Toujours
+  aucun composant ni token nouveau.
+- **Passe du 2026-10-04 — `Soutenir Ex-libris · Cartes`** (`534:16797`, page `Screens`) : quatre cartes pour remplacer
+  l'étiquette de V3, jugée laide. `A · Étagère` (`534:16799`, `shelf/parchment`, illustration à gauche) ;
+  `B · Ex-libris` (`534:16814`, vignette d'ex-libris sur `shelf/label/paper`, double filet `foreground/tinted`,
+  inclinée −1°) ; `C · Vert nuit` (`534:16830`, `background/tinted-inverse`, illustration qui déborde à droite,
+  pastille « 50 % pour inventaire.io » avec le logo) ; `D · Deux bibliothèques` (`534:16848`, lavis `ShelfWash` sur
+  `shelf/parchment`, illustration + logo inventaire.io, `Sync / Progress Bar` à 50 %). Chacune posée dans un clone de
+  V1 (`534:16870`, `534:16948`, `534:17027`, `534:17108`). **Trois images importées** (frame
+  `Assets · images importées`, `534:16798`) : `BooksOnShelf` — l'illustration de l'icône d'app
+  (`Resources/AppIcon.icon/Assets/BooksOnShelf.png`, réduite à 700 px) —, `ShelfWash` (`wash.png`, 700 px) et
+  `InventaireIo`. Leurs `imageHash` se réutilisent sans réimport. Cartes en nœuds bruts (propositions, pas
+  composants) ; l'opacité de la pastille de C se perd au `clone()` et doit être reposée.
+- **Passe du 2026-10-04 (2) — `Soutenir Ex-libris · Cartes (2)`** (`538:17203`) : six pistes de plus, chacune seule
+  puis posée dans un clone de V1. `E · Étiquette verte` (`538:17204`) — la C en étiquette de bagage : vecteur à coins
+  gauches coupés, `background/tinted-inverse` + lavis à 18 %, œillet couleur du fond, ficelle `shelf/label/ink`,
+  −1,5° ; `F · Marque-page` (`538:17222`) — ruban `background/tinted-inverse` à queue d'aronde sur carte blanche,
+  « Plus tard » textuel au lieu de la croix ; `G · Fiche de prêt` (`539:17214`) — fiche réglée sur
+  `shelf/label/paper`, « Et vous ? », tampon `foreground/error` « 50 % INVENTAIRE.IO » à 12° ; `H · Timbre`
+  (`540:17276`) — timbre dentelé (perforations = ellipses `background/default`), oblitération en pointillés ;
+  `I · Étagère` (`540:17337`) — instance de `Shelf Card` Illustrative, l'étiquette du rayon *est* le bouton
+  « Soutenir Ex-libris », haut rogné par un cadre `shelf crop` ; `J · Ticket` (`540:17368`) — billet
+  `background/tinted` avec talon « 50 / 50 · ADMET UN DON », encoches couleur du fond et perforation en tirets.
+  Les vecteurs `vectorPaths` refusent les commandes `T` (et `S`) : tout écrire en `C` / `Q`.
+- **Passe du 2026-10-06 — `NavigationSplitView · iPad mini`** (`552:2`, **nouvelle page `Screens iPad`**
+  `548:17852`, mode clair seul) : les onglets principaux en NavigationSplitView, pour une app redimensionnable
+  (iPad, iPhone Duo). La TabView reste la racine — capsule flottante en haut en largeur régulière — et chaque onglet
+  héberge un split view ; en largeur compacte on retombe sur les écrans iPhone. `S1 · Inventaire · 3 colonnes`
+  (`552:3`, Bibliothèque & étagères 280 | livres 360 avec `Shelf Card` en tête | fiche) ; `S2 · Listes · 3 colonnes`
+  (`552:440`) ; `S3 · Réseau · 2 colonnes` (`552:18694`, sidebar 360 clonée d'A1, détail dans une colonne lisible de
+  700 — deux `Shelf Card` côte à côte) ; `S4 · Profil · 2 colonnes` (`552:18902`, Transactions sélectionné) ;
+  `S5 · Inventaire · Portrait` (`552:19108`, 744 × 1133, sidebar repliée). Panneau `Spec · NavigationSplitView iPad`
+  (`553:1015`) avec huit points à trancher. Frames 1133 × 744, mode `Light` épinglé. **Trois composants nouveaux** sur
+  `Screens · Components` : `Chrome / Status Bar · iPad` (`551:506`, Theme, 24 pt, icônes en MAX),
+  `Chrome / Tab Bar · iPad` (`551:543`, Active ∈ {Inventaire, Listes, Réseau, Profil}, `background/default` +
+  `Shadow/Light` à la place du Liquid Glass), `Sidebar / Row` (`551:558`, State ∈ {Default, Selected}, props
+  `Label`, `Count`, `Show count`, `Glyph`, `Show glyph` — Selected = `background/tinted` + `foreground/tinted`).
+  `Icon` (`21:60`) passe à **27 variantes** avec `sidebar.left` (`550:17914`). **Chrome rendu responsive** :
+  contraintes de `Chrome / Nav Bar` (titre STRETCH, action MAX), `Chrome / Search Field` (champ STRETCH, Annuler MAX),
+  `Chrome / Status Bar` (icônes MAX) et `Chrome / Home Indicator` (grabber CENTER) — rien ne bouge à 393, mais
+  une instance s'étire enfin à la largeur d'une colonne. La sélection d'une cellule (`Cell / Book`, `Cell / Entity`,
+  `Cell / User`) est un override de fill `background/tinted`, pas une variante. `Shelf Card` (layout absolu) ne se
+  réduit pas : la garder à 338 et dimensionner la colonne autour. **Aucun token nouveau.** Proposition, non implémentée.
+- **Passe du 2026-10-06 (2) — `NavigationSplitView natif · premier niveau · iPad mini`** (`556:1015`, page
+  `Screens iPad`, sous la précédente) : ce que donne le **seul changement de code**, sans design ajouté — en largeur
+  `.regular`, la TabView est remplacée par un NavigationSplitView à deux colonnes dont la sidebar est une
+  `List(selection:)` des quatre onglets, et le détail l'écran racine iPhone tel quel, étiré. `P1 · Inventaire`
+  (`556:1016`), `P2 · Listes` (`557:1226`), `P3 · Réseau` (`557:1498`, badge en texte secondaire), `P4 · Profil`
+  (`557:1804`), `P5 · Inventaire › Fiche livre` (`557:19789`, poussée dans le détail), `P6 · Portrait · sidebar
+  masquée` (`557:20058`), `P7 · Portrait · sidebar en surimpression` (`557:20263`, voile `background/inverse` à
+  `opacity/surface/backdrop`). Panneau `Spec · NavigationSplitView natif` (`558:2087`) avec le code Swift et ce que
+  la maquette révèle. **Deux composants nouveaux** sur `Screens · Components` : `Chrome / Sidebar Row · System`
+  (`555:498`, State ∈ {Default, Selected}, props `Glyph` (INSTANCE_SWAP sur `Icon`), `Label`, `Badge`, `Show badge` —
+  le rang natif, police système, Selected = `background/tinted-inverse` + `foreground/inverse`) et
+  `Chrome / Glass Button` (`555:499`, 44 pt, prop `Glyph`). **SF Pro et les SF Symbols ne se rendent pas via le
+  connecteur Figma** : `listAvailableFontsAsync` les liste, mais `hasMissingFont === true` et largeur 0 —
+  `getSfSymbolCharacter` ne sert donc à rien ici. Inter et `Icon` en tiennent lieu, comme pour le reste du chrome.
 - **Implémentation du 2026-09-27 — `Réseau · Onglet & Groupes`** (`499:14069`) : l'onglet Réseau et la
   gestion des groupes sont implémentés ([feature 0028](../features/0028-network-tab-and-groups.md)). Écarts, le code
   faisant foi : création et réglages en feuilles et non en écrans poussés ; pas de pilule « Rejoindre » dans la

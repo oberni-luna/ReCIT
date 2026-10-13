@@ -13,6 +13,9 @@ import SwiftUI
 struct AvatarFallbackView: View {
     let kind: AvatarKind
     let side: CGFloat
+    /// The ground under the mark: tinted, except where the avatar sits on a tinted surface
+    /// already — a group tile on the card of a group I administer (`Graph / Group`, Admin).
+    var fill: DesignSystem.Color = .backgroundTinted
 
     private var metrics: AvatarMetrics {
         .init(side: side)
@@ -20,7 +23,7 @@ struct AvatarFallbackView: View {
 
     var body: some View {
         ZStack {
-            DesignSystem.Color.backgroundTinted.color
+            fill.color
 
             if metrics.showsMark {
                 switch kind {

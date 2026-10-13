@@ -6,12 +6,16 @@
 //  `Réseau · Graphe` section were drawn at sizes the token scale does not hold, and PRD 0019
 //  keeps them here rather than adding tokens (precedents: `ShelfCardMetrics`, `SortGridMetrics`).
 //
-//  Seeded with « Vous » (`Graph / Me`, `512:16006`); the other nodes add theirs as they are drawn.
+//  « Vous » is `Graph / Me` (`512:16006`), a friend `Graph / Friend` (`512:16016`), a group
+//  `Graph / Group` (`512:16061`); the lines are R1′ (`603:20944`) with Q32 and Q32 bis.
 //
 
 import SwiftUI
 
 enum NetworkGraphMetrics {
+
+    // MARK: « Vous »
+
     /// The side of my avatar at the centre of the graph.
     static let meSide: CGFloat = 72
     /// The ring around it, painted over the photo's edge.
@@ -26,4 +30,53 @@ enum NetworkGraphMetrics {
         bottom: 3,
         trailing: 10
     )
+
+    // MARK: A reader
+
+    /// The side of a friend's avatar.
+    static let friendSide: CGFloat = 44
+    /// The widest a friend's name gets before it is cut, at the default text size — the column
+    /// `Graph / Friend` is drawn in. It grows with the text, up to the graph's cap.
+    static let friendNameMaxWidth: CGFloat = 100
+    /// The hairline around a friend's avatar.
+    static let friendRingWidth: CGFloat = 1
+    /// The dashed ring of a reader who asked to be my friend (Q5b).
+    static let requesterRingWidth: CGFloat = 1.5
+
+    // MARK: A group
+
+    /// The side of a group's picture on its card.
+    static let groupTileSide: CGFloat = 32
+    /// The widest a group's name or detail gets before it is cut, at the default text size.
+    static let groupTextMaxWidth: CGFloat = 160
+    /// The card's padding: 8 around, 12 after the text — `spacing/small` and `spacing/s-medium`.
+    static let groupCardInsets: EdgeInsets = .init(
+        top: DesignSystem.Spacing.small.rawValue,
+        leading: DesignSystem.Spacing.small.rawValue,
+        bottom: DesignSystem.Spacing.small.rawValue,
+        trailing: DesignSystem.Spacing.sMedium.rawValue
+    )
+    /// The border of a card I administer or belong to.
+    static let groupBorderWidth: CGFloat = 1
+    /// The dashed border of a card that invited me.
+    static let invitedBorderWidth: CGFloat = 1.5
+
+    // MARK: Lines
+
+    /// The one dash of the graph, on lines, invited cards and requester rings alike (Q32).
+    static let dash: [CGFloat] = [4, 4]
+    /// A line to a group, from me or from a friend, and the dashed lines.
+    static let groupLineWidth: CGFloat = 1.5
+    static let groupLineOpacity: Double = 0.6
+    /// A line from me to a friend: lighter, so the groups carry the drawing (Q32 bis).
+    static let meToReaderLineWidth: CGFloat = 1
+    static let meToReaderLineOpacity: Double = 0.3
+
+    // MARK: The whole
+
+    /// The largest text size the graph follows (Q43). Past it the boxes would crowd the screen;
+    /// the lists and VoiceOver carry the larger sizes.
+    static let largestTextSize: DynamicTypeSize = .xxxLarge
+    /// How long nodes take to slide to their new places when the network changes (Q17).
+    static let transitionDuration: TimeInterval = 0.45
 }

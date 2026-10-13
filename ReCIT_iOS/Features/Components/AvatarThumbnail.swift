@@ -21,15 +21,19 @@ struct AvatarThumbnail: View {
     let kind: AvatarKind
     let imageUrl: String?
     let side: CGFloat
+    /// The ground of the fallback; see `AvatarFallbackView.fill`.
+    let fallbackFill: DesignSystem.Color
 
     init(
         _ kind: AvatarKind,
         imageUrl: String?,
-        side: CGFloat
+        side: CGFloat,
+        fallbackFill: DesignSystem.Color = .backgroundTinted
     ) {
         self.kind = kind
         self.imageUrl = imageUrl
         self.side = side
+        self.fallbackFill = fallbackFill
     }
 
     init(
@@ -50,7 +54,11 @@ struct AvatarThumbnail: View {
 
     var body: some View {
         ZStack {
-            AvatarFallbackView(kind: kind, side: side)
+            AvatarFallbackView(
+                kind: kind,
+                side: side,
+                fill: fallbackFill
+            )
 
             if let url {
                 CachedAsyncImage(url: url) { image in

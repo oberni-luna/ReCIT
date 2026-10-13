@@ -81,6 +81,8 @@ public extension DesignSystem {
             }
         }
 
+        /// The font at the text size the app runs at — for UIKit, which has no SwiftUI
+        /// environment to read it from (the navigation bar's titles).
         var uiFont: UIFont {
             if let customFont, let customUiFont = UIFont(name: customFont.fontName, size: size) {
                 UIFontMetrics(forTextStyle: fontTextStyle).scaledFont(for: customUiFont)
@@ -89,9 +91,39 @@ public extension DesignSystem {
             }
         }
 
+        /// The font at `dynamicTypeSize` — what `textStyle(_:)` draws with, so that a view whose
+        /// environment caps the text size (`.dynamicTypeSize(...)`, the Réseau graph at
+        /// `.xxxLarge`) gets the capped size. `uiFont` scales to the app's own size, which a
+        /// SwiftUI cap never reaches: the cap used to be silently ignored by every design-system
+        /// style (PRD 0019, Q43).
+        func uiFont(for dynamicTypeSize: DynamicTypeSize) -> UIFont {
+            let traits: UITraitCollection = .init(preferredContentSizeCategory: .init(dynamicTypeSize))
+            let metrics: UIFontMetrics = .init(forTextStyle: fontTextStyle)
+            if let customFont, let customUiFont = UIFont(name: customFont.fontName, size: size) {
+                return metrics.scaledFont(for: customUiFont, compatibleWith: traits)
+            } else {
+                return metrics.scaledFont(for: .systemFont(ofSize: size, weight: weight), compatibleWith: traits)
+            }
+        }
+
         var font: Font {
             Font(uiFont)
         }
+
+        func font(for dynamicTypeSize: DynamicTypeSize) -> Font {
+            Font(uiFont(for: dynamicTypeSize))
+        }
+    }
+}
+
+/// Draws a design-system style at the text size of the view's environment, cap included.
+struct TextStyleModifier: ViewModifier {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    let style: DesignSystem.TextStyle
+
+    func body(content: Content) -> some View {
+        content.font(style.font(for: dynamicTypeSize))
     }
 }
 
@@ -137,7 +169,7 @@ extension DesignSystem.TextStyle {
 
 public extension View {
     func textStyle(_ style: DesignSystem.TextStyle) -> some View {
-        font(style.font)
+        modifier(TextStyleModifier(style: style))
     }
 }
 

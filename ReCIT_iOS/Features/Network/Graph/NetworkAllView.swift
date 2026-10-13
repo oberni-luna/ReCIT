@@ -5,9 +5,9 @@
 //  Réseau › Tout — the segment that draws my network as a graph (PRD 0019), on
 //  `backgroundDefault`, nav bar included, where the lists keep their grey (Q14).
 //
-//  **A shell for now** (issue 0105): « Vous » at the centre of the graph area, or the empty state
-//  E1 when there is nobody and nothing to draw around me (Q39). The constellation — groups in a
-//  ring, friends near the groups they share with me — fills the `.graph` case in issue 0106.
+//  The constellation (issue 0106): « Vous » at the centre, my groups in a ring, my friends near
+//  the groups they share with me, the readers tied to me alone close by — or the empty state E1
+//  when there is nobody and nothing to draw around me (Q39).
 //
 //  Everything is read from the store through `@Query` (ADR 0001), the groups included since issue
 //  0103, so the segment is the same offline and from the moment the app opens.
@@ -31,9 +31,10 @@ struct NetworkAllView: View {
 
     var body: some View {
         let me: User? = signedInUser
+        let groups: MyGroups = groupModel.myGroups(from: storedGroups)
         let content: NetworkAllContent = .init(
             relations: allUsers.lazy.filter { $0._id != me?._id }.map(\.relation),
-            groups: groupModel.myGroups(from: storedGroups)
+            groups: groups
         )
 
         Group {
@@ -44,16 +45,16 @@ struct NetworkAllView: View {
                     imageUrl: me?.avatarURLValue
                 )
             case .graph:
-                // Centred on the avatar, as the constellation will be.
-                MeCentredLayout(
-                    spacing: .large,
-                    leadAnchor: NetworkGraphMetrics.meSide / 2
-                ) {
-                    NetworkMeNode(
-                        username: me?.username ?? "",
-                        imageUrl: me?.avatarURLValue
+                NetworkGraphView(
+                    graph: .init(
+                        .init(
+                            me: me,
+                            myUserId: groupModel.myUserId,
+                            users: allUsers,
+                            groups: groups
+                        )
                     )
-                }
+                )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

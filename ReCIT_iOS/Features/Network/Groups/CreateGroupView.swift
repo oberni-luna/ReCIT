@@ -11,9 +11,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CreateGroupView: View {
     @Environment(GroupModel.self) private var groupModel
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
     /// Told the new group's id once it exists, so the presenter can open it.
@@ -88,7 +90,8 @@ struct CreateGroupView: View {
                 name: name,
                 description: groupDescription,
                 searchable: searchable,
-                open: open
+                open: open,
+                modelContext: modelContext
             )
             dismiss()
             onCreated(group.id)

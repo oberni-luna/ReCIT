@@ -5,9 +5,10 @@
 //  One group, as I stand in it — frames `A5` (not a member), `A6` (member) and `A8` (admin).
 //
 //  The screen reads the group afresh each time it opens (`GET /api/groups/by-id`), whether it
-//  came from my list or from a search: a group seen from the search is not in memory yet, and
-//  one of mine may have moved since the launch. What the gestures change is shown at once, from
-//  `GroupModel`, which is observable.
+//  came from my list or from a search: a group seen from the search is not known yet, and one of
+//  mine may have moved since the last sync. What the gestures change is shown at once: one of my
+//  groups through the screen's `@Query`, one from a search through `GroupModel`, which is
+//  observable.
 //
 
 import SwiftUI
@@ -18,6 +19,7 @@ struct GroupDetailView: View {
     @Environment(\.modelContext) private var modelContext
 
     @Query(sort: \User.username) private var allUsers: [User]
+    @Query private var storedGroups: [StoredGroup]
 
     let groupId: String
     @Binding var path: NavigationPath
@@ -30,7 +32,7 @@ struct GroupDetailView: View {
     private static let membersPreviewCount: Int = 5
 
     private var group: ReaderGroup? {
-        groupModel.group(id: groupId)
+        groupModel.group(id: groupId, among: storedGroups)
     }
 
     private var myRole: GroupRole? {

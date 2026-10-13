@@ -32,7 +32,8 @@ enum TestStore {
             Work.self,
             WpExtract.self,
             UserTransaction.self,
-            TransactionMessage.self
+            TransactionMessage.self,
+            StoredGroup.self
         ])
         // A unique on-disk store per container fully isolates each test's data,
         // so tearing one container down never touches another's store.

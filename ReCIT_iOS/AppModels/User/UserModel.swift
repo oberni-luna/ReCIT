@@ -374,6 +374,7 @@ final class UserModel: OptimisticMutating {
         try deleteAll(Shelf.self, in: modelContext)
         try deleteAll(EntityListItem.self, in: modelContext)
         try deleteAll(EntityList.self, in: modelContext)
+        try deleteAll(StoredGroup.self, in: modelContext)
         try deleteAll(User.self, in: modelContext)
     }
 

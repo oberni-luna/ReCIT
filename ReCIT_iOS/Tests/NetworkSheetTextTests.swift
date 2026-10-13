@@ -103,17 +103,55 @@ import Testing
         #expect(summary.sentence(bundle: try Self.bundle("en"), locale: Self.english) == expected)
     }
 
-    /// A member's sheet says no role; an invitation's says its members, not who sent it.
-    @Test func memberAndInvitationOpenOnTheMembers() throws {
-        let french: Bundle = try Self.bundle("fr")
+    /// A member's sheet says no role, and offers no answer.
+    @Test func memberOpensOnTheMembers() throws {
         let member: NetworkGroupSummary = .init(group: group(role: .member, members: 48), friends: [])
+
+        #expect(member.sentence(bundle: try Self.bundle("fr"), locale: Self.french) == "48 membres.")
+        #expect(member.invitor == nil)
+        #expect(member.isInvitation == false)
+    }
+
+    /// An invitation names who sent it, then its members and my friends there (issue 0108).
+    @Test func invitationOpensOnItsSender() throws {
         let invitation: NetworkGroupSummary = .init(
-            group: .init(id: "l11", name: "Lecteurs du 11e", role: .invited, memberIds: [], memberCount: 31, invitorUsername: "Camille"),
-            friends: readers(1)
+            group: .init(
+                id: "l11",
+                name: "Lecteurs du 11e",
+                role: .invited,
+                memberIds: [],
+                memberCount: 31,
+                invitorUsername: "Camille"
+            ),
+            friends: ["Camille", "Nora"].map { .init(id: $0, username: $0) }
         )
 
-        #expect(member.sentence(bundle: french, locale: Self.french) == "48 membres.")
-        #expect(invitation.sentence(bundle: french, locale: Self.french) == "31 membres, dont 1 de vos amis\u{202F}: Inès.")
+        #expect(invitation.isInvitation)
+        #expect(
+            invitation.sentence(bundle: try Self.bundle("fr"), locale: Self.french)
+                == "Invitation de Camille · 31 membres, dont 2 de vos amis\u{202F}: Camille et Nora."
+        )
+        #expect(
+            invitation.sentence(bundle: try Self.bundle("en"), locale: Self.english)
+                == "Invited by Camille · 31 members, including 2 of your friends: Camille and Nora."
+        )
+    }
+
+    /// An invitation whose sender the store does not know opens on its members, as its card does.
+    @Test func invitationWithNoKnownSenderOpensOnTheMembers() throws {
+        let invitation: NetworkGroupSummary = .init(
+            group: .init(id: "l11", name: "Lecteurs du 11e", role: .invited, memberIds: [], memberCount: 31),
+            friends: []
+        )
+
+        #expect(invitation.isInvitation)
+        #expect(invitation.invitor == nil)
+        #expect(invitation.sentence(bundle: try Self.bundle("fr"), locale: Self.french) == "31 membres.")
+    }
+
+    @Test func theAnswersToAGroupAreAcceptAndDecline() {
+        #expect(NetworkSheetAnswer.accept.groupAction == .accept)
+        #expect(NetworkSheetAnswer.refuse.groupAction == .decline)
     }
 
     // MARK: - A friend's sheet
@@ -153,6 +191,23 @@ import Testing
 
         #expect(NetworkReaderSummary(reader: paul, in: r1).commonGroupsText() == nil)
         #expect(NetworkReaderSummary(reader: ariane, in: r1).commonGroupsText() == nil)
+    }
+
+    /// A reader asking to be my friend is told what refusing does, as on their profile, and
+    /// offered the answers; a friend is not.
+    @Test func aRequestSaysWhatAnsweringDoes() throws {
+        let ariane: NetworkReaderNode = try #require(r1.reader(id: "ariane"))
+        let request: NetworkReaderSummary = .init(reader: ariane, in: r1)
+        let camille: NetworkReaderNode = try #require(r1.reader(id: "camille"))
+        let friend: NetworkReaderSummary = .init(reader: camille, in: r1)
+
+        #expect(request.isRequest)
+        #expect(
+            request.explanationText(bundle: try Self.bundle("fr"), locale: Self.french)
+                == "Ariane vous a demandé de rejoindre son réseau. Refuser ne le prévient pas et ne l’empêche pas de redemander."
+        )
+        #expect(friend.isRequest == false)
+        #expect(friend.explanationText() == nil)
     }
 
     @Test func memberSinceAsTheReaderRowsSayIt() throws {

@@ -11,12 +11,15 @@
 //
 //  Touching a node opens its sheet; « Ouvrir le groupe » and « Voir le profil » push the group's
 //  page or the reader's profile onto the Réseau tab's own path, so going back returns to the
-//  graph (issue 0107).
+//  graph (issue 0107). An invitation to a group or a friend request is answered from its sheet,
+//  with the optimistic gestures of the Amis and Groupes rows (issue 0108, ADR 0001): the store
+//  moves at once, a failure is put back and reported through `AppErrorReporter`.
 //
 //  Everything is read from the store through `@Query` (ADR 0001), the groups included since issue
 //  0103, so the segment is the same offline and from the moment the app opens.
 //
 
+import LBSnackBar
 import SwiftUI
 import SwiftData
 
@@ -25,6 +28,8 @@ struct NetworkAllView: View {
 
     @Environment(UserModel.self) private var userModel
     @Environment(GroupModel.self) private var groupModel
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.snackBar) private var snackBar
 
     @Query private var allUsers: [User]
     @Query private var storedGroups: [StoredGroup]
@@ -62,6 +67,8 @@ struct NetworkAllView: View {
                     )
                 ) { node in
                     open(node)
+                } onAnswer: { node, answer in
+                    self.answer(answer, to: node)
                 }
             }
         }
@@ -85,6 +92,31 @@ struct NetworkAllView: View {
             guard let user = allUsers.first(where: { $0._id == id }) else { return }
 
             path.append(NavigationDestination.user(user: user))
+        case .me:
+            break
+        }
+    }
+
+    /// Answers what `node` stands for: an invitation to a group, or a reader asking to be my
+    /// friend — the latter as the Invitations list does, SnackBar included.
+    private func answer(_ answer: NetworkSheetAnswer, to node: NetworkNodeID) {
+        switch node {
+        case .group(let id):
+            groupModel.perform(answer.groupAction, on: id, modelContext: modelContext)
+        case .reader(let id):
+            guard let user = allUsers.first(where: { $0._id == id }) else { return }
+
+            let invitation: InvitationAnswer = .init(
+                userModel: userModel,
+                modelContext: modelContext,
+                snackBar: snackBar
+            )
+            switch answer {
+            case .accept:
+                invitation.accept(user)
+            case .refuse:
+                invitation.refuse(user)
+            }
         case .me:
             break
         }

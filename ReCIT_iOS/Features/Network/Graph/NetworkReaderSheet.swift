@@ -6,8 +6,11 @@
 //  « Membre depuis mars 2021 » as the reader rows say it, « 1 groupe en commun : Club de
 //  Belleville. » — admin and member groups only (Q27 bis) — and « Voir le profil », full width.
 //
-//  A reader who asked to be my friend shows the same sheet for now; Accepter / Refuser come with
-//  issue 0108.
+//  A reader who asked to be my friend (Q5, Q26, issue 0108) is answered here: in place of the
+//  groups in common, the sentence their profile says of the request, then Accepter and Refuser
+//  above « Voir le profil », which steps down to the secondary style so one gesture leads.
+//  Accepted, the sheet stays up and reads as a friend's; refused, the reader leaves the graph and
+//  the sheet closes with them.
 //
 
 import SwiftUI
@@ -15,6 +18,8 @@ import SwiftUI
 struct NetworkReaderSheet: View {
     let summary: NetworkReaderSummary
     let onOpen: () -> Void
+    /// Answers the request; only offered while the reader is asking.
+    var onAnswer: (NetworkSheetAnswer) -> Void = { _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: .sMedium) {
@@ -37,17 +42,26 @@ struct NetworkReaderSheet: View {
                     .foregroundStyle(.foregroundSecondary)
             }
 
-            if let commonGroups = summary.commonGroupsText() {
+            if let explanation = summary.explanationText() {
+                Text(verbatim: explanation)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if let commonGroups = summary.commonGroupsText() {
                 Text(verbatim: commonGroups)
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundSecondary)
+            }
+
+            if summary.isRequest {
+                NetworkSheetAnswerButtons(onAnswer: onAnswer)
             }
 
             Button(action: onOpen) {
                 Text("network.graph.view_profile")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.primary())
+            .buttonStyle(summary.isRequest ? .secondary() : .primary())
             .accessibilityIdentifier("e2e.network.graph.sheet.viewProfile")
         }
     }
@@ -62,6 +76,21 @@ struct NetworkReaderSheet: View {
                 isIsolated: false
             ),
             commonGroups: [.init(id: "club", name: "Club de Belleville", role: .admin, memberIds: [])]
+        ),
+        onOpen: {}
+    )
+    .padding()
+}
+
+#Preview("Request") {
+    NetworkReaderSheet(
+        summary: .init(
+            reader: .init(
+                reader: .init(id: "ariane", username: "Ariane", created: 1_614_556_800_000),
+                state: .requested,
+                isIsolated: true
+            ),
+            commonGroups: []
         ),
         onOpen: {}
     )

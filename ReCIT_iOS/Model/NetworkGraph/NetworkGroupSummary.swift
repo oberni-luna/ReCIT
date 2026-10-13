@@ -7,8 +7,9 @@
 //  those friends, five at most.
 //
 //  - The sentence opens on the card's own words for my role and the members — « Admin · 12
-//    membres » or « 12 membres » — and an invitation, whose card names who sent it, says its
-//    members here.
+//    membres » or « 12 membres ». An invitation says who sent it first, then its members:
+//    « Invitation de Camille · 31 membres » (issue 0108); « 31 membres » when the store does not
+//    know the sender.
 //  - With no friend of mine in the group, it stops there: « 48 membres. »
 //  - Otherwise it counts them and names them by `NetworkNameList`.
 //
@@ -23,6 +24,11 @@ nonisolated struct NetworkGroupSummary: Hashable, Sendable {
     static let maximumAvatars: Int = 5
 
     let name: String
+    /// Where I stand in it: an invitation is answered from the sheet.
+    let role: NetworkGroupRole
+    /// Whoever invited me, named before the members; `nil` unless I am invited and the store
+    /// knows them.
+    let invitor: String?
     /// My role and the members, as the card says them — never the invitation's sender.
     let lead: NetworkGroupCardDetail
     /// My friends in the group, all of them.
@@ -40,6 +46,10 @@ nonisolated struct NetworkGroupSummary: Hashable, Sendable {
         friends: [NetworkGraphReader]
     ) {
         name = group.name
+        role = group.role
+        invitor = group.role == .invited
+            ? group.invitorUsername.flatMap { $0.isEmpty ? nil : $0 }
+            : nil
         lead = group.role == .admin
             ? .admin(memberCount: group.memberCount)
             : .members(count: group.memberCount)
@@ -54,6 +64,11 @@ nonisolated struct NetworkGroupSummary: Hashable, Sendable {
         in graph: NetworkGraph
     ) {
         self.init(group: group, friends: graph.friends(in: group.id))
+    }
+
+    /// Whether the sheet offers Accepter and Refuser: the group invited me.
+    var isInvitation: Bool {
+        role == .invited
     }
 
     /// Whether the sentence goes on past the members: some friend of mine is in the group.

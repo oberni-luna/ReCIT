@@ -28,6 +28,12 @@
 //  « Ouvrir le groupe » and « Voir le profil » close the sheet first, and open the page once it
 //  is gone.
 //
+//  **Answering** (issue 0108): an invitation or a friend request touched is answered from its
+//  sheet, by `onAnswer`. Accepted, the node stays, its dashed lines turn solid and the sheet stays
+//  up on the new state; refused, the node fades out of the graph and the selection goes with it,
+//  which closes the sheet — still showing, on its way down, the graph it was opened on, and no
+//  longer answering touches.
+//
 //  **The text size is capped at `.xxxLarge`** on the graph alone (Q43): past it the boxes would
 //  crowd any screen; the lists and VoiceOver carry the accessibility sizes. The sheet is attached
 //  outside the cap and follows the reader's size.
@@ -39,6 +45,8 @@ struct NetworkGraphView: View {
     let graph: NetworkGraph
     /// Opens the page of a node — a group's, or a reader's profile — once the sheet is gone.
     var onOpen: (NetworkNodeID) -> Void = { _ in }
+    /// Answers the invitation or the friend request a node stands for.
+    var onAnswer: (NetworkNodeID, NetworkSheetAnswer) -> Void = { _, _ in }
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -68,6 +76,9 @@ struct NetworkGraphView: View {
     @State private var sheetTop: CGFloat?
     /// The page to open once the sheet is gone.
     @State private var pendingOpen: NetworkNodeID?
+    /// The graph as it was when the node of the sheet left it, so the sheet closes on its last
+    /// content rather than on an empty one.
+    @State private var closingGraph: NetworkGraph?
 
     private let cache: NetworkGraphLayoutCache = .shared
 
@@ -106,6 +117,8 @@ struct NetworkGraphView: View {
                 updateCamera()
             }
         }
+        // A card whose role changed, a node that left: faded rather than swapped (Q17).
+        .animation(reduceMotion ? nil : .smooth(duration: NetworkGraphMetrics.transitionDuration), value: graph)
         .clipped()
         .dynamicTypeSize(...NetworkGraphMetrics.largestTextSize)
         .gesture(SimultaneousGesture(dragGesture, pinchGesture))
@@ -118,8 +131,9 @@ struct NetworkGraphView: View {
         .task(id: layout) {
             await place(layout)
         }
-        .onChange(of: graph) {
-            if let selection, graph.highlight(for: selection) == nil {
+        .onChange(of: graph) { previous, current in
+            if let selection, current.highlight(for: selection) == nil {
+                closingGraph = previous
                 self.selection = nil
             }
         }
@@ -164,10 +178,16 @@ struct NetworkGraphView: View {
     private var sheet: some View {
         Group {
             if let sheetNode {
-                NetworkNodeSheet(graph: graph, node: sheetNode) { node in
-                    pendingOpen = node
-                    selection = nil
-                }
+                NetworkNodeSheet(
+                    graph: selection == nil ? closingGraph ?? graph : graph,
+                    node: sheetNode,
+                    onOpen: { node in
+                        pendingOpen = node
+                        selection = nil
+                    },
+                    onAnswer: onAnswer
+                )
+                .allowsHitTesting(selection != nil)
             }
         }
         .fixedSize(horizontal: false, vertical: true)
@@ -190,6 +210,7 @@ struct NetworkGraphView: View {
 
     private func openPending() {
         sheetTop = nil
+        closingGraph = nil
         guard let pendingOpen else { return }
 
         self.pendingOpen = nil

@@ -6,6 +6,9 @@
 //  are, since when they have been on inventaire.io, and « 1 groupe en commun : Club de
 //  Belleville. »
 //
+//  A reader who asked to be my friend is answered from the sheet (issue 0108): it says what
+//  answering does, in the words of their profile, instead of the groups in common.
+//
 //  Only the groups we both administer or belong to are in common: a group that invited me is lit
 //  when the friend is touched, but not counted. No group in common, no line — a « 0 » would read
 //  « 0 groupe » in French, where zero is singular.
@@ -44,6 +47,11 @@ nonisolated struct NetworkReaderSummary: Hashable, Sendable {
         in graph: NetworkGraph
     ) {
         self.init(reader: reader, commonGroups: graph.commonGroups(of: reader.id))
+    }
+
+    /// Whether the sheet offers Accepter and Refuser: the reader asked to be my friend.
+    var isRequest: Bool {
+        state == .requested
     }
 
     /// Whether the sheet says what we share.

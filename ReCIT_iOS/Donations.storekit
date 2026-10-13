@@ -1,0 +1,90 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : []
+  },
+  "identifier" : "EXLIBRISDONATIONS",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "3.00",
+      "familyShareable" : false,
+      "internalID" : "6760000001",
+      "localizations" : [
+        {
+          "description" : "A three-euro donation to Ex-libris.",
+          "displayName" : "A coffee",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Un don de trois euros à Ex-libris.",
+          "displayName" : "Un café",
+          "locale" : "fr"
+        }
+      ],
+      "productID" : "studio.lunabee.nouveaurecit.donation.coffee",
+      "referenceName" : "Don · un café",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "5.00",
+      "familyShareable" : false,
+      "internalID" : "6760000002",
+      "localizations" : [
+        {
+          "description" : "A five-euro donation to Ex-libris.",
+          "displayName" : "A paperback",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Un don de cinq euros à Ex-libris.",
+          "displayName" : "Un poche",
+          "locale" : "fr"
+        }
+      ],
+      "productID" : "studio.lunabee.nouveaurecit.donation.paperback",
+      "referenceName" : "Don · un poche",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "10.00",
+      "familyShareable" : false,
+      "internalID" : "6760000003",
+      "localizations" : [
+        {
+          "description" : "A ten-euro donation to Ex-libris.",
+          "displayName" : "A hardcover",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Un don de dix euros à Ex-libris.",
+          "displayName" : "Un grand format",
+          "locale" : "fr"
+        }
+      ],
+      "productID" : "studio.lunabee.nouveaurecit.donation.hardcover",
+      "referenceName" : "Don · un grand format",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_developerTeamID" : "",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "fr",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storeKitErrors" : [],
+    "_storefront" : "FRA",
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

@@ -44,6 +44,9 @@ struct RootView: View {
     /// injected into the signed-out branch — it is the one model that runs before there is a
     /// user, so it is also the one that never reaches `MainTabView`.
     @State var coverWallModel: CoverWallModel
+    /// Donations to Ex-libris, through the App Store. Built here rather than by the sheet that
+    /// sells them: the transactions it has to finish can arrive at any time from launch on.
+    @State var donationModel: DonationModel
 
     @Environment(\.modelContext) var modelContext
 
@@ -89,6 +92,7 @@ struct RootView: View {
         _tipsStore = State(initialValue: TipsStore())
         _recentSearchStore = State(initialValue: RecentSearchStore())
         _coverWallModel = State(initialValue: CoverWallModel(apiService: publicAPIService))
+        _donationModel = State(initialValue: DonationModel())
     }
 
     /// The sorting flow's flag as a binding: a cover needs one, and an observable is not one.
@@ -147,6 +151,7 @@ struct RootView: View {
                     .environment(onboardingStore)
                     .environment(tipsStore)
                     .environment(recentSearchStore)
+                    .environment(donationModel)
                     .environment(authModel)
                     .onAppear {
                         refreshUserData()

@@ -12,9 +12,19 @@ struct ProfileView: View {
     @Environment(AuthModel.self) private var authModel
     @Environment(UserModel.self) private var userModel
     @Environment(SyncStatusStore.self) private var syncStatus
+    @Environment(DonationModel.self) private var donationModel
 
     @State private var path: NavigationPath = .init()
     @Query private var allTransactions: [UserTransaction]
+    /// Whether the card asking for a coffee has been put away. Kept on the device, not on the
+    /// account: it speaks of the app, so signing out and in again does not bring it back.
+    @AppStorage("profile.supportCard.dismissed") private var isSupportCardDismissed: Bool = false
+    @State private var isSupportSheetPresented: Bool = false
+
+    /// The card shows until it is put away, or until a donation has gone through on this device.
+    private var showsSupportCard: Bool {
+        isSupportCardDismissed == false && donationModel.hasDonated == false
+    }
 
     var currentTransactions: [UserTransaction] {
         allTransactions.filter(\.isCurrent)
@@ -34,11 +44,32 @@ struct ProfileView: View {
             }
             .navigationTitle("nav.profile")
         }
+        .sheet(isPresented: $isSupportSheetPresented) {
+            SupportSheet()
+        }
     }
 
     @ViewBuilder
     func connectedView(user: User) -> some View {
         List {
+            // First on the screen, above the account: the one place the app asks for anything.
+            // See the Figma frame `P1 · Profil · Soutenir & À propos`.
+            if showsSupportCard {
+                Section {
+                    SupportExLibrisCard {
+                        isSupportSheetPresented = true
+                    } onDismiss: {
+                        withAnimation {
+                            isSupportCardDismissed = true
+                        }
+                    }
+                    // Inset on every side: the section clips its row to rounded corners, which
+                    // would otherwise cut the card's shadow.
+                    .listRowInsets(top: .small, leading: .small, bottom: .small, trailing: .small)
+                    .listRowBackground(Color.clear)
+                }
+            }
+
             Section {
                 UserHeaderView(user: user)
             }

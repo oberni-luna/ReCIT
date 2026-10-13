@@ -5,7 +5,9 @@
 //  The camera over the Réseau graph (PRD 0019, module 7). What can be got wrong is arithmetic:
 //  an opening frame that is not the whole network, a scale that escapes its range, a pinch that
 //  lets the content slide away from the fingers, a drag that loses the network off screen, a
-//  touch that picks the wrong node, a node left under the sheet — or moved further than needed.
+//  touch that picks the wrong node, a node left under the sheet — or moved further than needed;
+//  and, since issue 0109, a level that flickers around its threshold, a button that zooms by
+//  anything but ×1.5, or a touch in the overview that lands on a box no longer drawn.
 //
 
 import CoreGraphics
@@ -52,7 +54,10 @@ import Testing
     @Test func opensOnTheWholeNetworkWithVousInTheMiddle() {
         let viewport: GraphViewport = viewport()
 
-        #expect(viewport.scale == Self.placement.fittingScale(in: Self.screen, margin: GraphViewport.margin))
+        // It fits at ×0.6 or more with its nodes shrinking with it: it opens in full.
+        #expect(viewport.scale == Self.placement.shrinkingFittingScale(in: Self.screen, margin: GraphViewport.margin))
+        #expect(viewport.scale >= NetworkGraphLevel.overviewEntryScale)
+        #expect(viewport.level == .full)
         #expect(viewport.origin == .init(x: Self.screen.width / 2, y: Self.screen.height / 2))
         #expect(viewport.isAtOpeningFrame)
         let onScreen: CGRect = .init(origin: .zero, size: Self.screen).insetBy(dx: GraphViewport.margin - 0.01, dy: GraphViewport.margin - 0.01)
@@ -66,7 +71,7 @@ import Testing
         #expect(isClose(viewport.worldPoint(at: viewport.screenPoint(of: world)), world))
     }
 
-    @Test func nodesKeepTheirSizeAtEveryScale() throws {
+    @Test func nodesKeepTheirSizeFromFullSizeUp() throws {
         let zoomed: GraphViewport = viewport().pinching(by: 2, at: .init(x: 196, y: 300))
         let frame: CGRect = try #require(zoomed.screenFrame(of: .group("club")))
         let anchor: CGPoint = try #require(zoomed.screenAnchor(of: .group("club")))
@@ -243,5 +248,205 @@ import Testing
 
         #expect(updated == viewport(size: small))
         #expect(updated.isAtOpeningFrame)
+    }
+
+    // MARK: - Below full size
+
+    @Test func belowFullSizeTheNodesShrinkWithTheNetwork() throws {
+        let start: GraphViewport = viewport()
+        let shrunk: GraphViewport = start.pinching(by: 0.8 / start.scale, at: .init(x: 196, y: 300))
+        let frame: CGRect = try #require(shrunk.screenFrame(of: .group("club")))
+        let anchor: CGPoint = try #require(shrunk.screenAnchor(of: .group("club")))
+
+        #expect(abs(shrunk.scale - 0.8) < 0.0001)
+        #expect(shrunk.level == .full)
+        #expect(abs(shrunk.nodeScale - 0.8) < 0.0001)
+        #expect(abs(frame.width - 180 * 0.8) < 0.001)
+        #expect(abs(frame.height - 50 * 0.8) < 0.001)
+        #expect(isClose(.init(x: frame.midX, y: frame.midY), anchor))
+    }
+
+    // MARK: - Levels
+
+    /// A network far wider than the screen: it opens well below ×0.6.
+    private static let wide: NetworkGraphPlacement = {
+        let boxes: [NetworkNodeID: (CGPoint, NetworkNodeBox)] = [
+            .me: (.zero, .init(size: .init(width: 72, height: 90), anchor: .init(x: 36, y: 36))),
+            .group("club"): (.init(x: 600, y: 0), .init(centred: .init(width: 180, height: 50))),
+            .reader("ines"): (.init(x: -600, y: 300), .init(size: .init(width: 100, height: 64), anchor: .init(x: 50, y: 22)))
+        ]
+        return .init(
+            positions: boxes.mapValues(\.0),
+            frames: boxes.mapValues { $0.1.frame(at: $0.0) }
+        )
+    }()
+
+    private func wideViewport() -> GraphViewport {
+        .init(placement: Self.wide, size: Self.screen)
+    }
+
+    /// The camera pinched to `scale` about the middle of the screen.
+    private func pinched(
+        _ viewport: GraphViewport,
+        to scale: CGFloat
+    ) -> GraphViewport {
+        viewport.pinching(by: scale / viewport.scale, at: .init(x: Self.screen.width / 2, y: Self.screen.height / 2))
+    }
+
+    @Test("The overview takes over below ×0.6 and gives way above ×0.7", arguments: [
+        (NetworkGraphLevel.full, CGFloat(0.65), NetworkGraphLevel.full),
+        (.full, 0.6, .full),
+        (.full, 0.59, .overview),
+        (.overview, 0.59, .overview),
+        (.overview, 0.65, .overview),
+        (.overview, 0.7, .overview),
+        (.overview, 0.71, .full),
+        (.full, 1.5, .full),
+        (.overview, 0.1, .overview)
+    ])
+    func levelHysteresis(
+        from: NetworkGraphLevel,
+        scale: CGFloat,
+        to: NetworkGraphLevel
+    ) {
+        #expect(from.next(at: scale) == to)
+    }
+
+    @Test func aPinchHoveringAroundAThresholdDoesNotFlicker() {
+        let start: GraphViewport = wideViewport()
+        #expect(start.scale < NetworkGraphLevel.overviewEntryScale)
+        #expect(start.level == .overview)
+
+        // Out of the overview only past ×0.7…
+        let hovering: GraphViewport = pinched(start, to: 0.65)
+        #expect(hovering.level == .overview)
+        #expect(pinched(hovering, to: 0.69).level == .overview)
+        let full: GraphViewport = pinched(hovering, to: 0.72)
+        #expect(full.level == .full)
+
+        // …and back into it only under ×0.6: back and forth around ×0.65 changes nothing.
+        var camera: GraphViewport = full
+        for scale: CGFloat in [0.65, 0.68, 0.62, 0.66, 0.61] {
+            camera = pinched(camera, to: scale)
+            #expect(camera.level == .full)
+        }
+        #expect(pinched(camera, to: 0.58).level == .overview)
+    }
+
+    /// A network that does not fit at ×0.6 opens in the overview, framed on the overview's own
+    /// boxes: every dot and tile on screen, at a larger scale than the full boxes would allow.
+    @Test func aLargeNetworkOpensOnTheOverviewsBoxes() {
+        let overviewBoxes: [NetworkNodeID: NetworkNodeBox] = [
+            .me: NetworkNodeBox(size: .init(width: 72, height: 90), anchor: .init(x: 36, y: 36)).scaled(by: 0.7),
+            .group("club"): .init(size: .init(width: 86, height: 72), anchor: .init(x: 43, y: 26)),
+            .reader("ines"): .init(centred: .init(width: 24, height: 24))
+        ]
+        let full: GraphViewport = wideViewport()
+        let camera: GraphViewport = full.with(overviewBoxes: overviewBoxes)
+
+        #expect(camera.level == .overview)
+        #expect(camera.isAtOpeningFrame)
+        #expect(camera.scale > full.scale)
+        let onScreen: CGRect = .init(origin: .zero, size: Self.screen).insetBy(dx: GraphViewport.margin - 0.01, dy: GraphViewport.margin - 0.01)
+        #expect(onScreen.contains(networkFrame(camera)))
+        #expect(networkFrame(camera).maxX > Self.screen.width - GraphViewport.margin - 1)
+    }
+
+    @Test func aSmallNetworkOpensInFullAndALargeOneInTheOverview() {
+        let small: GraphViewport = .init(
+            placement: Self.placement,
+            size: .init(width: 1_000, height: 1_000)
+        )
+
+        #expect(small.scale == 1)
+        #expect(small.level == .full)
+        #expect(wideViewport().level == .overview)
+    }
+
+    @Test func aSyncKeepsTheLevel() {
+        let hovering: GraphViewport = pinched(wideViewport(), to: 0.65)
+        let updated: GraphViewport = hovering.updating(placement: Self.wide, size: Self.screen)
+
+        #expect(updated.level == .overview)
+        #expect(updated == hovering)
+    }
+
+    // MARK: - Buttons
+
+    @Test func zoomingInAndOutGoesByOneAndAHalfAboutTheMiddle() {
+        let start: GraphViewport = viewport().pinching(by: 1.2, at: .init(x: 196, y: 300))
+        let middle: CGPoint = .init(x: Self.screen.width / 2, y: Self.screen.height / 2)
+        let underMiddle: CGPoint = start.worldPoint(at: middle)
+
+        let zoomedIn: GraphViewport = start.zoomingIn()
+        #expect(abs(zoomedIn.scale - start.scale * 1.5) < 0.0001)
+        #expect(isClose(zoomedIn.screenPoint(of: underMiddle), middle))
+
+        let back: GraphViewport = zoomedIn.zoomingOut()
+        #expect(abs(back.scale - start.scale) < 0.0001)
+        #expect(isClose(back.origin, start.origin))
+    }
+
+    @Test func theButtonsStopAtTheEndsOfTheRange() {
+        let opening: GraphViewport = viewport()
+        #expect(opening.canZoomOut == false)
+        #expect(opening.zoomingOut() == opening)
+        #expect(opening.canZoomIn)
+
+        var camera: GraphViewport = opening
+        for _ in 0..<10 {
+            camera = camera.zoomingIn()
+        }
+        #expect(camera.scale == GraphViewport.maximumScale)
+        #expect(camera.canZoomIn == false)
+        #expect(camera.canZoomOut)
+    }
+
+    @Test func recentringAfterTheButtonsReturnsToTheOpeningFrame() {
+        let opening: GraphViewport = wideViewport()
+        var moved: GraphViewport = opening
+        for _ in 0..<5 {
+            moved = moved.zoomingIn()
+        }
+        moved = moved.panning(by: .init(width: 40, height: -30))
+
+        #expect(moved.level == .full)
+        let recentred: GraphViewport = moved.recentred()
+        #expect(recentred.isAtOpeningFrame)
+        #expect(recentred.scale == opening.scale)
+        #expect(recentred.origin == opening.origin)
+        #expect(recentred.level == .overview)
+    }
+
+    // MARK: - Touching the overview
+
+    /// In the overview, a group is its compact tile: a touch where its full card was, off the
+    /// tile, lands on nothing; a reader is a 24 pt dot, touched within 44 pt.
+    @Test func aTouchInTheOverviewLandsOnTheBoxesItDraws() throws {
+        let overviewBoxes: [NetworkNodeID: NetworkNodeBox] = [
+            .me: NetworkNodeBox(size: .init(width: 72, height: 90), anchor: .init(x: 36, y: 36)).scaled(by: 0.7),
+            .group("club"): .init(size: .init(width: 86, height: 72), anchor: .init(x: 43, y: 26)),
+            .reader("ines"): .init(centred: .init(width: 24, height: 24))
+        ]
+        let camera: GraphViewport = wideViewport().with(overviewBoxes: overviewBoxes)
+        #expect(camera.level == .overview)
+
+        let club: CGPoint = try #require(camera.screenAnchor(of: .group("club")))
+        let tile: CGRect = try #require(camera.screenFrame(of: .group("club")))
+        #expect(tile.size == .init(width: 86, height: 72))
+        #expect(isClose(.init(x: tile.midX, y: tile.minY + 26), club))
+        #expect(camera.node(at: .init(x: club.x, y: club.y + 40)) == .group("club"))
+        // Inside the full card, 70 pt to the side of its centre, but off the tile: nothing any more.
+        #expect(camera.node(at: .init(x: club.x + 70, y: club.y)) == nil)
+
+        let ines: CGPoint = try #require(camera.screenAnchor(of: .reader("ines")))
+        #expect(camera.node(at: .init(x: ines.x + 21, y: ines.y)) == .reader("ines"))
+        #expect(camera.node(at: .init(x: ines.x, y: ines.y + 30)) == nil)
+
+        // Back in full, the full boxes answer again.
+        let full: GraphViewport = pinched(camera, to: 1)
+        #expect(full.level == .full)
+        let card: CGRect = try #require(full.screenFrame(of: .group("club")))
+        #expect(card.size == .init(width: 180, height: 50))
     }
 }

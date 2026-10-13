@@ -17,8 +17,18 @@
 //
 //  **The camera** is a `GraphViewport`, kept here rather than recomputed with each placement, so
 //  a sync keeps the zoom and the place the reader left (Q33). A pinch is anchored at the fingers,
-//  a drag moves the network within its bounds, and both can run at once: what they do is applied
-//  on top of the camera while the fingers are down, and kept when they lift.
+//  a drag moves the network within its bounds, and both can run at once. A pinch is applied to
+//  the camera step by step as the fingers move — so the level it calls for, with its hysteresis,
+//  never flickers mid-gesture (Q31) — and a drag on top of it while the fingers are down, kept
+//  when they lift.
+//
+//  **Zoomed out** past ×0.6, the graph turns to its overview (R3): dots, compact tiles, « Vous »
+//  at 70 %. The compact tiles are measured as they are drawn, and their boxes handed to the
+//  camera, which hit-tests them while the overview is up.
+//
+//  **The controls** (Q33–Q35): Zoomer, Dézoomer and Recentrer, at the bottom right, animate the
+//  camera — ×1.5 about the middle of the graph, or back to the opening frame. The status pill at
+//  the bottom left is `NetworkAllView`'s.
 //
 //  **Touching** goes through the camera's hit test (Q36): a node lights itself, its neighbours and
 //  its lines, and its summary rises in a native sheet with one detent measured to its content
@@ -50,8 +60,10 @@ struct NetworkGraphView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// Each node's size as last measured.
+    /// Each node's full size as last measured.
     @State private var sizes: [NetworkNodeID: CGSize] = [:]
+    /// Each group's compact tile, as last measured in the overview.
+    @State private var tileSizes: [NetworkNodeID: CGSize] = [:]
     /// Where the nodes stand; `nil` until the first placement, which is shown without animation.
     @State private var placement: NetworkGraphPlacement?
     /// The room the graph has on screen.
@@ -62,6 +74,8 @@ struct NetworkGraphView: View {
     @State private var camera: GraphViewport?
     /// A drag that ended while a pinch went on, kept until the pinch ends too.
     @State private var heldTranslation: CGSize = .zero
+    /// How much of the pinch in flight the camera has taken in already.
+    @State private var appliedMagnification: CGFloat = 1
     @GestureState private var dragTranslation: CGSize = .zero
     @GestureState private var pinch: NetworkGraphPinch?
 
@@ -84,6 +98,11 @@ struct NetworkGraphView: View {
 
     var body: some View {
         let boxes: [NetworkNodeID: NetworkNodeBox] = boxes
+        let overviewBoxes: [NetworkNodeID: NetworkNodeBox] = NetworkOverviewBoxes.boxes(
+            graph: graph,
+            fullBoxes: boxes,
+            tileSizes: tileSizes
+        )
         let layout: NetworkGraphLayout? = .init(graph: graph, boxes: boxes)
         let live: GraphViewport? = liveCamera
         let isReady: Bool = placement != nil && live != nil
@@ -95,11 +114,18 @@ struct NetworkGraphView: View {
             centre: live?.origin ?? .init(x: area.width / 2, y: area.height / 2),
             placed: isReady ? Set(placement?.positions.keys.map(\.self) ?? []) : [],
             boxes: boxes,
+            level: live?.level ?? .full,
+            overviewBoxes: overviewBoxes,
             selection: selection,
             highlight: selection.flatMap(graph.highlight(for:)),
             onMeasure: { node, size in
                 if sizes[node] != size {
                     sizes[node] = size
+                }
+            },
+            onMeasureOverview: { node, size in
+                if case .group = node, tileSizes[node] != size {
+                    tileSizes[node] = size
                 }
             },
             onActivate: { node in
@@ -128,8 +154,24 @@ struct NetworkGraphView: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("e2e.network.graph")
+        // Outside the graph's gestures and its text-size cap: a button is not a pinch, and it
+        // follows the reader's text size.
+        .overlay(alignment: .bottomTrailing) {
+            NetworkGraphZoomControls(
+                canZoomIn: live?.canZoomIn ?? false,
+                canZoomOut: live?.canZoomOut ?? false,
+                canRecentre: live.map { $0.isAtOpeningFrame == false } ?? false,
+                onZoomIn: { moveCamera { $0.zoomingIn() } },
+                onZoomOut: { moveCamera { $0.zoomingOut() } },
+                onRecentre: { moveCamera { $0.recentred() } }
+            )
+            .padding(.all, .medium)
+        }
         .task(id: layout) {
             await place(layout)
+        }
+        .onChange(of: overviewBoxes) {
+            camera = camera?.with(overviewBoxes: overviewBoxes)
         }
         .onChange(of: graph) { previous, current in
             if let selection, current.highlight(for: selection) == nil {
@@ -138,10 +180,13 @@ struct NetworkGraphView: View {
             }
         }
         .onChange(of: pinch == nil) {
-            // A pinch cancelled rather than ended: keep the drag it held.
-            if pinch == nil, heldTranslation != .zero {
-                camera = camera?.panning(by: heldTranslation)
-                heldTranslation = .zero
+            // A pinch cancelled rather than ended: keep the zoom it reached and the drag it held.
+            if pinch == nil {
+                appliedMagnification = 1
+                if heldTranslation != .zero {
+                    camera = camera?.panning(by: heldTranslation)
+                    heldTranslation = .zero
+                }
             }
         }
         .onChange(of: selection) { previous, current in
@@ -258,13 +303,11 @@ struct NetworkGraphView: View {
 
     // MARK: - The camera
 
-    /// The camera with the gestures in flight applied on top of it.
+    /// The camera with the drag in flight applied on top of it — the pinch in flight is in it
+    /// already.
     private var liveCamera: GraphViewport? {
         guard var live = camera else { return nil }
 
-        if let pinch {
-            live = live.pinching(by: pinch.magnification, at: pinch.anchor)
-        }
         let translation: CGSize = .init(
             width: dragTranslation.width + heldTranslation.width,
             height: dragTranslation.height + heldTranslation.height
@@ -296,17 +339,35 @@ struct NetworkGraphView: View {
             }
     }
 
+    /// Each step of the pinch is applied to the camera as it comes, anchored where the fingers
+    /// first met — the same result as the whole pinch at once, short of a bound.
     private var pinchGesture: some Gesture {
         MagnifyGesture()
             .updating($pinch) { value, state, _ in
                 state = .init(magnification: value.magnification, anchor: value.startLocation)
             }
-            .onEnded { value in
-                camera = camera?
-                    .pinching(by: value.magnification, at: value.startLocation)
-                    .panning(by: heldTranslation)
-                heldTranslation = .zero
+            .onChanged { value in
+                let step: CGFloat = value.magnification / appliedMagnification
+                appliedMagnification = value.magnification
+                camera = camera?.pinching(by: step, at: value.startLocation)
             }
+            .onEnded { _ in
+                camera = camera?.panning(by: heldTranslation)
+                heldTranslation = .zero
+                appliedMagnification = 1
+            }
+    }
+
+    /// Moves the camera for a button — sliding there, unless Reduce Motion is on.
+    private func moveCamera(_ move: (GraphViewport) -> GraphViewport) {
+        guard let camera else { return }
+
+        let next: GraphViewport = move(camera)
+        guard next != camera else { return }
+
+        withAnimation(reduceMotion ? nil : .smooth(duration: NetworkGraphMetrics.transitionDuration)) {
+            self.camera = next
+        }
     }
 
     /// The camera over the current placement and area: the opening frame the first time, then
@@ -314,7 +375,13 @@ struct NetworkGraphView: View {
     private func updateCamera() {
         guard let placement, area.width > 0, area.height > 0 else { return }
 
-        camera = camera?.updating(placement: placement, size: area) ?? .init(placement: placement, size: area)
+        let overviewBoxes: [NetworkNodeID: NetworkNodeBox] = NetworkOverviewBoxes.boxes(
+            graph: graph,
+            fullBoxes: boxes,
+            tileSizes: tileSizes
+        )
+        camera = camera?.updating(placement: placement, size: area)
+            ?? .init(placement: placement, size: area, overviewBoxes: overviewBoxes)
     }
 
     // MARK: - Placing

@@ -9,6 +9,9 @@
 //  **A node touched** (R2): its lines are lit — full green, 2.5 pt, dashed still if they were —
 //  and every other line fades to 12 %, in place of its own opacity.
 //
+//  **Two sets of styles** (Q32): the full graph's (R1) and the overview's (R3), by
+//  `NetworkEdgeStyle`.
+//
 //  One path per style, each stroked once: hundreds of lines cost a handful of draws, and where
 //  two lines of a style cross they do not darken each other.
 //
@@ -23,70 +26,46 @@ struct NetworkEdgesCanvas: View {
     let segments: [NetworkEdgeSegment]
     /// A node is touched: what it does not light fades.
     let isHighlighting: Bool
+    /// The level drawn, which picks the set of styles (Q32).
+    var level: NetworkGraphLevel = .full
 
     var body: some View {
         let tinted: Color = DesignSystem.Color.foregroundTinted.color
-        let segments: [NetworkEdgeSegment] = segments
-        let isHighlighting: Bool = isHighlighting
+        let batches: [(style: NetworkEdgeStyle, path: Path)] = batches
         Canvas { context, _ in
-            var toGroups: Path = .init()
-            var toReaders: Path = .init()
-            var dashed: Path = .init()
-            var lit: Path = .init()
-            var litDashed: Path = .init()
-            for segment in segments {
-                if segment.isLit {
-                    if segment.kind.isDashed {
-                        litDashed.move(to: segment.from)
-                        litDashed.addLine(to: segment.to)
-                    } else {
-                        lit.move(to: segment.from)
-                        lit.addLine(to: segment.to)
-                    }
-                } else if segment.kind.isDashed {
-                    dashed.move(to: segment.from)
-                    dashed.addLine(to: segment.to)
-                } else if segment.kind.joinsMeToReader {
-                    toReaders.move(to: segment.from)
-                    toReaders.addLine(to: segment.to)
-                } else {
-                    toGroups.move(to: segment.from)
-                    toGroups.addLine(to: segment.to)
-                }
+            for batch in batches {
+                context.stroke(
+                    batch.path,
+                    with: .color(tinted.opacity(batch.style.opacity)),
+                    style: .init(
+                        lineWidth: batch.style.lineWidth,
+                        dash: batch.style.isDashed ? NetworkGraphMetrics.dash : []
+                    )
+                )
             }
-            let dimmed: Double = NetworkGraphMetrics.dimmedLineOpacity
-            context.stroke(
-                toReaders,
-                with: .color(tinted.opacity(isHighlighting ? dimmed : NetworkGraphMetrics.meToReaderLineOpacity)),
-                lineWidth: NetworkGraphMetrics.meToReaderLineWidth
-            )
-            context.stroke(
-                toGroups,
-                with: .color(tinted.opacity(isHighlighting ? dimmed : NetworkGraphMetrics.groupLineOpacity)),
-                lineWidth: NetworkGraphMetrics.groupLineWidth
-            )
-            context.stroke(
-                dashed,
-                with: .color(tinted.opacity(isHighlighting ? dimmed : 1)),
-                style: .init(
-                    lineWidth: NetworkGraphMetrics.groupLineWidth,
-                    dash: NetworkGraphMetrics.dash
-                )
-            )
-            context.stroke(
-                lit,
-                with: .color(tinted),
-                lineWidth: NetworkGraphMetrics.litLineWidth
-            )
-            context.stroke(
-                litDashed,
-                with: .color(tinted),
-                style: .init(
-                    lineWidth: NetworkGraphMetrics.litLineWidth,
-                    dash: NetworkGraphMetrics.dash
-                )
-            )
         }
         .accessibilityHidden(true)
+    }
+
+    /// One path per style, in the order the styles first appear — the lit ones last, over the
+    /// others.
+    private var batches: [(style: NetworkEdgeStyle, path: Path)] {
+        var batches: [(style: NetworkEdgeStyle, path: Path)] = []
+        var indices: [NetworkEdgeStyle: Int] = [:]
+        for segment in segments.filter({ $0.isLit == false }) + segments.filter(\.isLit) {
+            let base: NetworkEdgeStyle = .init(segment.kind, level: level)
+            let style: NetworkEdgeStyle = segment.isLit ? base.lit : (isHighlighting ? base.dimmed : base)
+            let index: Int
+            if let existing = indices[style] {
+                index = existing
+            } else {
+                index = batches.count
+                indices[style] = index
+                batches.append((style, Path()))
+            }
+            batches[index].path.move(to: segment.from)
+            batches[index].path.addLine(to: segment.to)
+        }
+        return batches
     }
 }

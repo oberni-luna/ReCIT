@@ -7,13 +7,23 @@
 //
 //  **World and screen.** The placement puts every node in world points, « Vous » at the origin,
 //  y downwards. On screen, a world point is `origin + point × scale`, `origin` being where
-//  « Vous » stands. The nodes keep their size at every scale — only their anchors move — so a
-//  node's box on screen is its measured box, centred on its scaled anchor.
+//  « Vous » stands. From full size up, the nodes keep their size — only their anchors move apart.
+//  Below it they shrink with the network, about their anchors: the placement keeps the boxes
+//  apart at full size, and only a network drawn whole, nodes and gaps alike, keeps them apart
+//  smaller.
+//
+//  **Two levels** (Q31, R3). Under ×0.6 the graph turns to its overview — dots, compact tiles,
+//  « Vous » at 70 % — and back above ×0.7 (`NetworkGraphLevel`). The overview's nodes have sizes
+//  of their own, which the view measures and hands over as `overviewBoxes`: they are what a
+//  touch lands on, and what the bounds hold, while the overview is up.
 //
 //  **The range** (Q33). It opens on the opening frame: the whole network, « Vous » in the middle,
-//  never above full size (`NetworkGraphPlacement.fittingScale`). That frame is also the smallest
-//  scale — zooming out further would only shrink a network already whole on screen — and twice
-//  the full size is the largest.
+//  never above full size. That frame is also the smallest scale — zooming out further would only
+//  shrink a network already whole on screen — and twice the full size is the largest. The
+//  opening frame is drawn in full when the whole graph fits at ×0.6 or more, its nodes shrinking
+//  with it (`NetworkGraphPlacement.shrinkingFittingScale`); otherwise it is the overview, framed
+//  on the overview's own boxes (`fittingScale`). At the smallest scale the graph is always drawn
+//  at the level it opened at.
 //
 //  **The bounds** (Q33): the network never leaves the screen. Whatever is pinched or dragged, the
 //  network's box keeps covering the middle of the graph area: half of it can go past an edge, all
@@ -24,8 +34,12 @@
 //  `panning(by:)`), and the caller keeps the result when the fingers lift, as `CoverZoom` does.
 //  A pinch is anchored at the fingers: the world point under them stays under them.
 //
-//  **Touching** (Q36): a node answers to a touch inside its box, grown to 44 pt for one smaller
-//  than a finger; where two answer, the one whose anchor is nearer wins.
+//  **Touching** (Q36): a node answers to a touch inside its box on screen — at the level drawn —
+//  grown to 44 pt for one smaller than a finger; where two answer, the one whose anchor is nearer
+//  wins.
+//
+//  **The buttons** (Q33, Q34): Zoomer and Dézoomer pinch by ×1.5 about the middle of the graph
+//  area; Recentrer goes back to the opening frame.
 //
 //  **When the network changes** — a sync, a new text size — the camera keeps its scale and its
 //  place, brought back within the new bounds, so a sync never undoes a zoom. Only a camera still
@@ -44,6 +58,8 @@ nonisolated struct GraphViewport: Equatable, Sendable {
     static let margin: CGFloat = 16
     /// The smallest touch target, on each side (Q36).
     static let touchSide: CGFloat = 44
+    /// What Zoomer multiplies the scale by, and Dézoomer divides it by (Q33).
+    static let zoomStep: CGFloat = 1.5
 
     private(set) var placement: NetworkGraphPlacement
     /// The graph area on screen.
@@ -54,18 +70,53 @@ nonisolated struct GraphViewport: Equatable, Sendable {
     private(set) var offset: CGSize
     /// The opening frame's scale, which is also the smallest.
     private(set) var minimumScale: CGFloat
+    /// What the nodes are drawn as: full, or the overview (Q31).
+    private(set) var level: NetworkGraphLevel
+    /// What the opening frame is drawn as.
+    private(set) var openingLevel: NetworkGraphLevel
+    /// Each node's box in the overview, on screen: a dot, a compact tile, « Vous » at 70 %. A node
+    /// without one is taken at its full size.
+    private(set) var overviewBoxes: [NetworkNodeID: NetworkNodeBox]
 
     /// The opening frame over `placement` in a graph area of `size`.
     init(
         placement: NetworkGraphPlacement,
-        size: CGSize
+        size: CGSize,
+        overviewBoxes: [NetworkNodeID: NetworkNodeBox] = [:]
     ) {
         self.placement = placement
         self.size = size
-        let opening: CGFloat = placement.fittingScale(in: size, margin: Self.margin)
-        minimumScale = opening
-        scale = opening
+        self.overviewBoxes = overviewBoxes
+        let opening: (scale: CGFloat, level: NetworkGraphLevel) = Self.openingFrame(
+            placement: placement,
+            size: size,
+            overviewBoxes: overviewBoxes
+        )
+        minimumScale = opening.scale
+        scale = opening.scale
         offset = .zero
+        openingLevel = opening.level
+        level = opening.level
+    }
+
+    /// The opening frame's scale and level: in full if the whole graph fits at ×0.6 or more with
+    /// its nodes shrinking with it; otherwise the overview, framed on its own boxes.
+    private static func openingFrame(
+        placement: NetworkGraphPlacement,
+        size: CGSize,
+        overviewBoxes: [NetworkNodeID: NetworkNodeBox]
+    ) -> (scale: CGFloat, level: NetworkGraphLevel) {
+        let shrinking: CGFloat = placement.shrinkingFittingScale(in: size, margin: margin)
+        if shrinking >= NetworkGraphLevel.overviewEntryScale {
+            return (shrinking, .full)
+        }
+        let overview: CGFloat = placement.fittingScale(
+            in: size,
+            margin: margin,
+            maximum: NetworkGraphLevel.overviewEntryScale,
+            boxes: overviewBoxes
+        )
+        return (overview, .overview)
     }
 
     // MARK: - Range
@@ -77,6 +128,22 @@ nonisolated struct GraphViewport: Equatable, Sendable {
     /// Still where it opened: nothing has been pinched or dragged since.
     var isAtOpeningFrame: Bool {
         scale == minimumScale && offset == .zero
+    }
+
+    /// Whether Zoomer still has room to zoom.
+    var canZoomIn: Bool {
+        scale < scaleRange.upperBound
+    }
+
+    /// Whether Dézoomer still has room to zoom out.
+    var canZoomOut: Bool {
+        scale > scaleRange.lowerBound
+    }
+
+    /// How large the full nodes are drawn: their measured size from full size up, smaller with
+    /// the network below it.
+    var nodeScale: CGFloat {
+        min(scale, 1)
     }
 
     // MARK: - World → screen
@@ -100,12 +167,25 @@ nonisolated struct GraphViewport: Equatable, Sendable {
         placement.position(of: node).map(screenPoint(of:))
     }
 
-    /// `node`'s box on screen: its measured size, around its anchor.
+    /// `node`'s box on screen, around its anchor: at the level drawn, and at `nodeScale` in full.
     func screenFrame(of node: NetworkNodeID) -> CGRect? {
+        guard let position = placement.position(of: node), let box = screenBox(of: node) else { return nil }
+
+        return box.frame(at: screenPoint(of: position))
+    }
+
+    /// `node`'s box as drawn on screen, its anchor where the lines meet.
+    func screenBox(of node: NetworkNodeID) -> NetworkNodeBox? {
+        if level == .overview, let box = overviewBoxes[node] {
+            return box
+        }
         guard let position = placement.position(of: node), let frame = placement.frame(of: node) else { return nil }
 
-        let anchor: CGPoint = screenPoint(of: position)
-        return frame.offsetBy(dx: anchor.x - position.x, dy: anchor.y - position.y)
+        let box: NetworkNodeBox = .init(
+            size: frame.size,
+            anchor: .init(x: position.x - frame.minX, y: position.y - frame.minY)
+        )
+        return box.scaled(by: nodeScale)
     }
 
     // MARK: - Gestures
@@ -119,7 +199,7 @@ nonisolated struct GraphViewport: Equatable, Sendable {
         guard magnification > 0, magnification.isFinite else { return self }
 
         var viewport: GraphViewport = self
-        viewport.scale = clampedScale(scale * magnification)
+        viewport.setScale(clampedScale(scale * magnification))
         let ratio: CGFloat = viewport.scale / scale
         let origin: CGPoint = origin
         let newOrigin: CGPoint = .init(
@@ -146,9 +226,29 @@ nonisolated struct GraphViewport: Equatable, Sendable {
     /// Back to the opening frame: the whole network, « Vous » in the middle.
     func recentred() -> GraphViewport {
         var viewport: GraphViewport = self
-        viewport.scale = minimumScale
+        viewport.setScale(minimumScale)
         viewport.offset = .zero
         return viewport
+    }
+
+    /// Zoomer: ×1.5 about the middle of the graph area, within the range (Q33).
+    func zoomingIn() -> GraphViewport {
+        pinching(by: Self.zoomStep, at: .init(x: size.width / 2, y: size.height / 2))
+    }
+
+    /// Dézoomer: ÷1.5 about the middle of the graph area, within the range (Q33).
+    func zoomingOut() -> GraphViewport {
+        pinching(by: 1 / Self.zoomStep, at: .init(x: size.width / 2, y: size.height / 2))
+    }
+
+    /// The camera with the overview's boxes as the view last measured them — and, since they
+    /// frame an overview opening, the opening frame they make.
+    func with(overviewBoxes: [NetworkNodeID: NetworkNodeBox]) -> GraphViewport {
+        guard overviewBoxes != self.overviewBoxes else { return self }
+
+        var viewport: GraphViewport = self
+        viewport.overviewBoxes = overviewBoxes
+        return viewport.updating(placement: placement, size: size)
     }
 
     // MARK: - Touching
@@ -203,16 +303,28 @@ nonisolated struct GraphViewport: Equatable, Sendable {
         placement: NetworkGraphPlacement,
         size: CGSize
     ) -> GraphViewport {
-        let opening: GraphViewport = .init(placement: placement, size: size)
+        let opening: GraphViewport = .init(
+            placement: placement,
+            size: size,
+            overviewBoxes: overviewBoxes
+        )
         guard isAtOpeningFrame == false, self.size.width > 0, self.size.height > 0 else { return opening }
 
         var viewport: GraphViewport = opening
-        viewport.scale = viewport.clampedScale(scale)
+        viewport.level = level
+        viewport.setScale(viewport.clampedScale(scale))
         viewport.offset = offset
         return viewport.bounded()
     }
 
     // MARK: - Bounds
+
+    /// Sets the scale, and the level it calls for coming from the current one — the opening
+    /// frame's at the smallest scale.
+    private mutating func setScale(_ newScale: CGFloat) {
+        scale = newScale
+        level = newScale <= minimumScale ? openingLevel : level.next(at: newScale)
+    }
 
     private func clampedScale(_ scale: CGFloat) -> CGFloat {
         min(max(scale, scaleRange.lowerBound), scaleRange.upperBound)
@@ -242,9 +354,9 @@ nonisolated struct GraphViewport: Equatable, Sendable {
     private var extent: CGRect? {
         var box: CGRect = .null
         for (node, position) in placement.positions {
-            guard let frame = placement.frame(of: node) else { continue }
+            guard let nodeBox = screenBox(of: node) else { continue }
 
-            box = box.union(frame.offsetBy(dx: position.x * (scale - 1), dy: position.y * (scale - 1)))
+            box = box.union(nodeBox.frame(at: .init(x: position.x * scale, y: position.y * scale)))
         }
         return box.isNull ? nil : box
     }

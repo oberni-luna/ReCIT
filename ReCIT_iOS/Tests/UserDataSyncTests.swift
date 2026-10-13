@@ -80,4 +80,19 @@ struct UserDataSyncTests {
         #expect(SyncStatusStore(defaults: defaults).hasCompletedFirstSync(.groups) == false)
         #expect(mock.recordedRequests.contains { $0.endpoint.hasPrefix("/api/items/inventory-view") })
     }
+
+    @Test("Offline at a first launch, every domain that never synced is failed — « Tout » offers « Réessayer »")
+    func failedUserSync() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let defaults: UserDefaults = UserDefaults(suiteName: "user-data-sync-\(UUID().uuidString)") ?? .standard
+        let syncStatus: SyncStatusStore = .init(defaults: defaults)
+        let mock: MockAPIService = .init()
+        mock.stub("/api/user", error: URLError(.notConnectedToInternet))
+
+        await makeSync(mock, syncStatus: syncStatus, defaults: defaults).run(modelContext: context)
+
+        #expect(syncStatus.phase(.community) == .failed)
+        #expect(syncStatus.phase(.groups) == .failed)
+        #expect(mock.recordedRequests.contains { $0.endpoint.hasPrefix("/api/relations") } == false)
+    }
 }

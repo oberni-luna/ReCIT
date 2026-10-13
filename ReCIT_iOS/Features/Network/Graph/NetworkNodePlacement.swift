@@ -3,7 +3,8 @@
 //  ReCIT_iOS
 //
 //  How a node of the Réseau graph is put on screen: measured at its own size first — the size
-//  the placement keeps clear around it — then centred where its anchor falls. Hidden, and out of
+//  the placement keeps clear around it — then drawn at the scale the camera calls for and
+//  centred where its anchor falls. Hidden, and out of
 //  VoiceOver's way, until the placement has a place for it; faded to 30 % when a touch lights
 //  other nodes and not this one (R2).
 //
@@ -17,6 +18,9 @@ import SwiftUI
 struct NetworkNodePlacement: ViewModifier {
     let node: NetworkNodeID
     let centre: CGPoint
+    /// How large the node is drawn against its measured size: smaller with the network below full
+    /// size, « Vous » at 70 % in the overview. Its measure stays the unscaled one.
+    var scale: CGFloat = 1
     let isPlaced: Bool
     var isDimmed: Bool = false
     let onMeasure: (NetworkNodeID, CGSize) -> Void
@@ -31,6 +35,7 @@ struct NetworkNodePlacement: ViewModifier {
             } action: { size in
                 onMeasure(node, size)
             }
+            .scaleEffect(scale)
             .opacity(isPlaced ? (isDimmed ? NetworkGraphMetrics.dimmedNodeOpacity : 1) : 0)
             .accessibilityHidden(isPlaced == false)
             .modifier(NetworkNodeActivation(onActivate: onActivate))

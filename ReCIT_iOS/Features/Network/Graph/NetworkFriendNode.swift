@@ -7,7 +7,8 @@
 //  (Q19). A reader who asked to be my friend has a dashed ring instead of the hairline (Q5b).
 //
 //  Its anchor — where the lines meet — is the centre of the avatar, not of the node: the name
-//  hangs under it.
+//  hangs under it, on `backgroundDefault`, so a line from the avatar to a group below — or any other
+//  line passing by — goes under the name instead of through it.
 //
 //  **Lit** by a touch — the reader touched, or a friend of the group touched — the ring turns to
 //  2 pt of green and the name to bold (`Graph / Friend · Highlighted`, R2). The node keeps the
@@ -45,6 +46,8 @@ struct NetworkFriendNode: View {
                         .accessibilityHidden(true)
                 }
             }
+            // A line from the avatar to a group below runs under the name rather than through it.
+            .background(DesignSystem.Color.backgroundDefault.color)
         }
         .accessibilityElement(children: .combine)
         .accessibilityValue(reader.state == .requested ? Text("network.invitation.received") : Text(verbatim: ""))

@@ -43,6 +43,19 @@ enum NetworkGraphMetrics {
     /// The dashed ring of a reader who asked to be my friend (Q5b).
     static let requesterRingWidth: CGFloat = 1.5
 
+    // MARK: The overview (R3)
+
+    /// The side of a reader's dot — `Graph / Friend · Dot` (`519:16390`): no name, no initials
+    /// (Q37).
+    static let dotSide: CGFloat = 24
+    /// The side of a group's tile — `Graph / Group · Compact` (`519:16401`).
+    static let compactTileSide: CGFloat = 52
+    /// The tile's edge, in `backgroundTintedInverse`.
+    static let compactTileBorderWidth: CGFloat = 2
+    /// The widest a compact group's name gets before it is cut, at the default text size: R3's
+    /// longest, « BD & romans graphiques », fits.
+    static let compactNameMaxWidth: CGFloat = 130
+
     // MARK: A group
 
     /// The side of a group's picture on its card.
@@ -71,6 +84,13 @@ enum NetworkGraphMetrics {
     /// A line from me to a friend: lighter, so the groups carry the drawing (Q32 bis).
     static let meToReaderLineWidth: CGFloat = 1
     static let meToReaderLineOpacity: Double = 0.3
+    /// In the overview (R3): a line from me to a group, solid or dashed, is bolder, so the ring
+    /// of groups reads at a glance; a line from a friend to a group is lighter, so forty of them
+    /// stay a texture.
+    static let overviewMeToGroupLineWidth: CGFloat = 2
+    static let overviewMeToGroupLineOpacity: Double = 0.8
+    static let overviewFriendToGroupLineWidth: CGFloat = 1
+    static let overviewFriendToGroupLineOpacity: Double = 0.3
 
     // MARK: A node touched
 
@@ -97,6 +117,17 @@ enum NetworkGraphMetrics {
     /// The sheet's detent before its content has been measured: a guess near R2's, replaced on the
     /// first layout.
     static let sheetPlaceholderHeight: CGFloat = 200
+
+    // MARK: The controls
+
+    /// The status pill's padding: 6 above and below — off the spacing scale — and 12 on the sides
+    /// (`compteur`, `521:15993`).
+    static let statusInsets: EdgeInsets = .init(
+        top: 6,
+        leading: DesignSystem.Spacing.sMedium.rawValue,
+        bottom: 6,
+        trailing: DesignSystem.Spacing.sMedium.rawValue
+    )
 
     // MARK: The whole
 

@@ -37,6 +37,12 @@ struct UserDataSync {
     let onSessionGone: () async -> Void
 
     func run(modelContext: ModelContext) async {
+        // Every domain is on its way from here, not from its own turn: a screen waiting on a
+        // first sync says « Synchronisation… » rather than « Réessayer » while my user, the
+        // étagères and whatever comes before it are still being fetched (Q40).
+        for domain in SyncStatusStore.Domain.allCases {
+            syncStatus.markStarted(domain)
+        }
         do {
             print("## Sync my user ")
             try await userModel.syncMyUser(modelContext: modelContext)
@@ -49,11 +55,18 @@ struct UserDataSync {
             // the session and `RootView` shows the authentication flow on the next render.
             if SessionExpiry.isSessionGone(error) {
                 await onSessionGone()
+                return
             }
+            // Nothing below runs: every domain never synced has failed with it — offline at a
+            // first launch, which « Tout » answers with « Réessayer » (Q41).
+            failEveryDomain()
             return
         }
 
-        guard let myUser = userModel.myUser else { return }
+        guard let myUser = userModel.myUser else {
+            failEveryDomain()
+            return
+        }
         inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
         // Accepting an invitation pulls the new friend's books, and the étagères they
         // share, on the spot — which is the one thing `UserModel` needs either of these
@@ -138,6 +151,13 @@ struct UserDataSync {
             } catch {
                 print("⚠️⚠️⚠️⚠️⚠️ Error during inventory sync for \(user.username): \(error)")
             }
+        }
+    }
+
+    /// Records that no domain will sync this time — those that never have are left failed.
+    private func failEveryDomain() {
+        for domain in SyncStatusStore.Domain.allCases {
+            syncStatus.markFailed(domain)
         }
     }
 

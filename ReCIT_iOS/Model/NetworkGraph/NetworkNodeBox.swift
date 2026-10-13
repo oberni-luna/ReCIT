@@ -46,6 +46,15 @@ nonisolated struct NetworkNodeBox: Hashable, Sendable {
         .init(x: anchorX, y: anchorY)
     }
 
+    /// The box drawn at `factor` of its size, about its anchor — which stays where it was on the
+    /// node.
+    func scaled(by factor: CGFloat) -> NetworkNodeBox {
+        .init(
+            size: .init(width: width * factor, height: height * factor),
+            anchor: .init(x: anchorX * factor, y: anchorY * factor)
+        )
+    }
+
     /// The box when its anchor sits at `position`.
     func frame(at position: CGPoint) -> CGRect {
         .init(

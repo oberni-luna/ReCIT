@@ -18,6 +18,12 @@
 //  Everything is read from the store through `@Query` (ADR 0001), the groups included since issue
 //  0103, so the segment is the same offline and from the moment the app opens.
 //
+//  **The status pill** (issue 0109), at the bottom left: « N amis · N groupes », « Synchronisation… »
+//  until my relations and my groups have answered once, or « Réessayer » on a first launch whose
+//  sync failed, which runs it again (Q10, Q40, Q41). The empty state does without the counter and
+//  the zoom controls (Q39) — but not without the other two: on a first launch the store is empty
+//  because nothing has arrived yet, and that is where « Réessayer » is needed.
+//
 
 import LBSnackBar
 import SwiftUI
@@ -30,6 +36,8 @@ struct NetworkAllView: View {
     @Environment(GroupModel.self) private var groupModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
+    @Environment(SyncStatusStore.self) private var syncStatus
+    @Environment(\.syncUserData) private var syncUserData
 
     @Query private var allUsers: [User]
     @Query private var storedGroups: [StoredGroup]
@@ -48,6 +56,20 @@ struct NetworkAllView: View {
             groups: groups
         )
 
+        let graph: NetworkGraph = .init(
+            .init(
+                me: me,
+                myUserId: groupModel.myUserId,
+                users: allUsers,
+                groups: groups
+            )
+        )
+        let status: NetworkGraphStatus = .init(
+            counter: graph.counter,
+            community: syncStatus.phase(.community),
+            groups: syncStatus.phase(.groups)
+        )
+
         Group {
             switch content {
             case .empty:
@@ -56,16 +78,7 @@ struct NetworkAllView: View {
                     imageUrl: me?.avatarURLValue
                 )
             case .graph:
-                NetworkGraphView(
-                    graph: .init(
-                        .init(
-                            me: me,
-                            myUserId: groupModel.myUserId,
-                            users: allUsers,
-                            groups: groups
-                        )
-                    )
-                ) { node in
+                NetworkGraphView(graph: graph) { node in
                     open(node)
                 } onAnswer: { node, answer in
                     self.answer(answer, to: node)
@@ -73,6 +86,14 @@ struct NetworkAllView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .bottomLeading) {
+            if content == .graph || status.isCounter == false {
+                NetworkGraphStatusPill(status: status) {
+                    syncUserData()
+                }
+                .padding(.all, .medium)
+            }
+        }
         // Through every safe area, so the band and the nav bar are white too. Not
         // `toolbarBackground`: it swaps the bar's appearance for one of SwiftUI's, which drops the
         // design system's title fonts — « Réseau » turned to the system font on this one segment.

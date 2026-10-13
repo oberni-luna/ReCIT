@@ -178,6 +178,29 @@ struct NetworkGraphTests {
         #expect(NetworkGraph(input).counter == .init(friends: friends, groups: groups))
     }
 
+    // MARK: - Overview
+
+    @Test("Overview of R3: only the friends without a group keep their line to « Vous »; every line is drawn in full")
+    func overviewLinesOfR3() {
+        let graph: NetworkGraph = .init(NetworkGraphFixture.r3)
+        let toFriends: [NetworkEdge] = graph.edges.filter { $0.kind == .meToFriend }
+        let kept: [NetworkEdge] = toFriends.filter { graph.isDrawn($0, at: .overview) }
+
+        #expect(toFriends.count == 42)
+        #expect(Set(kept.map(\.to)) == [.reader("sarah"), .reader("nathan"), .reader("mila"), .reader("clara")])
+        #expect(graph.edges.filter { $0.kind != .meToFriend }.allSatisfy { graph.isDrawn($0, at: .overview) })
+        #expect(graph.edges.allSatisfy { graph.isDrawn($0, at: .full) })
+    }
+
+    @Test("Overview of R1: the requester's dashed line and the isolated friend's line stay")
+    func overviewLinesOfR1() {
+        #expect(r1.isDrawn(edge(.me, .reader("ariane"), .meToRequester), at: .overview))
+        #expect(r1.isDrawn(edge(.me, .reader("paul"), .meToFriend), at: .overview))
+        #expect(r1.isDrawn(edge(.me, .reader("ines"), .meToFriend), at: .overview) == false)
+        #expect(r1.isDrawn(edge(.me, .group("l11"), .meToInvitation), at: .overview))
+        #expect(r1.isDrawn(edge(.reader("camille"), .group("l11"), .friendToGroup), at: .overview))
+    }
+
     // MARK: - Neighbours
 
     @Test("A group's friends, by handle")

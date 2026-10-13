@@ -4,7 +4,8 @@
 //
 //  The small rules the Réseau graph is drawn by: what a group card's second line says (Q9), when
 //  the nodes slide (Q17, Q23), and how positions interpolate so that a node that arrives slides
-//  out of « Vous » (PRD 0019).
+//  out of « Vous » (PRD 0019); since issue 0109, the two sets of line styles (Q32), the boxes of
+//  the overview (R3), and what the status pill says (Q10, Q40, Q41).
 //
 
 import CoreGraphics
@@ -84,5 +85,119 @@ struct NetworkGraphRenderingRulesTests {
         #expect(positions - positions == .init([.me: .zero]))
         #expect(positions + .zero == positions)
         #expect(NetworkGraphPositions.zero.magnitudeSquared == 0)
+    }
+
+    // MARK: - Line styles
+
+    @Test("In full, R1's lines; in the overview, R3's")
+    func lineStyles() {
+        let fullToGroup: NetworkEdgeStyle = .init(.meToGroup, level: .full)
+        #expect(fullToGroup.lineWidth == 1.5)
+        #expect(fullToGroup.opacity == 0.6)
+        #expect(NetworkEdgeStyle(.friendToGroup, level: .full) == fullToGroup)
+
+        let overviewToGroup: NetworkEdgeStyle = .init(.meToGroup, level: .overview)
+        #expect(overviewToGroup.lineWidth == 2)
+        #expect(overviewToGroup.opacity == 0.8)
+        #expect(overviewToGroup.isDashed == false)
+        let overviewInvitation: NetworkEdgeStyle = .init(.meToInvitation, level: .overview)
+        #expect(overviewInvitation.lineWidth == 2)
+        #expect(overviewInvitation.opacity == 0.8)
+        #expect(overviewInvitation.isDashed)
+
+        let overviewFriendToGroup: NetworkEdgeStyle = .init(.friendToGroup, level: .overview)
+        #expect(overviewFriendToGroup.lineWidth == 1)
+        #expect(overviewFriendToGroup.opacity == 0.3)
+
+        // « Vous » ↔ a friend is the same light line at both levels (Q32 bis).
+        #expect(NetworkEdgeStyle(.meToFriend, level: .overview) == NetworkEdgeStyle(.meToFriend, level: .full))
+        #expect(NetworkEdgeStyle(.meToFriend, level: .full).opacity == 0.3)
+        #expect(NetworkEdgeStyle(.meToRequester, level: .overview).isDashed)
+    }
+
+    @Test("Lit, a line is 2.5 pt at full strength, dashed still; dimmed, it keeps its width at 12 %")
+    func litAndDimmedLines() {
+        let invitation: NetworkEdgeStyle = .init(.meToInvitation, level: .overview)
+        #expect(invitation.lit.lineWidth == 2.5)
+        #expect(invitation.lit.opacity == 1)
+        #expect(invitation.lit.isDashed)
+        #expect(invitation.dimmed.lineWidth == 2)
+        #expect(invitation.dimmed.opacity == 0.12)
+    }
+
+    // MARK: - Overview boxes
+
+    @Test("In the overview: « Vous » at 70 %, readers as 24 pt dots, groups as their tile, anchored at the tile")
+    func overviewBoxes() {
+        let graph: NetworkGraph = .init(NetworkGraphFixture.r1)
+        let me: NetworkNodeBox = .init(size: .init(width: 72, height: 84), anchor: .init(x: 36, y: 36))
+        let boxes: [NetworkNodeID: NetworkNodeBox] = NetworkOverviewBoxes.boxes(
+            graph: graph,
+            fullBoxes: [.me: me],
+            tileSizes: [.group("club"): .init(width: 110, height: 72)]
+        )
+
+        #expect(boxes[.me] == me.scaled(by: 0.7))
+        #expect(boxes[.reader("ines")] == .init(centred: .init(width: 24, height: 24)))
+        #expect(boxes[.reader("ariane")] == .init(centred: .init(width: 24, height: 24)))
+        #expect(boxes[.group("club")] == .init(size: .init(width: 110, height: 72), anchor: .init(x: 55, y: 26)))
+        // Not measured yet: the bare tile.
+        #expect(boxes[.group("bd")] == .init(centred: .init(width: 52, height: 52)))
+    }
+
+    // MARK: - Status pill
+
+    @Test("The counter once relations and groups have both answered; R3 counts 42 · 6")
+    func statusCounter() {
+        let counter: NetworkGraphCounter = NetworkGraph(NetworkGraphFixture.r3).counter
+        #expect(NetworkGraphStatus(counter: counter, community: .synced, groups: .synced) == .counter(.init(friends: 42, groups: 6)))
+    }
+
+    @Test("« Synchronisation… » while either is on its way, « Réessayer » once neither is and one failed", arguments: [
+        (SyncStatusStore.Phase.pending, SyncStatusStore.Phase.pending, NetworkGraphStatus.syncing),
+        (.syncing, .pending, .syncing),
+        (.synced, .syncing, .syncing),
+        (.failed, .syncing, .syncing),
+        (.failed, .synced, .retry),
+        (.synced, .failed, .retry),
+        (.failed, .failed, .retry),
+        (.failed, .pending, .retry)
+    ])
+    func statusBeforeTheFirstSync(
+        community: SyncStatusStore.Phase,
+        groups: SyncStatusStore.Phase,
+        expected: NetworkGraphStatus
+    ) {
+        #expect(NetworkGraphStatus(counter: .init(friends: 1, groups: 1), community: community, groups: groups) == expected)
+    }
+
+    @Test("The status follows the store: syncing, then the counter; a failed first launch, then « Réessayer »")
+    func statusFollowsTheStore() throws {
+        let defaults: UserDefaults = try #require(UserDefaults(suiteName: "network-status-\(UUID().uuidString)"))
+        let store: SyncStatusStore = .init(defaults: defaults)
+        let counter: NetworkGraphCounter = .init(friends: 42, groups: 6)
+        let status: () -> NetworkGraphStatus = {
+            .init(counter: counter, community: store.phase(.community), groups: store.phase(.groups))
+        }
+
+        store.markStarted(.community)
+        store.markStarted(.groups)
+        #expect(status() == .syncing)
+        store.markFailed(.community)
+        #expect(status() == .syncing)
+        store.markFailed(.groups)
+        #expect(status() == .retry)
+
+        // « Réessayer » runs the sync again.
+        store.markStarted(.community)
+        store.markStarted(.groups)
+        #expect(status() == .syncing)
+        store.markCompleted(.community)
+        store.markCompleted(.groups)
+        #expect(status() == .counter(counter))
+
+        // A later failure says nothing (Q41).
+        store.markFailed(.groups)
+        #expect(status() == .counter(counter))
     }
 }

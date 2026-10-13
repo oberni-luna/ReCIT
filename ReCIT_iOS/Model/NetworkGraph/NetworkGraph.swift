@@ -165,6 +165,18 @@ nonisolated struct NetworkGraph: Hashable, Sendable {
         readerIndex[readerId].map { groupsOfReader[$0] } ?? []
     }
 
+    /// Whether `edge` is drawn at `level`. In the overview, the line from « Vous » to a friend
+    /// goes, except for a friend tied to me alone — without it they would float — and a requester's
+    /// dashed line stays (Q6, R3). Everything is drawn in full.
+    func isDrawn(
+        _ edge: NetworkEdge,
+        at level: NetworkGraphLevel
+    ) -> Bool {
+        guard level == .overview, edge.kind == .meToFriend, case .reader(let id) = edge.to else { return true }
+
+        return reader(id: id)?.isIsolated ?? true
+    }
+
     // MARK: - Neighbours
 
     /// My friends who administer `groupId` or belong to it, by handle — what its sheet names.

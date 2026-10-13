@@ -120,7 +120,7 @@ seams it needs in the app (`AppModels/UITest/UITestHooks.swift`).
 
 `ReCIT.swift` (the `@main`) does three things:
 
-1. Builds a single `ModelContainer` covering every SwiftData `@Model`: `InventoryItem`, `User`, `Edition`, `EntityList`, `EntityListItem`, `Author`, `Work`, `WpExtract`, `UserTransaction`, `TransactionMessage`. Persistence is on-disk, **not** CloudKit.
+1. Builds a single `ModelContainer` covering every SwiftData `@Model`: `InventoryItem`, `User`, `Edition`, `EntityList`, `EntityListItem`, `Author`, `Work`, `WpExtract`, `UserTransaction`, `TransactionMessage`, `StoredGroup`. Persistence is on-disk, **not** CloudKit.
 2. Creates the long-lived `AuthModel` and attaches it to the scene via `.environmentObject`.
 3. Calls `DesignSystem.start()` to register custom fonts (Alegreya, OpenSans) and configure `UINavigationBar` appearance.
 
@@ -158,7 +158,7 @@ Reference implementations: `TransactionModel` (messages + state changes), `Entit
 
 ### Navigation
 
-There is no per-feature `NavigationStack`. `MainTabView` owns each tab's `NavigationPath`, and `Features/EntityBrowser/NavigationDestination.swift` is the single enum dispatching to detail screens. To add a new destination:
+Each tab root (`ShelvesView`, `EntityListView`, `NetworkView`, `ProfileView`) owns its `NavigationStack` and `@State` `NavigationPath`; modal flows (`SortFlowView`, `AuthFlowView`) own theirs; detail screens never add one. `Features/EntityBrowser/NavigationDestination.swift` is the single enum dispatching to detail screens. To add a new destination:
 
 1. Add a case to `NavigationDestination` (and a stable `id` string).
 2. Add a `case` to `viewForDestination(_:)` returning the detail view.
@@ -257,10 +257,11 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0025 Signing out forgets the user, and keeps the books](docs/features/0025-sign-out-forgets-the-user.md) — every way a session ends empties users, items, étagères, lists and transactions; editions, works and authors stay
 - [0026 The Profil says the app is inventaire.io underneath](docs/features/0026-profile-says-it-is-inventaire.md) — a dismissable paper tag under the account, linking inventaire.io and its open data
 - [0027 How far a first sync has got](docs/features/0027-first-sync-progress.md) — a determinate bar over items received / announced for my inventory, each friend's cell and their profile; friends show before their books, which sync last, one by one
-- [0028 Un onglet Réseau, et les groupes d'inventaire.io](docs/features/0028-network-tab-and-groups.md) — Amis | Groupes in a fourth tab with a badge; join, answer, leave, invite, run and create groups, held in memory, every gesture optimistic but creation
+- [0028 Un onglet Réseau, et les groupes d'inventaire.io](docs/features/0028-network-tab-and-groups.md) — Amis | Groupes in a tab of their own with a badge; join, answer, leave, invite, run and create groups, every gesture optimistic but creation (groups persisted since 0035)
 - [0029 A book's cover, full screen](docs/features/0029-full-screen-cover.md) — tap the header's cover to see it fitted to the whole screen; double-tap between fit and fill, pinch, drag, swipe down to close
 - [0030 Works, authors and editions upserted in place](docs/features/0030-entities-upserted-in-place.md) — one way into the store for entities, so a sync stops wiping genres and colours; what removed issue 0067's row; writes after a round trip re-read or skip what has gone
 - [0031 Ex-libris on Android](docs/features/0031-android-app.md) — `Recit_Android/`, Room + Compose + Navigation 3: account, inventory and shelves, search, book, lists, friends, profile; scanner, sorting, transactions and groups not ported; never run signed in
 - [0032 « Enregistrer », and a question before leaving « Ranger mes livres » unsaved](docs/features/0032-sorting-save-and-leave.md) — the primary button renamed; the cross asks « Quitter sans enregistrer ? » over unsaved changes until answered « Quitter » once
 - [0033 The group the Réseau badge is about](docs/features/0033-group-pending-dot.md) — a red dot after the name of each group with requests to join waiting on me as its admin
 - [0034 À propos d'inventaire.io, la version, et un café pour Ex-libris](docs/features/0034-profile-about-and-support.md) — a white À propos screen whose étagère carries my three latest books; the version at the foot of the Profil; a dismissable card and a StoreKit 2 donation sheet (3 / 5 / 10 €, half to inventaire.io); the paper tag of 0026 retired; products not yet on App Store Connect
+- [0035 The Réseau network as a graph](docs/features/0035-network-graph.md) — « Tout » draws me, my groups and friends; pinch, touch, answer; DEBUG only

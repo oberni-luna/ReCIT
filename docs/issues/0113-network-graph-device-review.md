@@ -4,7 +4,7 @@ Type: HITL
 
 ## Parent
 
-`docs/prd/0019-network-graph.md`
+`docs/features/0035-network-graph.md`
 
 ## What to build
 
@@ -25,4 +25,4 @@ Rien de « Tout » n'a été vu sur un appareil. Avant de le livrer en 1.4.0 :
 
 ## Blocked by
 
-- `docs/issues/0112-write-up.md`
+None - can start immediately (0112, the write-up, is done)

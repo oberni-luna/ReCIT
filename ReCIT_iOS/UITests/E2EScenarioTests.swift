@@ -4,8 +4,8 @@
 //
 //  The whole app, once through, on a simulator, against the real inventaire.io: sign in, quit
 //  and reopen still signed in, scan two books, find three more by hand, make two étagères and
-//  fill them by dragging, make a list and put two works in it, then take every one of those
-//  things back out again and sign out.
+//  fill them by dragging, open a group from the Réseau graph, make a list and put two works in
+//  it, then take every one of those things back out again and sign out.
 //
 //  **It is a scenario, not an assertion suite.** Nothing here calls `XCTFail`: every step files
 //  a line in `E2EReport` — what it did, on what, a screenshot, and OK or KO with the reason —
@@ -425,7 +425,25 @@ final class E2EScenarioTests: XCTestCase {
             return "Retour à l'inventaire"
         }
 
-        // MARK: 19. A list
+        // MARK: 19. Réseau · Tout — a group opened from the graph
+
+        // The graph of « Tout » (PRD 0019), walked the way a reader walks it: touch a group, read
+        // its sheet, open it, come back. Placed here, between the étagères and the list, so that
+        // whatever it leaves behind cannot reach the cleanup — the list step opens its own tab.
+        //
+        // « Tout » is compiled in `DEBUG` only, and the `ReCIT_iOSE2E` scheme tests in Debug.
+        //
+        // Not critical, and **non joué** rather than KO when the test account has no group to
+        // touch: the graph draws what inventaire.io holds about the account, and an account that
+        // belongs to no group is not a defect of the app.
+        driver.step("Réseau · Tout : un groupe ouvert depuis le graphe", critical: false) {
+            try Self.openGroupFromNetworkGraph(driver: driver, app: app)
+        }
+        // After the step's screenshot, so a KO is photographed as it stood: a sheet left up over
+        // the tab bar would take the list steps down with it.
+        Self.closeNetworkSheet(driver: driver)
+
+        // MARK: 20. A list
 
         driver.step("Création de la liste « \(listName) »", critical: false) {
             try driver.openTab(.lists)
@@ -450,7 +468,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Liste « \(listName) » créée (type : œuvres)"
         }
 
-        // MARK: 20–21. Two works into it
+        // MARK: 21–22. Two works into it
 
         for index in 0..<2 {
             driver.step("Ajout de l'œuvre \(index + 1) à la liste", critical: false) {
@@ -463,7 +481,7 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 22. What the list holds
+        // MARK: 23. What the list holds
 
         driver.step("Vérification du contenu de la liste", critical: false) {
             try driver.openTab(.lists)
@@ -480,7 +498,7 @@ final class E2EScenarioTests: XCTestCase {
             return "\(driver.all("e2e.listItemRow").count) œuvre(s) présentes dans « \(listName) »"
         }
 
-        // MARK: 23. Delete the list
+        // MARK: 24. Delete the list
 
         driver.step("Suppression de la liste", critical: false) {
             if driver.exists("e2e.listItemRow") == false {
@@ -506,7 +524,7 @@ final class E2EScenarioTests: XCTestCase {
             return "Liste « \(listName) » supprimée"
         }
 
-        // MARK: 24–25. Delete the shelves
+        // MARK: 25–26. Delete the shelves
 
         // Alphabetically, which is the order the carousel puts them in: the first card is the
         // only one fully on screen, and deleting it promotes the next one into its place. Taking
@@ -549,7 +567,7 @@ final class E2EScenarioTests: XCTestCase {
             }
         }
 
-        // MARK: 26. Delete the books
+        // MARK: 27. Delete the books
 
         driver.step("Suppression des livres de l'inventaire", critical: false) {
             try driver.openTab(.inventory)
@@ -621,7 +639,7 @@ final class E2EScenarioTests: XCTestCase {
             return "\(removed.count) livre(s) supprimé(s) : \(removed.joined(separator: ", "))"
         }
 
-        // MARK: 27. Sign out
+        // MARK: 28. Sign out
 
         driver.step("Déconnexion", critical: false) {
             try driver.openTab(.settings)
@@ -1015,6 +1033,155 @@ final class E2EScenarioTests: XCTestCase {
             within: 10
         )
         return true
+    }
+
+    /// Réseau › Tout, a group node touched, its sheet, « Ouvrir le groupe », the group's screen,
+    /// and back to the graph. Returns the step's detail.
+    ///
+    /// **The nodes are found by identifier and touched at their centre.** They are not buttons:
+    /// the graph hit-tests a touch against its camera (nearest node within 44 pt), so a tap on the
+    /// centre of a node's frame is the gesture a finger makes.
+    ///
+    /// **A group is told from a reader by its sheet**, not by its identifier: both are
+    /// `e2e.network.graph.node.<server id>`, and the ids are CouchDB's. The nodes are probed from
+    /// the last in tree order — the graph declares readers, then groups, then « Vous » — so the
+    /// first touched is a group whenever there is one, and the probing stops after a handful.
+    @MainActor
+    private static func openGroupFromNetworkGraph(
+        driver: E2EDriver,
+        app: XCUIApplication
+    ) throws -> String {
+        try driver.openTab(.network)
+        try driver.popBack(to: .network)
+
+        // « Tout » — by its title inside the control the band carries: a segmented picker is one
+        // element with a button per segment, and the identifier is on the control.
+        let control: XCUIElement = try driver.waitForIdentifier(
+            "e2e.network.segment",
+            "le contrôle segmenté du Réseau"
+        )
+        let scoped: XCUIElement = control.buttons["Tout"]
+        let all: XCUIElement = scoped.exists ? scoped : app.segmentedControls.buttons["Tout"]
+        guard all.waitForExistence(timeout: 5) else {
+            throw E2EFailure(
+                "Le segment « Tout » est absent du Réseau. Il n'existe qu'en DEBUG : "
+                + "le schéma ReCIT_iOSE2E doit tester en configuration Debug."
+            )
+        }
+
+        let emptyMarker: String = "e2e.network.empty.addFriends"
+        try driver.tap(all, "le segment « Tout »", until: {
+            driver.exists("e2e.network.graph") || driver.exists(emptyMarker)
+        })
+
+        if driver.exists("e2e.network.graph") == false {
+            throw E2ENotPlayed(
+                "Le compte de test n'a ni ami ni groupe : « Tout » montre son état vide, "
+                + "il n'y a pas de graphe à toucher."
+            )
+        }
+
+        // The nodes stay hidden, and out of the accessibility tree, until the placement has put
+        // them somewhere; they appear together, « Vous » with them.
+        try driver.waitForIdentifier(
+            "e2e.network.graph.node.me",
+            "« Vous » au centre du graphe (fin de la mise en place)",
+            timeout: E2EDriver.syncTimeout
+        )
+
+        let prefix: String = "e2e.network.graph.node."
+        let candidates: [String] = driver.identifiers(startingWith: prefix)
+            .filter { $0 != prefix + "me" }
+            .reversed()
+        let maximumProbes: Int = 8
+
+        let sheet: XCUIElement = driver.any("e2e.network.graph.sheet")
+        let openGroup: XCUIElement = driver.any("e2e.network.graph.sheet.openGroup")
+        let viewProfile: XCUIElement = driver.any("e2e.network.graph.sheet.viewProfile")
+        var probed: Int = 0
+        var groupName: String?
+
+        for identifier in candidates.prefix(maximumProbes) where groupName == nil {
+            // One node at a time, from a closed sheet: a sheet up may sit over the next node, and
+            // a touch on it would land on the sheet.
+            closeNetworkSheet(driver: driver)
+
+            let node: XCUIElement = driver.any(identifier)
+            guard driver.isReachable(node) else { continue }
+            probed += 1
+
+            var opened: Bool = false
+            for _ in 0..<2 where opened == false {
+                driver.tapAbsolute(node)
+                opened = driver.holds({ openGroup.exists || viewProfile.exists }, within: 6)
+            }
+            guard opened else {
+                throw E2EFailure(
+                    "Un nœud du graphe (\(identifier)) a été touché deux fois en son centre "
+                    + "sans que sa feuille monte."
+                )
+            }
+
+            if openGroup.exists {
+                let header: String = sheet.staticTexts.firstMatch.label
+                groupName = header.isEmpty ? node.label : header
+            }
+        }
+
+        guard let groupName else {
+            closeNetworkSheet(driver: driver)
+            let unprobed: Int = max(candidates.count - maximumProbes, 0)
+            throw E2ENotPlayed(
+                candidates.isEmpty
+                    ? "Le graphe ne montre que « Vous » : aucun nœud à toucher."
+                    : "Aucun groupe parmi les \(probed) nœud(s) touché(s) du graphe"
+                        + (unprobed > 0 ? " (\(unprobed) autre(s) non essayé(s))" : "")
+                        + " : le compte de test n'est membre d'aucun groupe."
+            )
+        }
+
+        // « Ouvrir le groupe » closes the sheet first and pushes the page once it has gone, so
+        // the screen has changed when both the sheet and the root's band are off it.
+        try driver.tap(openGroup, "« Ouvrir le groupe »", until: {
+            sheet.exists == false && driver.isShowingRoot(of: .network) == false
+        })
+
+        // The members link shows once the group is read; the title already says which group it
+        // is from the store. Either is the group's screen.
+        try driver.waitUntil("l'écran du groupe « \(groupName) »", timeout: E2EDriver.syncTimeout) {
+            driver.exists("e2e.group.members")
+                || app.navigationBars[groupName].exists
+                || app.navigationBars.staticTexts[groupName].exists
+        }
+
+        try driver.popBack(to: .network)
+        try driver.waitForIdentifier("e2e.network.graph", "le graphe de « Tout », au retour du groupe")
+        return "« Tout » → groupe « \(groupName) » touché, ouvert depuis sa feuille, puis retour au graphe"
+    }
+
+    /// Closes the Réseau graph's sheet if it is up, by dragging it down from its top edge.
+    ///
+    /// By coordinate, never through the element: a swipe asked of an element XCTest finds
+    /// un-hittable fails the whole run rather than the step. Silent when there is no sheet, and
+    /// bounded when one will not go — the step after it is what reports a screen still covered.
+    @MainActor
+    private static func closeNetworkSheet(driver: E2EDriver) {
+        let sheet: XCUIElement = driver.any("e2e.network.graph.sheet")
+
+        for _ in 0..<3 where sheet.exists {
+            guard driver.isReachable(sheet) else { return }
+
+            let frame: CGRect = sheet.frame
+            let start: XCUICoordinate = driver.app.coordinate(withNormalizedOffset: .zero)
+                .withOffset(.init(dx: frame.midX, dy: frame.minY + 12))
+            start.press(
+                forDuration: 0.05,
+                thenDragTo: start.withOffset(.init(dx: 0, dy: frame.height + 240)),
+                withVelocity: .fast,
+                thenHoldForDuration: 0
+            )
+            driver.holds({ sheet.exists == false }, within: 3)
+        }
     }
 
     /// Opens the inventory's book at `bookIndex` and files its work into `listName`.

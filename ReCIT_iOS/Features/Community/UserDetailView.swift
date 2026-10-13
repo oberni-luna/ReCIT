@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct UserDetailView: View {
     @Environment(UserModel.self) private var userModel

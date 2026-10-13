@@ -28,6 +28,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import LBSnackBar
 
 struct ShelfFormView: View {

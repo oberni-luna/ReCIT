@@ -33,7 +33,11 @@ struct UserCellView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: .sMedium) {
-            CellThumbnail(imageUrl: user.avatarURLValue, cornerRadius: .full, size: .medium)
+            AvatarThumbnail(
+                .reader(username: user.username),
+                imageUrl: user.avatarURLValue,
+                size: .medium
+            )
 
             VStack(alignment: .leading, spacing: .xSmall) {
                 Text(user.username)

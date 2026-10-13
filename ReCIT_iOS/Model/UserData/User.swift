@@ -122,10 +122,15 @@ public class User: Identifiable, Equatable {
         self.lastItemAdded = user.lastItemAdded
     }
 
+    /// `picture` goes through the rule `APIService.absoluteImageUrl` applies to every other image
+    /// (`AbsoluteImageURL`): an `/img/...` path is put after `baseUrl`, an absolute url is kept.
+    /// It used to be glued after `baseUrl` whatever its shape. An empty `picture` is no picture,
+    /// so the avatar falls back to initials instead of fetching the bare base url.
     convenience init(userDTO: UserDTO, baseUrl: String) {
         let position: Coordinates? = if let positionArray = userDTO.position, positionArray.count == 2 {
             Coordinates(latitude: positionArray[0], longitude: positionArray[1])
         } else { nil }
+        let picture: String? = userDTO.picture.flatMap { $0.isEmpty ? nil : $0 }
 
         self.init(
             _id: userDTO._id,
@@ -133,7 +138,7 @@ public class User: Identifiable, Equatable {
             username: userDTO.username,
             email: userDTO.email,
             position: position,
-            avatarURLValue: userDTO.picture != nil ? "\(baseUrl)\(userDTO.picture ?? "")" : nil,
+            avatarURLValue: AbsoluteImageURL.resolve(picture, baseUrl: baseUrl),
             itemCount: userDTO.snapshot?.values.map { $0.`items:count` }.max() ?? 0,
             lastItemAdded: userDTO.snapshot?.values.map { $0.`items:last-add` ?? 0 }.max() ?? 0,
             created: userDTO.created

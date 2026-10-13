@@ -5963,6 +5963,38 @@
         }
       }
     },
+    "network.graph.empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your reader friends and groups will gather here, around you."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos amis lecteurs et vos groupes se placeront ici, autour de vous."
+          }
+        }
+      }
+    },
+    "network.graph.me" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous"
+          }
+        }
+      }
+    },
     "network.invitation.accept" : {
       "localizations" : {
         "en" : {
@@ -6492,6 +6524,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réseau"
+          }
+        }
+      }
+    },
+    "network.segment.all" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout"
           }
         }
       }

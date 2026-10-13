@@ -17,7 +17,7 @@
 //
 //  Its anchor is its centre. Name and detail are cut on one line past a width that grows with the
 //  text (Q19). Touched through the graph's own hit test (`GraphViewport.node(at:)`), not as a
-//  button.
+//  button; what VoiceOver says of it is `NetworkGraphAccessibility`'s, set where it is placed.
 //
 
 import SwiftUI
@@ -68,7 +68,6 @@ struct NetworkGroupCard: View {
             NetworkGroupCardBorder(role: group.role, isSelected: isSelected)
         }
         .shadow(.light)
-        .accessibilityElement(children: .combine)
     }
 
     private var fill: DesignSystem.Color {

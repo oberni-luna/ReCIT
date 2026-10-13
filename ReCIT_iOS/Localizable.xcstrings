@@ -5963,6 +5963,23 @@
         }
       }
     },
+    "network.graph.a11y.select_hint" : {
+      "comment" : "VoiceOver hint of a node of the Réseau graph: activating it selects it and raises its summary in a sheet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows its summary."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche son résumé."
+          }
+        }
+      }
+    },
     "network.graph.counter %lld %lld" : {
       "comment" : "Status pill of the Réseau graph: my accepted friends (%1$lld), then the groups I administer or belong to (%2$lld). Requests and invitations are not counted.",
       "localizations" : {
@@ -6209,7 +6226,7 @@
       }
     },
     "network.graph.sheet.group_friends %@ %lld %@" : {
-      "comment" : "Sheet of a group touched in the Réseau graph. %1$@ is my role and the members (« Admin · 12 membres »), %2$lld how many of my friends are in it, %3$@ their names (an already formatted list, « Inès, Léa et 3 autres »).",
+      "comment" : "Sheet of a group touched in the Réseau graph, and its VoiceOver label. %1$@ is my role and the members (« Admin · 12 membres » on the sheet; « Club de Belleville, Admin, 12 membres » for VoiceOver), %2$lld how many of my friends are in it, %3$@ their names (an already formatted list, « Inès, Léa et 3 autres »).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6270,7 +6287,7 @@
       }
     },
     "network.graph.sheet.group_members %@" : {
-      "comment" : "Sheet of a group touched in the Réseau graph, when none of my friends is in it: the sentence stops at my role and the members (« Admin · 12 membres »).",
+      "comment" : "Sheet of a group touched in the Réseau graph, and its VoiceOver label, when none of my friends is in it: the sentence stops at my role and the members (« Admin · 12 membres »; « Club de Belleville, Admin, 12 membres » for VoiceOver).",
       "localizations" : {
         "en" : {
           "stringUnit" : {

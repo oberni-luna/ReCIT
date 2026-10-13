@@ -278,6 +278,19 @@ struct NetworkGraphTests {
         #expect(Set(graph.readingOrder) == Set(graph.nodes))
     }
 
+    @Test("VoiceOver: each node offers its sheet's gestures, « Vous » none")
+    func actions() {
+        #expect(r1.actions(for: .me).isEmpty)
+        #expect(r1.actions(for: .group("club")) == [.openGroup])
+        #expect(r1.actions(for: .group("bd")) == [.openGroup])
+        #expect(r1.actions(for: .group("l11")) == [.accept, .refuse, .openGroup])
+        #expect(r1.actions(for: .reader("camille")) == [.viewProfile])
+        #expect(r1.actions(for: .reader("paul")) == [.viewProfile])
+        #expect(r1.actions(for: .reader("ariane")) == [.accept, .refuse, .viewProfile])
+        #expect(r1.actions(for: .group("unknown")).isEmpty)
+        #expect(r1.actions(for: .reader("club-stranger-0")).isEmpty)
+    }
+
     // MARK: - Empty
 
     @Test("Nobody and nothing: only « Vous »")

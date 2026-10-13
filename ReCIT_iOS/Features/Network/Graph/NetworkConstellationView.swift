@@ -28,6 +28,13 @@
 //  readers lit the highlighted one; and the node touched is drawn over the others, under « Vous »
 //  (Q19).
 //
+//  **To VoiceOver** (Q44) the lines are nothing, and each node is one element with its whole
+//  label and its actions, read in `NetworkGraph.readingOrder`. The drawn nodes are hidden from
+//  it — `zIndex`, which keeps the drawing order above, would order them for accessibility too.
+//  VoiceOver reads instead a layer of transparent frames over the nodes, laid out in reading
+//  order and given it as sort priorities, without which UIKit sorts them by where they are on
+//  screen (`NetworkNodeAccessibilityFrame`).
+//
 
 import SwiftUI
 
@@ -55,8 +62,12 @@ struct NetworkConstellationView: View, Animatable {
     let onMeasure: (NetworkNodeID, CGSize) -> Void
     /// Reports the size of a group's compact tile whenever it is measured.
     var onMeasureOverview: (NetworkNodeID, CGSize) -> Void = { _, _ in }
+    /// What VoiceOver says of each node, and in which order it reads them (Q44).
+    var accessibility: NetworkGraphAccessibility = .init()
     /// Selects a node activated by VoiceOver.
     var onActivate: (NetworkNodeID) -> Void = { _ in }
+    /// Does a VoiceOver custom action on a node.
+    var onAction: (NetworkNodeID, NetworkNodeAction) -> Void = { _, _ in }
 
     nonisolated var animatableData: AnimatablePair<NetworkGraphPositions, AnimatablePair<CGFloat, CGPoint.AnimatableData>> {
         get { .init(positions, .init(scale, centre.animatableData)) }
@@ -71,38 +82,52 @@ struct NetworkConstellationView: View, Animatable {
         ZStack {
             NetworkEdgesCanvas(segments: segments, isHighlighting: highlight != nil, level: level)
 
-            ForEach(graph.readers, id: \.id) { reader in
-                let isHighlighted: Bool = highlight?.contains(reader.nodeID) == true
-                Group {
-                    if showsOverview(reader.nodeID) {
-                        NetworkFriendDot(reader: reader, isHighlighted: isHighlighted)
-                    } else {
-                        NetworkFriendNode(reader: reader, isHighlighted: isHighlighted)
-                    }
+            // Drawn bottom to top by `zIndex`, and hidden from VoiceOver.
+            ForEach(graph.readingOrder, id: \.self) { node in
+                if let subject = subject(of: node) {
+                    NetworkNodeView(
+                        subject: subject,
+                        isOverview: showsOverview(node),
+                        isSelected: selection == node,
+                        isHighlighted: highlight?.contains(node) == true
+                    )
+                    .modifier(placement(of: node))
+                    .zIndex(zIndex(of: node))
                 }
-                .modifier(placement(of: reader.nodeID))
-                .zIndex(selection == reader.nodeID ? 2 : 0)
             }
-
-            ForEach(graph.groups, id: \.id) { group in
-                let isSelected: Bool = selection == .group(group.id)
-                Group {
-                    if showsOverview(.group(group.id)) {
-                        NetworkGroupTile(group: group, isSelected: isSelected)
-                    } else {
-                        NetworkGroupCard(group: group, isSelected: isSelected)
-                    }
+        }
+        // What VoiceOver reads, over the drawing, in the reading order (Q44).
+        .overlay {
+            ZStack {
+                ForEach(graph.readingOrder.enumerated(), id: \.element) { offset, node in
+                    accessibilityFrame(of: node, sortPriority: Double(graph.readingOrder.count - offset))
                 }
-                .modifier(placement(of: .group(group.id)))
-                .zIndex(isSelected ? 2 : 1)
             }
+        }
+    }
 
-            NetworkMeNode(
-                username: graph.me.username,
-                imageUrl: graph.me.pictureURL
-            )
-            .modifier(placement(of: .me))
-            .zIndex(3)
+    private func subject(of node: NetworkNodeID) -> NetworkNodeView.Subject? {
+        switch node {
+        case .me:
+            .me(graph.me)
+        case .group(let id):
+            graph.group(id: id).map { .group($0) }
+        case .reader(let id):
+            graph.reader(id: id).map { .reader($0) }
+        }
+    }
+
+    /// Bottom to top: friends, groups, the node touched, « Vous » (Q19).
+    private func zIndex(of node: NetworkNodeID) -> Double {
+        switch node {
+        case .me:
+            3
+        case _ where selection == node:
+            2
+        case .group:
+            1
+        case .reader:
+            0
         }
     }
 
@@ -118,33 +143,53 @@ struct NetworkConstellationView: View, Animatable {
         level == .overview && boxes[node] != nil
     }
 
-    private func placement(of node: NetworkNodeID) -> NetworkNodePlacement {
-        let anchor: CGPoint = anchor(of: node)
-        let isOverview: Bool = showsOverview(node)
-        // The box on screen, and how much the view is scaled to fill it.
-        let box: NetworkNodeBox?
-        let drawScale: CGFloat
-        if isOverview {
-            box = overviewBoxes[node]
-            drawScale = node == .me ? NetworkGraphLevel.overviewMeScale : 1
-        } else {
-            let nodeScale: CGFloat = min(scale, 1)
-            box = boxes[node]?.scaled(by: nodeScale)
-            drawScale = nodeScale
+    /// The box `node` takes on screen — `nil` until it is measured — and how much its view is
+    /// scaled to fill it.
+    private func screenBox(of node: NetworkNodeID) -> (box: NetworkNodeBox?, scale: CGFloat) {
+        if showsOverview(node) {
+            return (overviewBoxes[node], node == .me ? NetworkGraphLevel.overviewMeScale : 1)
         }
-        let offset: CGSize = box.map {
-            .init(width: $0.width / 2 - $0.anchorX, height: $0.height / 2 - $0.anchorY)
-        } ?? .zero
+        let nodeScale: CGFloat = min(scale, 1)
+        return (boxes[node]?.scaled(by: nodeScale), nodeScale)
+    }
+
+    /// Where the centre of `node`'s view falls on screen.
+    private func viewCentre(of node: NetworkNodeID, box: NetworkNodeBox?) -> CGPoint {
+        let anchor: CGPoint = anchor(of: node)
+        guard let box else { return anchor }
+
+        return .init(x: anchor.x + box.width / 2 - box.anchorX, y: anchor.y + box.height / 2 - box.anchorY)
+    }
+
+    private func placement(of node: NetworkNodeID) -> NetworkNodePlacement {
+        let (box, drawScale): (NetworkNodeBox?, CGFloat) = screenBox(of: node)
         // A compact tile's measure is the overview's; every other view measured is a full one.
-        let measuresOverview: Bool = isOverview && node != .me
+        let measuresOverview: Bool = showsOverview(node) && node != .me
         return .init(
             node: node,
-            centre: .init(x: anchor.x + offset.width, y: anchor.y + offset.height),
+            centre: viewCentre(of: node, box: box),
             scale: drawScale,
             isPlaced: placed.contains(node),
             isDimmed: highlight.map { $0.contains(node) == false } ?? false,
-            onMeasure: measuresOverview ? onMeasureOverview : onMeasure,
-            onActivate: node == .me ? nil : { onActivate(node) }
+            onMeasure: measuresOverview ? onMeasureOverview : onMeasure
+        )
+    }
+
+    private func accessibilityFrame(
+        of node: NetworkNodeID,
+        sortPriority: Double
+    ) -> NetworkNodeAccessibilityFrame {
+        let box: NetworkNodeBox? = screenBox(of: node).box
+        return .init(
+            node: node,
+            centre: viewCentre(of: node, box: box),
+            size: box?.size ?? .zero,
+            sortPriority: sortPriority,
+            isPlaced: placed.contains(node) && box != nil,
+            accessibility: accessibility[node],
+            isSelected: selection == node,
+            onActivate: node == .me ? nil : { onActivate(node) },
+            onAction: { action in onAction(node, action) }
         )
     }
 

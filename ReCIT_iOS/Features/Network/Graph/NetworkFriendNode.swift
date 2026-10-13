@@ -15,7 +15,8 @@
 //  size it was measured at: the name is laid out in both weights and takes the room of the wider,
 //  so lighting a node never moves the graph around it.
 //
-//  Touched through the graph's own hit test (`GraphViewport.node(at:)`), not as a button.
+//  Touched through the graph's own hit test (`GraphViewport.node(at:)`), not as a button; what
+//  VoiceOver says of it is `NetworkGraphAccessibility`'s, set where it is placed.
 //
 
 import SwiftUI
@@ -43,14 +44,11 @@ struct NetworkFriendNode: View {
                         .opacity(isHighlighted ? 0 : 1)
                     name(.footnote200Bold)
                         .opacity(isHighlighted ? 1 : 0)
-                        .accessibilityHidden(true)
                 }
             }
             // A line from the avatar to a group below runs under the name rather than through it.
             .background(DesignSystem.Color.backgroundDefault.color)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityValue(reader.state == .requested ? Text("network.invitation.received") : Text(verbatim: ""))
     }
 
     private func name(_ style: DesignSystem.TextStyle) -> some View {

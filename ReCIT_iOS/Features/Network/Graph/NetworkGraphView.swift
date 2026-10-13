@@ -44,6 +44,12 @@
 //  which closes the sheet — still showing, on its way down, the graph it was opened on, and no
 //  longer answering touches.
 //
+//  **VoiceOver** (issue 0110, Q44) reads the graph as a list, in `NetworkGraph.readingOrder`, each
+//  node with its whole label (`NetworkGraphAccessibility`, described once per network) and its
+//  custom actions: Ouvrir le groupe or Voir le profil, through the same path as the sheet's
+//  buttons, and Accepter and Refuser, through `onAnswer`. The lines are hidden; the zoom controls
+//  and the status pill sit outside the graph's container, after it.
+//
 //  **The text size is capped at `.xxxLarge`** on the graph alone (Q43): past it the boxes would
 //  crowd any screen; the lists and VoiceOver carry the accessibility sizes. The sheet is attached
 //  outside the cap and follows the reader's size.
@@ -93,6 +99,8 @@ struct NetworkGraphView: View {
     /// The graph as it was when the node of the sheet left it, so the sheet closes on its last
     /// content rather than on an empty one.
     @State private var closingGraph: NetworkGraph?
+    /// What VoiceOver says of each node, described once per network rather than with each frame.
+    @State private var accessibility: NetworkGraphAccessibility = .init()
 
     private let cache: NetworkGraphLayoutCache = .shared
 
@@ -128,8 +136,12 @@ struct NetworkGraphView: View {
                     tileSizes[node] = size
                 }
             },
+            accessibility: accessibility,
             onActivate: { node in
                 select(node)
+            },
+            onAction: { node, action in
+                perform(action, on: node)
             }
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -166,6 +178,9 @@ struct NetworkGraphView: View {
                 onRecentre: { moveCamera { $0.recentred() } }
             )
             .padding(.all, .medium)
+        }
+        .onChange(of: graph, initial: true) {
+            accessibility = .init(graph)
         }
         .task(id: layout) {
             await place(layout)
@@ -299,6 +314,31 @@ struct NetworkGraphView: View {
         withAnimation(reduceMotion ? nil : .smooth(duration: NetworkGraphMetrics.transitionDuration)) {
             self.camera = next
         }
+    }
+
+    // MARK: - VoiceOver
+
+    /// A custom action on a node (Q44): the sheet's gestures, without the sheet.
+    private func perform(_ action: NetworkNodeAction, on node: NetworkNodeID) {
+        switch action {
+        case .openGroup, .viewProfile:
+            open(node)
+        case .accept:
+            onAnswer(node, .accept)
+        case .refuse:
+            onAnswer(node, .refuse)
+        }
+    }
+
+    /// Opens the page of `node` — after the sheet is gone, when one is up.
+    private func open(_ node: NetworkNodeID) {
+        guard selection != nil else {
+            onOpen(node)
+            return
+        }
+
+        pendingOpen = node
+        selection = nil
     }
 
     // MARK: - The camera

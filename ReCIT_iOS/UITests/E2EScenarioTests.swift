@@ -1043,9 +1043,11 @@ final class E2EScenarioTests: XCTestCase {
     /// centre of a node's frame is the gesture a finger makes.
     ///
     /// **A group is told from a reader by its sheet**, not by its identifier: both are
-    /// `e2e.network.graph.node.<server id>`, and the ids are CouchDB's. The nodes are probed from
-    /// the last in tree order — the graph declares readers, then groups, then « Vous » — so the
-    /// first touched is a group whenever there is one, and the probing stops after a handful.
+    /// `e2e.network.graph.node.<server id>`, and the ids are CouchDB's. The nodes are probed in
+    /// tree order, which is VoiceOver's reading order (issue 0110) — « Vous », the readers asking
+    /// to be my friend, the groups that invited me, my groups, then my friends — so the first
+    /// touched is a group whenever there is one and few requests wait, and the probing stops
+    /// after a handful.
     @MainActor
     private static func openGroupFromNetworkGraph(
         driver: E2EDriver,
@@ -1092,7 +1094,6 @@ final class E2EScenarioTests: XCTestCase {
         let prefix: String = "e2e.network.graph.node."
         let candidates: [String] = driver.identifiers(startingWith: prefix)
             .filter { $0 != prefix + "me" }
-            .reversed()
         let maximumProbes: Int = 8
 
         let sheet: XCUIElement = driver.any("e2e.network.graph.sheet")

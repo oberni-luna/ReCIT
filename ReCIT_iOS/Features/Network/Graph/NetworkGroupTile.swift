@@ -13,7 +13,8 @@
 //  under it do not cross it.
 //
 //  The tile's corners are the avatar's `.medium`, not Figma's 14, which no radius token holds.
-//  Its anchor is the centre of the tile, not of the node: the name hangs under it.
+//  Its anchor is the centre of the tile, not of the node: the name hangs under it. What VoiceOver
+//  says of it is the full card's (`NetworkGraphAccessibility`), set where it is placed.
 //
 
 import SwiftUI
@@ -55,7 +56,6 @@ struct NetworkGroupTile: View {
                 }
             }
         }
-        .accessibilityElement(children: .combine)
     }
 
     private var nameColor: DesignSystem.Color {

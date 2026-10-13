@@ -9,6 +9,8 @@
 //  lit (R2).
 //
 //  Its anchor is its centre. Touched through the graph's hit test, which grows it to 44 pt (Q36).
+//  What VoiceOver says of it is the full node's (`NetworkGraphAccessibility`), set where it is
+//  placed.
 //
 
 import SwiftUI
@@ -26,9 +28,6 @@ struct NetworkFriendDot: View {
         .overlay {
             NetworkFriendRing(state: reader.state, isHighlighted: isHighlighted)
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: reader.reader.username))
-        .accessibilityValue(reader.state == .requested ? Text("network.invitation.received") : Text(verbatim: ""))
     }
 }
 

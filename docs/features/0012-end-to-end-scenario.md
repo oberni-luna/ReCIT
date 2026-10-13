@@ -162,12 +162,14 @@ sheet, taps « Ouvrir le groupe », waits for the group's screen, and goes back 
 
 - **« Tout » exists in `DEBUG` only** (PRD 0019, Q47). The `ReCIT_iOSE2E` scheme tests in Debug;
   a scheme switched to Release would make this row KO with a sentence that says so.
-- **The nodes are not buttons.** The graph hit-tests a touch against its camera, so a node is
-  found by `e2e.network.graph.node.<id>` and touched at the centre of its frame, by coordinate.
+- **The nodes are not touched as buttons.** The graph hit-tests a touch against its camera, so a
+  node is found by `e2e.network.graph.node.<id>` — the transparent frame VoiceOver reads over
+  it, which lets touches through — and touched at the centre of its frame, by coordinate.
 - **A group is told from a reader by its sheet**, not by its identifier: both carry the server's
   CouchDB id. The step lists the node identifiers (`E2EDriver.identifiers(startingWith:)`),
-  leaves out `…node.me`, and probes from the last in tree order — the graph declares readers,
-  then groups, then « Vous » — so the first node touched is a group whenever there is one. The
+  leaves out `…node.me`, and probes in tree order, which is VoiceOver's reading order (issue
+  0110) — « Vous », friend requests, invitations, groups, then friends — so the first node
+  touched is a group whenever there is one and few requests wait. The
   sheet answers: `…sheet.openGroup` for a group, `…sheet.viewProfile` for a reader. At most eight
   nodes are probed, each from a closed sheet.
 - **It reports non joué, not KO**, when « Tout » shows its empty state (no friend, no group) or
@@ -176,7 +178,7 @@ sheet, taps « Ouvrir le groupe », waits for the group's screen, and goes back 
   the list steps that follow find the tab bar uncovered.
 
 Identifiers it relies on, all existing in the app: `e2e.network.segment` (`NetworkSegmentBand`),
-`e2e.network.graph` (`NetworkGraphView`), `e2e.network.graph.node.<id>` (`NetworkNodePlacement`),
+`e2e.network.graph` (`NetworkGraphView`), `e2e.network.graph.node.<id>` (`NetworkNodeAccessibilityFrame`),
 `e2e.network.graph.sheet` (`NetworkNodeSheet`), `e2e.network.graph.sheet.openGroup`
 (`NetworkGroupSheet`), `e2e.network.graph.sheet.viewProfile` (`NetworkReaderSheet`),
 `e2e.network.empty.addFriends` (`NetworkFirstStepsCard`) and `e2e.group.members`

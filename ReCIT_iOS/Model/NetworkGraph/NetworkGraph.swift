@@ -38,6 +38,11 @@ nonisolated struct NetworkGraph: Hashable, Sendable {
     let edges: [NetworkEdge]
     /// What « N amis · N groupes » says (Q10).
     let counter: NetworkGraphCounter
+    /// The order VoiceOver reads the graph in (Q44): « Vous », then what waits on my answer — the
+    /// readers who asked, then the groups that invited me — then each of my groups in the order
+    /// of the ring, then each friend once, by handle. Every node exactly once. Kept rather than
+    /// computed: the constellation lays its nodes out in this order with every frame.
+    let readingOrder: [NetworkNodeID]
 
     private let groupIndex: [String: Int]
     private let readerIndex: [String: Int]
@@ -137,6 +142,7 @@ nonisolated struct NetworkGraph: Hashable, Sendable {
             friends: friends.count,
             groups: groups.filter(\.role.belongs).count
         )
+        readingOrder = Self.readingOrder(groups: groups, readers: readers)
     }
 
     // MARK: - Nodes
@@ -221,15 +227,34 @@ nonisolated struct NetworkGraph: Hashable, Sendable {
 
     // MARK: - Reading order
 
-    /// The order VoiceOver reads the graph in (Q44): « Vous », then what waits on my answer — the
-    /// readers who asked, then the groups that invited me — then each of my groups in the order
-    /// of the ring, then each friend once, by handle. Every node exactly once.
-    var readingOrder: [NetworkNodeID] {
+    /// « Vous », what waits on my answer, my groups, then each friend once — see `readingOrder`.
+    private static func readingOrder(
+        groups: [NetworkGraphGroup],
+        readers: [NetworkReaderNode]
+    ) -> [NetworkNodeID] {
         let requesters: [NetworkNodeID] = readers.filter { $0.state == .requested }.map(\.nodeID)
         let invitations: [NetworkNodeID] = groups.filter { $0.role == .invited }.map { .group($0.id) }
         let mine: [NetworkNodeID] = groups.filter(\.role.belongs).map { .group($0.id) }
         let friends: [NetworkNodeID] = readers.filter { $0.state == .friend }.map(\.nodeID)
         return [.me] + requesters + invitations + mine + friends
+    }
+
+    /// What VoiceOver offers on `node` besides selecting it (Q44), in the order of its sheet's
+    /// buttons: Accepter and Refuser for what waits on me, then the page — « Ouvrir le groupe »
+    /// or « Voir le profil ». Nothing for « Vous », or for a node not drawn.
+    func actions(for node: NetworkNodeID) -> [NetworkNodeAction] {
+        switch node {
+        case .me:
+            return []
+        case .group(let id):
+            guard let group = group(id: id) else { return [] }
+
+            return group.role == .invited ? [.accept, .refuse, .openGroup] : [.openGroup]
+        case .reader(let id):
+            guard let reader = reader(id: id) else { return [] }
+
+            return reader.state == .requested ? [.accept, .refuse, .viewProfile] : [.viewProfile]
+        }
     }
 
     // MARK: - Orders

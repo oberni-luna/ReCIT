@@ -33,6 +33,9 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// Pushed from the Profil's last row; it reads the signed-in user off `UserModel`, so the
     /// case carries nothing.
     case deleteAccount
+    /// What inventaire.io is, and the app's place on it. Pushed from the Profil's
+    /// « À propos d'inventaire.io » row; it carries nothing.
+    case aboutInventaire
     /// One group of readers, by id — mine, or one found by name. The screen reads it afresh
     /// on arrival, so the id is the whole payload (PRD 0016).
     case group(id: String)
@@ -68,6 +71,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "invitations"
         case .deleteAccount:
             return "deleteAccount"
+        case .aboutInventaire:
+            return "aboutInventaire"
         case .group(let id):
             return "group:\(id)"
         case .findGroups:
@@ -149,6 +154,8 @@ extension NavigationDestination {
           InvitationsView(path: path)
       case .deleteAccount:
           DeleteAccountView()
+      case .aboutInventaire:
+          AboutInventaireView()
       case .group(let id):
           GroupDetailView(groupId: id, path: path)
       case .findGroups:

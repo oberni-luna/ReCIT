@@ -18,6 +18,278 @@
         }
       }
     },
+    "about.headline" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The library behind Ex-libris"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La bibliothèque derrière Ex-libris"
+          }
+        }
+      }
+    },
+    "about.independence" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex-libris is an independent app: it is built on inventaire.io’s public API."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex-libris est une app indépendante : elle s’appuie sur l’API publique d’inventaire.io."
+          }
+        }
+      }
+    },
+    "about.link.data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explore the open data"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorer les données ouvertes"
+          }
+        }
+      }
+    },
+    "about.link.donate" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soutenir inventaire.io"
+          }
+        }
+      }
+    },
+    "about.link.source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read the source code"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire le code source"
+          }
+        }
+      }
+    },
+    "about.link.website" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visit inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visiter inventaire.io"
+          }
+        }
+      }
+    },
+    "about.links" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Going further"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller plus loin"
+          }
+        }
+      }
+    },
+    "about.tagline" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io is a shared library, free and without ads. Ex-libris keeps your books there."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io est une bibliothèque commune, libre et sans publicité. Ex-libris y range vos livres."
+          }
+        }
+      }
+    },
+    "about.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos"
+          }
+        }
+      }
+    },
+    "about.value.account.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same sign-in, same books: everything you shelve here is on inventaire.io, and the other way round."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mêmes identifiants, mêmes livres : tout ce que vous rangez ici se retrouve sur inventaire.io, et inversement."
+          }
+        }
+      }
+    },
+    "about.value.account.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account is an inventaire.io account"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre compte est un compte inventaire.io"
+          }
+        }
+      }
+    },
+    "about.value.commons.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everyone lists their books there and chooses who sees them: their friends, their groups, or everyone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chacun y inventorie ses livres et choisit qui les voit : ses amis, ses groupes, ou tout le monde."
+          }
+        }
+      }
+    },
+    "about.value.commons.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A shared library"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une bibliothèque commune"
+          }
+        }
+      }
+    },
+    "about.value.data.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titles, authors and editions join a free database, linked to Wikidata, that anyone can reuse."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titres, auteur·ices et éditions rejoignent une base libre, reliée à Wikidata, que chacun peut réutiliser."
+          }
+        }
+      }
+    },
+    "about.value.data.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open data"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des données ouvertes"
+          }
+        }
+      }
+    },
+    "about.value.software.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its code is public, it sells nothing about you, and it lives on donations from the people who use it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son code est public, il ne revend rien de vous, et il vit des dons de celles et ceux qui l’utilisent."
+          }
+        }
+      }
+    },
+    "about.value.software.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free software, without ads"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un logiciel libre, sans publicité"
+          }
+        }
+      }
+    },
     "action.add" : {
       "localizations" : {
         "en" : {
@@ -6447,6 +6719,22 @@
         }
       }
     },
+    "profile.about_inventaire" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos d’inventaire.io"
+          }
+        }
+      }
+    },
     "profile.anonymous" : {
       "localizations" : {
         "en" : {
@@ -6530,108 +6818,6 @@
         }
       }
     },
-    "profile.inventaire.commons" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ex-libris keeps your books on **inventaire.io**, a shared library, free and ad-free."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ex-libris range vos livres sur **inventaire.io**, une bibliothèque commune, libre et sans publicité."
-          }
-        }
-      }
-    },
-    "profile.inventaire.commons.link" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discover inventaire.io"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Découvrir inventaire.io"
-          }
-        }
-      }
-    },
-    "profile.inventaire.data" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every book you add enriches its **open data**: titles, authors, editions, which anyone can reuse."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chaque livre que vous ajoutez enrichit ses **données ouvertes** : titres, auteur·ices, éditions, que chacun peut réutiliser."
-          }
-        }
-      }
-    },
-    "profile.inventaire.data.link" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explore the open data"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explorer les données ouvertes"
-          }
-        }
-      }
-    },
-    "profile.inventaire.dismiss" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hide"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Masquer"
-          }
-        }
-      }
-    },
-    "profile.inventaire.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plugged into inventaire.io"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Branché sur inventaire.io"
-          }
-        }
-      }
-    },
     "profile.invitations" : {
       "localizations" : {
         "en" : {
@@ -6694,6 +6880,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun ami pour le moment"
+          }
+        }
+      }
+    },
+    "profile.version %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex-libris · Version %1$@ (%2$@)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex-libris · Version %1$@ (%2$@)"
           }
         }
       }

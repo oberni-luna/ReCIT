@@ -15,9 +15,6 @@ struct ProfileView: View {
 
     @State private var path: NavigationPath = .init()
     @Query private var allTransactions: [UserTransaction]
-    /// Whether the inventaire.io tag has been put away. Kept on the device, not on the account:
-    /// it speaks of the app, so signing out and in again does not bring it back.
-    @AppStorage("profile.inventaireNotice.dismissed") private var isInventaireNoticeDismissed: Bool = false
 
     var currentTransactions: [UserTransaction] {
         allTransactions.filter(\.isCurrent)
@@ -44,23 +41,6 @@ struct ProfileView: View {
         List {
             Section {
                 UserHeaderView(user: user)
-            }
-
-            // Right under the account: the one place the app says out loud that it is
-            // inventaire.io underneath. See feature 0026. The invitations that used to sit above
-            // it moved to the Réseau tab with the rest of the network (PRD 0016).
-            if isInventaireNoticeDismissed == false {
-                Section {
-                    InventaireNoticeTag {
-                        withAnimation {
-                            isInventaireNoticeDismissed = true
-                        }
-                    }
-                    // Inset on every side: the section clips its row to rounded corners, which
-                    // would otherwise cut the leaning paper's corners and its shadow.
-                    .listRowInsets(top: .small, leading: .small, bottom: .small, trailing: .small)
-                    .listRowBackground(Color.clear)
-                }
             }
 
             Section {
@@ -91,6 +71,17 @@ struct ProfileView: View {
                     .foregroundStyle(.foregroundSecondary)
             }
 
+            // Where the app says it is inventaire.io underneath — the screen took over from the
+            // paper tag that used to sit under the account (feature 0026).
+            Section {
+                NavigationLink(value: NavigationDestination.aboutInventaire) {
+                    Text("profile.about_inventaire")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundTinted)
+                }
+                .accessibilityIdentifier("e2e.profile.about")
+            }
+
             Section {
                 AsyncButton(
                     action: { await signOut() },
@@ -116,6 +107,10 @@ struct ProfileView: View {
                         .foregroundStyle(.foregroundError)
                 }
                 .accessibilityIdentifier("e2e.profile.deleteAccount")
+            }
+
+            Section {
+                ProfileVersionFooter(version: .current)
             }
 
             // Scaffolding, and last on the screen so it reads as such. Both onboarding

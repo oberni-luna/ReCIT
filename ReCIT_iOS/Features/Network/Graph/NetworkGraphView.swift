@@ -70,6 +70,13 @@ struct NetworkGraphView: View {
     @State private var sizes: [NetworkNodeID: CGSize] = [:]
     /// Each group's compact tile, as last measured in the overview.
     @State private var tileSizes: [NetworkNodeID: CGSize] = [:]
+    /// The box of every node measured so far, in full — derived from `sizes` and the graph, and
+    /// kept rather than recomputed with each frame of a gesture, which changes neither.
+    @State private var boxes: [NetworkNodeID: NetworkNodeBox] = [:]
+    /// Each node's box in the overview — derived from `boxes`, `tileSizes` and the graph.
+    @State private var overviewBoxes: [NetworkNodeID: NetworkNodeBox] = [:]
+    /// What the placement is computed from; `nil` while a node is still unmeasured.
+    @State private var layout: NetworkGraphLayout?
     /// Where the nodes stand; `nil` until the first placement, which is shown without animation.
     @State private var placement: NetworkGraphPlacement?
     /// The room the graph has on screen.
@@ -105,13 +112,6 @@ struct NetworkGraphView: View {
     private let cache: NetworkGraphLayoutCache = .shared
 
     var body: some View {
-        let boxes: [NetworkNodeID: NetworkNodeBox] = boxes
-        let overviewBoxes: [NetworkNodeID: NetworkNodeBox] = NetworkOverviewBoxes.boxes(
-            graph: graph,
-            fullBoxes: boxes,
-            tileSizes: tileSizes
-        )
-        let layout: NetworkGraphLayout? = .init(graph: graph, boxes: boxes)
         let live: GraphViewport? = liveCamera
         let isReady: Bool = placement != nil && live != nil
 
@@ -129,11 +129,13 @@ struct NetworkGraphView: View {
             onMeasure: { node, size in
                 if sizes[node] != size {
                     sizes[node] = size
+                    updateBoxes()
                 }
             },
             onMeasureOverview: { node, size in
                 if case .group = node, tileSizes[node] != size {
                     tileSizes[node] = size
+                    updateBoxes()
                 }
             },
             accessibility: accessibility,
@@ -181,12 +183,10 @@ struct NetworkGraphView: View {
         }
         .onChange(of: graph, initial: true) {
             accessibility = .init(graph)
+            updateBoxes()
         }
         .task(id: layout) {
             await place(layout)
-        }
-        .onChange(of: overviewBoxes) {
-            camera = camera?.with(overviewBoxes: overviewBoxes)
         }
         .onChange(of: graph) { previous, current in
             if let selection, current.highlight(for: selection) == nil {
@@ -415,20 +415,41 @@ struct NetworkGraphView: View {
     private func updateCamera() {
         guard let placement, area.width > 0, area.height > 0 else { return }
 
-        let overviewBoxes: [NetworkNodeID: NetworkNodeBox] = NetworkOverviewBoxes.boxes(
-            graph: graph,
-            fullBoxes: boxes,
-            tileSizes: tileSizes
-        )
         camera = camera?.updating(placement: placement, size: area)
             ?? .init(placement: placement, size: area, overviewBoxes: overviewBoxes)
     }
 
     // MARK: - Placing
 
-    /// The box of every node measured so far, anchored where its lines meet: the centre of the
-    /// avatar for « Vous » and the readers, the centre of the card for a group.
-    private var boxes: [NetworkNodeID: NetworkNodeBox] {
+    /// Derives the boxes, the overview's and the layout again from what was last measured — once
+    /// per measure or per network, never per frame — and hands the camera the overview's.
+    private func updateBoxes() {
+        let nextBoxes: [NetworkNodeID: NetworkNodeBox] = Self.boxes(of: graph, sizes: sizes)
+        let nextOverviewBoxes: [NetworkNodeID: NetworkNodeBox] = NetworkOverviewBoxes.boxes(
+            graph: graph,
+            fullBoxes: nextBoxes,
+            tileSizes: tileSizes
+        )
+        let nextLayout: NetworkGraphLayout? = .init(graph: graph, boxes: nextBoxes)
+
+        if nextBoxes != boxes {
+            boxes = nextBoxes
+        }
+        if nextLayout != layout {
+            layout = nextLayout
+        }
+        if nextOverviewBoxes != overviewBoxes {
+            overviewBoxes = nextOverviewBoxes
+            camera = camera?.with(overviewBoxes: nextOverviewBoxes)
+        }
+    }
+
+    /// The box of every node of `graph` measured so far, anchored where its lines meet: the
+    /// centre of the avatar for « Vous » and the readers, the centre of the card for a group.
+    private static func boxes(
+        of graph: NetworkGraph,
+        sizes: [NetworkNodeID: CGSize]
+    ) -> [NetworkNodeID: NetworkNodeBox] {
         var boxes: [NetworkNodeID: NetworkNodeBox] = [:]
         for node in graph.nodes {
             guard let size = sizes[node] else { continue }

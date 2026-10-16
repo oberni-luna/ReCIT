@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
@@ -65,8 +66,8 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
  *
  * Not searching: my first-sync banner, « Étagères » with « Ajouter », the shelf carousel (or the
  * empty-shelf card), then « Tous les livres · N ». The Material 3 `SearchBar` stands in for
- * `.searchable`; expanded, it hosts the unified search. « Scanner » in the toolbar opens the scan
- * flow (ADR 0007).
+ * `.searchable`; expanded, it hosts the unified search. « Ranger » (once the inventory has synced)
+ * and « Scanner » in the toolbar open the scan-and-sort flow at the surface or at the camera (ADR 0007).
  */
 @Composable
 fun InventoryScreen(navigator: Navigator) {
@@ -92,6 +93,13 @@ fun InventoryScreen(navigator: Navigator) {
                     title = stringResource(R.string.tab_inventory),
                     scrollBehavior = scrollBehavior,
                     actions = {
+                        if (myUser?.lastInventorySync != null) {
+                            ToolbarAction(
+                                title = stringResource(R.string.shelves_action_sort),
+                                icon = Icons.AutoMirrored.Filled.LibraryBooks,
+                                onClick = sortFlow::presentSorting,
+                            )
+                        }
                         ToolbarAction(
                             title = stringResource(R.string.shelves_action_scan),
                             icon = Icons.Default.QrCodeScanner,
@@ -155,6 +163,7 @@ fun InventoryScreen(navigator: Navigator) {
                     viewModel = viewModel,
                     navigator = navigator,
                     onScan = sortFlow::presentScanning,
+                    onSort = sortFlow::presentSorting,
                     onSearch = {
                         viewModel.onExpandedChange(true)
                         focusTick += 1
@@ -192,7 +201,13 @@ private fun SearchSurface(viewModel: InventoryViewModel, myUserId: String, navig
 }
 
 @Composable
-private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator, onScan: () -> Unit, onSearch: () -> Unit) {
+private fun InventoryContent(
+    viewModel: InventoryViewModel,
+    navigator: Navigator,
+    onScan: () -> Unit,
+    onSort: () -> Unit,
+    onSearch: () -> Unit,
+) {
     val shelves: List<ShelfWithItems>? by viewModel.shelves.collectAsStateWithLifecycle()
     val myItems: List<ItemRow>? by viewModel.myItems.collectAsStateWithLifecycle()
     val syncState: FirstSyncState by viewModel.syncState.collectAsStateWithLifecycle()
@@ -222,7 +237,7 @@ private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator
             if (loaded != null) {
                 if (loaded.isEmpty()) {
                     if (syncState == FirstSyncState.Synced && myItems != null) {
-                        item(key = "shelves.empty") { EmptyShelfCard(ownsBooks = items.isNotEmpty(), onScan = onScan, onSearch = onSearch) }
+                        item(key = "shelves.empty") { EmptyShelfCard(ownsBooks = items.isNotEmpty(), onScan = onScan, onSearch = onSearch, onSort = onSort) }
                     }
                 } else {
                     item(key = "shelves.carousel") {

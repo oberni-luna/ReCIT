@@ -22,7 +22,9 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
  *   (pass [scrollBehavior] and `Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)`);
  * - [RecitTopBar] is `.inline` — a pushed screen, centred, with the `Back` chevron.
  *
- * `actions` is the toolbar: `.primaryAction` / `.confirmationAction` items go there.
+ * `actions` is the toolbar: `.primaryAction` / `.confirmationAction` items go there;
+ * `navigationIcon` stands in for the back chevron where a screen has another way out — a flow's
+ * close cross.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,12 +58,15 @@ fun RecitTopBar(
     onBack: (() -> Unit)?,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    navigationIcon: (@Composable () -> Unit)? = null,
 ) {
     CenterAlignedTopAppBar(
         title = {
             Text(text = title, style = RecitTheme.typography.title50, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
-        navigationIcon = { if (onBack != null) BackButton(onBack) },
+        navigationIcon = {
+            if (onBack != null) BackButton(onBack) else navigationIcon?.invoke()
+        },
         actions = actions,
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(

@@ -6,8 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 
-/** `SortFlowStart` (ADR 0007): where the scan-and-sort flow opens. */
-enum class SortFlowStart { Scanning }
+/**
+ * `SortFlowStart` (ADR 0007): where the scan-and-sort flow opens — at the camera, or straight at the
+ * sorting surface.
+ */
+enum class SortFlowStart { Scanning, Sorting }
 
 /**
  * `SortFlowPresentation` (ADR 0007): one flag for the whole app, raised by every entry point, and
@@ -21,6 +24,10 @@ class SortFlowPresentation(initial: SortFlowStart? = null) {
 
     fun presentScanning() {
         if (start == null) start = SortFlowStart.Scanning
+    }
+
+    fun presentSorting() {
+        if (start == null) start = SortFlowStart.Sorting
     }
 
     fun dismiss() {

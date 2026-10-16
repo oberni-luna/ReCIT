@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.ui.root
 
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -25,6 +26,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -37,6 +39,7 @@ import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.sorting.SortApplyFailure
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
@@ -72,13 +75,14 @@ fun MainScaffold() {
     val stacks: Map<AppTab, NavBackStack<NavKey>> = AppTab.entries.associateWith { tab -> rememberNavBackStack(tab.root) }
     val badge: Int by container.users.receivedRequestCount.collectAsState(initial = 0)
     val genericError: String = stringResource(R.string.error_generic)
+    val context: Context = LocalContext.current
     val sortFlow: SortFlowPresentation = rememberSaveable(saver = sortFlowSaver) { SortFlowPresentation() }
     val flowStart: SortFlowStart? = sortFlow.start
 
     LaunchedEffect(Unit) {
         launch {
             container.errorReporter.failures.collect { error ->
-                messenger.showError(genericError, error.localizedMessage)
+                messenger.showError(genericError, failureMessage(context, error))
             }
         }
         messenger.messages.collect { message: SnackMessage ->
@@ -167,6 +171,13 @@ private fun TabContent(backStack: NavBackStack<NavKey>) {
 }
 
 private fun mutableStateOfTab() = androidx.compose.runtime.mutableStateOf(AppTab.Inventory)
+
+/** What the snackbar says under « Une erreur s'est produite »: the sorting run names its étagère. */
+private fun failureMessage(context: Context, error: Throwable): String? = when (error) {
+    is SortApplyFailure.ShelfNoLongerExists -> context.getString(R.string.sort_error_shelf_missing, error.shelfName)
+    is SortApplyFailure.BooksNoLongerInInventory -> context.getString(R.string.sort_error_books_missing, error.shelfName)
+    else -> error.localizedMessage
+}
 
 /** The flow survives a configuration change at its start route; its own stack does not. */
 private val sortFlowSaver: Saver<SortFlowPresentation, String> = Saver(

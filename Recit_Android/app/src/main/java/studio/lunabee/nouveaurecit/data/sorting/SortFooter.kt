@@ -23,9 +23,14 @@ sealed interface SortFooter {
     data class Report(val ledger: SortApplyLedger) : SortFooter
 
     companion object {
-        /** [hasShelves] only separates the two idle readings. */
+        /**
+         * [hasShelves] only separates the two idle readings. A run that landed whole gives way to the
+         * recap as soon as new changes are made — iOS keeps its report, which then hides every later
+         * recap until the screen is left. A stopped run's report stays: it is what the resume answers.
+         */
         fun of(plan: SortWritePlan, progress: SortApplyLedger?, hasShelves: Boolean): SortFooter = when {
-            progress != null && progress.isFinished -> Report(progress)
+            progress != null && progress.isFinished &&
+                !(progress.result == SortApplyLedger.Result.AllLanded && plan.hasPendingChanges) -> Report(progress)
             plan.hasPendingChanges -> Recap(plan)
             hasShelves -> Idle
             else -> IdleWithoutShelves

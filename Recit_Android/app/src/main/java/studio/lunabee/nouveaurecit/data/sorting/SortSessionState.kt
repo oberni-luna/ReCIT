@@ -53,9 +53,8 @@ data class SortSessionState(
     val writePlan: SortWritePlan by lazy { SortWritePlan(snapshot, changes) }
 
     /**
-     * **The button rule, derived — no "has applied" flag.** A non-empty stack makes « Enregistrer » live
-     * and the third button « Annuler »; an empty one makes it « Terminer ». A successful apply empties
-     * the stack, so the labels change on their own.
+     * **The button rule, derived — no "has applied" flag.** A non-empty stack makes « Enregistrer » and
+     * « Annuler » live; a successful apply empties the stack, so they stand down on their own.
      */
     val hasPendingChanges: Boolean get() = changes.isNotEmpty()
 

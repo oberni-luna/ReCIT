@@ -24,6 +24,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
@@ -288,11 +289,11 @@ private fun ShelfLabel(text: String, maxWidth: Dp, onClick: () -> Unit, modifier
 
 /**
  * `ShelfEmptyStateView` (feature 0021): the step the user is at, written above the plank. With no
- * book yet, « Scanner » opens the scan flow and « Rechercher » raises the search field; the sort tag
- * is left out of this port, so the « books but no shelf » state keeps its two lines and no tag.
+ * book yet, « Scanner » opens the scan flow and « Rechercher » raises the search field; with books but
+ * no shelf, « Ranger mes livres » opens the sorting surface.
  */
 @Composable
-internal fun EmptyShelfCard(ownsBooks: Boolean, onScan: () -> Unit, onSearch: () -> Unit) {
+internal fun EmptyShelfCard(ownsBooks: Boolean, onScan: () -> Unit, onSearch: () -> Unit, onSort: () -> Unit) {
     BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         val width: Dp = maxWidth * ShelfCardMetrics.CARD_WIDTH_FRACTION
         val metrics = ShelfCardMetrics(width.value)
@@ -322,7 +323,15 @@ internal fun EmptyShelfCard(ownsBooks: Boolean, onScan: () -> Unit, onSearch: ()
                     )
                 }
                 Spacer(Modifier.weight(1f).height(Spacing.small))
-                if (!ownsBooks) {
+                if (ownsBooks) {
+                    ShelfActionTag(
+                        title = stringResource(R.string.shelf_empty_action_sort_title),
+                        detail = stringResource(R.string.shelf_empty_action_sort_detail),
+                        icon = Icons.AutoMirrored.Filled.LibraryBooks,
+                        onClick = onSort,
+                        modifier = Modifier.padding(bottom = Spacing.xxSmall),
+                    )
+                } else {
                     Row(
                         modifier = Modifier.padding(bottom = Spacing.xxSmall),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),

@@ -21,6 +21,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.serialization.Serializable
+import studio.lunabee.nouveaurecit.data.sorting.SortSectionId
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.ui.common.RecitSnackbar
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
@@ -28,6 +29,9 @@ import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.appEntries
 import studio.lunabee.nouveaurecit.ui.scan.ScanCameraScreen
+import studio.lunabee.nouveaurecit.ui.sort.ScanTallyScreen
+import studio.lunabee.nouveaurecit.ui.sort.SortShelfScreen
+import studio.lunabee.nouveaurecit.ui.sort.SortSurfaceScreen
 
 /**
  * `SortFlowRoute` (ADR 0007): the screens that exist only inside the flow. They are not cases of the
@@ -36,6 +40,26 @@ import studio.lunabee.nouveaurecit.ui.scan.ScanCameraScreen
 @Serializable
 sealed interface FlowDestination : NavKey {
     @Serializable data object Camera : FlowDestination
+
+    /** The bilan: it replaces the camera, which is what releases the lens. */
+    @Serializable data class Tally(val addedBookCount: Int) : FlowDestination
+
+    /** The sorting surface. Its way out is the cross, never back to a receipt (ADR 0007, rule 6). */
+    @Serializable data object Sorting : FlowDestination
+
+    /** An étagère as it will be — an existing one by its server id, or a draft by its client id. */
+    @Serializable data class SortShelf(val shelfId: String?, val draftId: String?) : FlowDestination {
+        val sectionId: SortSectionId
+            get() = if (shelfId != null) SortSectionId.Shelf(shelfId) else SortSectionId.Draft(draftId.orEmpty())
+
+        companion object {
+            fun of(section: SortSectionId): SortShelf? = when (section) {
+                is SortSectionId.Shelf -> SortShelf(shelfId = section.id, draftId = null)
+                is SortSectionId.Draft -> SortShelf(shelfId = null, draftId = section.id)
+                SortSectionId.Unshelved -> null
+            }
+        }
+    }
 }
 
 /**
@@ -50,6 +74,11 @@ sealed interface FlowDestination : NavKey {
 fun SortFlowHost(start: SortFlowStart, onClose: () -> Unit, snackbarHostState: SnackbarHostState) {
     val backStack: NavBackStack<NavKey> = remember(start) { NavBackStack(rootOf(start)) }
     val navigator: Navigator = remember(backStack) { Navigator(backStack) }
+    // A step that ends the one before it — the camera for the bilan, the bilan for the surface.
+    val replaceAll: (NavKey) -> Unit = { destination ->
+        backStack.clear()
+        backStack.add(destination)
+    }
 
     Box(
         Modifier
@@ -66,7 +95,7 @@ fun SortFlowHost(start: SortFlowStart, onClose: () -> Unit, snackbarHostState: S
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                flowEntries(navigator = navigator, onClose = onClose)
+                flowEntries(navigator = navigator, push = backStack::add, replaceAll = replaceAll, onClose = onClose)
                 appEntries(navigator)
             },
         )
@@ -76,13 +105,37 @@ fun SortFlowHost(start: SortFlowStart, onClose: () -> Unit, snackbarHostState: S
 
 private fun rootOf(start: SortFlowStart): NavKey = when (start) {
     SortFlowStart.Scanning -> FlowDestination.Camera
+    SortFlowStart.Sorting -> FlowDestination.Sorting
 }
 
-private fun EntryProviderScope<NavKey>.flowEntries(navigator: Navigator, onClose: () -> Unit) {
+private fun EntryProviderScope<NavKey>.flowEntries(
+    navigator: Navigator,
+    push: (NavKey) -> Unit,
+    replaceAll: (NavKey) -> Unit,
+    onClose: () -> Unit,
+) {
     entry<FlowDestination.Camera> {
         ScanCameraScreen(
             onOpenBook = { book -> navigator.push(Destination.Book(BookAnchor.Edition(book.uri))) },
-            onFinished = { _, _ -> onClose() },
+            onFinished = { addedBookCount, presentsTally ->
+                if (presentsTally) replaceAll(FlowDestination.Tally(addedBookCount)) else onClose()
+            },
         )
+    }
+    entry<FlowDestination.Tally> { destination ->
+        ScanTallyScreen(
+            addedBookCount = destination.addedBookCount,
+            onSort = { replaceAll(FlowDestination.Sorting) },
+            onClose = onClose,
+        )
+    }
+    entry<FlowDestination.Sorting> {
+        SortSurfaceScreen(
+            onClose = onClose,
+            onOpenSection = { section -> FlowDestination.SortShelf.of(section)?.let(push) },
+        )
+    }
+    entry<FlowDestination.SortShelf> { destination ->
+        SortShelfScreen(sectionId = destination.sectionId, onBack = navigator::pop)
     }
 }

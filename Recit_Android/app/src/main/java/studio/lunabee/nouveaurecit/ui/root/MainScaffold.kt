@@ -16,14 +16,17 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -41,6 +44,10 @@ import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitSnackbar
 import studio.lunabee.nouveaurecit.ui.common.RecitSnackbarVisuals
 import studio.lunabee.nouveaurecit.ui.common.SnackMessage
+import studio.lunabee.nouveaurecit.ui.flow.LocalSortFlow
+import studio.lunabee.nouveaurecit.ui.flow.SortFlowHost
+import studio.lunabee.nouveaurecit.ui.flow.SortFlowPresentation
+import studio.lunabee.nouveaurecit.ui.flow.SortFlowStart
 import studio.lunabee.nouveaurecit.ui.navigation.AppTab
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.appEntries
@@ -52,6 +59,9 @@ import studio.lunabee.nouveaurecit.ui.navigation.appEntries
  *
  * Failures reported by background writes, and every sentence a screen wants said, surface here once
  * as a snackbar.
+ *
+ * The scan-and-sort flow (ADR 0007) is drawn here too, above the `Scaffold` — its navigation bar
+ * included — and the snackbar moves above it while it is open.
  */
 @Composable
 fun MainScaffold() {
@@ -62,6 +72,8 @@ fun MainScaffold() {
     val stacks: Map<AppTab, NavBackStack<NavKey>> = AppTab.entries.associateWith { tab -> rememberNavBackStack(tab.root) }
     val badge: Int by container.users.receivedRequestCount.collectAsState(initial = 0)
     val genericError: String = stringResource(R.string.error_generic)
+    val sortFlow: SortFlowPresentation = rememberSaveable(saver = sortFlowSaver) { SortFlowPresentation() }
+    val flowStart: SortFlowStart? = sortFlow.start
 
     LaunchedEffect(Unit) {
         launch {
@@ -75,9 +87,38 @@ fun MainScaffold() {
         }
     }
 
+    CompositionLocalProvider(LocalSortFlow provides sortFlow) {
+        Box {
+            // Under an open flow the tabs are still composed, as on iOS, but out of reach of TalkBack.
+            Box(if (flowStart == null) Modifier else Modifier.clearAndSetSemantics {}) {
+                Tabs(
+                    selected = selected,
+                    onSelect = { selected = it },
+                    stacks = stacks,
+                    badge = badge,
+                    snackbarHostState = snackbarHostState,
+                    showsSnackbar = flowStart == null,
+                )
+            }
+            if (flowStart != null) {
+                SortFlowHost(start = flowStart, onClose = sortFlow::dismiss, snackbarHostState = snackbarHostState)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Tabs(
+    selected: AppTab,
+    onSelect: (AppTab) -> Unit,
+    stacks: Map<AppTab, NavBackStack<NavKey>>,
+    badge: Int,
+    snackbarHostState: SnackbarHostState,
+    showsSnackbar: Boolean,
+) {
     Scaffold(
         contentWindowInsets = WindowInsets(0),
-        snackbarHost = { SnackbarHost(snackbarHostState) { RecitSnackbar(it) } },
+        snackbarHost = { if (showsSnackbar) SnackbarHost(snackbarHostState) { RecitSnackbar(it) } },
         bottomBar = {
             NavigationBar(containerColor = RecitTheme.colors.backgroundSecondary) {
                 AppTab.entries.forEach { tab ->
@@ -85,7 +126,7 @@ fun MainScaffold() {
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
-                            if (isSelected) Navigator(stacks.getValue(tab)).popToRoot() else selected = tab
+                            if (isSelected) Navigator(stacks.getValue(tab)).popToRoot() else onSelect(tab)
                         },
                         icon = {
                             BadgedBox(badge = { if (tab == AppTab.Network && badge > 0) Badge { Text("$badge") } }) {
@@ -126,3 +167,9 @@ private fun TabContent(backStack: NavBackStack<NavKey>) {
 }
 
 private fun mutableStateOfTab() = androidx.compose.runtime.mutableStateOf(AppTab.Inventory)
+
+/** The flow survives a configuration change at its start route; its own stack does not. */
+private val sortFlowSaver: Saver<SortFlowPresentation, String> = Saver(
+    save = { it.start?.name.orEmpty() },
+    restore = { saved -> SortFlowPresentation(SortFlowStart.entries.firstOrNull { it.name == saved }) },
+)

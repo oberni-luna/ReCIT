@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The batch scanner (feature 0007). French values of ReCIT_iOS/Localizable.xcstrings, keys with '.'
+  turned into '_' under a scan_ prefix. The permission sentences are Android's own: Android can ask
+  again after a first refusal, and its settings are « Paramètres », not « Réglages ».
+-->
+<resources>
+    <string name="scan_hint">Approchez le code-barres d\'un livre de l\'appareil photo</string>
+    <string name="scan_finish">Terminer</string>
+    <string name="scan_caption_not_found">Cette édition n\'existe pas sur inventaire.io</string>
+    <string name="scan_caption_owned">Dans mon inventaire</string>
+
+    <string name="scan_permission_title">Le scanner a besoin de l\'appareil photo</string>
+    <string name="scan_permission_ask_message">Ex-libris lit le code-barres de vos livres avec l\'appareil photo, pour les ajouter l\'un après l\'autre.</string>
+    <string name="scan_permission_allow">Autoriser l\'appareil photo</string>
+    <string name="scan_permission_denied_message">L\'accès à l\'appareil photo est désactivé pour Ex-libris. Autorisez-le dans les paramètres, puis revenez pour scanner vos livres.</string>
+    <string name="scan_permission_open_settings">Ouvrir les paramètres</string>
+
+    <string name="shelves_action_scan">Scanner</string>
+    <string name="shelf_empty_action_scan_title">Scanner</string>
+    <string name="shelf_empty_action_scan_detail">le code-barres d’un livre</string>
+</resources>

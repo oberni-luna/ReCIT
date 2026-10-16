@@ -189,6 +189,10 @@ interface InventoryDao {
     @Query("SELECT DISTINCT editionUri FROM inventory_items")
     suspend fun heldEditionUris(): List<String>
 
+    /** `BookViewModel.ownedItemsPredicate`, counted: the scanner's « Dans mon inventaire ». */
+    @Query("SELECT COUNT(*) FROM inventory_items WHERE editionUri = :editionUri AND ownerId = :ownerId")
+    suspend fun countOwned(editionUri: String, ownerId: String): Int
+
     @Upsert
     suspend fun upsert(items: List<InventoryItemEntity>)
 

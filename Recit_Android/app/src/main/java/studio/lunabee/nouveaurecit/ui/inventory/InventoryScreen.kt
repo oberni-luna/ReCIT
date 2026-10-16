@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -19,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -36,7 +39,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ItemRow
@@ -48,6 +53,8 @@ import studio.lunabee.nouveaurecit.designsystem.SyncingPlaceholder
 import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
 import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.flow.LocalSortFlow
+import studio.lunabee.nouveaurecit.ui.flow.SortFlowPresentation
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
@@ -58,8 +65,8 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
  *
  * Not searching: my first-sync banner, « Étagères » with « Ajouter », the shelf carousel (or the
  * empty-shelf card), then « Tous les livres · N ». The Material 3 `SearchBar` stands in for
- * `.searchable`; expanded, it hosts the unified search. The scan and sort toolbar actions are not
- * part of this port.
+ * `.searchable`; expanded, it hosts the unified search. « Scanner » in the toolbar opens the scan
+ * flow (ADR 0007).
  */
 @Composable
 fun InventoryScreen(navigator: Navigator) {
@@ -70,6 +77,7 @@ fun InventoryScreen(navigator: Navigator) {
     val focusRequester: FocusRequester = remember { FocusRequester() }
     var focusTick: Int by remember { mutableIntStateOf(0) }
     val expanded: Boolean = viewModel.expanded
+    val sortFlow: SortFlowPresentation = LocalSortFlow.current
 
     LaunchedEffect(focusTick) {
         if (focusTick > 0) runCatching { focusRequester.requestFocus() }
@@ -79,7 +87,19 @@ fun InventoryScreen(navigator: Navigator) {
     Scaffold(
         modifier = if (expanded) Modifier else Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            if (!expanded) RecitLargeTopBar(title = stringResource(R.string.tab_inventory), scrollBehavior = scrollBehavior)
+            if (!expanded) {
+                RecitLargeTopBar(
+                    title = stringResource(R.string.tab_inventory),
+                    scrollBehavior = scrollBehavior,
+                    actions = {
+                        ToolbarAction(
+                            title = stringResource(R.string.shelves_action_scan),
+                            icon = Icons.Default.QrCodeScanner,
+                            onClick = sortFlow::presentScanning,
+                        )
+                    },
+                )
+            }
         },
         containerColor = RecitTheme.colors.backgroundDefault,
         contentWindowInsets = WindowInsets(0),
@@ -134,6 +154,7 @@ fun InventoryScreen(navigator: Navigator) {
                 InventoryContent(
                     viewModel = viewModel,
                     navigator = navigator,
+                    onScan = sortFlow::presentScanning,
                     onSearch = {
                         viewModel.onExpandedChange(true)
                         focusTick += 1
@@ -171,7 +192,7 @@ private fun SearchSurface(viewModel: InventoryViewModel, myUserId: String, navig
 }
 
 @Composable
-private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator, onSearch: () -> Unit) {
+private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator, onScan: () -> Unit, onSearch: () -> Unit) {
     val shelves: List<ShelfWithItems>? by viewModel.shelves.collectAsStateWithLifecycle()
     val myItems: List<ItemRow>? by viewModel.myItems.collectAsStateWithLifecycle()
     val syncState: FirstSyncState by viewModel.syncState.collectAsStateWithLifecycle()
@@ -201,7 +222,7 @@ private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator
             if (loaded != null) {
                 if (loaded.isEmpty()) {
                     if (syncState == FirstSyncState.Synced && myItems != null) {
-                        item(key = "shelves.empty") { EmptyShelfCard(ownsBooks = items.isNotEmpty(), onSearch = onSearch) }
+                        item(key = "shelves.empty") { EmptyShelfCard(ownsBooks = items.isNotEmpty(), onScan = onScan, onSearch = onSearch) }
                     }
                 } else {
                     item(key = "shelves.carousel") {
@@ -232,5 +253,19 @@ private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator
 
     if (isCreatingShelf) {
         ShelfFormSheet(shelfId = null, fileItemId = null, onDismiss = { isCreatingShelf = false })
+    }
+}
+
+/** A toolbar button with its glyph *and* its word, as `Button(_:systemImage:)` draws in a toolbar. */
+@Composable
+private fun ToolbarAction(title: String, icon: ImageVector, onClick: () -> Unit) {
+    TextButton(onClick = onClick) {
+        Icon(icon, contentDescription = null, tint = RecitTheme.colors.foregroundTinted, modifier = Modifier.size(18.dp))
+        Text(
+            text = title,
+            style = RecitTheme.typography.action300,
+            color = RecitTheme.colors.foregroundTinted,
+            modifier = Modifier.padding(start = Spacing.xSmall),
+        )
     }
 }

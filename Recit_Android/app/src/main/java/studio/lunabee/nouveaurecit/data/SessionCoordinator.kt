@@ -9,6 +9,7 @@ import kotlinx.coroutines.sync.withLock
 import studio.lunabee.nouveaurecit.auth.AuthRepository
 import studio.lunabee.nouveaurecit.auth.model.SessionExpiry
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.data.sorting.SortSession
 
 /**
  * `RootView+RefreshUserData` and `RootView+ForgetSignedOutUser`: the sync order of a signed-in
@@ -25,6 +26,7 @@ class SessionCoordinator(
     private val shelves: ShelfRepository,
     private val inventory: InventoryRepository,
     private val lists: ListRepository,
+    private val sortSession: SortSession,
     private val syncStatus: SyncStatus,
 ) {
     private val mutex: Mutex = Mutex()
@@ -72,6 +74,8 @@ class SessionCoordinator(
 
     suspend fun forgetSignedOutUser() {
         syncStatus.reset()
+        // The sorting draft is the user's, like their étagères: the next account must not open on it.
+        sortSession.reset()
         runCatching { users.wipeUserData() }.onFailure { Log.w(TAG, "wipe failed", it) }
     }
 
@@ -79,6 +83,7 @@ class SessionCoordinator(
     suspend fun deleteAccount() {
         users.deleteAccount()
         syncStatus.reset()
+        sortSession.reset()
         auth.forgetSession()
     }
 

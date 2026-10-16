@@ -145,6 +145,44 @@ class ShelfRepository(
         )
     }
 
+    /**
+     * `createShelfAwaitingServer`: `?action=create`, **awaited**, then the server's shelf upserted and
+     * returned. For « Ranger mes livres », whose apply needs the real `_id` before it can file anything
+     * and must know the creation landed before it ticks the étagère (iOS PRD 0008). Created private and
+     * without a description, as the sorting surface asks only for a name.
+     */
+    suspend fun createShelfNow(name: String): ShelfEntity {
+        val response: ShelfResponseDto = api.send(
+            "/api/shelves",
+            body = NewShelfDto(name.trim(), null, emptyList()),
+            query = listOf("action" to "create"),
+        )
+        val shelf: ShelfEntity = Merges.shelf(dao.get(response.shelf.id), response.shelf)
+        dao.upsert(listOf(shelf))
+        return shelf
+    }
+
+    /**
+     * `addItemsAwaitingServer`: one `add-items` call, awaited, local membership reconciled from the
+     * answer. Items the shelf already holds are dropped from the payload, and an empty payload is a
+     * no-op — which is what makes a sorting apply that stopped partway safe to resume.
+     */
+    suspend fun addItemsNow(shelfId: String, itemIds: List<String>) {
+        val held: Set<String> = dao.itemIds(shelfId).toSet()
+        val toSend: List<String> = itemIds.distinct().filter { it !in held }
+        if (toSend.isEmpty()) return
+        sendMembership(shelfId, toSend, add = true)
+    }
+
+    /** `removeItemsAwaitingServer`: the mirror of [addItemsNow] — only items the shelf holds are sent. */
+    suspend fun removeItemsNow(shelfId: String, itemIds: List<String>) {
+        val held: Set<String> = dao.itemIds(shelfId).toSet()
+        val toSend: List<String> = itemIds.distinct().filter { it in held }
+        if (toSend.isEmpty()) return
+        sendMembership(shelfId, toSend, add = false)
+    }
+
+    /** One membership call, and the shelf's local items replaced by what the server says it now holds. */
     private suspend fun sendMembership(shelfId: String, itemIds: List<String>, add: Boolean) {
         val response: ShelvesWithItemsResponseDto = api.send(
             "/api/shelves",

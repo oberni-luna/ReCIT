@@ -23,6 +23,7 @@ import studio.lunabee.nouveaurecit.data.SyncStatus
 import studio.lunabee.nouveaurecit.data.UserPreferences
 import studio.lunabee.nouveaurecit.data.UserRepository
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
+import studio.lunabee.nouveaurecit.data.sorting.SortSession
 import studio.lunabee.nouveaurecit.network.ApiService
 import java.util.concurrent.TimeUnit
 
@@ -72,6 +73,16 @@ class AppContainer(context: Context) {
     val lists: ListRepository = ListRepository(api, database, optimisticRunner)
     val search: SearchRepository = SearchRepository(api)
 
+    /** « Ranger mes livres »: app-scoped, so a draft and a run in flight both outlive the screen. */
+    val sortSession: SortSession = SortSession(
+        scope = applicationScope,
+        users = users,
+        shelves = shelves,
+        inventory = inventory,
+        db = database,
+        errorReporter = errorReporter,
+    )
+
     val session: SessionCoordinator = SessionCoordinator(
         scope = applicationScope,
         auth = auth,
@@ -79,6 +90,7 @@ class AppContainer(context: Context) {
         shelves = shelves,
         inventory = inventory,
         lists = lists,
+        sortSession = sortSession,
         syncStatus = syncStatus,
     )
 

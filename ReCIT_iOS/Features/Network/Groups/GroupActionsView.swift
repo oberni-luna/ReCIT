@@ -19,6 +19,17 @@ struct GroupActionsView: View {
     let myRole: GroupRole?
     let invitorName: String?
 
+    /// Whether the view has anything to show for `myRole`. A member who may leave has neither a
+    /// button nor a note, and the screen leaves the section out rather than give it an empty row.
+    static func hasContent(for myRole: GroupRole?, in group: ReaderGroup, myUserId: String?) -> Bool {
+        switch myRole {
+        case .none, .declined, .requested, .invited:
+            true
+        case .admin, .member:
+            myUserId.map { group.canLeave($0) == false } ?? false
+        }
+    }
+
     var body: some View {
         VStack(spacing: .medium) {
             switch myRole {

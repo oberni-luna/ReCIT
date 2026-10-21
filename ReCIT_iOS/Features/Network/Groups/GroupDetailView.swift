@@ -9,6 +9,13 @@
 //  one of mine may have moved since the launch. What the gestures change is shown at once, from
 //  `GroupModel`, which is observable.
 //
+//  **One gap between the sections, the same everywhere.** The list's default gap is the height
+//  of a row, and the buttons under the header sat in a section of their own even when they had
+//  nothing to show — an admin who may leave got an empty row framed by two gaps. The section is
+//  now left out when it is empty, the gap is `medium`, and the buttons' row has no vertical
+//  inset: from the last thing under the header to the next section's title, the distance is the
+//  same with or without them.
+//
 
 import SwiftUI
 import SwiftData
@@ -63,6 +70,7 @@ struct GroupDetailView: View {
                 .listRowBackground(Color.clear)
             }
         }
+        .listSectionSpacing(.custom(DesignSystem.Spacing.medium.rawValue))
         .applyListBackground()
         .navigationTitle(group?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
@@ -98,11 +106,14 @@ struct GroupDetailView: View {
             GroupHeaderView(group: group)
         }
 
-        Section {
-            GroupActionsView(group: group, myRole: myRole, invitorName: invitorName(in: group))
+        if GroupActionsView.hasContent(for: myRole, in: group, myUserId: groupModel.myUserId) {
+            Section {
+                GroupActionsView(group: group, myRole: myRole, invitorName: invitorName(in: group))
+            }
+            .listRowInsets(.vertical, .zero)
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
         }
-        .listRowBackground(Color.clear)
-        .listRowSeparator(.hidden)
 
         // First for an admin, since these wait on them and nothing else will say so.
         if myRole == .admin && group.requested.isEmpty == false {

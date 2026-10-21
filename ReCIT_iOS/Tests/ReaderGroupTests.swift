@@ -153,6 +153,18 @@ struct ReaderGroupTests {
         #expect(try group(members: ["m"]).applying(.leave, by: "m").role(of: "m") == nil)
     }
 
+    @MainActor
+    @Test("The buttons under a group's header are left out only for a member who may leave")
+    func actionsSectionContent() {
+        #expect(GroupActionsView.hasContent(for: .admin, in: group(), myUserId: "admin") == false)
+        #expect(GroupActionsView.hasContent(for: .member, in: group(members: ["m"]), myUserId: "m") == false)
+        // The only admin with members left: the note that says why « Quitter » is off.
+        #expect(GroupActionsView.hasContent(for: .admin, in: group(members: ["m"]), myUserId: "admin"))
+        #expect(GroupActionsView.hasContent(for: nil, in: group(), myUserId: "me"))
+        #expect(GroupActionsView.hasContent(for: .requested, in: group(requested: ["me"]), myUserId: "me"))
+        #expect(GroupActionsView.hasContent(for: .invited, in: group(invited: ["me"]), myUserId: "me"))
+    }
+
     @Test("Cancelling a request takes me out")
     func cancelRequest() throws {
         #expect(try group(requested: ["me"]).applying(.cancelRequest, by: "me").role(of: "me") == nil)

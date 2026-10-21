@@ -7,17 +7,17 @@
   "nonRenewingSubscriptions" : [],
   "products" : [
     {
-      "displayPrice" : "3.00",
+      "displayPrice" : "2.99",
       "familyShareable" : false,
       "internalID" : "6760000001",
       "localizations" : [
         {
-          "description" : "A three-euro donation to Ex-libris.",
+          "description" : "A small tip for Ex-libris, the price of a coffee.",
           "displayName" : "A coffee",
           "locale" : "en_US"
         },
         {
-          "description" : "Un don de trois euros à Ex-libris.",
+          "description" : "Un petit don à Ex-libris, le prix d'un café.",
           "displayName" : "Un café",
           "locale" : "fr"
         }
@@ -27,17 +27,17 @@
       "type" : "Consumable"
     },
     {
-      "displayPrice" : "5.00",
+      "displayPrice" : "4.99",
       "familyShareable" : false,
       "internalID" : "6760000002",
       "localizations" : [
         {
-          "description" : "A five-euro donation to Ex-libris.",
+          "description" : "A tip for Ex-libris, the price of a paperback.",
           "displayName" : "A paperback",
           "locale" : "en_US"
         },
         {
-          "description" : "Un don de cinq euros à Ex-libris.",
+          "description" : "Un don à Ex-libris, le prix d'un livre de poche.",
           "displayName" : "Un poche",
           "locale" : "fr"
         }
@@ -47,17 +47,17 @@
       "type" : "Consumable"
     },
     {
-      "displayPrice" : "10.00",
+      "displayPrice" : "9.99",
       "familyShareable" : false,
       "internalID" : "6760000003",
       "localizations" : [
         {
-          "description" : "A ten-euro donation to Ex-libris.",
+          "description" : "A tip for Ex-libris, the price of a hardcover.",
           "displayName" : "A hardcover",
           "locale" : "en_US"
         },
         {
-          "description" : "Un don de dix euros à Ex-libris.",
+          "description" : "Un don à Ex-libris, le prix d'un grand format.",
           "displayName" : "Un grand format",
           "locale" : "fr"
         }

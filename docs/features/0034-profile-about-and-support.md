@@ -111,9 +111,13 @@ line over the button if it failed. Backing out of the App Store's own sheet says
 
 ## Not done / not verified
 
-- **The three products do not exist on App Store Connect.** Until they are created as consumables under the
-  identifiers above, a release build shows « Les dons ne sont pas disponibles pour le moment. » and nothing can
-  be bought. The simulator, run from Xcode with the `ReCIT_iOS` scheme, uses `Donations.storekit` instead.
+- **The three products exist on App Store Connect but are not yet reviewed.** Created on 2026-10-21 as
+  consumables under the identifiers above (Apple IDs 6825449171, 6825450978, 6825451502), available in all 175
+  storefronts, display names and descriptions in fr and en-US. France has no whole-euro price point, so they cost
+  **2,99 €, 4,99 € and 9,99 €**, and the sheet shows the cents. `Donations.storekit` was aligned to match. Each one
+  still needs its review screenshot, and the first in-app purchases must be submitted with a new app version.
+  Until they are approved, a release build shows « Les dons ne sont pas disponibles pour le moment. ». The
+  simulator, run from Xcode with the `ReCIT_iOS` scheme, uses `Donations.storekit` instead.
 - **App Review risk.** Guideline 3.2.2 forbids collecting charitable donations through in-app purchase outside
   3.2.1(vi). Tipping a developer is ordinary; promising that half of it goes to an association may be read as
   fundraising for it. To weigh before submitting — the wording of the card, the tagline and the 50 / 50 is where

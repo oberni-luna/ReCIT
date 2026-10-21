@@ -5936,6 +5936,7 @@
       }
     },
     "nav.settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8049,13 +8050,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Free, without ads, made by hand. Every donation is shared equally with inventaire.io."
+            "value" : "Free, without ads, contributing to an open source and open data project. Every donation is shared equally with inventaire.io."
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gratuit, sans publicité, fait à la main. Chaque don est partagé, à parts égales, avec inventaire.io."
+            "state" : "needs_review",
+            "value" : "Gratuit, sans publicité, contribuant à une base de données bibliographique ouverte. Chaque don est partagé, à parts égales, avec inventaire.io."
           }
         }
       }
@@ -8330,6 +8331,7 @@
       }
     },
     "tab.profile" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

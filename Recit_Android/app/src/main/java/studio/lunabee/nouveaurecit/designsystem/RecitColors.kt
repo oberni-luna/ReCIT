@@ -27,6 +27,12 @@ data class RecitColors(
     val backgroundTinted: Color,
     val backgroundTintedInverse: Color,
     val backgroundError: Color,
+    /** Behind a tab's root list (feature 0039): its cells read as cards on it. */
+    val backgroundGrouped: Color,
+    /** Behind a list shown in a sheet — the profile — a step above [backgroundGrouped]. */
+    val backgroundGroupedElevated: Color,
+    /** A grouped list's cells, on either of the two above. */
+    val backgroundGroupedCell: Color,
     val borderDefault: Color,
     val isDark: Boolean,
 ) {
@@ -50,6 +56,9 @@ data class RecitColors(
             backgroundTinted = Primitive.Green100,
             backgroundTintedInverse = Primitive.Green800,
             backgroundError = Primitive.Red100,
+            backgroundGrouped = Primitive.Gray50,
+            backgroundGroupedElevated = Primitive.Gray50,
+            backgroundGroupedCell = Primitive.Gray0,
             borderDefault = Color.Black.copy(alpha = 0.1f),
             isDark = false,
         )
@@ -70,6 +79,9 @@ data class RecitColors(
             backgroundTinted = Primitive.Green900,
             backgroundTintedInverse = Primitive.Green200,
             backgroundError = Primitive.Gray700,
+            backgroundGrouped = Primitive.Gray1000,
+            backgroundGroupedElevated = Primitive.Gray900,
+            backgroundGroupedCell = Primitive.Gray800,
             borderDefault = Color.White.copy(alpha = 0.1f),
             isDark = true,
         )

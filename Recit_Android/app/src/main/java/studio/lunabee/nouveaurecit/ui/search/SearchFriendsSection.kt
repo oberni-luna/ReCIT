@@ -66,7 +66,9 @@ internal fun LazyListScope.searchFriendsSection(
     when (state) {
         FriendsCarouselState.Hidden -> Unit
         FriendsCarouselState.Invitation -> {
-            item(key = "friends.header") { SectionHeader(title = stringResource(R.string.inventory_search_friends_section)) }
+            item(key = "friends.header") {
+                SectionHeader(title = stringResource(R.string.inventory_search_friends_section), modifier = Modifier.padding(horizontal = Spacing.medium))
+            }
             item(key = "friends.invite") {
                 Box(Modifier.fillMaxWidth().padding(vertical = Spacing.small), contentAlignment = Alignment.Center) {
                     SearchFriendsInvitationTag(onClick = onInvite)
@@ -75,8 +77,10 @@ internal fun LazyListScope.searchFriendsSection(
         }
         is FriendsCarouselState.Recent -> {
             item(key = "friends.header") {
+                // Given the margin of the inset sections around it, so the titles line up.
                 SectionHeader(
                     title = stringResource(R.string.inventory_search_friends_section),
+                    modifier = Modifier.padding(horizontal = Spacing.medium),
                     trailing = if (state.showsSeeAll) {
                         {
                             TintedTextButton(

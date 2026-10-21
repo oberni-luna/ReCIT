@@ -80,6 +80,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
             RecitTopBar(
                 title = state.list?.name.orEmpty(),
                 onBack = navigator::pop,
+                containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
                     if (state.list != null) {
                         IconButton(onClick = { showsForm = true }) {
@@ -89,7 +90,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 },
             )
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundGrouped,
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             val list = state.list
@@ -138,7 +139,7 @@ private fun ListElementRow(row: ListElementRowModel, isAuthor: Boolean, onClick:
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(RecitTheme.colors.backgroundDefault)
+            .background(RecitTheme.colors.backgroundGroupedCell)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.medium, vertical = Spacing.small),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),

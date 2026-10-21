@@ -10,9 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Search
@@ -27,6 +28,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -40,7 +43,9 @@ import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.SearchResult
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
+import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
+import studio.lunabee.nouveaurecit.designsystem.RecitColors
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
@@ -56,6 +61,9 @@ import studio.lunabee.nouveaurecit.ui.navigation.Destination
  * `SearchContent` (features 0014, 0037): what the Recherche tab shows for each [SearchPhase] — at
  * rest the recents and « Chez mes amis », then the local matches, the three suggestions, and
  * inventaire.io's results.
+ *
+ * Every section but « Chez mes amis » is an inset-grouped card on [RecitColors.backgroundGrouped]
+ * (feature 0039); the carousel runs edge to edge on the list's own background.
  *
  * The empty recent-searches state only shows when there is nothing else: with the carousel or its
  * invitation on screen, a rest state saying "nothing here" would contradict itself.
@@ -78,7 +86,7 @@ internal fun SearchContent(
 ) {
     val shownRecents: List<String> = if (phase == SearchPhase.Recents) recents else emptyList()
     if (phase == SearchPhase.Recents && shownRecents.isEmpty() && friends == FriendsCarouselState.Hidden) {
-        Box(Modifier.fillMaxSize().background(RecitTheme.colors.backgroundSecondary), contentAlignment = Alignment.Center) {
+        Box(Modifier.fillMaxSize().background(RecitTheme.colors.backgroundGrouped), contentAlignment = Alignment.Center) {
             EmptyState(
                 title = stringResource(R.string.inventory_search_recents_empty_title),
                 message = stringResource(R.string.inventory_search_recents_empty_message),
@@ -94,18 +102,24 @@ internal fun SearchContent(
     PullToRefreshBox(
         isRefreshing = false,
         onRefresh = onRetry,
-        modifier = Modifier.fillMaxSize().background(RecitTheme.colors.backgroundSecondary),
+        modifier = Modifier.fillMaxSize().background(RecitTheme.colors.backgroundGrouped),
     ) {
         LazyColumn(Modifier.fillMaxSize()) {
             if (shownRecents.isNotEmpty()) {
                 item(key = "recents.header") {
                     SectionHeader(
                         title = stringResource(R.string.inventory_search_recents_section),
+                        modifier = Modifier.padding(horizontal = Spacing.medium),
                         trailing = { TintedTextButton(text = stringResource(R.string.inventory_search_recents_clear), onClick = onClearRecents) },
                     )
                 }
-                items(shownRecents, key = { "recent.$it" }) { recent ->
-                    SearchQueryRow(icon = Icons.Outlined.Schedule, label = AnnotatedString(recent), onClick = { onSelectRecent(recent) })
+                itemsIndexed(shownRecents, key = { _, recent -> "recent.$recent" }) { index, recent ->
+                    SearchQueryRow(
+                        icon = Icons.Outlined.Schedule,
+                        label = AnnotatedString(recent),
+                        onClick = { onSelectRecent(recent) },
+                        modifier = Modifier.groupedCell(index, shownRecents.size, RecitTheme.colors.backgroundGroupedCell),
+                    )
                 }
             }
             searchFriendsSection(state = friends, items = friendsItems, onInvite = onInvite, onPush = onPush)
@@ -113,6 +127,7 @@ internal fun SearchContent(
                 item(key = "local.header") {
                     SectionHeader(
                         title = stringResource(R.string.inventory_search_local_section),
+                        modifier = Modifier.padding(horizontal = Spacing.medium),
                         trailing = if (local.totalCount > InventorySearchRanking.DISPLAY_LIMIT) {
                             {
                                 TintedTextButton(
@@ -125,13 +140,17 @@ internal fun SearchContent(
                         }
                     )
                 }
-                items(local.items, key = { "local.${it.item.id}" }) { row ->
-                    InventoryItemRow(
-                        row = row,
-                        showsOwner = row.item.ownerId != myUserId,
-                        onClick = { onPush(Destination.Book(BookAnchor.Item(row.item.id))) },
-                    )
-                    HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
+                itemsIndexed(local.items, key = { _, row -> "local.${row.item.id}" }) { index, row ->
+                    Column(Modifier.groupedCell(index, local.items.size, RecitTheme.colors.backgroundGroupedCell)) {
+                        InventoryItemRow(
+                            row = row,
+                            showsOwner = row.item.ownerId != myUserId,
+                            onClick = { onPush(Destination.Book(BookAnchor.Item(row.item.id))) },
+                        )
+                        if (index < local.items.lastIndex) {
+                            HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
+                        }
+                    }
                 }
             }
             if (phase is SearchPhase.Suggesting) {
@@ -147,8 +166,10 @@ internal fun SearchContent(
 private fun LazyListScope.suggestions(query: String, onSuggestion: (SearchSuggestion) -> Unit) {
     val suggestions: List<SearchSuggestion> = SearchSuggestion.suggestions(query)
     if (suggestions.isEmpty()) return
-    item(key = "suggestions.header") { SectionHeader(title = stringResource(R.string.inventory_search_remote_section)) }
-    items(suggestions, key = { "suggestion.${it.kind}" }) { suggestion ->
+    item(key = "suggestions.header") {
+        SectionHeader(title = stringResource(R.string.inventory_search_remote_section), modifier = Modifier.padding(horizontal = Spacing.medium))
+    }
+    itemsIndexed(suggestions, key = { _, suggestion -> "suggestion.${suggestion.kind}" }) { index, suggestion ->
         val sentence: String = when (suggestion.kind) {
             SearchSuggestion.Kind.Works -> stringResource(R.string.inventory_search_suggestion_works, suggestion.query)
             SearchSuggestion.Kind.Humans -> stringResource(R.string.inventory_search_suggestion_humans, suggestion.query)
@@ -167,6 +188,7 @@ private fun LazyListScope.suggestions(query: String, onSuggestion: (SearchSugges
             label = emphasised(suggestion.query, sentence),
             spokenLabel = spoken,
             onClick = { onSuggestion(suggestion) },
+            modifier = Modifier.groupedCell(index, suggestions.size, RecitTheme.colors.backgroundGroupedCell),
         )
     }
 }
@@ -218,9 +240,15 @@ private fun LazyListScope.resultGroup(
     onPush: (Destination) -> Unit,
 ) {
     if (results.isEmpty()) return
-    item(key = "results.$key.header") { SectionHeader(title = stringResource(title, results.size)) }
-    items(results, key = { "result.$key.${it.id}" }) { result ->
-        SearchResultRow(result = result, onClick = { onPush(destinationFor(result)) })
+    item(key = "results.$key.header") {
+        SectionHeader(title = stringResource(title, results.size), modifier = Modifier.padding(horizontal = Spacing.medium))
+    }
+    itemsIndexed(results, key = { _, result -> "result.$key.${result.id}" }) { index, result ->
+        SearchResultRow(
+            result = result,
+            onClick = { onPush(destinationFor(result)) },
+            modifier = Modifier.groupedCell(index, results.size, RecitTheme.colors.backgroundGroupedCell),
+        )
     }
 }
 
@@ -231,9 +259,9 @@ private fun destinationFor(result: SearchResult): Destination = when (result.typ
 
 /** `SearchResultCell`: a work's portrait cover or an author's round portrait, the label and the description. */
 @Composable
-private fun SearchResultRow(result: SearchResult, onClick: () -> Unit) {
+private fun SearchResultRow(result: SearchResult, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
@@ -260,10 +288,11 @@ private fun SearchQueryRow(
     icon: ImageVector,
     label: AnnotatedString,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     spokenLabel: String? = null,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium)
@@ -282,4 +311,19 @@ private fun emphasised(query: String, sentence: String): AnnotatedString = build
     SearchSuggestion.emphasisRange(query, sentence)?.let { range ->
         addStyle(SpanStyle(fontWeight = FontWeight.Bold), range.first, range.last + 1)
     }
+}
+
+/**
+ * One row of an inset-grouped section (feature 0039): the cell colour, inset by the screen's margin,
+ * rounded at the section's two ends — so the section reads as one card on the list's background.
+ */
+private fun Modifier.groupedCell(index: Int, count: Int, color: Color): Modifier {
+    val radius = CornerRadius.rounded
+    val shape = RoundedCornerShape(
+        topStart = if (index == 0) radius else CornerRadius.none,
+        topEnd = if (index == 0) radius else CornerRadius.none,
+        bottomStart = if (index == count - 1) radius else CornerRadius.none,
+        bottomEnd = if (index == count - 1) radius else CornerRadius.none,
+    )
+    return padding(horizontal = Spacing.medium).clip(shape).background(color)
 }

@@ -94,6 +94,7 @@ fun ListsScreen(navigator: Navigator) {
                 title = stringResource(R.string.nav_lists),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = { ProfileAvatarButton() },
+                containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
                     IconButton(onClick = { showsForm = true }) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add))
@@ -101,7 +102,7 @@ fun ListsScreen(navigator: Navigator) {
                 },
             )
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundGrouped,
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -158,8 +159,8 @@ private fun ListsSearchField(query: String, onQueryChange: (String) -> Unit) {
         shape = CircleShape,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = RecitTheme.colors.backgroundDefault,
-            unfocusedContainerColor = RecitTheme.colors.backgroundDefault,
+            focusedContainerColor = RecitTheme.colors.backgroundGroupedCell,
+            unfocusedContainerColor = RecitTheme.colors.backgroundGroupedCell,
             focusedBorderColor = RecitTheme.colors.borderTinted,
             unfocusedBorderColor = RecitTheme.colors.borderDefault,
             focusedTextColor = RecitTheme.colors.foregroundDefault,
@@ -178,7 +179,7 @@ private fun ListRow(row: ListRowModel, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(RecitTheme.colors.backgroundDefault)
+            .background(RecitTheme.colors.backgroundGroupedCell)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),

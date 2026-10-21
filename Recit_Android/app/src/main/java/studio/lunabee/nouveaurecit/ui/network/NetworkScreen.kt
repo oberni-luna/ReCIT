@@ -99,13 +99,14 @@ fun NetworkScreen(navigator: Navigator) {
                 title = stringResource(R.string.network_nav_network),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = { ProfileAvatarButton() },
+                containerColor = RecitTheme.colors.backgroundGrouped,
             ) {
                 IconButton(onClick = { navigator.push(Destination.AddFriends) }) {
                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.network_add_friends))
                 }
             }
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundGrouped,
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -130,7 +131,7 @@ fun NetworkScreen(navigator: Navigator) {
                         SectionHeader(stringResource(R.string.network_profile_invitations), Modifier.padding(horizontal = Spacing.medium))
                     }
                     item(key = "invitations") {
-                        SectionCard {
+                        SectionCard(color = RecitTheme.colors.backgroundGroupedCell) {
                             invitations.forEach { user ->
                                 InvitationRow(
                                     user = user,
@@ -156,7 +157,7 @@ fun NetworkScreen(navigator: Navigator) {
                     SectionHeader(stringResource(R.string.network_friends), Modifier.padding(horizontal = Spacing.medium))
                 }
                 item(key = "friends") {
-                    SectionCard {
+                    SectionCard(color = RecitTheme.colors.backgroundGroupedCell) {
                         when (sectionState) {
                             FriendsSectionState.Syncing -> SyncingInlineRow(
                                 message = stringResource(R.string.sync_loading),

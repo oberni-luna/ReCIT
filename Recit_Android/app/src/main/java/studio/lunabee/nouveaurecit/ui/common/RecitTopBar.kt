@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -23,7 +24,8 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
  * - [RecitTopBar] is `.inline` — a pushed screen, centred, with the `Back` chevron.
  *
  * `actions` is the toolbar: `.primaryAction` / `.confirmationAction` items go there;
- * `navigationIcon` is `.topBarLeading`, shown when there is no back button.
+ * `navigationIcon` is `.topBarLeading`, shown when there is no back button. `containerColor`
+ * follows the screen's own background, so the bar does not stand out from it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +34,7 @@ fun RecitLargeTopBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onBack: (() -> Unit)? = null,
     navigationIcon: @Composable () -> Unit = {},
+    containerColor: Color = RecitTheme.colors.backgroundSecondary,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     LargeTopAppBar(
@@ -42,8 +45,8 @@ fun RecitLargeTopBar(
         actions = actions,
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = RecitTheme.colors.backgroundSecondary,
-            scrolledContainerColor = RecitTheme.colors.backgroundSecondary,
+            containerColor = containerColor,
+            scrolledContainerColor = containerColor,
             titleContentColor = RecitTheme.colors.foregroundDefault,
             actionIconContentColor = RecitTheme.colors.foregroundTinted,
             navigationIconContentColor = RecitTheme.colors.foregroundDefault,
@@ -58,6 +61,7 @@ fun RecitTopBar(
     onBack: (() -> Unit)?,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    containerColor: Color = RecitTheme.colors.backgroundSecondary,
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -67,8 +71,8 @@ fun RecitTopBar(
         actions = actions,
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = RecitTheme.colors.backgroundSecondary,
-            scrolledContainerColor = RecitTheme.colors.backgroundSecondary,
+            containerColor = containerColor,
+            scrolledContainerColor = containerColor,
             titleContentColor = RecitTheme.colors.foregroundDefault,
             actionIconContentColor = RecitTheme.colors.foregroundTinted,
             navigationIconContentColor = RecitTheme.colors.foregroundDefault,

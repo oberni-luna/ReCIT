@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,7 @@ import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
 import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.PillButton
 import studio.lunabee.nouveaurecit.designsystem.PillStyle
+import studio.lunabee.nouveaurecit.designsystem.RecitColors
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.TagLabel
@@ -219,15 +221,22 @@ fun LinkRow(text: String, onClick: () -> Unit) {
     )
 }
 
-/** An inset-grouped `Section`'s card: the rows of one section, on the default background. */
+/**
+ * An inset-grouped `Section`'s card: the rows of one section, on the default background — or, on a
+ * tab's root, on [RecitColors.backgroundGroupedCell] (feature 0039).
+ */
 @Composable
-fun SectionCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+fun SectionCard(
+    modifier: Modifier = Modifier,
+    color: Color = RecitTheme.colors.backgroundDefault,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.medium)
             .clip(RoundedCornerShape(CornerRadius.rounded))
-            .background(RecitTheme.colors.backgroundDefault),
+            .background(color),
         content = content,
     )
 }

@@ -78,9 +78,10 @@ fun ProfileScreen(navigator: Navigator) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_close))
                     }
                 },
+                containerColor = RecitTheme.colors.backgroundGroupedElevated,
             )
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundGroupedElevated,
     ) { padding: PaddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -140,7 +141,7 @@ private fun ProfileCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CornerRadius.rounded),
-        color = RecitTheme.colors.backgroundDefault,
+        color = RecitTheme.colors.backgroundGroupedCell,
     ) {
         Column(content = content)
     }

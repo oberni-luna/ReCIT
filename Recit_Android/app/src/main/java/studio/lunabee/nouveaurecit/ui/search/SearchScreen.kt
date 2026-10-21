@@ -66,8 +66,14 @@ fun SearchScreen(navigator: Navigator) {
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { RecitLargeTopBar(title = stringResource(R.string.tab_search), scrollBehavior = scrollBehavior) },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        topBar = {
+            RecitLargeTopBar(
+                title = stringResource(R.string.tab_search),
+                scrollBehavior = scrollBehavior,
+                containerColor = RecitTheme.colors.backgroundGrouped,
+            )
+        },
+        containerColor = RecitTheme.colors.backgroundGrouped,
         contentWindowInsets = WindowInsets(0),
     ) { padding ->
         if (user == null) {
@@ -101,7 +107,7 @@ fun SearchScreen(navigator: Navigator) {
                 expanded = false,
                 onExpandedChange = {},
                 modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium),
-                colors = SearchBarDefaults.colors(containerColor = RecitTheme.colors.backgroundDefault),
+                colors = SearchBarDefaults.colors(containerColor = RecitTheme.colors.backgroundGroupedCell),
             ) {}
             SearchSurface(viewModel = viewModel, myUserId = user.id, router = router, navigator = navigator)
         }

@@ -40,7 +40,7 @@ fun ProfileSheet(onClose: () -> Unit, snackbarHostState: SnackbarHostState) {
     val navigator: Navigator = remember(backStack) { Navigator(backStack) }
     // Composed before the stack's own handler, which therefore wins while there is something to pop.
     BackHandler(onBack = onClose)
-    Surface(modifier = Modifier.fillMaxSize(), color = RecitTheme.colors.backgroundSecondary) {
+    Surface(modifier = Modifier.fillMaxSize(), color = RecitTheme.colors.backgroundGroupedElevated) {
         Box(Modifier.fillMaxSize()) {
             NavDisplay(
                 backStack = backStack,

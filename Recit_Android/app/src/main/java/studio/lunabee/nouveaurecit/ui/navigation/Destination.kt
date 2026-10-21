@@ -38,6 +38,8 @@ sealed interface Destination : NavKey {
     @Serializable data object Invitations : Destination
 
     @Serializable data object DeleteAccount : Destination
+
+    @Serializable data object AboutInventaire : Destination
 }
 
 /** `Features/Book/BookAnchor.swift`: what a book screen is opened from. */

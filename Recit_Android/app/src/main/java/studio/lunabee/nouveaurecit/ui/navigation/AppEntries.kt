@@ -14,6 +14,7 @@ import studio.lunabee.nouveaurecit.ui.network.AddFriendsScreen
 import studio.lunabee.nouveaurecit.ui.network.InvitationsScreen
 import studio.lunabee.nouveaurecit.ui.network.NetworkScreen
 import studio.lunabee.nouveaurecit.ui.network.UserScreen
+import studio.lunabee.nouveaurecit.ui.profile.AboutInventaireScreen
 import studio.lunabee.nouveaurecit.ui.profile.DeleteAccountScreen
 import studio.lunabee.nouveaurecit.ui.profile.ProfileScreen
 
@@ -36,4 +37,5 @@ fun EntryProviderScope<NavKey>.appEntries(navigator: Navigator) {
     entry<Destination.AddFriends> { AddFriendsScreen(navigator) }
     entry<Destination.Invitations> { InvitationsScreen(navigator) }
     entry<Destination.DeleteAccount> { DeleteAccountScreen(navigator) }
+    entry<Destination.AboutInventaire> { AboutInventaireScreen(navigator) }
 }

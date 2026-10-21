@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 
-/** `ProfileView`'s state: my user, the count under my name, the notice, and signing out. */
+/** `ProfileView`'s state: my user, the count under my name, and signing out. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     val user: StateFlow<UserEntity?> = container.users.myUser
@@ -28,18 +28,8 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), 0)
 
-    /** `null` until DataStore answers, so a dismissed notice does not flash in at launch. */
-    val isNoticeDismissed: StateFlow<Boolean?> = container.preferences.observeBoolean(NOTICE_DISMISSED_KEY)
-        .map<Boolean, Boolean?> { it }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
-
     private val _isSigningOut: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isSigningOut: StateFlow<Boolean> = _isSigningOut.asStateFlow()
-
-    /** Kept on the device, not on the account: signing out and in again does not bring it back. */
-    fun dismissNotice() {
-        viewModelScope.launch { container.preferences.setBoolean(NOTICE_DISMISSED_KEY, true) }
-    }
 
     /**
      * Drops the session. Run on the application scope: the root swaps this whole tab view for the
@@ -58,7 +48,6 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     companion object {
-        const val NOTICE_DISMISSED_KEY: String = "profile.inventaireNotice.dismissed"
         private const val STOP_TIMEOUT: Long = 5_000
 
         /**

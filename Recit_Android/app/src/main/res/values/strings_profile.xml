@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The Profil tab and the account-deletion screen: French values of ReCIT_iOS/Localizable.xcstrings,
-  keys with '.' turned into '_'. `**…**` marks the bold part of a sentence, as the iOS catalogue does.
+  The Profil and the account-deletion screen: French values of ReCIT_iOS/Localizable.xcstrings,
+  keys with '.' turned into '_'.
 -->
 <resources>
     <string name="nav_profile">Profil</string>
@@ -12,16 +12,29 @@
         <item quantity="other">%d éléments</item>
     </plurals>
 
-    <!-- The inventaire.io notice (feature 0026) -->
-    <string name="profile_inventaire_title">Branché sur inventaire.io</string>
-    <string name="profile_inventaire_dismiss">Masquer</string>
-    <string name="profile_inventaire_commons">Ex-libris range vos livres sur **inventaire.io**, une bibliothèque commune, libre et sans publicité.</string>
-    <string name="profile_inventaire_commons_link">Découvrir inventaire.io</string>
-    <string name="profile_inventaire_data">Chaque livre que vous ajoutez enrichit ses **données ouvertes** : titres, auteur·ices, éditions, que chacun peut réutiliser.</string>
-    <string name="profile_inventaire_data_link">Explorer les données ouvertes</string>
-
+    <string name="profile_about_inventaire">À propos d’inventaire.io</string>
     <string name="profile_logout">Se déconnecter</string>
     <string name="profile_delete_account">Supprimer mon compte</string>
+    <string name="profile_version">Ex-libris · Version %1$s (%2$s)</string>
+
+    <!-- À propos d'inventaire.io (feature 0034) -->
+    <string name="about_title">À propos</string>
+    <string name="about_headline">La bibliothèque derrière Ex-libris</string>
+    <string name="about_tagline">inventaire.io est une bibliothèque commune, libre et sans publicité. Ex-libris y range vos livres.</string>
+    <string name="about_value_commons_title">Une bibliothèque commune</string>
+    <string name="about_value_commons_body">Chacun y inventorie ses livres et choisit qui les voit : ses amis, ses groupes, ou tout le monde.</string>
+    <string name="about_value_account_title">Votre compte est un compte inventaire.io</string>
+    <string name="about_value_account_body">Mêmes identifiants, mêmes livres : tout ce que vous rangez ici se retrouve sur inventaire.io, et inversement.</string>
+    <string name="about_value_data_title">Des données ouvertes</string>
+    <string name="about_value_data_body">Titres, auteur·ices et éditions rejoignent une base libre, reliée à Wikidata, que chacun peut réutiliser.</string>
+    <string name="about_value_software_title">Un logiciel libre, sans publicité</string>
+    <string name="about_value_software_body">Son code est public, il ne revend rien de vous, et il vit des dons de celles et ceux qui l’utilisent.</string>
+    <string name="about_links">Aller plus loin</string>
+    <string name="about_link_website">Visiter inventaire.io</string>
+    <string name="about_link_data">Explorer les données ouvertes</string>
+    <string name="about_link_source">Lire le code source</string>
+    <string name="about_link_donate">Soutenir inventaire.io</string>
+    <string name="about_independence">Ex-libris est une app indépendante : elle s’appuie sur l’API publique d’inventaire.io.</string>
 
     <!-- Deleting the account (feature 0017) -->
     <string name="delete_account_title">Supprimer mon compte</string>

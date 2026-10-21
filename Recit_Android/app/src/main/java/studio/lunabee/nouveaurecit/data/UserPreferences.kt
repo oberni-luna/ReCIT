@@ -17,7 +17,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 /**
  * `UserDefaults` / `@AppStorage`: small per-device answers — a dismissed notice, recent searches.
- * Keys are free-form; a feature names its own (`profile.inventaireNotice.dismissed`, …).
+ * Keys are free-form; a feature names its own (`RecentSearchStore.searches.<user id>`, …).
  */
 class UserPreferences(context: Context) {
     private val store: DataStore<Preferences> = context.dataStore

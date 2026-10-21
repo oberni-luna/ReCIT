@@ -223,8 +223,9 @@ private fun ShelfCard(
     }
 }
 
+/** A copy standing face-on on a plank. Without [onClick] it is an illustration: nothing answers a tap. */
 @Composable
-private fun StandingCover(row: ItemRow, width: Dp, height: Dp, onClick: () -> Unit) {
+internal fun StandingCover(row: ItemRow, width: Dp, height: Dp, onClick: (() -> Unit)?) {
     val shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp)
     Box(
         modifier = Modifier
@@ -232,7 +233,7 @@ private fun StandingCover(row: ItemRow, width: Dp, height: Dp, onClick: () -> Un
             .shadow(elevation = 2.dp, shape = shape)
             .clip(shape)
             .background(ShelfPalette.Parchment)
-            .clickable(onClickLabel = row.title, onClick = onClick),
+            .then(if (onClick != null) Modifier.clickable(onClickLabel = row.title, onClick = onClick) else Modifier),
     ) {
         if (!row.image.isNullOrEmpty()) {
             AsyncImage(model = row.image, contentDescription = row.title, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
@@ -250,7 +251,7 @@ private fun StandingCover(row: ItemRow, width: Dp, height: Dp, onClick: () -> Un
 }
 
 @Composable
-private fun Plank(width: Dp, height: Dp) {
+internal fun Plank(width: Dp, height: Dp) {
     Image(
         painter = painterResource(R.drawable.shelf_plank),
         contentDescription = null,

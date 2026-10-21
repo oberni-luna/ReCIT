@@ -22,9 +22,10 @@ gaps. That section is now left out when empty, the sections are spaced by `mediu
 buttons' row has no vertical inset: from the last thing under the header to the next section's title,
 the distance is one gap whether « Vous êtes le seul admin… » is there or not.
 
-**A pressed book locks two thirds through the hold.** Selection mode used to arm at the very end of the
-0.5 s hold, after the book had stopped growing. It now arms at about 0.33 s: the medium haptic and the
-book's cell land then, while the book is still growing. The growth and the veil keep their timing, so
+**A pressed book locks halfway through the hold.** Selection mode used to arm at the very end of the
+0.5 s hold, after the book had stopped growing. It now arms at 0.25 s, as the veil starts coming in:
+the medium haptic and the book's cell land then, while the book is still growing. (Two thirds through
+was tried first, and still felt late.) The growth and the veil keep their timing, so
 the press lasts exactly as long as before. Lifting from that point opens the book.
 
 ## Technical surface
@@ -40,7 +41,7 @@ the press lasts exactly as long as before. Lifting from that point opens the boo
   anything to show — false only for an admin or member who may leave. `GroupDetailView` emits the section
   on that, with `.listRowInsets(.vertical, .zero)`, and spaces the list with
   `.listSectionSpacing(.custom(DesignSystem.Spacing.medium.rawValue))`. One test in `ReaderGroupTests`.
-- **Press lock.** `ShelfPressRecognizer.armProgress` (2/3) joins `holdDuration` and `focusProgress`; the
+- **Press lock.** `ShelfPressRecognizer.armProgress` (0.5) joins `holdDuration` and `focusProgress`; the
   arm task sleeps to `focusProgress`, fires `onFocusing`, then sleeps to `armProgress` and arms.
   `ShelfRowView` is unchanged but for a comment. ADR 0006 is amended (beat 3).
 - No SwiftData schema change, no new string.

@@ -37,7 +37,9 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
     /// How far through the hold selection mode arms. Before the end, not at it: the book is
     /// still growing when it locks, so the haptic and the cell land while the gesture is
     /// visibly under way rather than after it has stopped. The wind-up itself keeps its length.
-    static let armProgress: Double = 2.0 / 3.0
+    /// Halfway, with the veil — two thirds still felt late. Never below `focusProgress`: the
+    /// focus has to start before the arm.
+    static let armProgress: Double = 0.5
 
     var onPressBegan: ((CGPoint) -> Void)?
     /// The hold is nearly through: bring the focus in ahead of arming.

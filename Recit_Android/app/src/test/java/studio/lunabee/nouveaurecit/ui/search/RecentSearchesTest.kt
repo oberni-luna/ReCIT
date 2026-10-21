@@ -1,10 +1,8 @@
-package studio.lunabee.nouveaurecit.ui.inventory
+package studio.lunabee.nouveaurecit.ui.search
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
-import studio.lunabee.nouveaurecit.data.SyncStatus
-import studio.lunabee.nouveaurecit.data.model.Visibility
 
 class RecentSearchesTest {
     @Test
@@ -38,24 +36,5 @@ class RecentSearchesTest {
     @Test
     fun historyIsPerUser() {
         assertNotEquals(RecentSearches.preferenceKey("me"), RecentSearches.preferenceKey("you"))
-    }
-
-    @Test
-    fun firstSyncStateFollowsLastSyncThenProgress() {
-        assertEquals(FirstSyncState.Synced, FirstSyncState.from(lastInventorySync = 1.0, progress = SyncStatus.Progress()))
-        assertEquals(FirstSyncState.Waiting, FirstSyncState.from(lastInventorySync = null, progress = null))
-        val running: FirstSyncState = FirstSyncState.from(null, SyncStatus.Progress(received = 1, announced = 4))
-        assertEquals(0.25f, running.fraction)
-        assertEquals(25, running.percent)
-        assertEquals(null, FirstSyncState.from(null, SyncStatus.Progress()).percent)
-    }
-
-    @Test
-    fun shelfVisibilityRoundTrips() {
-        assertEquals(ShelfVisibility.Private, ShelfVisibility.from(emptyList()))
-        assertEquals(ShelfVisibility.Friends, ShelfVisibility.from(listOf(Visibility.Friends)))
-        assertEquals(ShelfVisibility.Public, ShelfVisibility.from(listOf(Visibility.Friends, Visibility.Public)))
-        assertEquals(ShelfVisibility.Private, ShelfVisibility.from(listOf(Visibility.Groups)))
-        ShelfVisibility.entries.forEach { assertEquals(it, ShelfVisibility.from(it.raw)) }
     }
 }

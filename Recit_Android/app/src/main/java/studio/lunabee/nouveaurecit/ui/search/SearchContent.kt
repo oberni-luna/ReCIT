@@ -1,4 +1,4 @@
-package studio.lunabee.nouveaurecit.ui.inventory
+package studio.lunabee.nouveaurecit.ui.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,24 +53,31 @@ import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 
 /**
- * `InventorySearchContent` (feature 0014): what the search surface shows for each [SearchPhase] —
- * the recents, the local matches, the three suggestions, and inventaire.io's results.
+ * `SearchContent` (features 0014, 0037): what the Recherche tab shows for each [SearchPhase] — at
+ * rest the recents and « Chez mes amis », then the local matches, the three suggestions, and
+ * inventaire.io's results.
+ *
+ * The empty recent-searches state only shows when there is nothing else: with the carousel or its
+ * invitation on screen, a rest state saying "nothing here" would contradict itself.
  */
 @Composable
-internal fun InventorySearchContent(
-    phase: SearchPhase?,
+internal fun SearchContent(
+    phase: SearchPhase,
     recents: List<String>,
     allItems: List<ItemRow>,
     myUserId: String,
+    friends: FriendsCarouselState,
+    friendsItems: List<ItemRow>,
     remoteState: RemoteSearchState,
     onSelectRecent: (String) -> Unit,
     onClearRecents: () -> Unit,
     onSuggestion: (SearchSuggestion) -> Unit,
     onRetry: () -> Unit,
+    onInvite: () -> Unit,
     onPush: (Destination) -> Unit,
 ) {
     val shownRecents: List<String> = if (phase == SearchPhase.Recents) recents else emptyList()
-    if (phase == SearchPhase.Recents && shownRecents.isEmpty()) {
+    if (phase == SearchPhase.Recents && shownRecents.isEmpty() && friends == FriendsCarouselState.Hidden) {
         Box(Modifier.fillMaxSize().background(RecitTheme.colors.backgroundSecondary), contentAlignment = Alignment.Center) {
             EmptyState(
                 title = stringResource(R.string.inventory_search_recents_empty_title),
@@ -80,7 +87,7 @@ internal fun InventorySearchContent(
         }
         return
     }
-    val localQuery: String? = phase?.localQuery
+    val localQuery: String? = phase.localQuery
     val local: InventorySearchRanking.ItemOutcome? = remember(allItems, localQuery, myUserId) {
         localQuery?.let { InventorySearchRanking.rankItems(allItems, it, myUserId) }
     }
@@ -101,6 +108,7 @@ internal fun InventorySearchContent(
                     SearchQueryRow(icon = Icons.Outlined.Schedule, label = AnnotatedString(recent), onClick = { onSelectRecent(recent) })
                 }
             }
+            searchFriendsSection(state = friends, items = friendsItems, onInvite = onInvite, onPush = onPush)
             if (local != null && localQuery != null && local.items.isNotEmpty()) {
                 item(key = "local.header") {
                     SectionHeader(

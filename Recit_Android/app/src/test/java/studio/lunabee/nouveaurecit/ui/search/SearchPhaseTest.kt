@@ -1,4 +1,4 @@
-package studio.lunabee.nouveaurecit.ui.inventory
+package studio.lunabee.nouveaurecit.ui.search
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -7,38 +7,38 @@ import studio.lunabee.nouveaurecit.data.SearchResult
 
 class SearchPhaseTest {
     @Test
-    fun noSurfaceWhenNotFocusedAndNothingSent() {
-        assertNull(SearchPhase.current(isFocused = false, query = "zola", submittedQuery = null))
+    fun anEmptyFieldIsTheRestState() {
+        assertEquals(SearchPhase.Recents, SearchPhase.current(query = "   ", submittedQuery = null))
     }
 
     @Test
-    fun emptyFocusedFieldShowsRecents() {
-        assertEquals(SearchPhase.Recents, SearchPhase.current(isFocused = true, query = "   ", submittedQuery = null))
+    fun typedWithoutSendingSuggestsWhateverTheFocus() {
+        assertEquals(SearchPhase.Suggesting("zola"), SearchPhase.current(query = "zola", submittedQuery = null))
     }
 
     @Test
     fun belowThresholdIsTyping() {
-        assertEquals(SearchPhase.Typing("zo"), SearchPhase.current(isFocused = true, query = " zo ", submittedQuery = null))
+        assertEquals(SearchPhase.Typing("zo"), SearchPhase.current(query = " zo ", submittedQuery = null))
     }
 
     @Test
     fun threeCharactersSuggest() {
-        assertEquals(SearchPhase.Suggesting("zol"), SearchPhase.current(isFocused = true, query = "zol", submittedQuery = null))
+        assertEquals(SearchPhase.Suggesting("zol"), SearchPhase.current(query = "zol", submittedQuery = null))
     }
 
     @Test
-    fun submittedQueryOutranksFocus() {
-        assertEquals(SearchPhase.Results("zola"), SearchPhase.current(isFocused = false, query = "zola ", submittedQuery = "zola"))
+    fun aSubmittedQueryShowsItsResults() {
+        assertEquals(SearchPhase.Results("zola"), SearchPhase.current(query = "zola ", submittedQuery = "zola"))
     }
 
     @Test
     fun editingAfterSubmitLeavesResults() {
-        assertEquals(SearchPhase.Suggesting("zolas"), SearchPhase.current(isFocused = true, query = "zolas", submittedQuery = "zola"))
+        assertEquals(SearchPhase.Suggesting("zolas"), SearchPhase.current(query = "zolas", submittedQuery = "zola"))
     }
 
     @Test
     fun emptyQueryNeverMatchesASubmission() {
-        assertEquals(SearchPhase.Recents, SearchPhase.current(isFocused = true, query = "", submittedQuery = ""))
+        assertEquals(SearchPhase.Recents, SearchPhase.current(query = "", submittedQuery = ""))
     }
 
     @Test

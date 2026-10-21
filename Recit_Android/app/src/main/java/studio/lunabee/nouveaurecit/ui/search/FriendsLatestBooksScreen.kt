@@ -1,4 +1,4 @@
-package studio.lunabee.nouveaurecit.ui.inventory
+package studio.lunabee.nouveaurecit.ui.search
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -30,25 +30,23 @@ import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
 /**
- * `InventorySearchAllLocalView` — « Tout voir »: every local match for the query, mine first then
- * newest, ranked by the same function as the capped section so the two never disagree.
+ * `FriendsLatestBooksView` — « Tout voir » from « Chez mes amis »: every book my friends have, most
+ * recently added first — the carousel without its cap, each row naming its owner.
  */
 @Composable
-fun LocalSearchResultsScreen(destination: Destination.LocalSearchResults, navigator: Navigator) {
-    val viewModel: LocalSearchResultsViewModel = recitViewModel(key = "localSearch:${destination.query}") {
-        LocalSearchResultsViewModel(it, destination.query)
-    }
-    val state: LocalSearchResultsViewModel.State by viewModel.state.collectAsStateWithLifecycle()
+fun FriendsLatestBooksScreen(navigator: Navigator) {
+    val viewModel: FriendsLatestBooksViewModel = recitViewModel { FriendsLatestBooksViewModel(it) }
+    val items: List<ItemRow> by viewModel.items.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { RecitTopBar(title = stringResource(R.string.inventory_search_local_section), onBack = navigator::pop) },
+        topBar = { RecitTopBar(title = stringResource(R.string.inventory_search_friends_section), onBack = navigator::pop) },
         containerColor = RecitTheme.colors.backgroundSecondary,
     ) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding)) {
-            items(state.items, key = { it.item.id }) { row ->
+            items(items, key = { it.item.id }) { row ->
                 InventoryItemRow(
                     row = row,
-                    showsOwner = row.item.ownerId != state.myUserId,
+                    showsOwner = true,
                     onClick = { navigator.push(Destination.Book(BookAnchor.Item(row.item.id))) },
                 )
                 HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
@@ -57,13 +55,9 @@ fun LocalSearchResultsScreen(destination: Destination.LocalSearchResults, naviga
     }
 }
 
-class LocalSearchResultsViewModel(container: AppContainer, query: String) : ViewModel() {
-    data class State(val items: List<ItemRow>, val myUserId: String?)
-
-    val state: StateFlow<State> = combine(container.inventory.observeAll(), container.users.myUserId) { items, myId ->
-        val ranked: List<ItemRow> = myId?.let {
-            InventorySearchRanking.rankItems(items, query, it, limit = InventorySearchRanking.NO_LIMIT).items
-        }.orEmpty()
-        State(ranked, myId)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, State(emptyList(), null))
+/** Every copy that is not mine, newest first, as the store orders them. */
+class FriendsLatestBooksViewModel(container: AppContainer) : ViewModel() {
+    val items: StateFlow<List<ItemRow>> = combine(container.inventory.observeAll(), container.users.myUserId) { items, myId ->
+        if (myId == null) emptyList() else items.filter { it.item.ownerId != myId }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 }

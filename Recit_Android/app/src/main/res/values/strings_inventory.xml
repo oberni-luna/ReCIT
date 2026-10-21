@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The Inventaire tab (issue 0103): shelves, the unified search, the shelf screen and form.
+  The Inventaire tab (issue 0103): shelves, the shelf screen and form; and the Recherche tab
+  (feature 0037), whose keys keep their inventory_search_ prefix as the iOS catalogue does.
   French values of ReCIT_iOS/Localizable.xcstrings, keys with '.' turned into '_'. Keys other
   features may also need (the sync captions, « Retirer de », « Créer et ajouter », « Ajouté à »)
   carry an `inventory_` / `shelf_` prefix so that no two strings_<feature>.xml define one name.
@@ -28,7 +29,7 @@
     <string name="shelf_empty_action_search_title">Rechercher</string>
     <string name="shelf_empty_action_search_detail">par titre ou auteur</string>
 
-    <!-- Unified search (feature 0014) -->
+    <!-- The search (features 0014 and 0037) -->
     <string name="inventory_search_placeholder">Rechercher</string>
     <string name="inventory_search_recents_section">Recherches récentes</string>
     <string name="inventory_search_recents_clear">Effacer</string>
@@ -48,6 +49,10 @@
     <string name="inventory_search_error_retry">Réessayer</string>
     <string name="inventory_search_results_works">Livres · %1$d</string>
     <string name="inventory_search_results_humans">Auteur·ices · %1$d</string>
+    <string name="inventory_search_friends_section">Chez mes amis</string>
+    <string name="inventory_search_friends_section_cover">%1$s, chez %2$s</string>
+    <string name="inventory_search_friends_section_invite_title">Trouver des lecteurs</string>
+    <string name="inventory_search_friends_section_invite_detail">Les livres de vos amis s\'afficheront ici.</string>
 
     <!-- Shelf screen -->
     <string name="shelf_detail_edit">Modifier</string>

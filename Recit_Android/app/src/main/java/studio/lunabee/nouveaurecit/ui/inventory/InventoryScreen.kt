@@ -1,41 +1,23 @@
 package studio.lunabee.nouveaurecit.ui.inventory
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
@@ -50,129 +32,45 @@ import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
+import studio.lunabee.nouveaurecit.ui.navigation.LocalTabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
 import studio.lunabee.nouveaurecit.ui.profile.ProfileAvatarButton
 
 /**
- * The Inventaire tab — `ShelvesView` / `ShelvesContent` and, while the search is up,
- * `InventorySearchContent` (features 0001, 0005, 0014, 0021, 0027).
+ * The Inventaire tab — `ShelvesView` / `ShelvesContent` (features 0001, 0005, 0021, 0027).
  *
- * Not searching: my first-sync banner, « Étagères » with « Ajouter », the shelf carousel (or the
- * empty-shelf card), then « Tous les livres · N ». The Material 3 `SearchBar` stands in for
- * `.searchable`; expanded, it hosts the unified search. The scan and sort toolbar actions are not
- * part of this port.
+ * My first-sync banner, « Étagères » with « Ajouter », the shelf carousel (or the empty-shelf card),
+ * then « Tous les livres · N ». The search left for a tab of its own (feature 0037); the empty
+ * shelf's « Rechercher » sends there. The scan and sort toolbar actions are not part of this port.
  */
 @Composable
 fun InventoryScreen(navigator: Navigator) {
     val viewModel: InventoryViewModel = recitViewModel { InventoryViewModel(it) }
+    val router: TabRouter = LocalTabRouter.current
     val myUser: UserEntity? by viewModel.myUser.collectAsStateWithLifecycle()
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val focusManager: FocusManager = LocalFocusManager.current
-    val focusRequester: FocusRequester = remember { FocusRequester() }
-    var focusTick: Int by remember { mutableIntStateOf(0) }
-    val expanded: Boolean = viewModel.expanded
-
-    LaunchedEffect(focusTick) {
-        if (focusTick > 0) runCatching { focusRequester.requestFocus() }
-    }
-    BackHandler(enabled = expanded) { viewModel.onExpandedChange(false) }
 
     Scaffold(
-        modifier = if (expanded) Modifier else Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            if (!expanded) RecitLargeTopBar(
-                    title = stringResource(R.string.tab_inventory),
-                    scrollBehavior = scrollBehavior,
-                    navigationIcon = { ProfileAvatarButton() },
-                )
+            RecitLargeTopBar(
+                title = stringResource(R.string.tab_inventory),
+                scrollBehavior = scrollBehavior,
+                navigationIcon = { ProfileAvatarButton() },
+            )
         },
         containerColor = RecitTheme.colors.backgroundDefault,
         contentWindowInsets = WindowInsets(0),
     ) { padding ->
-        val user: UserEntity? = myUser
-        if (user == null) {
+        if (myUser == null) {
             SyncingPlaceholder(message = stringResource(R.string.sync_loading), modifier = Modifier.padding(padding))
             return@Scaffold
         }
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            SearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = viewModel.query,
-                        onQueryChange = viewModel::onQueryChange,
-                        onSearch = {
-                            viewModel.submitKeyboard()
-                            focusManager.clearFocus()
-                        },
-                        expanded = expanded,
-                        onExpandedChange = viewModel::onExpandedChange,
-                        modifier = Modifier.focusRequester(focusRequester),
-                        placeholder = { Text(stringResource(R.string.inventory_search_placeholder)) },
-                        leadingIcon = {
-                            if (expanded) {
-                                IconButton(onClick = { viewModel.onExpandedChange(false) }) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
-                                }
-                            } else {
-                                Icon(Icons.Default.Search, contentDescription = null)
-                            }
-                        },
-                        trailingIcon = {
-                            if (expanded && viewModel.query.isNotEmpty()) {
-                                IconButton(onClick = { viewModel.onQueryChange("") }) {
-                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.inventory_search_recents_clear))
-                                }
-                            }
-                        },
-                    )
-                },
-                expanded = expanded,
-                onExpandedChange = viewModel::onExpandedChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = if (expanded) Spacing.zero else Spacing.medium),
-                colors = SearchBarDefaults.colors(containerColor = RecitTheme.colors.backgroundSecondary),
-            ) {
-                SearchSurface(viewModel = viewModel, myUserId = user.id, navigator = navigator)
-            }
-            if (!expanded) {
-                InventoryContent(
-                    viewModel = viewModel,
-                    navigator = navigator,
-                    onSearch = {
-                        viewModel.onExpandedChange(true)
-                        focusTick += 1
-                    },
-                )
-            }
+        Box(Modifier.fillMaxSize().padding(padding)) {
+            InventoryContent(viewModel = viewModel, navigator = navigator, onSearch = router::openSearch)
         }
     }
-}
-
-@Composable
-private fun SearchSurface(viewModel: InventoryViewModel, myUserId: String, navigator: Navigator) {
-    val recents: List<String> by viewModel.recents.collectAsStateWithLifecycle()
-    val allItems: List<ItemRow> by viewModel.allItems.collectAsStateWithLifecycle()
-    val remoteState: RemoteSearchState by viewModel.remoteState.collectAsStateWithLifecycle()
-    val focusManager: FocusManager = LocalFocusManager.current
-    InventorySearchContent(
-        phase = viewModel.phase,
-        recents = recents,
-        allItems = allItems,
-        myUserId = myUserId,
-        remoteState = remoteState,
-        onSelectRecent = { recent ->
-            viewModel.selectRecent(recent)
-            focusManager.clearFocus()
-        },
-        onClearRecents = viewModel::clearRecents,
-        onSuggestion = { suggestion ->
-            viewModel.submit(suggestion)
-            focusManager.clearFocus()
-        },
-        onRetry = viewModel::retry,
-        onPush = navigator::push,
-    )
 }
 
 @Composable

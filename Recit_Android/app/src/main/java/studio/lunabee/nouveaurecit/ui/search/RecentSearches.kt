@@ -1,4 +1,4 @@
-package studio.lunabee.nouveaurecit.ui.inventory
+package studio.lunabee.nouveaurecit.ui.search
 
 import studio.lunabee.nouveaurecit.data.model.Merges
 

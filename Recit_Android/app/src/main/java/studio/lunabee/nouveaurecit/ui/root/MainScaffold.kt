@@ -83,6 +83,10 @@ fun MainScaffold() {
         }
     }
 
+    LaunchedEffect(router.searchRootRequest) {
+        if (router.searchRootRequest > 0) Navigator(stacks.getValue(AppTab.Search)).popToRoot()
+    }
+
     CompositionLocalProvider(LocalTabRouter provides router) {
         Box(Modifier.fillMaxSize()) {
             Shell(router, stacks, badge, snackbarHostState)

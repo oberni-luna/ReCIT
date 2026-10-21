@@ -16,6 +16,7 @@ sealed interface Destination : NavKey {
     @Serializable data object InventoryRoot : Destination
     @Serializable data object ListsRoot : Destination
     @Serializable data object NetworkRoot : Destination
+    @Serializable data object SearchRoot : Destination
 
     /** The profile sheet's root (feature 0038). */
     @Serializable data object ProfileRoot : Destination
@@ -34,6 +35,9 @@ sealed interface Destination : NavKey {
     @Serializable data class Shelf(val id: String) : Destination
 
     @Serializable data class LocalSearchResults(val query: String) : Destination
+
+    /** « Tout voir » from « Chez mes amis »: every book my friends have, newest first. */
+    @Serializable data object FriendsLatestBooks : Destination
 
     @Serializable data object AddFriends : Destination
 

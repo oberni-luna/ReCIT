@@ -1,14 +1,17 @@
-package studio.lunabee.nouveaurecit.ui.inventory
+package studio.lunabee.nouveaurecit.ui.search
 
 /**
- * `Model/SearchResult/SearchPhase.swift`: what the inventory's search surface shows right now,
- * from whether the field is open, what has been typed, and whether a search was sent for exactly
- * that text. Pure, so the rule is driven by values in a test instead of by a keyboard.
+ * `Model/SearchResult/SearchPhase.swift`: what the Recherche tab shows right now, from what has
+ * been typed and whether a search was sent for exactly that text. Pure, so the rule is driven by
+ * values in a test instead of by a keyboard.
+ *
+ * The focus plays no part since the search has a tab of its own (feature 0037): an empty field is
+ * the tab at rest, keyboard up or down.
  *
  * It owns the three-character threshold, written nowhere else.
  */
 sealed interface SearchPhase {
-    /** The field is open and empty: the recent searches have the screen. */
+    /** The field is empty: the recent searches and « Chez mes amis » have the screen. */
     data object Recents : SearchPhase
 
     /** One or two characters — below the threshold. Nothing new appears. */
@@ -36,16 +39,14 @@ sealed interface SearchPhase {
         const val MINIMUM_QUERY_LENGTH: Int = 3
 
         /**
-         * The phase the screen is in, or `null` when there is no search surface at all. A submitted
-         * query outranks the focus — sending a search hides the keyboard, and the results have to
-         * survive that; editing the query afterwards no longer matches, which leaves `Results`.
+         * The phase the screen is in. A query sent for exactly the text in the field shows its
+         * results; editing the query afterwards no longer matches, which leaves `Results`.
          */
-        fun current(isFocused: Boolean, query: String, submittedQuery: String?): SearchPhase? {
+        fun current(query: String, submittedQuery: String?): SearchPhase {
             val trimmed: String = query.trim()
             if (submittedQuery != null && trimmed.isNotEmpty() && submittedQuery.trim() == trimmed) {
                 return Results(trimmed)
             }
-            if (!isFocused) return null
             return when {
                 trimmed.length >= MINIMUM_QUERY_LENGTH -> Suggesting(trimmed)
                 trimmed.isEmpty() -> Recents

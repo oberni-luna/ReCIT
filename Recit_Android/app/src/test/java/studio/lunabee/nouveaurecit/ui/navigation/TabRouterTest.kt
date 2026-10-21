@@ -29,4 +29,37 @@ class TabRouterTest {
         router.closeProfile()
         assertFalse(router.isProfilePresented)
     }
+
+    @Test
+    fun tapping_recherche_while_it_shows_raises_its_field_once() {
+        val router = TabRouter(selected = AppTab.Search)
+        assertTrue(router.select(AppTab.Search))
+        assertTrue(router.consumeSearchField())
+        assertFalse(router.consumeSearchField())
+    }
+
+    @Test
+    fun arriving_on_recherche_leaves_the_keyboard_down() {
+        val router = TabRouter()
+        router.select(AppTab.Search)
+        assertFalse(router.consumeSearchField())
+    }
+
+    @Test
+    fun opening_the_search_selects_it_at_its_root_with_its_field_and_lowers_the_profile() {
+        val router = TabRouter(isProfilePresented = true)
+        router.openSearch()
+        assertEquals(AppTab.Search, router.selected)
+        assertEquals(1, router.searchRootRequest)
+        assertTrue(router.consumeSearchField())
+        assertFalse(router.isProfilePresented)
+    }
+
+    @Test
+    fun opening_the_network_lowers_the_profile() {
+        val router = TabRouter(selected = AppTab.Search, isProfilePresented = true)
+        router.openNetwork()
+        assertEquals(AppTab.Network, router.selected)
+        assertFalse(router.isProfilePresented)
+    }
 }

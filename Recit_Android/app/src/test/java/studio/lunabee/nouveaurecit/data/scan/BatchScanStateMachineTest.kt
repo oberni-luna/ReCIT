@@ -9,7 +9,7 @@ import org.junit.Test
  * `BatchScanStateMachineTests`: the batch scanner's rules, driven by events instead of a barcode in
  * front of a lens. The repeat-scan gate is why this suite exists — invisible until it breaks, at
  * which point the flow re-offers the book the user is still holding. Time is injected, so the
- * cooldown is asserted rather than slept through. The creation cases (feature 0020) are not ported.
+ * cooldown is asserted rather than slept through.
  */
 class BatchScanStateMachineTest {
     private var instant: Long = 0
@@ -240,6 +240,35 @@ class BatchScanStateMachineTest {
         advance(400)
         assertFalse(machine.apply(BatchScanEvent.CodeSeen(firstCode)))
         assertEquals(BatchScanState.NotFound(firstCode), machine.state)
+    }
+
+    @Test
+    fun aCreatedBookConfirmsOnTheRowThatOfferedItAndCounts() {
+        val machine: BatchScanStateMachine = makeMachine()
+        val created: ScannedBook = book(firstCode).copy(title = "La Main gauche de la nuit")
+        machine.apply(BatchScanEvent.CodeSeen(firstCode))
+        machine.apply(BatchScanEvent.LookupFailed(firstCode))
+
+        assertTrue(machine.apply(BatchScanEvent.CreationFinished(created)))
+        assertEquals(BatchScanState.Added(created), machine.state)
+        assertEquals(1, machine.addedBookCount)
+    }
+
+    /**
+     * The form can outlive the row that opened it — a different barcode may have taken it meanwhile.
+     * What comes back then belongs to nobody, and must not confirm over the book now on screen.
+     */
+    @Test
+    fun aCreationLandingForABookTheRowHasMovedOnFromIsDropped() {
+        val machine: BatchScanStateMachine = makeMachine()
+        machine.apply(BatchScanEvent.CodeSeen(firstCode))
+        machine.apply(BatchScanEvent.LookupFailed(firstCode))
+        advance(400)
+        machine.apply(BatchScanEvent.CodeSeen(secondCode))
+
+        assertFalse(machine.apply(BatchScanEvent.CreationFinished(book(firstCode))))
+        assertEquals(BatchScanState.LookingUp(secondCode), machine.state)
+        assertEquals(0, machine.addedBookCount)
     }
 
     @Test

@@ -9,8 +9,6 @@ package studio.lunabee.nouveaurecit.data.scan
  * the code just handled stays gated until a different one appears or it has been out of frame for
  * [cooldownMillis] — every sighting pushes that deadline back, refused ones included, so a wobbling
  * hand does not count as the book having been put down.
- *
- * The creation of a missing edition (`creationFinished` on iOS, feature 0020) is not ported.
  */
 class BatchScanStateMachine(
     private val cooldownMillis: Long = DEFAULT_COOLDOWN_MILLIS,
@@ -61,6 +59,16 @@ class BatchScanStateMachine(
             BatchScanEvent.AddFailed -> {
                 if (current !is BatchScanState.Adding) return false
                 state = BatchScanState.Resolved(current.book)
+            }
+
+            // Only from the row that offered the creation, and only for the book it was about: a form
+            // left open while the row was evicted by another barcode must not confirm over whatever
+            // took its place.
+            is BatchScanEvent.CreationFinished -> {
+                if (current !is BatchScanState.NotFound || current.code != event.book.code) return false
+                state = BatchScanState.Added(event.book)
+                // A created book is filed like any other, so the bilan counts it like any other.
+                addedBookCount += 1
             }
 
             BatchScanEvent.Cleared -> {

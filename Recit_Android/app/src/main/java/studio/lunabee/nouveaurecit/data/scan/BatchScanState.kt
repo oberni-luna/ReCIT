@@ -46,6 +46,14 @@ sealed interface BatchScanEvent {
 
     data object AddFailed : BatchScanEvent
 
+    /**
+     * The user created the edition inventaire.io was missing, and it landed in their inventory. Its
+     * own event rather than [LookupResolved] + [AddFinished]: the row it answers is [BatchScanState.NotFound],
+     * which no add ever starts from, and what it reports is a book that went straight from unknown to
+     * filed (feature 0020).
+     */
+    data class CreationFinished(val book: ScannedBook) : BatchScanEvent
+
     /** The row has said what it had to say and gives the screen back to the camera. */
     data object Cleared : BatchScanEvent
 }

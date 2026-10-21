@@ -55,9 +55,13 @@ struct SearchTabView: View {
                 destination.viewForDestination($path)
             }
             .navigationTitle("nav.search")
+            // Pinned under the title rather than left to the system. iOS 27 lays the search
+            // tab out in the bar with the others, and a field placed automatically there only
+            // shows once something activates it — selecting the tab left nothing to type in.
             .searchable(
                 text: $searchText,
-                isPresented: $isSearchPresented
+                isPresented: $isSearchPresented,
+                placement: .navigationBarDrawer(displayMode: .always)
             )
             // The keyboard's « rechercher » key sends the query against both books and people
             // — the same thing the third suggestion does, and the same value, so the two

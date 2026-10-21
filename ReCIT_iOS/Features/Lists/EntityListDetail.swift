@@ -73,7 +73,7 @@ struct EntityListDetail: View {
                 )
             }
         }
-        .applyListBackground()
+        .applyListBackground(.backgroundGrouped)
         .onChange(of: matchingLists.isEmpty, popIfTheListIsGone)
     }
 }

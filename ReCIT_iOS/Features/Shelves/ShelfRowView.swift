@@ -259,9 +259,9 @@ struct ShelfRowView: View {
         }
     }
 
-    /// The hold completed: selection mode is on and the book's cell slides in above it. The
-    /// book itself needs nothing here — the spring started at touch-down lands on full size at
-    /// exactly this moment.
+    /// Two thirds through the hold: selection mode locks and the book's cell slides in above
+    /// it. The book itself needs nothing here — the spring started at touch-down carries on to
+    /// full size over the last third, and the veil with it.
     private func arm() {
         withAnimation(.spring(duration: cellDuration, bounce: cellBounce)) { focus.isArmed = true }
     }

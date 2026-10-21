@@ -15,7 +15,7 @@ struct ShelfPressGestureView: UIViewRepresentable {
     var onPressBegan: (CGPoint) -> Void
     /// The hold is nearly through: the surroundings start to blur.
     var onFocusing: () -> Void
-    /// The hold completed: selection mode is on.
+    /// Two thirds through the hold: selection mode is on.
     var onArmed: () -> Void
     /// The finger moved while selection mode is on.
     var onMoved: (CGPoint) -> Void

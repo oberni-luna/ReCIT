@@ -19,7 +19,7 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
     /// has gone somewhere else — a scroll, or the system — and the copy has to be off the
     /// screen before that somewhere-else has moved far. See ADR 0006.
     enum Cancellation {
-        /// The finger lifted before the hold completed.
+        /// The finger lifted before selection mode armed.
         case lifted
         /// The finger travelled past `slop`: the scroll view owns the touch now.
         case travelled
@@ -27,13 +27,17 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
         case interrupted
     }
 
-    /// How long the finger must stay down before selection mode arms.
+    /// How long the press's wind-up lasts: the book growing to full size, the veil coming in.
     static let holdDuration: TimeInterval = 0.5
     /// Travel allowed before arming; past it the touch belongs to the scroll view.
     static let slop: CGFloat = 10
     /// How far through the hold the veil starts coming in. Halfway, not sooner: a single tap
     /// would otherwise flash the whole screen for an instant.
     static let focusProgress: Double = 0.5
+    /// How far through the hold selection mode arms. Before the end, not at it: the book is
+    /// still growing when it locks, so the haptic and the cell land while the gesture is
+    /// visibly under way rather than after it has stopped. The wind-up itself keeps its length.
+    static let armProgress: Double = 2.0 / 3.0
 
     var onPressBegan: ((CGPoint) -> Void)?
     /// The hold is nearly through: bring the focus in ahead of arming.
@@ -64,7 +68,7 @@ final class ShelfPressRecognizer: UIGestureRecognizer {
             try? await Task.sleep(for: .seconds(Self.holdDuration * Self.focusProgress))
             guard let self, Task.isCancelled == false, isArmed == false else { return }
             onFocusing?()
-            try? await Task.sleep(for: .seconds(Self.holdDuration * (1 - Self.focusProgress)))
+            try? await Task.sleep(for: .seconds(Self.holdDuration * (Self.armProgress - Self.focusProgress)))
             guard Task.isCancelled == false, isArmed == false else { return }
             arm()
         }

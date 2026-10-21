@@ -3,6 +3,7 @@
 - Status: Accepted
 - Date: 2026-08-19
 - Amended: 2026-08-24 — the copy follows the shelf while it scrolls (rule 5)
+- Amended: 2026-10-21 — selection mode arms two thirds through the hold, not at its end (beat 3)
 - Supersedes: the interaction half of ADR 0005 (tap-to-select)
 
 ## Context
@@ -30,8 +31,10 @@ from that one constant.
    the carousel keeps the swipe.
 2. **Halfway through the hold** — the veil starts coming in, over the remaining half. Not
    sooner: a single tap would otherwise flash the whole screen for an instant.
-3. **End of the hold** — selection mode arms: a medium impact haptic, and the pressed book's
-   cell fades in above it.
+3. **Two thirds through the hold** (`armProgress`) — selection mode arms: a medium impact
+   haptic, and the pressed book's cell fades in above it. The growth and the veil carry on to
+   the end of the hold: the book locks while it is still visibly growing, so the haptic marks
+   the gesture taking hold rather than a pause after it. Lifting from here opens the book.
 4. **Slide** — the growth follows the finger to the nearest book, one selection tick per book
    crossed. Off the étagère, nothing is selected and selection mode unwinds.
 5. **Lift** — opens the grown book; lifting with nothing selected does nothing.
@@ -42,7 +45,7 @@ list below is the fast path to a book.
 ### A custom recognizer, not `UILongPressGestureRecognizer`
 
 `ShelfPressRecognizer` (a `UIGestureRecognizer` subclass) reports `pressBegan` from
-`touchesBegan`, fires `onFocusing` halfway through a cancellable `Task` sleep, arms at the end,
+`touchesBegan`, fires `onFocusing` halfway through a cancellable `Task` sleep, arms two thirds through,
 then drives `moved` / `ended` / `cancelled`. It sets `cancelsTouchesInView = false`, recognises
 simultaneously with the carousel's pan, and does not claim the touch until it arms — so before
 the hold a swipe scrolls exactly as before. This is the feature's only UIKit code; SwiftUI still

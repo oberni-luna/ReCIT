@@ -22,6 +22,7 @@ import studio.lunabee.nouveaurecit.data.ShelfRepository
 import studio.lunabee.nouveaurecit.data.SyncStatus
 import studio.lunabee.nouveaurecit.data.UserPreferences
 import studio.lunabee.nouveaurecit.data.UserRepository
+import studio.lunabee.nouveaurecit.data.creation.EntityCreationRepository
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.data.sorting.SortSession
 import studio.lunabee.nouveaurecit.network.ApiService
@@ -72,6 +73,9 @@ class AppContainer(context: Context) {
     val shelves: ShelfRepository = ShelfRepository(api, database, optimisticRunner)
     val lists: ListRepository = ListRepository(api, database, optimisticRunner)
     val search: SearchRepository = SearchRepository(api)
+
+    /** Publishing into inventaire.io's open database (feature 0020). Never optimistic. */
+    val creation: EntityCreationRepository = EntityCreationRepository(api = api, publicApi = publicApi)
 
     /** « Ranger mes livres »: app-scoped, so a draft and a run in flight both outlive the screen. */
     val sortSession: SortSession = SortSession(

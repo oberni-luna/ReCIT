@@ -8,6 +8,7 @@ import kotlinx.serialization.serializer
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -46,6 +47,25 @@ class ApiService(
     /** The no-body verb — `DELETE /api/user`. No `Content-Type` either: there is nothing to type. */
     suspend inline fun <reified T> sendEmpty(path: String, method: String): T =
         execute(buildRequest(path, emptyList(), method, ByteArray(0).toRequestBody(null)), serializer())
+
+    /**
+     * One file as `multipart/form-data` — `POST /api/images/upload`. The server indexes its answer by the
+     * form field's name, so the url comes back under [fieldName].
+     */
+    suspend fun upload(
+        path: String,
+        query: List<Pair<String, String>>,
+        fieldName: String,
+        fileName: String,
+        bytes: ByteArray,
+        mediaType: String = "image/jpeg",
+    ): Map<String, String> {
+        val payload: RequestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart(fieldName, fileName, bytes.toRequestBody(mediaType.toMediaType()))
+            .build()
+        return execute(buildRequest(path, query, "POST", payload), serializer())
+    }
 
     fun buildRequest(
         path: String,

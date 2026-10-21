@@ -25,6 +25,8 @@ public extension DesignSystem {
         case backgroundInverse
         case backgroundDisable
         case backgroundSecondary
+        case backgroundGrouped
+        case backgroundGroupedElevated
         case backgroundTinted
         case backgroundTintedInverse
         case backgroundError
@@ -66,6 +68,15 @@ public extension DesignSystem {
                     .init(light:.init("color/gray/200"), dark: .white.opacity(0.1))
             case .backgroundSecondary:
                     .init(light:.init("color/gray/50"), dark:.init("color/gray/800"))
+            // Behind a tab's root list. In dark, pure black, so the system's own cell grey
+            // reads as a card on it — `backgroundSecondary` is nearly that grey and the cells
+            // melted into it.
+            case .backgroundGrouped:
+                    .init(light:.init("color/gray/50"), dark:.init("color/gray/1000"))
+            // The same, behind a list shown in a sheet. A sheet raises its cells to a lighter
+            // grey, so its backdrop sits one step above black — between the two, not on either.
+            case .backgroundGroupedElevated:
+                    .init(light:.init("color/gray/50"), dark:.init("color/gray/900"))
             case .backgroundTinted:
                     .init(light:.init("color/green/100"), dark:.init("color/green/900"))
             case .backgroundTintedInverse:

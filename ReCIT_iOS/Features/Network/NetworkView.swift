@@ -47,7 +47,7 @@ struct NetworkView: View {
                     }
                 }
             }
-            .applyListBackground()
+            .applyListBackground(.backgroundGrouped)
             .navigationTitle("nav.network")
             .toolbar { toolbarContent }
             .navigationDestination(for: NavigationDestination.self) { destination in

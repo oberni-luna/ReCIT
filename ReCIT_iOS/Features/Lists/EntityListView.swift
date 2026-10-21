@@ -72,7 +72,7 @@ struct EntityListView: View {
             .sheet(isPresented: $showNewListModal) {
                 ListFormView()
             }
-            .applyListBackground()
+            .applyListBackground(.backgroundGrouped)
         }
     }
 }

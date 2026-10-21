@@ -9,6 +9,9 @@ import SwiftUI
 extension View {
     /// The screen's own grey, behind a list that no longer paints its own.
     ///
+    /// `backgroundSecondary` unless told otherwise. A tab's root asks for `backgroundGrouped`,
+    /// a sheet for `backgroundGroupedElevated`: the two only differ from the default in dark.
+    ///
     /// The colour is placed in a background that ignores **every** safe-area region, keyboard
     /// included, and not simply handed to `.background(_:)`. A list under a keyboard has its
     /// safe area cut by the keyboard inset, so a background sized on that shrunken frame leaves
@@ -17,11 +20,11 @@ extension View {
     ///
     /// Only the background overflows. `.ignoresSafeArea(.keyboard)` on the list itself would
     /// slide its rows under the keyboard, which is a worse bug than the one it fixes.
-    func applyListBackground() -> some View {
+    func applyListBackground(_ color: DesignSystem.Color = .backgroundSecondary) -> some View {
         self
             .scrollContentBackground(.hidden)
             .background {
-                DesignSystem.Color.backgroundSecondary.color
+                color.color
                     .ignoresSafeArea(.all)
             }
     }

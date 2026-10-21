@@ -73,9 +73,9 @@ struct ProfileView: View {
                             isSupportCardDismissed = true
                         }
                     }
-                    // Inset on every side: the section clips its row to rounded corners, which
-                    // would otherwise cut the card's shadow.
-                    .listRowInsets(top: .small, leading: .small, bottom: .small, trailing: .small)
+                    // Inset above and below, so the section's rounded clip leaves the shadow
+                    // room; not on the sides, so the card lines up with the cells under it.
+                    .listRowInsets(top: .small, bottom: .small)
                     .listRowBackground(Color.clear)
                 }
             }
@@ -161,7 +161,7 @@ struct ProfileView: View {
             ProfileDebugSection(path: $path)
             #endif
         }
-        .applyListBackground()
+        .applyListBackground(.backgroundGroupedElevated)
     }
 
     /// What this sheet shows when there is no user to show: the statement, and a way out of it.
@@ -195,7 +195,7 @@ struct ProfileView: View {
         }
         .padding(.all, .large)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .applyListBackground()
+        .applyListBackground(.backgroundGroupedElevated)
     }
 
     /// Drops the session.

@@ -236,7 +236,7 @@ struct SearchContent: View {
                     message: "inventory.search.recents.empty.message"
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(.backgroundSecondary)
+                .background(.backgroundGrouped)
                 .accessibilityIdentifier("e2e.searchRecents.empty")
             } else {
                 List {
@@ -275,8 +275,8 @@ struct SearchContent: View {
                         )
                     }
                 }
-                .listStyle(.plain)
-                .applyListBackground()
+                .listStyle(.insetGrouped)
+                .applyListBackground(.backgroundGrouped)
                 // A change of phase as one movement: the carousel leaving at the first character,
                 // and the sections arriving, leaving and moving with it. Keyed on the phase's
                 // step rather than on the phase, which carries the query: a keystroke that only

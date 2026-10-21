@@ -48,7 +48,13 @@ struct SearchFriendsSection: View {
                 carousel
             } header: {
                 header(showsSeeAll: showsSeeAll)
+                    // Given back the margin the section gave up, so the title lines up with
+                    // the headers of the inset sections around it.
+                    .padding(.horizontal, .medium)
             }
+            // Edge to edge, like the plain list it used to sit in: an inset section would cut
+            // the row of covers a margin short of the screen's edge.
+            .listSectionMargins(.horizontal, 0)
         }
     }
 

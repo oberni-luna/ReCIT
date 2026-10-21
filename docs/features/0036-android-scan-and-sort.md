@@ -80,7 +80,8 @@ scaffolding and were never committed.
   - ML Kit `barcode-scanning` 17.3.0, the bundled model, so no Play Services download.
   - The manifest asks for `CAMERA`, with the camera feature not required.
 - **`data/scan/`**, pure: `BatchScanStateMachine`, `BatchScanState`, `BatchScanEvent`, `ScannedBook`.
-  - Ported from Swift with its injected clock and every case of its suite, except creation.
+  - Ported from Swift with its injected clock and every case of its suite, except creation — which
+    [0037](0037-android-create-a-missing-book.md) brought back.
   - `InventoryDao.countOwned(editionUri, ownerId)` is the ownership check.
 - **`data/sorting/`**, pure, ported from `Model/Sorting/`: `SortSnapshot`, `SortSectionId`,
   `SortChange`, `SortProjection`, `SortWritePlan`, `SortApplyLedger`, `SortApplyLanding`,
@@ -159,7 +160,8 @@ scaffolding and were never committed.
   - The camera, ML Kit's reading speed, the haptics and the permission screens need a phone.
   - The drag, the panel's gradient and the grid's layout at 360 and 411 dp need eyes.
 - **Not ported:**
-  - creating a book from an unknown scan (0020);
+  - creating a book from an unknown scan (0020) — ported later, in
+    [0037](0037-android-create-a-missing-book.md);
   - the automatic proposal (0008);
   - the tips (0015);
   - the variable blur under the panel;

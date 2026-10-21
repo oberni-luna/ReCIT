@@ -116,7 +116,7 @@ ADR 0001 and ADR 0008 hold as written:
   pass on a device with a test account is owed.
 - **No end-to-end scenario and no instrumented tests** exist for Android.
 - **Not ported:**
-  - creating a book;
+  - creating a book — ported later, in [0037](0037-android-create-a-missing-book.md);
   - automatic sorting (Apple Intelligence has no on-device equivalent here);
   - the batch scanner and manual sorting were ported later, in
     [0036](0036-android-scan-and-sort.md);

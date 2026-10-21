@@ -7,6 +7,11 @@ Note on numbering: this document is `0014` and not `0012`. Feature documents car
 sequence, and `0012` was already taken by [the end-to-end scenario](0012-end-to-end-scenario.md).
 The PRD number and the feature number do not line up for this one.
 
+> **Where the search lives was taken back on 2026-10-21** by
+> [0037 — a Recherche tab](0037-search-tab.md): the field left the inventory for a tab with the
+> system's search role, and the `InventorySearch*` screens became `Search*` in `Features/Search/`.
+> What the search answers, and everything below about how, still holds.
+
 ## What it does
 
 There used to be two searches that did not speak to each other: the inventory tab filtered only

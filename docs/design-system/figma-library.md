@@ -1866,9 +1866,10 @@ Plus rien à trancher : le dernier point ouvert de la passe (« Tout voir ») l'
 
 ## Passes Figma dues — recherche unifiée (au 2026-09-11)
 
-1. **La tab bar à 3 onglets.** L'onglet Recherche était caché en surcharge d'instance ; il est **supprimé du code**
-   depuis l'issue 0074. La variante de `Chrome / Tab Bar` à trois onglets est maintenant due, ce n'est plus un
-   raccourci mais un écart.
+1. **La tab bar.** ~~La variante à trois onglets~~ — **dépassée le 2026-10-21** : l'onglet Recherche, supprimé à
+   l'issue 0074, est revenu avec la feature 0037, sous le rôle système `.search`. Ce qui est dû maintenant est une
+   barre Inventaire / Listes / Réseau / Réglages **plus une pastille loupe détachée** au bout, et sa forme repliée
+   quand Recherche est actif (un bouton pour les autres onglets, le champ à côté). Voir D-R6.
 2. **L'écran « Tout voir ».** La section `Recherche unifiée` (`334:8624`) n'a pas de frame pour lui. Il en faut une :
    barre de navigation avec retour et titre en ligne « Dans mes livres et chez mes amis », liste simple de rangées
    `Cell / Inventory` (l'exemplaire d'un ami nommant son propriétaire), plus la variante d'en-tête de section portant
@@ -1886,6 +1887,7 @@ Plus rien à trancher : le dernier point ouvert de la passe (« Tout voir ») l'
 
 | # | Où | Constat | Statut |
 |---|---|---|---|
+| D-R6 | `Features/MainNavigation/MainTabView.swift` — `TabConfig.search` | Depuis la feature 0037 (2026-10-21), la recherche est un onglet à rôle `.search` qu'iOS 26 pose **à part**, en pastille, au bout de la barre ; actif, il replie les autres onglets en un bouton et met le champ en bas. `Chrome / Tab Bar` (`25:234`) a encore `Active ∈ {Inventaire, Listes, Réglages, Recherche}` : ni Réseau, ni pastille détachée, ni forme repliée. Le carrousel « Chez mes amis » (cellules `SortBookCardView`) et son invitation n'ont pas de frame non plus | ouverte — le code fait foi |
 | D-R1 | ~~`AppModels/Search/SearchModel.swift:20`~~ | `searchLocalInventory(query:modelContext:)` n'est **appelé par personne**. Le temps 2 de cette maquette est exactement son emploi | **résolue** le 2026-09-11 (issue 0074) — supprimée plutôt que ressuscitée : la section locale lit les `@Query` de l'inventaire via `InventorySearchRanking`, une seconde requête aurait cassé la réactivité qu'ADR 0001 demande |
 | D-R2 | `Features/Search/SearchView.swift:34` | Le seuil distant est à **3** caractères ; la maquette proposait 2 | **close** le 2026-09-11 — le code fait foi, la maquette passe à 3 |
 | D-R3 | ~~`Features/Search/SearchView.swift:67-72`~~ | Doublon de **D19** (chaîne non localisée + `HStack(spacing: 12)` littéral) | **résolue** le 2026-09-11 (issue 0074) — voir D19 |

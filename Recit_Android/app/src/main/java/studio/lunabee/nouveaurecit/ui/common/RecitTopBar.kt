@@ -22,7 +22,8 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
  *   (pass [scrollBehavior] and `Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)`);
  * - [RecitTopBar] is `.inline` — a pushed screen, centred, with the `Back` chevron.
  *
- * `actions` is the toolbar: `.primaryAction` / `.confirmationAction` items go there.
+ * `actions` is the toolbar: `.primaryAction` / `.confirmationAction` items go there;
+ * `navigationIcon` is `.topBarLeading`, shown when there is no back button.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,13 +31,14 @@ fun RecitLargeTopBar(
     title: String,
     scrollBehavior: TopAppBarScrollBehavior,
     onBack: (() -> Unit)? = null,
+    navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     LargeTopAppBar(
         title = {
             Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
-        navigationIcon = { if (onBack != null) BackButton(onBack) },
+        navigationIcon = { if (onBack != null) BackButton(onBack) else navigationIcon() },
         actions = actions,
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(

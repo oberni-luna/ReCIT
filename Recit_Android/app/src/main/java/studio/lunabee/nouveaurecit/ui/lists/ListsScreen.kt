@@ -66,6 +66,7 @@ import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.profile.ProfileAvatarButton
 
 /**
  * `EntityListView` — the Listes tab: the placeholder until the first lists sync, the empty state of
@@ -92,6 +93,7 @@ fun ListsScreen(navigator: Navigator) {
             RecitLargeTopBar(
                 title = stringResource(R.string.nav_lists),
                 scrollBehavior = scrollBehavior,
+                navigationIcon = { ProfileAvatarButton() },
                 actions = {
                     IconButton(onClick = { showsForm = true }) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add))

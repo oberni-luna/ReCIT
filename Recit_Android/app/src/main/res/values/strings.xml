@@ -11,7 +11,6 @@
     <string name="tab_inventory">Inventaire</string>
     <string name="tab_lists">Listes</string>
     <string name="tab_community">Réseau</string>
-    <string name="tab_profile">Profil</string>
 
     <!-- Common actions -->
     <string name="action_back">Retour</string>

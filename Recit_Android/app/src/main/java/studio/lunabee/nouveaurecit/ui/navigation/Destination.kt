@@ -12,10 +12,12 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed interface Destination : NavKey {
-    /** The four tab roots. */
+    /** The tab roots. */
     @Serializable data object InventoryRoot : Destination
     @Serializable data object ListsRoot : Destination
     @Serializable data object NetworkRoot : Destination
+
+    /** The profile sheet's root (feature 0038). */
     @Serializable data object ProfileRoot : Destination
 
     @Serializable data class Author(val uri: String) : Destination

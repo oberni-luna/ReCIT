@@ -1,9 +1,13 @@
 package studio.lunabee.nouveaurecit.ui.root
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -16,12 +20,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -42,23 +46,27 @@ import studio.lunabee.nouveaurecit.ui.common.RecitSnackbar
 import studio.lunabee.nouveaurecit.ui.common.RecitSnackbarVisuals
 import studio.lunabee.nouveaurecit.ui.common.SnackMessage
 import studio.lunabee.nouveaurecit.ui.navigation.AppTab
+import studio.lunabee.nouveaurecit.ui.navigation.LocalTabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.appEntries
+import studio.lunabee.nouveaurecit.ui.profile.ProfileSheet
 
 /**
- * `MainTabView`: a `NavigationBar` over four tabs, each owning its back stack — iOS's one
+ * `MainTabView`: a `NavigationBar` over the tabs, each owning its back stack — iOS's one
  * `NavigationStack(path:)` per tab. Switching tab keeps every stack where it was; re-selecting the
- * current tab pops it to its root, as tapping a selected tab does on iOS.
+ * current tab pops it to its root, as tapping a selected tab does on iOS. The [TabRouter] says which
+ * tab shows and whether the profile sheet is up over them (feature 0038).
  *
  * Failures reported by background writes, and every sentence a screen wants said, surface here once
- * as a snackbar.
+ * as a snackbar — in the profile sheet while it is up, since it covers the shell's.
  */
 @Composable
 fun MainScaffold() {
     val container: AppContainer = LocalAppContainer.current
     val messenger: Messenger = LocalMessenger.current
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
-    var selected: AppTab by rememberSaveable { mutableStateOfTab() }
+    val router: TabRouter = rememberSaveable(saver = TabRouter.Saver) { TabRouter() }
     val stacks: Map<AppTab, NavBackStack<NavKey>> = AppTab.entries.associateWith { tab -> rememberNavBackStack(tab.root) }
     val badge: Int by container.users.receivedRequestCount.collectAsState(initial = 0)
     val genericError: String = stringResource(R.string.error_generic)
@@ -75,9 +83,31 @@ fun MainScaffold() {
         }
     }
 
+    CompositionLocalProvider(LocalTabRouter provides router) {
+        Box(Modifier.fillMaxSize()) {
+            Shell(router, stacks, badge, snackbarHostState)
+            AnimatedVisibility(
+                visible = router.isProfilePresented,
+                enter = slideInVertically { it },
+                exit = slideOutVertically { it },
+            ) {
+                ProfileSheet(onClose = router::closeProfile, snackbarHostState = snackbarHostState)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Shell(
+    router: TabRouter,
+    stacks: Map<AppTab, NavBackStack<NavKey>>,
+    badge: Int,
+    snackbarHostState: SnackbarHostState,
+) {
+    val selected: AppTab = router.selected
     Scaffold(
         contentWindowInsets = WindowInsets(0),
-        snackbarHost = { SnackbarHost(snackbarHostState) { RecitSnackbar(it) } },
+        snackbarHost = { if (!router.isProfilePresented) SnackbarHost(snackbarHostState) { RecitSnackbar(it) } },
         bottomBar = {
             NavigationBar(containerColor = RecitTheme.colors.backgroundSecondary) {
                 AppTab.entries.forEach { tab ->
@@ -85,7 +115,7 @@ fun MainScaffold() {
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
-                            if (isSelected) Navigator(stacks.getValue(tab)).popToRoot() else selected = tab
+                            if (router.select(tab)) Navigator(stacks.getValue(tab)).popToRoot()
                         },
                         icon = {
                             BadgedBox(badge = { if (tab == AppTab.Network && badge > 0) Badge { Text("$badge") } }) {
@@ -124,5 +154,3 @@ private fun TabContent(backStack: NavBackStack<NavKey>) {
         entryProvider = entryProvider { appEntries(navigator) },
     )
 }
-
-private fun mutableStateOfTab() = androidx.compose.runtime.mutableStateOf(AppTab.Inventory)

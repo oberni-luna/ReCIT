@@ -49,6 +49,7 @@ import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.profile.ProfileAvatarButton
 
 class NetworkViewModel(private val container: AppContainer) : ViewModel() {
     val invitations: StateFlow<List<UserEntity>> = container.users.observeByRelation(UserRelation.RequestReceived)
@@ -94,7 +95,11 @@ fun NetworkScreen(navigator: Navigator) {
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            RecitLargeTopBar(title = stringResource(R.string.network_nav_network), scrollBehavior = scrollBehavior) {
+            RecitLargeTopBar(
+                title = stringResource(R.string.network_nav_network),
+                scrollBehavior = scrollBehavior,
+                navigationIcon = { ProfileAvatarButton() },
+            ) {
                 IconButton(onClick = { navigator.push(Destination.AddFriends) }) {
                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.network_add_friends))
                 }

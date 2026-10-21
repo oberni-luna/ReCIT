@@ -51,6 +51,7 @@ import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.profile.ProfileAvatarButton
 
 /**
  * The Inventaire tab — `ShelvesView` / `ShelvesContent` and, while the search is up,
@@ -79,7 +80,11 @@ fun InventoryScreen(navigator: Navigator) {
     Scaffold(
         modifier = if (expanded) Modifier else Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            if (!expanded) RecitLargeTopBar(title = stringResource(R.string.tab_inventory), scrollBehavior = scrollBehavior)
+            if (!expanded) RecitLargeTopBar(
+                    title = stringResource(R.string.tab_inventory),
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = { ProfileAvatarButton() },
+                )
         },
         containerColor = RecitTheme.colors.backgroundDefault,
         contentWindowInsets = WindowInsets(0),

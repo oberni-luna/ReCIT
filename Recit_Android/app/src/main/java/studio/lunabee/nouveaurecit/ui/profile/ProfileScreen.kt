@@ -14,8 +14,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,13 +45,16 @@ import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
+import studio.lunabee.nouveaurecit.ui.navigation.LocalTabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
 
 /**
  * `ProfileView`: the account, « À propos d’inventaire.io » (feature 0034), signing out, the door to
  * deleting the account (feature 0017) in its own card away from signing out, and the version.
  *
- * Signing out needs no navigation: the root swaps the tabs for the welcome screen as soon as the
+ * It lives in the profile sheet (feature 0038), closed by « Fermer » at the top left. Signing out
+ * needs no navigation: the root swaps the tabs, sheet included, for the welcome screen as soon as the
  * session goes, and forgets the user on the way (feature 0025). The current-transactions section and
  * the debug section of iOS are not ported.
  */
@@ -60,10 +65,21 @@ fun ProfileScreen(navigator: Navigator) {
     val itemCount: Int by viewModel.itemCount.collectAsStateWithLifecycle()
     val isSigningOut: Boolean by viewModel.isSigningOut.collectAsStateWithLifecycle()
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val router: TabRouter = LocalTabRouter.current
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { RecitLargeTopBar(title = stringResource(R.string.nav_profile), scrollBehavior = scrollBehavior) },
+        topBar = {
+            RecitLargeTopBar(
+                title = stringResource(R.string.nav_profile),
+                scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    IconButton(onClick = router::closeProfile) {
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_close))
+                    }
+                },
+            )
+        },
         containerColor = RecitTheme.colors.backgroundSecondary,
     ) { padding: PaddingValues ->
         LazyColumn(

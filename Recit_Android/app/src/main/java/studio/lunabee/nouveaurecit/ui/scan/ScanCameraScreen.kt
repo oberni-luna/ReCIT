@@ -36,6 +36,8 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.createbook.CreateBookScreen
+import studio.lunabee.nouveaurecit.ui.createbook.CreateBookSession
 
 /**
  * `BatchScanCameraView` (feature 0007): the live feed, and the one book rising over it that is
@@ -45,11 +47,15 @@ import studio.lunabee.nouveaurecit.ui.common.recitViewModel
  *
  * « Terminer » — or the back gesture — ends the session: [onFinished] is told how many books it
  * added and whether the bilan is due.
+ *
+ * « Nouveau livre » (feature 0020) takes the feed's place while it is up: the camera is released, which
+ * the cover photograph needs, and no barcode counts until the form goes.
  */
 @Composable
 fun ScanCameraScreen(onOpenBook: (ScannedBook) -> Unit, onFinished: (addedBookCount: Int, presentsTally: Boolean) -> Unit) {
     val viewModel: ScanViewModel = recitViewModel { ScanViewModel(it) }
     val state: BatchScanState by viewModel.state.collectAsStateWithLifecycle()
+    val creation: CreateBookSession? by viewModel.creation.collectAsStateWithLifecycle()
     val cameraAccess: CameraAccessState = rememberCameraAccess()
     val haptics: HapticFeedback = LocalHapticFeedback.current
     val messenger: Messenger = LocalMessenger.current
@@ -78,6 +84,11 @@ fun ScanCameraScreen(onOpenBook: (ScannedBook) -> Unit, onFinished: (addedBookCo
     }
     BackHandler(onBack = finish)
 
+    creation?.let { session ->
+        CreateBookScreen(session = session, onClose = viewModel::closeCreation)
+        return
+    }
+
     Box(Modifier.fillMaxSize().background(ScanOverlayPalette.Ground)) {
         when (cameraAccess.access) {
             CameraAccess.Granted -> {
@@ -86,6 +97,7 @@ fun ScanCameraScreen(onOpenBook: (ScannedBook) -> Unit, onFinished: (addedBookCo
                     state = state,
                     onOpen = onOpenBook,
                     onAdd = viewModel::addPendingBook,
+                    onCreate = viewModel::openCreation,
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
@@ -110,7 +122,13 @@ fun ScanCameraScreen(onOpenBook: (ScannedBook) -> Unit, onFinished: (addedBookCo
  * fading a veil in behind it.
  */
 @Composable
-private fun ResultSlot(state: BatchScanState, onOpen: (ScannedBook) -> Unit, onAdd: () -> Unit, modifier: Modifier = Modifier) {
+private fun ResultSlot(
+    state: BatchScanState,
+    onOpen: (ScannedBook) -> Unit,
+    onAdd: () -> Unit,
+    onCreate: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -126,7 +144,7 @@ private fun ResultSlot(state: BatchScanState, onOpen: (ScannedBook) -> Unit, onA
             label = "scan.slot",
         ) { target ->
             if (target.showsRow) {
-                ScanResultRow(state = target, onOpen = onOpen, onAdd = onAdd)
+                ScanResultRow(state = target, onOpen = onOpen, onAdd = onAdd, onCreate = onCreate)
             } else {
                 ScanHint()
             }

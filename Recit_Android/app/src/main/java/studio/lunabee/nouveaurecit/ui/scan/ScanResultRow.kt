@@ -28,6 +28,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,13 +68,15 @@ object ScanOverlayPalette {
  * round button that files it. While the lookup runs, a placeholder book is drawn as a skeleton so the
  * row keeps its height. Tapping the text opens the book once there is one.
  *
- * An unknown edition says so and offers nothing: creating a book (feature 0020) is not ported.
+ * An unknown edition says so, and its button — in the place of the « + » — opens « Nouveau livre »
+ * (feature 0020). It carries the same glyph; only its label tells the two apart, as on iOS.
  */
 @Composable
 fun ScanResultRow(
     state: BatchScanState,
     onOpen: (ScannedBook) -> Unit,
     onAdd: () -> Unit,
+    onCreate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val book: ScannedBook = state.book ?: ScannedBook.Placeholder
@@ -125,7 +129,13 @@ fun ScanResultRow(
                 modifier = Modifier.redacted(isLookingUp),
             )
         }
-        if (state !is BatchScanState.NotFound) ScanAddButton(state = state, onClick = onAdd)
+        if (state is BatchScanState.NotFound) {
+            ScanRoundButton(onClick = onCreate, enabled = true, contentDescription = stringResource(R.string.create_book_row_action)) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            }
+        } else {
+            ScanAddButton(state = state, onClick = onAdd)
+        }
     }
 }
 
@@ -149,6 +159,18 @@ private fun Modifier.redacted(isRedacted: Boolean): Modifier =
 @Composable
 private fun ScanAddButton(state: BatchScanState, onClick: () -> Unit) {
     val enabled: Boolean = state is BatchScanState.Resolved || state is BatchScanState.Added
+    ScanRoundButton(onClick = onClick, enabled = enabled, contentDescription = stringResource(R.string.action_add_to_inventory)) {
+        if (state is BatchScanState.Adding) {
+            CircularProgressIndicator(color = ScanOverlayPalette.Tint, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
+        } else {
+            Icon(imageVector = if (state is BatchScanState.Added) Icons.Default.Check else Icons.Default.Add, contentDescription = null)
+        }
+    }
+}
+
+/** The row's round button, on the tinted surface. The label goes on the button, not on its glyph. */
+@Composable
+private fun ScanRoundButton(onClick: () -> Unit, enabled: Boolean, contentDescription: String, content: @Composable () -> Unit) {
     FilledIconButton(
         onClick = onClick,
         enabled = enabled,
@@ -159,17 +181,9 @@ private fun ScanAddButton(state: BatchScanState, onClick: () -> Unit) {
             disabledContainerColor = ScanOverlayPalette.TintedSurface.copy(alpha = 0.5f),
             disabledContentColor = ScanOverlayPalette.Tint.copy(alpha = 0.5f),
         ),
-        modifier = Modifier.size(56.dp),
-    ) {
-        if (state is BatchScanState.Adding) {
-            CircularProgressIndicator(color = ScanOverlayPalette.Tint, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
-        } else {
-            Icon(
-                imageVector = if (state is BatchScanState.Added) Icons.Default.Check else Icons.Default.Add,
-                contentDescription = stringResource(R.string.action_add_to_inventory),
-            )
-        }
-    }
+        modifier = Modifier.size(56.dp).semantics { this.contentDescription = contentDescription },
+        content = content,
+    )
 }
 
 /** `ScanHintView`: what to point the phone at, in the place the book will take. */

@@ -39,7 +39,7 @@ struct ShelfFocusBookCell: View {
                     .lineLimit(2)
                     .padding(.bottom, .xSmall)
 
-                Text(edition.authorNames.joined(separator: ", "))
+                Text(edition.displayedAuthorNames.joined(separator: ", "))
                     .textStyle(.footnote200)
                     .lineLimit(1)
             }

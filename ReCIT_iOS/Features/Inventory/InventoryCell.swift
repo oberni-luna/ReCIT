@@ -31,8 +31,11 @@ struct InventoryCell: View {
                                 .textStyle(.content300)
                         }
 
-                        Text(edition.authorNames.joined(separator: ", "))
-                            .textStyle(.footnote200)
+                        let authorNames: [String] = edition.displayedAuthorNames
+                        if authorNames.isEmpty == false {
+                            Text(authorNames.joined(separator: ", "))
+                                .textStyle(.footnote200)
+                        }
 
                     }
                     .foregroundStyle(.foregroundDefault)

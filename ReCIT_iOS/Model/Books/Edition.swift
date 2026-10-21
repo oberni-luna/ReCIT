@@ -36,6 +36,19 @@ public class Edition: Identifiable, Entity {
         Array(Set(works.flatMap(\.authors)))
     }
 
+    /// The names a row of books shows under the title: the item snapshot's, in the server's
+    /// order, or — for an edition no snapshot has named yet — those of its works' authors.
+    ///
+    /// The fallback is not decoration. An edition first fetched as an entity (the scanner, the
+    /// search, the book screen) has no names: `init(entityDto:)` has none to give. Until a
+    /// snapshot fills them in, its row used to show a title and nothing under it.
+    var displayedAuthorNames: [String] {
+        guard authorNames.isEmpty else { return authorNames }
+        return authors.map(\.name)
+            .filter { $0.isEmpty == false }
+            .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+    }
+
     var workUris: [String] {
         if self.works.isEmpty == false {
             Array(Set(self.works.map(\.uri)))
@@ -60,7 +73,7 @@ public class Edition: Identifiable, Entity {
             title: entitySnapshotDTO.`entity:title`,
             subtitle: entitySnapshotDTO.`entity:subtitle`,
             lang: entitySnapshotDTO.`entity:lang`,
-            authorNames: entitySnapshotDTO.`entity:authors`?.components(separatedBy: ",") ?? [],
+            authorNames: entitySnapshotDTO.authorNames,
             image: apiService.absoluteImageUrl(entitySnapshotDTO.`entity:image`),
             series: entitySnapshotDTO.`entity:series`
         )
@@ -78,6 +91,14 @@ public class Edition: Identifiable, Entity {
             authorNames: [],
             image: apiService.absoluteImageUrl(entityDto.image?.url ?? "")
         )
+    }
+
+    /// Takes the author names an item's snapshot carries. The entity never gives any, so the
+    /// snapshot is their only source; a snapshot that names none leaves the ones held.
+    func mergeAuthorNames(from snapshot: EntitySnapshotDTO) {
+        let names: [String] = snapshot.authorNames
+        guard names.isEmpty == false else { return }
+        authorNames = names
     }
 
     /// Adds the works this edition is not filed under yet. By uri, so asking twice adds nothing.

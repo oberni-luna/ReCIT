@@ -83,7 +83,7 @@ public final class InventoryItem{
         self.owner = forUser
         self.searchIndex = InventoryItem.buildSearchIndex(
             ownerUsername: forUser.username,
-            authorNames: itemDTO.snapshot.`entity:authors`?.components(separatedBy: ",") ?? [],
+            authorNames: itemDTO.snapshot.authorNames,
             title: itemDTO.snapshot.`entity:title`,
             subtitle: itemDTO.snapshot.`entity:subtitle`
         )
@@ -103,7 +103,7 @@ public final class InventoryItem{
         }
         searchIndex = InventoryItem.buildSearchIndex(
             ownerUsername: forUser.username,
-            authorNames: itemDTO.snapshot.`entity:authors`?.components(separatedBy: ",") ?? [],
+            authorNames: itemDTO.snapshot.authorNames,
             title: itemDTO.snapshot.`entity:title`,
             subtitle: itemDTO.snapshot.`entity:subtitle`
         )

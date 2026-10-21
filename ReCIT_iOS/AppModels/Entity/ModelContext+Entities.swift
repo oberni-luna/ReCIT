@@ -79,10 +79,13 @@ extension ModelContext {
     /// The edition an inventory item names, from the store when it is there, otherwise made from
     /// the item's snapshot.
     ///
-    /// An edition already held is left as it is: the snapshot is the item's copy of a few of the
+    /// An edition already held keeps its fields: the snapshot is the item's copy of a few of the
     /// entity's fields, and the entity itself — fetched by `EntityModel` — is the better source.
+    /// Except its author names, which the entity never carries: an edition the scanner fetched
+    /// before the copy was added has none, and only the snapshot can give them.
     func edition(uri: String, snapshot: EntitySnapshotDTO, apiService: APIServicing) throws -> Edition {
         if let edition = try fetch(FetchDescriptor<Edition>(predicate: #Predicate { $0.uri == uri })).first {
+            edition.mergeAuthorNames(from: snapshot)
             return edition
         }
         let edition: Edition = .init(uri: uri, entitySnapshotDTO: snapshot, apiService: apiService)

@@ -143,6 +143,7 @@ final class InventoryModel: OptimisticMutating {
                 myItem.update(from: itemDTO, forUser: forUser, apiService: apiService)
                 if assignsShelves { myItem.shelves = shelves }
                 myItem.edition?.mergeWorks([relatedWork])
+                myItem.edition?.mergeAuthorNames(from: itemDTO.snapshot)
             } else {
                 let edition: Edition = try modelContext.edition(uri: itemDTO.entity, snapshot: itemDTO.snapshot, apiService: apiService)
                 let myItem: InventoryItem = .init(itemDTO: itemDTO, forUser: forUser, edition: edition)

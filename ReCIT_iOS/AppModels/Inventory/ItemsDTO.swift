@@ -42,4 +42,13 @@ struct EntitySnapshotDTO: Codable {
     let `entity:ordinal`: String?
     let `entity:worksUris`: [String]?
     let `entity:authorsUris`: [String]?
+
+    /// `entity:authors` as names: the server joins them with commas, and spaces around them
+    /// are not part of a name.
+    var authorNames: [String] {
+        (`entity:authors` ?? "")
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { $0.isEmpty == false }
+    }
 }

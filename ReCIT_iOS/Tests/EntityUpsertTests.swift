@@ -136,6 +136,58 @@ struct EntityUpsertTests {
         #expect(try context.fetch(FetchDescriptor<Edition>()).count == 1)
     }
 
+    @Test("A held edition with no author names takes the snapshot's")
+    func snapshotFillsTheHeldEditionsAuthorNames() throws {
+        let context: ModelContext = try TestStore.makeContext()
+        // What the scanner leaves behind: fetched as an entity, so nobody named its authors.
+        let held: Edition = Fixture.edition(uri: "isbn:1", title: "Mille plateaux")
+        context.insert(held)
+        try context.save()
+
+        let snapshot: EntitySnapshotDTO = try JSONDecoder().decode(
+            EntitySnapshotDTO.self,
+            from: Data(#"{"entity:title":"Mille plateaux","entity:authors":"Gilles Deleuze, Félix Guattari"}"#.utf8)
+        )
+        let edition: Edition = try context.edition(uri: "isbn:1", snapshot: snapshot, apiService: MockAPIService())
+
+        #expect(edition === held)
+        #expect(held.authorNames == ["Gilles Deleuze", "Félix Guattari"])
+    }
+
+    @Test("A snapshot that names no author leaves the held names alone")
+    func silentSnapshotKeepsAuthorNames() throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let held: Edition = Fixture.edition(uri: "isbn:1", title: "Dune", authorNames: ["Frank Herbert"])
+        context.insert(held)
+        try context.save()
+
+        let snapshot: EntitySnapshotDTO = try JSONDecoder().decode(
+            EntitySnapshotDTO.self,
+            from: Data(#"{"entity:title":"Dune","entity:authors":" , "}"#.utf8)
+        )
+        _ = try context.edition(uri: "isbn:1", snapshot: snapshot, apiService: MockAPIService())
+
+        #expect(held.authorNames == ["Frank Herbert"])
+    }
+
+    @Test("An edition nobody named falls back on its works' authors, in order")
+    func displayedAuthorNamesFallBackOnWorks() throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let work: Work = .init(uri: "wd:W1", lastrevid: 1, title: "Mille plateaux")
+        work.authors = [
+            .init(uri: "wd:A2", lastrevid: 1, name: "Guattari"),
+            .init(uri: "wd:A1", lastrevid: 1, name: "Deleuze")
+        ]
+        let edition: Edition = Fixture.edition(uri: "isbn:1")
+        edition.works = [work]
+        context.insert(edition)
+
+        #expect(edition.displayedAuthorNames == ["Deleuze", "Guattari"])
+
+        edition.authorNames = ["Gilles Deleuze", "Félix Guattari"]
+        #expect(edition.displayedAuthorNames == ["Gilles Deleuze", "Félix Guattari"])
+    }
+
     @Test("Upserting an edition adds its works without doubling them")
     func editionUpsertMergesWorks() throws {
         let context: ModelContext = try TestStore.makeContext()

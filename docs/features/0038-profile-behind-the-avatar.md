@@ -78,4 +78,4 @@ Nothing is persisted and nothing talks to the server.
   builds only.
 - **Figma** — D-R7 in `docs/design-system/figma-library.md`: the mocked tab bar still has a Profil
   tab, and no screen has the avatar.
-- **Android** (`Recit_Android/`) keeps its Profil tab.
+- **Android** (`Recit_Android/`) followed in [0041](0041-android-catches-up-with-ios.md), with an overlay that cannot be swiped down.

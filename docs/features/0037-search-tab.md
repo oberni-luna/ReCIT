@@ -96,4 +96,4 @@ involved.
   Not part of the spike's criteria, left alone.
 - **Figma** — D-R6 in `docs/design-system/figma-library.md`: no tab bar with the detached search
   pill, no frame for the carousel or its invitation.
-- **Android** (`Recit_Android/`) is untouched.
+- **Android** (`Recit_Android/`) followed in [0041](0041-android-catches-up-with-ios.md).

@@ -127,7 +127,7 @@ line over the button if it failed. Backing out of the App Store's own sheet says
   books, the `List` row insets, the sheet's pinned button, a purchase against `Donations.storekit` and the
   thank-you were not seen.
 - **No way back to the sheet** once the card is put away. P1 shows none; a permanent row would be the place.
-- **Android**: not ported.
+- **Android**: À propos and the version ported in [0041](0041-android-catches-up-with-ios.md); the donations not.
 - The end-to-end scenario was not played (on request only), nor extended.
 - `docs/design-system/figma-library.md` was not updated with this implementation: the file was being edited in
   another session.

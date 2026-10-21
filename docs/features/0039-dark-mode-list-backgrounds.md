@@ -70,4 +70,4 @@ In light, nothing changes: every value involved is `gray/50`, as before.
 - **`scripts/e2e.sh` not run.** No accessibility identifier moved.
 - **Figma** — D-R8 in `docs/design-system/figma-library.md`: the two tokens are not variables in the
   file yet, and the mocked screens are still on `gray/800` in dark with a plain search list.
-- **Android** (`Recit_Android/`) not touched.
+- **Android** (`Recit_Android/`) followed in [0041](0041-android-catches-up-with-ios.md), with a third token for the cells.

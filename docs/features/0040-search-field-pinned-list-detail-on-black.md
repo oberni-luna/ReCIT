@@ -60,4 +60,4 @@ nothing changes (`gray/50`).
   `app.searchFields.firstMatch`, which the placement does not change.
 - **Figma** — D-R6 and D-R8 in `docs/design-system/figma-library.md` carry the field's placement on
   iOS 27 and the list's detail.
-- **Android** (`Recit_Android/`) not touched.
+- **Android** (`Recit_Android/`) followed in [0041](0041-android-catches-up-with-ios.md): its field is always shown, and a list's detail is on black.

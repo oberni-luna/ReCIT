@@ -43,6 +43,7 @@ struct ShelvesView: View {
             // library sorts nothing — while "Scanner" is how the library stops being empty,
             // so it is always there.
             .toolbar {
+                ProfileToolbarItem()
                 ToolbarItemGroup(placement: .primaryAction) {
                     if userModel.myUser?.lastInventorySync != nil {
                         Button("shelves.action.sort", systemImage: "books.vertical.fill") {

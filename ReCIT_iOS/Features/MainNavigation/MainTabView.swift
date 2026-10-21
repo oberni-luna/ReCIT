@@ -25,7 +25,6 @@ struct MainTabView: View {
         /// Profil for a tab of its own.
         case community
         case transactions
-        case profile
         /// The Recherche tab (PRD 0020). Last here, and last on screen whatever its place: its
         /// role is what makes iOS lay it out apart, at the end of the bar.
         case search
@@ -39,8 +38,6 @@ struct MainTabView: View {
                 false
             case .transactions:
                 true
-            case .profile:
-                false
             case .lists:
                 false
             case .search:
@@ -56,8 +53,6 @@ struct MainTabView: View {
                 "book"
             case .transactions:
                 "arrow.left.arrow.right"
-            case .profile:
-                "person"
             case .lists:
                 "list.clipboard"
             case .search:
@@ -73,8 +68,6 @@ struct MainTabView: View {
                 String(localized: "tab.inventory")
             case .transactions:
                 String(localized: "tab.transactions")
-            case .profile:
-                String(localized: "tab.profile")
             case .lists:
                 String(localized: "tab.lists")
             case .search:
@@ -128,6 +121,11 @@ struct MainTabView: View {
                 }
             }
         }
+        // Inside the two injections below, so the profile's screens get them too: a transaction
+        // leads to a reader's shelves, which need a router and a focus. See `ProfileSheet`.
+        .sheet(isPresented: $router.isProfilePresented) {
+            ProfileSheet()
+        }
         .environment(shelfFocus)
         .environment(router)
         .overlay {
@@ -167,10 +165,6 @@ private extension MainTabView {
         case .transactions:
             Text("nav.transactions_placeholder")
                 .navigationTitle("nav.transactions")
-                .navigationBarTitleDisplayMode(.inline)
-        case .profile:
-            ProfileView()
-                .navigationTitle("nav.settings")
                 .navigationBarTitleDisplayMode(.inline)
         case .lists:
             EntityListView()

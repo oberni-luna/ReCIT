@@ -624,7 +624,14 @@ final class E2EScenarioTests: XCTestCase {
         // MARK: 27. Sign out
 
         driver.step("Déconnexion", critical: false) {
-            try driver.openTab(.settings)
+            // The profile is a sheet since feature 0038, opened by the avatar at the top of
+            // the inventory.
+            try driver.openTab(.inventory)
+            try driver.tap(
+                driver.any("e2e.profile.open"),
+                "l'avatar du profil",
+                until: { driver.exists("e2e.profile.logout") }
+            )
             try driver.tap(
                 driver.any("e2e.profile.logout"),
                 "le bouton « Se déconnecter »",

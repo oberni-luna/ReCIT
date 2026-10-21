@@ -13,6 +13,7 @@ struct ProfileView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(SyncStatusStore.self) private var syncStatus
     @Environment(DonationModel.self) private var donationModel
+    @Environment(\.dismiss) var dismiss
 
     @State private var path: NavigationPath = .init()
     @Query private var allTransactions: [UserTransaction]
@@ -43,6 +44,15 @@ struct ProfileView: View {
                 destination.viewForDestination($path)
             }
             .navigationTitle("nav.profile")
+            // A sheet since feature 0038: the swipe down closes it too, the button says so.
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("action.close", systemImage: "xmark") {
+                        dismiss()
+                    }
+                    .accessibilityIdentifier("e2e.profile.close")
+                }
+            }
         }
         .sheet(isPresented: $isSupportSheetPresented) {
             SupportSheet()
@@ -154,7 +164,7 @@ struct ProfileView: View {
         .applyListBackground()
     }
 
-    /// What this tab shows when there is no user to show: the statement, and a way out of it.
+    /// What this sheet shows when there is no user to show: the statement, and a way out of it.
     ///
     /// Reachable in two ways, and the button answers both. Signed out, it is what the screen
     /// says while `RootView` is about to replace the whole tab view with the authentication

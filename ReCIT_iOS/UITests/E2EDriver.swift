@@ -458,10 +458,12 @@ final class E2EDriver {
     /// **It came back at PRD 0020**, with the same role and the same behaviour: selecting it
     /// dissolves the bar into a field at the foot of the screen. The scanner stayed in the
     /// inventory's navigation bar, so nothing the scenario reaches through it moved.
+    ///
+    /// `Réglages` left at feature 0038: the profile is a sheet now, opened by the avatar at the
+    /// top of the inventory (`e2e.profile.open`), and the sign-out step taps that instead.
     enum Tab: String {
         case inventory = "Inventaire"
         case lists = "Listes"
-        case settings = "Réglages"
         case search = "Recherche"
     }
 
@@ -489,8 +491,6 @@ final class E2EDriver {
             exists("e2e.shelves.sort")
         case .lists:
             exists("e2e.lists.add")
-        case .settings:
-            exists("e2e.profile.logout")
         case .search:
             // Nothing on the search's root is unique to it — every tab with a list carries a
             // search field — so the marker is the tab itself, selected, with nothing pushed.

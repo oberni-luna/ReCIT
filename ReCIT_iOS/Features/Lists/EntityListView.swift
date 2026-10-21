@@ -60,6 +60,7 @@ struct EntityListView: View {
             }
             .navigationTitle("nav.lists")
             .toolbar {
+                ProfileToolbarItem()
                 ToolbarItem(placement: .confirmationAction) {
                     Button("action.add", systemImage: "plus") {
                         showNewListModal = true

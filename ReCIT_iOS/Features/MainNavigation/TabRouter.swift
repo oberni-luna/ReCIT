@@ -3,7 +3,8 @@
 //  ReCIT_iOS
 //
 //  Which tab is showing, and the requests one tab makes of another: « take me to the search
-//  field », from the empty shelf, and « take me to Réseau », from the search's invitation.
+//  field », from the empty shelf, « take me to Réseau », from the search's invitation, and
+//  « show me my profile », from the avatar at the top of Inventaire, Listes and Réseau.
 //  `MainTabView` owns it and injects it, like `ShelfFocusModel`, because what it holds only
 //  means something while the tabs are on screen — a sign-out drops it with them.
 //
@@ -15,7 +16,10 @@
 //  tab may not have been built yet when the request is made — the first time anyone opens it is
 //  exactly the case — and a flag waits for it where an event would be gone.
 //
-//  See PRD 0020 and issue 0116.
+//  The profile is a sheet rather than a tab since feature 0038: it is about the account, not
+//  about the books, and the tab bar has room for four things a reader goes back to.
+//
+//  See PRD 0020, issue 0116 and feature 0038.
 //
 
 import Observation
@@ -34,6 +38,10 @@ final class TabRouter {
     /// value, not a flag: two requests in a row are two pops, and nothing has to clear it.
     private(set) var searchRootRequest: Int = 0
 
+    /// Whether the profile sheet is up. Settable from outside because the sheet's own dismissal —
+    /// a swipe down — writes it back through a binding.
+    var isProfilePresented: Bool = false
+
     /// A tap on a tab. Tapping Recherche while it is already showing is the way back to a fresh
     /// search: its stack goes back to the root, and the field comes up.
     func select(_ tab: MainTabView.TabConfig) {
@@ -46,13 +54,20 @@ final class TabRouter {
 
     /// The Recherche tab, with its field up — what the empty shelf's « Rechercher » tag asks for.
     func openSearch() {
+        isProfilePresented = false
         selectedTab = .search
         wantsSearchField = true
     }
 
     /// The Réseau tab — what « Chez mes amis » offers a reader with no friend yet (issue 0117).
     func openNetwork() {
+        isProfilePresented = false
         selectedTab = .community
+    }
+
+    /// The profile sheet — what the avatar at the top of the three main tabs opens.
+    func openProfile() {
+        isProfilePresented = true
     }
 
     /// Whether the field was asked for, forgetting the request in the same move so it is acted

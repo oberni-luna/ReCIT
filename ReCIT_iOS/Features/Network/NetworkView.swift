@@ -64,6 +64,7 @@ struct NetworkView: View {
     /// The « + » follows the segment: a friend to find on one side, a group on the other.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        ProfileToolbarItem()
         ToolbarItem(placement: .primaryAction) {
             switch segment {
             case .friends:

@@ -3,6 +3,7 @@ package studio.lunabee.nouveaurecit.data
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
+import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.InventoryItemEntity
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.UserEntity
@@ -90,10 +91,15 @@ class InventoryRepository(
         }
     }
 
-    /** One item into the store: its edition (from the snapshot when the store has none), its row, its shelves. */
+    /**
+     * One item into the store: its edition (from the snapshot when the store has none, named after
+     * the snapshot's authors when it has one), its row, its shelves.
+     */
     private suspend fun upsertItem(dto: ItemDto, ownerUsername: String, linkedWorkUri: String?) {
         val entityDao = db.entityDao()
-        if (entityDao.edition(dto.entity) == null) entityDao.upsertEditions(listOf(Merges.edition(dto.entity, dto.snapshot)))
+        val held: EditionEntity? = entityDao.edition(dto.entity)
+        val edition: EditionEntity = held?.let { Merges.withSnapshotAuthors(it, dto.snapshot) } ?: Merges.edition(dto.entity, dto.snapshot)
+        if (edition != held) entityDao.upsertEditions(listOf(edition))
         if (linkedWorkUri != null) entities.linkEdition(dto.entity, listOf(linkedWorkUri))
         dao.upsert(listOf(Merges.item(dao.get(dto.id), dto, ownerUsername)))
         val shelfIds: List<String> = db.shelfDao().existingIds(dto.shelves.orEmpty())

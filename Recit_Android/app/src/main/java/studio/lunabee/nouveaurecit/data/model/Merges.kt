@@ -146,15 +146,32 @@ object Merges {
         title = snapshot.title,
         subtitle = snapshot.subtitle,
         lang = snapshot.lang,
-        authorNames = snapshot.authors?.split(",")?.map(String::trim)?.filter(String::isNotEmpty).orEmpty(),
+        authorNames = authorNames(snapshot),
         image = ImageUrl.absolute(snapshot.image),
         series = snapshot.series,
     )
 
+    /**
+     * `EntitySnapshotDTO.authorNames`: `entity:authors`, split on commas and trimmed, read here and
+     * nowhere else — split in place, every name but the first kept a leading space.
+     */
+    fun authorNames(snapshot: EntitySnapshotDto): List<String> =
+        snapshot.authors?.split(",")?.map(String::trim)?.filter(String::isNotEmpty).orEmpty()
+
+    /**
+     * `Edition.mergeAuthorNames(from:)` (feature 0036): an edition first met as an entity — through
+     * the search or the book screen — carries no author names, and the item's snapshot is the only
+     * place they live. The snapshot's names win when it has some; otherwise the edition is kept.
+     */
+    fun withSnapshotAuthors(edition: EditionEntity, snapshot: EntitySnapshotDto): EditionEntity {
+        val names: List<String> = authorNames(snapshot)
+        return if (names.isEmpty() || names == edition.authorNames) edition else edition.copy(authorNames = names)
+    }
+
     fun item(existing: InventoryItemEntity?, dto: ItemDto, ownerUsername: String): InventoryItemEntity {
         val index: String = searchIndex(
             ownerUsername = ownerUsername,
-            authorNames = dto.snapshot.authors?.split(",").orEmpty(),
+            authorNames = authorNames(dto.snapshot),
             title = dto.snapshot.title,
             subtitle = dto.snapshot.subtitle,
         )

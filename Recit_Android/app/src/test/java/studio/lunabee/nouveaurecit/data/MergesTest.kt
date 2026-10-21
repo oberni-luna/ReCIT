@@ -4,6 +4,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import studio.lunabee.nouveaurecit.data.db.EditionEntity
+import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.model.Merges
 import studio.lunabee.nouveaurecit.data.model.TransactionType
 import studio.lunabee.nouveaurecit.data.model.UserRelation
@@ -89,6 +90,26 @@ class MergesTest {
         val edition = Merges.edition("isbn:1", EntitySnapshotDto(title = "T", authors = "A, B", image = "x.jpg"))
         assertEquals(listOf("A", "B"), edition.authorNames)
         assertEquals("https://commons.wikimedia.org/wiki/Special:FilePath/x.jpg?width=512", edition.image)
+    }
+
+    @Test
+    fun a_snapshot_names_the_authors_of_an_edition_met_as_an_entity() {
+        val held = EditionEntity(uri = "isbn:1", title = "T")
+        val named = Merges.withSnapshotAuthors(held, EntitySnapshotDto(title = "T", authors = "Annie Ernaux, Marc Marie"))
+        assertEquals(listOf("Annie Ernaux", "Marc Marie"), named.authorNames)
+    }
+
+    @Test
+    fun a_snapshot_that_names_nobody_keeps_the_editions_names() {
+        val held = EditionEntity(uri = "isbn:1", title = "T", authorNames = listOf("A"))
+        assertEquals(held, Merges.withSnapshotAuthors(held, EntitySnapshotDto(title = "T", authors = " , ")))
+    }
+
+    @Test
+    fun a_row_falls_back_on_its_works_authors_sorted() {
+        assertEquals(listOf("A"), ItemRow.displayedAuthorNames(listOf(" A "), listOf("Z")))
+        assertEquals(listOf("Albert", "Émile", "Zoé"), ItemRow.displayedAuthorNames(emptyList(), listOf("Zoé", "Émile", "Albert", "Zoé")))
+        assertEquals(emptyList<String>(), ItemRow.displayedAuthorNames(emptyList(), emptyList()))
     }
 
     @Test

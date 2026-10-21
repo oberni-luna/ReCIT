@@ -27,7 +27,7 @@ struct BookDetailView: View {
     /// How many times this screen has been asked to load. Bumped by « Réessayer », and the
     /// `.task` key — which is how a retry re-runs a call that nothing else about the screen has
     /// changed. One way in, so loading, the book, the two absences and the failure are decided
-    /// in one place. Same shape as `InventorySearchContent`'s.
+    /// in one place. Same shape as `SearchContent`'s.
     @State private var attempt: Int = 0
 
     @Binding var path: NavigationPath

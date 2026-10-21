@@ -1,5 +1,5 @@
 //
-//  InventorySearchResultsSection.swift
+//  SearchResultsSection.swift
 //  ReCIT_iOS
 //
 //  What inventaire.io answered, in two groups: the books first, the people after. One flat list
@@ -12,7 +12,7 @@
 //
 //  There is deliberately nothing here for "loading", "nothing found" or "the call failed". Those
 //  three are not results, and a view that drew both would have to decide, on every branch, which
-//  of them wins. They belong to `InventorySearchRemoteSection`, which mounts this one only when
+//  of them wins. They belong to `SearchRemoteSection`, which mounts this one only when
 //  `RemoteSearchState` says there are results to draw (issue 0076).
 //
 //  See PRD 0012.
@@ -20,7 +20,7 @@
 
 import SwiftUI
 
-struct InventorySearchResultsSection: View {
+struct SearchResultsSection: View {
     let results: [SearchResult]
 
     private var works: [SearchResult] {
@@ -35,11 +35,11 @@ struct InventorySearchResultsSection: View {
         let workResults: [SearchResult] = works
         let humanResults: [SearchResult] = humans
 
-        InventorySearchResultGroup(
+        SearchResultGroup(
             title: "inventory.search.results.works \(workResults.count)",
             results: workResults
         )
-        InventorySearchResultGroup(
+        SearchResultGroup(
             title: "inventory.search.results.humans \(humanResults.count)",
             results: humanResults
         )

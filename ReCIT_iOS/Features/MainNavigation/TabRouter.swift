@@ -1,0 +1,58 @@
+//
+//  TabRouter.swift
+//  ReCIT_iOS
+//
+//  Which tab is showing, and the one cross-tab request the app makes: « take me to the search
+//  field ». `MainTabView` owns it and injects it, like `ShelfFocusModel`, because what it holds
+//  only means something while the tabs are on screen — a sign-out drops it with them.
+//
+//  It exists because the search left the inventory for a tab of its own (PRD 0020). The empty
+//  shelf's « Rechercher » tag used to raise a field on its own screen; now it has to change
+//  tab *and* raise a field that belongs to another view, which neither view can do alone.
+//
+//  The field request is a flag the search tab consumes rather than an event it listens to: the
+//  tab may not have been built yet when the request is made — the first time anyone opens it is
+//  exactly the case — and a flag waits for it where an event would be gone.
+//
+//  See PRD 0020 and issue 0116.
+//
+
+import Observation
+
+@Observable @MainActor
+final class TabRouter {
+    /// The tab on screen. Written through `select(_:)`, so a tap on the tab already showing can be
+    /// told apart from a tap on another one.
+    private(set) var selectedTab: MainTabView.TabConfig = .inventory
+
+    /// Whether the search tab should raise its field the next time it looks. Consumed once, by
+    /// `consumeSearchFieldRequest()`.
+    private(set) var wantsSearchField: Bool = false
+
+    /// Bumped each time the search tab is asked to go back to its root. Its stack watches the
+    /// value, not a flag: two requests in a row are two pops, and nothing has to clear it.
+    private(set) var searchRootRequest: Int = 0
+
+    /// A tap on a tab. Tapping Recherche while it is already showing is the way back to a fresh
+    /// search: its stack goes back to the root, and the field comes up.
+    func select(_ tab: MainTabView.TabConfig) {
+        if tab == .search, selectedTab == .search {
+            searchRootRequest += 1
+            wantsSearchField = true
+        }
+        selectedTab = tab
+    }
+
+    /// The Recherche tab, with its field up — what the empty shelf's « Rechercher » tag asks for.
+    func openSearch() {
+        selectedTab = .search
+        wantsSearchField = true
+    }
+
+    /// Whether the field was asked for, forgetting the request in the same move so it is acted
+    /// on once.
+    func consumeSearchFieldRequest() -> Bool {
+        defer { wantsSearchField = false }
+        return wantsSearchField
+    }
+}

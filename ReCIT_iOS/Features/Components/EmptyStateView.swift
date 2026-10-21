@@ -19,7 +19,7 @@
 //  **It does not place itself.** No `maxHeight`, no `Spacer`, no assumption about what sits
 //  above or below: it is exactly as tall as what it holds, and the screen mounting it decides
 //  where that goes. The search surface centres it in the band the keyboard leaves visible,
-//  which is not the centre of the frame — see `InventorySearchContent`.
+//  which is not the centre of the frame — see `SearchContent`.
 //
 //  See issue 0073 and PRD 0012.
 //

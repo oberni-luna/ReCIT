@@ -1,5 +1,5 @@
 //
-//  InventorySearchResultGroup.swift
+//  SearchResultGroup.swift
 //  ReCIT_iOS
 //
 //  One group of remote results — a header carrying its count, and the cells under it. It draws
@@ -7,7 +7,7 @@
 //  « Livres · 0 » behind.
 //
 //  The cells are `SearchResultCell`, which already knows how to draw a work, a person and one of
-//  my own copies, and the rows push onto the inventory tab's own `NavigationPath` through
+//  my own copies, and the rows push onto the search tab's own `NavigationPath` through
 //  `NavigationDestination` — no second stack, no case added to the enum. A result whose type has
 //  no destination (nothing this screen asks for, today) still draws; it simply does not lead
 //  anywhere, which is better than hiding an answer the server gave.
@@ -17,7 +17,7 @@
 
 import SwiftUI
 
-struct InventorySearchResultGroup: View {
+struct SearchResultGroup: View {
     let title: LocalizedStringKey
     let results: [SearchResult]
 

@@ -1,11 +1,11 @@
 //
-//  InventorySearchContent.swift
+//  SearchContent.swift
 //  ReCIT_iOS
 //
-//  The inventory screen while its search field is open. It replaces what used to sit behind
-//  `isSearching` — a flat list of the user's own books, and nothing else — with a surface
-//  driven by `SearchPhase`, which is what lets the field stop meaning "filter my shelves" and
-//  start meaning "find this book".
+//  The Recherche tab's surface, driven by `SearchPhase`. It was born inside the inventory, in
+//  place of a flat list of the user's own books that sat behind `isSearching` (PRD 0012), and
+//  moved to a tab of its own at PRD 0020 — which is why it no longer reads the focus: the tab
+//  always has something to show, and an empty field is its rest state.
 //
 //  All four phases draw something now. Under three characters the screen still shows nothing
 //  new rather than an empty section, which is the whole point of the threshold living in
@@ -51,7 +51,7 @@
 import SwiftData
 import SwiftUI
 
-struct InventorySearchContent: View {
+struct SearchContent: View {
     let user: User
     /// What is in the field. A binding rather than a value, because tapping a recent search has
     /// to put its query back in the field — the phase is computed from what the field holds, so
@@ -62,7 +62,6 @@ struct InventorySearchContent: View {
     /// entity types — see `SearchSuggestion`.
     @Binding var submission: SearchSuggestion?
 
-    @Environment(\.isSearching) private var isSearching
     @Environment(SearchModel.self) private var searchModel
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(RecentSearchStore.self) private var recentSearchStore
@@ -127,9 +126,8 @@ struct InventorySearchContent: View {
         )
     }
 
-    private var phase: SearchPhase? {
+    private var phase: SearchPhase {
         SearchPhase.current(
-            isFocused: isSearching,
             query: searchText,
             submittedQuery: submission?.query
         )
@@ -167,13 +165,12 @@ struct InventorySearchContent: View {
     }
 
     /// Which of the four phases the screen is in, without the query — what the list animates on.
-    private var phaseStep: Int? {
+    private var phaseStep: Int {
         switch phase {
         case .recents: 0
         case .typing: 1
         case .suggesting: 2
         case .results: 3
-        case nil: nil
         }
     }
 
@@ -225,14 +222,14 @@ struct InventorySearchContent: View {
                 .accessibilityIdentifier("e2e.searchRecents.empty")
             } else {
                 List {
-                    InventorySearchRecentsSection(
+                    SearchRecentsSection(
                         searches: recentSearches,
                         onSelect: select(recent:),
                         onClear: { recentSearchStore.clear(userId: user._id) }
                     )
 
                     if let localQuery {
-                        InventorySearchLocalSection(
+                        SearchLocalSection(
                             query: localQuery,
                             ownerId: user._id,
                             myItems: myItems,
@@ -240,16 +237,16 @@ struct InventorySearchContent: View {
                         )
                     }
 
-                    InventorySearchFriendsSection(items: friendsCarouselItems)
+                    SearchFriendsSection(items: friendsCarouselItems)
 
                     if case .suggesting(let query) = phase {
-                        InventorySearchSuggestionsSection(query: query) { suggestion in
+                        SearchSuggestionsSection(query: query) { suggestion in
                             submission = suggestion
                         }
                     }
 
                     if case .results(let query) = phase {
-                        InventorySearchRemoteSection(
+                        SearchRemoteSection(
                             state: remoteState,
                             query: query,
                             onRetry: { attempt += 1 }
@@ -265,9 +262,9 @@ struct InventorySearchContent: View {
                 .animation(.smooth, value: phaseStep)
                 // The only way to ask inventaire.io the same question twice, now that coming
                 // back from a book no longer does it by accident. Innermost of the app's two
-                // `.refreshable`s — `RootView` puts one on `MainTabView` for the inventory —
-                // so a pull *on the search results* refreshes the search rather than the
-                // shelves, which is what the gesture means where it is made.
+                // `.refreshable`s — `RootView` puts one on `MainTabView` for every tab — so a
+                // pull *on the search results* refreshes the search rather than the user's
+                // data, which is what the gesture means where it is made.
                 //
                 // It bumps the attempt rather than calling out itself: there is exactly one
                 // place a call leaves this screen, and a second entry point would be a second
@@ -354,7 +351,7 @@ struct InventorySearchContent: View {
     }
 }
 
-extension InventorySearchContent {
+extension SearchContent {
     /// One go at one query. It is the `.task` key, and it holds the attempt count so that
     /// « Réessayer » — which changes nothing about what is being searched for — still reads as
     /// a different call to run.

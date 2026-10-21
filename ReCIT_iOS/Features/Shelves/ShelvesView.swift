@@ -3,8 +3,10 @@
 //  ReCIT_iOS
 //
 //  Inventory tab root: the bookshelf. Shows the user's étagères as a 2-up grid with
-//  a "sans étagère" list below. When the user searches, it falls back to the flat
-//  filtered inventory list. Replaces MyInventoryView. See ADR 0003.
+//  a "sans étagère" list below. Replaces MyInventoryView. See ADR 0003.
+//
+//  It carried the app's search field from PRD 0012 to PRD 0020, which gave the search a tab of
+//  its own (`SearchTabView`).
 //
 
 import SwiftUI
@@ -13,18 +15,7 @@ struct ShelvesView: View {
     @Environment(SortFlowPresentation.self) private var sortFlow
     @Environment(UserModel.self) private var userModel
 
-    @State private var searchText: String = ""
     @State private var path: NavigationPath = .init()
-
-    /// The search that has been sent — the query and the entity types it asked inventaire.io
-    /// for. It lives here rather than in the search surface because `.onSubmit(of: .search)`
-    /// only reaches the field from the view that carries `.searchable`, or from above it.
-    /// Nothing clears it: a query edited afterwards stops matching what was sent, and that is
-    /// what takes the screen back out of its results (`SearchPhase`).
-    @State private var submission: SearchSuggestion?
-    /// Whether the search field is up. Held so the empty shelf's « Rechercher » tag can raise it:
-    /// `.searchable` only takes that from a binding.
-    @State private var isSearchPresented: Bool = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -35,10 +26,7 @@ struct ShelvesView: View {
                     // what an empty store would say about a library that is still coming.
                     ShelvesContent(
                         user: user,
-                        searchText: $searchText,
-                        submission: $submission,
-                        path: $path,
-                        onSearch: { isSearchPresented = true }
+                        path: $path
                     )
                 } else {
                     SyncingPlaceholderView()
@@ -66,20 +54,6 @@ struct ShelvesView: View {
                         sortFlow.presentScanning()
                     }
                     .accessibilityIdentifier("e2e.shelves.scan")
-                }
-            }
-            .searchable(
-                text: $searchText,
-                isPresented: $isSearchPresented
-            )
-            // The keyboard's « rechercher » key sends the query against both books and people
-            // — the same thing the third suggestion does, and the same value, so the two
-            // gestures cannot end up asking inventaire.io for different things. Below three
-            // characters it sends nothing: `SearchSuggestion` reads the threshold rather than
-            // keeping a second copy of it.
-            .onSubmit(of: .search) {
-                if let everything = SearchSuggestion.everything(for: searchText) {
-                    submission = everything
                 }
             }
         }

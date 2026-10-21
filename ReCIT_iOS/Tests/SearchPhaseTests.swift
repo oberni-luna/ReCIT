@@ -10,7 +10,7 @@
 //  read from `SearchPhase.minimumQueryLength` so that moving the threshold moves the tests with
 //  it instead of breaking them.
 //
-//  See PRD 0012.
+//  See PRD 0012 and PRD 0020.
 //
 
 import Testing
@@ -20,11 +20,10 @@ import Testing
 struct SearchPhaseTests {
 
     private func phase(
-        focused: Bool = true,
         _ query: String,
         submitted: String? = nil
-    ) -> SearchPhase? {
-        SearchPhase.current(isFocused: focused, query: query, submittedQuery: submitted)
+    ) -> SearchPhase {
+        SearchPhase.current(query: query, submittedQuery: submitted)
     }
 
     // MARK: - The threshold
@@ -116,17 +115,17 @@ struct SearchPhaseTests {
         #expect(phase("hugo", submitted: "monte cristo") == .suggesting(query: "hugo"))
     }
 
-    // MARK: - Focus
+    // MARK: - The tab has no "closed" state
 
-    @Test("Losing the focus with nothing sent closes the search surface")
-    func losingFocusClosesTheSurface() {
-        #expect(phase(focused: false, "mon") == nil)
-        #expect(phase(focused: false, "") == nil)
+    @Test("An empty field is the rest state, never the absence of a search surface")
+    func emptyFieldIsTheRestState() {
+        #expect(phase("") == .recents)
+        #expect(phase("", submitted: "mon") == .recents)
     }
 
-    @Test("Results survive the keyboard going away, since submitting is what dismisses it")
-    func resultsSurviveLosingFocus() {
-        #expect(phase(focused: false, "mon", submitted: "mon") == .results(query: "mon"))
+    @Test("A query below the threshold stays a query being typed, keyboard or not")
+    func shortQueryIsTyping() {
+        #expect(phase("mo") == .typing(query: "mo"))
     }
 
     // MARK: - The query a phase carries

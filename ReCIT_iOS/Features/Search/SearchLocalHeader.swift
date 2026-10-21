@@ -1,5 +1,5 @@
 //
-//  InventorySearchLocalHeader.swift
+//  SearchLocalHeader.swift
 //  ReCIT_iOS
 //
 //  The local section's header, and the way past its cap.
@@ -9,7 +9,7 @@
 //  each would read as two screens stacked.
 //
 //  The action is a `NavigationLink`, not a `Button`: « Tout voir » goes somewhere, and the link
-//  appends onto the inventory tab's own `NavigationPath` the same way every row of the section
+//  appends onto the search tab's own `NavigationPath` the same way every row of the section
 //  below it does. It is drawn only when the cap hides something — the caller passes the answer,
 //  because only the ranking knows the uncapped total.
 //
@@ -18,7 +18,7 @@
 
 import SwiftUI
 
-struct InventorySearchLocalHeader: View {
+struct SearchLocalHeader: View {
     /// The query the full listing will answer. Carried into the destination rather than read
     /// back from the field, so the screen shows the search this header was drawn for.
     let query: String

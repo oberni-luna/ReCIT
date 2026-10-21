@@ -1,5 +1,5 @@
 //
-//  InventorySearchRecentsSection.swift
+//  SearchRecentsSection.swift
 //  ReCIT_iOS
 //
 //  « Recherches récentes » — the first thing the field shows, before a single character is
@@ -18,7 +18,7 @@
 //
 //  Nothing is drawn when the history is empty — the section yields the screen whole rather
 //  than leaving a header over nothing. What stands there instead is `EmptyStateView`, mounted
-//  by `InventorySearchContent`: the block has to be centred in the band between the field and
+//  by `SearchContent`: the block has to be centred in the band between the field and
 //  the keyboard, which no row of a `List` can be.
 //
 //  See PRD 0012 and issues 0072 and 0073.
@@ -26,7 +26,7 @@
 
 import SwiftUI
 
-struct InventorySearchRecentsSection: View {
+struct SearchRecentsSection: View {
     /// The searches to draw, most recent first — already capped by the store.
     let searches: [String]
     let onSelect: (String) -> Void

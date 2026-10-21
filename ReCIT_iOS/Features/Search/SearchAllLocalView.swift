@@ -1,5 +1,5 @@
 //
-//  InventorySearchAllLocalView.swift
+//  SearchAllLocalView.swift
 //  ReCIT_iOS
 //
 //  « Dans mes livres et chez mes amis », uncapped — where « Tout voir » leads.
@@ -31,7 +31,7 @@
 import SwiftData
 import SwiftUI
 
-struct InventorySearchAllLocalView: View {
+struct SearchAllLocalView: View {
     /// The query this screen answers, carried from the header that pushed it. The search field
     /// is on the screen below, so nothing here can read it back.
     let query: String

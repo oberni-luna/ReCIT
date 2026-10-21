@@ -31,14 +31,26 @@ La recherche unifiée quitte l'inventaire pour un onglet à elle, avec le rôle 
 
 ## Acceptance criteria
 
-- [ ] Un onglet Recherche à rôle `search` apparaît dans la barre ; l'inventaire n'a plus de champ.
-- [ ] Au repos, l'onglet montre les récents (ou l'état vide) et le carrousel, sans clavier.
+- [x] Un onglet Recherche à rôle `search` apparaît dans la barre ; l'inventaire n'a plus de champ.
+- [x] Au repos, l'onglet montre les récents (ou l'état vide) et le carrousel, sans clavier.
 - [ ] Récents, suggestions, résultats, chargement, absence, échec, « Réessayer » et tirer-pour-rafraîchir se comportent comme avant.
-- [ ] Changer d'onglet puis revenir conserve requête, résultats et livre ouvert, sans nouvel appel `GET /api/search`.
-- [ ] Re-taper l'onglet sélectionné revient à la racine et lève le clavier.
+- [x] Changer d'onglet puis revenir conserve requête, résultats et livre ouvert, sans nouvel appel `GET /api/search`.
+- [x] Re-taper l'onglet sélectionné revient à la racine et lève le clavier.
 - [ ] L'étiquette « Rechercher » de l'étagère vide ouvre l'onglet clavier levé.
-- [ ] Tests `SearchPhase` (phases sans focus, texte blanc = repos) et `TabRouter` (étiquette, re-tap, demande consommée une fois).
-- [ ] `ReCIT_iOSE2E` compile avec les étapes réécrites (le lancement de `scripts/e2e.sh` reste à l'issue 0118).
+- [x] Tests `SearchPhase` (phases sans focus, texte blanc = repos) et `TabRouter` (étiquette, re-tap, demande consommée une fois).
+- [x] `ReCIT_iOSE2E` compile avec les étapes réécrites (le lancement de `scripts/e2e.sh` reste à l'issue 0118).
+
+## Notes d'implémentation (2026-10-21)
+
+- Vu sur simulateur iPhone 17, connecté : loupe à part au bout de la barre, repos sans clavier,
+  envoi, livre poussé, re-tap de l'onglet (racine + champ), aller-retour par l'Inventaire sans
+  nouvel appel `GET /api/search`.
+- **Pas vu** : l'étiquette « Rechercher » de l'étagère vide (le compte a des étagères) — couverte
+  par `TabRouterTests` seulement ; la ligne « Récents, suggestions… se comportent comme avant »
+  n'a été parcourue qu'en partie.
+- Dans l'onglet Recherche actif, iOS 26 replie les autres onglets en un seul bouton : le re-tap
+  de la loupe n'est possible que depuis un écran poussé, où la barre complète revient.
+- `scripts/e2e.sh` n'est pas lancé ici (issue 0118).
 
 ## Blocked by
 

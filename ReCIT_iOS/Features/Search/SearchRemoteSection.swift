@@ -1,5 +1,5 @@
 //
-//  InventorySearchRemoteSection.swift
+//  SearchRemoteSection.swift
 //  ReCIT_iOS
 //
 //  The inventaire.io half of the search surface, once a query has been sent: the grouped
@@ -11,7 +11,7 @@
 //  branches to render (issue 0076).
 //
 //  **The local section is not in here, and that is the point.** It sits above, drawn by
-//  `InventorySearchContent` for as long as the query stands, so a call still in flight — or one
+//  `SearchContent` for as long as the query stands, so a call still in flight — or one
 //  that failed — never blanks the books this device could already show. A dead connection must
 //  not look like an empty library.
 //
@@ -33,7 +33,7 @@
 
 import SwiftUI
 
-struct InventorySearchRemoteSection: View {
+struct SearchRemoteSection: View {
     /// What the remote call is doing, and what it brought back.
     let state: RemoteSearchState
     /// The query that was sent — named in the "no result" sentence, so the screen says what it
@@ -72,25 +72,25 @@ struct InventorySearchRemoteSection: View {
             .accessibilityIdentifier("e2e.searchError")
 
         case nil:
-            InventorySearchResultsSection(results: state.results)
+            SearchResultsSection(results: state.results)
         }
     }
 }
 
 #Preview("Chargement") {
     List {
-        InventorySearchRemoteSection(state: .loading, query: "monte cristo") {}
+        SearchRemoteSection(state: .loading, query: "monte cristo") {}
     }
 }
 
 #Preview("Aucun résultat") {
     List {
-        InventorySearchRemoteSection(state: .loaded([]), query: "monte cristo") {}
+        SearchRemoteSection(state: .loaded([]), query: "monte cristo") {}
     }
 }
 
 #Preview("Échec") {
     List {
-        InventorySearchRemoteSection(state: .failed, query: "monte cristo") {}
+        SearchRemoteSection(state: .failed, query: "monte cristo") {}
     }
 }

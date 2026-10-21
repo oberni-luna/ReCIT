@@ -453,12 +453,16 @@ final class E2EDriver {
     /// foot of the screen and **withdraws the navigation bar entirely**, toolbar included — so
     /// the scan action that tab's toolbar declared was not reachable from it at all, which is
     /// what pushed the scanner's entry point into the inventory's navigation bar and the
-    /// scenario's into the accueil. The search now lives in the inventory's own field, the bar
-    /// shows three places rather than four, and none of that behaviour is in the run any more.
+    /// scenario's into the accueil. The search then lived in the inventory's own field.
+    ///
+    /// **It came back at PRD 0020**, with the same role and the same behaviour: selecting it
+    /// dissolves the bar into a field at the foot of the screen. The scanner stayed in the
+    /// inventory's navigation bar, so nothing the scenario reaches through it moved.
     enum Tab: String {
         case inventory = "Inventaire"
         case lists = "Listes"
         case settings = "Réglages"
+        case search = "Recherche"
     }
 
     /// Whether one of the app's full-screen flows is over the tabs.
@@ -487,6 +491,11 @@ final class E2EDriver {
             exists("e2e.lists.add")
         case .settings:
             exists("e2e.profile.logout")
+        case .search:
+            // Nothing on the search's root is unique to it — every tab with a list carries a
+            // search field — so the marker is the tab itself, selected, with nothing pushed.
+            app.tabBars.buttons[Tab.search.rawValue].isSelected
+                && isReachable(app.navigationBars.buttons["BackButton"]) == false
         }
     }
 

@@ -147,7 +147,7 @@ extension NavigationDestination {
       case .shelf(let id):
           ShelfDetailView(shelfId: id, path: path)
       case .localSearchResults(let query):
-          InventorySearchAllLocalView(query: query)
+          SearchAllLocalView(query: query)
       case .addFriends:
           ReaderSearchView(path: path)
       case .invitations:

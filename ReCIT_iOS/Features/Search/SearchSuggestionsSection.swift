@@ -1,5 +1,5 @@
 //
-//  InventorySearchSuggestionsSection.swift
+//  SearchSuggestionsSection.swift
 //  ReCIT_iOS
 //
 //  « Chercher sur inventaire.io » — the three rows that take a query past what this device
@@ -17,7 +17,7 @@
 
 import SwiftUI
 
-struct InventorySearchSuggestionsSection: View {
+struct SearchSuggestionsSection: View {
     let query: String
     let onSelect: (SearchSuggestion) -> Void
 

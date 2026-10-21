@@ -1,5 +1,5 @@
 //
-//  InventorySearchFriendsSection.swift
+//  SearchFriendsSection.swift
 //  ReCIT_iOS
 //
 //  « Chez mes amis »: a single row of my friends' books, most recently added first — the news
@@ -16,7 +16,7 @@
 
 import SwiftUI
 
-struct InventorySearchFriendsSection: View {
+struct SearchFriendsSection: View {
     let items: [InventoryItem]
 
     /// The width the row was given, which sets each card's width exactly as « Ranger mes

@@ -2,9 +2,8 @@
 //  SearchPhase.swift
 //  ReCIT_iOS
 //
-//  What the inventory's search surface shows right now, computed from the three things the
-//  screen knows: whether the field is being edited, what has been typed, and whether a search
-//  has been sent for exactly that text. Pure — no SwiftUI, no SwiftData — so the rule can be
+//  What the Recherche tab shows right now, computed from the two things the screen knows: what
+//  has been typed, and whether a search has been sent for exactly that text. Pure — no SwiftUI, no SwiftData — so the rule can be
 //  driven by values in a test instead of by a keyboard.
 //
 //  **It owns the three-character threshold**, which is written nowhere else. Before this type
@@ -20,7 +19,12 @@
 //  only half the rule — the other half is what the screen shows on either side of it, and a
 //  phase bolted on later would have to re-derive it.
 //
-//  See PRD 0012.
+//  **The focus stopped counting at PRD 0020.** While the surface lived inside the inventory, an
+//  unfocused field with nothing sent meant "no search at all — show the shelves", and the phase
+//  was `nil`. The surface has a tab of its own now, and that tab always has something to show:
+//  an empty field is the rest state whether the keyboard is up or not.
+//
+//  See PRD 0012 and PRD 0020.
 //
 
 import Foundation
@@ -30,7 +34,7 @@ enum SearchPhase: Equatable, Sendable {
     /// searches. The app's one copy of that number.
     static let minimumQueryLength: Int = 3
 
-    /// The field is open and empty: the recent searches have the screen.
+    /// The field is empty: the recent searches, and my friends' latest books, have the screen.
     case recents
     /// One or two characters — below the threshold. The recents stay; nothing new appears.
     case typing(query: String)
@@ -39,24 +43,20 @@ enum SearchPhase: Equatable, Sendable {
     /// A search has been sent for this exact query: its full results have the screen.
     case results(query: String)
 
-    /// The phase the screen is in, or `nil` when there is no search surface at all — the field
-    /// is not being edited and nothing has been sent, so the inventory itself is showing.
+    /// The phase the screen is in.
     ///
-    /// A submitted query outranks the focus: sending a search dismisses the keyboard, and the
-    /// results have to survive that. Editing the query afterwards no longer matches what was
-    /// sent, which is what carries the screen back out of `results` on its own.
+    /// A submitted query outranks what is being typed only while the two agree: editing the
+    /// query afterwards no longer matches what was sent, which is what carries the screen back
+    /// out of `results` on its own.
     static func current(
-        isFocused: Bool,
         query: String,
         submittedQuery: String?
-    ) -> SearchPhase? {
+    ) -> SearchPhase {
         let trimmed: String = Self.normalise(query)
 
         if let submittedQuery, !trimmed.isEmpty, Self.normalise(submittedQuery) == trimmed {
             return .results(query: trimmed)
         }
-
-        guard isFocused else { return nil }
 
         if trimmed.count >= Self.minimumQueryLength {
             return .suggesting(query: trimmed)

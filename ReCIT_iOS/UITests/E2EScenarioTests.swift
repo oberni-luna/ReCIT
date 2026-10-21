@@ -757,22 +757,27 @@ final class E2EScenarioTests: XCTestCase {
 
     /// One search, all the way to a copy in the inventory. Returns the title of the book added.
     ///
-    /// **It searches from the inventory's own field** (issue 0074). The tab it used to open no
-    /// longer exists, and the field it types into is the merged one: three characters put the
-    /// local matches and the three inventaire.io suggestions on screen, and it is *sending* the
-    /// query — the keyboard's « rechercher » key — that spends the network call and produces the
-    /// rows this step is after. Typing alone never did on the old screen either; there it was a
-    /// debounce, here it is a decision (see PRD 0012).
+    /// **It searches from the Recherche tab** (PRD 0020), which took the merged field over from
+    /// the inventory, where issue 0074 had put it. Three characters put the local matches and
+    /// the three inventaire.io suggestions on screen, and it is *sending* the query — the
+    /// keyboard's « rechercher » key — that spends the network call and produces the rows this
+    /// step is after (see PRD 0012).
     @MainActor
     private static func searchAndAdd(
         query: String,
         driver: E2EDriver,
         app: XCUIApplication
     ) throws -> String {
-        try driver.openTab(.inventory)
+        // Selected first, then walked back to its root: the tab keeps its stack, so the book the
+        // previous search opened is still on it. `openTab` would refuse a tab whose root is
+        // not showing yet.
+        let tab: XCUIElement = app.tabBars.buttons[E2EDriver.Tab.search.rawValue]
+        try driver.tap(tab, "l'onglet « Recherche »", until: { tab.isSelected })
+        try driver.popBack(to: .search)
 
+        // The tab keeps the last query in its field; `type` empties it before typing.
         let field: XCUIElement = try searchField(driver: driver, app: app)
-        try driver.type(query, into: field, "le champ de recherche de l'inventaire")
+        try driver.type(query, into: field, "le champ de l'onglet Recherche")
 
         // Sending the query, not merely typing it: the suggestions are on screen at three
         // characters, the results only after a submission. The return key is the same gesture
@@ -787,8 +792,8 @@ final class E2EScenarioTests: XCTestCase {
         }
 
         let first: XCUIElement = driver.all("e2e.searchResult").element(boundBy: 0)
-        // The inventory always has a navigation bar now, so "a nav bar appeared" no longer says
-        // the push happened. A back button does, and it appears the moment it does.
+        // The tab has a navigation bar at its root, so "a nav bar appeared" does not say the push
+        // happened. A back button does, and it appears the moment it does.
         try driver.tap(first, "le premier résultat de « \(query) »", until: {
             app.navigationBars.buttons["BackButton"].exists
         })
@@ -812,12 +817,11 @@ final class E2EScenarioTests: XCTestCase {
         return title.isEmpty ? query : title
     }
 
-    /// The inventory's search field, open and ready to be typed into.
+    /// The Recherche tab's field, ready to be typed into.
     ///
-    /// `.searchable` puts it in the navigation bar's drawer, where it is on screen as soon as
-    /// the inventory is — but iOS decides from the scroll position whether it is drawn or
-    /// collapsed behind a « Rechercher » button, so a field that is not there yet is looked for
-    /// under that button before the step gives up.
+    /// The tab's role puts it at the foot of the screen as soon as the tab is selected, but a
+    /// field that is not there yet is still looked for under a « Rechercher » button before the
+    /// step gives up.
     @MainActor
     private static func searchField(driver: E2EDriver, app: XCUIApplication) throws -> XCUIElement {
         let field: XCUIElement = app.searchFields.firstMatch
@@ -829,44 +833,23 @@ final class E2EScenarioTests: XCTestCase {
         }
 
         guard field.waitForExistence(timeout: E2EDriver.defaultTimeout) else {
-            throw E2EFailure("Le champ de recherche de l'inventaire n'est jamais apparu.")
+            throw E2EFailure("Le champ de l'onglet Recherche n'est jamais apparu.")
         }
         return field
     }
 
     /// Back out of a search, all the way to the étagères.
     ///
-    /// **Two moves, because a search is two things at once.** The result opened a stack that has
-    /// to be unwound, and the field is still open behind it — and while it is, the inventory is
-    /// drawing its search surface instead of its books, which is where the steps after this one
-    /// go looking for `e2e.inventoryBook`. « Annuler » is what closes the field; it does not
-    /// empty it, and nothing here needs it to.
+    /// The search has a tab of its own since PRD 0020, so leaving it is choosing the inventory —
+    /// no « Annuler » to tap, and nothing to unwind first: the tab keeps its stack, and the next
+    /// search walks it back to its root. `openTab` walks back over a pushed screen that hides
+    /// the tab bar, and waits for the étagères' own marker.
     ///
-    /// This replaces `popBack(to: .search)`, which walked back to a tab that no longer exists.
+    /// This replaces the « Annuler » dance of issue 0074, which closed the inventory's field so
+    /// the inventory would draw its books again.
     @MainActor
     private static func leaveSearch(driver: E2EDriver, app: XCUIApplication) throws {
-        // Unwind whatever the result opened. Bounded, and silent when there is nothing to
-        // unwind — the wait at the end is what reports a screen that would not let go.
-        for _ in 0..<6 {
-            let back: XCUIElement = app.navigationBars.buttons["BackButton"]
-            guard driver.isReachable(back) else { break }
-            if back.isHittable { back.tap() } else { driver.tapAbsolute(back) }
-            driver.holds(
-                { driver.isReachable(app.navigationBars.buttons["BackButton"]) == false },
-                within: 4
-            )
-        }
-
-        let cancel: XCUIElement = app.buttons["Annuler"]
-        if driver.isReachable(cancel) {
-            try driver.tap(cancel, "« Annuler » de la recherche", until: {
-                driver.isReachable(app.buttons["Annuler"]) == false
-            })
-        }
-
-        try driver.waitUntil("le retour aux étagères") {
-            driver.isShowingRoot(of: .inventory)
-        }
+        try driver.openTab(.inventory)
     }
 
     /// Walks whatever a search result opened onto — an author, a work with several editions —

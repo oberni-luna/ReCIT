@@ -1,5 +1,5 @@
 //
-//  InventorySearchLocalSection.swift
+//  SearchLocalSection.swift
 //  ReCIT_iOS
 //
 //  One section, mixing my books and my friends' copies, capped at three. It is the first half
@@ -16,7 +16,7 @@
 //  inventaire.io stays above the keyboard; it must never be the reason a book cannot be found,
 //  so the total the ranking returns buys a way past it. Where it leads was the open question of
 //  issue 0075, settled in favour of a screen of its own: `NavigationDestination
-//  .localSearchResults`, pushed onto the inventory tab's own path like every other row here.
+//  .localSearchResults`, pushed onto the search tab's own path like every other row here.
 //
 //  A book whose row has gone (the copy was deleted while the list was still on screen) never
 //  becomes a candidate: reading a persisted property off an invalidated model is a hard trap,
@@ -32,7 +32,7 @@
 
 import SwiftUI
 
-struct InventorySearchLocalSection: View {
+struct SearchLocalSection: View {
     let query: String
     let ownerId: String
     let myItems: [InventoryItem]
@@ -66,7 +66,7 @@ struct InventorySearchLocalSection: View {
                     }
                 }
             } header: {
-                InventorySearchLocalHeader(
+                SearchLocalHeader(
                     query: query,
                     showsSeeAll: ranked.totalCount > InventorySearchRanking.displayLimit
                 )

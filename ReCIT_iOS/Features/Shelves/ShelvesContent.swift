@@ -4,8 +4,7 @@
 //
 //  The synced state of the bookshelf: a horizontal, snapping carousel of étagères
 //  (A→Z) over a vertical list of all the user's books. Both are `@Query`-driven so
-//  they stay reactive across syncs. Focusing the search hides the shelves and gives the
-//  screen to the merged search surface. See ADR 0003 / PRD 0001 / PRD 0012.
+//  they stay reactive across syncs. See ADR 0003 / PRD 0001.
 //
 
 import SwiftUI
@@ -13,19 +12,12 @@ import SwiftData
 
 struct ShelvesContent: View {
     let user: User
-    /// What is in the field, owned by `ShelvesView`. A binding because tapping a recent search
-    /// puts its query back in the field (issue 0072).
-    @Binding var searchText: String
-    /// The search that has been sent, if one has — owned by `ShelvesView`, because the
-    /// keyboard's « rechercher » key only reaches the field from above `.searchable`.
-    @Binding var submission: SearchSuggestion?
     @Binding var path: NavigationPath
-    /// Opens the inventory's search field — owned by `ShelvesView`, because only the view that
-    /// carries `.searchable` can present it. The empty shelf's « Rechercher » tag is its caller.
-    let onSearch: () -> Void
 
     @Environment(SortFlowPresentation.self) private var sortFlow
-    @Environment(\.isSearching) private var isSearching
+    /// The empty shelf's « Rechercher » tag goes to another tab's field, which only the router
+    /// can reach (PRD 0020).
+    @Environment(TabRouter.self) private var router
     @Environment(ShelfFocusModel.self) private var focus
     @Environment(InventoryModel.self) private var inventoryModel
 
@@ -42,16 +34,10 @@ struct ShelvesContent: View {
 
     init(
         user: User,
-        searchText: Binding<String>,
-        submission: Binding<SearchSuggestion?>,
-        path: Binding<NavigationPath>,
-        onSearch: @escaping () -> Void
+        path: Binding<NavigationPath>
     ) {
         self.user = user
-        self._searchText = searchText
-        self._submission = submission
         self._path = path
-        self.onSearch = onSearch
 
         let ownerId: String = user._id
         _shelves = Query(
@@ -67,70 +53,58 @@ struct ShelvesContent: View {
     }
 
     var body: some View {
-        if isSearching {
-            // The field used to filter this user's own books and stop there, which is how a
-            // book two streets away came back as an empty list. It now opens the merged search
-            // surface: my copies and my friends', past three characters, and the three ways on
-            // to inventaire.io under them. See PRD 0012.
-            InventorySearchContent(
-                user: user,
-                searchText: $searchText,
-                submission: $submission
-            )
-        } else {
-            GeometryReader { geo in
-                let cardWidth: CGFloat = geo.size.width * 0.86
-                ScrollView {
-                    if syncState != .synced {
-                        InventorySyncBanner(title: "sync.inventory.mine.title", state: syncState)
-                            .padding(.all, .medium)
-                            // The inventory's page is white, so the card is the secondary
-                            // grey that lists sit on — the maquette's white on grey, inverted.
-                            .background(.backgroundSecondary)
-                            .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.medium))
-                            .padding(.horizontal, .medium)
-                            .padding(.top, .small)
-                            .accessibilityIdentifier("e2e.shelves.syncBanner")
-                    }
-
-                    ShelfSectionHeader(
-                        title: "Étagères",
-                        actionTitle: "Ajouter",
-                        action: { isCreatingShelf = true }
-                    )
-                    .padding(.top, .medium)
-                    // One or the other, never both: with no étagère there is nothing to
-                    // page through, so the empty shelf stands in place of the carousel.
-                    if shelves.isEmpty {
-                        // Held back until the first sync is over: its errand reads the store,
-                        // and a store still filling would tell a reader with three hundred
-                        // books to go and scan them.
-                        if syncState == .synced {
-                            ShelfEmptyStateView(
-                                width: cardWidth,
-                                errand: emptyShelfErrand,
-                                onAction: perform
-                            )
-                                .accessibilityIdentifier("e2e.shelves.emptyCard")
-                                // Centred: alone on the screen, a card parked where the
-                                // carousel's first one would be read as off-centre. The
-                                // first real étagère lands a little further left, at the
-                                // same height — a sideways step, not a jump.
-                                .frame(maxWidth: .infinity)
-                        }
-                    } else {
-                        shelvesCarousel(cardWidth: cardWidth)
-                    }
-
-                    ShelfSectionHeader(title: "Tous les livres · \(myItems.count)")
-                        .padding(.top, .large)
-                    allBooksList
+        GeometryReader { geo in
+            let cardWidth: CGFloat = geo.size.width * 0.86
+            ScrollView {
+                if syncState != .synced {
+                    InventorySyncBanner(title: "sync.inventory.mine.title", state: syncState)
+                        .padding(.all, .medium)
+                        // The inventory's page is white, so the card is the secondary
+                        // grey that lists sit on — the maquette's white on grey, inverted.
+                        .background(.backgroundSecondary)
+                        .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.medium))
+                        .padding(.horizontal, .medium)
+                        .padding(.top, .small)
+                        .accessibilityIdentifier("e2e.shelves.syncBanner")
                 }
-                // Frozen while a shelf is being scrubbed, so the slide can't scroll the page.
-                .scrollDisabled(focus.isArmed)
-                .sheet(isPresented: $isCreatingShelf) {
-                    ShelfFormView()
+
+                ShelfSectionHeader(
+                    title: "Étagères",
+                    actionTitle: "Ajouter",
+                    action: { isCreatingShelf = true }
+                )
+                .padding(.top, .medium)
+                // One or the other, never both: with no étagère there is nothing to
+                // page through, so the empty shelf stands in place of the carousel.
+                if shelves.isEmpty {
+                    // Held back until the first sync is over: its errand reads the store,
+                    // and a store still filling would tell a reader with three hundred
+                    // books to go and scan them.
+                    if syncState == .synced {
+                        ShelfEmptyStateView(
+                            width: cardWidth,
+                            errand: emptyShelfErrand,
+                            onAction: perform
+                        )
+                            .accessibilityIdentifier("e2e.shelves.emptyCard")
+                            // Centred: alone on the screen, a card parked where the
+                            // carousel's first one would be read as off-centre. The
+                            // first real étagère lands a little further left, at the
+                            // same height — a sideways step, not a jump.
+                            .frame(maxWidth: .infinity)
+                    }
+                } else {
+                    shelvesCarousel(cardWidth: cardWidth)
                 }
+
+                ShelfSectionHeader(title: "Tous les livres · \(myItems.count)")
+                    .padding(.top, .large)
+                allBooksList
+            }
+            // Frozen while a shelf is being scrubbed, so the slide can't scroll the page.
+            .scrollDisabled(focus.isArmed)
+            .sheet(isPresented: $isCreatingShelf) {
+                ShelfFormView()
             }
         }
     }
@@ -188,7 +162,7 @@ struct ShelvesContent: View {
         case .scan:
             sortFlow.presentScanning()
         case .search:
-            onSearch()
+            router.openSearch()
         case .sort:
             sortFlow.presentSorting()
         }

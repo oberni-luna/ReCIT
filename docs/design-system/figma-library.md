@@ -403,7 +403,7 @@ qu'il faut lire les deux modes.
 | Token | Hex | α | Consommé par |
 |---|---|---|---|
 | `color/gray/0` | `#FFFFFF` | 1 | `background/default` L · `shelf/label/paper` **L et D** |
-| `color/gray/50` | `#F1F1F1` | 1 | `foreground/inverse` L · `foreground/default` D · `background/secondary` L |
+| `color/gray/50` | `#F1F1F1` | 1 | `foreground/inverse` L · `foreground/default` D · `background/secondary` L · `background/grouped` L · `background/grouped-elevated` L |
 | `color/gray/200` | `#E8ECE6` | 1 | `background/inverse` D · `background/disable` L · `background/tinted-inverse` D |
 | `color/gray/400` | `#AFAFAF` | 1 | `foreground/disable` L — a perdu `foreground/secondary` D et `foreground/placeholder` L le 2026-09-06 |
 | `color/gray/500` | `#959A92` | 1 | — inutilisé |
@@ -411,8 +411,8 @@ qu'il faut lire les deux modes.
 | `color/gray/700` | `#2D2D2D` | 1 | `background/error` D |
 | `color/gray/700 75%` | `#2D2D2D` | **0.50** | — inutilisé · **le nom ment** (voir D1) |
 | `color/gray/800` | `#2A2A2A` | 1 | `background/secondary` D |
-| `color/gray/900` | `#191919` | 1 | `foreground/default` L · `foreground/inverse` D · `background/inverse` L · `shelf/label/ink` **L et D** |
-| `color/gray/1000` | `#000000` | 1 | `background/default` D |
+| `color/gray/900` | `#191919` | 1 | `foreground/default` L · `foreground/inverse` D · `background/inverse` L · `background/grouped-elevated` D · `shelf/label/ink` **L et D** |
+| `color/gray/1000` | `#000000` | 1 | `background/default` D · `background/grouped` D |
 | `color/gray/1000 10%` | `#000000` | 0.10 | — inutilisé |
 | `color/green/100` | `#F2FAE9` | 1 | `foreground/tinted-inverse` L · `background/tinted` L |
 | `color/green/200` | `#E7FFCE` | 1 | `foreground/tinted` D · `border/tinted` D · `background/tinted-inverse` D |
@@ -489,6 +489,8 @@ valeur fixe, donc pas de variable.
 | `background/inverse` | `gray/900` | `gray/200` | `.backgroundInverse` |
 | `background/disable` | `gray/200` | **`white-01`** | `.backgroundDisable` |
 | `background/secondary` | `gray/50` | `gray/800` | `.backgroundSecondary` |
+| `background/grouped` | `gray/50` | `gray/1000` | `.backgroundGrouped` — **code seul**, voir D-R8 |
+| `background/grouped-elevated` | `gray/50` | `gray/900` | `.backgroundGroupedElevated` — **code seul**, voir D-R8 |
 | `background/tinted` | `green/100` | `green/900` | `.backgroundTinted` |
 | `background/tinted-inverse` | `green/800` | `green/200` | `.backgroundTintedInverse` |
 | `background/error` | `red/100` | **`gray/700`** | `.backgroundError` — voir D7 |
@@ -1889,6 +1891,7 @@ Plus rien à trancher : le dernier point ouvert de la passe (« Tout voir ») l'
 |---|---|---|---|
 | D-R6 | `Features/MainNavigation/MainTabView.swift` — `TabConfig.search` | Depuis la feature 0037 (2026-10-21), la recherche est un onglet à rôle `.search` qu'iOS 26 pose **à part**, en pastille, au bout de la barre ; actif, il replie les autres onglets en un bouton et met le champ en bas. `Chrome / Tab Bar` (`25:234`) a encore `Active ∈ {Inventaire, Listes, Réglages, Recherche}` : ni Réseau, ni pastille détachée, ni forme repliée. Le carrousel « Chez mes amis » (cellules `SortBookCardView`) et son invitation n'ont pas de frame non plus | ouverte — le code fait foi |
 | D-R7 | `Features/MainNavigation/MainTabView.swift`, `Features/Profile/ProfileToolbarItem.swift` | Depuis la feature 0038 (2026-10-21), le Profil n'est plus un onglet : un bouton rond en haut à gauche d'Inventaire, Listes et Réseau (l'icône `person` dans le verre de la barre, ou la photo du compte en cercle de 44 pt) l'ouvre en sheet, avec « Fermer ». `Chrome / Tab Bar` a encore un onglet Profil / Réglages, et aucun écran ne porte l'avatar | ouverte — le code fait foi |
+| D-R8 | `DesignSystem/Tokens/Color.swift`, `DesignSystem/List/View+applyBackground.swift` | Depuis la feature 0039 (2026-10-21), deux tokens existent dans le code et pas dans la collection `Color` : `background/grouped` (`gray/50` / `gray/1000`), sous la liste racine de Listes, Réseau et Recherche, et `background/grouped-elevated` (`gray/50` / `gray/900`), sous la liste du Profil en sheet. En sombre, les maquettes de ces écrans sont encore sur `background/secondary` (`gray/800`). Recherche est passée de liste *plain* à *inset grouped* dans toutes ses phases, et la carte « café » du Profil s'aligne sur les cellules (plus d'inset latéral de 8 pt) | ouverte — le code fait foi ; variables non créées, le plugin Figma n'étant pas authentifié dans la session |
 | D-R1 | ~~`AppModels/Search/SearchModel.swift:20`~~ | `searchLocalInventory(query:modelContext:)` n'est **appelé par personne**. Le temps 2 de cette maquette est exactement son emploi | **résolue** le 2026-09-11 (issue 0074) — supprimée plutôt que ressuscitée : la section locale lit les `@Query` de l'inventaire via `InventorySearchRanking`, une seconde requête aurait cassé la réactivité qu'ADR 0001 demande |
 | D-R2 | `Features/Search/SearchView.swift:34` | Le seuil distant est à **3** caractères ; la maquette proposait 2 | **close** le 2026-09-11 — le code fait foi, la maquette passe à 3 |
 | D-R3 | ~~`Features/Search/SearchView.swift:67-72`~~ | Doublon de **D19** (chaîne non localisée + `HStack(spacing: 12)` littéral) | **résolue** le 2026-09-11 (issue 0074) — voir D19 |

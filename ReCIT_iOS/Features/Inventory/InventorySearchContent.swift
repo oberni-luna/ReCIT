@@ -102,6 +102,9 @@ struct InventorySearchContent: View {
     /// key, then a suggestion — cost one call rather than two.
     private let debounce: Duration = .milliseconds(250)
 
+    /// How many covers « Chez mes amis » shows: a glance, not a catalogue.
+    private let friendsCarouselLimit: Int = 10
+
     init(
         user: User,
         searchText: Binding<String>,
@@ -163,6 +166,26 @@ struct InventorySearchContent: View {
         return .init(submission: activeSubmission, count: attempt)
     }
 
+    /// Which of the four phases the screen is in, without the query — what the list animates on.
+    private var phaseStep: Int? {
+        switch phase {
+        case .recents: 0
+        case .typing: 1
+        case .suggesting: 2
+        case .results: 3
+        case nil: nil
+        }
+    }
+
+    /// What « Chez mes amis » shows: my friends' most recent books, ten at most — and only
+    /// while nothing is typed. It is discovery, not an answer: once a query stands, my friends'
+    /// copies are answered by the local section, next to mine (PRD 0020, issue 0115).
+    private var friendsCarouselItems: [InventoryItem] {
+        guard case .recents = phase else { return [] }
+
+        return Array(friendsItems.lazy.filter(\.isStillInTheStore).prefix(friendsCarouselLimit))
+    }
+
     /// The recents the screen would draw right now — the displayed three, or nothing at all
     /// when the field is past the threshold and the recents have given the screen away.
     private var recentSearches: [String] {
@@ -217,6 +240,8 @@ struct InventorySearchContent: View {
                         )
                     }
 
+                    InventorySearchFriendsSection(items: friendsCarouselItems)
+
                     if case .suggesting(let query) = phase {
                         InventorySearchSuggestionsSection(query: query) { suggestion in
                             submission = suggestion
@@ -233,6 +258,11 @@ struct InventorySearchContent: View {
                 }
                 .listStyle(.plain)
                 .applyListBackground()
+                // A change of phase as one movement: the carousel leaving at the first character,
+                // and the sections arriving, leaving and moving with it. Keyed on the phase's
+                // step rather than on the phase, which carries the query: a keystroke that only
+                // refilters what is already there is not animated. See issue 0115.
+                .animation(.smooth, value: phaseStep)
                 // The only way to ask inventaire.io the same question twice, now that coming
                 // back from a book no longer does it by accident. Innermost of the app's two
                 // `.refreshable`s — `RootView` puts one on `MainTabView` for the inventory —

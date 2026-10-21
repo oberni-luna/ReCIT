@@ -3557,6 +3557,40 @@
         }
       }
     },
+    "inventory.search.friends_section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At my friends'"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chez mes amis"
+          }
+        }
+      }
+    },
+    "inventory.search.friends_section.cover %@ %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, at %2$@'s"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, chez %2$@"
+          }
+        }
+      }
+    },
     "inventory.search.loading" : {
       "extractionState" : "manual",
       "localizations" : {

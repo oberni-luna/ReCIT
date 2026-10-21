@@ -76,4 +76,15 @@ struct TabRouterTests {
         #expect(router.consumeSearchFieldRequest())
         #expect(router.consumeSearchFieldRequest() == false)
     }
+
+    @Test("The search's invitation opens Réseau")
+    func openNetworkSelectsTheNetworkTab() {
+        let router: TabRouter = .init()
+        router.select(.search)
+
+        router.openNetwork()
+
+        #expect(router.selectedTab == .community)
+        #expect(router.wantsSearchField == false)
+    }
 }

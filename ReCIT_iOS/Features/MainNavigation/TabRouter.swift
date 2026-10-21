@@ -2,9 +2,10 @@
 //  TabRouter.swift
 //  ReCIT_iOS
 //
-//  Which tab is showing, and the one cross-tab request the app makes: « take me to the search
-//  field ». `MainTabView` owns it and injects it, like `ShelfFocusModel`, because what it holds
-//  only means something while the tabs are on screen — a sign-out drops it with them.
+//  Which tab is showing, and the requests one tab makes of another: « take me to the search
+//  field », from the empty shelf, and « take me to Réseau », from the search's invitation.
+//  `MainTabView` owns it and injects it, like `ShelfFocusModel`, because what it holds only
+//  means something while the tabs are on screen — a sign-out drops it with them.
 //
 //  It exists because the search left the inventory for a tab of its own (PRD 0020). The empty
 //  shelf's « Rechercher » tag used to raise a field on its own screen; now it has to change
@@ -47,6 +48,11 @@ final class TabRouter {
     func openSearch() {
         selectedTab = .search
         wantsSearchField = true
+    }
+
+    /// The Réseau tab — what « Chez mes amis » offers a reader with no friend yet (issue 0117).
+    func openNetwork() {
+        selectedTab = .community
     }
 
     /// Whether the field was asked for, forgetting the request in the same move so it is acted

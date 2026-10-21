@@ -3591,6 +3591,40 @@
         }
       }
     },
+    "inventory.search.friends_section.invite.detail" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your friends' books will show here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les livres de vos amis s'afficheront ici."
+          }
+        }
+      }
+    },
+    "inventory.search.friends_section.invite.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find readers"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver des lecteurs"
+          }
+        }
+      }
+    },
     "inventory.search.loading" : {
       "extractionState" : "manual",
       "localizations" : {

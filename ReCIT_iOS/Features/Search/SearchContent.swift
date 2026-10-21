@@ -66,8 +66,13 @@ struct SearchContent: View {
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(RecentSearchStore.self) private var recentSearchStore
 
+    @Environment(TabRouter.self) private var router
+
     @Query private var myItems: [InventoryItem]
     @Query private var friendsItems: [InventoryItem]
+    /// Every reader in the store, to know whether any of them is a friend. Filtered in Swift:
+    /// `relation` is computed, and a `#Predicate` cannot see it.
+    @Query private var users: [User]
 
     /// What inventaire.io is doing and what it answered, for as long as the screen is showing
     /// that answer. Not persisted, and not `SearchModel`'s business: it is one screen's view of
@@ -100,9 +105,6 @@ struct SearchContent: View {
     /// How long a submission waits before it leaves. Two submissions in a row — the keyboard
     /// key, then a suggestion — cost one call rather than two.
     private let debounce: Duration = .milliseconds(250)
-
-    /// How many covers « Chez mes amis » shows: a glance, not a catalogue.
-    private let friendsCarouselLimit: Int = 10
 
     init(
         user: User,
@@ -174,13 +176,26 @@ struct SearchContent: View {
         }
     }
 
-    /// What « Chez mes amis » shows: my friends' most recent books, ten at most — and only
-    /// while nothing is typed. It is discovery, not an answer: once a query stands, my friends'
-    /// copies are answered by the local section, next to mine (PRD 0020, issue 0115).
-    private var friendsCarouselItems: [InventoryItem] {
-        guard case .recents = phase else { return [] }
+    /// My friends' copies still in the store, most recent first.
+    private var liveFriendsItems: [InventoryItem] {
+        friendsItems.filter(\.isStillInTheStore)
+    }
 
-        return Array(friendsItems.lazy.filter(\.isStillInTheStore).prefix(friendsCarouselLimit))
+    /// What « Chez mes amis » draws: at rest only, an invitation without a friend, nothing when
+    /// my friends have no book. See `FriendsCarouselState`.
+    private var friendsCarouselState: FriendsCarouselState {
+        FriendsCarouselState.current(
+            phase: phase,
+            hasFriends: users.contains { $0.relation == .friend },
+            friendsBookCount: liveFriendsItems.count
+        )
+    }
+
+    /// The books the carousel shows, cut to the state's count.
+    private var friendsCarouselItems: [InventoryItem] {
+        guard case .recent(let shownCount, _) = friendsCarouselState else { return [] }
+
+        return Array(liveFriendsItems.prefix(shownCount))
     }
 
     /// The recents the screen would draw right now — the displayed three, or nothing at all
@@ -194,9 +209,12 @@ struct SearchContent: View {
     /// Whether the screen has nothing but an absence to show: the field is open, empty, and no
     /// search has ever been sent from this account on this device. First launch, and the state
     /// « Effacer » comes back to.
+    ///
+    /// « Chez mes amis » counts as something to show: with the carousel or its invitation on
+    /// screen, the rest state is not empty, and a sentence saying it is would contradict it.
     private var showsEmptyRecents: Bool {
         if case .recents = phase {
-            recentSearches.isEmpty
+            recentSearches.isEmpty && friendsCarouselState == .hidden
         } else {
             false
         }
@@ -237,7 +255,11 @@ struct SearchContent: View {
                         )
                     }
 
-                    SearchFriendsSection(items: friendsCarouselItems)
+                    SearchFriendsSection(
+                        state: friendsCarouselState,
+                        items: friendsCarouselItems,
+                        onInvite: router.openNetwork
+                    )
 
                     if case .suggesting(let query) = phase {
                         SearchSuggestionsSection(query: query) { suggestion in

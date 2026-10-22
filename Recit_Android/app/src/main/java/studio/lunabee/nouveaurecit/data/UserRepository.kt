@@ -25,12 +25,16 @@ class UserRepository(
     private val api: ApiService,
     private val db: AppDatabase,
     private val runner: OptimisticRunner,
+    private val preferences: UserPreferences,
 ) {
     private val dao = db.userDao()
 
     private val _myUserId: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    /** `myUser`'s id, once `GET /api/user` has answered since launch. */
+    /**
+     * `myUser`'s id: the one remembered from the last session at launch, so the cached store shows
+     * before the network answers, then the one `GET /api/user` returns.
+     */
     val myUserId: StateFlow<String?> = _myUserId.asStateFlow()
 
     val myUser: Flow<UserEntity?> = _myUserId.flatMapLatest { id -> id?.let(dao::observe) ?: flowOf(null) }
@@ -45,10 +49,18 @@ class UserRepository(
 
     suspend fun myUser(): UserEntity? = _myUserId.value?.let { dao.get(it) }
 
+    /** Puts back the id of the last session's user, when its row is still in the store. */
+    suspend fun restoreMyUserId() {
+        if (_myUserId.value != null) return
+        val id: String = preferences.string(MY_USER_ID_KEY) ?: return
+        if (dao.get(id) != null) _myUserId.value = id
+    }
+
     suspend fun syncMyUser() {
         val dto: UserDto = api.get("/api/user")
         dao.upsert(listOf(Merges.user(dao.get(dto.id), dto, ApiService.BASE_URL)))
         _myUserId.value = dto.id
+        preferences.setString(MY_USER_ID_KEY, dto.id)
     }
 
     suspend fun getOrFetchUsers(ids: List<String>): List<UserEntity> {
@@ -140,6 +152,7 @@ class UserRepository(
 
     private suspend fun wipeLocalStore(includingEntities: Boolean) {
         _myUserId.value = null
+        preferences.setString(MY_USER_ID_KEY, null)
         db.withTransaction {
             db.inventoryDao().deleteAll()
             db.shelfDao().deleteAll()
@@ -159,6 +172,8 @@ class UserRepository(
     }
 
     companion object {
+        private const val MY_USER_ID_KEY: String = "session.myUserId"
+
         /** `UserRelation.byUserID`: requests first, and a friendship wins over both. */
         fun relationsById(dto: UserNetworkDto): Map<String, UserRelation> = buildMap {
             dto.userRequested.forEach { put(it, UserRelation.RequestSent) }

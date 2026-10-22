@@ -36,6 +36,12 @@ data class RecitColors(
     val borderDefault: Color,
     val isDark: Boolean,
 ) {
+    /**
+     * What floats above a screen — a sheet, a menu, a dialog, the snackbar. Android only: in dark
+     * it is one step lighter than the screen, so elevation reads the right way round.
+     */
+    val backgroundRaised: Color get() = if (isDark) backgroundSecondary else backgroundDefault
+
     val borderTinted: Color get() = foregroundTinted
     val borderError: Color get() = foregroundError
 
@@ -120,6 +126,9 @@ object Primitive {
 object ShelfPalette {
     val Parchment: Color = Color(0xFFE4DAC4)
     val LabelPaper: Color = Primitive.Gray0
+
+    /** The paper in dark mode: cream and a step down, so a tag does not glare on black. */
+    val LabelPaperDark: Color = Color(0xFFE2DCCD)
     val LabelInk: Color = Primitive.Gray900
     val LabelInkSecondary: Color = Primitive.Gray900.copy(alpha = 0.5f)
     val LabelLink: Color = Primitive.Green700

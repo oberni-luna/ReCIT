@@ -59,7 +59,16 @@ class EntityListViewModel(
         fetchMissing(entry.list.type, uris)
         return when (entry.list.type) {
             EntityListType.Work -> entities.entities.observeWorksWithAuthors(uris).map { works ->
-                val byUri: Map<String, ListElementRowModel> = works.associate { it.work.uri to ListElementRowModel(it.work.uri, it.work.title, it.work.subtitle, it.work.image, "") }
+                val byUri: Map<String, ListElementRowModel> = works.associate { entry ->
+                    entry.work.uri to ListElementRowModel(
+                        uri = entry.work.uri,
+                        title = entry.work.title,
+                        subtitle = entry.work.subtitle,
+                        image = entry.work.image,
+                        comment = "",
+                        authors = entry.authors.joinToString(", ") { it.name },
+                    )
+                }
                 elements.mapNotNull { element -> byUri[element.uri]?.copy(comment = element.comment) }
             }
             EntityListType.Author -> entities.entities.observeAuthors(uris).map { authors ->

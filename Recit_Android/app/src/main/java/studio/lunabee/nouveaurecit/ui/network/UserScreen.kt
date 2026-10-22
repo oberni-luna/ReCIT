@@ -1,24 +1,17 @@
 package studio.lunabee.nouveaurecit.ui.network
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -28,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,12 +28,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -59,23 +48,22 @@ import studio.lunabee.nouveaurecit.data.db.ShelfWithItems
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.UserRelation
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
-import studio.lunabee.nouveaurecit.designsystem.CornerRadius
+import studio.lunabee.nouveaurecit.designsystem.ConfirmDialog
 import studio.lunabee.nouveaurecit.designsystem.DestructiveButton
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SecondaryButton
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
-import studio.lunabee.nouveaurecit.designsystem.ShelfPalette
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
-import studio.lunabee.nouveaurecit.designsystem.shelfPaper
 import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.inventory.ShelfCarousel
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
@@ -137,7 +125,7 @@ fun UserScreen(destination: Destination.User, navigator: Navigator) {
                 },
             )
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         if (current == null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -156,31 +144,16 @@ fun UserScreen(destination: Destination.User, navigator: Navigator) {
     }
 
     if (isConfirmingRemoval && current != null) {
-        AlertDialog(
-            onDismissRequest = { isConfirmingRemoval = false },
-            text = {
-                Text(
-                    stringResource(R.string.network_remove_confirm, current.username),
-                    style = RecitTheme.typography.content300,
-                    color = RecitTheme.colors.foregroundDefault,
-                )
+        ConfirmDialog(
+            title = null,
+            message = stringResource(R.string.network_remove_confirm, current.username),
+            confirmLabel = stringResource(R.string.network_remove),
+            cancelLabel = stringResource(R.string.action_cancel),
+            onConfirm = {
+                isConfirmingRemoval = false
+                viewModel.actions.unfriend(current.id)
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        isConfirmingRemoval = false
-                        viewModel.actions.unfriend(current.id)
-                    },
-                ) {
-                    Text(stringResource(R.string.network_remove), color = RecitTheme.colors.foregroundError)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { isConfirmingRemoval = false }) {
-                    Text(stringResource(R.string.action_cancel), color = RecitTheme.colors.foregroundTinted)
-                }
-            },
-            containerColor = RecitTheme.colors.backgroundDefault,
+            onDismiss = { isConfirmingRemoval = false },
         )
     }
 
@@ -254,15 +227,20 @@ private fun UserContent(
         if (showsInventory(user.id, myUserId, user.relation)) {
             if (shelves.isNotEmpty()) {
                 item(key = "shelves-header") {
-                    SectionHeader(stringResource(R.string.network_user_shelves_header, user.username), Modifier.padding(horizontal = Spacing.medium))
+                    SectionHeader(stringResource(R.string.network_user_shelves_header, user.username))
                 }
                 item(key = "shelves") {
-                    ShelvesCarousel(shelves = shelves, onOpen = { navigator.push(Destination.Shelf(it)) })
+                    // The same planks and paper labels as my own étagères, read-only.
+                    ShelfCarousel(
+                        shelves = shelves,
+                        onOpenShelf = { navigator.push(Destination.Shelf(it)) },
+                        onOpenItem = { navigator.push(Destination.Book(BookAnchor.Item(it))) },
+                    )
                 }
             }
 
             item(key = "inventory-header") {
-                SectionHeader(stringResource(R.string.network_user_inventory_header, user.username), Modifier.padding(horizontal = Spacing.medium))
+                SectionHeader(stringResource(R.string.network_user_inventory_header, user.username))
             }
             item(key = "inventory") {
                 SectionCard {
@@ -276,7 +254,7 @@ private fun UserContent(
                         PlainRow(stringResource(R.string.network_inventory_empty))
                     }
                     items.forEachIndexed { index, row ->
-                        if (index > 0 || syncState != FirstSyncState.Synced) HorizontalDivider(color = RecitTheme.colors.borderDefault)
+                        if (index > 0 || syncState != FirstSyncState.Synced) HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
                         InventoryItemRow(
                             row = row,
                             showsOwner = false,
@@ -313,65 +291,21 @@ private fun UserContent(
     }
 }
 
-/** `UserHeaderView`: the 64 dp avatar, the username, how many books. */
+/** `UserHeaderView`: the portrait (or initials), the username, how many books. */
 @Composable
 private fun UserHeader(user: UserEntity, itemCount: Int) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        if (user.avatarUrl != null) {
-            CellThumbnail(url = user.avatarUrl, size = ThumbnailSize.Large, shape = ThumbnailShape.Circle)
-        }
-        Text(user.username, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
+        CellThumbnail(url = user.avatarUrl, size = ThumbnailSize.XLarge, shape = ThumbnailShape.Circle, fallbackName = user.username)
+        Text(user.username, style = RecitTheme.typography.title50, color = RecitTheme.colors.foregroundDefault)
         Text(
             pluralStringResource(R.plurals.network_user_item_count, itemCount, itemCount),
             style = RecitTheme.typography.content300,
-            color = RecitTheme.colors.foregroundDefault,
+            color = RecitTheme.colors.foregroundSecondary,
         )
-    }
-}
-
-/**
- * `UserShelvesSection`, read-only: the étagères a friend shares, as a horizontal row of cards —
- * the paper label and the first covers. Tapping a card opens the étagère, which stands its editing
- * down for a shelf that is not mine.
- */
-@Composable
-private fun ShelvesCarousel(shelves: List<ShelfWithItems>, onOpen: (String) -> Unit) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = Spacing.medium),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
-    ) {
-        items(shelves, key = { it.shelf.id }) { shelf ->
-            ShelfCard(shelf = shelf, onClick = { onOpen(shelf.shelf.id) })
-        }
-    }
-}
-
-@Composable
-private fun ShelfCard(shelf: ShelfWithItems, onClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .width(ShelfCardWidth)
-            .clip(RoundedCornerShape(CornerRadius.rounded))
-            .background(ShelfPalette.Parchment)
-            .clickable(onClick = onClick)
-            .padding(Spacing.sMedium),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sMedium),
-    ) {
-        Text(
-            text = shelf.shelf.name,
-            style = RecitTheme.typography.action300,
-            color = ShelfPalette.LabelInk,
-            maxLines = 1,
-            modifier = Modifier.shelfPaper(shelf.shelf.id).padding(horizontal = Spacing.small, vertical = Spacing.xSmall),
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-            shelf.items.take(ShelfCardCovers).forEach { row ->
-                CellThumbnail(url = row.image, size = ThumbnailSize.Medium, shape = ThumbnailShape.Portrait)
-            }
-        }
     }
 }
 
@@ -438,7 +372,7 @@ private fun Note(text: String) {
 private fun RelationRequestSheet(user: UserEntity, onSend: () -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = RecitTheme.colors.backgroundDefault,
+        containerColor = RecitTheme.colors.backgroundRaised,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium).padding(bottom = Spacing.large),
@@ -466,6 +400,3 @@ private fun RelationRequestSheet(user: UserEntity, onSend: () -> Unit, onDismiss
     }
 }
 
-/** Fixed artwork geometry of a shelf card. */
-private val ShelfCardWidth: Dp = 260.dp
-private const val ShelfCardCovers: Int = 4

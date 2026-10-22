@@ -11,9 +11,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -44,7 +42,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.TagLabel
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
-import studio.lunabee.nouveaurecit.designsystem.WithLabel
+import studio.lunabee.nouveaurecit.designsystem.formFieldColors
 import studio.lunabee.nouveaurecit.ui.common.Formatting
 
 /** How long typing must pause before the note is saved — `BookMyCopySection.autosaveDelay`. */
@@ -63,7 +61,7 @@ internal fun CommunityItemRow(row: ItemRow, onClick: () -> Unit) {
     CellSurface(onClick = onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small), verticalAlignment = Alignment.CenterVertically) {
-                CellThumbnail(url = owner.avatarUrl, size = ThumbnailSize.Medium, shape = ThumbnailShape.Circle)
+                CellThumbnail(url = owner.avatarUrl, size = ThumbnailSize.Medium, shape = ThumbnailShape.Circle, fallbackName = owner.username)
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                     Text(owner.username, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small), verticalAlignment = Alignment.CenterVertically) {
@@ -109,29 +107,22 @@ internal fun MyNotesCell(row: ItemRow, onCommit: (String) -> Unit) {
     }
 
     CellSurface {
-        WithLabel(label = stringResource(R.string.inventory_item_my_notes)) {
-            TextField(
-                value = draft,
-                onValueChange = { draft = it },
-                placeholder = { Text(stringResource(R.string.inventory_item_write_notes), style = RecitTheme.typography.content300) },
-                textStyle = RecitTheme.typography.content300.copy(color = RecitTheme.colors.foregroundDefault),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = RecitTheme.colors.foregroundTinted,
-                    focusedPlaceholderColor = RecitTheme.colors.foregroundPlaceholder,
-                    unfocusedPlaceholderColor = RecitTheme.colors.foregroundPlaceholder,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged { state ->
-                        if (focused && !state.isFocused) commit.value(latestDraft.value)
-                        focused = state.isFocused
-                    },
-            )
-        }
+        // A visible field: without its outline it read as grey text, not as somewhere to write.
+        OutlinedTextField(
+            value = draft,
+            onValueChange = { draft = it },
+            label = { Text(stringResource(R.string.inventory_item_my_notes)) },
+            placeholder = { Text(stringResource(R.string.inventory_item_write_notes), style = RecitTheme.typography.content300) },
+            textStyle = RecitTheme.typography.content300,
+            minLines = 2,
+            colors = formFieldColors(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { state ->
+                    if (focused && !state.isFocused) commit.value(latestDraft.value)
+                    focused = state.isFocused
+                },
+        )
     }
 }
 
@@ -165,7 +156,7 @@ internal fun MyCopyDetailsCell(row: ItemRow, onTransaction: (TransactionType) ->
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     matchAnchorWidth = false,
-                    containerColor = RecitTheme.colors.backgroundDefault,
+                    containerColor = RecitTheme.colors.backgroundRaised,
                 ) {
                     TransactionType.entries.forEach { type ->
                         DropdownMenuItem(

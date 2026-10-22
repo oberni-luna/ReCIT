@@ -50,7 +50,7 @@ data class EditionEntity(
 @Entity(tableName = "works")
 data class WorkEntity(
     @PrimaryKey val uri: String,
-    val lastrevid: Int = 0,
+    val lastrevid: Long = 0,
     val title: String,
     val subtitle: String? = null,
     val originalLang: String? = null,
@@ -62,7 +62,7 @@ data class WorkEntity(
 @Entity(tableName = "authors")
 data class AuthorEntity(
     @PrimaryKey val uri: String,
-    val lastrevid: Int = 0,
+    val lastrevid: Long = 0,
     val name: String,
     val subtitle: String? = null,
     val dateOfBirth: String? = null,

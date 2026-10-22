@@ -1,11 +1,9 @@
 package studio.lunabee.nouveaurecit.ui.lists
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,15 +26,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.model.EntityListType
-import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
-import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
-import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
+import studio.lunabee.nouveaurecit.ui.common.BookRow
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
@@ -80,7 +77,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
             RecitTopBar(
                 title = state.list?.name.orEmpty(),
                 onBack = navigator::pop,
-                containerColor = RecitTheme.colors.backgroundGrouped,
+                containerColor = RecitTheme.colors.backgroundDefault,
                 actions = {
                     if (state.list != null) {
                         IconButton(onClick = { showsForm = true }) {
@@ -90,7 +87,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 },
             )
         },
-        containerColor = RecitTheme.colors.backgroundGrouped,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             val list = state.list
@@ -100,6 +97,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 // A publisher list shows no rows on iOS either: it says it is empty.
                 state.rows.isEmpty() -> EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
                 else -> LazyColumn(Modifier.fillMaxSize()) {
+                    item(key = "header") { ListHeader(description = list.explanation, count = state.rows.size, type = list.type) }
                     items(state.rows, key = { it.uri }) { row ->
                         SwipeToDeleteRow(
                             key = row.uri,
@@ -133,31 +131,37 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
     }
 }
 
-/** `ListItemCellView`: the thumbnail, then title, subtitle and the element's comment. */
+/** What the list is for — its description — and how much it holds, above its elements. */
+@Composable
+private fun ListHeader(description: String?, count: Int, type: EntityListType) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.small),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
+    ) {
+        description?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
+        }
+        Text(
+            pluralStringResource(ListsPresentation.countPlural(type), count, count),
+            style = RecitTheme.typography.footnote200,
+            color = RecitTheme.colors.foregroundSecondary,
+        )
+    }
+}
+
+/** `ListItemCellView`: a [BookRow], with the element's comment as its footer. */
 @Composable
 private fun ListElementRow(row: ListElementRowModel, isAuthor: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(RecitTheme.colors.backgroundGroupedCell)
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CellThumbnail(
-            url = row.image,
-            size = ThumbnailSize.Medium,
-            shape = if (isAuthor) ThumbnailShape.Circle else ThumbnailShape.Portrait,
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xSmall)) {
-            Text(row.title, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
-            row.subtitle?.takeIf { it.isNotEmpty() }?.let {
-                Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary)
-            }
-            if (row.comment.isNotEmpty()) {
-                Text(row.comment, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
-            }
-        }
-    }
+    BookRow(
+        title = row.title,
+        imageUrl = row.image,
+        onClick = onClick,
+        modifier = Modifier.background(RecitTheme.colors.backgroundDefault),
+        authors = row.authors,
+        subtitle = row.subtitle,
+        isPerson = isAuthor,
+        footer = row.comment.takeIf { it.isNotEmpty() }?.let { comment ->
+            { Text(comment, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault) }
+        },
+    )
 }

@@ -2,28 +2,18 @@ package studio.lunabee.nouveaurecit.ui.inventory
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,10 +22,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -43,9 +31,12 @@ import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ShelfEntity
 import studio.lunabee.nouveaurecit.data.db.UserEntity
-import studio.lunabee.nouveaurecit.designsystem.DestructiveButton
+import studio.lunabee.nouveaurecit.designsystem.ConfirmDialog
+import studio.lunabee.nouveaurecit.designsystem.DestructiveTextButton
+import studio.lunabee.nouveaurecit.designsystem.FormTextField
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
+import studio.lunabee.nouveaurecit.designsystem.SheetHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.WithLabel
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
@@ -120,7 +111,7 @@ fun ShelfFormSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundRaised,
     ) {
         Column(
             modifier = Modifier
@@ -132,36 +123,23 @@ fun ShelfFormSheet(
                 .padding(bottom = Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = close) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.shelf_form_close), tint = RecitTheme.colors.foregroundTinted)
-                }
-                Text(
-                    text = stringResource(if (isEditing) R.string.shelf_form_title_edit else R.string.shelf_form_title_new),
-                    style = RecitTheme.typography.title50,
-                    color = RecitTheme.colors.foregroundDefault,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f),
-                )
-                // Balances the close button so the title stays centred.
-                Spacer(Modifier.minimumInteractiveComponentSize())
-            }
-            OutlinedTextField(
+            SheetHeader(
+                title = stringResource(if (isEditing) R.string.shelf_form_title_edit else R.string.shelf_form_title_new),
+                closeLabel = stringResource(R.string.shelf_form_close),
+                onClose = close,
+            )
+            FormTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(stringResource(R.string.shelf_form_name)) },
-                singleLine = true,
-                textStyle = RecitTheme.typography.content300,
-                modifier = Modifier.fillMaxWidth(),
+                label = stringResource(R.string.shelf_form_name),
             )
-            OutlinedTextField(
+            FormTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text(stringResource(R.string.shelf_form_description)) },
+                label = stringResource(R.string.shelf_form_description),
+                singleLine = false,
                 minLines = 2,
                 maxLines = 4,
-                textStyle = RecitTheme.typography.content300,
-                modifier = Modifier.fillMaxWidth(),
             )
             WithLabel(label = stringResource(R.string.shelf_form_visibility)) {
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
@@ -192,7 +170,7 @@ fun ShelfFormSheet(
                 enabled = canSubmit,
             )
             if (isEditing) {
-                DestructiveButton(
+                DestructiveTextButton(
                     text = stringResource(R.string.shelf_form_delete),
                     onClick = { isConfirmingDelete = true },
                 )
@@ -201,27 +179,18 @@ fun ShelfFormSheet(
     }
 
     if (isConfirmingDelete && shelfId != null) {
-        AlertDialog(
-            onDismissRequest = { isConfirmingDelete = false },
-            title = { Text(stringResource(R.string.shelf_form_delete_confirm_title)) },
-            text = { Text(stringResource(R.string.shelf_form_delete_confirm_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        isConfirmingDelete = false
-                        container.applicationScope.launch { container.shelves.deleteShelf(shelfId) }
-                        onDismiss()
-                        onDeleted()
-                    },
-                ) {
-                    Text(stringResource(R.string.shelf_form_delete), color = RecitTheme.colors.foregroundError)
-                }
+        ConfirmDialog(
+            title = stringResource(R.string.shelf_form_delete_confirm_title),
+            message = stringResource(R.string.shelf_form_delete_confirm_message),
+            confirmLabel = stringResource(R.string.action_delete),
+            cancelLabel = stringResource(R.string.shelf_form_cancel),
+            onConfirm = {
+                isConfirmingDelete = false
+                container.applicationScope.launch { container.shelves.deleteShelf(shelfId) }
+                onDismiss()
+                onDeleted()
             },
-            dismissButton = {
-                TextButton(onClick = { isConfirmingDelete = false }) {
-                    Text(stringResource(R.string.shelf_form_cancel), color = RecitTheme.colors.foregroundTinted)
-                }
-            },
+            onDismiss = { isConfirmingDelete = false },
         )
     }
 }

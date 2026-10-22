@@ -1,22 +1,25 @@
 package studio.lunabee.nouveaurecit.ui.auth
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -24,6 +27,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -35,8 +39,9 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 
 /**
- * The green chrome of the account screens: a tinted bar, a scrolling form, and the action bar
- * pinned above the keyboard (`safeAreaInset(edge: .bottom)`).
+ * The green chrome of the account screens: a transparent bar on the green, then one scrolling
+ * column — the form, then its actions under the last field, never pinned over it. With the
+ * keyboard up, the column shrinks above it and the focused field scrolls into view.
  */
 @Composable
 fun AuthScaffold(
@@ -46,38 +51,38 @@ fun AuthScaffold(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Scaffold(
-        topBar = { AuthTopBar(title, onBack) },
+        topBar = { RecitTopBar(title = title, onBack = onBack, containerColor = Color.Transparent) },
         containerColor = RecitTheme.colors.backgroundTinted,
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(RecitTheme.colors.backgroundTinted)
-                    .navigationBarsPadding()
-                    .imePadding()
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.large),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
-                content = bottomBar,
-            )
-        },
+        contentWindowInsets = WindowInsets.safeDrawing,
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .consumeWindowInsets(padding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.medium, vertical = Spacing.large),
             verticalArrangement = Arrangement.spacedBy(Spacing.large),
-            content = content,
-        )
+        ) {
+            content()
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.small),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+                content = bottomBar,
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** An error on the green: light text after a red glyph, since red text on green does not read. */
 @Composable
-private fun AuthTopBar(title: String, onBack: (() -> Unit)?) {
-    RecitTopBar(title = title, onBack = onBack)
+fun AuthError(text: String, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xSmall)) {
+        Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = Primitive.Red400, modifier = Modifier.size(16.dp))
+        Text(text, style = RecitTheme.typography.footnote200, color = RecitTheme.colors.foregroundDefault)
+    }
 }
 
 /**
@@ -119,13 +124,13 @@ fun AuthField(
                 focusedTextColor = Primitive.Gray900,
                 unfocusedTextColor = Primitive.Gray900,
                 cursorColor = Primitive.Green700,
-                focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
             ),
             modifier = Modifier.fillMaxWidth(),
         )
         if (error != null) {
-            Text(error, style = RecitTheme.typography.footnote200, color = RecitTheme.colors.foregroundError)
+            AuthError(error)
         }
     }
 }

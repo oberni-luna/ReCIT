@@ -3,25 +3,34 @@ package studio.lunabee.nouveaurecit.ui.profile
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.designsystem.ConfirmDialog
 import studio.lunabee.nouveaurecit.designsystem.DestructiveButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
@@ -51,14 +60,14 @@ fun DeleteAccountScreen(navigator: Navigator) {
 
     Scaffold(
         topBar = { RecitTopBar(title = stringResource(R.string.delete_account_title), onBack = navigator::pop) },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding: PaddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(Spacing.large),
+                .padding(horizontal = Spacing.medium, vertical = Spacing.large),
             verticalArrangement = Arrangement.spacedBy(Spacing.large),
         ) {
             BodyText(stringResource(R.string.delete_account_intro))
@@ -68,7 +77,7 @@ fun DeleteAccountScreen(navigator: Navigator) {
                     BodyText(stringResource(R.string.delete_account_empty))
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                        counted.lines.forEach { line: AccountDeletionSummary.Line -> BodyText(lineText(line)) }
+                        counted.lines.forEach { line: AccountDeletionSummary.Line -> LossLine(lineText(line), lineIcon(line)) }
                     }
                 }
             }
@@ -89,28 +98,16 @@ fun DeleteAccountScreen(navigator: Navigator) {
     }
 
     if (isConfirming) {
-        AlertDialog(
-            onDismissRequest = { isConfirming = false },
-            title = { Text(stringResource(R.string.delete_account_confirm_title)) },
-            text = { Text(stringResource(R.string.delete_account_confirm_message)) },
-            dismissButton = {
-                TextButton(onClick = { isConfirming = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
+        ConfirmDialog(
+            title = stringResource(R.string.delete_account_confirm_title),
+            message = stringResource(R.string.delete_account_confirm_message),
+            confirmLabel = stringResource(R.string.delete_account_confirm_delete),
+            cancelLabel = stringResource(R.string.action_cancel),
+            onConfirm = {
+                isConfirming = false
+                viewModel.deleteAccount { error: Throwable -> messenger.showError(genericError, error.localizedMessage) }
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        isConfirming = false
-                        viewModel.deleteAccount { error: Throwable -> messenger.showError(genericError, error.localizedMessage) }
-                    },
-                ) {
-                    Text(stringResource(R.string.delete_account_confirm_delete), color = RecitTheme.colors.foregroundError)
-                }
-            },
-            containerColor = RecitTheme.colors.backgroundDefault,
-            titleContentColor = RecitTheme.colors.foregroundDefault,
-            textContentColor = RecitTheme.colors.foregroundDefault,
+            onDismiss = { isConfirming = false },
         )
     }
 }
@@ -123,6 +120,21 @@ private fun lineText(line: AccountDeletionSummary.Line): String {
         AccountDeletionSummary.Kind.Lists -> R.plurals.delete_account_line_lists
     }
     return pluralStringResource(plural, line.count, line.count)
+}
+
+/** One thing the deletion takes away, behind the glyph of what it is. */
+@Composable
+private fun LossLine(text: String, icon: ImageVector) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = RecitTheme.colors.foregroundError, modifier = Modifier.size(20.dp))
+        BodyText(text)
+    }
+}
+
+private fun lineIcon(line: AccountDeletionSummary.Line): ImageVector = when (line.kind) {
+    AccountDeletionSummary.Kind.Books -> Icons.AutoMirrored.Outlined.MenuBook
+    AccountDeletionSummary.Kind.Shelves -> Icons.AutoMirrored.Outlined.LibraryBooks
+    AccountDeletionSummary.Kind.Lists -> Icons.AutoMirrored.Outlined.List
 }
 
 @Composable

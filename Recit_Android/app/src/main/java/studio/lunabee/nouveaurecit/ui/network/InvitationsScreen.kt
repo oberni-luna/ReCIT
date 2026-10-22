@@ -66,7 +66,7 @@ fun InvitationsScreen(navigator: Navigator) {
 
     Scaffold(
         topBar = { RecitTopBar(title = stringResource(R.string.network_invitations), onBack = navigator::pop) },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -85,12 +85,12 @@ fun InvitationsScreen(navigator: Navigator) {
 
             if (received.isNotEmpty()) {
                 item(key = "received-header") {
-                    SectionHeader(stringResource(R.string.network_invitations_received), Modifier.padding(horizontal = Spacing.medium))
+                    SectionHeader(stringResource(R.string.network_invitations_received))
                 }
                 item(key = "received") {
                     SectionCard {
                         received.forEachIndexed { index, user ->
-                            if (index > 0) HorizontalDivider(color = RecitTheme.colors.borderDefault)
+                            if (index > 0) HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
                             InvitationRow(
                                 user = user,
                                 syncState = FirstSyncState.of(user.lastInventorySync, progress[user.id]),
@@ -111,12 +111,12 @@ fun InvitationsScreen(navigator: Navigator) {
 
             if (sent.isNotEmpty()) {
                 item(key = "sent-header") {
-                    SectionHeader(stringResource(R.string.network_invitations_sent), Modifier.padding(horizontal = Spacing.medium))
+                    SectionHeader(stringResource(R.string.network_invitations_sent))
                 }
                 item(key = "sent") {
                     SectionCard {
                         sent.forEachIndexed { index, user ->
-                            if (index > 0) HorizontalDivider(color = RecitTheme.colors.borderDefault)
+                            if (index > 0) HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
                             ReaderRow(
                                 user = user,
                                 syncState = FirstSyncState.of(user.lastInventorySync, progress[user.id]),

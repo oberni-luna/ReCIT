@@ -7,10 +7,21 @@
     <string name="nav_profile">Profil</string>
 
     <plurals name="user_item_count">
-        <item quantity="one">%d élément</item>
-        <item quantity="many">%d éléments</item>
-        <item quantity="other">%d éléments</item>
+        <item quantity="one">%d livre</item>
+        <item quantity="many">%d livres</item>
+        <item quantity="other">%d livres</item>
     </plurals>
+    <plurals name="profile_shelf_count">
+        <item quantity="one">%d étagère</item>
+        <item quantity="many">%d étagères</item>
+        <item quantity="other">%d étagères</item>
+    </plurals>
+    <plurals name="profile_list_count">
+        <item quantity="one">%d liste</item>
+        <item quantity="many">%d listes</item>
+        <item quantity="other">%d listes</item>
+    </plurals>
+    <string name="profile_account_section">Compte</string>
 
     <string name="profile_about_inventaire">À propos d’inventaire.io</string>
     <string name="profile_logout">Se déconnecter</string>

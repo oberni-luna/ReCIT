@@ -24,13 +24,14 @@ class ShelfLogicTest {
     }
 
     @Test
-    fun cardMetricsFollowTheIosProportions() {
+    fun cardMetricsHoldTheCoversAndLittleMore() {
         val metrics = ShelfCardMetrics(width = 320f)
-        assertEquals(180f, metrics.zoneHeight, 0.001f)
-        assertEquals(45f, metrics.topRoom, 0.001f)
+        // 320 × 9 / 32 = 90 tall, 60 wide: four fit in 272 with a 4 gap, five do not.
+        assertEquals(90f, metrics.coverHeight, 0.001f)
+        assertEquals(102f, metrics.zoneHeight, 0.001f)
+        assertEquals(8f, metrics.topRoom, 0.001f)
         assertEquals(320f * 129f / 820f, metrics.plankHeight, 0.001f)
         assertEquals(272f, metrics.booksWidth, 0.001f)
-        // 180 × 0.5 = 90 tall, 60 wide: four fit in 272 with a 4 gap, five do not.
         assertEquals(4, metrics.fittingCount)
         assertEquals(0, ShelfCardMetrics(width = 0f).fittingCount)
     }

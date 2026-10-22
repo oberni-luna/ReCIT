@@ -28,6 +28,13 @@
     <string name="shelf_empty_sort_body">Vos livres sont là. Il reste à leur faire une place sur des étagères.</string>
     <string name="shelf_empty_action_search_title">Rechercher</string>
     <string name="shelf_empty_action_search_detail">par titre ou auteur</string>
+    <string name="shelf_empty_action_add_title">Ajouter des livres</string>
+    <string name="shelf_empty_action_add_detail">depuis votre inventaire</string>
+    <string name="shelf_add_books_title">Ajouter à %1$s</string>
+    <string name="shelf_add_books_empty_title">Aucun livre dans votre inventaire</string>
+    <string name="shelf_add_books_empty_message">Cherchez un livre, ajoutez-le à votre inventaire, et il pourra aller sur une étagère.</string>
+    <string name="shelf_add_books_on_shelf">Sur l’étagère, toucher pour le retirer</string>
+    <string name="shelf_add_books_add">Ajouter à l’étagère</string>
 
     <!-- The search (features 0014 and 0037) -->
     <string name="inventory_search_placeholder">Rechercher</string>
@@ -57,6 +64,14 @@
     <!-- Shelf screen -->
     <string name="shelf_detail_edit">Modifier</string>
     <string name="shelf_detail_empty">Cette étagère est vide</string>
+    <string name="shelf_detail_empty_message">Choisissez dans votre inventaire les livres qui y vont.</string>
+    <string name="shelf_detail_visibility_private">Privée</string>
+    <string name="shelf_detail_visibility_friends">Visible par vos amis</string>
+    <string name="shelf_detail_visibility_public">Publique</string>
+    <plurals name="shelf_detail_count">
+        <item quantity="one">%1$d livre</item>
+        <item quantity="other">%1$d livres</item>
+    </plurals>
     <string name="shelf_remove_from_named">Retirer de %1$s</string>
 
     <!-- Shelf form (literals on iOS) -->

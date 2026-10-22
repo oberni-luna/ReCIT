@@ -40,6 +40,7 @@
 
     <!-- Relations -->
     <string name="network_add_to_network">Ajouter au réseau</string>
+    <string name="network_add_reader">Ajouter %1$s</string>
     <string name="network_reciprocal">Une fois la demande acceptée, vous verrez ses livres et il verra les vôtres. inventaire.io ne connaît pas de sens unique : le réseau est réciproque.</string>
     <string name="network_request_sent">Envoyée</string>
     <string name="network_request_awaiting">Demande envoyée</string>
@@ -55,9 +56,9 @@
 
     <!-- A user's profile -->
     <plurals name="network_user_item_count">
-        <item quantity="one">%1$d élément</item>
-        <item quantity="many">%1$d éléments</item>
-        <item quantity="other">%1$d éléments</item>
+        <item quantity="one">%1$d livre</item>
+        <item quantity="many">%1$d livres</item>
+        <item quantity="other">%1$d livres</item>
     </plurals>
     <string name="network_user_shelves_header">Étagères de %1$s</string>
     <string name="network_user_inventory_header">Inventaire de %1$s</string>

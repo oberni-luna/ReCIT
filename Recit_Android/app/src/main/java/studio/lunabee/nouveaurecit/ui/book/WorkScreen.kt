@@ -74,7 +74,11 @@ private fun EditionPicker(state: WorkUiState, viewModel: WorkViewModel, navigato
                                     context = context,
                                     entries = state.myLists,
                                     onToggle = { entry ->
-                                        scope.launch { if (viewModel.toggleList(entry)) messenger.show(membershipMessage(context, entry)) }
+                                        scope.launch {
+                                            if (viewModel.toggleList(entry)) {
+                                                showMembership(messenger, context, entry) { navigator.push(Destination.EntityList(entry.id)) }
+                                            }
+                                        }
                                     },
                                     onCreate = { createsList = true },
                                 ),
@@ -84,7 +88,7 @@ private fun EditionPicker(state: WorkUiState, viewModel: WorkViewModel, navigato
                 },
             )
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding: PaddingValues ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             val work: WorkEntity? = state.work

@@ -1,7 +1,7 @@
 package studio.lunabee.nouveaurecit.ui.inventory
 
-import studio.lunabee.nouveaurecit.data.db.ItemRow
 import kotlin.math.floor
+import studio.lunabee.nouveaurecit.data.db.ItemRow
 
 /**
  * `ShelfCardMetrics` and `ShelfDrawnBooks`, in plain numbers (dp as `Float`) so they test without
@@ -11,13 +11,15 @@ import kotlin.math.floor
  * cover geometry ([coverHeight], [coverWidth], [fittingCount]) is this port's own.
  */
 data class ShelfCardMetrics(val width: Float) {
-    val zoneHeight: Float get() = width * 9f / 16f
     val plankHeight: Float get() = width * 129f / 820f
-    val topRoom: Float get() = zoneHeight * 0.25f
     val booksWidth: Float get() = (width - HORIZONTAL_MARGIN * 2).coerceAtLeast(0f)
 
-    /** A standing cover takes half the zone, so four stand on a phone-sized card. */
-    val coverHeight: Float get() = zoneHeight * 0.5f
+    /** Four covers stand side by side on a phone-sized card. */
+    val coverHeight: Float get() = width * 9f / 32f
+
+    /** The covers and a little headroom — no more, so the plank does not float under empty space. */
+    val zoneHeight: Float get() = coverHeight + HEADROOM
+    val topRoom: Float get() = TOP_ROOM
     val coverWidth: Float get() = coverHeight * 2f / 3f
 
     /** How many covers stand side by side in [booksWidth], [COVER_GAP] apart. */
@@ -31,6 +33,8 @@ data class ShelfCardMetrics(val width: Float) {
         const val GUTTER: Float = 14f
         const val SIDE_PADDING: Float = 12f
         const val LABEL_OVERLAP: Float = 14f
+        const val HEADROOM: Float = 12f
+        const val TOP_ROOM: Float = 8f
     }
 }
 

@@ -18,7 +18,7 @@ data class EntityResultsDto(val entities: Map<String, EntityResultDto> = emptyMa
 @Serializable
 data class EntityResultDto(
     val uri: String,
-    val lastrevid: Int? = null,
+    val lastrevid: Long? = null,
     val type: String? = null,
     val originalLang: String? = null,
     val labels: Map<String, String> = emptyMap(),

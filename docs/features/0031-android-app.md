@@ -7,7 +7,7 @@ shelves, search, a book's screen, lists, friends, and the profile.
 
 ## What it does
 
-- **Signed out:** the welcome screen (the green veil, without the drifting wall of covers), then
+- **Signed out:** the welcome screen (the green veil, and since feature 0044 the drifting wall of covers), then
   sign-in, account creation with live checks of the username and e-mail, and the reset-password
   sheet. A session survives a relaunch.
 - **Inventaire:**
@@ -110,10 +110,10 @@ ADR 0001 and ADR 0008 hold as written:
 
 ## Not done, or not verified
 
-- **Never exercised signed in.** The app was installed on an API 35 emulator: it launches, the
-  welcome and sign-in screens render, and nothing crashes. No session was opened, so every
-  signed-in screen has been compiled and unit-tested but not seen running against inventaire.io. A
-  pass on a device with a test account is owed.
+- **First exercised signed in on 2026-10-16**, on an API 35 emulator with a test account, during the
+  review of feature 0044. That pass found two bugs this port shipped with — books from search never
+  opened (`lastrevid` overflowed an `Int`), and Wikimedia images never loaded (OkHttp's default
+  user agent) — both fixed there. A pass on a physical device is still owed.
 - **No end-to-end scenario and no instrumented tests** exist for Android.
 - **Not ported:**
   - creating a book — ported later, in [0043](0043-android-create-a-missing-book.md);
@@ -121,7 +121,7 @@ ADR 0001 and ADR 0008 hold as written:
   - the batch scanner and manual sorting were ported later, in
     [0042](0042-android-scan-and-sort.md);
   - painted spines and the press-and-hold focus;
-  - the wall of covers and the onboarding after sign-in;
+  - the onboarding after sign-in (the wall of covers came with feature 0044);
   - tips, transactions (hidden on iOS too), groups, the full-screen cover, reporting by mail;
   - genre enrichment and genre tags.
 - No Figma pass: the screens follow the iOS code, not the Figma library.

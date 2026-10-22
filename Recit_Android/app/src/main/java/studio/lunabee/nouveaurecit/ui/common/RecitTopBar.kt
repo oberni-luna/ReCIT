@@ -7,6 +7,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -25,8 +26,11 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
  *
  * `actions` is the toolbar: `.primaryAction` / `.confirmationAction` items go there;
  * `navigationIcon` is `.topBarLeading`, shown when there is no back button — on a pushed screen it
- * stands in for the chevron where there is another way out, a flow's close cross. `containerColor`
- * follows the screen's own background, so the bar does not stand out from it.
+ * stands in for the chevron where there is another way out, a flow's close cross.
+ *
+ * Both bars wear the screen's own background, so a screen is one surface; the bar only takes the
+ * secondary tone once content scrolls under it. [containerColor] and [contentColor] let a screen
+ * that paints under its bar (the book header, the green account screens) make it transparent.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +39,7 @@ fun RecitLargeTopBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onBack: (() -> Unit)? = null,
     navigationIcon: @Composable () -> Unit = {},
-    containerColor: Color = RecitTheme.colors.backgroundSecondary,
+    containerColor: Color = RecitTheme.colors.backgroundDefault,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     LargeTopAppBar(
@@ -45,13 +49,7 @@ fun RecitLargeTopBar(
         navigationIcon = { if (onBack != null) BackButton(onBack) else navigationIcon() },
         actions = actions,
         scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = containerColor,
-            scrolledContainerColor = containerColor,
-            titleContentColor = RecitTheme.colors.foregroundDefault,
-            actionIconContentColor = RecitTheme.colors.foregroundTinted,
-            navigationIconContentColor = RecitTheme.colors.foregroundDefault,
-        ),
+        colors = recitTopBarColors(containerColor, RecitTheme.colors.foregroundDefault),
     )
 }
 
@@ -63,7 +61,8 @@ fun RecitTopBar(
     actions: @Composable RowScope.() -> Unit = {},
     navigationIcon: @Composable () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    containerColor: Color = RecitTheme.colors.backgroundSecondary,
+    containerColor: Color = RecitTheme.colors.backgroundDefault,
+    contentColor: Color = RecitTheme.colors.foregroundDefault,
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -72,15 +71,19 @@ fun RecitTopBar(
         navigationIcon = { if (onBack != null) BackButton(onBack) else navigationIcon() },
         actions = actions,
         scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = containerColor,
-            scrolledContainerColor = containerColor,
-            titleContentColor = RecitTheme.colors.foregroundDefault,
-            actionIconContentColor = RecitTheme.colors.foregroundTinted,
-            navigationIconContentColor = RecitTheme.colors.foregroundDefault,
-        ),
+        colors = recitTopBarColors(containerColor, contentColor),
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun recitTopBarColors(containerColor: Color, contentColor: Color): TopAppBarColors = TopAppBarDefaults.topAppBarColors(
+    containerColor = containerColor,
+    scrolledContainerColor = if (containerColor == Color.Transparent) containerColor else RecitTheme.colors.backgroundSecondary,
+    titleContentColor = contentColor,
+    actionIconContentColor = if (contentColor == RecitTheme.colors.foregroundDefault) RecitTheme.colors.foregroundTinted else contentColor,
+    navigationIconContentColor = contentColor,
+)
 
 @Composable
 fun BackButton(onBack: () -> Unit) {

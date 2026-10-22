@@ -10,26 +10,26 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.UserRelation
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
-import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.PillButton
 import studio.lunabee.nouveaurecit.designsystem.PillStyle
 import studio.lunabee.nouveaurecit.designsystem.RecitColors
@@ -74,9 +74,9 @@ fun ReaderCell(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
         verticalAlignment = Alignment.Top,
     ) {
-        CellThumbnail(url = user.avatarUrl, size = ThumbnailSize.Medium, shape = ThumbnailShape.Circle)
+        CellThumbnail(url = user.avatarUrl, size = ThumbnailSize.Medium, shape = ThumbnailShape.Circle, fallbackName = user.username)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xSmall)) {
-            Text(user.username, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
+            Text(user.username, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault, maxLines = 1, overflow = TextOverflow.Ellipsis)
             SyncProgressBar(syncState)
             SyncCaption(syncState)
         }
@@ -188,11 +188,15 @@ fun ReaderRow(
 ) {
     ReaderCell(user = user, syncState = syncState, onClick = onOpen) {
         when (readerTrailing(user.relation)) {
-            ReaderTrailing.Add -> PillButton(
-                text = stringResource(R.string.action_add),
+            ReaderTrailing.Add -> FilledTonalIconButton(
                 onClick = onAdd,
-                icon = Icons.Rounded.Add,
-            )
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = RecitTheme.colors.backgroundTinted,
+                    contentColor = RecitTheme.colors.foregroundTinted,
+                ),
+            ) {
+                Icon(Icons.Rounded.PersonAdd, contentDescription = stringResource(R.string.network_add_reader, user.username))
+            }
             ReaderTrailing.Sent -> TagLabel(
                 text = stringResource(R.string.network_request_sent),
                 style = TagStyle.Secondary,
@@ -222,23 +226,12 @@ fun LinkRow(text: String, onClick: () -> Unit) {
 }
 
 /**
- * An inset-grouped `Section`'s card: the rows of one section, on the default background — or, on a
- * tab's root, on [RecitColors.backgroundGroupedCell] (feature 0039).
+ * The rows of one `Section`. iOS draws them as an inset-grouped card; Android lists run full width
+ * on the screen's background, the rows carrying their own margins and dividers.
  */
 @Composable
-fun SectionCard(
-    modifier: Modifier = Modifier,
-    color: Color = RecitTheme.colors.backgroundDefault,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.medium)
-            .clip(RoundedCornerShape(CornerRadius.rounded))
-            .background(color),
-        content = content,
-    )
+fun SectionCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = modifier.fillMaxWidth(), content = content)
 }
 
 /** A plain line of text in a list section (« Aucun ami pour le moment », « Oh, c'est vide ici »). */

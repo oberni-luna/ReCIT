@@ -99,14 +99,14 @@ fun NetworkScreen(navigator: Navigator) {
                 title = stringResource(R.string.network_nav_network),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = { ProfileAvatarButton() },
-                containerColor = RecitTheme.colors.backgroundGrouped,
+                containerColor = RecitTheme.colors.backgroundDefault,
             ) {
                 IconButton(onClick = { navigator.push(Destination.AddFriends) }) {
                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.network_add_friends))
                 }
             }
         },
-        containerColor = RecitTheme.colors.backgroundGrouped,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -128,10 +128,10 @@ fun NetworkScreen(navigator: Navigator) {
             ) {
                 if (invitations.isNotEmpty()) {
                     item(key = "invitations-header") {
-                        SectionHeader(stringResource(R.string.network_profile_invitations), Modifier.padding(horizontal = Spacing.medium))
+                        SectionHeader(stringResource(R.string.network_profile_invitations))
                     }
                     item(key = "invitations") {
-                        SectionCard(color = RecitTheme.colors.backgroundGroupedCell) {
+                        SectionCard {
                             invitations.forEach { user ->
                                 InvitationRow(
                                     user = user,
@@ -146,7 +146,7 @@ fun NetworkScreen(navigator: Navigator) {
                                         messenger.show(context.getString(R.string.network_invitation_refused, user.username))
                                     },
                                 )
-                                HorizontalDivider(color = RecitTheme.colors.borderDefault)
+                                HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
                             }
                             LinkRow(stringResource(R.string.network_invitations_all)) { navigator.push(Destination.Invitations) }
                         }
@@ -154,10 +154,10 @@ fun NetworkScreen(navigator: Navigator) {
                 }
 
                 item(key = "friends-header") {
-                    SectionHeader(stringResource(R.string.network_friends), Modifier.padding(horizontal = Spacing.medium))
+                    SectionHeader(stringResource(R.string.network_friends))
                 }
                 item(key = "friends") {
-                    SectionCard(color = RecitTheme.colors.backgroundGroupedCell) {
+                    SectionCard {
                         when (sectionState) {
                             FriendsSectionState.Syncing -> SyncingInlineRow(
                                 message = stringResource(R.string.sync_loading),
@@ -170,7 +170,7 @@ fun NetworkScreen(navigator: Navigator) {
                                     syncState = syncStates[friend.id] ?: FirstSyncState.Synced,
                                     onClick = { navigator.push(Destination.User(friend.id)) },
                                 )
-                                HorizontalDivider(color = RecitTheme.colors.borderDefault)
+                                HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
                             }
                         }
                         // Present even with no friend at all: an empty network is when one needs it.

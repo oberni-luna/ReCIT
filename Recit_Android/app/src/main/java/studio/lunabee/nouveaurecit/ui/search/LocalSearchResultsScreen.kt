@@ -42,7 +42,7 @@ fun LocalSearchResultsScreen(destination: Destination.LocalSearchResults, naviga
 
     Scaffold(
         topBar = { RecitTopBar(title = stringResource(R.string.inventory_search_local_section), onBack = navigator::pop) },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding)) {
             items(state.items, key = { it.item.id }) { row ->

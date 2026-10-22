@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  « Ranger mes livres » (features 0010 and 0032) and the bilan after a scan. French values of
+  ReCIT_iOS/Localizable.xcstrings (manual_sort.*, onboarding.tally.*), keys with '.' turned into '_'
+  under a sort_ prefix. iOS's « %#@shelves@ : %2$@. » substitutions are plurals carrying both
+  arguments. French needs `many` beside `one` and `other`; it reads as `other`.
+  The menu « Ranger dans… » and the sort tag's detail are Android's own: there is no proposal here.
+-->
+<resources>
+    <string name="sort_title">Ranger mes livres</string>
+    <string name="sort_syncing">Lecture de votre bibliothèque…</string>
+    <string name="sort_shelves_header">Étagères</string>
+    <string name="sort_card_title">%1$s · %2$d</string>
+    <string name="sort_pill_new">Nouvelle</string>
+    <string name="sort_pill_modified">Modifiée</string>
+    <string name="sort_mark_applying">Enregistrement en cours</string>
+    <string name="sort_mark_failed">Échec de l\'enregistrement</string>
+    <string name="sort_create_shelf">Nouvelle étagère</string>
+    <string name="sort_unshelved_header">Livres à ranger · %1$d</string>
+    <string name="sort_unshelved_empty">Tous vos livres sont rangés.</string>
+    <string name="sort_file_into">Ranger dans %1$s</string>
+    <string name="sort_file_into_menu">Ranger dans…</string>
+    <string name="sort_unshelve">Retirer %1$s de cette étagère</string>
+    <string name="sort_discard">Annuler</string>
+    <string name="sort_apply">Enregistrer</string>
+    <string name="sort_discard_confirm_title">Abandonner votre rangement ?</string>
+    <string name="sort_discard_confirm_action">Abandonner</string>
+    <string name="sort_leave_confirm_title">Quitter sans enregistrer ?</string>
+    <string name="sort_leave_confirm_message">Vos changements ne sont pas encore enregistrés. Vous les retrouverez ici en revenant.</string>
+    <string name="sort_leave_confirm_action">Quitter</string>
+
+    <string name="sort_footer_idle">Rien à enregistrer pour le moment.</string>
+    <string name="sort_footer_idle_no_shelf">Drag &amp; drop les livres dans les étagères pour les ranger. Rien à enregistrer pour le moment.</string>
+    <string name="sort_recap_nothing_to_save">Vos changements s’annulent : il n’y a rien à enregistrer.</string>
+    <plurals name="sort_recap_shelves_to_create">
+        <item quantity="one">%1$d étagère à créer</item>
+        <item quantity="many">%1$d étagères à créer</item>
+        <item quantity="other">%1$d étagères à créer</item>
+    </plurals>
+    <plurals name="sort_recap_shelves_modified">
+        <item quantity="one">%1$d étagère modifiée</item>
+        <item quantity="many">%1$d étagères modifiées</item>
+        <item quantity="other">%1$d étagères modifiées</item>
+    </plurals>
+    <plurals name="sort_recap_books_filed">
+        <item quantity="one">%1$d livre rangé</item>
+        <item quantity="many">%1$d livres rangés</item>
+        <item quantity="other">%1$d livres rangés</item>
+    </plurals>
+    <plurals name="sort_recap_books_left">
+        <item quantity="one">%1$d livre restera sans étagère</item>
+        <item quantity="many">%1$d livres resteront sans étagère</item>
+        <item quantity="other">%1$d livres resteront sans étagère</item>
+    </plurals>
+
+    <string name="sort_report_nothing_to_save">Il n\'y avait rien à enregistrer : vos changements s\'annulaient.</string>
+    <plurals name="sort_report_all_landed">
+        <item quantity="one">%1$d étagère a été enregistrée.</item>
+        <item quantity="many">%1$d étagères ont été enregistrées.</item>
+        <item quantity="other">%1$d étagères ont été enregistrées.</item>
+    </plurals>
+    <string name="sort_report_stopped">L\'enregistrement s\'est arrêté en cours de route. Ce qui a été enregistré est conservé.</string>
+    <string name="sort_report_stopped_none_landed">Aucune étagère n\'a été enregistrée.</string>
+    <plurals name="sort_report_stopped_landed">
+        <item quantity="one">%1$d étagère a été enregistrée : %2$s.</item>
+        <item quantity="many">%1$d étagères ont été enregistrées : %2$s.</item>
+        <item quantity="other">%1$d étagères ont été enregistrées : %2$s.</item>
+    </plurals>
+    <plurals name="sort_report_stopped_failed">
+        <item quantity="one">%1$d étagère n\'a pas pu être enregistrée et existe peut-être sans tous ses livres : %2$s.</item>
+        <item quantity="many">%1$d étagères n\'ont pas pu être enregistrées et existent peut-être sans tous leurs livres : %2$s.</item>
+        <item quantity="other">%1$d étagères n\'ont pas pu être enregistrées et existent peut-être sans tous leurs livres : %2$s.</item>
+    </plurals>
+    <plurals name="sort_report_stopped_not_attempted">
+        <item quantity="one">%1$d étagère n\'a pas été traitée : %2$s.</item>
+        <item quantity="many">%1$d étagères n\'ont pas été traitées : %2$s.</item>
+        <item quantity="other">%1$d étagères n\'ont pas été traitées : %2$s.</item>
+    </plurals>
+    <string name="sort_report_stopped_resume">Appuyez à nouveau sur « Enregistrer » pour terminer : ce qui a déjà été enregistré ne sera pas refait.</string>
+    <string name="sort_list_and">et</string>
+
+    <string name="sort_error_shelf_missing">« %1$s » ne fait plus partie de vos étagères.</string>
+    <string name="sort_error_books_missing">Les livres à ranger dans « %1$s » ne sont plus dans votre inventaire.</string>
+    <string name="sort_create_name_taken">Une étagère nommée « %1$s » figure déjà dans cette liste.</string>
+
+    <string name="sort_shelf_detail_empty">Aucun livre sur cette étagère pour le moment.</string>
+    <string name="sort_shelf_detail_swipe_hint">Balayez un livre pour le retirer de cette étagère.</string>
+
+    <plurals name="sort_tally_title">
+        <item quantity="one">%1$d livre ajouté</item>
+        <item quantity="many">%1$d livres ajoutés</item>
+        <item quantity="other">%1$d livres ajoutés</item>
+    </plurals>
+    <string name="sort_tally_body">Ils ne sont sur aucune étagère.</string>
+    <string name="sort_tally_sort">Ranger mes livres</string>
+    <string name="sort_tally_continue_without_sorting">Continuer sans ranger</string>
+
+    <string name="shelves_action_sort">Ranger</string>
+    <string name="shelf_empty_action_sort_title">Ranger mes livres</string>
+    <string name="shelf_empty_action_sort_detail">en les glissant sur des étagères</string>
+</resources>

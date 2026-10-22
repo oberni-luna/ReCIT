@@ -24,7 +24,8 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
  * - [RecitTopBar] is `.inline` — a pushed screen, centred, with the `Back` chevron.
  *
  * `actions` is the toolbar: `.primaryAction` / `.confirmationAction` items go there;
- * `navigationIcon` is `.topBarLeading`, shown when there is no back button. `containerColor`
+ * `navigationIcon` is `.topBarLeading`, shown when there is no back button — on a pushed screen it
+ * stands in for the chevron where there is another way out, a flow's close cross. `containerColor`
  * follows the screen's own background, so the bar does not stand out from it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +61,7 @@ fun RecitTopBar(
     title: String,
     onBack: (() -> Unit)?,
     actions: @Composable RowScope.() -> Unit = {},
+    navigationIcon: @Composable () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
     containerColor: Color = RecitTheme.colors.backgroundSecondary,
 ) {
@@ -67,7 +69,7 @@ fun RecitTopBar(
         title = {
             Text(text = title, style = RecitTheme.typography.title50, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
-        navigationIcon = { if (onBack != null) BackButton(onBack) },
+        navigationIcon = { if (onBack != null) BackButton(onBack) else navigationIcon() },
         actions = actions,
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(

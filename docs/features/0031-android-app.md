@@ -13,7 +13,8 @@ shelves, search, a book's screen, lists, friends, and the profile.
 - **Inventaire:**
   - the first-sync banner and its progress bar;
   - my shelves as a snapping carousel of plank cards, each with its tilted paper label;
-  - the empty-shelf card, offering only « Rechercher » (there is no scanner);
+  - the empty-shelf card, offering only « Rechercher » (there was no scanner; 0042 added the scan and
+    sort tags);
   - « Tous les livres ».
   - Shelves can be created, edited, deleted and emptied by swipe.
   - The unified search covers recent searches, local matches mine-first, three suggestions, and
@@ -103,8 +104,9 @@ ADR 0001 and ADR 0008 hold as written:
 - **Strings that several features share** are prefixed with their feature (`inventory_`, `shelf_`,
   `network_`) so the parallel `strings_<feature>.xml` files cannot collide. A few iOS strings with
   one form became plurals.
-- **The empty-shelf card offers only « Rechercher »**, since nothing scans or sorts yet. With books
-  but no shelf, it shows its heading and body with no tag.
+- **The empty-shelf card offered only « Rechercher »**, since nothing scanned or sorted yet. With books
+  but no shelf, it showed its heading and body with no tag. Since
+  [0042](0042-android-scan-and-sort.md) it carries iOS's three tags.
 
 ## Not done, or not verified
 
@@ -114,9 +116,10 @@ ADR 0001 and ADR 0008 hold as written:
   pass on a device with a test account is owed.
 - **No end-to-end scenario and no instrumented tests** exist for Android.
 - **Not ported:**
-  - the batch scanner and creating a book (they need CameraX and ML Kit, new dependencies to
-    confirm first);
-  - automatic and manual sorting (Apple Intelligence has no on-device equivalent here);
+  - creating a book — ported later, in [0043](0043-android-create-a-missing-book.md);
+  - automatic sorting (Apple Intelligence has no on-device equivalent here);
+  - the batch scanner and manual sorting were ported later, in
+    [0042](0042-android-scan-and-sort.md);
   - painted spines and the press-and-hold focus;
   - the wall of covers and the onboarding after sign-in;
   - tips, transactions (hidden on iOS too), groups, the full-screen cover, reporting by mail;

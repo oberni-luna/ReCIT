@@ -24,7 +24,9 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -36,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -287,11 +290,11 @@ private fun ShelfLabel(text: String, maxWidth: Dp, onClick: () -> Unit, modifier
 
 /**
  * `ShelfEmptyStateView` (feature 0021): the step the user is at, written above the plank. With no
- * book yet, the « Rechercher » tag raises the search field; the scan and sort tags are left out of
- * this port, so the « books but no shelf » state keeps its two lines and no tag.
+ * book yet, « Scanner » opens the scan flow and « Rechercher » raises the search field; with books but
+ * no shelf, « Ranger mes livres » opens the sorting surface.
  */
 @Composable
-internal fun EmptyShelfCard(ownsBooks: Boolean, onSearch: () -> Unit) {
+internal fun EmptyShelfCard(ownsBooks: Boolean, onScan: () -> Unit, onSearch: () -> Unit, onSort: () -> Unit) {
     BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         val width: Dp = maxWidth * ShelfCardMetrics.CARD_WIDTH_FRACTION
         val metrics = ShelfCardMetrics(width.value)
@@ -321,13 +324,32 @@ internal fun EmptyShelfCard(ownsBooks: Boolean, onSearch: () -> Unit) {
                     )
                 }
                 Spacer(Modifier.weight(1f).height(Spacing.small))
-                if (!ownsBooks) {
+                if (ownsBooks) {
                     ShelfActionTag(
-                        title = stringResource(R.string.shelf_empty_action_search_title),
-                        detail = stringResource(R.string.shelf_empty_action_search_detail),
-                        onClick = onSearch,
+                        title = stringResource(R.string.shelf_empty_action_sort_title),
+                        detail = stringResource(R.string.shelf_empty_action_sort_detail),
+                        icon = Icons.AutoMirrored.Filled.LibraryBooks,
+                        onClick = onSort,
                         modifier = Modifier.padding(bottom = Spacing.xxSmall),
                     )
+                } else {
+                    Row(
+                        modifier = Modifier.padding(bottom = Spacing.xxSmall),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
+                    ) {
+                        ShelfActionTag(
+                            title = stringResource(R.string.shelf_empty_action_scan_title),
+                            detail = stringResource(R.string.shelf_empty_action_scan_detail),
+                            icon = Icons.Default.QrCodeScanner,
+                            onClick = onScan,
+                        )
+                        ShelfActionTag(
+                            title = stringResource(R.string.shelf_empty_action_search_title),
+                            detail = stringResource(R.string.shelf_empty_action_search_detail),
+                            icon = Icons.Default.Search,
+                            onClick = onSearch,
+                        )
+                    }
                 }
             }
             Plank(width = width, height = metrics.plankHeight.dp)
@@ -337,7 +359,7 @@ internal fun EmptyShelfCard(ownsBooks: Boolean, onSearch: () -> Unit) {
 
 /** `ShelfActionTag`: a glyph, a title and its detail, on paper. */
 @Composable
-private fun ShelfActionTag(title: String, detail: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ShelfActionTag(title: String, detail: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .shelfPaper(title)
@@ -347,7 +369,7 @@ private fun ShelfActionTag(title: String, detail: String, onClick: () -> Unit, m
         verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xSmall)) {
-            Icon(Icons.Default.Search, contentDescription = null, tint = ShelfPalette.LabelInk, modifier = Modifier.size(18.dp))
+            Icon(icon, contentDescription = null, tint = ShelfPalette.LabelInk, modifier = Modifier.size(18.dp))
             Text(title, style = RecitTheme.typography.content400Bold, color = ShelfPalette.LabelInk, maxLines = 1)
         }
         Text(detail, style = RecitTheme.typography.footnote200, color = ShelfPalette.LabelInk, maxLines = 2, textAlign = TextAlign.Center)

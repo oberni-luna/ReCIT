@@ -13,6 +13,8 @@ kotlinx-coroutines = "1.11.0"
 kotlinx-serialization = "1.11.0"
 okhttp = "5.5.0"
 coil = "3.6.3"
+camerax = "1.6.2"
+mlkit-barcode = "17.3.0"
 junit = "4.13.2"
 
 [libraries]
@@ -41,6 +43,10 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver3", version.ref = "okhttp" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkit-barcode" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]

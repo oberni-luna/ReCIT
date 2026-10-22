@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- The scanner needs a camera; the rest of the app does not, so it is not required. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:name=".RecitApplication"
@@ -18,5 +22,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- The camera app writes a new book's cover here (feature 0020); see res/xml/cover_paths.xml. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.covers"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/cover_paths" />
+        </provider>
     </application>
 </manifest>

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.AuthorEntity
@@ -42,7 +44,7 @@ fun AuthorScreen(destination: Destination.Author, navigator: Navigator) {
 
     Scaffold(
         topBar = { RecitTopBar(title = stringResource(R.string.nav_author), onBack = navigator::pop) },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding: PaddingValues ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             val author: AuthorEntity? = state.author
@@ -63,23 +65,34 @@ private fun CenteredText(text: String) {
     }
 }
 
+/** Who the author·ice is: the portrait (or initials), the name as the page's title, Wikidata's line, the dates. */
+@Composable
+private fun AuthorHeader(author: AuthorEntity) {
+    val birth: String? = Formatting.wikidataDate(author.dateOfBirth)
+    val death: String? = Formatting.wikidataDate(author.dateOfDeath)
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.medium),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.small),
+    ) {
+        CellThumbnail(url = author.image, size = ThumbnailSize.XLarge, shape = ThumbnailShape.Circle, fallbackName = author.name)
+        Text(author.name, style = RecitTheme.typography.title200, color = RecitTheme.colors.foregroundDefault, textAlign = TextAlign.Center)
+        author.subtitle?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary, textAlign = TextAlign.Center)
+        }
+        val dates: String? = when {
+            birth != null && death != null -> stringResource(R.string.author_life_dates, birth, death)
+            birth != null -> stringResource(R.string.author_birth_date, birth)
+            else -> null
+        }
+        dates?.let { Text(it, style = RecitTheme.typography.footnote200, color = RecitTheme.colors.foregroundSecondary, textAlign = TextAlign.Center) }
+    }
+}
+
 @Composable
 private fun AuthorContent(author: AuthorEntity, state: AuthorUiState, navigator: Navigator) {
     LazyColumn(Modifier.fillMaxSize()) {
-        item(key = "author") {
-            CellSurface {
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                    if (author.image != null) CellThumbnail(url = author.image, size = ThumbnailSize.Large, shape = ThumbnailShape.Circle)
-                    Text(author.name, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
-                    author.subtitle?.takeIf { it.isNotBlank() }?.let {
-                        Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
-                    }
-                    Formatting.wikidataDate(author.dateOfBirth)?.let {
-                        Text(stringResource(R.string.author_birth_date, it), style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
-                    }
-                }
-            }
-        }
+        item(key = "author") { AuthorHeader(author) }
         item(key = "works-header") { SectionHeader(title = stringResource(R.string.author_works_header, author.name)) }
         if (state.works.isEmpty() && state.worksLoading) {
             item(key = "works-loading") {

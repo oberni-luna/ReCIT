@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -30,10 +31,18 @@ class UserPreferences(context: Context) {
         store.edit { it[booleanPreferencesKey(key)] = value }
     }
 
+    suspend fun string(key: String): String? = store.data.first()[stringPreferencesKey(key)]
+
+    suspend fun setString(key: String, value: String?) {
+        store.edit { if (value == null) it.remove(stringPreferencesKey(key)) else it[stringPreferencesKey(key)] = value }
+    }
+
     fun observeStrings(key: String): Flow<List<String>> =
         store.data.map { preferences ->
             preferences[stringPreferencesKey(key)]?.let { runCatching { Json.decodeFromString(strings, it) }.getOrNull() }.orEmpty()
         }
+
+    suspend fun observeStringsOnce(key: String): List<String> = observeStrings(key).first()
 
     suspend fun setStrings(key: String, value: List<String>) {
         store.edit { it[stringPreferencesKey(key)] = Json.encodeToString(strings, value) }

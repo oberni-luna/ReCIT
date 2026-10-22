@@ -77,7 +77,8 @@ fun EmptyState(
             }
         }
         if (actionTitle != null && onAction != null) {
-            PrimaryButton(text = actionTitle, onClick = onAction)
+            // A compact tonal pill: an empty state suggests, it does not shout.
+            PillButton(text = actionTitle, onClick = onAction, style = PillStyle.Tinted)
         }
     }
 }
@@ -196,11 +197,16 @@ enum class ThumbnailSize(val width: Dp) {
     Small(36.dp),
     Medium(48.dp),
     Large(64.dp),
+    XLarge(96.dp),
 }
 
 enum class ThumbnailShape { Square, Portrait, Circle }
 
-/** `CellThumbnail` — a remote image with the placeholder background and the light shadow. */
+/**
+ * `CellThumbnail` — a remote image with the placeholder background and the light shadow. A
+ * portrait is a book cover, 2:3. Given a [fallbackName], a circle without a picture — or whose
+ * picture fails — shows that name's initials instead of an empty disc.
+ */
 @Composable
 fun CellThumbnail(
     url: String?,
@@ -208,16 +214,32 @@ fun CellThumbnail(
     size: ThumbnailSize = ThumbnailSize.Medium,
     shape: ThumbnailShape = ThumbnailShape.Portrait,
     cornerRadius: Dp = CornerRadius.minimal,
+    fallbackName: String? = null,
 ) {
-    val height: Dp = if (shape == ThumbnailShape.Portrait) size.width * 4 / 3 else size.width
+    val height: Dp = if (shape == ThumbnailShape.Portrait) size.width * 3 / 2 else size.width
     val clip: Shape = if (shape == ThumbnailShape.Circle) CircleShape else RoundedCornerShape(cornerRadius)
+    val initials: String? = fallbackName?.let(::initialsOf)
     Box(
         modifier = modifier
             .size(width = size.width, height = height)
             .shadow(elevation = 1.dp, shape = clip)
             .clip(clip)
-            .background(RecitTheme.colors.backgroundDisable),
+            .background(if (initials != null) RecitTheme.colors.backgroundTinted else RecitTheme.colors.backgroundDisable),
+        contentAlignment = Alignment.Center,
     ) {
+        if (initials != null) {
+            Text(
+                text = initials,
+                style = when {
+                    size.width >= ThumbnailSize.XLarge.width -> RecitTheme.typography.title200
+                    size.width >= ThumbnailSize.Large.width -> RecitTheme.typography.title50
+                    size.width >= ThumbnailSize.Medium.width -> RecitTheme.typography.content400Bold
+                    else -> RecitTheme.typography.footnote200Bold
+                },
+                color = RecitTheme.colors.foregroundTinted,
+                maxLines = 1,
+            )
+        }
         if (url != null) {
             AsyncImage(
                 model = url,
@@ -229,16 +251,30 @@ fun CellThumbnail(
     }
 }
 
+/** Up to two initials: the first letters of the first two words, else the first two letters. */
+fun initialsOf(name: String): String {
+    val words: List<String> = name.split(' ', '-', '_', '.').filter { it.isNotBlank() }
+    val letters: String = when {
+        words.size >= 2 -> "${words[0].first()}${words[1].first()}"
+        words.size == 1 -> words[0].filter { it.isLetterOrDigit() }.take(2).ifEmpty { words[0].take(1) }
+        else -> ""
+    }
+    return letters.uppercase()
+}
+
 /**
  * `ShelfPaperModifier` — white paper, radius 4, the light shadow, and a tilt of about ±1° that is
- * deterministic in `seed`, so the same label always leans the same way.
+ * deterministic in `seed`, so the same label always leans the same way. In dark mode the paper is
+ * cream and a step darker.
  */
+@Composable
 fun Modifier.shelfPaper(seed: String): Modifier {
     val tilt: Float = deterministicTilt(seed)
+    val paper: Color = if (RecitTheme.colors.isDark) ShelfPalette.LabelPaperDark else ShelfPalette.LabelPaper
     return this
         .rotate(tilt)
         .shadow(elevation = 2.dp, shape = RoundedCornerShape(CornerRadius.minimal))
-        .background(ShelfPalette.LabelPaper, RoundedCornerShape(CornerRadius.minimal))
+        .background(paper, RoundedCornerShape(CornerRadius.minimal))
 }
 
 /** `Model/Utils/DeterministicTilt.swift`, in spirit: a stable angle in [-1°, 1°] from a string. */

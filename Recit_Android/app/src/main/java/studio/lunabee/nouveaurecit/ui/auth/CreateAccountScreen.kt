@@ -141,7 +141,7 @@ fun CreateAccountScreen(onBack: () -> Unit) {
             isSecure = true,
         )
         state.generalError?.let {
-            Text(stringResource(it), style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundError)
+            AuthError(stringResource(it))
         }
     }
 }

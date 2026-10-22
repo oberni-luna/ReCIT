@@ -32,10 +32,16 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -148,7 +154,7 @@ internal fun ShelvesSectionHeader(
             modifier = Modifier.weight(1f).padding(vertical = Spacing.small),
         )
         if (actionTitle != null && onAction != null) {
-            TextButton(onClick = onAction) {
+            TextButton(onClick = onAction, contentPadding = PaddingValues(start = Spacing.small, end = Spacing.zero)) {
                 Icon(Icons.Default.Add, contentDescription = null, tint = RecitTheme.colors.foregroundTinted, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(Spacing.xSmall))
                 Text(actionTitle, style = RecitTheme.typography.action200, color = RecitTheme.colors.foregroundTinted)
@@ -157,21 +163,34 @@ internal fun ShelvesSectionHeader(
     }
 }
 
-/** The horizontal, snapping carousel of my shelves: cards of 86 % of the width, 14 apart. */
+/**
+ * The horizontal, snapping carousel of shelves: cards of 86 % of the width, 14 apart, the current
+ * one centred between its neighbours' edges. A shelf that appears while the carousel is on screen
+ * — one just created — is scrolled to. [onAddBooks], on my shelves only, puts a « Ajouter des
+ * livres » tag on an empty plank.
+ */
 @Composable
 internal fun ShelfCarousel(
     shelves: List<ShelfWithItems>,
     onOpenShelf: (String) -> Unit,
     onOpenItem: (String) -> Unit,
+    onAddBooks: ((ShelfWithItems) -> Unit)? = null,
 ) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val cardWidth: Dp = maxWidth * ShelfCardMetrics.CARD_WIDTH_FRACTION
         val pagerState: PagerState = rememberPagerState { shelves.size }
+        val ids: List<String> = shelves.map { it.shelf.id }
+        var knownIds: List<String> by remember { mutableStateOf(ids) }
+        LaunchedEffect(ids) {
+            val added: Int = ids.indexOfFirst { it !in knownIds }
+            knownIds = ids
+            if (added >= 0) pagerState.animateScrollToPage(added)
+        }
         HorizontalPager(
             state = pagerState,
             pageSize = PageSize.Fixed(cardWidth),
             pageSpacing = ShelfCardMetrics.GUTTER.dp,
-            contentPadding = PaddingValues(horizontal = ShelfCardMetrics.SIDE_PADDING.dp),
+            contentPadding = PaddingValues(horizontal = (maxWidth - cardWidth) / 2),
             key = { index -> shelves[index].shelf.id },
             verticalAlignment = Alignment.Top,
         ) { index ->
@@ -181,6 +200,7 @@ internal fun ShelfCarousel(
                 width = cardWidth,
                 onOpen = { onOpenShelf(shelf.shelf.id) },
                 onOpenItem = onOpenItem,
+                onAddBooks = onAddBooks?.let { add -> { add(shelf) } },
             )
         }
     }
@@ -193,6 +213,7 @@ private fun ShelfCard(
     width: Dp,
     onOpen: () -> Unit,
     onOpenItem: (String) -> Unit,
+    onAddBooks: (() -> Unit)?,
 ) {
     val metrics = ShelfCardMetrics(width.value)
     val drawn: List<ItemRow> = ShelfDrawnBooks.from(shelf.items).take(metrics.fittingCount)
@@ -200,8 +221,17 @@ private fun ShelfCard(
         Spacer(Modifier.height(metrics.topRoom.dp))
         Box(
             modifier = Modifier.width(width).height(metrics.zoneHeight.dp).padding(horizontal = ShelfCardMetrics.HORIZONTAL_MARGIN.dp),
-            contentAlignment = Alignment.BottomStart,
+            contentAlignment = if (drawn.isEmpty()) Alignment.BottomCenter else Alignment.BottomStart,
         ) {
+            if (drawn.isEmpty() && onAddBooks != null) {
+                ShelfActionTag(
+                    icon = Icons.Default.Add,
+                    title = stringResource(R.string.shelf_empty_action_add_title),
+                    detail = stringResource(R.string.shelf_empty_action_add_detail),
+                    onClick = onAddBooks,
+                    modifier = Modifier.padding(bottom = Spacing.xxSmall),
+                )
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(ShelfCardMetrics.COVER_GAP.dp), verticalAlignment = Alignment.Bottom) {
                 drawn.forEach { row ->
                     StandingCover(
@@ -285,58 +315,66 @@ private fun ShelfLabel(text: String, maxWidth: Dp, onClick: () -> Unit, modifier
 }
 
 /**
- * `ShelfEmptyStateView` (feature 0021): the step the user is at, written above the plank. With no
- * book yet, the « Rechercher » tag raises the search field; the scan and sort tags are left out of
- * this port, so the « books but no shelf » state keeps its two lines and no tag.
+ * `ShelfEmptyStateView` (feature 0021): the step the user is at, written above the plank, and the
+ * paper tag that takes it. With no book yet, « Rechercher » raises the search field; with books
+ * but no étagère, « Créer une étagère » opens the form. Scanning and sorting are not ported.
  */
 @Composable
-internal fun EmptyShelfCard(ownsBooks: Boolean, onSearch: () -> Unit) {
+internal fun EmptyShelfCard(ownsBooks: Boolean, onSearch: () -> Unit, onCreateShelf: () -> Unit) {
     BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         val width: Dp = maxWidth * ShelfCardMetrics.CARD_WIDTH_FRACTION
         val metrics = ShelfCardMetrics(width.value)
-        Column(modifier = Modifier.width(width), horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(Modifier.height(metrics.topRoom.dp))
+        Column(
+            modifier = Modifier.width(width).padding(top = Spacing.small),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+        ) {
             Column(
-                modifier = Modifier.width(width).height(metrics.zoneHeight.dp),
+                modifier = Modifier.width(metrics.booksWidth.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
             ) {
-                Column(
-                    modifier = Modifier.width(metrics.booksWidth.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
-                ) {
-                    Text(
-                        text = stringResource(if (ownsBooks) R.string.shelf_empty_sort_heading else R.string.shelf_empty_scan_heading),
-                        style = RecitTheme.typography.content400Bold,
-                        color = RecitTheme.colors.foregroundDefault,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.semantics { heading() },
-                    )
-                    Text(
-                        text = stringResource(if (ownsBooks) R.string.shelf_empty_sort_body else R.string.shelf_empty_scan_body),
-                        style = RecitTheme.typography.content300,
-                        color = RecitTheme.colors.foregroundSecondary,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                Spacer(Modifier.weight(1f).height(Spacing.small))
-                if (!ownsBooks) {
+                Text(
+                    text = stringResource(if (ownsBooks) R.string.shelf_empty_sort_heading else R.string.shelf_empty_scan_heading),
+                    style = RecitTheme.typography.content400Bold,
+                    color = RecitTheme.colors.foregroundDefault,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.semantics { heading() },
+                )
+                Text(
+                    text = stringResource(if (ownsBooks) R.string.shelf_empty_sort_body else R.string.shelf_empty_scan_body),
+                    style = RecitTheme.typography.content300,
+                    color = RecitTheme.colors.foregroundSecondary,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (ownsBooks) {
                     ShelfActionTag(
+                        icon = Icons.Default.Add,
+                        title = stringResource(R.string.shelf_empty_action_create_title),
+                        detail = stringResource(R.string.shelf_empty_action_create_detail),
+                        onClick = onCreateShelf,
+                        modifier = Modifier.padding(bottom = Spacing.xxSmall),
+                    )
+                } else {
+                    ShelfActionTag(
+                        icon = Icons.Default.Search,
                         title = stringResource(R.string.shelf_empty_action_search_title),
                         detail = stringResource(R.string.shelf_empty_action_search_detail),
                         onClick = onSearch,
                         modifier = Modifier.padding(bottom = Spacing.xxSmall),
                     )
                 }
+                Plank(width = width, height = metrics.plankHeight.dp)
             }
-            Plank(width = width, height = metrics.plankHeight.dp)
         }
     }
 }
 
 /** `ShelfActionTag`: a glyph, a title and its detail, on paper. */
 @Composable
-private fun ShelfActionTag(title: String, detail: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ShelfActionTag(icon: ImageVector, title: String, detail: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .shelfPaper(title)
@@ -346,7 +384,7 @@ private fun ShelfActionTag(title: String, detail: String, onClick: () -> Unit, m
         verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xSmall)) {
-            Icon(Icons.Default.Search, contentDescription = null, tint = ShelfPalette.LabelInk, modifier = Modifier.size(18.dp))
+            Icon(icon, contentDescription = null, tint = ShelfPalette.LabelInk, modifier = Modifier.size(18.dp))
             Text(title, style = RecitTheme.typography.content400Bold, color = ShelfPalette.LabelInk, maxLines = 1)
         }
         Text(detail, style = RecitTheme.typography.footnote200, color = ShelfPalette.LabelInk, maxLines = 2, textAlign = TextAlign.Center)

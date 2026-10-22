@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
@@ -39,10 +40,12 @@ fun UserRow(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CellThumbnail(url = user.avatarUrl, size = avatarSize, shape = ThumbnailShape.Circle)
+        CellThumbnail(url = user.avatarUrl, size = avatarSize, shape = ThumbnailShape.Circle, fallbackName = user.username)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
-            Text(user.username, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
-            subtitle?.let { Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary) }
+            Text(user.username, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            subtitle?.let {
+                Text(it, style = RecitTheme.typography.footnote200, color = RecitTheme.colors.foregroundSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
         }
         trailing()
     }

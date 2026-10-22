@@ -94,10 +94,12 @@ fun TintedTextButton(
     modifier: Modifier = Modifier,
     color: Color = RecitTheme.colors.foregroundTinted,
     icon: ImageVector? = null,
+    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
 ) {
     TextButton(
         onClick = onClick,
         modifier = modifier,
+        contentPadding = contentPadding,
         colors = ButtonDefaults.textButtonColors(contentColor = color),
     ) {
         if (icon != null) {
@@ -160,8 +162,9 @@ private fun LargeButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = container,
             contentColor = content,
-            disabledContainerColor = if (isLoading) container else RecitTheme.colors.backgroundDisable,
-            disabledContentColor = if (isLoading) content else RecitTheme.colors.foregroundDisable,
+            // Disabled reads as the same button, faded — not a grey slab that vanishes on the green.
+            disabledContainerColor = if (isLoading) container else container.copy(alpha = 0.35f),
+            disabledContentColor = if (isLoading) content else content.copy(alpha = 0.6f),
         ),
     ) {
         if (isLoading) {

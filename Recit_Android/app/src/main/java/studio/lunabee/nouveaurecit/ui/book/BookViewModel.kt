@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -28,6 +27,7 @@ import studio.lunabee.nouveaurecit.data.db.WorkEntity
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.data.model.TransactionType
 import studio.lunabee.nouveaurecit.data.model.Visibility
+import studio.lunabee.nouveaurecit.network.NetworkError
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 
 /** What the book screen shows: the [BookPhase] decides the frame, the rest fills it. */
@@ -53,7 +53,8 @@ sealed interface BookPhase {
 
     data class Loaded(val editionUri: String) : BookPhase
 
-    data object Error : BookPhase
+    /** [offline] when the call never reached inventaire.io; otherwise the answer could not be read. */
+    data class Error(val offline: Boolean) : BookPhase
 
     data object NoResult : BookPhase
 }
@@ -208,7 +209,7 @@ class BookViewModel(
             throw cancellation
         } catch (error: Exception) {
             // A cached copy on screen keeps showing; a failure only matters when there is nothing.
-            if (cached == null) phase.value = BookPhase.Error
+            if (cached == null) phase.value = BookPhase.Error(offline = error is NetworkError.Transport)
         }
         afterLoad()
     }
@@ -221,7 +222,7 @@ class BookViewModel(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {
-            phase.value = BookPhase.Error
+            phase.value = BookPhase.Error(offline = error is NetworkError.Transport)
         }
         afterLoad()
     }

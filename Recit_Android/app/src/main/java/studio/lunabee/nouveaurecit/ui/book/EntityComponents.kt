@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import studio.lunabee.nouveaurecit.R
@@ -43,6 +44,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.designsystem.WithLabel
+import studio.lunabee.nouveaurecit.ui.common.BookRow
 
 /*
  * The pieces the book, work and author screens share: `EntityHeaderView` + `EntityImageView`,
@@ -56,9 +58,13 @@ private val CoverHeight = 256.dp
 private val CoverBlur = 80.dp
 private const val CoverBlurAlpha: Float = 0.2f
 
-/** `EntityHeaderView`: the cover over its blurred copy, the title in title200, the subtitle. */
+/**
+ * `EntityHeaderView`: the cover over its blurred copy, the title in title200, the subtitle. The
+ * blurred copy runs up under the status bar and a see-through top bar; [topInset] keeps the cover
+ * itself clear of them.
+ */
 @Composable
-internal fun EntityHeader(title: String, subtitle: String?, imageUrl: String?, modifier: Modifier = Modifier) {
+internal fun EntityHeader(title: String, subtitle: String?, imageUrl: String?, modifier: Modifier = Modifier, topInset: Dp = 0.dp) {
     Box(modifier.fillMaxWidth()) {
         if (imageUrl != null) {
             AsyncImage(
@@ -69,7 +75,7 @@ internal fun EntityHeader(title: String, subtitle: String?, imageUrl: String?, m
             )
         }
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.medium),
+            modifier = Modifier.fillMaxWidth().padding(top = topInset).padding(horizontal = Spacing.medium, vertical = Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
         ) {
             if (imageUrl != null) {
@@ -138,7 +144,7 @@ internal fun SummaryRow(summary: SummaryState) {
                 ModalBottomSheet(
                     onDismissRequest = { showsAll = false },
                     sheetState = rememberModalBottomSheetState(),
-                    containerColor = RecitTheme.colors.backgroundDefault,
+                    containerColor = RecitTheme.colors.backgroundRaised,
                 ) {
                     Text(
                         summary.text,
@@ -163,7 +169,7 @@ internal fun AuthorsRow(authors: List<AuthorEntity>, onAuthor: (String) -> Unit)
             val author: AuthorEntity = authors.first()
             CellSurface(onClick = { onAuthor(author.uri) }) {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small), verticalAlignment = Alignment.CenterVertically) {
-                    CellThumbnail(url = author.image, size = ThumbnailSize.Medium, shape = ThumbnailShape.Circle)
+                    CellThumbnail(url = author.image, size = ThumbnailSize.Medium, shape = ThumbnailShape.Circle, fallbackName = author.name)
                     Text(author.name, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
                 }
             }
@@ -176,7 +182,7 @@ internal fun AuthorsRow(authors: List<AuthorEntity>, onAuthor: (String) -> Unit)
                         horizontalArrangement = Arrangement.spacedBy(Spacing.small),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        CellThumbnail(url = author.image, size = ThumbnailSize.Small, shape = ThumbnailShape.Circle)
+                        CellThumbnail(url = author.image, size = ThumbnailSize.Small, shape = ThumbnailShape.Circle, fallbackName = author.name)
                         Text(author.name, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault, maxLines = 2)
                     }
                 }
@@ -185,20 +191,10 @@ internal fun AuthorsRow(authors: List<AuthorEntity>, onAuthor: (String) -> Unit)
     }
 }
 
-/** `SearchResultCell`'s work cell: a portrait cover, the title, and an optional secondary line. */
+/** `SearchResultCell`'s work cell, drawn as the app's one [BookRow]. */
 @Composable
 internal fun EntityResultRow(title: String, subtitle: String?, imageUrl: String?, onClick: () -> Unit) {
-    CellSurface(onClick = onClick) {
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium), verticalAlignment = Alignment.Top) {
-            CellThumbnail(url = imageUrl, size = ThumbnailSize.Medium, shape = ThumbnailShape.Portrait)
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.xSmall)) {
-                Text(title, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
-                if (!subtitle.isNullOrBlank()) {
-                    Text(subtitle, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary)
-                }
-            }
-        }
-    }
+    BookRow(title = title, imageUrl = imageUrl, onClick = onClick, subtitle = subtitle)
 }
 
 /** A section's spinner row, while its content is on its way. */

@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,15 +38,13 @@ import androidx.compose.ui.unit.dp
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.SearchResult
 import studio.lunabee.nouveaurecit.data.db.ItemRow
-import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingInlineRow
-import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
-import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.designsystem.TintedTextButton
+import studio.lunabee.nouveaurecit.ui.common.BookRow
 import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
@@ -71,7 +68,7 @@ internal fun InventorySearchContent(
 ) {
     val shownRecents: List<String> = if (phase == SearchPhase.Recents) recents else emptyList()
     if (phase == SearchPhase.Recents && shownRecents.isEmpty()) {
-        Box(Modifier.fillMaxSize().background(RecitTheme.colors.backgroundSecondary), contentAlignment = Alignment.Center) {
+        Box(Modifier.fillMaxSize().background(RecitTheme.colors.backgroundDefault), contentAlignment = Alignment.Center) {
             EmptyState(
                 title = stringResource(R.string.inventory_search_recents_empty_title),
                 message = stringResource(R.string.inventory_search_recents_empty_message),
@@ -87,7 +84,7 @@ internal fun InventorySearchContent(
     PullToRefreshBox(
         isRefreshing = false,
         onRefresh = onRetry,
-        modifier = Modifier.fillMaxSize().background(RecitTheme.colors.backgroundSecondary),
+        modifier = Modifier.fillMaxSize().background(RecitTheme.colors.backgroundDefault),
     ) {
         LazyColumn(Modifier.fillMaxSize()) {
             if (shownRecents.isNotEmpty()) {
@@ -221,29 +218,16 @@ private fun destinationFor(result: SearchResult): Destination = when (result.typ
     SearchResult.Type.Humans -> Destination.Author(result.uri)
 }
 
-/** `SearchResultCell`: a work's portrait cover or an author's round portrait, the label and the description. */
+/** `SearchResultCell`: a work's cover or an author·ice's portrait, the label and the description. */
 @Composable
 private fun SearchResultRow(result: SearchResult, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
-        verticalAlignment = Alignment.Top,
-    ) {
-        CellThumbnail(
-            url = result.image,
-            size = ThumbnailSize.Small,
-            shape = if (result.type == SearchResult.Type.Humans) ThumbnailShape.Circle else ThumbnailShape.Portrait,
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xSmall)) {
-            Text(result.label, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
-            result.description?.takeIf { it.isNotBlank() }?.let {
-                Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary)
-            }
-        }
-    }
+    BookRow(
+        title = result.label,
+        imageUrl = result.image,
+        onClick = onClick,
+        subtitle = result.description,
+        isPerson = result.type == SearchResult.Type.Humans,
+    )
 }
 
 /** `SearchQueryRow`: a 24-wide tinted glyph and a content300 label. */

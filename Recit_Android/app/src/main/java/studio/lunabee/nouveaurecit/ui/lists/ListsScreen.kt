@@ -15,20 +15,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -53,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
+import studio.lunabee.nouveaurecit.designsystem.RecitSearchField
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.ShelfPalette
 import studio.lunabee.nouveaurecit.designsystem.Spacing
@@ -99,7 +93,7 @@ fun ListsScreen(navigator: Navigator) {
                 },
             )
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -136,37 +130,12 @@ fun ListsScreen(navigator: Navigator) {
 /** `.searchable(text:)`: filters the lists by name. */
 @Composable
 private fun ListsSearchField(query: String, onQueryChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-        placeholder = { Text(stringResource(R.string.lists_search_prompt), style = RecitTheme.typography.content300) },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.lists_search_clear))
-                }
-            }
-        },
-        singleLine = true,
-        textStyle = RecitTheme.typography.content300,
-        shape = CircleShape,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = RecitTheme.colors.backgroundDefault,
-            unfocusedContainerColor = RecitTheme.colors.backgroundDefault,
-            focusedBorderColor = RecitTheme.colors.borderTinted,
-            unfocusedBorderColor = RecitTheme.colors.borderDefault,
-            focusedTextColor = RecitTheme.colors.foregroundDefault,
-            unfocusedTextColor = RecitTheme.colors.foregroundDefault,
-            focusedLeadingIconColor = RecitTheme.colors.foregroundSecondary,
-            unfocusedLeadingIconColor = RecitTheme.colors.foregroundSecondary,
-            focusedPlaceholderColor = RecitTheme.colors.foregroundPlaceholder,
-            unfocusedPlaceholderColor = RecitTheme.colors.foregroundPlaceholder,
-        ),
+    RecitSearchField(
+        query = query,
+        onQueryChange = onQueryChange,
+        placeholder = stringResource(R.string.lists_search_prompt),
+        clearLabel = stringResource(R.string.lists_search_clear),
+        modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small),
     )
 }
 
@@ -201,7 +170,12 @@ private fun ListRow(row: ListRowModel, onClick: () -> Unit) {
                 )
             }
             Text(
-                text = pluralStringResource(ListsPresentation.countPlural(row.type), row.count, row.count),
+                // Plural rules follow the device's language; « 0 œuvres » showed on an English phone.
+                text = if (row.count == 0) {
+                    stringResource(R.string.list_count_empty)
+                } else {
+                    pluralStringResource(ListsPresentation.countPlural(row.type), row.count, row.count)
+                },
                 style = RecitTheme.typography.footnote200,
                 color = RecitTheme.colors.foregroundSecondary,
             )
@@ -209,11 +183,11 @@ private fun ListRow(row: ListRowModel, onClick: () -> Unit) {
     }
 }
 
-/** `ListCoverFan`: up to three covers, 13dp apart, the first in front; always as wide as a full fan. */
+/** `ListCoverFan`: up to three 48 dp covers, 18dp apart, the first in front; always as wide as a full fan. */
 @Composable
 private fun ListCoverFan(covers: List<String?>, type: EntityListType) {
-    val size: ThumbnailSize = ThumbnailSize.Small
-    val step: Dp = 13.dp
+    val size: ThumbnailSize = ThumbnailSize.Medium
+    val step: Dp = 18.dp
     val shape: ThumbnailShape = if (type == EntityListType.Author) ThumbnailShape.Circle else ThumbnailShape.Portrait
     Box(modifier = Modifier.width(size.width + step * (ListsPresentation.COVER_LIMIT - 1))) {
         // Drawn back to front, so the first cover lands on top.

@@ -3,27 +3,19 @@ package studio.lunabee.nouveaurecit.ui.lists
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,11 +37,12 @@ import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.data.model.Visibility
-import studio.lunabee.nouveaurecit.designsystem.DestructiveButton
+import studio.lunabee.nouveaurecit.designsystem.DestructiveTextButton
+import studio.lunabee.nouveaurecit.designsystem.FormTextField
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
+import studio.lunabee.nouveaurecit.designsystem.SheetHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
-import studio.lunabee.nouveaurecit.designsystem.WithLabel
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
@@ -143,7 +135,7 @@ fun ListFormSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundRaised,
     ) {
         Column(
             modifier = Modifier
@@ -154,52 +146,44 @@ fun ListFormSheet(
                 .padding(bottom = Spacing.large),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(if (isCreating) R.string.list_form_create_title else R.string.list_form_edit_title),
-                    style = RecitTheme.typography.title50,
-                    color = RecitTheme.colors.foregroundDefault,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_close), tint = RecitTheme.colors.foregroundTinted)
-                }
-            }
+            SheetHeader(
+                title = stringResource(if (isCreating) R.string.list_form_create_title else R.string.list_form_edit_title),
+                closeLabel = stringResource(R.string.action_close),
+                onClose = onDismiss,
+            )
+            FormTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = stringResource(R.string.list_form_name),
+            )
+            FormTextField(
+                value = description,
+                onValueChange = { description = it },
+                label = stringResource(R.string.list_form_description),
+                singleLine = false,
+                minLines = 2,
+                maxLines = 4,
+            )
 
             // Not asked when the book has already answered: a list opened from a book holds its work.
             if (isCreating && !isFiling) {
                 ListTypePicker(selected = type, onSelect = { type = it })
             }
 
-            WithLabel(label = stringResource(R.string.list_form_name)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    textStyle = RecitTheme.typography.content300,
-                    colors = formFieldColors(),
-                )
-            }
-            WithLabel(label = stringResource(R.string.list_form_description)) {
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 2,
-                    textStyle = RecitTheme.typography.content300,
-                    colors = formFieldColors(),
-                )
-            }
-
             PrimaryButton(
-                text = stringResource(if (isFiling) R.string.list_form_create_and_add else R.string.action_submit),
+                text = stringResource(
+                    when {
+                        isFiling -> R.string.list_form_create_and_add
+                        isCreating -> R.string.list_form_create
+                        else -> R.string.action_save
+                    },
+                ),
                 onClick = ::submit,
                 enabled = ListsPresentation.canSubmit(isFiling, name) && !isDeleting,
                 isLoading = isSubmitting,
             )
             if (!isCreating) {
-                DestructiveButton(
+                DestructiveTextButton(
                     text = stringResource(R.string.list_form_delete),
                     onClick = ::delete,
                     enabled = !isSubmitting,
@@ -215,42 +199,25 @@ fun ListFormSheet(
 @Composable
 private fun ListTypePicker(selected: EntityListType, onSelect: (EntityListType) -> Unit) {
     var expanded: Boolean by remember { mutableStateOf(false) }
-    WithLabel(label = stringResource(R.string.list_form_type)) {
-        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-            OutlinedTextField(
-                value = stringResource(selected.label),
-                onValueChange = {},
-                readOnly = true,
-                singleLine = true,
-                textStyle = RecitTheme.typography.content300,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                colors = formFieldColors(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-            )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                EntityListType.entries.forEach { type ->
-                    DropdownMenuItem(
-                        text = { Text(stringResource(type.label), style = RecitTheme.typography.content300) },
-                        onClick = {
-                            onSelect(type)
-                            expanded = false
-                        },
-                    )
-                }
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        FormTextField(
+            value = stringResource(selected.label),
+            onValueChange = {},
+            label = stringResource(R.string.list_form_type),
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            EntityListType.entries.forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(type.label), style = RecitTheme.typography.content300) },
+                    onClick = {
+                        onSelect(type)
+                        expanded = false
+                    },
+                )
             }
         }
     }
 }
-
-@Composable
-private fun formFieldColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
-    focusedContainerColor = RecitTheme.colors.backgroundDefault,
-    unfocusedContainerColor = RecitTheme.colors.backgroundDefault,
-    focusedBorderColor = RecitTheme.colors.borderTinted,
-    unfocusedBorderColor = RecitTheme.colors.borderDefault,
-    focusedTextColor = RecitTheme.colors.foregroundDefault,
-    unfocusedTextColor = RecitTheme.colors.foregroundDefault,
-    cursorColor = RecitTheme.colors.foregroundTinted,
-)

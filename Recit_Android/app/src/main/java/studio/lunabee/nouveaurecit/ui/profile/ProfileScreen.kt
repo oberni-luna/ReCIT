@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,16 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -30,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -41,15 +40,17 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import studio.lunabee.nouveaurecit.BuildConfig
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
-import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
+import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.ShelfPalette
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
@@ -73,6 +74,8 @@ fun ProfileScreen(navigator: Navigator) {
     val viewModel: ProfileViewModel = recitViewModel { container -> ProfileViewModel(container) }
     val user: UserEntity? by viewModel.user.collectAsStateWithLifecycle()
     val itemCount: Int by viewModel.itemCount.collectAsStateWithLifecycle()
+    val shelfCount: Int by viewModel.shelfCount.collectAsStateWithLifecycle()
+    val listCount: Int by viewModel.listCount.collectAsStateWithLifecycle()
     val isNoticeDismissed: Boolean? by viewModel.isNoticeDismissed.collectAsStateWithLifecycle()
     val isSigningOut: Boolean by viewModel.isSigningOut.collectAsStateWithLifecycle()
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -80,97 +83,99 @@ fun ProfileScreen(navigator: Navigator) {
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { RecitLargeTopBar(title = stringResource(R.string.nav_profile), scrollBehavior = scrollBehavior) },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding: PaddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(horizontal = Spacing.medium, vertical = Spacing.medium),
-            verticalArrangement = Arrangement.spacedBy(Spacing.large),
+            contentPadding = PaddingValues(vertical = Spacing.medium),
         ) {
             user?.let { me: UserEntity ->
                 item(key = "header") {
-                    ProfileCard { UserHeader(user = me, itemCount = itemCount) }
+                    UserHeader(user = me, itemCount = itemCount, shelfCount = shelfCount, listCount = listCount)
                 }
             }
             item(key = "notice") {
                 AnimatedVisibility(visible = isNoticeDismissed == false) {
                     InventaireNoticeTag(
                         onDismiss = viewModel::dismissNotice,
-                        modifier = Modifier.padding(horizontal = Spacing.small),
+                        modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.medium),
                     )
                 }
             }
+            item(key = "account-header") { SectionHeader(title = stringResource(R.string.profile_account_section)) }
             item(key = "logout") {
-                ProfileCard {
-                    ProfileActionRow(
-                        text = stringResource(R.string.profile_logout),
-                        onClick = viewModel::signOut,
-                        enabled = !isSigningOut,
-                    ) {
-                        if (isSigningOut) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(Spacing.medium),
-                                color = RecitTheme.colors.foregroundError,
-                                strokeWidth = 2.dp,
-                            )
-                        }
-                    }
-                }
-            }
-            item(key = "deleteAccount") {
-                ProfileCard {
-                    ProfileActionRow(
-                        text = stringResource(R.string.profile_delete_account),
-                        onClick = { navigator.push(Destination.DeleteAccount) },
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = RecitTheme.colors.foregroundSecondary,
+                ProfileActionRow(
+                    text = stringResource(R.string.profile_logout),
+                    onClick = viewModel::signOut,
+                    enabled = !isSigningOut,
+                    color = RecitTheme.colors.foregroundDefault,
+                ) {
+                    if (isSigningOut) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(Spacing.medium),
+                            color = RecitTheme.colors.foregroundSecondary,
+                            strokeWidth = 2.dp,
                         )
                     }
                 }
+                HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
+            }
+            item(key = "deleteAccount") {
+                ProfileActionRow(
+                    text = stringResource(R.string.profile_delete_account),
+                    onClick = { navigator.push(Destination.DeleteAccount) },
+                    color = RecitTheme.colors.foregroundError,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = RecitTheme.colors.foregroundSecondary,
+                    )
+                }
+            }
+            item(key = "version") {
+                Text(
+                    text = stringResource(R.string.profile_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+                    style = RecitTheme.typography.footnote200,
+                    color = RecitTheme.colors.foregroundSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.xLarge),
+                )
             }
         }
     }
 }
 
-/** One inset-grouped `Section`: a rounded card on the list background. */
+/** `UserHeaderView`: the portrait (or initials), the username, then what the account holds. */
 @Composable
-private fun ProfileCard(content: @Composable ColumnScope.() -> Unit) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(CornerRadius.rounded),
-        color = RecitTheme.colors.backgroundDefault,
+private fun UserHeader(user: UserEntity, itemCount: Int, shelfCount: Int, listCount: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.small),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(content = content)
-    }
-}
-
-/** `UserHeaderView`: the avatar when there is one, the username, the count of my books. */
-@Composable
-private fun UserHeader(user: UserEntity, itemCount: Int) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
-        verticalArrangement = Arrangement.spacedBy(Spacing.small),
-    ) {
-        if (user.avatarUrl != null) {
-            CellThumbnail(url = user.avatarUrl, size = ThumbnailSize.Large, shape = ThumbnailShape.Circle)
+        CellThumbnail(url = user.avatarUrl, size = ThumbnailSize.Large, shape = ThumbnailShape.Circle, fallbackName = user.username)
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
+            Text(user.username, style = RecitTheme.typography.title50, color = RecitTheme.colors.foregroundDefault)
+            Text(
+                text = listOf(
+                    pluralStringResource(R.plurals.user_item_count, itemCount, itemCount),
+                    pluralStringResource(R.plurals.profile_shelf_count, shelfCount, shelfCount),
+                    pluralStringResource(R.plurals.profile_list_count, listCount, listCount),
+                ).joinToString(" · "),
+                style = RecitTheme.typography.content300,
+                color = RecitTheme.colors.foregroundSecondary,
+            )
         }
-        Text(user.username, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault)
-        Text(
-            text = pluralStringResource(R.plurals.user_item_count, itemCount, itemCount),
-            style = RecitTheme.typography.content300,
-            color = RecitTheme.colors.foregroundDefault,
-        )
     }
 }
 
-/** A red action300 row, as the sign-out and delete-account rows read on iOS. */
+/** An action row: red only when it destroys, as the sign-out row no longer does. */
 @Composable
 private fun ProfileActionRow(
     text: String,
     onClick: () -> Unit,
+    color: Color,
     enabled: Boolean = true,
     trailing: @Composable () -> Unit,
 ) {
@@ -178,14 +183,14 @@ private fun ProfileActionRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
+            .padding(horizontal = Spacing.medium, vertical = Spacing.medium),
         horizontalArrangement = Arrangement.spacedBy(Spacing.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = text,
             style = RecitTheme.typography.action300,
-            color = RecitTheme.colors.foregroundError,
+            color = color,
             modifier = Modifier.weight(1f),
         )
         trailing()

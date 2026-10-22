@@ -28,6 +28,13 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), 0)
 
+    /** How many étagères and lists are mine, for the line under my name. */
+    val shelfCount: StateFlow<Int> = container.users.myUserId
+        .flatMapLatest { id: String? -> if (id == null) flowOf(0) else container.shelves.observeCountOf(id) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), 0)
+    val listCount: StateFlow<Int> = container.lists.observeCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), 0)
+
     /** `null` until DataStore answers, so a dismissed notice does not flash in at launch. */
     val isNoticeDismissed: StateFlow<Boolean?> = container.preferences.observeBoolean(NOTICE_DISMISSED_KEY)
         .map<Boolean, Boolean?> { it }

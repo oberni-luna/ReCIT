@@ -6,26 +6,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -49,8 +39,8 @@ import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.SyncStatus
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.UserRelation
-import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
+import studio.lunabee.nouveaurecit.designsystem.RecitSearchField
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
@@ -139,7 +129,7 @@ fun AddFriendsScreen(navigator: Navigator) {
                 SearchField(query = state.query, onQueryChange = viewModel::onQueryChange)
             }
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -147,7 +137,7 @@ fun AddFriendsScreen(navigator: Navigator) {
         ) {
             if (pending.isNotEmpty()) {
                 item(key = "pending-header") {
-                    SectionHeader(stringResource(R.string.network_requests_pending), Modifier.padding(horizontal = Spacing.medium))
+                    SectionHeader(stringResource(R.string.network_requests_pending))
                 }
                 item(key = "pending") {
                     ReaderSection(pending, progress, navigator, viewModel.actions)
@@ -156,7 +146,7 @@ fun AddFriendsScreen(navigator: Navigator) {
 
             if (results.isNotEmpty()) {
                 item(key = "results-header") {
-                    SectionHeader(stringResource(R.string.network_search_header), Modifier.padding(horizontal = Spacing.medium))
+                    SectionHeader(stringResource(R.string.network_search_header))
                 }
                 item(key = "results") {
                     ReaderSection(results, progress, navigator, viewModel.actions)
@@ -172,42 +162,13 @@ fun AddFriendsScreen(navigator: Navigator) {
 
 @Composable
 private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
-    TextField(
-        value = query,
-        onValueChange = onQueryChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-        placeholder = { Text(stringResource(R.string.network_search_prompt), style = RecitTheme.typography.content300) },
-        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.network_search_clear))
-                }
-            }
-        },
-        singleLine = true,
-        textStyle = RecitTheme.typography.content300,
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.None,
-            autoCorrectEnabled = false,
-            imeAction = ImeAction.Search,
-        ),
-        shape = RoundedCornerShape(CornerRadius.rounded),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = RecitTheme.colors.backgroundDefault,
-            unfocusedContainerColor = RecitTheme.colors.backgroundDefault,
-            focusedIndicatorColor = RecitTheme.colors.backgroundDefault,
-            unfocusedIndicatorColor = RecitTheme.colors.backgroundDefault,
-            cursorColor = RecitTheme.colors.foregroundTinted,
-            focusedTextColor = RecitTheme.colors.foregroundDefault,
-            unfocusedTextColor = RecitTheme.colors.foregroundDefault,
-            focusedPlaceholderColor = RecitTheme.colors.foregroundPlaceholder,
-            unfocusedPlaceholderColor = RecitTheme.colors.foregroundPlaceholder,
-            focusedLeadingIconColor = RecitTheme.colors.foregroundSecondary,
-            unfocusedLeadingIconColor = RecitTheme.colors.foregroundSecondary,
-        ),
+    RecitSearchField(
+        query = query,
+        onQueryChange = onQueryChange,
+        placeholder = stringResource(R.string.network_search_prompt),
+        clearLabel = stringResource(R.string.network_search_clear),
+        autoCorrect = false,
+        modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small),
     )
 }
 
@@ -220,7 +181,7 @@ private fun ReaderSection(
 ) {
     SectionCard {
         users.forEachIndexed { index, user ->
-            if (index > 0) HorizontalDivider(color = RecitTheme.colors.borderDefault)
+            if (index > 0) HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
             ReaderRow(
                 user = user,
                 syncState = FirstSyncState.of(user.lastInventorySync, progress[user.id]),

@@ -30,6 +30,7 @@ data class ListElementRowModel(
     val subtitle: String?,
     val image: String?,
     val comment: String,
+    val authors: String? = null,
 )
 
 /**

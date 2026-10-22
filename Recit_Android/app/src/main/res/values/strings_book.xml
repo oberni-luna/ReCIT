@@ -14,6 +14,7 @@
     <string name="action_add_to_inventory">Ajouter à l\'inventaire</string>
     <string name="list_removed_from_named">Retiré de %1$s</string>
     <string name="inventory_item_remove_from_inventory">Supprimer de mon inventaire</string>
+    <string name="inventory_item_remove_menu">Supprimer ce livre</string>
     <string name="inventory_item_delete_confirm">Supprimer cet item de votre inventaire ?</string>
     <string name="inventory_item_deleted">Supprimé !</string>
     <string name="edition_added_to_inventory">Ajouté à votre inventaire</string>
@@ -22,6 +23,7 @@
     <!-- States -->
     <string name="book_resolve_error_title">Impossible d’ouvrir ce livre</string>
     <string name="book_resolve_error_message">La connexion à inventaire.io a échoué.</string>
+    <string name="book_resolve_error_unreadable">inventaire.io a répondu, mais l’app n’a pas su lire sa réponse.</string>
     <string name="book_no_edition_title">Aucune édition pour ce livre</string>
     <string name="book_no_edition_message">inventaire.io connaît ce titre, mais n’a aucune édition à en montrer.</string>
 
@@ -45,6 +47,7 @@
     <string name="nav_author">Auteur</string>
     <string name="author_loading">Chargement de l\'auteur...</string>
     <string name="author_loading_works">Chargement des œuvres de %1$s</string>
-    <string name="author_birth_date">Né le %1$s</string>
+    <string name="author_birth_date">Né·e le %1$s</string>
+    <string name="author_life_dates">%1$s – %2$s</string>
     <string name="author_works_header">Œuvres de %1$s</string>
 </resources>

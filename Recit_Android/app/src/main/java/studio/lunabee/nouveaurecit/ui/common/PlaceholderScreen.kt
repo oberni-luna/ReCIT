@@ -15,7 +15,7 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 fun PlaceholderScreen(title: String, onBack: (() -> Unit)?) {
     Scaffold(
         topBar = { RecitTopBar(title = title, onBack = onBack) },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
             Text(title, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary)

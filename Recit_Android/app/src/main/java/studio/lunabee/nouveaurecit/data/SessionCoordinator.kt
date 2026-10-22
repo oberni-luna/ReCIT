@@ -34,6 +34,7 @@ class SessionCoordinator(
     /** Suspends until the sync is over — what pull-to-refresh waits on. */
     suspend fun refresh() = mutex.withLock {
         if (!auth.isAuthenticated.value) return@withLock
+        runCatching { users.restoreMyUserId() }.onFailure { Log.w(TAG, "restore failed", it) }
         try {
             users.syncMyUser()
         } catch (error: Exception) {

@@ -100,7 +100,7 @@ fun NetworkScreen(navigator: Navigator) {
                 }
             }
         },
-        containerColor = RecitTheme.colors.backgroundSecondary,
+        containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -122,7 +122,7 @@ fun NetworkScreen(navigator: Navigator) {
             ) {
                 if (invitations.isNotEmpty()) {
                     item(key = "invitations-header") {
-                        SectionHeader(stringResource(R.string.network_profile_invitations), Modifier.padding(horizontal = Spacing.medium))
+                        SectionHeader(stringResource(R.string.network_profile_invitations))
                     }
                     item(key = "invitations") {
                         SectionCard {
@@ -140,7 +140,7 @@ fun NetworkScreen(navigator: Navigator) {
                                         messenger.show(context.getString(R.string.network_invitation_refused, user.username))
                                     },
                                 )
-                                HorizontalDivider(color = RecitTheme.colors.borderDefault)
+                                HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
                             }
                             LinkRow(stringResource(R.string.network_invitations_all)) { navigator.push(Destination.Invitations) }
                         }
@@ -148,7 +148,7 @@ fun NetworkScreen(navigator: Navigator) {
                 }
 
                 item(key = "friends-header") {
-                    SectionHeader(stringResource(R.string.network_friends), Modifier.padding(horizontal = Spacing.medium))
+                    SectionHeader(stringResource(R.string.network_friends))
                 }
                 item(key = "friends") {
                     SectionCard {
@@ -164,7 +164,7 @@ fun NetworkScreen(navigator: Navigator) {
                                     syncState = syncStates[friend.id] ?: FirstSyncState.Synced,
                                     onClick = { navigator.push(Destination.User(friend.id)) },
                                 )
-                                HorizontalDivider(color = RecitTheme.colors.borderDefault)
+                                HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
                             }
                         }
                         // Present even with no friend at all: an empty network is when one needs it.

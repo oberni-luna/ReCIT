@@ -1,6 +1,7 @@
 package studio.lunabee.nouveaurecit.ui.auth
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import studio.lunabee.nouveaurecit.auth.AuthRepository
 import studio.lunabee.nouveaurecit.auth.model.AuthException
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
+import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.TintedTextButton
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 
@@ -70,9 +72,13 @@ fun SignInScreen(onBack: () -> Unit) {
         AuthField(label = stringResource(R.string.login_username), value = username, onValueChange = { username = it })
         AuthField(label = stringResource(R.string.login_password), value = password, onValueChange = { password = it }, isSecure = true)
         state.error?.let {
-            Text(stringResource(it), style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundError)
+            AuthError(stringResource(it))
         }
-        TintedTextButton(text = stringResource(R.string.login_button_forgot_password), onClick = { showsReset = true })
+        TintedTextButton(
+            text = stringResource(R.string.login_button_forgot_password),
+            onClick = { showsReset = true },
+            contentPadding = PaddingValues(vertical = Spacing.small),
+        )
     }
 
     if (showsReset) {

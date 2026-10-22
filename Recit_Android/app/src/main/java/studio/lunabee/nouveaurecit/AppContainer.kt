@@ -3,6 +3,7 @@ package studio.lunabee.nouveaurecit
 import android.content.Context
 import coil3.ImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -11,6 +12,7 @@ import studio.lunabee.nouveaurecit.auth.AuthRepository
 import studio.lunabee.nouveaurecit.auth.AuthService
 import studio.lunabee.nouveaurecit.auth.KeystoreSessionVault
 import studio.lunabee.nouveaurecit.auth.SessionCookieJar
+import studio.lunabee.nouveaurecit.data.CoverWallRepository
 import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.ErrorReporter
 import studio.lunabee.nouveaurecit.data.InventoryRepository
@@ -24,7 +26,6 @@ import studio.lunabee.nouveaurecit.data.UserPreferences
 import studio.lunabee.nouveaurecit.data.UserRepository
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.network.ApiService
-import java.util.concurrent.TimeUnit
 
 /**
  * The composition root — `ReCIT.swift` plus `RootView`'s `@State` models. One instance per process,
@@ -38,9 +39,14 @@ class AppContainer(context: Context) {
 
     private val cookieJar: SessionCookieJar = SessionCookieJar()
 
+    /**
+     * Every request names the app. Wikimedia Commons answers `403` to OkHttp's default
+     * `okhttp/x.y` agent, which left every author portrait and Commons cover blank.
+     */
     private val baseClient: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor { chain -> chain.proceed(chain.request().newBuilder().header("User-Agent", USER_AGENT).build()) }
         .build()
 
     val sessionClient: OkHttpClient = baseClient.newBuilder().cookieJar(cookieJar).build()
@@ -66,11 +72,12 @@ class AppContainer(context: Context) {
     )
 
     val entities: EntityRepository = EntityRepository(api, database.entityDao())
-    val users: UserRepository = UserRepository(api, database, optimisticRunner)
+    val users: UserRepository = UserRepository(api, database, optimisticRunner, preferences)
     val inventory: InventoryRepository = InventoryRepository(api, database, entities, optimisticRunner, syncStatus)
     val shelves: ShelfRepository = ShelfRepository(api, database, optimisticRunner)
     val lists: ListRepository = ListRepository(api, database, optimisticRunner)
     val search: SearchRepository = SearchRepository(api)
+    val coverWall: CoverWallRepository = CoverWallRepository(publicApi, preferences)
 
     val session: SessionCoordinator = SessionCoordinator(
         scope = applicationScope,
@@ -86,4 +93,8 @@ class AppContainer(context: Context) {
     fun imageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
         .components { add(OkHttpNetworkFetcherFactory(callFactory = { publicClient })) }
         .build()
+
+    private companion object {
+        val USER_AGENT: String = "Ex-libris/${BuildConfig.VERSION_NAME} (Android)"
+    }
 }

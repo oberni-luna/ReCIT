@@ -15,6 +15,7 @@
     <string name="lists_empty_action_create_detail">à lire, à acheter, à offrir</string>
 
     <!-- Row counts (feature 0024) -->
+    <string name="list_count_empty">Vide</string>
     <plurals name="list_count_work">
         <item quantity="one">%d œuvre</item>
         <item quantity="many">%d œuvres</item>
@@ -40,6 +41,7 @@
     <string name="list_form_type">Type</string>
     <string name="list_form_name">Nom</string>
     <string name="list_form_description">Description</string>
+    <string name="list_form_create">Créer</string>
     <string name="list_form_create_and_add">Créer et ajouter</string>
     <string name="list_form_delete">Supprimer la liste</string>
     <string name="list_added_to_named">Ajouté à %1$s</string>

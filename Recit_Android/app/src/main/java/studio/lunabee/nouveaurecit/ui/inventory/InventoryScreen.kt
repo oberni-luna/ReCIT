@@ -125,7 +125,10 @@ fun InventoryScreen(navigator: Navigator) {
                 onExpandedChange = viewModel::onExpandedChange,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = if (expanded) Spacing.zero else Spacing.medium),
+                    .padding(horizontal = if (expanded) Spacing.zero else Spacing.medium)
+                    .padding(bottom = if (expanded) Spacing.zero else Spacing.small),
+                // Collapsed, the field sits under the top bar, which already clears the status bar.
+                windowInsets = if (expanded) SearchBarDefaults.windowInsets else WindowInsets(0),
                 colors = SearchBarDefaults.colors(containerColor = RecitTheme.colors.backgroundSecondary),
             ) {
                 SearchSurface(viewModel = viewModel, myUserId = user.id, navigator = navigator)
@@ -177,6 +180,7 @@ private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator
     val syncState: FirstSyncState by viewModel.syncState.collectAsStateWithLifecycle()
     val isRefreshing: Boolean by viewModel.isRefreshing.collectAsStateWithLifecycle()
     var isCreatingShelf: Boolean by rememberSaveable { mutableStateOf(false) }
+    var addingBooksTo: ShelfWithItems? by remember { mutableStateOf(null) }
     val items: List<ItemRow> = myItems.orEmpty()
 
     PullToRefreshBox(isRefreshing = isRefreshing, onRefresh = viewModel::refresh, modifier = Modifier.fillMaxSize()) {
@@ -201,7 +205,9 @@ private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator
             if (loaded != null) {
                 if (loaded.isEmpty()) {
                     if (syncState == FirstSyncState.Synced && myItems != null) {
-                        item(key = "shelves.empty") { EmptyShelfCard(ownsBooks = items.isNotEmpty(), onSearch = onSearch) }
+                        item(key = "shelves.empty") {
+                            EmptyShelfCard(ownsBooks = items.isNotEmpty(), onSearch = onSearch, onCreateShelf = { isCreatingShelf = true })
+                        }
                     }
                 } else {
                     item(key = "shelves.carousel") {
@@ -209,15 +215,19 @@ private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator
                             shelves = loaded,
                             onOpenShelf = { navigator.push(Destination.Shelf(it)) },
                             onOpenItem = { navigator.push(Destination.Book(BookAnchor.Item(it))) },
+                            onAddBooks = { addingBooksTo = it },
                         )
                     }
                 }
             }
-            item(key = "books.header") {
-                ShelvesSectionHeader(
-                    title = stringResource(R.string.shelves_all_books, items.size),
-                    modifier = Modifier.padding(top = Spacing.large),
-                )
+            // No count until the store has answered: « Tous les livres · 0 » would flash on launch.
+            if (myItems != null) {
+                item(key = "books.header") {
+                    ShelvesSectionHeader(
+                        title = stringResource(R.string.shelves_all_books, items.size),
+                        modifier = Modifier.padding(top = Spacing.large),
+                    )
+                }
             }
             items(items, key = { it.item.id }) { row ->
                 InventoryItemRow(
@@ -232,5 +242,8 @@ private fun InventoryContent(viewModel: InventoryViewModel, navigator: Navigator
 
     if (isCreatingShelf) {
         ShelfFormSheet(shelfId = null, fileItemId = null, onDismiss = { isCreatingShelf = false })
+    }
+    addingBooksTo?.let { shelf ->
+        AddBooksToShelfSheet(shelfId = shelf.shelf.id, shelfName = shelf.shelf.name, onDismiss = { addingBooksTo = null })
     }
 }

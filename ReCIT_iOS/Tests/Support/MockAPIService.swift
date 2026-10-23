@@ -39,6 +39,16 @@ final class MockAPIService: APIServicing {
         stubs.append((match, .failure(error)))
     }
 
+    /// Replaces what `match` answers, keeping its place in the order: a server whose answer
+    /// changed between two calls of the same model.
+    func restub(_ match: String, json: String) {
+        if let index = stubs.firstIndex(where: { $0.match == match }) {
+            stubs[index] = (match, .data(Data(json.utf8)))
+        } else {
+            stub(match, json: json)
+        }
+    }
+
     // MARK: - APIServicing
 
     func baseUrl() -> String {

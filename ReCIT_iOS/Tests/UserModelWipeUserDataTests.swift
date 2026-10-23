@@ -18,7 +18,7 @@ import Testing
 struct UserModelWipeUserDataTests {
 
     /// A store with something of every kind in it: me and a friend, our books, an étagère, a
-    /// list, a transaction with a message, and the entities the books point at.
+    /// list, a transaction with a message, a group, and the entities the books point at.
     private func populatedContext() throws -> ModelContext {
         let context: ModelContext = try TestStore.makeContext()
 
@@ -96,6 +96,25 @@ struct UserModelWipeUserDataTests {
             )
         )
 
+        context.insert(
+            StoredGroup(
+                group: .init(
+                    id: "group-1",
+                    name: "Club",
+                    slug: nil,
+                    description: "",
+                    pictureURL: nil,
+                    searchable: true,
+                    open: false,
+                    admins: [.init(user: "user-1", invitor: nil, timestamp: 1)],
+                    members: [.init(user: "user-2", invitor: "user-1", timestamp: 2)],
+                    invited: [],
+                    declined: [],
+                    requested: []
+                )
+            )
+        )
+
         try context.save()
         return context
     }
@@ -115,6 +134,7 @@ struct UserModelWipeUserDataTests {
         #expect(try context.fetch(FetchDescriptor<EntityListItem>()).isEmpty)
         #expect(try context.fetch(FetchDescriptor<UserTransaction>()).isEmpty)
         #expect(try context.fetch(FetchDescriptor<TransactionMessage>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<StoredGroup>()).isEmpty)
         #expect(model.myUser == nil)
     }
 

@@ -33,6 +33,9 @@ final class SyncStatusStore {
         case lists
         case transactions
         case community
+        /// My groups (issue 0103). Persisted since then: until it has synced once, an empty store
+        /// means « not read yet », not « in no group ».
+        case groups
     }
 
     /// Current sync state of a domain within this launch.

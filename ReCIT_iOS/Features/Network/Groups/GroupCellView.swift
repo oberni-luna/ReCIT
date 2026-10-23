@@ -4,7 +4,8 @@
 //
 //  A group in a list — the left half of `Cell / Group` in the Figma pass. The picture is a
 //  square with rounded corners where a reader's is a circle: a group should never be read as a
-//  person at a glance.
+//  person at a glance. Without a picture, or when it will not load, the square shows the
+//  `person.2` glyph on a tinted fill (`AvatarThumbnail`), where it used to stay an empty grey.
 //
 //  A dot after the name says the group waits on me — requests to join that only I, as an admin,
 //  can answer. It is what the Réseau tab's badge counts, put back on the group it came from.
@@ -39,7 +40,7 @@ struct GroupCellView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: .sMedium) {
-            CellThumbnail(imageUrl: pictureURL, cornerRadius: .medium, size: .medium)
+            AvatarThumbnail(.group, imageUrl: pictureURL, size: .medium)
 
             VStack(alignment: .leading, spacing: .xSmall) {
                 HStack(spacing: .small) {

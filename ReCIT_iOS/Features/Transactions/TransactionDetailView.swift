@@ -149,7 +149,11 @@ struct TransactionDetailView: View {
             }
         default:
             HStack(alignment: .top, spacing: .sMedium) {
-                CellThumbnail(imageUrl: message.user.avatarURLValue, cornerRadius: .full, size: .small)
+                AvatarThumbnail(
+                    .reader(username: message.user.username),
+                    imageUrl: message.user.avatarURLValue,
+                    size: .small
+                )
                 VStack(alignment: .leading, spacing: .xSmall) {
                     Text(message.user.username)
                         .textStyle(.content400Bold)

@@ -16,7 +16,7 @@ struct GroupHeaderView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: .small) {
-            CellThumbnail(imageUrl: group.pictureURL, cornerRadius: .medium, size: .large)
+            AvatarThumbnail(.group, imageUrl: group.pictureURL, size: .large)
 
             Text(group.name)
                 .textStyle(.content400Bold)

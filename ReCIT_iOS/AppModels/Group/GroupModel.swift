@@ -3,17 +3,23 @@
 //  ReCIT_iOS
 //
 //  Groups of readers on inventaire.io — the ones I belong to, the ones inviting me, the ones I
-//  asked to join, and whichever one is open on screen. See PRD 0016.
+//  asked to join, and whichever one is open on screen. See PRD 0016, and PRD 0019 for the move
+//  to the store.
 //
-//  **In memory, not in SwiftData.** A group is a `ReaderGroup` value held here for the launch:
-//  a new `@Model` would be a store migration, which this project does not do without asking.
-//  The screens stay reactive all the same — this is `@Observable`, and they read the
-//  dictionary — and the people in a group are `User`s of the store, looked up by id.
+//  **Mine in the store, the others in memory.** A group I hold a role in — admin, member,
+//  invited, or asked to join from this device — is a `StoredGroup`, there from the moment the app
+//  opens and offline, read by the screens through `@Query` (ADR 0001). A group opened from a
+//  search is a `ReaderGroup` kept here for the launch, as every group was until issue 0103. The
+//  people in a group are `User`s of the store, looked up by id.
 //
-//  **Writes are optimistic** (ADR 0001): a gesture is applied to the local value first,
-//  through the same transition the server runs (`ReaderGroup.applying`), then sent in a task
-//  this model owns; a refusal puts the previous value back and speaks through the snack bar.
-//  Creating a group is the exception — see `createGroup`.
+//  **Writes are optimistic** (ADR 0001): a gesture is applied to the group first, through the
+//  same transition the server runs (`ReaderGroup.applying`), then sent in a task this model owns;
+//  a refusal puts the previous value back and speaks through the snack bar. Creating a group is
+//  the exception — see `createGroup`.
+//
+//  **The sync is an upsert with a deletion scope** (feature 0019): every stored group is in its
+//  charge, except one whose read failed. A group I left, or whose invitation was withdrawn, is
+//  gone from the store at the next sync; a group from a search was never in it.
 //
 
 import Foundation
@@ -25,23 +31,28 @@ final class GroupModel: OptimisticMutating {
 
     private let apiService: APIServicing
     private let ledger: GroupRequestLedger
+    private let defaults: UserDefaults
+    private static let signedInReaderKey: String = "groups.signedInReader"
+
+    /// The roles that make a group one of mine, and so a group the store keeps. A declined
+    /// invitation is not one: `GET /api/groups` stops naming the group, and so does the device.
+    private static let storedRoles: Set<GroupRole> = [.admin, .member, .invited, .requested]
 
     /// Shared channel used to surface a background optimistic failure to the UI.
     var errorReporter: AppErrorReporter?
 
-    /// Every group this launch knows, by id: mine, and the ones opened from a search.
-    private(set) var groupsByID: [String: ReaderGroup] = [:]
+    /// The groups this launch has read that the store does not hold: opened from a search, or
+    /// dropped by a sync while a screen may still be open on them. Never shown in the Groupes
+    /// segment, which lists the store alone.
+    private(set) var visitedGroups: [String: ReaderGroup] = [:]
 
-    /// Whether `syncMyGroups` has answered once this launch. Until then the Groupes segment
-    /// says it is loading, rather than that there is no group — the groups are not kept across
-    /// launches, so an empty dictionary means nothing before the first answer.
-    private(set) var hasLoaded: Bool = false
-
-    /// Whether the last sync failed before any had answered — the segment says so instead of
-    /// spinning for ever.
-    private(set) var syncFailed: Bool = false
-
-    /// The signed-in reader, as of the last sync. Every gesture is made in their name.
+    /// The signed-in reader, as of the last sync. Every gesture is made in their name, and every
+    /// role a screen shows is theirs.
+    ///
+    /// **Kept across launches**, unlike the rest of this model: the stored groups are only
+    /// readable with it, and the first answer that would bring it back — `GET /api/user` — is a
+    /// network call. Without it the Groupes segment could not tell an invitation from a group of
+    /// mine before the sync, nor at all offline. Forgotten with the groups at sign-out.
     private(set) var myUserId: String?
 
     /// The most recent background task spawned by an optimistic write. Exposed so tests can
@@ -51,104 +62,91 @@ final class GroupModel: OptimisticMutating {
     init(
         apiService: APIServicing,
         errorReporter: AppErrorReporter? = nil,
-        ledger: GroupRequestLedger = .init()
+        ledger: GroupRequestLedger = .init(),
+        defaults: UserDefaults = .standard
     ) {
         self.apiService = apiService
         self.errorReporter = errorReporter
         self.ledger = ledger
+        self.defaults = defaults
+        self.myUserId = defaults.string(forKey: Self.signedInReaderKey)
     }
 
     // MARK: - Reading
 
-    func group(id: String) -> ReaderGroup? {
-        groupsByID[id]
+    /// A group as a screen shows it: the stored copy when it is one of mine, the one read for
+    /// this launch otherwise.
+    ///
+    /// - Parameter stored: What the screen's `@Query` holds. Passed in rather than fetched, so
+    ///   the screen redraws when the store changes.
+    func group(id: String, among stored: [StoredGroup]) -> ReaderGroup? {
+        stored.first { $0.isStillInTheStore && $0._id == id }?.readerGroup ?? visitedGroups[id]
     }
 
-    /// The groups where I hold `roles`, by name.
-    func groups(where roles: Set<GroupRole>) -> [ReaderGroup] {
-        groupsByID.values
-            .filter { group in group.role(of: myUserId).map(roles.contains) ?? false }
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    /// The same lookup, straight from the store — for the gestures, and for the tests.
+    func group(id: String, in modelContext: ModelContext) -> ReaderGroup? {
+        storedGroup(id: id, in: modelContext)?.readerGroup ?? visitedGroups[id]
     }
 
-    var myGroups: [ReaderGroup] {
-        groups(where: [.admin, .member])
-    }
-
-    var invitations: [ReaderGroup] {
-        groups(where: [.invited])
-    }
-
-    var sentRequests: [ReaderGroup] {
-        groups(where: [.requested])
-    }
-
-    /// Requests waiting on me, in the groups I administer.
-    var requestsToReview: Int {
-        groups(where: [.admin]).reduce(0) { $0 + $1.requestsToReview(by: myUserId) }
-    }
-
-    /// Everything in the Groupes segment that waits on an answer from me — what the Réseau
-    /// tab's badge adds to the friends' invitations.
-    var pendingCount: Int {
-        invitations.count + requestsToReview
+    /// My groups by section, from what a screen's `@Query` holds.
+    func myGroups(from stored: [StoredGroup]) -> MyGroups {
+        .init(stored.filter(\.isStillInTheStore).map(\.readerGroup), me: myUserId)
     }
 
     // MARK: - Syncing
 
-    /// Reads `GET /api/groups`, then the groups this device asked to join, and puts a name on
-    /// everyone they mention.
+    /// Reads `GET /api/groups`, then the groups this device asked to join, writes them into the
+    /// store, and puts a name on everyone they mention.
     ///
-    /// The answer replaces what was known: a group I left on the website, or that removed me,
-    /// is gone from the segment at the next sync rather than lingering.
+    /// The answer is upserted in place — an open screen keeps its object — and every stored
+    /// group it does not name is deleted: a group I left on the website, or that removed me, is
+    /// gone from the segment at the next sync rather than lingering. The only exception is a
+    /// request whose read failed: a bad connection does not erase a request.
     func syncMyGroups(myUserId: String, modelContext: ModelContext) async throws {
-        self.myUserId = myUserId
-        syncFailed = false
+        remember(myUserId)
 
-        let answer: GroupsDTO?
-        do {
-            answer = try await apiService.fetchData(fromEndpoint: "/api/groups")
-        } catch {
-            syncFailed = true
-            throw error
-        }
-        var fresh: [String: ReaderGroup] = [:]
+        let answer: GroupsDTO? = try await apiService.fetchData(fromEndpoint: "/api/groups")
+        var fresh: [String: GroupDTO] = [:]
         for dto in answer?.groups ?? [] {
-            fresh[dto._id] = makeGroup(dto)
+            fresh[dto._id] = dto
         }
 
         // The requests are the one role `/api/groups` leaves out. Each is read back: still
-        // waiting, it stays; accepted or refused, the ledger forgets it. A failed read keeps
-        // what was known, so a bad connection does not erase a request.
-        for id in ledger.ids(for: myUserId) where fresh[id] == nil {
+        // waiting, it stays; accepted or refused, the ledger forgets it.
+        var unread: Set<String> = []
+        for id in ledger.ids(for: myUserId).sorted() where fresh[id] == nil {
             do {
-                let group: ReaderGroup = try await readGroup(id: id, modelContext: modelContext)
-                if group.role(of: myUserId) == .requested {
-                    fresh[id] = group
+                let dto: GroupDTO = try await readGroup(id: id, modelContext: modelContext)
+                if ReaderGroup(dto: dto, pictureURL: nil).role(of: myUserId) == .requested {
+                    fresh[id] = dto
                 } else {
                     ledger.remove(id, for: myUserId)
                 }
             } catch NetworkError.badStatus(code: 404, _) {
                 ledger.remove(id, for: myUserId)
             } catch {
-                if let known = groupsByID[id] {
-                    fresh[id] = known
-                }
+                unread.insert(id)
             }
         }
 
-        groupsByID = fresh
-        hasLoaded = true
+        // Signed out while the answers were on their way: the store is the next account's now,
+        // and a sync that wrote nothing must not be counted as one that succeeded.
+        guard self.myUserId == myUserId else { throw CancellationError() }
 
-        try await fetchMissingUsers(Set(fresh.values.flatMap(\.everyoneIds)), modelContext: modelContext)
+        try store(Array(fresh.values), keeping: unread, in: modelContext)
+
+        let named: [String] = try modelContext.fetch(FetchDescriptor<StoredGroup>())
+            .flatMap { $0.readerGroup.everyoneIds }
+        try await fetchMissingUsers(Set(named), modelContext: modelContext)
     }
 
     /// Reads one group afresh — the screen of a group, mine or not — and stores the people it
     /// names, which `by-id` sends along already shaped as users.
     @discardableResult
     func fetchGroup(id: String, modelContext: ModelContext) async throws -> ReaderGroup {
-        let group: ReaderGroup = try await readGroup(id: id, modelContext: modelContext)
-        groupsByID[id] = group
+        let dto: GroupDTO = try await readGroup(id: id, modelContext: modelContext)
+        let group: ReaderGroup = absorb(dto, in: modelContext)
+        try modelContext.save()
         return group
     }
 
@@ -186,6 +184,9 @@ final class GroupModel: OptimisticMutating {
     /// server would refuse — inviting someone who declined, leaving as the last admin — is
     /// reported and goes no further, instead of flashing a state that will be taken back.
     ///
+    /// A gesture that makes a group from a search mine — a request, or joining an open group —
+    /// moves it into the store; a refusal moves it back out.
+    ///
     /// - Parameter target: The other person, for the gestures about someone else.
     func perform(
         _ action: GroupAction,
@@ -193,7 +194,7 @@ final class GroupModel: OptimisticMutating {
         target: String? = nil,
         modelContext: ModelContext
     ) {
-        guard let myUserId, let current = groupsByID[groupId] else { return }
+        guard let myUserId, let current = group(id: groupId, in: modelContext) else { return }
 
         let next: ReaderGroup
         do {
@@ -203,11 +204,14 @@ final class GroupModel: OptimisticMutating {
             return
         }
 
+        let wasStored: Bool = storedGroup(id: groupId, in: modelContext) != nil
         let ledger: GroupRequestLedger = ledger
         inFlightTask = optimistic(
             modelContext,
-            apply: { [weak self] in self?.groupsByID[groupId] = next },
-            revert: { [weak self] in self?.groupsByID[groupId] = current },
+            apply: { [weak self] in self?.place(next, in: modelContext) },
+            revert: { [weak self] in
+                self?.putBack(current, wasStored: wasStored, actor: myUserId, in: modelContext)
+            },
             request: { [weak self] in
                 try await self?.put(action, groupId: groupId, target: target)
             },
@@ -235,7 +239,8 @@ final class GroupModel: OptimisticMutating {
         name: String,
         description: String,
         searchable: Bool,
-        open: Bool
+        open: Bool,
+        modelContext: ModelContext
     ) async throws -> ReaderGroup {
         guard let dto: GroupDTO = try await apiService.send(
             toEndpoint: "/api/groups",
@@ -248,22 +253,26 @@ final class GroupModel: OptimisticMutating {
         ) else {
             throw NetworkError.badResponse
         }
-        let group: ReaderGroup = makeGroup(dto)
-        groupsByID[group.id] = group
+        let group: ReaderGroup = absorb(dto, in: modelContext)
+        try modelContext.save()
         return group
     }
 
     /// Writes one setting, optimistically. `update-settings` takes one attribute per call, so a
     /// form that changed two sends two.
     func update(_ setting: GroupSetting, on groupId: String, modelContext: ModelContext) {
-        guard let current = groupsByID[groupId] else { return }
+        guard let current = group(id: groupId, in: modelContext) else { return }
         let next: ReaderGroup = setting.applied(to: current)
         guard next != current else { return }
 
+        let wasStored: Bool = storedGroup(id: groupId, in: modelContext) != nil
+        let actor: String? = myUserId
         inFlightTask = optimistic(
             modelContext,
-            apply: { [weak self] in self?.groupsByID[groupId] = next },
-            revert: { [weak self] in self?.groupsByID[groupId] = current },
+            apply: { [weak self] in self?.place(next, in: modelContext) },
+            revert: { [weak self] in
+                self?.putBack(current, wasStored: wasStored, actor: actor, in: modelContext)
+            },
             request: { [weak self] in
                 try await self?.putSetting(setting, groupId: groupId)
             }
@@ -272,16 +281,130 @@ final class GroupModel: OptimisticMutating {
 
     // MARK: - Signing out
 
-    /// Leaves nothing of the last account's groups in memory. The ledger is keyed by account,
-    /// and stays for when they come back.
+    /// Leaves nothing of the last account's groups in memory, and forgets who they were for.
+    /// The stored groups go with the rest of the account's rows (`UserModel.wipeUserData`); the
+    /// ledger is keyed by account, and stays for when they come back.
     func reset() {
-        groupsByID = [:]
-        hasLoaded = false
-        syncFailed = false
+        visitedGroups = [:]
         myUserId = nil
+        defaults.removeObject(forKey: Self.signedInReaderKey)
     }
 
-    // MARK: - Private
+    // MARK: - Private · the store
+
+    private func remember(_ userId: String) {
+        myUserId = userId
+        defaults.set(userId, forKey: Self.signedInReaderKey)
+    }
+
+    private func storedGroup(id: String, in modelContext: ModelContext) -> StoredGroup? {
+        let descriptor: FetchDescriptor<StoredGroup> = .init(predicate: #Predicate { $0._id == id })
+        return try? modelContext.fetch(descriptor).first
+    }
+
+    /// Whether `group` is one the store should keep: one I hold a role in.
+    private func isMine(_ group: ReaderGroup) -> Bool {
+        group.role(of: myUserId).map(Self.storedRoles.contains) ?? false
+    }
+
+    /// Takes a document the server sent: merged into the stored copy when there is one, stored
+    /// when it makes the group one of mine, kept for the launch otherwise. Not saved.
+    private func absorb(_ dto: GroupDTO, in modelContext: ModelContext) -> ReaderGroup {
+        let pictureURL: String? = apiService.absoluteImageUrl(dto.picture)
+        if let stored = storedGroup(id: dto._id, in: modelContext) {
+            stored.update(from: dto, pictureURL: pictureURL)
+            return stored.readerGroup
+        }
+        let group: ReaderGroup = .init(dto: dto, pictureURL: pictureURL)
+        if isMine(group) {
+            modelContext.insert(StoredGroup(dto: dto, pictureURL: pictureURL))
+            visitedGroups[group.id] = nil
+        } else {
+            visitedGroups[group.id] = group
+        }
+        return group
+    }
+
+    /// Writes a value the app computed — a gesture's outcome, a setting — where the group
+    /// lives. A stored group stays stored whatever the gesture did to my role: the next sync is
+    /// what takes it out, so a screen open on it does not lose it mid-gesture. Not saved.
+    private func place(_ group: ReaderGroup, in modelContext: ModelContext) {
+        if let stored = storedGroup(id: group.id, in: modelContext) {
+            stored.overwrite(with: group)
+        } else if isMine(group) {
+            modelContext.insert(StoredGroup(group: group))
+            visitedGroups[group.id] = nil
+        } else {
+            visitedGroups[group.id] = group
+        }
+    }
+
+    /// Undoes `place` after a refusal. A group that was stored gets its previous value back —
+    /// unless it has left the store meanwhile, synced away or signed out, and there is nothing
+    /// to put back. A group that was not goes back to memory, out of the store it was moved
+    /// into. Nothing at all when the account changed during the round trip.
+    private func putBack(
+        _ previous: ReaderGroup,
+        wasStored: Bool,
+        actor: String?,
+        in modelContext: ModelContext
+    ) {
+        guard actor == myUserId else { return }
+        let stored: StoredGroup? = storedGroup(id: previous.id, in: modelContext)
+        if wasStored {
+            stored?.overwrite(with: previous)
+        } else {
+            if let stored {
+                modelContext.delete(stored)
+            }
+            visitedGroups[previous.id] = previous
+        }
+    }
+
+    /// Upserts what a sync read, in place, and deletes every stored group it did not name —
+    /// except `unread`, the requests that could not be read this time. Saves.
+    private func store(
+        _ dtos: [GroupDTO],
+        keeping unread: Set<String>,
+        in modelContext: ModelContext
+    ) throws {
+        // What the sync drops stays readable for this launch, for a screen still open on it — as
+        // the server now has it, without me: a group I left on the website must not go on
+        // offering « Quitter », nor show me as a member in the search, until it is read again.
+        let named: Set<String> = Set(dtos.map(\._id))
+        for stored in try modelContext.fetch(FetchDescriptor<StoredGroup>())
+        where named.contains(stored._id) == false && unread.contains(stored._id) == false {
+            visitedGroups[stored._id] = Self.dropping(myUserId, from: stored.readerGroup)
+        }
+
+        try modelContext.upsert(
+            dtos,
+            dtoID: { dto in dto._id },
+            modelID: { (stored: StoredGroup) in stored._id },
+            make: { dto in StoredGroup(dto: dto, pictureURL: apiService.absoluteImageUrl(dto.picture)) },
+            update: { stored, dto in stored.update(from: dto, pictureURL: apiService.absoluteImageUrl(dto.picture)) },
+            deleteMissing: true,
+            scope: { stored in unread.contains(stored._id) == false }
+        )
+        for id in named {
+            visitedGroups[id] = nil
+        }
+        try modelContext.save()
+    }
+
+    /// `group` once a sync has stopped naming it among mine: I hold none of the roles that keep
+    /// a group in the store any more. A refusal, which the sync does not read, is left as it was.
+    private static func dropping(_ userId: String?, from group: ReaderGroup) -> ReaderGroup {
+        guard let userId else { return group }
+        var group: ReaderGroup = group
+        group.admins.removeAll { $0.user == userId }
+        group.members.removeAll { $0.user == userId }
+        group.invited.removeAll { $0.user == userId }
+        group.requested.removeAll { $0.user == userId }
+        return group
+    }
+
+    // MARK: - Private · the server
 
     private func put(_ action: GroupAction, groupId: String, target: String?) async throws {
         let _: OkStatusDTO? = try await apiService.send(
@@ -299,18 +422,15 @@ final class GroupModel: OptimisticMutating {
         )
     }
 
-    private func readGroup(id: String, modelContext: ModelContext) async throws -> ReaderGroup {
+    /// `GET /api/groups/by-id`, with the people it names stored on the way.
+    private func readGroup(id: String, modelContext: ModelContext) async throws -> GroupDTO {
         guard let answer: GroupByIdDTO = try await apiService.fetchData(
             fromEndpoint: "/api/groups/by-id?id=\(id)"
         ) else {
             throw NetworkError.badResponse
         }
         try User.upsert(answer.users, baseUrl: apiService.baseUrl(), in: modelContext)
-        return makeGroup(answer.group)
-    }
-
-    private func makeGroup(_ dto: GroupDTO) -> ReaderGroup {
-        .init(dto: dto, pictureURL: apiService.absoluteImageUrl(dto.picture))
+        return answer.group
     }
 
     /// The people a group names who are not in the store yet, fetched by fifty so the url

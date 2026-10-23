@@ -94,11 +94,12 @@ struct MainTabView: View {
     /// it drives has to reach over the nav bar and the tab bar. See ADR 0006.
     @State private var shelfFocus: ShelfFocusModel = .init()
     @Query private var allUsers: [User]
+    @Query private var storedGroups: [StoredGroup]
 
     /// What the Réseau tab's badge counts: everything there that waits on an answer from me.
     /// inventaire.io notifies nobody, so without it an invitation is only found by chance.
     private var networkBadgeCount: Int {
-        allUsers.filter { $0.relation == .requestReceived }.count + groupModel.pendingCount
+        allUsers.filter { $0.relation == .requestReceived }.count + groupModel.myGroups(from: storedGroups).pendingCount
     }
 
     var body: some View {

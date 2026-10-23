@@ -4,10 +4,10 @@
 //
 //  A group of readers on inventaire.io — a club, a family, a building — who share their books.
 //
-//  **A value, not a `@Model`.** Groups live in `GroupModel`, in memory, for this launch: adding
-//  a persisted model means a store migration, which this project does not do without asking.
-//  Everything a screen needs comes back with one `GET /api/groups` at launch, and a group's
-//  members are `User`s of the store, looked up by id. See PRD 0016.
+//  **A value, not a `@Model`.** It is what every screen and every transition works with. Since
+//  issue 0103 my groups are kept in the store as `StoredGroup`s, which read out as this value
+//  and take one back; a group opened from a search stays one of these in `GroupModel`'s memory.
+//  A group's members are `User`s of the store, looked up by id. See PRD 0016 and PRD 0019.
 //
 //  **The transitions are the server's.** `applying(_:by:on:)` reproduces
 //  `groupMembershipActions` in `server/models/group.ts`, down to its shortcuts: a request to an

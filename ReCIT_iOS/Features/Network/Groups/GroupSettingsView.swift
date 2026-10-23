@@ -18,6 +18,8 @@ struct GroupSettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
+    @Query private var storedGroups: [StoredGroup]
+
     let group: ReaderGroup
 
     @State private var name: String
@@ -31,7 +33,7 @@ struct GroupSettingsView: View {
 
     /// Live from the model, so a toggle reflects what was written — or put back.
     private var current: ReaderGroup {
-        groupModel.group(id: group.id) ?? group
+        groupModel.group(id: group.id, among: storedGroups) ?? group
     }
 
     private var textChanged: Bool {

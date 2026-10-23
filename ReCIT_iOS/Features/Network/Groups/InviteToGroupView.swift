@@ -19,13 +19,14 @@ struct InviteToGroupView: View {
     @Environment(\.modelContext) private var modelContext
 
     @Query(sort: \User.username) private var allUsers: [User]
+    @Query private var storedGroups: [StoredGroup]
 
     let groupId: String
 
     @State private var query: String = ""
 
     private var group: ReaderGroup? {
-        groupModel.group(id: groupId)
+        groupModel.group(id: groupId, among: storedGroups)
     }
 
     private var friends: [User] {

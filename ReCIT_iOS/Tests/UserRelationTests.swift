@@ -341,6 +341,23 @@ struct UserModelInvitationTests {
         #expect(asker.relation == .none)
         #expect(mock.recordedRequests.last?.endpoint == "/api/relations/discard")
     }
+
+    @Test("A refused refusal puts the request back, and says so")
+    func discardRevertsOnFailure() async throws {
+        let (context, me, asker): (ModelContext, User, User) = try makeStore()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/relations/discard", error: NetworkError.badResponse)
+        let reporter: AppErrorReporter = .init()
+        let model: UserModel = .init(apiService: mock, errorReporter: reporter)
+        model.myUser = me
+
+        model.discardRelation(with: asker, modelContext: context)
+        #expect(asker.relation == .none)
+
+        await model.inFlightTask?.value
+        #expect(asker.relation == .requestReceived)
+        #expect(reporter.lastFailure != nil)
+    }
 }
 
 @MainActor

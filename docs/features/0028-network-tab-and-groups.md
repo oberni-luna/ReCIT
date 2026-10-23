@@ -5,6 +5,12 @@ Shipped on 2026-09-27. Le PRD (`docs/prd/0016-network-tab-and-groups.md`) et les
 Figma `Réseau · Onglet & Groupes` (`499:14069`), décrite en fin de
 [figma-library.md](../design-system/figma-library.md).
 
+> **2026-10-13 — voir [0035](0035-network-graph.md).** Les groupes ne sont plus en mémoire : ils sont persistés
+> en SwiftData (`StoredGroup`) et synchronisés juste après les relations, ce qui renverse la décision « En
+> mémoire » ci-dessous ; `hasLoaded` / `syncFailed` ont laissé place au marqueur `.groups` de `SyncStatusStore`.
+> Réseau est le 3e onglet visible (Inventaire, Listes, Réseau, Profil ; Transactions est masqué), et non le 4e
+> comme écrit plus bas. Le reste de ce document est laissé tel qu'il a été livré.
+
 ## Ce que ça fait
 
 **Un onglet à part.** Le réseau vivait au milieu du Profil, entre les transactions et la

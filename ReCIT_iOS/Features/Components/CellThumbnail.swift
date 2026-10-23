@@ -72,6 +72,14 @@ struct CellThumbnail: View {
         }
         .frame(width: width, height: height)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        .shadow(color: .black.opacity(0.1), radius: 2)
+        .thumbnailShadow()
+    }
+}
+
+extension View {
+    /// The shadow every list thumbnail lifts off its row with — a cover, an author, and the
+    /// readers and groups of `AvatarThumbnail` — kept in one place so they cannot drift apart.
+    func thumbnailShadow() -> some View {
+        shadow(color: .black.opacity(0.1), radius: 2)
     }
 }

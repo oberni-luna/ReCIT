@@ -17,8 +17,9 @@ struct RootView: View {
     @State var inventoryModel: InventoryModel
     @State var shelfModel: ShelfModel
     @State var transactionModel: TransactionModel
-    /// The groups of readers I belong to, am invited to, or asked to join (PRD 0016). In
-    /// memory, like the rest of its state — see `GroupModel`.
+    /// The groups of readers I belong to, am invited to, or asked to join (PRD 0016). Mine are
+    /// in the store since issue 0103; the ones opened from a search stay in its memory — see
+    /// `GroupModel`.
     @State var groupModel: GroupModel
     /// Writing into inventaire.io's open database (PRD 0015). Shared like every other model,
     /// and reached from inside the sorting flow's cover, where the scanner lives.
@@ -121,6 +122,8 @@ struct RootView: View {
                     .refreshable {
                         refreshUserData()
                     }
+                    // The same sync, for a screen with nothing to pull: « Tout »'s « Réessayer ».
+                    .environment(\.syncUserData, .init { refreshUserData() })
                     // The sorting flow: **above the refreshable, below the models.** Above, so the
                     // flow's scroll views keep their downward drags; below, so its screens actually
                     // find the models — a cover's content inherits what its ancestors inject, and a

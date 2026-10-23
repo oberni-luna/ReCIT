@@ -213,6 +213,20 @@ final class E2EDriver {
         any(identifier).exists
     }
 
+    /// The identifiers on screen that start with `prefix`, in tree order and each once.
+    ///
+    /// For the places where the identifier itself is the information: the nodes of the Réseau
+    /// graph are `e2e.network.graph.node.<server id>`, and which ids the run will meet is the
+    /// test account's business, not the scenario's.
+    func identifiers(startingWith prefix: String) -> [String] {
+        let query: XCUIElementQuery = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix))
+        var seen: Set<String> = []
+        return query.allElementsBoundByIndex
+            .map(\.identifier)
+            .filter { seen.insert($0).inserted }
+    }
+
     /// The **text field** carrying this identifier. Asked for by type rather than by
     /// `any(_:)`, because a field drawn with a label beside it puts two elements under one
     /// identifier and the label is the one that resolves first — typing into it fails the
@@ -446,7 +460,12 @@ final class E2EDriver {
 
     // MARK: - Navigation
 
-    /// The three tabs the scenario visits.
+    /// The tabs the scenario visits.
+    ///
+    /// **Réseau joined them with issue 0111**: the scenario opens its « Tout » segment, touches a
+    /// group in the graph and opens the group from the sheet. Its root is recognised by the
+    /// segmented control, which sits in a band of the root screen only — a pushed group or
+    /// profile does not carry it.
     ///
     /// **There were four until issue 0074.** `Recherche` was a `Tab(role: .search)`, and on
     /// iOS 26 that does not merely select: it dissolves the tab bar into a search field at the
@@ -465,6 +484,7 @@ final class E2EDriver {
         case inventory = "Inventaire"
         case lists = "Listes"
         case search = "Recherche"
+        case network = "Réseau"
     }
 
     /// Whether one of the app's full-screen flows is over the tabs.
@@ -496,6 +516,8 @@ final class E2EDriver {
             // search field — so the marker is the tab itself, selected, with nothing pushed.
             app.tabBars.buttons[Tab.search.rawValue].isSelected
                 && isReachable(app.navigationBars.buttons["BackButton"]) == false
+        case .network:
+            exists("e2e.network.segment")
         }
     }
 

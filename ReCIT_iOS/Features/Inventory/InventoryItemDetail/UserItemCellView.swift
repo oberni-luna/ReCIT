@@ -28,7 +28,7 @@ struct UserItemCellView: View {
     func othersItemCellView(owner: User) -> some View {
         VStack(alignment: .leading, spacing: .small) {
             HStack(alignment: .center, spacing: .small) {
-                CellThumbnail(imageUrl: owner.avatarURLValue, cornerRadius: .full)
+                AvatarThumbnail(.reader(username: owner.username), imageUrl: owner.avatarURLValue)
                 VStack(alignment: .leading, spacing: .small) {
                     Text(owner.username)
                         .textStyle(.content400Bold)

@@ -12,9 +12,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct FindGroupsView: View {
     @Environment(GroupModel.self) private var groupModel
+    @Query private var storedGroups: [StoredGroup]
 
     @Binding var path: NavigationPath
 
@@ -38,7 +40,7 @@ struct FindGroupsView: View {
                         NavigationLink(value: NavigationDestination.group(id: result.id)) {
                             GroupRowView(
                                 cell: .init(result: result),
-                                role: groupModel.group(id: result.id)?.role(of: groupModel.myUserId)
+                                role: groupModel.group(id: result.id, among: storedGroups)?.role(of: groupModel.myUserId)
                             )
                         }
                     }

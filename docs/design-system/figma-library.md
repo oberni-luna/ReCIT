@@ -92,6 +92,34 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   implémentée. Deux pièges du connecteur : les `id` de styles finissent par une virgule (`S:…,`) — sans elle,
   `setTextStyleIdAsync` ne fait rien et le texte reste en Inter ; et `setBoundVariableForPaint` remet l'`opacity`
   de la peinture à 1, à reposer après coup.
+- **Passes du 2026-10-13 — `Réseau · Graphe`** (`512:15486`, page `Screens`) : la section proposée plus tôt (R1–R6,
+  six composants `Graph / …` locaux, panneau `Spec · Réseau en graphe` `515:16039`) **complétée** après le grilling
+  du même jour, puis **validée**. Composants locaux, à ne pas publier : `Graph / Friend` gagne `Requested` (anneau
+  pointillé `[4,4]`) ; `Graph / Friend · Dot` passe à Default / Requested, sans initiales (photo ou disque teinté) ;
+  `Graph / Group` gagne la propriété `Show pending` (le point rouge de 0033 après le nom) et **un seul aspect
+  sélectionné** quel que soit le rôle (`512:16050`), au lieu des Member / Invited · Highlighted ; `Graph / Me` a son
+  repli en initiales ; `Graph / Zoom Controls` (`521:15969`) refait en `Chrome / Glass Button` ; `Graph / Status
+  Pill` (compteur, « Synchronisation… », « Réessayer ») ; `Avatar · Repli`, Kind (lecteur, groupe) × Size (44 pt en
+  `Action/action300`, 32 pt en `Action/action200`). Frames : `R1′` (`603:20944`, contrôles et compteur posés),
+  `R1′b`, `R3′` (`603:21890`, « 42 amis · 6 groupes » au lieu de 7, arêtes des isolés gardées au dézoom), `R2′`
+  (feuille groupe native couvrant la tab bar), `R2b`, `R2c`, `R2d`, `E1`–`E3` (dont l'état vide `E1`,
+  `602:18269`), `R5′` et `R6′`, `R1′ · Sombre` et `R3′ · Sombre` (mode de variables `Dark`), la bande
+  `Feuille groupe · variantes de texte` (0, 1, 4, « et N autres ») et le panneau `Décisions · grilling 2026-10-13`,
+  qui fait foi sur le `Spec` d'origine. Entre elles, ce que la liste « À dessiner » du grilling demandait : le menu
+  « + » de Tout, les feuilles invitation de groupe, demandeur et ami, la pilule « Synchronisation… » / « Réessayer »,
+  les replis d'avatar dans les rangées d'Amis et de Groupes. `R4`
+  (zoomé, minicarte) est **hors v1**. Une passe de corrections a suivi la relecture. **Aucun token nouveau** ; les
+  tailles hors échelle (72, 44, 24, 52, 32 pt, rayon de feuille 32, paddings de pilule) restent littérales. Défauts
+  du fichier sans conséquence sur le code : `Icon` n'a ni `minus`, ni `scope`, ni `person.badge.plus`, ni
+  `arrow.clockwise`, ni `checkmark`, ni `xmark` (substituts en place) ; `Chrome / Tab Bar · Réseau` sans variante
+  sombre (override dans les écrans sombres). **Implémentée le même jour, en `DEBUG` seulement**
+  ([feature 0035](../features/0035-network-graph.md)). Écarts, le code faisant foi : `Picker` natif dans un bandeau
+  fixe pour `Chrome / Segmented Control · 3` ; `.sheet` native à un detent mesuré, poignée système, graphe actif
+  derrière, au lieu du panneau dessiné ; Liquid Glass (`.buttonStyle(.glass)` dans un `GlassEffectContainer`,
+  `.glassEffect` pour la pilule) au lieu des capsules, boutons désactivés et non masqués aux bornes ; `Menu` natif
+  pour le « + » ; tuile compacte au rayon `radius/medium` (8) au lieu de 14 ; SF Symbols `minus`, `scope`,
+  `person.badge.plus`, `arrow.clockwise` ; entre ×0,6 et ×1, les nœuds pleins rétrécissent avec le réseau (non
+  dessiné) ; ni R4, ni les comptes de livres de R5 / R6. Détail dans la feature.
 - **Implémentation du 2026-09-27 — `Réseau · Onglet & Groupes`** (`499:14069`) : l'onglet Réseau et la
   gestion des groupes sont implémentés ([feature 0028](../features/0028-network-tab-and-groups.md)). Écarts, le code
   faisant foi : création et réglages en feuilles et non en écrans poussés ; pas de pilule « Rejoindre » dans la

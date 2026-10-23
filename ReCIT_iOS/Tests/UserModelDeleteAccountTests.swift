@@ -17,8 +17,8 @@ import Testing
 @Suite("UserModel.deleteAccount", .serialized)
 struct UserModelDeleteAccountTests {
 
-    /// A store with something of every kind in it: mine, a friend's, and the shared entities
-    /// both point at.
+    /// A store with something of every kind in it: mine, a friend's, a group of mine, and the
+    /// shared entities both point at.
     private func populatedContext() throws -> ModelContext {
         let context: ModelContext = try TestStore.makeContext()
 
@@ -30,6 +30,24 @@ struct UserModelDeleteAccountTests {
         let edition: Edition = Fixture.edition(uri: "isbn:9782072965821", title: "Test Book")
         context.insert(Fixture.inventoryItem(id: "item-1", ownerId: "user-1", edition: edition))
         context.insert(Fixture.inventoryItem(id: "item-2", ownerId: "user-2", edition: edition))
+        context.insert(
+            StoredGroup(
+                group: .init(
+                    id: "group-1",
+                    name: "Club",
+                    slug: nil,
+                    description: "",
+                    pictureURL: nil,
+                    searchable: true,
+                    open: false,
+                    admins: [.init(user: "user-1", invitor: nil, timestamp: 1)],
+                    members: [],
+                    invited: [],
+                    declined: [],
+                    requested: []
+                )
+            )
+        )
 
         try context.save()
         return context
@@ -48,6 +66,7 @@ struct UserModelDeleteAccountTests {
         #expect(try context.fetch(FetchDescriptor<User>()).isEmpty)
         #expect(try context.fetch(FetchDescriptor<InventoryItem>()).isEmpty)
         #expect(try context.fetch(FetchDescriptor<Edition>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<StoredGroup>()).isEmpty)
         #expect(model.myUser == nil)
     }
 
@@ -80,6 +99,7 @@ struct UserModelDeleteAccountTests {
 
         #expect(try context.fetch(FetchDescriptor<User>()).count == 2)
         #expect(try context.fetch(FetchDescriptor<InventoryItem>()).count == 2)
+        #expect(try context.fetch(FetchDescriptor<StoredGroup>()).count == 1)
         #expect(model.myUser === me)
     }
 

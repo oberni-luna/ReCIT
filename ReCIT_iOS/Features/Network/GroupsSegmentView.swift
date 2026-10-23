@@ -6,9 +6,10 @@
 //  invitations waiting on me first, since nothing else will tell me about them, then my groups,
 //  then the requests I sent that nobody has answered, and the ways to find or start one.
 //
-//  Sections only, like `FriendsSegmentView`, so it slots under the segmented control. Everything
-//  is read off `GroupModel`, which is observable: answering an invitation moves the group from
-//  one section to the other on the spot.
+//  Sections only, like `FriendsSegmentView`, listed by `NetworkSegmentContent`. The groups
+//  are read from the store through `@Query` (ADR 0001), so they are there from the moment the
+//  app opens, offline too, and answering an invitation moves the group from one section to the
+//  other on the spot. `MyGroups` does the sorting; `GroupModel` knows who I am.
 //
 
 import SwiftUI
@@ -16,20 +17,22 @@ import SwiftData
 
 struct GroupsSegmentView: View {
     @Environment(GroupModel.self) private var groupModel
+    @Environment(SyncStatusStore.self) private var syncStatus
     @Query private var allUsers: [User]
+    @Query private var storedGroups: [StoredGroup]
 
     @Binding var path: NavigationPath
     /// Opens the creation form, which `NetworkView` presents: the « + » of its bar opens it too.
     let onCreate: () -> Void
 
-    private var isEmpty: Bool {
-        groupModel.myGroups.isEmpty && groupModel.invitations.isEmpty && groupModel.sentRequests.isEmpty
-    }
-
     var body: some View {
-        if groupModel.hasLoaded == false {
+        let groups: MyGroups = groupModel.myGroups(from: storedGroups)
+
+        // An empty store says nothing before the groups have synced once: placeholder, or the
+        // failure of that first sync. Once they have, it means « in no group », offline too.
+        if groups.isEmpty && syncStatus.hasCompletedFirstSync(.groups) == false {
             Section {
-                if groupModel.syncFailed {
+                if syncStatus.phase(.groups) == .failed {
                     Text("groups.load_failed")
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundSecondary)
@@ -37,7 +40,7 @@ struct GroupsSegmentView: View {
                     SyncingInlineRow()
                 }
             }
-        } else if isEmpty {
+        } else if groups.isEmpty {
             Section {
                 EmptyStateView(
                     glyph: "person.2",
@@ -56,9 +59,9 @@ struct GroupsSegmentView: View {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
         } else {
-            if groupModel.invitations.isEmpty == false {
+            if groups.invitations.isEmpty == false {
                 Section {
-                    ForEach(groupModel.invitations) { group in
+                    ForEach(groups.invitations) { group in
                         GroupInvitationRowView(
                             group: group,
                             invitorName: invitorName(in: group)
@@ -71,9 +74,9 @@ struct GroupsSegmentView: View {
                 }
             }
 
-            if groupModel.myGroups.isEmpty == false {
+            if groups.mine.isEmpty == false {
                 Section {
-                    ForEach(groupModel.myGroups) { group in
+                    ForEach(groups.mine) { group in
                         NavigationLink(value: NavigationDestination.group(id: group.id)) {
                             GroupRowView(
                                 cell: .init(
@@ -89,9 +92,9 @@ struct GroupsSegmentView: View {
                 }
             }
 
-            if groupModel.sentRequests.isEmpty == false {
+            if groups.sentRequests.isEmpty == false {
                 Section {
-                    ForEach(groupModel.sentRequests) { group in
+                    ForEach(groups.sentRequests) { group in
                         NavigationLink(value: NavigationDestination.group(id: group.id)) {
                             GroupRowView(cell: .init(group: group), role: .requested)
                         }

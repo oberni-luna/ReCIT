@@ -18,6 +18,7 @@ struct GroupMembersView: View {
     @Environment(\.modelContext) private var modelContext
 
     @Query(sort: \User.username) private var allUsers: [User]
+    @Query private var storedGroups: [StoredGroup]
 
     let groupId: String
     @Binding var path: NavigationPath
@@ -25,7 +26,7 @@ struct GroupMembersView: View {
     @State private var pendingGesture: MemberGesture?
 
     private var group: ReaderGroup? {
-        groupModel.group(id: groupId)
+        groupModel.group(id: groupId, among: storedGroups)
     }
 
     private var amAdmin: Bool {

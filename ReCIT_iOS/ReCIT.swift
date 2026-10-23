@@ -77,7 +77,12 @@ struct ReCIT: App {
             Work.self,
             WpExtract.self,
             UserTransaction.self,
-            TransactionMessage.self
+            TransactionMessage.self,
+            // Added in issue 0103 (the groups, until then in memory). A new entity is a
+            // lightweight migration SwiftData runs on its own, like the properties added since
+            // 1.1.0 — no `VersionedSchema`. `ModelContainerMigrationTests` opens a store of the
+            // previous schema with this one.
+            StoredGroup.self
         ])
         let modelConfiguration: ModelConfiguration = .init(schema: schema, isStoredInMemoryOnly: false)
         do {

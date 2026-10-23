@@ -499,6 +499,7 @@ final class E2EDriver {
             || exists("e2e.sort.close")
             || exists("e2e.onboarding.primary")
             || exists("e2e.onboarding.later")
+            || exists("e2e.onboarding.continue")
     }
 
     /// What says "this tab's root is on screen". Also the marker `popBack` walks towards, which

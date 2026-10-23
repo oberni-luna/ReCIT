@@ -48,6 +48,7 @@ struct OnboardingTallyUnavailableActions: View {
                 title: "onboarding.tally.continue_without_sorting",
                 action: onContinue
             )
+            .accessibilityIdentifier("e2e.onboarding.continue")
         }
     }
 }

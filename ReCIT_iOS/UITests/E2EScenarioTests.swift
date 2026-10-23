@@ -220,23 +220,31 @@ final class E2EScenarioTests: XCTestCase {
                 driver.any("e2e.scan.finish"),
                 "le bouton « Terminer »",
                 until: {
-                    driver.exists("e2e.onboarding.later") || driver.isShowingRoot(of: .inventory)
+                    driver.exists("e2e.onboarding.later")
+                        || driver.exists("e2e.onboarding.continue")
+                        || driver.isShowingRoot(of: .inventory)
                 },
                 settle: E2EDriver.defaultTimeout
             )
 
             // The bilan is owed to a session that filed books into a library with no étagère,
             // which is exactly this one — but it is the gate's decision, so both endings are
-            // accepted here.
+            // accepted here. Its way out depends on the phone: « Plus tard » under the offer to
+            // arrange the books, « Continuer sans ranger » where Apple Intelligence cannot run
+            // (below iOS 26, on an ineligible device), since there is nothing to postpone there.
             let later: XCUIElement = driver.any("e2e.onboarding.later")
-            if later.waitForExistence(timeout: 10) {
-                try driver.tap(later, "« Plus tard » du bilan de scan", until: {
-                    driver.exists("e2e.onboarding.later") == false
+            let continueWithoutSorting: XCUIElement = driver.any("e2e.onboarding.continue")
+            if driver.holds({ later.exists || continueWithoutSorting.exists }, within: 10) {
+                let (exit, exitIdentifier, exitName): (XCUIElement, String, String) = later.exists
+                    ? (later, "e2e.onboarding.later", "« Plus tard »")
+                    : (continueWithoutSorting, "e2e.onboarding.continue", "« Continuer sans ranger »")
+                try driver.tap(exit, "\(exitName) du bilan de scan", until: {
+                    driver.exists(exitIdentifier) == false
                 })
                 try driver.waitUntil("le retour aux onglets", timeout: E2EDriver.syncTimeout) {
                     driver.isShowingRoot(of: .inventory)
                 }
-                return "Bilan de scan affiché (\(scannedTitles.count) livre(s)) puis écarté"
+                return "Bilan de scan affiché (\(scannedTitles.count) livre(s)) puis écarté par \(exitName)"
             }
 
             try driver.waitUntil("le retour aux onglets", timeout: E2EDriver.syncTimeout) {

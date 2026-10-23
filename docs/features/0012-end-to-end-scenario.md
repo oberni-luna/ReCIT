@@ -251,6 +251,22 @@ pendant cette étape"**, roughly two minutes in. The driver notices the dead app
 it without the signed-out wipe — the session lives in the keychain, so it comes back where it was —
 and the steps after it are attempted for real.
 
+## What iOS 18 changed (2026-10-23)
+
+The first runs on an iOS 18.6 simulator ([0045](0045-running-on-ios-18.md)) met two screens the
+scenario had never had to answer, and stood behind them for the rest of the run.
+
+- **The bilan's way out depends on the phone.** Where Apple Intelligence cannot run — every phone
+  below iOS 26 — the bilan after a scan says why and offers « Continuer sans ranger » instead of
+  « Plus tard ». The button had no identifier, so « Fin de la session de scan » took the
+  inventory's root for shown (the cover does not hide it from the accessibility tree) and the
+  searches typed under the bilan. It is `e2e.onboarding.continue` now
+  (`OnboardingTallyUnavailableActions`), counts as a flow over the tabs, and the step answers
+  whichever of the two is there.
+- **An empty inventory brings the first-launch cover back.** The deletion of the books empties it
+  on purpose, so `E2EDriver.dismissFirstLaunchCover(within:)` answers « Plus tard » after each
+  book, and once more before the sign-out.
+
 ## Known limits
 
 - The scanner is exercised through the package's simulator placard, so the run proves the lookup,

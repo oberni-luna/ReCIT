@@ -105,7 +105,7 @@ struct OnboardingSettlingBooksView: View {
         // one arrived, which is the one thing the arrival must never do.
         if layout.width > 0, books.isEmpty == false {
             ZStack {
-                ForEach(books.enumerated(), id: \.element.id) { index, item in
+                ForEach(Array(books.enumerated()), id: \.element.id) { index, item in
                     OnboardingSettlingBookView(
                         item: item,
                         frame: layout.bookFrame(at: index),

@@ -50,11 +50,21 @@ struct SearchFriendsSection: View {
                 header(showsSeeAll: showsSeeAll)
                     // Given back the margin the section gave up, so the title lines up with
                     // the headers of the inset sections around it.
-                    .padding(.horizontal, .medium)
+                    .padding(.horizontal, marginGivenBack)
             }
             // Edge to edge, like the plain list it used to sit in: an inset section would cut
             // the row of covers a margin short of the screen's edge.
             .listSectionHorizontalMargins(0)
+        }
+    }
+
+    /// The section gives up its margins only from iOS 26 (`listSectionHorizontalMargins`), so
+    /// only there does its title need them back: on iOS 18 it already lines up.
+    private var marginGivenBack: DesignSystem.Spacing {
+        if #available(iOS 26.0, *) {
+            .medium
+        } else {
+            .zero
         }
     }
 

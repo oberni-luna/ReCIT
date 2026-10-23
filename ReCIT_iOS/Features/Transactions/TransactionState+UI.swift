@@ -12,7 +12,12 @@ extension UserTransaction.TransactionState {
     var systemImage: String {
         switch self {
         case .requested:
-            "questionmark.message.fill"
+            // `questionmark.message.fill` arrived in iOS 18.1 and draws nothing on 18.0.
+            if #available(iOS 18.1, *) {
+                "questionmark.message.fill"
+            } else {
+                "questionmark.bubble.fill"
+            }
         case .accepted:
             "checkmark.message.fill"
         case .confirmed:

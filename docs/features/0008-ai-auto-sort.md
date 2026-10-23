@@ -87,7 +87,8 @@ Everything runs on the phone. No book list leaves the device.
   entry point, since the user can do nothing about it; Apple Intelligence being off is stated
   with a route to Settings; a model still downloading is shown inert and described as
   temporary. Availability is read fresh and the model type is observable, so enabling it and
-  returning needs no relaunch.
+  returning needs no relaunch. Below iOS 26 there is no model at all, and the app reports an
+  ineligible device — see [0045](0045-running-on-ios-18.md).
 - **Hiding applies only to the entry point that can be hidden** — the settings one. The
   empty-state étagère card is the empty state itself, so it always leads into the flow and the
   flow states the reason. It briefly fell back to the create form on an ineligible device

@@ -56,7 +56,7 @@ struct ListCoverFan: View {
 
     var body: some View {
         ZStack(alignment: .leading) {
-            ForEach(images.enumerated(), id: \.offset) { index, image in
+            ForEach(Array(images.enumerated()), id: \.offset) { index, image in
                 thumbnail(image)
                     .offset(x: Self.step * CGFloat(index))
                     .zIndex(Double(-index))

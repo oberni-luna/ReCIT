@@ -202,7 +202,7 @@ Anything from iOS 26 goes behind `#available(iOS 26.0, *)`. Glass and the per-ed
 - Buttons with an image must also carry text: `Button("Tap me", systemImage: "plus", action: …)`.
 - Split sub-views into new `View` structs, not computed properties.
 - No `UIScreen.main.bounds`; no `GeometryReader` if `containerRelativeFrame()` / `visualEffect()` will do.
-- Iterate enumerated sequences directly: `ForEach(x.enumerated(), id: \.element.id)` — don't wrap in `Array(...)`.
+- Wrap enumerated sequences for `ForEach`: `ForEach(Array(x.enumerated()), id: \.element.id)`. `EnumeratedSequence` is a `RandomAccessCollection` only from iOS 26, and the app runs from iOS 18; the targets are in the Swift 5 language mode, so the compiler only warns.
 - Hide scroll indicators with `.scrollIndicators(.hidden)`, not the initializer flag.
 - `.bold()` instead of `.fontWeight(.bold)`; don't force font sizes — use Dynamic Type.
 - Avoid `AnyView`. Avoid hard-coded padding / spacing values unless asked.
@@ -275,3 +275,4 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0042 Scanning and sorting books, on Android](docs/features/0042-android-scan-and-sort.md) — CameraX + ML Kit batch scanner and « Ranger mes livres » by hand in one full-screen flow, the bilan between them; the drag is the app's own; no proposal, no book creation; never run on a device
 - [0043 Creating a book inventaire.io lacks, on Android](docs/features/0043-android-create-a-missing-book.md) — the scanner's unknown row opens « Nouveau livre »: title, author picked or created, cover by the camera app, dry run then `resolve`, filed and counted; drafts by ISBN; never run on a device
 - [0044 Ex-libris on Android, reviewed and redressed](docs/features/0044-android-visual-review.md) — a screen-by-screen review, 46 fixes: books from search open again (`lastrevid` is a `Long`), Wikimedia images load (a named user agent), the cache shows before the network; an app icon, one surface per screen, one book row, one search field, one sheet; the welcome wall of covers; an étagère filled from itself
+- [0045 Ex-libris on iOS 18](docs/features/0045-running-on-ios-18.md) — 1.5.0 runs from iOS 18.0; no Apple Intelligence proposal below iOS 26, glass and per-edge list insets through wrappers, `ForEach` over `Array(x.enumerated())` again; e2e on iOS 18.6 at 22 OK / 5 KO, not yet diagnosed

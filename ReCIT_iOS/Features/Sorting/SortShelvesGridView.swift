@@ -56,7 +56,7 @@ struct SortShelvesGridView: View {
                         alignment: .leading,
                         spacing: SortGridMetrics.shelfSpacing
                     ) {
-                        ForEach(sections.enumerated(), id: \.element.id) { index, section in
+                        ForEach(Array(sections.enumerated()), id: \.element.id) { index, section in
                             SortShelfCardCell(
                                 section: section,
                                 status: plan.status(of: section.id),

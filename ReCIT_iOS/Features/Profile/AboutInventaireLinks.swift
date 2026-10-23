@@ -29,7 +29,7 @@ struct AboutInventaireLinks: View {
                 .accessibilityAddTraits(.isHeader)
 
             VStack(spacing: .zero) {
-                ForEach(links.enumerated(), id: \.element.url) { index, link in
+                ForEach(Array(links.enumerated()), id: \.element.url) { index, link in
                     if index > 0 {
                         Rectangle()
                             .fill(DesignSystem.Color.borderDefault.color)

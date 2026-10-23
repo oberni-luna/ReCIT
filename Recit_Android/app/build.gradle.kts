@@ -11,11 +11,25 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "studio.lunabee.nouveaurecit"
+        applicationId = "studio.lunabee.nouveaurecit.android"
         minSdk = 28
         targetSdk = 37
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
+    }
+
+    // The upload key lives outside the repository: its path and passwords are read from
+    // ~/.gradle/gradle.properties. Without them the release bundle comes out unsigned.
+    val uploadStoreFile: String? = providers.gradleProperty("EXLIBRIS_UPLOAD_STORE_FILE").orNull
+    signingConfigs {
+        if (uploadStoreFile != null) {
+            create("upload") {
+                storeFile = file(uploadStoreFile)
+                storePassword = providers.gradleProperty("EXLIBRIS_UPLOAD_STORE_PASSWORD").get()
+                keyAlias = providers.gradleProperty("EXLIBRIS_UPLOAD_KEY_ALIAS").get()
+                keyPassword = providers.gradleProperty("EXLIBRIS_UPLOAD_KEY_PASSWORD").get()
+            }
+        }
     }
 
     buildTypes {
@@ -25,6 +39,7 @@ android {
         }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("upload")
             buildConfigField("String", "SESSION_STORE_NAME", "\"asso.recits.auth.cookies\"")
         }
     }

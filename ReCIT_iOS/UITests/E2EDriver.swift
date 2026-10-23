@@ -539,6 +539,24 @@ final class E2EDriver {
         try tap(button, "l'onglet « \(tab.rawValue) »", until: { self.isShowingRoot(of: tab) })
     }
 
+    /// Puts the first-launch cover away by « Plus tard » if it shows up within `timeout`, and
+    /// says whether there was one.
+    ///
+    /// **The cover is not only for a first launch.** It comes back whenever the inventory empties,
+    /// which is what the scenario's last steps do to it. That is the app's intent, not a fault, so
+    /// the scenario answers it the way a user would and carries on — until 2026-10-23 it stood
+    /// over the tab bar, and the deletion of the books and the sign-out both reported KO.
+    @discardableResult
+    func dismissFirstLaunchCover(within timeout: TimeInterval) throws -> Bool {
+        let later: XCUIElement = any("e2e.onboarding.later")
+        guard later.waitForExistence(timeout: timeout) else { return false }
+
+        try tap(later, "« Plus tard » de l'accueil", until: {
+            self.exists("e2e.onboarding.later") == false
+        })
+        return true
+    }
+
     /// Walks back up a tab's stack until its root is on screen again, or gives up. Checked
     /// before every tap, never after, so the root's own trailing action is never mistaken for a
     /// way back.

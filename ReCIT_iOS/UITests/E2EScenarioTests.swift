@@ -581,6 +581,7 @@ final class E2EScenarioTests: XCTestCase {
                 .firstMatch
 
             var removed: [String] = []
+            var coverDismissed: Bool = false
             // Bounded rather than "while there are books left": a removal that silently failed
             // would otherwise loop until the test timed out with nothing to say.
             for _ in 0..<12 {
@@ -622,6 +623,11 @@ final class E2EScenarioTests: XCTestCase {
                 )
 
                 removed.append(Self.shorten(label))
+                // The last book out brings the first-launch cover back over everything: an empty
+                // inventory is a first launch again, as far as the app is concerned.
+                if try driver.dismissFirstLaunchCover(within: 5) {
+                    coverDismissed = true
+                }
                 try driver.popBack(to: .inventory)
                 try driver.waitUntil("la mise à jour du compteur « Tous les livres »", timeout: 25) {
                     counter.exists && counter.label != countedBefore
@@ -636,14 +642,18 @@ final class E2EScenarioTests: XCTestCase {
                     + "voir le compteur « Tous les livres » sur la capture."
                 )
             }
-            return "\(removed.count) livre(s) supprimé(s) : \(removed.joined(separator: ", "))"
+            let deleted: String = "\(removed.count) livre(s) supprimé(s) : \(removed.joined(separator: ", "))"
+            return coverDismissed
+                ? deleted + " — accueil réapparu sur l'inventaire vide, écarté par « Plus tard »"
+                : deleted
         }
 
         // MARK: 28. Sign out
 
         driver.step("Déconnexion", critical: false) {
             // The profile is a sheet since feature 0038, opened by the avatar at the top of
-            // the inventory.
+            // the inventory. The accueil may still be over it, when the step before stopped short.
+            try driver.dismissFirstLaunchCover(within: 2)
             try driver.openTab(.inventory)
             try driver.tap(
                 driver.any("e2e.profile.open"),

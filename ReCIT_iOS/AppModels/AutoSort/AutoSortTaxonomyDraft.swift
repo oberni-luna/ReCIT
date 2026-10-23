@@ -10,6 +10,7 @@
 
 import FoundationModels
 
+@available(iOS 26.0, *)
 @Generable(description: "Un ensemble d'étagères pour une bibliothèque personnelle.")
 struct AutoSortTaxonomyDraft {
 

@@ -178,7 +178,9 @@ The design system is mirrored into Figma (variables, text styles, shadow styles,
 
 ## Swift / SwiftUI conventions
 
-Target: **iOS 26.0+**, **Swift 6.2+**, strict concurrency, SwiftUI-only (no UIKit unless asked). Do not add third-party SPM packages without confirming first — current deps are `LBSnackBar`, `Nuke`, `CodeScanner`, `swift-async-algorithms`, `swift-collections`.
+Target: **iOS 18.0+** (since 1.5.0; it was iOS 26.0 before), **Swift 6.2+**, strict concurrency, SwiftUI-only (no UIKit unless asked). Do not add third-party SPM packages without confirming first — current deps are `LBSnackBar`, `Nuke`, `CodeScanner`, `swift-async-algorithms`, `swift-collections`.
+
+Anything from iOS 26 goes behind `#available(iOS 26.0, *)`. Glass and the per-edge list insets already have wrappers that do it — `glassButtonStyle()` and `interactiveGlassCircle()` in `DesignSystem/Extensions/View+glass.swift`, `listRowVerticalInsets(_:)` and `listSectionHorizontalMargins(_:)` in `DesignSystem/List/View+listMargins.swift` — and auto-sort (Foundation Models) reports `.deviceNotEligible` before iOS 26, which hides its entry points. To try the app on an iOS 18 simulator, **build for that simulator**, not for an iOS 26+ one and then install: Xcode only embeds `libswiftCompatibilitySpan.dylib` when the build's destination lacks `Span`, and without it the app dies at launch with `Library not loaded: @rpath/libswiftCompatibilitySpan.dylib`. A generic-device or archive build embeds it.
 
 ### Swift
 

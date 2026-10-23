@@ -52,13 +52,15 @@ final class AutoSortModel {
     /// whose quality is a coin toss cannot be reviewed sensibly. Lowering the
     /// temperature trades novelty for the conventional answer, which for shelving a
     /// bookshelf is the right trade.
-    static let taxonomyOptions: GenerationOptions = .init(temperature: 0.3)
+    @available(iOS 26.0, *)
+    static var taxonomyOptions: GenerationOptions { .init(temperature: 0.3) }
 
     /// Phase 2 is not a judgement call at all — the étagères are already chosen and
     /// each genre has a best fit among them — so it is pushed as close to
     /// deterministic as the API allows. Creativity here shows up as a hallucinated
     /// shelf name, which is pure cost.
-    static let mappingOptions: GenerationOptions = .init(temperature: 0.1)
+    @available(iOS 26.0, *)
+    static var mappingOptions: GenerationOptions { .init(temperature: 0.1) }
 
     /// One genre batch per call in phase 2. Small enough that a batch and the
     /// étagère list it repeats sit comfortably inside the context window, and the
@@ -84,7 +86,11 @@ final class AutoSortModel {
     /// Apple Intelligence on and come back to a working feature: `SystemLanguageModel` is
     /// itself observable, so a view reading this in its body re-renders when the system
     /// state changes, with no relaunch and nothing here to invalidate.
+    ///
+    /// Before iOS 26 there is no on-device model to ask: the device is as ineligible as one
+    /// Apple Intelligence does not support, and the entry points hide the same way.
     var availability: Availability {
+        guard #available(iOS 26.0, *) else { return .deviceNotEligible }
         switch SystemLanguageModel.default.availability {
         case .available:
             return .available
@@ -146,6 +152,10 @@ final class AutoSortModel {
         // they are rather than being guessed at from title and author.
         guard histogram.isEmpty == false else { return .init(nothingToPropose: books) }
 
+        // Unreachable before iOS 26, where `availability` hides every entry point; checked
+        // all the same, since the session below cannot exist there.
+        guard #available(iOS 26.0, *) else { return .init(nothingToPropose: books) }
+
         do {
             let session: LanguageModelSession = .init(instructions: AutoSortPrompts.instructions)
             let taxonomy: [String] = try await proposeTaxonomy(session: session, histogram: histogram)
@@ -183,6 +193,7 @@ final class AutoSortModel {
     /// The histogram is passed rather than read off `self`, which is what keeps a run
     /// free of state: two callers could ask at once and neither would see the other's
     /// collection.
+    @available(iOS 26.0, *)
     private func proposeTaxonomy(
         session: LanguageModelSession,
         histogram: GenreHistogram
@@ -201,6 +212,7 @@ final class AutoSortModel {
     /// rather than one call per genre because a genre in isolation gives the model
     /// nothing to weigh it against, and rather than one call for everything because
     /// a long genre list plus a long answer overruns the context.
+    @available(iOS 26.0, *)
     private func mapGenres(
         session: LanguageModelSession,
         taxonomy: [String],

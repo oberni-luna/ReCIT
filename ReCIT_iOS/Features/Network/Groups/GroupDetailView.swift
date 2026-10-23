@@ -110,7 +110,7 @@ struct GroupDetailView: View {
             Section {
                 GroupActionsView(group: group, myRole: myRole, invitorName: invitorName(in: group))
             }
-            .listRowInsets(.vertical, .zero)
+            .listRowVerticalInsets(.zero)
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
         }

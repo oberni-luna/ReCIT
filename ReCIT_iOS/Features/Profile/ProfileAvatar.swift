@@ -28,6 +28,6 @@ struct ProfileAvatar: View {
             height: ThumbnailSize.toolbar.sizeInPt
         )
         .clipShape(.circle)
-        .glassEffect(.regular.interactive(), in: .circle)
+        .interactiveGlassCircle()
     }
 }

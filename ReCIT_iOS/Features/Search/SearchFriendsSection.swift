@@ -54,7 +54,7 @@ struct SearchFriendsSection: View {
             }
             // Edge to edge, like the plain list it used to sit in: an inset section would cut
             // the row of covers a margin short of the screen's edge.
-            .listSectionMargins(.horizontal, 0)
+            .listSectionHorizontalMargins(0)
         }
     }
 

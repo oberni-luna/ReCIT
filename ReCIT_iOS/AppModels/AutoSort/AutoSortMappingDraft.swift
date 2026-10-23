@@ -15,6 +15,7 @@
 
 import FoundationModels
 
+@available(iOS 26.0, *)
 @Generable(description: "Le rangement de chaque genre dans une étagère.")
 struct AutoSortMappingDraft {
 

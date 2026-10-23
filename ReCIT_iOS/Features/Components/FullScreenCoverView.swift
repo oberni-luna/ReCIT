@@ -39,7 +39,7 @@ struct FullScreenCoverView: View {
                 dismiss()
             }
             .labelStyle(.iconOnly)
-            .buttonStyle(.glass)
+            .glassButtonStyle()
             .buttonBorderShape(.circle)
             .controlSize(.large)
             .padding(.all, .medium)

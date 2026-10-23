@@ -23,6 +23,16 @@ struct ProfileToolbarItem: ToolbarContent {
     }
 
     var body: some ToolbarContent {
+        // The bar's shared glass only exists from iOS 26: before it there is no ring to put away.
+        if #available(iOS 26.0, *) {
+            item
+                .sharedBackgroundVisibility(avatarURL == nil ? .automatic : .hidden)
+        } else {
+            item
+        }
+    }
+
+    private var item: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
             if let avatarURL {
                 Button {
@@ -40,6 +50,5 @@ struct ProfileToolbarItem: ToolbarContent {
                 .accessibilityIdentifier("e2e.profile.open")
             }
         }
-        .sharedBackgroundVisibility(avatarURL == nil ? .automatic : .hidden)
     }
 }

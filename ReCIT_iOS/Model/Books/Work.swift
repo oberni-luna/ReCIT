@@ -70,7 +70,7 @@ public class Work: Identifiable, Entity {
         self.init(
             uri: entityDTO.uri,
             lastrevid: entityDTO.lastrevid ?? 0,
-            title: entityDTO.labels["fr"] ?? entityDTO.labels["en"] ?? entityDTO.labels.values.first ?? "Unknown",
+            title: EntityLabel.resolve(entityDTO.labels, originalLang: entityDTO.originalLang) ?? "Unknown",
             originalLang: entityDTO.originalLang, 
             image: imageUrl,
             publicationDate: publicationDateString?.parseToDate() ??
@@ -88,7 +88,7 @@ public class Work: Identifiable, Entity {
         let publicationDateString: String? = entityDTO.claims[WikidataProperty.publicationDate.rawValue]?.first?.getStringValue()
 
         lastrevid = entityDTO.lastrevid ?? lastrevid
-        if let title = entityDTO.labels["fr"] ?? entityDTO.labels["en"] ?? entityDTO.labels.values.first, !title.isEmpty {
+        if let title = EntityLabel.resolve(entityDTO.labels, originalLang: entityDTO.originalLang) {
             self.title = title
         }
         if let originalLang = entityDTO.originalLang {

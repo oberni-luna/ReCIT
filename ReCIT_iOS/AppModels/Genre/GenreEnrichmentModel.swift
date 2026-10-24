@@ -236,8 +236,7 @@ final class GenreEnrichmentModel {
             let endpoint: String = "/api/entities/by-uris?uris=\(batch.joined(separator: "|"))&attributes=labels&lang=fr"
             let response: EntityLabelsResultsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
             for (uri, entity) in response?.entities ?? [:] {
-                guard let label = entity.labels["fr"] ?? entity.labels["en"] ?? entity.labels.values.first,
-                      !label.isEmpty else { continue }
+                guard let label = EntityLabel.resolve(entity.labels) else { continue }
                 genreLabels[uri] = label
             }
         }

@@ -234,7 +234,9 @@ final class EntityModel {
         var authors: [Author] = []
         var urisToFetch: [String] = []
         for uri in uris {
-            if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri) {
+            // A nameless author is fetched again: it was stored before `EntityLabel` read the
+            // `mul` label, and the cache alone would keep it nameless for good.
+            if let author = try? getLocalAuthor(modelContext: modelContext, uri: uri), author.name.isEmpty == false {
                 authors.append(author)
             } else {
                 urisToFetch.append(uri)

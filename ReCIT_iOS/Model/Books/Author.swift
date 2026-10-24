@@ -43,7 +43,7 @@ public class Author: Identifiable, Entity {
         self.init(
             uri: entityDTO.uri,
             lastrevid: entityDTO.lastrevid ?? 0,
-            name: entityDTO.labels["fr"] ?? entityDTO.labels["en"] ?? "",
+            name: EntityLabel.resolve(entityDTO.labels, originalLang: entityDTO.originalLang) ?? "",
             dateOfBirth: dateOfBirthString?.parseToDate(),
             dateOfDeath: dateOfDeathString?.parseToDate(),
             image: imageUrl,
@@ -59,7 +59,7 @@ public class Author: Identifiable, Entity {
         let dateOfDeathString: String? = entityDTO.claims[WikidataProperty.dateOfDeath.rawValue]?.first?.getStringValue()
 
         lastrevid = entityDTO.lastrevid ?? lastrevid
-        if let name = entityDTO.labels["fr"] ?? entityDTO.labels["en"], !name.isEmpty {
+        if let name = EntityLabel.resolve(entityDTO.labels, originalLang: entityDTO.originalLang) {
             self.name = name
         }
         if let dateOfBirth = dateOfBirthString?.parseToDate() {

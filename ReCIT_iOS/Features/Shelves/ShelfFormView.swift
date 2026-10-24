@@ -117,7 +117,7 @@ struct ShelfFormView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Nom de l'étagère", text: $name)
+                    TextField("shelf.form.name", text: $name)
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundDefault)
                         .accessibilityIdentifier("e2e.shelfForm.name")
@@ -128,7 +128,7 @@ struct ShelfFormView: View {
                     // field whose value would be quietly thrown away is worse than an
                     // absent one, so drafting asks for the name alone.
                     if isDrafting == false {
-                        TextField("Description (optionnel)", text: $shelfDescription, axis: .vertical)
+                        TextField("shelf.form.description", text: $shelfDescription, axis: .vertical)
                             .lineLimit(2...4)
                             .textStyle(.content300)
                             .foregroundStyle(.foregroundDefault)
@@ -147,7 +147,7 @@ struct ShelfFormView: View {
 
                 if isDrafting == false {
                     Section {
-                        Picker("Visibilité", selection: $visibility) {
+                        Picker("shelf.form.visibility", selection: $visibility) {
                             ForEach(FormVisibility.allCases) { option in
                                 Text(option.label).tag(option)
                             }
@@ -167,7 +167,7 @@ struct ShelfFormView: View {
                             Button(role: .destructive) {
                                 isConfirmingDelete = true
                             } label: {
-                                Text("Supprimer l'étagère").frame(maxWidth: .infinity)
+                                Text("shelf.form.delete").frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.destructive())
                             .accessibilityIdentifier("e2e.shelfForm.delete")
@@ -176,26 +176,26 @@ struct ShelfFormView: View {
                 }
             }
             .applyListBackground()
-            .navigationTitle(isEditing ? "Modifier l'étagère" : "Nouvelle étagère")
+            .navigationTitle(isEditing ? "shelf.form.edit_title" : "shelf.form.create_title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer", systemImage: "xmark") { dismiss() }
+                    Button("action.close", systemImage: "xmark") { dismiss() }
                 }
             }
             // The books are named before the shelf is: "supprimer l'étagère" is read as
             // "supprimer mes livres", and a user who has just scanned two hundred books
             // will not risk it on a dialog that leaves the question open.
             .confirmationDialog(
-                "Supprimer cette étagère ?",
+                "shelf.form.delete_confirm.title",
                 isPresented: $isConfirmingDelete,
                 titleVisibility: .visible
             ) {
-                Button("Supprimer l'étagère", role: .destructive) { delete() }
+                Button("shelf.form.delete", role: .destructive) { delete() }
                     .accessibilityIdentifier("e2e.shelfForm.confirmDelete")
-                Button("Annuler", role: .cancel) { }
+                Button("action.cancel", role: .cancel) { }
             } message: {
-                Text("Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée.")
+                Text("shelf.form.delete_confirm.message")
             }
         }
     }
@@ -221,7 +221,7 @@ struct ShelfFormView: View {
             Button {
                 submit()
             } label: {
-                Text(isEditing ? "Enregistrer" : "Créer").frame(maxWidth: .infinity)
+                Text(isEditing ? "action.save" : "action.create").frame(maxWidth: .infinity)
             }
             .buttonStyle(.primary())
             .disabled(!canSubmit)
@@ -315,11 +315,11 @@ enum FormVisibility: String, CaseIterable, Identifiable {
 
     var id: Self { self }
 
-    var label: String {
+    var label: LocalizedStringResource {
         switch self {
-        case .private: return "Privé"
-        case .friends: return "Amis"
-        case .public: return "Public"
+        case .private: "shelf.visibility.private"
+        case .friends: "shelf.visibility.friends"
+        case .public: "shelf.visibility.public"
         }
     }
 

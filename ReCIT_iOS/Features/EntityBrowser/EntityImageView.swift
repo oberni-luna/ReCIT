@@ -48,7 +48,7 @@ struct EntityImageView<Content: View>: View {
                 imageView
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Agrandir la couverture")
+            .accessibilityLabel("cover.action.enlarge")
             .matchedTransitionSource(id: url, in: coverTransition)
             .accessibilityIdentifier("e2e.entityCover")
             .fullScreenCover(isPresented: $isShowingFullScreen) {

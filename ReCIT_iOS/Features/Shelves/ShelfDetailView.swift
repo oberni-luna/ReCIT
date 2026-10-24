@@ -77,7 +77,7 @@ struct ShelfDetailView: View {
     var body: some View {
         List {
             if books.isEmpty {
-                Text("Cette étagère est vide")
+                Text("shelf.detail.empty")
                     .textStyle(.action200)
                     .foregroundStyle(.foregroundSecondary)
             } else if let shelf {
@@ -129,7 +129,7 @@ struct ShelfDetailView: View {
             // shelf that is not there.
             if isMine {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Modifier", systemImage: "pencil") { editing = true }
+                    Button("action.edit", systemImage: "pencil") { editing = true }
                         .labelStyle(.titleAndIcon)
                 }
             }

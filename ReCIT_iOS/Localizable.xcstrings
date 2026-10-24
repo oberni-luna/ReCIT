@@ -437,6 +437,22 @@
         }
       }
     },
+    "action.create" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer"
+          }
+        }
+      }
+    },
     "action.delete" : {
       "localizations" : {
         "en" : {
@@ -701,12 +717,6 @@
         }
       }
     },
-    "Agrandir la couverture" : {
-
-    },
-    "Annuler" : {
-
-    },
     "auth.error.generic" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -838,6 +848,54 @@
         }
       }
     },
+    "auto_sort.unavailable.downloading" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence is still downloading its model. Automatic sorting will be available shortly."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modèle d'Apple Intelligence est en cours de téléchargement. Le rangement automatique sera disponible sous peu."
+          }
+        }
+      }
+    },
+    "auto_sort.unavailable.ineligible" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic sorting isn't available on this device."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le rangement automatique n'est pas disponible sur cet appareil."
+          }
+        }
+      }
+    },
+    "auto_sort.unavailable.switched_off" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic sorting relies on Apple Intelligence, which is switched off on this device. Turn it on in Settings to use it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le rangement automatique s'appuie sur Apple Intelligence, qui est désactivé sur cet appareil. Activez-le dans les Réglages pour l'utiliser."
+          }
+        }
+      }
+    },
     "book.no_edition.message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -939,9 +997,6 @@
         }
       }
     },
-    "Cette étagère est vide" : {
-
-    },
     "community.owner_not_lending %@" : {
       "localizations" : {
         "en" : {
@@ -958,8 +1013,37 @@
         }
       }
     },
-    "Couverture" : {
-
+    "cover.accessibility_label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cover"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couverture"
+          }
+        }
+      }
+    },
+    "cover.action.enlarge" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enlarge cover"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrandir la couverture"
+          }
+        }
+      }
     },
     "create_book.author_field" : {
       "localizations" : {
@@ -1458,9 +1542,6 @@
         }
       }
     },
-    "Créer" : {
-
-    },
     "delete_account.button" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1795,9 +1876,6 @@
         }
       }
     },
-    "Description (optionnel)" : {
-
-    },
     "edition.add_to_inventory" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1913,9 +1991,6 @@
         }
       }
     },
-    "Enregistrer" : {
-
-    },
     "entity.summary.label" : {
       "localizations" : {
         "en" : {
@@ -1998,22 +2073,100 @@
       }
     },
     "error.network.bad_response" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The server sent an unexpected response."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le serveur a renvoyé une réponse inattendue."
+          }
+        }
+      }
     },
     "error.network.bad_status" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The server returned an error."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le serveur a renvoyé une erreur."
+          }
+        }
+      }
     },
     "error.network.bad_url" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The requested address is not valid."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'adresse demandée n'est pas valide."
+          }
+        }
+      }
     },
     "error.network.decode_failed" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The server's response could not be read."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La réponse du serveur n'a pas pu être lue."
+          }
+        }
+      }
     },
     "error.network.encode_failed" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The request could not be prepared."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La requête n'a pas pu être préparée."
+          }
+        }
+      }
     },
     "error.network.invalid_request" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The request could not be sent."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La requête n'a pas pu être envoyée."
+          }
+        }
+      }
     },
     "error.with_message %@" : {
       "localizations" : {
@@ -2030,9 +2183,6 @@
           }
         }
       }
-    },
-    "Fermer" : {
-
     },
     "genre.enrichment.analysing" : {
       "extractionState" : "manual",
@@ -5767,12 +5917,6 @@
         }
       }
     },
-    "Modifier" : {
-
-    },
-    "Modifier l'étagère" : {
-
-    },
     "nav.author" : {
       "localizations" : {
         "en" : {
@@ -7031,6 +7175,7 @@
       }
     },
     "network.segment.all" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7077,12 +7222,6 @@
           }
         }
       }
-    },
-    "Nom de l'étagère" : {
-
-    },
-    "Nouvelle étagère" : {
-
     },
     "onboarding.later" : {
       "localizations" : {
@@ -7779,6 +7918,22 @@
         }
       }
     },
+    "shelf.detail.empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This shelf is empty"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette étagère est vide"
+          }
+        }
+      }
+    },
     "shelf.empty.action.scan.detail" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7949,6 +8104,182 @@
         }
       }
     },
+    "shelf.form.create_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle étagère"
+          }
+        }
+      }
+    },
+    "shelf.form.delete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer l'étagère"
+          }
+        }
+      }
+    },
+    "shelf.form.delete_confirm.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your books are kept: they stay in your inventory and on your other shelves. Only the shelf is deleted."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée."
+          }
+        }
+      }
+    },
+    "shelf.form.delete_confirm.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this shelf?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer cette étagère ?"
+          }
+        }
+      }
+    },
+    "shelf.form.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Description (optional)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Description (optionnel)"
+          }
+        }
+      }
+    },
+    "shelf.form.edit_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit shelf"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier l'étagère"
+          }
+        }
+      }
+    },
+    "shelf.form.name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shelf name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de l'étagère"
+          }
+        }
+      }
+    },
+    "shelf.form.visibility" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visibility"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visibilité"
+          }
+        }
+      }
+    },
+    "shelf.visibility.friends" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amis"
+          }
+        }
+      }
+    },
+    "shelf.visibility.private" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privé"
+          }
+        }
+      }
+    },
+    "shelf.visibility.public" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public"
+          }
+        }
+      }
+    },
     "shelves.action.scan" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7979,6 +8310,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ranger"
+          }
+        }
+      }
+    },
+    "shelves.all_books_header %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All books · %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les livres · %lld"
+          }
+        }
+      }
+    },
+    "shelves.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shelves"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étagères"
           }
         }
       }
@@ -8621,12 +8984,6 @@
           }
         }
       }
-    },
-    "Supprimer cette étagère ?" : {
-
-    },
-    "Supprimer l'étagère" : {
-
     },
     "sync.inventory.count %lld %lld" : {
       "extractionState" : "manual",
@@ -9632,19 +9989,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Étagères de %@"
-          }
-        }
-      }
-    },
-    "Visibilité" : {
-
-    },
-    "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vos livres sont conservés : ils restent dans votre inventaire et sur vos autres étagères. Seule l'étagère est supprimée."
           }
         }
       }

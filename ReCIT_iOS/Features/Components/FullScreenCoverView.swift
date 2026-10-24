@@ -32,7 +32,7 @@ struct FullScreenCoverView: View {
             zoomableCover
                 .ignoresSafeArea()
 
-            Button("Fermer", systemImage: "xmark") {
+            Button("action.close", systemImage: "xmark") {
                 withAnimation(.easeOut(duration: 0.2)) {
                     backdropOpacity = 0
                 }
@@ -80,7 +80,7 @@ struct FullScreenCoverView: View {
                 }
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Couverture")
+            .accessibilityLabel("cover.accessibility_label")
             .accessibilityAddTraits(.isImage)
             .accessibilityIdentifier("e2e.fullScreenCover")
     }

@@ -37,18 +37,18 @@ struct AutoSortUnavailableView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private var message: String {
+    private var message: LocalizedStringResource {
         switch entryPoint {
         case .switchedOff:
-            "Le rangement automatique s'appuie sur Apple Intelligence, qui est désactivé sur cet appareil. Activez-le dans les Réglages pour l'utiliser."
+            "auto_sort.unavailable.switched_off"
         case .downloading:
-            "Le modèle d'Apple Intelligence est en cours de téléchargement. Le rangement automatique sera disponible sous peu."
+            "auto_sort.unavailable.downloading"
         // Reached whenever an ineligible device arrives here, which the empty-state
         // étagère card does on purpose: it is the empty state, so it always leads into the
         // flow, and this is where the device's limitation gets said out loud. The settings
         // entry point hides itself instead, so it never renders this.
         case .hidden, .offered:
-            "Le rangement automatique n'est pas disponible sur cet appareil."
+            "auto_sort.unavailable.ineligible"
         }
     }
 

@@ -69,8 +69,8 @@ struct ShelvesContent: View {
                 }
 
                 ShelfSectionHeader(
-                    title: "Étagères",
-                    actionTitle: "Ajouter",
+                    title: String(localized: "shelves.header"),
+                    actionTitle: String(localized: "action.add"),
                     action: { isCreatingShelf = true }
                 )
                 .padding(.top, .medium)
@@ -97,7 +97,7 @@ struct ShelvesContent: View {
                     shelvesCarousel(cardWidth: cardWidth)
                 }
 
-                ShelfSectionHeader(title: "Tous les livres · \(myItems.count)")
+                ShelfSectionHeader(title: String(localized: "shelves.all_books_header \(myItems.count)"))
                     .padding(.top, .large)
                 allBooksList
             }

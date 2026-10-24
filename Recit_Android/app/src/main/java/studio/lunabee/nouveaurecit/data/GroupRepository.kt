@@ -14,6 +14,7 @@ import studio.lunabee.nouveaurecit.data.groups.GroupPeople
 import studio.lunabee.nouveaurecit.data.groups.GroupRequestLedger
 import studio.lunabee.nouveaurecit.data.groups.GroupRole
 import studio.lunabee.nouveaurecit.data.groups.GroupSearchResult
+import studio.lunabee.nouveaurecit.data.groups.GroupSetting
 import studio.lunabee.nouveaurecit.data.groups.GroupTransitionError
 import studio.lunabee.nouveaurecit.data.groups.MyGroups
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
@@ -22,7 +23,10 @@ import studio.lunabee.nouveaurecit.network.ImageUrl
 import studio.lunabee.nouveaurecit.network.NetworkError
 import studio.lunabee.nouveaurecit.network.dto.GroupActionPayload
 import studio.lunabee.nouveaurecit.network.dto.GroupByIdDto
+import studio.lunabee.nouveaurecit.network.dto.GroupCreationPayload
+import studio.lunabee.nouveaurecit.network.dto.GroupDto
 import studio.lunabee.nouveaurecit.network.dto.GroupSearchResultsDto
+import studio.lunabee.nouveaurecit.network.dto.GroupSettingPayload
 import studio.lunabee.nouveaurecit.network.dto.GroupsDto
 import studio.lunabee.nouveaurecit.network.dto.OkStatusDto
 import kotlin.coroutines.cancellation.CancellationException
@@ -38,7 +42,8 @@ import kotlin.coroutines.cancellation.CancellationException
  *
  * **Writes are optimistic** (ADR 0001): a gesture is applied to the group first, through the same
  * transition the server runs ([ReaderGroup.applying]), then sent by the [runner]; a refusal puts the
- * previous value back and speaks through the snackbar.
+ * previous value back and speaks through the snackbar. Creating a group is the exception — see
+ * [createGroup].
  *
  * [myUserId] is `UserRepository`'s: every gesture is made in that reader's name, and every role a
  * screen shows is theirs.
@@ -181,6 +186,50 @@ class GroupRepository(
             },
             // Signed out meanwhile: the groups are someone else's, or nobody's.
             stillThere = { myUserId.value == me && groupId in _groups.value },
+        )
+    }
+
+    // Creating and settings
+
+    /**
+     * Starts a group, with me as its only admin, and answers it once the server has.
+     *
+     * **Not optimistic**, unlike every other write here. The server limits creations, runs a spam
+     * check on the name and the description, and makes up the slug; a placeholder shown at once
+     * would too often have to be taken back, and the screen the form leads to needs the id the
+     * server gives.
+     */
+    suspend fun createGroup(name: String, description: String, searchable: Boolean, open: Boolean): ReaderGroup {
+        val dto: GroupDto = api.send(
+            path = "/api/groups",
+            body = GroupCreationPayload(name = name.trim(), description = description.trim(), searchable = searchable, open = open),
+        )
+        val group: ReaderGroup = ReaderGroup.of(dto)
+        _groups.update { it + (group.id to group) }
+        return group
+    }
+
+    /**
+     * Writes one setting, optimistically. `update-settings` takes one attribute per call, so a form
+     * that changed two sends two.
+     *
+     * @return The request's job, for the tests; `null` when nothing changed.
+     */
+    suspend fun update(setting: GroupSetting, groupId: String): Job? {
+        val current: ReaderGroup = _groups.value[groupId] ?: return null
+        val next: ReaderGroup = setting.applied(to = current)
+        if (next == current) return null
+        return runner.run(
+            apply = { _groups.update { it + (groupId to next) } },
+            revert = { _groups.update { it + (groupId to current) } },
+            request = {
+                api.send<GroupSettingPayload, OkStatusDto>(
+                    path = "/api/groups/update-settings",
+                    method = "PUT",
+                    body = GroupSettingPayload(group = groupId, attribute = setting.attribute, value = setting.value),
+                )
+            },
+            stillThere = { groupId in _groups.value },
         )
     }
 

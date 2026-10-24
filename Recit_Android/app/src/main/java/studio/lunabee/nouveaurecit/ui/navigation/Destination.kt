@@ -50,6 +50,8 @@ sealed interface Destination : NavKey {
 
     @Serializable data object FindGroups : Destination
 
+    @Serializable data class InviteToGroup(val id: String) : Destination
+
     @Serializable data object DeleteAccount : Destination
 
     @Serializable data object AboutInventaire : Destination

@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -50,6 +51,7 @@ import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.network.groups.CreateGroupSheet
 import studio.lunabee.nouveaurecit.ui.network.groups.GroupsSegment
 import studio.lunabee.nouveaurecit.ui.profile.ProfileAvatarButton
 
@@ -95,6 +97,7 @@ fun NetworkScreen(navigator: Navigator) {
     val segment: NetworkSegment? by viewModel.segment.collectAsStateWithLifecycle()
     val scope: CoroutineScope = rememberCoroutineScope()
     var isRefreshing: Boolean by remember { mutableStateOf(false) }
+    var isCreatingGroup: Boolean by rememberSaveable { mutableStateOf(false) }
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
@@ -107,10 +110,15 @@ fun NetworkScreen(navigator: Navigator) {
                     navigationIcon = { ProfileAvatarButton() },
                     containerColor = RecitTheme.colors.backgroundDefault,
                 ) {
-                    if (segment == NetworkSegment.Friends) {
-                        IconButton(onClick = { navigator.push(Destination.AddFriends) }) {
+                    // The « + » follows the segment: a friend to find on one side, a group to start on the other.
+                    when (segment) {
+                        NetworkSegment.Friends -> IconButton(onClick = { navigator.push(Destination.AddFriends) }) {
                             Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.network_add_friends))
                         }
+                        NetworkSegment.Groups -> IconButton(onClick = { isCreatingGroup = true }) {
+                            Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.groups_create))
+                        }
+                        null -> Unit
                     }
                 }
                 NetworkSegmentBand(
@@ -138,10 +146,17 @@ fun NetworkScreen(navigator: Navigator) {
         ) {
             when (segment) {
                 NetworkSegment.Friends -> FriendsSegment(viewModel, navigator)
-                NetworkSegment.Groups -> GroupsSegment(navigator)
+                NetworkSegment.Groups -> GroupsSegment(navigator, onCreate = { isCreatingGroup = true })
                 null -> Unit
             }
         }
+    }
+
+    if (isCreatingGroup) {
+        CreateGroupSheet(
+            onDismiss = { isCreatingGroup = false },
+            onCreated = { groupId -> navigator.push(Destination.Group(groupId)) },
+        )
     }
 }
 

@@ -2,6 +2,7 @@ package studio.lunabee.nouveaurecit.network.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonPrimitive
 import studio.lunabee.nouveaurecit.data.groups.GroupMembership
 
 /**
@@ -55,3 +56,16 @@ data class GroupSearchResultDto(
 /** The body of every `PUT /api/groups/<action>`: the group, and the other person when the gesture is about someone else. */
 @Serializable
 data class GroupActionPayload(val group: String, val user: String? = null)
+
+/** The body of `POST /api/groups`. `position` exists on the server and is not offered yet. */
+@Serializable
+data class GroupCreationPayload(
+    val name: String,
+    val description: String,
+    val searchable: Boolean,
+    val open: Boolean,
+)
+
+/** The body of `PUT /api/groups/update-settings`: one attribute and its new value per call. */
+@Serializable
+data class GroupSettingPayload(val group: String, val attribute: String, val value: JsonPrimitive)

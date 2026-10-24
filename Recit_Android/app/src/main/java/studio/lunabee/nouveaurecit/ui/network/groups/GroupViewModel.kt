@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.groups.GroupAction
+import studio.lunabee.nouveaurecit.data.groups.GroupSetting
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -47,6 +48,11 @@ class GroupViewModel(
     /** One membership gesture in my name, on this group — shown at once, put back if refused. */
     fun perform(action: GroupAction, target: String? = null) {
         viewModelScope.launch { container.groups.perform(action, groupId, target) }
+    }
+
+    /** One setting, written at once and put back if refused. */
+    fun update(setting: GroupSetting) {
+        viewModelScope.launch { container.groups.update(setting, groupId) }
     }
 
     init {

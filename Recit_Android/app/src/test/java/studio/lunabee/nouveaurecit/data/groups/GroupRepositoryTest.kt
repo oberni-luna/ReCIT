@@ -5,10 +5,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
@@ -25,6 +28,8 @@ import studio.lunabee.nouveaurecit.data.ErrorReporter
 import studio.lunabee.nouveaurecit.data.GroupRepository
 import studio.lunabee.nouveaurecit.data.OptimisticRunner
 import studio.lunabee.nouveaurecit.network.ApiService
+import studio.lunabee.nouveaurecit.network.NetworkError
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * `GroupModelTests`: the groups against a local server. Every request is redirected from
@@ -37,7 +42,7 @@ class GroupRepositoryTest {
     private val people: RecordingGroupPeople = RecordingGroupPeople()
     private val myUserId: MutableStateFlow<String?> = MutableStateFlow("me")
     private val reporter: ErrorReporter = ErrorReporter()
-    private val errors: MutableList<Throwable> = mutableListOf()
+    private val errors: MutableList<Throwable> = CopyOnWriteArrayList()
 
     /** The requests run on OkHttp's thread and come back unconfined: a test joins the job a gesture returns. */
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
@@ -67,6 +72,11 @@ class GroupRepositoryTest {
     fun tearDown() {
         scope.cancel()
         server.close()
+    }
+
+    /** The reporter's collector resumes on whichever thread reported: wait for it, in real time. */
+    private suspend fun awaitErrors(count: Int) = withContext(Dispatchers.Default) {
+        withTimeout(2_000) { while (errors.size < count) delay(5) }
     }
 
     private fun answer(body: String, code: Int = 200) {
@@ -213,6 +223,7 @@ class GroupRepositoryTest {
         repository.perform(GroupAction.Decline, "a")?.join()
 
         assertEquals(GroupRole.Invited, repository.groups.value.getValue("a").role(of = "me"))
+        awaitErrors(1)
         assertEquals(1, errors.size)
     }
 
@@ -223,6 +234,7 @@ class GroupRepositoryTest {
 
         assertNull(job)
         assertEquals(GroupRole.Admin, repository.groups.value.getValue("a").role(of = "me"))
+        awaitErrors(1)
         assertTrue(errors.single() is GroupTransitionError.LastAdmin)
         // The sync's request, and nothing since.
         assertEquals(1, server.requestCount)
@@ -268,6 +280,50 @@ class GroupRepositoryTest {
         assertEquals("groups", request.url.queryParameter("types"))
         assertEquals("polar & co", request.url.queryParameter("search"))
         assertTrue(repository.searchGroups("   ").isEmpty())
+    }
+
+    @Test
+    fun aSettingIsShownAtOnceAndPutBackIfRefused() = runTest {
+        syncOne(groupJson("a", "Club", admins = person("me")))
+        answer("""{"ok":true}""")
+        repository.update(GroupSetting.Name("Polars"), "a")?.join()
+        assertEquals("Polars", repository.groups.value.getValue("a").name)
+        val request: RecordedRequest = server.takeRequest()
+        assertEquals("/api/groups/update-settings", request.url.encodedPath)
+        assertEquals("""{"group":"a","attribute":"name","value":"Polars"}""", request.body?.utf8())
+
+        answer("nope", code = 400)
+        repository.update(GroupSetting.Open(true), "a")?.join()
+        assertFalse(repository.groups.value.getValue("a").open)
+        awaitErrors(1)
+        assertEquals(1, errors.size)
+
+        // Nothing changed, nothing sent.
+        assertNull(repository.update(GroupSetting.Name("Polars"), "a"))
+    }
+
+    @Test
+    fun aCreatedGroupIsOneOfMineAsItsAdmin() = runTest {
+        answer("""{"_id":"new","name":"Polars","slug":"polars","searchable":true,"open":false,"admins":[{"user":"me","invitor":null,"timestamp":1}],"members":[]}""")
+        val group: ReaderGroup = repository.createGroup("  Polars ", " Le jeudi ", searchable = true, open = false)
+
+        assertEquals("new", group.id)
+        assertEquals(listOf("new"), repository.myGroups.first().mine.map { it.id })
+        val request: RecordedRequest = server.takeRequest()
+        assertEquals("POST", request.method)
+        assertEquals("/api/groups", request.url.encodedPath)
+        assertEquals("""{"name":"Polars","description":"Le jeudi","searchable":true,"open":false}""", request.body?.utf8())
+    }
+
+    @Test
+    fun aRefusedCreationLeavesNothingBehind() = runTest {
+        answer("too many", code = 429)
+        try {
+            repository.createGroup("Polars", "", searchable = true, open = false)
+            fail("expected a failure")
+        } catch (_: NetworkError.BadStatus) {
+        }
+        assertTrue(repository.groups.value.isEmpty())
     }
 
     @Test

@@ -17,6 +17,8 @@ import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.MeetingRoom
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -58,9 +60,7 @@ import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
-import studio.lunabee.nouveaurecit.ui.network.FirstSyncState
 import studio.lunabee.nouveaurecit.ui.network.LinkRow
-import studio.lunabee.nouveaurecit.ui.network.ReaderCell
 import studio.lunabee.nouveaurecit.ui.network.SectionCard
 
 /** How many members a group's screen shows before « Voir les N membres ». */
@@ -79,6 +79,7 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
     val people: Map<String, UserEntity> by viewModel.people.collectAsStateWithLifecycle()
     val loadFailed: Boolean by viewModel.loadFailed.collectAsStateWithLifecycle()
     var isConfirmingLeave: Boolean by rememberSaveable { mutableStateOf(false) }
+    var isEditingSettings: Boolean by rememberSaveable { mutableStateOf(false) }
     val current: ReaderGroup? = group
     val myRole: GroupRole? = current?.role(of = myUserId)
 
@@ -90,7 +91,10 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
                 actions = {
                     if (current != null && myRole?.belongs == true) {
                         GroupMenu(
+                            isAdmin = myRole == GroupRole.Admin,
                             canLeave = myUserId?.let(current::canLeave) == true,
+                            onSettings = { isEditingSettings = true },
+                            onInvite = { navigator.push(Destination.InviteToGroup(current.id)) },
                             onLeave = { isConfirmingLeave = true },
                         )
                     }
@@ -105,7 +109,7 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
                 myUserId = myUserId,
                 people = people,
                 navigator = navigator,
-                onPerform = { viewModel.perform(it) },
+                onPerform = viewModel::perform,
                 modifier = Modifier.padding(padding),
             )
             loadFailed -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -119,6 +123,14 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
                 CircularProgressIndicator(color = RecitTheme.colors.foregroundTinted)
             }
         }
+    }
+
+    if (isEditingSettings && current != null) {
+        GroupSettingsSheet(
+            group = current,
+            onUpdate = viewModel::update,
+            onDismiss = { isEditingSettings = false },
+        )
     }
 
     if (isConfirmingLeave && current != null) {
@@ -136,9 +148,18 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
     }
 }
 
-/** The « … » of a group I belong to. « Quitter » is there for everyone, greyed for the last admin of a group with members. */
+/**
+ * The « … » of a group I belong to: its settings for an admin, inviting for anyone, and « Quitter »,
+ * greyed for the last admin of a group with members.
+ */
 @Composable
-private fun GroupMenu(canLeave: Boolean, onLeave: () -> Unit) {
+private fun GroupMenu(
+    isAdmin: Boolean,
+    canLeave: Boolean,
+    onSettings: () -> Unit,
+    onInvite: () -> Unit,
+    onLeave: () -> Unit,
+) {
     var expanded: Boolean by rememberSaveable { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }) {
@@ -149,6 +170,26 @@ private fun GroupMenu(canLeave: Boolean, onLeave: () -> Unit) {
             onDismissRequest = { expanded = false },
             containerColor = RecitTheme.colors.backgroundDefault,
         ) {
+            if (isAdmin) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.groups_settings)) },
+                    leadingIcon = { Icon(Icons.Outlined.Tune, contentDescription = null) },
+                    colors = menuItemColors(),
+                    onClick = {
+                        expanded = false
+                        onSettings()
+                    },
+                )
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.groups_invite)) },
+                leadingIcon = { Icon(Icons.Outlined.PersonAdd, contentDescription = null) },
+                colors = menuItemColors(),
+                onClick = {
+                    expanded = false
+                    onInvite()
+                },
+            )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.groups_leave)) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
@@ -177,7 +218,7 @@ private fun GroupContent(
     myUserId: String?,
     people: Map<String, UserEntity>,
     navigator: Navigator,
-    onPerform: (GroupAction) -> Unit,
+    onPerform: (GroupAction, String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val myRole: GroupRole? = group.role(of = myUserId)
@@ -202,7 +243,7 @@ private fun GroupContent(
                     myRole = myRole,
                     canLeave = canLeave,
                     invitorName = myUserId?.let(group::invitor)?.let { people[it]?.username },
-                    onPerform = onPerform,
+                    onPerform = { onPerform(it, null) },
                 )
             }
         }
@@ -214,7 +255,12 @@ private fun GroupContent(
                 SectionCard {
                     requests.forEachIndexed { index, user ->
                         if (index > 0) RowDivider()
-                        ReaderCell(user = user, syncState = FirstSyncState.Synced, onClick = { navigator.push(Destination.User(user.id)) })
+                        GroupRequestRow(
+                            user = user,
+                            onOpen = { navigator.push(Destination.User(user.id)) },
+                            onAccept = { onPerform(GroupAction.AcceptRequest, user.id) },
+                            onRefuse = { onPerform(GroupAction.RefuseRequest, user.id) },
+                        )
                     }
                 }
             }
@@ -229,6 +275,11 @@ private fun GroupContent(
                 }
                 LinkRow(pluralStringResource(R.plurals.groups_members_see_all, group.memberCount, group.memberCount)) {
                     navigator.push(Destination.GroupMembers(group.id))
+                }
+                // Any member may invite, not only the admins.
+                if (myRole?.belongs == true) {
+                    RowDivider()
+                    LinkRow(stringResource(R.string.groups_invite)) { navigator.push(Destination.InviteToGroup(group.id)) }
                 }
             }
         }

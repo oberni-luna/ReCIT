@@ -13,6 +13,7 @@
     <string name="groups_mine">Mes groupes</string>
     <string name="groups_requests_sent">Demandes envoyées</string>
     <string name="groups_find">Trouver un groupe</string>
+    <string name="groups_create">Créer un groupe</string>
     <string name="groups_empty_title">Aucun groupe pour l’instant</string>
     <string name="groups_empty_message">Un groupe réunit des lecteurs qui mettent leurs livres en commun : un club, une famille, un immeuble. Rejoignez-en un, ou créez le vôtre.</string>
     <string name="groups_load_failed">Vos groupes n’ont pas pu être chargés. Tirez vers le bas pour réessayer.</string>
@@ -71,4 +72,40 @@
     <string name="groups_search_explanation">Cherchez un groupe par son nom : un club de lecture, un quartier, un immeuble. Ouvrez-le pour le rejoindre, ou demander à le rejoindre.</string>
     <string name="groups_search_no_results">Aucun groupe trouvé</string>
     <string name="groups_search_no_results_message">Aucun groupe visible ne répond à « %1$s ».</string>
+
+    <!-- Running a group -->
+    <string name="groups_settings">Réglages du groupe</string>
+    <string name="groups_member_make_admin">Nommer admin</string>
+    <string name="groups_member_make_admin_confirm">Nommer %1$s admin ?</string>
+    <string name="groups_member_make_admin_message">Un admin valide les demandes, change les réglages et retire des membres. Cela ne peut pas être défait depuis l’app.</string>
+    <string name="groups_member_kick">Retirer du groupe</string>
+    <string name="groups_member_kick_confirm">Retirer %1$s du groupe ?</string>
+    <string name="groups_member_kick_message">Pour revenir, cette personne devra le demander ou être invitée à nouveau.</string>
+
+    <!-- Inviting friends -->
+    <string name="groups_invite">Inviter des amis</string>
+    <string name="groups_invite_action">Inviter</string>
+    <string name="groups_invite_already_member">Déjà membre</string>
+    <string name="groups_invite_declined">A décliné</string>
+    <string name="groups_invite_friends">Vos amis</string>
+    <string name="groups_invite_footer">Tout membre peut inviter. L’invitation apparaît dans Réseau › Groupes de l’ami invité.</string>
+    <string name="groups_invite_no_friends">Aucun ami à inviter</string>
+    <string name="groups_invite_no_friends_message">Les invitations vont à vos amis. Ajoutez-en depuis Réseau › Amis.</string>
+    <string name="groups_invite_prompt">Chercher parmi vos amis</string>
+
+    <!-- Creating a group, and its settings -->
+    <string name="groups_form_new">Nouveau groupe</string>
+    <string name="groups_form_name">Nom</string>
+    <string name="groups_form_name_too_long">Le nom d’un groupe fait %1$d caractères au plus.</string>
+    <string name="groups_form_description">Description (facultatif)</string>
+    <string name="groups_form_access">Qui peut entrer</string>
+    <string name="groups_form_searchable">Visible dans la recherche</string>
+    <string name="groups_form_searchable_detail">Tout lecteur d’inventaire.io peut trouver le groupe.</string>
+    <string name="groups_form_open">Ouvert à tous</string>
+    <string name="groups_form_open_on">Qui le souhaite entre sans attendre.</string>
+    <string name="groups_form_open_off">Désactivé : chaque demande attend l’accord d’un admin.</string>
+    <string name="groups_form_create">Créer le groupe</string>
+    <string name="groups_form_create_note">Vous en serez l’admin. Vous pourrez inviter vos amis dès sa création.</string>
+    <string name="groups_form_create_failed">inventaire.io n’a pas créé le groupe. Vérifiez votre connexion et réessayez dans un instant.</string>
+    <string name="groups_form_address">Adresse : inventaire.io/groups/%1$s</string>
 </resources>

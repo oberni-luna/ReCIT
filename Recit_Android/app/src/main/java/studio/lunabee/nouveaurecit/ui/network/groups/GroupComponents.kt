@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,8 @@ import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,6 +42,8 @@ import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.groups.GroupRole
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
 import studio.lunabee.nouveaurecit.designsystem.CornerRadius
+import studio.lunabee.nouveaurecit.designsystem.PillButton
+import studio.lunabee.nouveaurecit.designsystem.PillStyle
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.TagLabel
@@ -223,4 +229,90 @@ fun GroupNote(text: String, modifier: Modifier = Modifier) {
         color = RecitTheme.colors.foregroundSecondary,
         modifier = modifier.fillMaxWidth(),
     )
+}
+
+/**
+ * `GroupRequestRowView`: a reader asking to join a group I administer — the reader, then the two
+ * answers under them, the yes prominent, the no tinted and never red.
+ */
+@Composable
+fun GroupRequestRow(
+    user: UserEntity,
+    onOpen: () -> Unit,
+    onAccept: () -> Unit,
+    onRefuse: () -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().padding(bottom = Spacing.small)) {
+        ReaderCell(user = user, syncState = FirstSyncState.Synced, onClick = onOpen)
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.medium),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+        ) {
+            PillButton(text = stringResource(R.string.network_invitation_accept), onClick = onAccept, style = PillStyle.Prominent)
+            PillButton(text = stringResource(R.string.network_invitation_refuse), onClick = onRefuse)
+        }
+    }
+}
+
+/**
+ * `GroupAccessSection`: who may come into a group — whether any reader can find it, and whether a
+ * request lets them in at once. Shared by the creation form and the settings; the switches take the
+ * primary button's green.
+ */
+@Composable
+fun GroupAccessSection(
+    searchable: Boolean,
+    onSearchableChange: (Boolean) -> Unit,
+    open: Boolean,
+    onOpenChange: (Boolean) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+        Text(
+            text = stringResource(R.string.groups_form_access),
+            style = RecitTheme.typography.action200,
+            color = RecitTheme.colors.foregroundSecondary,
+        )
+        AccessSwitch(
+            title = stringResource(R.string.groups_form_searchable),
+            detail = stringResource(R.string.groups_form_searchable_detail),
+            checked = searchable,
+            onCheckedChange = onSearchableChange,
+        )
+        AccessSwitch(
+            title = stringResource(R.string.groups_form_open),
+            detail = stringResource(if (open) R.string.groups_form_open_on else R.string.groups_form_open_off),
+            checked = open,
+            onCheckedChange = onOpenChange,
+        )
+    }
+}
+
+/** A title, what it means under it, and the switch — the whole row toggles, as one control for TalkBack. */
+@Composable
+private fun AccessSwitch(title: String, detail: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .padding(vertical = Spacing.xSmall),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
+            Text(title, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
+            Text(detail, style = RecitTheme.typography.footnote200, color = RecitTheme.colors.foregroundSecondary)
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = RecitTheme.colors.foregroundTintedInverse,
+                checkedTrackColor = RecitTheme.colors.backgroundTintedInverse,
+                checkedBorderColor = RecitTheme.colors.backgroundTintedInverse,
+                uncheckedThumbColor = RecitTheme.colors.foregroundSecondary,
+                uncheckedTrackColor = RecitTheme.colors.backgroundSecondary,
+                uncheckedBorderColor = RecitTheme.colors.foregroundDisable,
+            ),
+        )
+    }
 }

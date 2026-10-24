@@ -40,6 +40,7 @@ import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.PillButton
 import studio.lunabee.nouveaurecit.designsystem.PillStyle
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
+import studio.lunabee.nouveaurecit.designsystem.SecondaryButton
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingInlineRow
@@ -78,10 +79,12 @@ class GroupsSegmentViewModel(private val container: AppContainer) : ViewModel() 
 
 /**
  * `GroupsSegmentView` — Réseau › Groupes: the invitations waiting on me first, since nothing else
- * will tell me about them, then my groups, then the requests I sent that nobody has answered.
+ * will tell me about them, then my groups, then the requests I sent that nobody has answered, and
+ * the ways to find or start one. [onCreate] opens the creation form, which the Réseau screen
+ * presents: the « + » of its bar opens it too.
  */
 @Composable
-fun GroupsSegment(navigator: Navigator) {
+fun GroupsSegment(navigator: Navigator, onCreate: () -> Unit) {
     val viewModel: GroupsSegmentViewModel = recitViewModel { GroupsSegmentViewModel(it) }
     val state: GroupsSegmentState by viewModel.state.collectAsStateWithLifecycle()
     val groups: MyGroups by viewModel.myGroups.collectAsStateWithLifecycle()
@@ -117,6 +120,11 @@ fun GroupsSegment(navigator: Navigator) {
                         icon = Icons.Outlined.Groups,
                         actionTitle = stringResource(R.string.groups_find),
                         onAction = { navigator.push(Destination.FindGroups) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    SecondaryButton(
+                        text = stringResource(R.string.groups_create),
+                        onClick = onCreate,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -169,6 +177,8 @@ fun GroupsSegment(navigator: Navigator) {
                 item(key = "links") {
                     SectionCard(Modifier.padding(top = Spacing.medium)) {
                         LinkRow(stringResource(R.string.groups_find)) { navigator.push(Destination.FindGroups) }
+                        RowDivider()
+                        LinkRow(stringResource(R.string.groups_create), onClick = onCreate)
                     }
                 }
             }

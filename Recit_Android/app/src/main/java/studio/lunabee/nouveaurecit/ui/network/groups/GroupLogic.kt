@@ -30,3 +30,18 @@ data class GroupSearchState(
             else -> GroupSearchPlaceholder.Initial
         }
 }
+
+/** What ends a friend's line on « Inviter des amis », from where they stand in the group. */
+enum class InviteTrailing { AlreadyMember, Sent, Declined, Accept, Invite }
+
+/**
+ * `InviteToGroupView.trailing`: a member is settled, an invitation waits, a refusal is final — and
+ * inviting a friend who had asked to join accepts them, so the pill says « Accepter ».
+ */
+fun inviteTrailing(role: GroupRole?): InviteTrailing = when (role) {
+    GroupRole.Admin, GroupRole.Member -> InviteTrailing.AlreadyMember
+    GroupRole.Invited -> InviteTrailing.Sent
+    GroupRole.Declined -> InviteTrailing.Declined
+    GroupRole.Requested -> InviteTrailing.Accept
+    null -> InviteTrailing.Invite
+}

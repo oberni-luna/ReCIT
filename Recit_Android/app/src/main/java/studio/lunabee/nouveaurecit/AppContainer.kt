@@ -15,6 +15,7 @@ import studio.lunabee.nouveaurecit.auth.SessionCookieJar
 import studio.lunabee.nouveaurecit.data.CoverWallRepository
 import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.ErrorReporter
+import studio.lunabee.nouveaurecit.data.GroupRepository
 import studio.lunabee.nouveaurecit.data.InventoryRepository
 import studio.lunabee.nouveaurecit.data.ListRepository
 import studio.lunabee.nouveaurecit.data.OptimisticRunner
@@ -26,6 +27,7 @@ import studio.lunabee.nouveaurecit.data.UserPreferences
 import studio.lunabee.nouveaurecit.data.UserRepository
 import studio.lunabee.nouveaurecit.data.creation.EntityCreationRepository
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
+import studio.lunabee.nouveaurecit.data.groups.PreferencesGroupRequestLedger
 import studio.lunabee.nouveaurecit.data.sorting.SortSession
 import studio.lunabee.nouveaurecit.network.ApiService
 
@@ -75,6 +77,14 @@ class AppContainer(context: Context) {
 
     val entities: EntityRepository = EntityRepository(api, database.entityDao())
     val users: UserRepository = UserRepository(api, database, optimisticRunner, preferences)
+
+    /** The groups are held in memory for the launch, their members in the store (feature 0046). */
+    val groups: GroupRepository = GroupRepository(
+        api = api,
+        people = users,
+        ledger = PreferencesGroupRequestLedger(preferences),
+        myUserId = users.myUserId,
+    )
     val inventory: InventoryRepository = InventoryRepository(api, database, entities, optimisticRunner, syncStatus)
     val shelves: ShelfRepository = ShelfRepository(api, database, optimisticRunner)
     val lists: ListRepository = ListRepository(api, database, optimisticRunner)
@@ -98,6 +108,7 @@ class AppContainer(context: Context) {
         scope = applicationScope,
         auth = auth,
         users = users,
+        groups = groups,
         shelves = shelves,
         inventory = inventory,
         lists = lists,

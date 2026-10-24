@@ -34,6 +34,9 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE id IN (:ids)")
     suspend fun get(ids: List<String>): List<UserEntity>
 
+    @Query("SELECT * FROM users WHERE id IN (:ids)")
+    fun observeMany(ids: List<String>): Flow<List<UserEntity>>
+
     @Query("SELECT * FROM users")
     suspend fun all(): List<UserEntity>
 

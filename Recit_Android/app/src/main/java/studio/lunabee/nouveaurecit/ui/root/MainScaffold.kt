@@ -40,6 +40,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
@@ -84,7 +86,11 @@ fun MainScaffold() {
     val sortFlow: SortFlowPresentation = rememberSaveable(saver = sortFlowSaver) { SortFlowPresentation() }
     val flowStart: SortFlowStart? = sortFlow.start
     val stacks: Map<AppTab, NavBackStack<NavKey>> = AppTab.entries.associateWith { tab -> rememberNavBackStack(tab.root) }
-    val badge: Int by container.users.receivedRequestCount.collectAsState(initial = 0)
+    // Friend invitations, group invitations, and requests to join the groups I administer.
+    val badgeCount: Flow<Int> = remember(container) {
+        combine(container.users.receivedRequestCount, container.groups.pendingCount, Int::plus)
+    }
+    val badge: Int by badgeCount.collectAsState(initial = 0)
     val genericError: String = stringResource(R.string.error_generic)
 
     LaunchedEffect(Unit) {

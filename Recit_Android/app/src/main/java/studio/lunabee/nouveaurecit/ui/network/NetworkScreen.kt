@@ -1,6 +1,7 @@
 package studio.lunabee.nouveaurecit.ui.network
 
 import android.content.Context
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -49,6 +50,7 @@ import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.network.groups.GroupsSegment
 import studio.lunabee.nouveaurecit.ui.profile.ProfileAvatarButton
 
 class NetworkViewModel(private val container: AppContainer) : ViewModel() {
@@ -71,39 +73,51 @@ class NetworkViewModel(private val container: AppContainer) : ViewModel() {
     val actions: RelationActions = RelationActions(container, viewModelScope)
 
     suspend fun refresh() = container.session.refresh()
+
+    /** The segment the tab shows: the last one chosen, `null` until the preference is read. */
+    val segment: StateFlow<NetworkSegment?> = container.preferences.observeString(NetworkSegment.STORAGE_KEY)
+        .map(NetworkSegment::restored)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun select(segment: NetworkSegment) {
+        viewModelScope.launch { container.preferences.setString(NetworkSegment.STORAGE_KEY, segment.name) }
+    }
 }
 
 /**
- * `NetworkView` with its `FriendsSegmentView` — Réseau › Amis. The invitations waiting on me come
- * first (inventaire.io notifies nobody, so the app is where they are found), then my friends and
- * the way to add more. The Groupes segment is not ported, so there is no segmented control.
+ * `NetworkView`: the Réseau tab, split by a segmented control fixed under the title — Amis, the
+ * readers I am close to, and Groupes, inventaire.io's other way of sharing books (feature 0046).
+ * The tab reopens on the segment chosen last.
  */
 @Composable
 fun NetworkScreen(navigator: Navigator) {
     val viewModel: NetworkViewModel = recitViewModel { NetworkViewModel(it) }
-    val invitations: List<UserEntity> by viewModel.invitations.collectAsStateWithLifecycle()
-    val friends: List<UserEntity> by viewModel.friends.collectAsStateWithLifecycle()
-    val community: SyncStatus.State? by viewModel.communityState.collectAsStateWithLifecycle()
-    val syncStates: Map<String, FirstSyncState> by viewModel.syncStates.collectAsStateWithLifecycle()
-    val messenger: Messenger = LocalMessenger.current
-    val context: Context = LocalContext.current
+    val segment: NetworkSegment? by viewModel.segment.collectAsStateWithLifecycle()
     val scope: CoroutineScope = rememberCoroutineScope()
-    val sectionState: FriendsSectionState = friendsSectionState(community, friends.size)
     var isRefreshing: Boolean by remember { mutableStateOf(false) }
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            RecitLargeTopBar(
-                title = stringResource(R.string.network_nav_network),
-                scrollBehavior = scrollBehavior,
-                navigationIcon = { ProfileAvatarButton() },
-                containerColor = RecitTheme.colors.backgroundDefault,
-            ) {
-                IconButton(onClick = { navigator.push(Destination.AddFriends) }) {
-                    Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.network_add_friends))
+            Column {
+                RecitLargeTopBar(
+                    title = stringResource(R.string.network_nav_network),
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = { ProfileAvatarButton() },
+                    containerColor = RecitTheme.colors.backgroundDefault,
+                ) {
+                    if (segment == NetworkSegment.Friends) {
+                        IconButton(onClick = { navigator.push(Destination.AddFriends) }) {
+                            Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.network_add_friends))
+                        }
+                    }
                 }
+                NetworkSegmentBand(
+                    selected = segment ?: NetworkSegment.Friends,
+                    onSelect = viewModel::select,
+                    collapsedFraction = scrollBehavior.state.collapsedFraction,
+                )
             }
         },
         containerColor = RecitTheme.colors.backgroundDefault,
@@ -122,62 +136,83 @@ fun NetworkScreen(navigator: Navigator) {
             },
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = Spacing.large),
-            ) {
-                if (invitations.isNotEmpty()) {
-                    item(key = "invitations-header") {
-                        SectionHeader(stringResource(R.string.network_profile_invitations))
-                    }
-                    item(key = "invitations") {
-                        SectionCard {
-                            invitations.forEach { user ->
-                                InvitationRow(
-                                    user = user,
-                                    syncState = syncStates[user.id] ?: FirstSyncState.Synced,
-                                    onOpen = { navigator.push(Destination.User(user.id)) },
-                                    onAccept = {
-                                        viewModel.actions.accept(user.id)
-                                        messenger.show(context.getString(R.string.network_invitation_accepted, user.username))
-                                    },
-                                    onRefuse = {
-                                        viewModel.actions.refuse(user.id)
-                                        messenger.show(context.getString(R.string.network_invitation_refused, user.username))
-                                    },
-                                )
-                                HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
-                            }
-                            LinkRow(stringResource(R.string.network_invitations_all)) { navigator.push(Destination.Invitations) }
-                        }
-                    }
-                }
+            when (segment) {
+                NetworkSegment.Friends -> FriendsSegment(viewModel, navigator)
+                NetworkSegment.Groups -> GroupsSegment(navigator)
+                null -> Unit
+            }
+        }
+    }
+}
 
-                item(key = "friends-header") {
-                    SectionHeader(stringResource(R.string.network_friends))
-                }
-                item(key = "friends") {
-                    SectionCard {
-                        when (sectionState) {
-                            FriendsSectionState.Syncing -> SyncingInlineRow(
-                                message = stringResource(R.string.sync_loading),
-                                modifier = Modifier.padding(horizontal = Spacing.medium),
-                            )
-                            FriendsSectionState.Empty -> PlainRow(stringResource(R.string.network_profile_network_empty))
-                            FriendsSectionState.Friends -> friends.forEach { friend ->
-                                ReaderCell(
-                                    user = friend,
-                                    syncState = syncStates[friend.id] ?: FirstSyncState.Synced,
-                                    onClick = { navigator.push(Destination.User(friend.id)) },
-                                )
-                                HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
-                            }
-                        }
-                        // Present even with no friend at all: an empty network is when one needs it.
-                        if (sectionState != FriendsSectionState.Syncing) {
-                            LinkRow(stringResource(R.string.network_add_friends)) { navigator.push(Destination.AddFriends) }
-                        }
+/**
+ * `FriendsSegmentView` — Réseau › Amis. The invitations waiting on me come first (inventaire.io
+ * notifies nobody, so the app is where they are found), then my friends and the way to add more.
+ */
+@Composable
+private fun FriendsSegment(viewModel: NetworkViewModel, navigator: Navigator) {
+    val invitations: List<UserEntity> by viewModel.invitations.collectAsStateWithLifecycle()
+    val friends: List<UserEntity> by viewModel.friends.collectAsStateWithLifecycle()
+    val community: SyncStatus.State? by viewModel.communityState.collectAsStateWithLifecycle()
+    val syncStates: Map<String, FirstSyncState> by viewModel.syncStates.collectAsStateWithLifecycle()
+    val messenger: Messenger = LocalMessenger.current
+    val context: Context = LocalContext.current
+    val sectionState: FriendsSectionState = friendsSectionState(community, friends.size)
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = Spacing.large),
+    ) {
+        if (invitations.isNotEmpty()) {
+            item(key = "invitations-header") {
+                SectionHeader(stringResource(R.string.network_profile_invitations))
+            }
+            item(key = "invitations") {
+                SectionCard {
+                    invitations.forEach { user ->
+                        InvitationRow(
+                            user = user,
+                            syncState = syncStates[user.id] ?: FirstSyncState.Synced,
+                            onOpen = { navigator.push(Destination.User(user.id)) },
+                            onAccept = {
+                                viewModel.actions.accept(user.id)
+                                messenger.show(context.getString(R.string.network_invitation_accepted, user.username))
+                            },
+                            onRefuse = {
+                                viewModel.actions.refuse(user.id)
+                                messenger.show(context.getString(R.string.network_invitation_refused, user.username))
+                            },
+                        )
+                        HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
                     }
+                    LinkRow(stringResource(R.string.network_invitations_all)) { navigator.push(Destination.Invitations) }
+                }
+            }
+        }
+
+        item(key = "friends-header") {
+            SectionHeader(stringResource(R.string.network_friends))
+        }
+        item(key = "friends") {
+            SectionCard {
+                when (sectionState) {
+                    FriendsSectionState.Syncing -> SyncingInlineRow(
+                        message = stringResource(R.string.sync_loading),
+                        modifier = Modifier.padding(horizontal = Spacing.medium),
+                    )
+                    FriendsSectionState.Empty -> PlainRow(stringResource(R.string.network_profile_network_empty))
+                    FriendsSectionState.Friends -> friends.forEach { friend ->
+                        ReaderCell(
+                            user = friend,
+                            syncState = syncStates[friend.id] ?: FirstSyncState.Synced,
+                            onClick = { navigator.push(Destination.User(friend.id)) },
+                        )
+                        HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
+                    }
+                }
+                // Present even with no friend at all: an empty network is when one needs it.
+                if (sectionState != FriendsSectionState.Syncing) {
+                    LinkRow(stringResource(R.string.network_add_friends)) { navigator.push(Destination.AddFriends) }
                 }
             }
         }

@@ -7,8 +7,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.data.groups.GroupPeople
 import studio.lunabee.nouveaurecit.data.model.Merges
 import studio.lunabee.nouveaurecit.data.model.UserRelation
 import studio.lunabee.nouveaurecit.network.ApiService
@@ -26,7 +28,7 @@ class UserRepository(
     private val db: AppDatabase,
     private val runner: OptimisticRunner,
     private val preferences: UserPreferences,
-) {
+) : GroupPeople {
     private val dao = db.userDao()
 
     private val _myUserId: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -40,6 +42,10 @@ class UserRepository(
     val myUser: Flow<UserEntity?> = _myUserId.flatMapLatest { id -> id?.let(dao::observe) ?: flowOf(null) }
 
     fun observeUser(id: String): Flow<UserEntity?> = dao.observe(id)
+
+    /** The readers among [ids] the store holds, by id — the people a group names. */
+    fun observeUsers(ids: Collection<String>): Flow<Map<String, UserEntity>> =
+        if (ids.isEmpty()) flowOf(emptyMap()) else dao.observeMany(ids.toList()).map { users -> users.associateBy { it.id } }
 
     fun observeByRelation(relation: UserRelation): Flow<List<UserEntity>> =
         _myUserId.flatMapLatest { id -> dao.observeByRelation(id.orEmpty(), relation) }
@@ -72,6 +78,20 @@ class UserRepository(
         val merged: List<UserEntity> = dtos.map { Merges.user(existing[it.id], it, ApiService.BASE_URL) }
         dao.upsert(merged)
         return merged
+    }
+
+    /** `User.upsert(_:baseUrl:in:)`: readers a group's `by-id` answer sends along, already shaped as users. */
+    override suspend fun store(users: List<UserDto>) {
+        if (users.isEmpty()) return
+        val existing: Map<String, UserEntity> = dao.get(users.map { it.id }).associateBy { it.id }
+        dao.upsert(users.map { Merges.user(existing[it.id], it, ApiService.BASE_URL) })
+    }
+
+    /** The people among [ids] the store does not hold yet, fetched by fifty. A group of strangers is blank lines without them. */
+    override suspend fun fetchMissing(ids: Set<String>) {
+        if (ids.isEmpty()) return
+        val stored: Set<String> = dao.get(ids.toList()).map { it.id }.toSet()
+        getOrFetchUsers((ids - stored).sorted())
     }
 
     suspend fun syncRelations() {

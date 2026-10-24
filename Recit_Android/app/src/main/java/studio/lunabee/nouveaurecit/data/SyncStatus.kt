@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
  * launch, and how far each user's first inventory sync has got (feature 0027).
  */
 class SyncStatus {
-    enum class Domain { Shelves, Inventory, Community, Lists }
+    enum class Domain { Shelves, Inventory, Community, Groups, Lists }
 
     enum class State { Idle, Running, Completed, Failed }
 

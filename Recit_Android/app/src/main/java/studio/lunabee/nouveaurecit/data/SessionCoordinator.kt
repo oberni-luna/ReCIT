@@ -15,14 +15,15 @@ import studio.lunabee.nouveaurecit.data.sorting.SortSession
  * `RootView+RefreshUserData` and `RootView+ForgetSignedOutUser`: the sync order of a signed-in
  * launch, and what a signed-out one forgets.
  *
- * Order: my user → my shelves → my inventory → relations → lists → each friend's shelves then
- * inventory, never-synced friends first. A `401` on the first call is the only thing that signs
+ * Order: my user → my shelves → my inventory → relations → groups → lists → each friend's shelves
+ * then inventory, never-synced friends first. A `401` on the first call is the only thing that signs
  * the user out (ADR 0008); every later failure is logged and the next domain carries on.
  */
 class SessionCoordinator(
     private val scope: CoroutineScope,
     private val auth: AuthRepository,
     private val users: UserRepository,
+    private val groups: GroupRepository,
     private val shelves: ShelfRepository,
     private val inventory: InventoryRepository,
     private val lists: ListRepository,
@@ -48,6 +49,7 @@ class SessionCoordinator(
         sync(SyncStatus.Domain.Shelves) { shelves.syncShelves(me) }
         sync(SyncStatus.Domain.Inventory) { inventory.syncInventory(users.myUser() ?: me) }
         sync(SyncStatus.Domain.Community) { users.syncRelations() }
+        sync(SyncStatus.Domain.Groups) { groups.syncMyGroups(me.id) }
         sync(SyncStatus.Domain.Lists) { lists.syncLists(me) }
         syncFriendsInventories()
     }
@@ -75,6 +77,7 @@ class SessionCoordinator(
 
     suspend fun forgetSignedOutUser() {
         syncStatus.reset()
+        groups.reset()
         // The sorting draft is the user's, like their étagères: the next account must not open on it.
         sortSession.reset()
         runCatching { users.wipeUserData() }.onFailure { Log.w(TAG, "wipe failed", it) }
@@ -84,6 +87,7 @@ class SessionCoordinator(
     suspend fun deleteAccount() {
         users.deleteAccount()
         syncStatus.reset()
+        groups.reset()
         sortSession.reset()
         auth.forgetSession()
     }

@@ -33,6 +33,8 @@ class UserPreferences(context: Context) {
 
     suspend fun string(key: String): String? = store.data.first()[stringPreferencesKey(key)]
 
+    fun observeString(key: String): Flow<String?> = store.data.map { it[stringPreferencesKey(key)] }
+
     suspend fun setString(key: String, value: String?) {
         store.edit { if (value == null) it.remove(stringPreferencesKey(key)) else it[stringPreferencesKey(key)] = value }
     }

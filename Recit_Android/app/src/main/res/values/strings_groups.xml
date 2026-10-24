@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Réseau › Groupes (feature 0046, the Android port of iOS features 0028 and 0033). French values of
+  ReCIT_iOS/Localizable.xcstrings, keys with '.' turned into '_'.
+-->
+<resources>
+    <!-- The segmented control of the Réseau tab -->
+    <string name="network_segment_friends">Amis</string>
+    <string name="network_segment_groups">Groupes</string>
+
+    <!-- The Groupes segment -->
+    <string name="groups_invitations">Invitations</string>
+    <string name="groups_mine">Mes groupes</string>
+    <string name="groups_requests_sent">Demandes envoyées</string>
+    <string name="groups_empty_title">Aucun groupe pour l’instant</string>
+    <string name="groups_empty_message">Un groupe réunit des lecteurs qui mettent leurs livres en commun : un club, une famille, un immeuble. Rejoignez-en un, ou créez le vôtre.</string>
+    <string name="groups_load_failed">Vos groupes n’ont pas pu être chargés. Tirez vers le bas pour réessayer.</string>
+    <string name="groups_invited_by">Invitation de %1$s</string>
+    <plurals name="groups_members_count">
+        <item quantity="one">%1$d membre</item>
+        <item quantity="many">%1$d membres</item>
+        <item quantity="other">%1$d membres</item>
+    </plurals>
+    <plurals name="groups_requests_pending">
+        <item quantity="one">%1$d demande à examiner</item>
+        <item quantity="many">%1$d demandes à examiner</item>
+        <item quantity="other">%1$d demandes à examiner</item>
+    </plurals>
+
+    <!-- Where I stand in a group -->
+    <string name="groups_role_admin">Admin</string>
+    <string name="groups_request_sent">Demande envoyée</string>
+    <string name="groups_invitation_received">Invitation</string>
+    <string name="groups_invitation_sent">Invitation envoyée</string>
+
+    <!-- A group's screen -->
+    <string name="groups_access_open">Ouvert à tous</string>
+    <string name="groups_access_on_request">Sur demande</string>
+    <string name="groups_detail_load_failed">Ce groupe n’a pas pu être chargé</string>
+    <string name="groups_detail_load_failed_message">Vérifiez votre connexion, puis revenez-y.</string>
+    <string name="groups_requests_to_review">Demandes à valider</string>
+    <string name="groups_members">Membres</string>
+    <plurals name="groups_members_see_all">
+        <item quantity="one">Voir le membre</item>
+        <item quantity="many">Voir les %1$d membres</item>
+        <item quantity="other">Voir les %1$d membres</item>
+    </plurals>
+
+    <!-- The members, by role -->
+    <string name="groups_members_admins">Admins</string>
+    <string name="groups_members_members">Membres</string>
+    <string name="groups_members_invited">Invitations envoyées</string>
+</resources>

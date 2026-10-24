@@ -43,6 +43,11 @@ sealed interface Destination : NavKey {
 
     @Serializable data object Invitations : Destination
 
+    /** A group, mine or found by search (feature 0046). */
+    @Serializable data class Group(val id: String) : Destination
+
+    @Serializable data class GroupMembers(val id: String) : Destination
+
     @Serializable data object DeleteAccount : Destination
 
     @Serializable data object AboutInventaire : Destination

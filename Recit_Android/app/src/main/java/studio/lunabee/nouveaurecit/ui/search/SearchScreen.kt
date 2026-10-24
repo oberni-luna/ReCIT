@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,7 +57,6 @@ fun SearchScreen(navigator: Navigator) {
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             RecitLargeTopBar(
                 title = stringResource(R.string.tab_search),
@@ -88,13 +86,25 @@ fun SearchScreen(navigator: Navigator) {
                     focusManager.clearFocus()
                 },
             )
-            SearchSurface(viewModel = viewModel, myUserId = user.id, router = router, navigator = navigator)
+            SearchSurface(
+                viewModel = viewModel,
+                myUserId = user.id,
+                scrollBehavior = scrollBehavior,
+                router = router,
+                navigator = navigator,
+            )
         }
     }
 }
 
 @Composable
-private fun SearchSurface(viewModel: SearchViewModel, myUserId: String, router: TabRouter, navigator: Navigator) {
+private fun SearchSurface(
+    viewModel: SearchViewModel,
+    myUserId: String,
+    scrollBehavior: TopAppBarScrollBehavior,
+    router: TabRouter,
+    navigator: Navigator,
+) {
     val recents: List<String> by viewModel.recents.collectAsStateWithLifecycle()
     val allItems: List<ItemRow> by viewModel.allItems.collectAsStateWithLifecycle()
     val friendsItems: List<ItemRow> by viewModel.friendsItems.collectAsStateWithLifecycle()
@@ -112,6 +122,7 @@ private fun SearchSurface(viewModel: SearchViewModel, myUserId: String, router: 
         friends = friends,
         friendsItems = friendsItems,
         remoteState = remoteState,
+        scrollBehavior = scrollBehavior,
         onSelectRecent = { recent ->
             viewModel.selectRecent(recent)
             focusManager.clearFocus()

@@ -21,7 +21,8 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 /**
  * `.navigationTitle` + `.navigationBarTitleDisplayMode`:
  * - [RecitLargeTopBar] is `.large` — a tab root's title, collapsing as the content scrolls
- *   (pass [scrollBehavior] and `Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)`);
+ *   (pass [scrollBehavior] and `Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)`; with
+ *   a pull-to-refresh, [LargeTitleRefreshBox] hooks the connection instead, inside the refresh);
  * - [RecitTopBar] is `.inline` — a pushed screen, centred, with the `Back` chevron.
  *
  * `actions` is the toolbar: `.primaryAction` / `.confirmationAction` items go there;

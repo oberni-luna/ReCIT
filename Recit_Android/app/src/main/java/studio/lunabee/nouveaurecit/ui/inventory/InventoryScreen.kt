@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,7 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,6 +36,7 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingPlaceholder
 import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
+import studio.lunabee.nouveaurecit.ui.common.LargeTitleRefreshBox
 import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.flow.LocalSortFlow
@@ -66,7 +65,6 @@ fun InventoryScreen(navigator: Navigator) {
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             RecitLargeTopBar(
                 title = stringResource(R.string.tab_inventory),
@@ -99,6 +97,7 @@ fun InventoryScreen(navigator: Navigator) {
             InventoryContent(
                 viewModel = viewModel,
                 navigator = navigator,
+                scrollBehavior = scrollBehavior,
                 onScan = sortFlow::presentScanning,
                 onSort = sortFlow::presentSorting,
                 onSearch = router::openSearch,
@@ -111,6 +110,7 @@ fun InventoryScreen(navigator: Navigator) {
 private fun InventoryContent(
     viewModel: InventoryViewModel,
     navigator: Navigator,
+    scrollBehavior: TopAppBarScrollBehavior,
     onScan: () -> Unit,
     onSort: () -> Unit,
     onSearch: () -> Unit,
@@ -123,7 +123,12 @@ private fun InventoryContent(
     var addingBooksTo: ShelfWithItems? by remember { mutableStateOf(null) }
     val items: List<ItemRow> = myItems.orEmpty()
 
-    PullToRefreshBox(isRefreshing = isRefreshing, onRefresh = viewModel::refresh, modifier = Modifier.fillMaxSize()) {
+    LargeTitleRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = viewModel::refresh,
+        scrollBehavior = scrollBehavior,
+        modifier = Modifier.fillMaxSize(),
+    ) {
         LazyColumn(Modifier.fillMaxSize()) {
             if (syncState != FirstSyncState.Synced) {
                 item(key = "syncBanner") {

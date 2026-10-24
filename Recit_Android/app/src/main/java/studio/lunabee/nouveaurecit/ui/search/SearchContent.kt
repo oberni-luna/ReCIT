@@ -23,7 +23,7 @@ import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -52,6 +52,7 @@ import studio.lunabee.nouveaurecit.designsystem.SyncingInlineRow
 import studio.lunabee.nouveaurecit.designsystem.TintedTextButton
 import studio.lunabee.nouveaurecit.ui.common.BookRow
 import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
+import studio.lunabee.nouveaurecit.ui.common.LargeTitleRefreshBox
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 
@@ -75,6 +76,7 @@ internal fun SearchContent(
     friends: FriendsCarouselState,
     friendsItems: List<ItemRow>,
     remoteState: RemoteSearchState,
+    scrollBehavior: TopAppBarScrollBehavior,
     onSelectRecent: (String) -> Unit,
     onClearRecents: () -> Unit,
     onSuggestion: (SearchSuggestion) -> Unit,
@@ -97,9 +99,10 @@ internal fun SearchContent(
     val local: InventorySearchRanking.ItemOutcome? = remember(allItems, localQuery, myUserId) {
         localQuery?.let { InventorySearchRanking.rankItems(allItems, it, myUserId) }
     }
-    PullToRefreshBox(
+    LargeTitleRefreshBox(
         isRefreshing = false,
         onRefresh = onRetry,
+        scrollBehavior = scrollBehavior,
         modifier = Modifier.fillMaxSize().background(RecitTheme.colors.backgroundGrouped),
     ) {
         LazyColumn(Modifier.fillMaxSize()) {

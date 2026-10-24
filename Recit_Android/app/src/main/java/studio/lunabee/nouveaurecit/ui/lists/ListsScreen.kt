@@ -27,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,7 +35,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -54,6 +52,7 @@ import studio.lunabee.nouveaurecit.designsystem.SyncingPlaceholder
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.designsystem.shelfPaper
+import studio.lunabee.nouveaurecit.ui.common.LargeTitleRefreshBox
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
@@ -82,7 +81,6 @@ fun ListsScreen(navigator: Navigator) {
     val genericError: String = stringResource(R.string.error_generic)
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             RecitLargeTopBar(
                 title = stringResource(R.string.nav_lists),
@@ -98,9 +96,10 @@ fun ListsScreen(navigator: Navigator) {
         },
         containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
-        PullToRefreshBox(
+        LargeTitleRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = viewModel::refresh,
+            scrollBehavior = scrollBehavior,
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
             when {

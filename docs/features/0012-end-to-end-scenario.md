@@ -27,8 +27,11 @@ The journey, in order:
    are still played (issue 0069);
 3. scan two books through the batch scanner — the two barcodes the feature was written from,
    « Lucioles » (`9782370493002`) and « Penss et les plis du monde » (`9782413013518`);
-4. find three more by hand: a French author (Victor Hugo), an English one (Virginia Woolf), and a
-   title looked up directly (Le Petit Prince), adding a copy of each to the inventory;
+4. search four times from the Recherche tab: « Dans la forêt », a friend's copy listed among the
+   local results as it is typed; then one search per suggestion under « Chercher sur
+   inventaire.io » — « Auteur·ices contenant » for Victor Hugo, the query as typed for Virginia
+   Woolf, « Livres contenant » for « Des souris et des hommes » — adding a copy of each of those
+   three to the inventory;
 5. open « Ranger mes livres », create two étagères, drag a book onto each, apply;
 6. open Réseau › « Tout », touch a group in the graph, open it from its sheet, come back — **non
    joué** when the test account belongs to no group (see *What the Réseau graph added*);
@@ -274,11 +277,25 @@ scenario had never had to answer, and stood behind them for the rest of the run.
   first: an active search field's « Annuler » has no identifier either, and a first attempt that
   took it for the back button reported every push before tapping, then cancelled the search.
 
+## The searches, by suggestion (2026-10-24)
+
+The Recherche tab answers a query in two places before anything is sent: « Dans mes livres et chez
+mes amis », from the local store, and « Chercher sur inventaire.io », three suggestions — books
+whose title holds the query, people whose name does, and the query as typed (PRD 0012). The
+scenario used to send every query with the keyboard's « rechercher » key, which is the third
+suggestion and only that one. The searches now cover all four ways:
+
+- **Recherche 1** types « Dans la forêt » and expects OlivierB's copy among the local results,
+  found by its label (title and owner), then opens it. Nothing is added: the copy is a friend's.
+- **Recherches 2 to 4** each tap one suggestion by its identifier,
+  `e2e.searchSuggestion.<humans|everything|works>`, and then walk to a book and add it as before.
+
 ## Known limits
 
 - The scanner is exercised through the package's simulator placard, so the run proves the lookup,
   the already-owned gate, the add and the tally — but not the camera or the barcode decoding.
-- The three searches depend on inventaire.io's own ranking. Plenty of works in that database have
+- The three searches through a suggestion depend on inventaire.io's own ranking, and the
+  friend's book on the test account's network: « Dans la forêt » must stay on OlivierB's shelves. Plenty of works in that database have
   no edition behind them, and their gateway sits on a spinner for ever — so `reachBookScreen`
   backtracks, trying the next work in the list when a branch leads nowhere. It gives up after
   150 s, and that row is then a report about the data, not about the app.

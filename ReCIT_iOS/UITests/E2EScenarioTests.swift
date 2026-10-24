@@ -45,12 +45,20 @@ final class E2EScenarioTests: XCTestCase {
         "9782413013518"
     ]
 
-    /// The three searches, one per kind: a French author, an English one, and a title looked up
-    /// directly. Each ends on a book screen and adds the copy to the inventory.
-    private static let searches: [(kind: String, query: String)] = [
-        (kind: "auteur français", query: "Victor Hugo"),
-        (kind: "auteur anglais", query: "Virginia Woolf"),
-        (kind: "titre", query: "Le Petit Prince")
+    /// A book a friend of the test account owns, and that friend: the Recherche tab must show the
+    /// copy among « Dans mes livres et chez mes amis » as it is typed, before anything is sent.
+    private static let friendsBook: (query: String, owner: String) = (
+        query: "Dans la forêt",
+        owner: "OlivierB"
+    )
+
+    /// The three suggestions under « Chercher sur inventaire.io », one search each. Each ends on
+    /// a book screen and adds the copy to the inventory. `kind` is the suffix of the row's
+    /// identifier, `e2e.searchSuggestion.<kind>` (`SearchSuggestion.Kind`).
+    private static let suggestedSearches: [(query: String, kind: String, row: String)] = [
+        (query: "Victor Hugo", kind: "humans", row: "« Auteur·ices contenant »"),
+        (query: "Virginia Woolf", kind: "everything", row: "« Virginia Woolf » tout court"),
+        (query: "Des souris et des hommes", kind: "works", row: "« Livres contenant »")
     ]
 
     // MARK: - The run
@@ -253,17 +261,36 @@ final class E2EScenarioTests: XCTestCase {
             return "Session close sans bilan"
         }
 
-        // MARK: 9–11. Three books found by hand
+        // MARK: 9. A friend's book, among the local results
 
-        for (offset, search) in Self.searches.enumerated() {
-            driver.step("Recherche \(offset + 1) — \(search.kind) : « \(search.query) »", critical: false) {
+        driver.step(
+            "Recherche 1 — livre d'un ami : « \(Self.friendsBook.query) »",
+            critical: false
+        ) {
+            try Self.findFriendsBook(
+                query: Self.friendsBook.query,
+                owner: Self.friendsBook.owner,
+                driver: driver,
+                app: app
+            )
+        }
+
+        // MARK: 10–12. One search per suggestion
+
+        for (offset, search) in Self.suggestedSearches.enumerated() {
+            driver.step(
+                "Recherche \(offset + 2) — « \(search.query) » puis \(search.row)",
+                critical: false
+            ) {
                 let title: String = try Self.searchAndAdd(
                     query: search.query,
+                    suggestion: search.kind,
+                    suggestionName: search.row,
                     driver: driver,
                     app: app
                 )
                 searchedTitles.append(title)
-                return "« \(title) » ajouté à l'inventaire depuis la recherche « \(search.query) »"
+                return "« \(title) » ajouté à l'inventaire depuis \(search.row) sur « \(search.query) »"
             }
         }
 
@@ -798,16 +825,21 @@ final class E2EScenarioTests: XCTestCase {
         return title.isEmpty ? "(titre illisible)" : title
     }
 
-    /// One search, all the way to a copy in the inventory. Returns the title of the book added.
+    /// One search through one suggestion, all the way to a copy in the inventory. Returns the
+    /// title of the book added.
     ///
     /// **It searches from the Recherche tab** (PRD 0020), which took the merged field over from
     /// the inventory, where issue 0074 had put it. Three characters put the local matches and
-    /// the three inventaire.io suggestions on screen, and it is *sending* the query — the
-    /// keyboard's « rechercher » key — that spends the network call and produces the rows this
-    /// step is after (see PRD 0012).
+    /// the three inventaire.io suggestions on screen — « Livres contenant », « Auteur·ices
+    /// contenant », the query as typed (PRD 0012) — and it is *choosing* one that spends the
+    /// network call and produces the rows this step is after. Until 2026-10-24 every search sent
+    /// the query with the keyboard's « rechercher » key, which is the third suggestion and only
+    /// that one; the first two were never exercised.
     @MainActor
     private static func searchAndAdd(
         query: String,
+        suggestion: String,
+        suggestionName: String,
         driver: E2EDriver,
         app: XCUIApplication
     ) throws -> String {
@@ -822,10 +854,15 @@ final class E2EScenarioTests: XCTestCase {
         let field: XCUIElement = try searchField(driver: driver, app: app)
         try driver.type(query, into: field, "le champ de l'onglet Recherche")
 
-        // Sending the query, not merely typing it: the suggestions are on screen at three
-        // characters, the results only after a submission. The return key is the same gesture
-        // as tapping the third suggestion, and asks inventaire.io for the same thing.
-        field.typeText("\n")
+        // Choosing the suggestion, not merely typing: the suggestions are on screen at three
+        // characters, the results only once one is chosen.
+        let row: XCUIElement = try driver.waitForIdentifier(
+            "e2e.searchSuggestion.\(suggestion)",
+            "la suggestion \(suggestionName)"
+        )
+        try driver.tap(row, "la suggestion \(suggestionName)", until: {
+            driver.exists("e2e.searchLoading") || driver.all("e2e.searchResult").count > 0
+        })
 
         // `e2e.searchResult` still names exactly what it always named — a result that came back
         // from inventaire.io — so this row's timings stay comparable with every past
@@ -858,6 +895,54 @@ final class E2EScenarioTests: XCTestCase {
         // Back to the étagères, ready for the next query.
         try leaveSearch(driver: driver, app: app)
         return title.isEmpty ? query : title
+    }
+
+    /// A friend's copy, found by typing its title and nothing more. Returns the step's detail.
+    ///
+    /// **Nothing is sent to inventaire.io.** My friends' books are in the local store, and the
+    /// Recherche tab ranks them under « Dans mes livres et chez mes amis » as the query is typed,
+    /// above the suggestions. The row is found by its label rather than an identifier — the
+    /// title, and the owner the cell names (`inventory.owned_by`) — because what is checked is
+    /// precisely that *this* friend's copy is the one listed.
+    ///
+    /// Friends' books sync last (feature 0027), so the row is given the sync's patience.
+    @MainActor
+    private static func findFriendsBook(
+        query: String,
+        owner: String,
+        driver: E2EDriver,
+        app: XCUIApplication
+    ) throws -> String {
+        let tab: XCUIElement = app.tabBars.buttons[E2EDriver.Tab.search.rawValue]
+        try driver.tap(tab, "l'onglet « Recherche »", until: { tab.isSelected })
+        try driver.popBack(to: .search)
+
+        let field: XCUIElement = try searchField(driver: driver, app: app)
+        try driver.type(query, into: field, "le champ de l'onglet Recherche")
+
+        // Any element type: a list row is a button or a cell depending on the system, and its
+        // label is the title, the authors and the owner read together.
+        let copy: XCUIElement = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS[cd] %@ AND label CONTAINS %@", query, owner))
+            .firstMatch
+        guard copy.waitForExistence(timeout: E2EDriver.syncTimeout) else {
+            throw E2EFailure(
+                "« \(query) » chez \(owner) n'est pas apparu dans « Dans mes livres et chez mes "
+                + "amis » au bout de \(Int(E2EDriver.syncTimeout)) s."
+            )
+        }
+        let sentAnything: Bool = driver.all("e2e.searchResult").count > 0
+
+        try driver.tap(copy, "« \(query) » chez \(owner)", until: { driver.exists("e2e.book.menu") })
+        let title: String = driver.any("e2e.entityTitle").label
+
+        try leaveSearch(driver: driver, app: app)
+
+        let shown: String = "« \(title.isEmpty ? query : title) », chez \(owner), listé parmi "
+            + "« Dans mes livres et chez mes amis »"
+        return sentAnything
+            ? shown + " (des résultats inventaire.io étaient aussi à l'écran), fiche ouverte"
+            : shown + " sans rien demander à inventaire.io, fiche ouverte"
     }
 
     /// The Recherche tab's field, ready to be typed into.

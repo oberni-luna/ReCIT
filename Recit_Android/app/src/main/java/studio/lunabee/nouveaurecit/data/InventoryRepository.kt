@@ -55,6 +55,9 @@ class InventoryRepository(
         try {
             val result: InventoryResultDto = api.get("/api/items/inventory-view", "user" to user.id)
             if (isFirstSync) syncStatus.announce(user.id, result.workUriItemsMap.values.sumOf { it.size })
+            // Authors are read again on every sync, as the works are below, so a name stored under an
+            // older labels rule heals; the loop then finds them cached. A failure leaves it to the loop.
+            runCatching { entities.refreshAuthors(result.worksTree.author.keys.filter { it != UNKNOWN_AUTHOR }) }
             val synced: MutableSet<String> = mutableSetOf()
             for ((authorUri, workUris) in result.worksTree.author) {
                 val works = runCatching { entities.fetchEntities(workUris) }.getOrNull() ?: continue

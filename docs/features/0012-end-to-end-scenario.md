@@ -270,7 +270,9 @@ scenario had never had to answer, and stood behind them for the rest of the run.
   labels it with the title of the screen below. The scenario asked for `BackButton` in five places,
   so on iOS 18 a search never saw its push and took the Recherche root for shown over the book it
   had opened: the three searches reported KO. `E2EDriver.backButton` answers on both, falling back
-  to the bar's first button when that button carries no identifier.
+  to the bar's first button on its leading half that carries no identifier — not merely the
+  first: an active search field's « Annuler » has no identifier either, and a first attempt that
+  took it for the back button reported every push before tapping, then cancelled the search.
 
 ## Known limits
 

@@ -506,22 +506,32 @@ final class E2EDriver {
     ///
     /// **iOS 26 names it `BackButton`; iOS 18 gives it no identifier at all** and labels it with
     /// the title of the screen below — « Recherche » over a book pushed from the search. There it
-    /// is the bar's first button, provided that button carries no identifier: the leading
-    /// controls the app puts in a bar at a tab's root do (`e2e.profile.open`). A sheet's
-    /// « Annuler » has none and would answer instead, which is why this is only asked of pushed
-    /// screens and tab roots, never with a sheet up. Until 2026-10-24 the scenario asked for
-    /// `BackButton` alone, and on iOS 18 the three searches reported KO: the push was never seen,
-    /// and the search's root was taken for shown over the book it had opened.
+    /// is the bar's first button on its leading half that carries no identifier. Both conditions
+    /// matter: the leading controls the app puts in a bar at a tab's root have an identifier
+    /// (`e2e.profile.open`), and an active search field's « Annuler » and clear button have none
+    /// but sit on the trailing half — taken for the back button, « Annuler » made a search
+    /// report its push before tapping anything, then cancelled it. A sheet's « Annuler » is
+    /// leading and would answer, which is why this is never asked with a sheet up.
+    ///
+    /// Until 2026-10-24 the scenario asked for `BackButton` alone, and on iOS 18 the three
+    /// searches reported KO: the push was never seen, and the search's root was taken for shown
+    /// over the book it had opened.
     var backButton: XCUIElement {
         let named: XCUIElement = app.navigationBars.buttons["BackButton"]
         if named.exists { return named }
 
-        // A direct child first: the search field's own buttons — clear, « Annuler » — sit inside
-        // the bar too, deeper down, and carry no identifier either.
         let bar: XCUIElement = app.navigationBars.firstMatch
-        let child: XCUIElement = bar.children(matching: .button).firstMatch
-        let first: XCUIElement = child.exists ? child : bar.buttons.firstMatch
-        return first.exists && first.identifier.isEmpty ? first : named
+        guard bar.exists else { return named }
+
+        let middle: CGFloat = bar.frame.midX
+        let buttons: XCUIElementQuery = bar.buttons
+        for index in 0..<buttons.count {
+            let button: XCUIElement = buttons.element(boundBy: index)
+            if button.identifier.isEmpty && button.frame.midX < middle {
+                return button
+            }
+        }
+        return named
     }
 
     /// What says "this tab's root is on screen". Also the marker `popBack` walks towards, which

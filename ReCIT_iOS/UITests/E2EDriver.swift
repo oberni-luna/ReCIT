@@ -502,6 +502,28 @@ final class E2EDriver {
             || exists("e2e.onboarding.continue")
     }
 
+    /// The navigation bar's back button, on every system the app runs on.
+    ///
+    /// **iOS 26 names it `BackButton`; iOS 18 gives it no identifier at all** and labels it with
+    /// the title of the screen below — « Recherche » over a book pushed from the search. There it
+    /// is the bar's first button, provided that button carries no identifier: the leading
+    /// controls the app puts in a bar at a tab's root do (`e2e.profile.open`). A sheet's
+    /// « Annuler » has none and would answer instead, which is why this is only asked of pushed
+    /// screens and tab roots, never with a sheet up. Until 2026-10-24 the scenario asked for
+    /// `BackButton` alone, and on iOS 18 the three searches reported KO: the push was never seen,
+    /// and the search's root was taken for shown over the book it had opened.
+    var backButton: XCUIElement {
+        let named: XCUIElement = app.navigationBars.buttons["BackButton"]
+        if named.exists { return named }
+
+        // A direct child first: the search field's own buttons — clear, « Annuler » — sit inside
+        // the bar too, deeper down, and carry no identifier either.
+        let bar: XCUIElement = app.navigationBars.firstMatch
+        let child: XCUIElement = bar.children(matching: .button).firstMatch
+        let first: XCUIElement = child.exists ? child : bar.buttons.firstMatch
+        return first.exists && first.identifier.isEmpty ? first : named
+    }
+
     /// What says "this tab's root is on screen". Also the marker `popBack` walks towards, which
     /// is why each one is something that exists **only** at the root.
     func isShowingRoot(of tab: Tab) -> Bool {
@@ -516,7 +538,7 @@ final class E2EDriver {
             // Nothing on the search's root is unique to it — every tab with a list carries a
             // search field — so the marker is the tab itself, selected, with nothing pushed.
             app.tabBars.buttons[Tab.search.rawValue].isSelected
-                && isReachable(app.navigationBars.buttons["BackButton"]) == false
+                && isReachable(backButton) == false
         case .network:
             exists("e2e.network.segment")
         }
@@ -531,7 +553,7 @@ final class E2EDriver {
         // backwards first. Bounded, and silent when it does not help — the tap below is what
         // reports the failure.
         for _ in 0..<4 where button.exists == false {
-            let back: XCUIElement = app.navigationBars.buttons["BackButton"]
+            let back: XCUIElement = backButton
             guard isReachable(back) else { break }
             back.tap()
             holds({ button.exists }, within: 3)

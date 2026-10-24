@@ -266,6 +266,11 @@ scenario had never had to answer, and stood behind them for the rest of the run.
 - **An empty inventory brings the first-launch cover back.** The deletion of the books empties it
   on purpose, so `E2EDriver.dismissFirstLaunchCover(within:)` answers « Plus tard » after each
   book, and once more before the sign-out.
+- **The back button has no identifier.** iOS 26 names it `BackButton`; iOS 18 leaves it bare and
+  labels it with the title of the screen below. The scenario asked for `BackButton` in five places,
+  so on iOS 18 a search never saw its push and took the Recherche root for shown over the book it
+  had opened: the three searches reported KO. `E2EDriver.backButton` answers on both, falling back
+  to the bar's first button when that button carries no identifier.
 
 ## Known limits
 

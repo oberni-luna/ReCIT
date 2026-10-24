@@ -838,7 +838,7 @@ final class E2EScenarioTests: XCTestCase {
         // The tab has a navigation bar at its root, so "a nav bar appeared" does not say the push
         // happened. A back button does, and it appears the moment it does.
         try driver.tap(first, "le premier résultat de « \(query) »", until: {
-            app.navigationBars.buttons["BackButton"].exists
+            driver.backButton.exists
         })
 
         try reachBookScreen(driver: driver)
@@ -1021,7 +1021,7 @@ final class E2EScenarioTests: XCTestCase {
     @MainActor
     private static func returnToInventoryRoot(driver: E2EDriver) {
         for _ in 0..<4 {
-            guard driver.app.navigationBars.buttons["BackButton"].exists else { return }
+            guard driver.backButton.exists else { return }
             guard goBack(driver: driver) else { return }
         }
     }
@@ -1029,7 +1029,7 @@ final class E2EScenarioTests: XCTestCase {
     /// One step back up the stack, or `false` when there is nowhere to go.
     @MainActor
     private static func goBack(driver: E2EDriver) -> Bool {
-        let back: XCUIElement = driver.app.navigationBars.buttons["BackButton"]
+        let back: XCUIElement = driver.backButton
         guard driver.isReachable(back) else { return false }
 
         back.tap()

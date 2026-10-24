@@ -60,7 +60,7 @@ object Merges {
     }
 
     fun author(existing: AuthorEntity?, dto: EntityResultDto): AuthorEntity {
-        val name: String? = (dto.labels["fr"] ?: dto.labels["en"] ?: dto.labels.values.firstOrNull())?.takeIf { it.isNotEmpty() }
+        val name: String? = EntityLabel.resolve(dto.labels, dto.originalLang)
         val subtitle: String? = dto.descriptions?.let { it["fr"] ?: it["en"] }
         val image: String? = ImageUrl.absolute(dto.image?.url)
         val born: String? = dto.claimString(WikidataProperty.DATE_OF_BIRTH)
@@ -87,7 +87,7 @@ object Merges {
     }
 
     fun work(existing: WorkEntity?, dto: EntityResultDto): WorkEntity {
-        val title: String? = (dto.labels["fr"] ?: dto.labels["en"] ?: dto.labels.values.firstOrNull())?.takeIf { it.isNotEmpty() }
+        val title: String? = EntityLabel.resolve(dto.labels, dto.originalLang)
         val subtitle: String? = dto.descriptions?.let { it["fr"] ?: it["en"] }
         val image: String? = ImageUrl.absolute(dto.image?.url)
         val date: String? = dto.claimString(WikidataProperty.PUBLICATION_DATE)

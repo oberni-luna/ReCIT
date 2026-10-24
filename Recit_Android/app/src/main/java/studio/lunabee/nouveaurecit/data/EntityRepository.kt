@@ -77,10 +77,18 @@ class EntityRepository(
     }
 
     suspend fun getOrFetchAuthors(uris: List<String>): List<AuthorEntity> {
-        val local: List<AuthorEntity> = dao.authors(uris)
+        // A nameless author is fetched again: the cache alone would keep it nameless for good.
+        val local: List<AuthorEntity> = dao.authors(uris).filter { it.name.isNotEmpty() }
         val missing: List<String> = uris - local.map { it.uri }.toSet()
         return local + upsertAuthors(fetchEntities(missing))
     }
+
+    /**
+     * Authors fetched again even when cached, 50 at a time. A name stored before `EntityLabel` read
+     * the `mul` label is a wrong language rather than an empty one (« Виктор Гюго » for `wd:Q535`),
+     * so only a fetch tells it apart.
+     */
+    suspend fun refreshAuthors(uris: List<String>): List<AuthorEntity> = upsertAuthors(fetchEntities(uris))
 
     suspend fun getOrFetchWorks(uris: List<String>): List<WorkEntity> {
         val local: List<WorkEntity> = dao.works(uris)

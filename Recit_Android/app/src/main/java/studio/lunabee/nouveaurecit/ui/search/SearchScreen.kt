@@ -3,17 +3,8 @@ package studio.lunabee.nouveaurecit.ui.search
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -31,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.designsystem.RecitSearchField
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingPlaceholder
@@ -46,8 +38,9 @@ import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
  * typed. It comes up when the [TabRouter] asks — a second tap on the tab, or the empty shelf's
  * « Rechercher ».
  *
- * A collapsed Material 3 `SearchBar` is the field; what it answers is drawn under it by
- * [SearchContent], not in the bar's expanded surface.
+ * The field is the app's [RecitSearchField], on the cells' colour so it stands out from the grouped
+ * background; what it answers is drawn under it by [SearchContent]. Not a Material 3 `SearchBar`: it
+ * pads itself with the status bar's height, which opened a gap between the title and the field.
  */
 @Composable
 fun SearchScreen(navigator: Navigator) {
@@ -81,34 +74,20 @@ fun SearchScreen(navigator: Navigator) {
             return@Scaffold
         }
         Column(Modifier.fillMaxSize().padding(padding)) {
-            SearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = viewModel.query,
-                        onQueryChange = viewModel::onQueryChange,
-                        onSearch = {
-                            viewModel.submitKeyboard()
-                            focusManager.clearFocus()
-                        },
-                        expanded = false,
-                        onExpandedChange = {},
-                        modifier = Modifier.focusRequester(focusRequester),
-                        placeholder = { Text(stringResource(R.string.inventory_search_placeholder)) },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                        trailingIcon = {
-                            if (viewModel.query.isNotEmpty()) {
-                                IconButton(onClick = { viewModel.onQueryChange("") }) {
-                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.inventory_search_recents_clear))
-                                }
-                            }
-                        },
-                    )
+            RecitSearchField(
+                query = viewModel.query,
+                onQueryChange = viewModel::onQueryChange,
+                placeholder = stringResource(R.string.inventory_search_placeholder),
+                clearLabel = stringResource(R.string.inventory_search_recents_clear),
+                modifier = Modifier
+                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                    .focusRequester(focusRequester),
+                containerColor = RecitTheme.colors.backgroundGroupedCell,
+                onSearch = {
+                    viewModel.submitKeyboard()
+                    focusManager.clearFocus()
                 },
-                expanded = false,
-                onExpandedChange = {},
-                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium),
-                colors = SearchBarDefaults.colors(containerColor = RecitTheme.colors.backgroundGroupedCell),
-            ) {}
+            )
             SearchSurface(viewModel = viewModel, myUserId = user.id, router = router, navigator = navigator)
         }
     }

@@ -10,6 +10,12 @@ import studio.lunabee.nouveaurecit.network.dto.GroupDto
  * **A value, not a Room row.** Groups are held in memory by `GroupRepository` for the launch, as
  * iOS did until its feature 0035: a table would be a schema migration. A group's members are
  * `UserEntity` rows of the store, looked up by id.
+ *
+ * **The transitions are the server's.** [applying] reproduces `groupMembershipActions` in
+ * `server/models/group.ts`, down to its shortcuts: a request to an open group lets you in, a request
+ * from someone invited or who declined lets them in, an invitation to someone who had asked accepts
+ * them. That is what lets every gesture be optimistic (ADR 0001): the state it shows is the state
+ * the server is about to write, and a refusal puts the previous value back.
  */
 data class ReaderGroup(
     val id: String,
@@ -71,6 +77,78 @@ data class ReaderGroup(
     fun canLeave(userId: String): Boolean {
         if (admins.none { it.user == userId }) return true
         return admins.size > 1 || members.isEmpty()
+    }
+
+    /**
+     * The group as it will be once [by] has made [action], to [on] when the gesture is about someone
+     * else.
+     *
+     * Throws a [GroupTransitionError] when the server would refuse, so that nothing optimistic is
+     * shown for a gesture that cannot succeed. Rights — who is admin enough to do what — are left to
+     * the screens, which only offer a gesture to someone allowed to make it.
+     */
+    fun applying(
+        action: GroupAction,
+        by: String,
+        on: String? = null,
+        at: Double = System.currentTimeMillis().toDouble(),
+    ): ReaderGroup = when (action) {
+        GroupAction.Invite -> {
+            val target: String = on ?: throw GroupTransitionError.MissingTarget()
+            when (role(of = target)) {
+                GroupRole.Requested -> moving(target, from = GroupRole.Requested, to = GroupRole.Member)
+                GroupRole.Declined -> throw GroupTransitionError.AlreadyDeclined()
+                null -> copy(invited = invited + GroupMembership(user = target, invitor = by, timestamp = at))
+                else -> throw GroupTransitionError.AlreadyInGroup()
+            }
+        }
+        GroupAction.Accept -> moving(by, from = GroupRole.Invited, to = GroupRole.Member)
+        GroupAction.Decline -> moving(by, from = GroupRole.Invited, to = GroupRole.Declined)
+        GroupAction.Request -> when (role(of = by)) {
+            GroupRole.Invited -> moving(by, from = GroupRole.Invited, to = GroupRole.Member)
+            GroupRole.Declined -> moving(by, from = GroupRole.Declined, to = GroupRole.Member)
+            null -> {
+                val membership: GroupMembership = GroupMembership(user = by, invitor = null, timestamp = at)
+                if (open) copy(members = members + membership) else copy(requested = requested + membership)
+            }
+            else -> throw GroupTransitionError.AlreadyInGroup()
+        }
+        GroupAction.CancelRequest -> removing(by, from = GroupRole.Requested)
+        GroupAction.AcceptRequest -> moving(on ?: throw GroupTransitionError.MissingTarget(), from = GroupRole.Requested, to = GroupRole.Member)
+        GroupAction.RefuseRequest -> removing(on ?: throw GroupTransitionError.MissingTarget(), from = GroupRole.Requested)
+        GroupAction.MakeAdmin -> moving(on ?: throw GroupTransitionError.MissingTarget(), from = GroupRole.Member, to = GroupRole.Admin)
+        GroupAction.Kick -> removing(on ?: throw GroupTransitionError.MissingTarget(), from = GroupRole.Member)
+        GroupAction.Leave -> {
+            if (!canLeave(by)) throw GroupTransitionError.LastAdmin()
+            removing(by, from = if (role(of = by) == GroupRole.Admin) GroupRole.Admin else GroupRole.Member)
+        }
+    }
+
+    private fun moving(userId: String, from: GroupRole, to: GroupRole): ReaderGroup {
+        val membership: GroupMembership = list(from).firstOrNull { it.user == userId } ?: throw GroupTransitionError.NotInExpectedRole()
+        val removed: ReaderGroup = replacing(from, list(from) - membership)
+        return removed.replacing(to, removed.list(to) + membership)
+    }
+
+    private fun removing(userId: String, from: GroupRole): ReaderGroup {
+        val membership: GroupMembership = list(from).firstOrNull { it.user == userId } ?: throw GroupTransitionError.NotInExpectedRole()
+        return replacing(from, list(from) - membership)
+    }
+
+    private fun list(role: GroupRole): List<GroupMembership> = when (role) {
+        GroupRole.Admin -> admins
+        GroupRole.Member -> members
+        GroupRole.Invited -> invited
+        GroupRole.Declined -> declined
+        GroupRole.Requested -> requested
+    }
+
+    private fun replacing(role: GroupRole, list: List<GroupMembership>): ReaderGroup = when (role) {
+        GroupRole.Admin -> copy(admins = list)
+        GroupRole.Member -> copy(members = list)
+        GroupRole.Invited -> copy(invited = list)
+        GroupRole.Declined -> copy(declined = list)
+        GroupRole.Requested -> copy(requested = list)
     }
 
     companion object {

@@ -12,11 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.MeetingRoom
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,16 +33,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.data.groups.GroupAction
 import studio.lunabee.nouveaurecit.data.groups.GroupRole
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
+import studio.lunabee.nouveaurecit.designsystem.ConfirmDialog
+import studio.lunabee.nouveaurecit.designsystem.DestructiveButton
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
+import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
+import studio.lunabee.nouveaurecit.designsystem.SecondaryButton
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.TagLabel
@@ -65,11 +78,24 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
     val myUserId: String? by viewModel.myUserId.collectAsStateWithLifecycle()
     val people: Map<String, UserEntity> by viewModel.people.collectAsStateWithLifecycle()
     val loadFailed: Boolean by viewModel.loadFailed.collectAsStateWithLifecycle()
+    var isConfirmingLeave: Boolean by rememberSaveable { mutableStateOf(false) }
     val current: ReaderGroup? = group
+    val myRole: GroupRole? = current?.role(of = myUserId)
 
     Scaffold(
         topBar = {
-            RecitTopBar(title = current?.name.orEmpty(), onBack = navigator::pop)
+            RecitTopBar(
+                title = current?.name.orEmpty(),
+                onBack = navigator::pop,
+                actions = {
+                    if (current != null && myRole?.belongs == true) {
+                        GroupMenu(
+                            canLeave = myUserId?.let(current::canLeave) == true,
+                            onLeave = { isConfirmingLeave = true },
+                        )
+                    }
+                },
+            )
         },
         containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding ->
@@ -79,6 +105,7 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
                 myUserId = myUserId,
                 people = people,
                 navigator = navigator,
+                onPerform = { viewModel.perform(it) },
                 modifier = Modifier.padding(padding),
             )
             loadFailed -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -93,7 +120,56 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
             }
         }
     }
+
+    if (isConfirmingLeave && current != null) {
+        ConfirmDialog(
+            title = stringResource(R.string.groups_leave_confirm, current.name),
+            message = null,
+            confirmLabel = stringResource(R.string.groups_leave),
+            cancelLabel = stringResource(R.string.action_cancel),
+            onConfirm = {
+                isConfirmingLeave = false
+                viewModel.perform(GroupAction.Leave)
+            },
+            onDismiss = { isConfirmingLeave = false },
+        )
+    }
 }
+
+/** The « … » of a group I belong to. « Quitter » is there for everyone, greyed for the last admin of a group with members. */
+@Composable
+private fun GroupMenu(canLeave: Boolean, onLeave: () -> Unit) {
+    var expanded: Boolean by rememberSaveable { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(painterResource(R.drawable.ic_more), contentDescription = stringResource(R.string.action_more))
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            containerColor = RecitTheme.colors.backgroundDefault,
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.groups_leave)) },
+                leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
+                enabled = canLeave,
+                colors = menuItemColors(),
+                onClick = {
+                    expanded = false
+                    onLeave()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun menuItemColors(): MenuItemColors = MenuDefaults.itemColors(
+    textColor = RecitTheme.colors.foregroundDefault,
+    leadingIconColor = RecitTheme.colors.foregroundDefault,
+    disabledTextColor = RecitTheme.colors.foregroundDisable,
+    disabledLeadingIconColor = RecitTheme.colors.foregroundDisable,
+)
 
 @Composable
 private fun GroupContent(
@@ -101,9 +177,11 @@ private fun GroupContent(
     myUserId: String?,
     people: Map<String, UserEntity>,
     navigator: Navigator,
+    onPerform: (GroupAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val myRole: GroupRole? = group.role(of = myUserId)
+    val canLeave: Boolean = myUserId?.let(group::canLeave) ?: true
     val members: List<Pair<UserEntity, GroupRole>> = group.memberIds.mapNotNull { id ->
         val user: UserEntity = people[id] ?: return@mapNotNull null
         val role: GroupRole = group.role(of = id) ?: return@mapNotNull null
@@ -116,6 +194,18 @@ private fun GroupContent(
         contentPadding = PaddingValues(bottom = Spacing.large),
     ) {
         item(key = "header") { GroupHeader(group) }
+
+        if (groupActionsHaveContent(myRole, canLeave)) {
+            item(key = "actions") {
+                GroupActions(
+                    group = group,
+                    myRole = myRole,
+                    canLeave = canLeave,
+                    invitorName = myUserId?.let(group::invitor)?.let { people[it]?.username },
+                    onPerform = onPerform,
+                )
+            }
+        }
 
         // First for an admin, since these wait on them and nothing else will say so.
         if (myRole == GroupRole.Admin && requests.isNotEmpty()) {
@@ -141,6 +231,54 @@ private fun GroupContent(
                     navigator.push(Destination.GroupMembers(group.id))
                 }
             }
+        }
+    }
+}
+
+/**
+ * `GroupActionsView`: what I can do about a group from where I stand in it — ask, take the asking
+ * back, answer an invitation — with the sentence that says what the gesture means.
+ */
+@Composable
+private fun GroupActions(
+    group: ReaderGroup,
+    myRole: GroupRole?,
+    canLeave: Boolean,
+    invitorName: String?,
+    onPerform: (GroupAction) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium),
+        verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+    ) {
+        when (myRole) {
+            null, GroupRole.Declined -> {
+                // An open group lets me in at once; any other waits on an admin — the button says which.
+                PrimaryButton(
+                    text = stringResource(if (group.open) R.string.groups_join else R.string.groups_request),
+                    onClick = { onPerform(GroupAction.Request) },
+                )
+                GroupNote(stringResource(if (group.open) R.string.groups_join_note else R.string.groups_request_note))
+            }
+            GroupRole.Requested -> {
+                SecondaryButton(
+                    text = stringResource(R.string.groups_request_awaiting),
+                    onClick = {},
+                    enabled = false,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                DestructiveButton(text = stringResource(R.string.groups_request_cancel), onClick = { onPerform(GroupAction.CancelRequest) })
+            }
+            GroupRole.Invited -> {
+                if (invitorName != null) GroupNote(stringResource(R.string.groups_invited_by, invitorName))
+                PrimaryButton(text = stringResource(R.string.network_invitation_accept), onClick = { onPerform(GroupAction.Accept) })
+                SecondaryButton(
+                    text = stringResource(R.string.network_invitation_refuse),
+                    onClick = { onPerform(GroupAction.Decline) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            GroupRole.Admin, GroupRole.Member -> if (!canLeave) GroupNote(stringResource(R.string.groups_leave_last_admin))
         }
     }
 }

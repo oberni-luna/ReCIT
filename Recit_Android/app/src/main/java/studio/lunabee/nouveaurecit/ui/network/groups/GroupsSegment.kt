@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,13 +28,17 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.SyncStatus
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.data.groups.GroupAction
 import studio.lunabee.nouveaurecit.data.groups.MyGroups
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
+import studio.lunabee.nouveaurecit.designsystem.PillButton
+import studio.lunabee.nouveaurecit.designsystem.PillStyle
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
@@ -41,6 +46,7 @@ import studio.lunabee.nouveaurecit.designsystem.SyncingInlineRow
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
+import studio.lunabee.nouveaurecit.ui.network.LinkRow
 import studio.lunabee.nouveaurecit.ui.network.SectionCard
 
 class GroupsSegmentViewModel(private val container: AppContainer) : ViewModel() {
@@ -63,6 +69,11 @@ class GroupsSegmentViewModel(private val container: AppContainer) : ViewModel() 
         .distinctUntilChanged()
         .flatMapLatest(container.users::observeUsers)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    /** Answers an invitation from its row: the group moves to « Mes groupes », or leaves the segment. */
+    fun answer(groupId: String, accept: Boolean) {
+        viewModelScope.launch { container.groups.perform(if (accept) GroupAction.Accept else GroupAction.Decline, groupId) }
+    }
 }
 
 /**
@@ -104,6 +115,8 @@ fun GroupsSegment(navigator: Navigator) {
                         title = stringResource(R.string.groups_empty_title),
                         message = stringResource(R.string.groups_empty_message),
                         icon = Icons.Outlined.Groups,
+                        actionTitle = stringResource(R.string.groups_find),
+                        onAction = { navigator.push(Destination.FindGroups) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -119,6 +132,8 @@ fun GroupsSegment(navigator: Navigator) {
                                     group = group,
                                     invitorName = myUserId?.let { group.invitor(of = it) }?.let { invitors[it]?.username },
                                     onOpen = { open(group) },
+                                    onAccept = { viewModel.answer(group.id, accept = true) },
+                                    onRefuse = { viewModel.answer(group.id, accept = false) },
                                 )
                             }
                         }
@@ -151,20 +166,28 @@ fun GroupsSegment(navigator: Navigator) {
                         }
                     }
                 }
+                item(key = "links") {
+                    SectionCard(Modifier.padding(top = Spacing.medium)) {
+                        LinkRow(stringResource(R.string.groups_find)) { navigator.push(Destination.FindGroups) }
+                    }
+                }
             }
         }
     }
 }
 
 /**
- * `GroupInvitationRowView`: which group, who asked. Laid out like a reader's invitation, the
- * answers under the group rather than beside it.
+ * `GroupInvitationRowView`: which group, who asked, and the two answers — laid out like a reader's
+ * invitation, the answers under the group rather than beside it: a « yes » wider than a thumb, and
+ * a « no » that is tinted and never red, since declining destroys nothing.
  */
 @Composable
 private fun GroupInvitationRow(
     group: ReaderGroup,
     invitorName: String?,
     onOpen: () -> Unit,
+    onAccept: () -> Unit,
+    onRefuse: () -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().padding(bottom = Spacing.small)) {
         Column(
@@ -186,6 +209,13 @@ private fun GroupInvitationRow(
                     color = RecitTheme.colors.foregroundSecondary,
                 )
             }
+        }
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.medium),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+        ) {
+            PillButton(text = stringResource(R.string.network_invitation_accept), onClick = onAccept, style = PillStyle.Prominent)
+            PillButton(text = stringResource(R.string.network_invitation_refuse), onClick = onRefuse)
         }
     }
 }

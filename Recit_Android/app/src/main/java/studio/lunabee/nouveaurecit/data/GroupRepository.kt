@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.data
 
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -8,15 +9,22 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import studio.lunabee.nouveaurecit.data.groups.GroupAction
 import studio.lunabee.nouveaurecit.data.groups.GroupPeople
 import studio.lunabee.nouveaurecit.data.groups.GroupRequestLedger
 import studio.lunabee.nouveaurecit.data.groups.GroupRole
+import studio.lunabee.nouveaurecit.data.groups.GroupSearchResult
+import studio.lunabee.nouveaurecit.data.groups.GroupTransitionError
 import studio.lunabee.nouveaurecit.data.groups.MyGroups
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
 import studio.lunabee.nouveaurecit.network.ApiService
+import studio.lunabee.nouveaurecit.network.ImageUrl
 import studio.lunabee.nouveaurecit.network.NetworkError
+import studio.lunabee.nouveaurecit.network.dto.GroupActionPayload
 import studio.lunabee.nouveaurecit.network.dto.GroupByIdDto
+import studio.lunabee.nouveaurecit.network.dto.GroupSearchResultsDto
 import studio.lunabee.nouveaurecit.network.dto.GroupsDto
+import studio.lunabee.nouveaurecit.network.dto.OkStatusDto
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -28,6 +36,10 @@ import kotlin.coroutines.cancellation.CancellationException
  * made the same choice in its feature 0028). The screens stay reactive all the same — they collect
  * [groups] — and the people in a group are `UserEntity` rows of the store, looked up by id.
  *
+ * **Writes are optimistic** (ADR 0001): a gesture is applied to the group first, through the same
+ * transition the server runs ([ReaderGroup.applying]), then sent by the [runner]; a refusal puts the
+ * previous value back and speaks through the snackbar.
+ *
  * [myUserId] is `UserRepository`'s: every gesture is made in that reader's name, and every role a
  * screen shows is theirs.
  */
@@ -35,6 +47,8 @@ class GroupRepository(
     private val api: ApiService,
     private val people: GroupPeople,
     private val ledger: GroupRequestLedger,
+    private val runner: OptimisticRunner,
+    private val errorReporter: ErrorReporter,
     private val myUserId: StateFlow<String?>,
 ) {
     private val _groups: MutableStateFlow<Map<String, ReaderGroup>> = MutableStateFlow(emptyMap())
@@ -113,6 +127,61 @@ class GroupRepository(
         val group: ReaderGroup = readGroup(id)
         _groups.update { it + (id to group) }
         return group
+    }
+
+    /** Groups whose name or description matches, best match first. Only the searchable ones: the server leaves the others out. */
+    suspend fun searchGroups(query: String, limit: Int = 20): List<GroupSearchResult> {
+        val trimmed: String = query.trim()
+        if (trimmed.isEmpty()) return emptyList()
+        val answer: GroupSearchResultsDto = api.get("/api/search", "types" to "groups", "search" to trimmed, "limit" to "$limit")
+        return answer.results
+            .sortedByDescending { it.score ?: 0.0 }
+            .map { GroupSearchResult(id = it.id, name = it.label, description = it.description, pictureUrl = ImageUrl.absolute(it.image)) }
+    }
+
+    // Membership writes
+
+    /**
+     * Makes one membership gesture, in my name, optimistically. [target] is the other person, for the
+     * gestures about someone else.
+     *
+     * The gesture is checked against the group as it stands before anything moves: one the server
+     * would refuse — inviting someone who declined, leaving as the last admin — is reported and goes
+     * no further, instead of flashing a state that will be taken back.
+     *
+     * @return The request's job, for the tests; `null` when nothing was sent.
+     */
+    suspend fun perform(action: GroupAction, groupId: String, target: String? = null): Job? {
+        val me: String = myUserId.value ?: return null
+        val current: ReaderGroup = _groups.value[groupId] ?: return null
+        val next: ReaderGroup = try {
+            current.applying(action, by = me, on = target)
+        } catch (error: GroupTransitionError) {
+            errorReporter.report(error)
+            return null
+        }
+        return runner.run(
+            apply = { _groups.update { it + (groupId to next) } },
+            revert = { _groups.update { it + (groupId to current) } },
+            request = {
+                api.send<GroupActionPayload, OkStatusDto>(
+                    path = "/api/groups/${action.path}",
+                    method = "PUT",
+                    body = GroupActionPayload(group = groupId, user = target.takeIf { action.targetsAnotherUser }),
+                )
+            },
+            reconcile = {
+                // Only a request that is still waiting needs remembering: a request to an open group
+                // let me straight in, and `/api/groups` will name it from now on.
+                if (action == GroupAction.Request && next.role(of = me) == GroupRole.Requested) {
+                    ledger.add(groupId, me)
+                } else if (action == GroupAction.CancelRequest) {
+                    ledger.remove(groupId, me)
+                }
+            },
+            // Signed out meanwhile: the groups are someone else's, or nobody's.
+            stillThere = { myUserId.value == me && groupId in _groups.value },
+        )
     }
 
     // Signing out

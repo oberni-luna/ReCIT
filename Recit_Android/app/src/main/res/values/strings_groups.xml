@@ -12,6 +12,7 @@
     <string name="groups_invitations">Invitations</string>
     <string name="groups_mine">Mes groupes</string>
     <string name="groups_requests_sent">Demandes envoyées</string>
+    <string name="groups_find">Trouver un groupe</string>
     <string name="groups_empty_title">Aucun groupe pour l’instant</string>
     <string name="groups_empty_message">Un groupe réunit des lecteurs qui mettent leurs livres en commun : un club, une famille, un immeuble. Rejoignez-en un, ou créez le vôtre.</string>
     <string name="groups_load_failed">Vos groupes n’ont pas pu être chargés. Tirez vers le bas pour réessayer.</string>
@@ -50,4 +51,24 @@
     <string name="groups_members_admins">Admins</string>
     <string name="groups_members_members">Membres</string>
     <string name="groups_members_invited">Invitations envoyées</string>
+
+    <!-- What I can do from where I stand -->
+    <string name="groups_join">Rejoindre le groupe</string>
+    <string name="groups_join_note">Ce groupe est ouvert à tous : vous en serez membre tout de suite.</string>
+    <string name="groups_request">Demander à rejoindre</string>
+    <string name="groups_request_note">Un admin du groupe valide chaque demande. Tant qu’il ne l’a pas acceptée, les livres du groupe vous restent fermés.</string>
+    <string name="groups_request_awaiting">Demande envoyée</string>
+    <string name="groups_request_cancel">Annuler la demande</string>
+    <string name="groups_leave">Quitter le groupe</string>
+    <string name="groups_leave_confirm">Quitter « %1$s » ?</string>
+    <string name="groups_leave_last_admin">Vous êtes le seul admin : nommez un autre admin avant de quitter le groupe.</string>
+
+    <!-- Finding a group -->
+    <string name="groups_search_prompt">Nom du groupe</string>
+    <string name="groups_search_header">Groupes</string>
+    <string name="groups_search_footer">Seuls les groupes visibles dans la recherche apparaissent ici.</string>
+    <string name="groups_search_title">Trouver un groupe</string>
+    <string name="groups_search_explanation">Cherchez un groupe par son nom : un club de lecture, un quartier, un immeuble. Ouvrez-le pour le rejoindre, ou demander à le rejoindre.</string>
+    <string name="groups_search_no_results">Aucun groupe trouvé</string>
+    <string name="groups_search_no_results_message">Aucun groupe visible ne répond à « %1$s ».</string>
 </resources>

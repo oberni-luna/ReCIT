@@ -3,10 +3,12 @@ package studio.lunabee.nouveaurecit.data.groups
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.dto.GroupDto
+import studio.lunabee.nouveaurecit.ui.network.groups.groupActionsHaveContent
 
 /**
  * `ReaderGroupTests`: a group decoded from what inventaire.io actually sends, and where each person
@@ -76,5 +78,61 @@ class ReaderGroupTest {
         assertTrue(group().canLeave("admin"))
         assertTrue(group(admins = listOf("admin", "b"), members = listOf("m")).canLeave("admin"))
         assertTrue(group(members = listOf("m")).canLeave("m"))
+        assertThrows(GroupTransitionError.LastAdmin::class.java) { group(members = listOf("m")).applying(GroupAction.Leave, by = "admin") }
+        assertNull(group().applying(GroupAction.Leave, by = "admin").role(of = "admin"))
+        assertNull(group(admins = listOf("admin", "b"), members = listOf("m")).applying(GroupAction.Leave, by = "admin").role(of = "admin"))
+        assertNull(group(members = listOf("m")).applying(GroupAction.Leave, by = "m").role(of = "m"))
+    }
+
+    @Test
+    fun aRequestToAGroupOnRequestWaitsAndToAnOpenGroupLetsYouIn() {
+        assertEquals(GroupRole.Requested, group().applying(GroupAction.Request, by = "me").role(of = "me"))
+        assertEquals(GroupRole.Member, group(open = true).applying(GroupAction.Request, by = "me").role(of = "me"))
+    }
+
+    @Test
+    fun aRequestFromSomeoneInvitedOrWhoDeclinedLetsThemIn() {
+        assertEquals(GroupRole.Member, group(invited = listOf("me")).applying(GroupAction.Request, by = "me").role(of = "me"))
+        assertEquals(GroupRole.Member, group(declined = listOf("me")).applying(GroupAction.Request, by = "me").role(of = "me"))
+        assertThrows(GroupTransitionError.AlreadyInGroup::class.java) { group(members = listOf("me")).applying(GroupAction.Request, by = "me") }
+    }
+
+    @Test
+    fun anInvitationToSomeoneWhoHadAskedAcceptsThem() {
+        assertEquals(GroupRole.Member, group(requested = listOf("r")).applying(GroupAction.Invite, by = "admin", on = "r").role(of = "r"))
+    }
+
+    @Test
+    fun anInvitationRemembersWhoSentItAndCannotReachSomeoneWhoDeclined() {
+        val invited: ReaderGroup = group().applying(GroupAction.Invite, by = "admin", on = "friend", at = 42.0)
+        assertEquals(GroupRole.Invited, invited.role(of = "friend"))
+        assertEquals("admin", invited.invitor(of = "friend"))
+        assertEquals(42.0, invited.invited.single().timestamp)
+        assertThrows(GroupTransitionError.AlreadyDeclined::class.java) { group(declined = listOf("d")).applying(GroupAction.Invite, by = "admin", on = "d") }
+        assertThrows(GroupTransitionError.AlreadyInGroup::class.java) { group(members = listOf("m")).applying(GroupAction.Invite, by = "admin", on = "m") }
+        assertThrows(GroupTransitionError.MissingTarget::class.java) { group().applying(GroupAction.Invite, by = "admin") }
+    }
+
+    @Test
+    fun answeringAnInvitationMovesMeToMembersOrToDeclined() {
+        assertEquals(GroupRole.Member, group(invited = listOf("me")).applying(GroupAction.Accept, by = "me").role(of = "me"))
+        assertEquals(GroupRole.Declined, group(invited = listOf("me")).applying(GroupAction.Decline, by = "me").role(of = "me"))
+        assertThrows(GroupTransitionError.NotInExpectedRole::class.java) { group().applying(GroupAction.Accept, by = "me") }
+    }
+
+    @Test
+    fun cancellingARequestTakesMeOut() {
+        assertNull(group(requested = listOf("me")).applying(GroupAction.CancelRequest, by = "me").role(of = "me"))
+    }
+
+    @Test
+    fun theButtonsUnderAGroupsHeaderAreLeftOutOnlyForAMemberWhoMayLeave() {
+        assertFalse(groupActionsHaveContent(GroupRole.Admin, canLeave = true))
+        assertFalse(groupActionsHaveContent(GroupRole.Member, canLeave = true))
+        // The only admin with members left: the note that says why « Quitter » is off.
+        assertTrue(groupActionsHaveContent(GroupRole.Admin, canLeave = false))
+        assertTrue(groupActionsHaveContent(null, canLeave = true))
+        assertTrue(groupActionsHaveContent(GroupRole.Requested, canLeave = true))
+        assertTrue(groupActionsHaveContent(GroupRole.Invited, canLeave = true))
     }
 }

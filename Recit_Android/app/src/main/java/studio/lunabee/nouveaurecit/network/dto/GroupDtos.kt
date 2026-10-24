@@ -35,3 +35,23 @@ data class GroupsDto(val groups: List<GroupDto> = emptyList())
 /** `GET /api/groups/by-id`: the group, and the people it names, already shaped as users. */
 @Serializable
 data class GroupByIdDto(val group: GroupDto, val users: List<UserDto> = emptyList())
+
+/**
+ * `GET /api/search?types=groups`: an id, a name, sometimes a description and a picture. Nothing
+ * about who is in it or whether it is open — the group's own screen reads that.
+ */
+@Serializable
+data class GroupSearchResultsDto(val results: List<GroupSearchResultDto> = emptyList())
+
+@Serializable
+data class GroupSearchResultDto(
+    val id: String,
+    val label: String = "",
+    val description: String? = null,
+    val image: String? = null,
+    @SerialName("_score") val score: Double? = null,
+)
+
+/** The body of every `PUT /api/groups/<action>`: the group, and the other person when the gesture is about someone else. */
+@Serializable
+data class GroupActionPayload(val group: String, val user: String? = null)

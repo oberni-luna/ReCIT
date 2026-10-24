@@ -83,6 +83,8 @@ class AppContainer(context: Context) {
         api = api,
         people = users,
         ledger = PreferencesGroupRequestLedger(preferences),
+        runner = optimisticRunner,
+        errorReporter = errorReporter,
         myUserId = users.myUserId,
     )
     val inventory: InventoryRepository = InventoryRepository(api, database, entities, optimisticRunner, syncStatus)

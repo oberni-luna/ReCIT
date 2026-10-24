@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.data.groups.GroupAction
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -42,6 +43,11 @@ class GroupViewModel(
 
     private val _loadFailed: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val loadFailed: StateFlow<Boolean> = _loadFailed.asStateFlow()
+
+    /** One membership gesture in my name, on this group — shown at once, put back if refused. */
+    fun perform(action: GroupAction, target: String? = null) {
+        viewModelScope.launch { container.groups.perform(action, groupId, target) }
+    }
 
     init {
         if (fetches) {

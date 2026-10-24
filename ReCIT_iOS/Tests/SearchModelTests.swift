@@ -17,8 +17,8 @@ struct SearchModelTests {
         mock.stub("/api/search", json: """
         {
           "results": [
-            { "id": "a", "type": "works", "uri": "wd:Q1", "label": "Low", "description": "d1", "image": "/img/a.jpg", "score": 1.0 },
-            { "id": "b", "type": "humans", "uri": "wd:Q2", "label": "High", "description": null, "image": null, "score": 9.0 }
+            { "id": "a", "type": "works", "uri": "wd:Q1", "label": "Low", "description": "d1", "image": "/img/a.jpg", "_score": 1.0 },
+            { "id": "b", "type": "humans", "uri": "wd:Q2", "label": "High", "description": null, "image": null, "_score": 9.0 }
           ]
         }
         """)
@@ -43,14 +43,23 @@ struct SearchModelTests {
         }
 
         let types: [String] = mock.recordedRequests.map { request in
-            request.endpoint
-                .split(separator: "?").last.map(String.init)?
-                .split(separator: "&")
-                .first(where: { $0.hasPrefix("types=") })
-                .map { String($0.dropFirst("types=".count)) } ?? ""
+            queryValue("types", in: request.endpoint) ?? ""
         }
 
         #expect(types == ["works", "humans", "humans|works"])
+    }
+
+    @Test("A query with a space or an accent reaches the server as typed, not encoded twice")
+    func remoteSearchEncodesTheQueryOnce() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/search", json: #"{ "results": [] }"#)
+        let model: SearchModel = .init(apiService: mock)
+
+        _ = try await model.searchEntity(query: "Émile Zola")
+
+        let endpoint: String = try #require(mock.recordedRequests.first?.endpoint)
+        #expect(queryValue("search", in: endpoint) == "Émile Zola")
+        #expect(queryValue("types", in: endpoint) == "humans|works")
     }
 
     @Test("A query carrying an ampersand reaches the server whole")
@@ -75,5 +84,20 @@ struct SearchModelTests {
 
         #expect(results.isEmpty)
         #expect(mock.recordedRequests.isEmpty)
+    }
+
+    /// What the server reads for `name`, once the endpoint has gone through `URL(string:)` the
+    /// way `APIService` sends it. The mock records the endpoint before that step, so reading it
+    /// raw would miss an endpoint the conversion encodes a second time.
+    private func queryValue(
+        _ name: String,
+        in endpoint: String
+    ) -> String? {
+        guard let url = URL(string: "https://test.local\(endpoint)") else { return nil }
+
+        return URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?
+            .first { $0.name == name }?
+            .value
     }
 }

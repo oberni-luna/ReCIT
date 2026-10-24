@@ -19,4 +19,16 @@ struct SearchResultDTO: Codable {
     let description: String?
     let image: String?
     let score: CGFloat?
+
+    /// The server names the score `_score`. Read as `score`, it was always `nil`, and the sort
+    /// by descending score in `SearchModel` had nothing to sort on.
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case uri
+        case label
+        case description
+        case image
+        case score = "_score"
+    }
 }

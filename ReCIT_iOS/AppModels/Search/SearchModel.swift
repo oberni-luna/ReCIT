@@ -29,9 +29,12 @@ final class SearchModel {
         let trimmedQuery: String = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedQuery.isEmpty == false else { return [] }
 
+        // The pipe goes out encoded. A raw `|` is not a URL character, and `URL(string:)` answers
+        // one by percent-encoding the whole string again — the `%` of the query included — so
+        // « Virginia Woolf » reached the server as the literal text `Virginia%20Woolf`.
         let types: String = entityTypes.isEmpty
-            ? "humans|works"
-            : entityTypes.map(\.rawValue).joined(separator: "|")
+            ? "humans%7Cworks"
+            : entityTypes.map(\.rawValue).joined(separator: "%7C")
         // A title can hold an ampersand or a plus, both of which end a query parameter and
         // would truncate the search rather than fail it.
         let search: String = trimmedQuery.addingPercentEncoding(

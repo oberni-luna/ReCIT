@@ -56,6 +56,26 @@ final class EntityCreationModel {
         return .init(uri: uri, code: code)
     }
 
+    /// The works a search proposed, each completed by what tells it apart: who wrote it, and
+    /// when.
+    ///
+    /// `/api/search` answers a label, a description and a cover — not the two facts a reader
+    /// recognises a book by. One `by-uris` call with `relatives=wdt:P50` brings both: the works'
+    /// claims and, in the same envelope, their authors' labels. Public, so it goes cookieless
+    /// like the ISBN lookup. When it fails the search's own description stands in: a candidate
+    /// is still worth showing without its byline, and a search is not a place for an error.
+    func describeWorks(_ results: [SearchResult]) async -> [WorkCandidate] {
+        guard results.isEmpty == false else { return [] }
+
+        let uris: String = results.map(\.uri).joined(separator: "|")
+        let response: WorkSummariesDTO? = try? await publicAPIService.fetchData(
+            fromEndpoint: "/api/entities/by-uris?uris=\(uris)&attributes=labels|claims&lang=fr&relatives=wdt:P50",
+            debug: false
+        )
+
+        return WorkCandidate.candidates(from: results, entities: response?.entities ?? [:])
+    }
+
     /// Sends the cover the reader photographed, and answers the url inventaire.io filed it
     /// under — or `nil`, which is not a failure worth stopping for.
     ///

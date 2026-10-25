@@ -188,16 +188,33 @@ struct ResolveRequestBuilderTests {
 
     /// Describing the work again would offer the server a second one to create, next to the
     /// one it has just recognised.
-    @Test("A recognised work is claimed by the edition, and seeded nowhere")
-    func recognisedWorkBecomesAClaim() {
+    /// An entry with no work seed is not an entry without a work: the server builds one from the
+    /// edition's title, which can match another work or be created beside the one claimed. A
+    /// named seed is reused as it is.
+    @Test("A known work is claimed by the edition, and named rather than left out")
+    func recognisedWorkBecomesAClaim() throws {
         let request: EntityResolveRequest = ResolveRequestBuilder.request(
             for: draft(workUri: "wd:Q1130619"),
             create: true,
             language: "fr"
         )
 
-        #expect(request.entries.first?.edition.claims?["wdt:P629"] == ["wd:Q1130619"])
-        #expect(request.entries.first?.works == nil)
+        let entry: EntityResolveRequest.Entry = try #require(request.entries.first)
+        #expect(entry.edition.claims?["wdt:P629"] == ["wd:Q1130619"])
+        #expect(entry.works == [.named("wd:Q1130619")])
+    }
+
+    /// A work that exists already has its authors. An author seed sent beside it would still be
+    /// resolved — or created — on its own.
+    @Test("A known work sends no author seed")
+    func knownWorkSendsNoAuthor() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(workUri: "wd:Q1130619"),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(try #require(request.entries.first).authors == nil)
     }
 
     @Test("Without a recognised work, one is described and nothing is claimed")

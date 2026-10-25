@@ -7,6 +7,198 @@
     ", " : {
 
     },
+    "create_book.edition.of" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edition of"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Édition de"
+          }
+        }
+      }
+    },
+    "create_book.edition.of_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The work and its author come from inventaire.io: nothing to type again. Not this one? Go back to the search."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’œuvre et son auteur viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Revenez à la recherche."
+          }
+        }
+      }
+    },
+    "create_book.edition.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle édition"
+          }
+        }
+      }
+    },
+    "create_book.edition.title_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken from the work. Correct it if the cover says otherwise: a translation, a subtitle."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repris de l’œuvre. Corrigez-le s’il diffère de la couverture : une traduction, un sous-titre."
+          }
+        }
+      }
+    },
+    "create_book.search.create %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create the work « %@ »"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer l’œuvre « %@ »"
+          }
+        }
+      }
+    },
+    "create_book.search.empty.message %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io does not know ISBN %@ yet. Search for its title or its author: if the work is already there, there will be almost nothing left to type."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io ne connaît pas encore l’ISBN %@. Cherchez le titre ou l’auteur·ice : si l’œuvre y est déjà, il ne restera presque rien à saisir."
+          }
+        }
+      }
+    },
+    "create_book.search.empty.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which book is it?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De quel livre s’agit-il ?"
+          }
+        }
+      }
+    },
+    "create_book.search.no_result" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No work of that name on inventaire.io. Check the spelling, or search for the author, before creating one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune œuvre de ce nom sur inventaire.io. Vérifiez l’orthographe, ou cherchez l’auteur·ice, avant d’en créer une."
+          }
+        }
+      }
+    },
+    "create_book.search.none_match" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of these: create the work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune ne correspond : créer l’œuvre"
+          }
+        }
+      }
+    },
+    "create_book.search.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title or author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titre ou auteur·ice"
+          }
+        }
+      }
+    },
+    "create_book.search.results" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Works on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Œuvres sur inventaire.io"
+          }
+        }
+      }
+    },
+    "create_book.search.why_existing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick the work this book is an edition of, even if it is a translation or another cover: that is what avoids a duplicate."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prenez l’œuvre dont ce livre est une édition, même si c’est une traduction ou une autre couverture : c’est ce qui évite un doublon."
+          }
+        }
+      }
+    },
     "🥲" : {
       "extractionState" : "stale",
       "localizations" : {

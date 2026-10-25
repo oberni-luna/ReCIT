@@ -91,6 +91,60 @@ struct EntityCreationModelTests {
         #expect(await model.uploadCover(imageData: Data("jpeg".utf8)) == nil)
     }
 
+    // MARK: - Describing the works a search found
+
+    @Test("One public by-uris call completes the works with their authors and year")
+    func describeWorksAsksOnceWithRelatives() async throws {
+        let mock: MockAPIService = .init()
+        let publicMock: MockAPIService = .init()
+        publicMock.stub("/api/entities/by-uris", json: """
+        {
+          "entities": {
+            "wd:Q102036201": {
+              "uri": "wd:Q102036201",
+              "labels": { "fr": "Le Ministère du futur" },
+              "claims": { "wdt:P50": ["wd:Q130779"], "wdt:P577": ["2020-10-06"] }
+            },
+            "wd:Q130779": { "uri": "wd:Q130779", "labels": { "fr": "Kim Stanley Robinson" }, "claims": {} }
+          }
+        }
+        """)
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: publicMock)
+        let works: [WorkCandidate] = await model.describeWorks([
+            .init(id: "Q102036201", uri: "wd:Q102036201", title: "Le Ministère du futur", score: 1, type: .works)
+        ])
+
+        #expect(works.first?.detail == "Kim Stanley Robinson · 2020")
+        #expect(publicMock.recordedRequests.count == 1)
+        #expect(publicMock.recordedRequests.first?.endpoint.contains("relatives=wdt:P50") == true)
+        #expect(mock.recordedRequests.isEmpty)
+    }
+
+    /// A search is not a place for an error: a candidate is still worth showing without its
+    /// byline.
+    @Test("A failed by-uris keeps the results, with the search's description")
+    func describeWorksSurvivesAFailure() async throws {
+        let publicMock: MockAPIService = .init()
+        publicMock.stub("/api/entities/by-uris", error: NetworkError.badStatus(code: 500, message: nil))
+
+        let model: EntityCreationModel = .init(apiService: MockAPIService(), publicAPIService: publicMock)
+        let works: [WorkCandidate] = await model.describeWorks([
+            .init(id: "Q1", uri: "wd:Q1", title: "Mars la rouge", description: "roman de Kim Stanley Robinson (1992)", score: 1, type: .works)
+        ])
+
+        #expect(works.map(\.detail) == ["roman de Kim Stanley Robinson (1992)"])
+    }
+
+    @Test("No results ask nothing")
+    func describeWorksWithNothingAsksNothing() async throws {
+        let publicMock: MockAPIService = .init()
+        let model: EntityCreationModel = .init(apiService: MockAPIService(), publicAPIService: publicMock)
+
+        #expect(await model.describeWorks([]).isEmpty)
+        #expect(publicMock.recordedRequests.isEmpty)
+    }
+
     // MARK: - The reconnaissance pass
 
     @Test("A work the server recognised is answered, so the reader can be asked about it")

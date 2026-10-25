@@ -114,7 +114,7 @@ struct BatchScanCameraView: View {
             }
         }
         .sheet(item: $creationRequest) { request in
-            CreateBookView(
+            NewBookFlowView(
                 draft: viewModel.draft(forISBN: request.isbn),
                 onCreated: viewModel.bookCreated,
                 onKeepDraft: viewModel.remember

@@ -60,9 +60,9 @@ enum ResolveRequestBuilder {
             editionClaims[Property.language] = [languageUri]
         }
 
-        // A work the reader recognised is pointed at, not described a second time: the edition
-        // claims to be an edition *of it*, and no second work is seeded. Describing it again
-        // would offer the server a work to create next to the one it just found.
+        // A work the reader picked or recognised is pointed at, not described a second time: the
+        // edition claims to be an edition *of it*, and the work seed names it by uri. Describing
+        // it again would offer the server a work to create next to the one it just found.
         if let workUri = draft.workUri {
             editionClaims[Property.editionOf] = [workUri]
         }
@@ -74,9 +74,15 @@ enum ResolveRequestBuilder {
             image: draft.coverImageUrl
         )
 
-        let works: [EntityResolveRequest.Seed]? = draft.workUri == nil
-            ? [.described(label: draft.trimmedTitle, language: labelLanguage)]
-            : nil
+        // A work that exists is named, never left out. An entry with no work seed is not an
+        // entry without a work: the server builds one from the edition's title
+        // (`sanitize_entry.ts`), which can then match another work or be created beside the one
+        // claimed above. A named seed is taken as resolved and reused as it is.
+        let works: [EntityResolveRequest.Seed] = if let workUri = draft.workUri {
+            [.named(workUri)]
+        } else {
+            [.described(label: draft.trimmedTitle, language: labelLanguage)]
+        }
 
         // Named, not described, as soon as the reader has picked someone who exists. Sending a
         // description where a uri was available is how a database of this kind fills with
@@ -87,8 +93,13 @@ enum ResolveRequestBuilder {
             .described(label: draft.trimmedAuthorName, language: labelLanguage)
         }
 
+        // Only a work being created needs its authors: one that exists already has them. An
+        // author seed sent beside an existing work would still be resolved — and, failing that,
+        // created — on its own (`create_unresolved_entry.ts`).
+        let authors: [EntityResolveRequest.Seed]? = draft.workUri == nil ? [author] : nil
+
         return .init(
-            entries: [.init(edition: edition, works: works, authors: [author])],
+            entries: [.init(edition: edition, works: works, authors: authors)],
             create: create,
             // Even when nothing is being created: a reconnaissance pass that comes back with a
             // cover has told us something worth keeping.

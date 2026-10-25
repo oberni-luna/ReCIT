@@ -2,14 +2,17 @@
 //  NewEditionView.swift
 //  ReCIT_iOS
 //
-//  « Nouvelle édition » — the book in hand is an edition of a work inventaire.io already has.
-//  Frame `V3` of « Nouveau livre v2 » in the Figma file.
+//  « Nouvelle édition » — the book in hand, described with the same form as « Modifier
+//  l'édition »: frame `E2` of the Figma section `Modifier l'édition · Toutes les données`. It
+//  replaces `V3`, and the edition half of `V5`, of « Nouveau livre v2 ».
 //
-//  The work and its authors came from the search: nothing to type again, and nothing to ask
-//  the reconnaissance pass, since the work is named by its uri. What is left is this edition —
-//  its cover, its ISBN, and its title, which starts as the work's.
+//  « Édition de » holds the work found by the search, or the one being described, whose title
+//  and authors are named on its own screen. Then the cover and the ISBN the camera read, the
+//  title — starting as the work's — and the subtitle, and every other property inventaire.io
+//  accepts on an edition, the language already filled in from the ISBN. « Publier et ajouter à
+//  mes livres » is pinned at the foot of the sheet.
 //
-//  See PRD 0026.
+//  See PRD 0026 and PRD 0027.
 //
 
 import SwiftUI
@@ -25,6 +28,14 @@ struct NewEditionView: View {
 
     /// Pushes « Image depuis une URL » for the cover.
     let onPickCoverURL: () -> Void
+    /// Back to the work search.
+    let onFindWork: () -> Void
+    /// Pushes the screen of the work being described.
+    let onOpenNewWork: () -> Void
+    /// Pushes the screen that changes one property of the catalogue.
+    let onOpenProperty: (EditionProperty) -> Void
+    /// Pushes the list of catalogues an identifier — or a link — is added to.
+    let onAddIdentifier: (EditionProperty.Group) -> Void
 
     var body: some View {
         Form {
@@ -38,19 +49,12 @@ struct NewEditionView: View {
 
             BibliographicDataNotice()
 
-            if let work = draft.chosenWork {
-                Section {
-                    WorkRow(work: work)
-                        .accessibilityIdentifier("e2e.createBook.edition.work")
-                } header: {
-                    CreateBookSectionHeader("create_book.edition.of")
-                } footer: {
-                    CreateBookSectionFooter("create_book.edition.of_help")
-                }
-            }
+            NewEditionWorkSection(draft: $draft, onFindWork: onFindWork, onOpenNewWork: onOpenNewWork)
 
             Section {
                 CreateBookCoverRow(isbn: draft.isbn, imageData: $draft.cover, onPickURL: onPickCoverURL)
+            } header: {
+                CreateBookSectionHeader("edit_edition.cover.header")
             } footer: {
                 CreateBookEditionNotes(draft: draft)
             }
@@ -61,11 +65,35 @@ struct NewEditionView: View {
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundDefault)
                     .withLabel(label: "create_book.title_field")
+
+                TextField("edit_edition.subtitle_field", text: $draft.subtitle, axis: .vertical)
+                    .accessibilityIdentifier("e2e.createBook.subtitle")
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundDefault)
+                    .withLabel(label: "edit_edition.subtitle_field")
+            } header: {
+                CreateBookSectionHeader("edit_edition.title.header")
             } footer: {
                 CreateBookSectionFooter("create_book.edition.title_help")
             }
 
-            Section {} footer: {
+            EditionPublicationSection(properties: draft.properties, onOpen: onOpenProperty)
+
+            EditionFormatSection(properties: $draft.properties)
+
+            EditionContributorsSection(properties: draft.properties, onOpen: onOpenProperty)
+
+            EditionIdentifiersSection(group: .databases, properties: $draft.properties) {
+                onAddIdentifier(.databases)
+            }
+
+            EditionIdentifiersSection(group: .links, properties: $draft.properties) {
+                onAddIdentifier(.links)
+            }
+        }
+        .applyListBackground()
+        .safeAreaInset(edge: .bottom) {
+            FormActionBar {
                 CreateBookPublishFooter(
                     failure: failure,
                     isPublishable: draft.isPublishable,
@@ -74,7 +102,6 @@ struct NewEditionView: View {
                 )
             }
         }
-        .applyListBackground()
         .navigationTitle(String(localized: "create_book.edition.title"))
         .navigationBarTitleDisplayMode(.inline)
         .bibliographicDataHelpButton()

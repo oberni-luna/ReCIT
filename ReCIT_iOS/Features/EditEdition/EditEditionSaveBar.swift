@@ -3,8 +3,7 @@
 //  ReCIT_iOS
 //
 //  « Enregistrer », pinned at the foot of the sheet (`safeAreaInset(edge: .bottom)`): the form is
-//  long, and saving it must not mean scrolling to its end. `Action Bar / Attached` in the Figma
-//  file without its two round buttons: `background/default`, a hairline above, the primary
+//  long, and saving it must not mean scrolling to its end. A `FormActionBar` holding the primary
 //  button across the width.
 //
 
@@ -16,9 +15,7 @@ struct EditEditionSaveBar: View {
     let onSave: () async -> Void
 
     var body: some View {
-        VStack(spacing: .zero) {
-            Divider()
-
+        FormActionBar {
             AsyncButton(
                 action: onSave,
                 actionOptions: [.showProgressView],
@@ -29,10 +26,7 @@ struct EditEditionSaveBar: View {
             )
             .buttonStyle(.primary())
             .disabled(isEnabled == false)
-            .padding(.horizontal, .medium)
-            .padding(.vertical, .sMedium)
             .accessibilityIdentifier("e2e.editEdition.save")
         }
-        .background(.backgroundDefault)
     }
 }

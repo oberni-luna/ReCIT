@@ -146,11 +146,49 @@ struct NewBookDraftTests {
         var draft: NewBookDraft = .init(isbn: "9782494289857")
         #expect(NewBookStep.resuming(draft).isEmpty)
 
+        // The edition's form, under which the new work's screen is one touch away.
         draft.startNewWork(titled: "étincelles écosocialistes")
-        #expect(NewBookStep.resuming(draft) == [.newWork])
+        #expect(NewBookStep.resuming(draft) == [.edition])
 
         draft.choose(ministry)
         #expect(NewBookStep.resuming(draft) == [.edition])
+    }
+
+    // MARK: - The edition's properties
+
+    @Test("What the ISBN says becomes the edition's language, unless one was chosen")
+    func languageFillsTheForm() {
+        var draft: NewBookDraft = .init(isbn: "9782494289857")
+        draft.language = .init(uri: "wd:Q150", code: "fr")
+        #expect(draft.properties.entities(of: .language).map(\.uri) == ["wd:Q150"])
+
+        var chosen: NewBookDraft = .init(isbn: "9782494289857")
+        chosen.properties.add(.init(uri: "wd:Q1860", label: "anglais"), to: .language)
+        chosen.language = .init(uri: "wd:Q150", code: "fr")
+        #expect(chosen.properties.entities(of: .language).map(\.uri) == ["wd:Q1860"])
+    }
+
+    @Test("A work detached leaves the draft without one, and unpublishable")
+    func detachedWork() {
+        var draft: NewBookDraft = .init(isbn: "9782494289857")
+        draft.choose(ministry)
+        #expect(draft.isPublishable)
+
+        draft.detachWork()
+        #expect(draft.hasWork == false)
+        #expect(draft.isPublishable == false)
+        #expect(NewBookStep.resuming(draft).isEmpty)
+    }
+
+    @Test("A collection to create needs a publisher before the book can be published")
+    func collectionNeedsPublisher() {
+        var draft: NewBookDraft = .init(isbn: "9782494289857")
+        draft.choose(ministry)
+        draft.properties.add(.init(label: "Nature writing"), to: .collection)
+        #expect(draft.isPublishable == false)
+
+        draft.properties.add(.init(label: "Le Sous-Bois"), to: .publisher)
+        #expect(draft.isPublishable)
     }
 
     @Test("Only the first letter is raised")

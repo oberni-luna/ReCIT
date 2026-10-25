@@ -14,23 +14,24 @@
 import Foundation
 
 enum NewBookStep: Hashable {
-    /// « Nouvelle édition » — an edition of the work picked from the search.
+    /// « Nouvelle édition » — the edition's form, every property of it.
     case edition
 
-    /// « Nouvelle œuvre » — the work and the edition, described together.
+    /// « Nouvelle œuvre » — the work being described, its title and authors.
     case newWork
 
     /// « Œuvre déjà connue » — the reconnaissance pass found the work being created.
     case recognisedWork(uri: String)
 
-    /// « Image depuis une URL » — a cover found on the web, for either form.
+    /// « Image depuis une URL » — a cover found on the web.
     case coverFromURL
+
+    /// One of the screens of the catalogue's properties.
+    case property(EditionPropertyStep)
 
     /// Where a draft left from an earlier attempt reopens: on the screen it was being written
     /// in, rather than on a search the reader has already answered.
     static func resuming(_ draft: NewBookDraft) -> [NewBookStep] {
-        if draft.chosenWork != nil { return [.edition] }
-        if draft.trimmedWorkTitle.isEmpty == false { return [.newWork] }
-        return []
+        draft.hasWork ? [.edition] : []
     }
 }

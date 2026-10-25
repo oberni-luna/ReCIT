@@ -1526,6 +1526,38 @@
         }
       }
     },
+    "create_book.edition.new_work_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch the new work to name it and give it its authors: it is published with this edition."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez la nouvelle œuvre pour la nommer et lui donner ses auteur·ices : elle est publiée avec cette édition."
+          }
+        }
+      }
+    },
+    "create_book.edition.no_work_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A book is an edition of a work: find it, or create it, to publish."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un livre est l’édition d’une œuvre : retrouvez-la, ou créez-la, pour publier."
+          }
+        }
+      }
+    },
     "create_book.edition.of" : {
       "localizations" : {
         "en" : {
@@ -1547,13 +1579,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The work and its author come from inventaire.io: nothing to type again. Not this one? Go back to the search."
+            "value" : "The work and its author come from inventaire.io: nothing to type again. Not this one? Touch it to go back to the search, or swipe it to detach it."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L’œuvre et son auteur viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Revenez à la recherche."
+            "value" : "L’œuvre et son auteur viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Touchez-la pour revenir à la recherche, ou glissez-la pour la détacher."
           }
         }
       }
@@ -1911,22 +1943,6 @@
         }
       }
     },
-    "create_book.new_work.edition_section" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This edition"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette édition"
-          }
-        }
-      }
-    },
     "create_book.new_work.help" : {
       "localizations" : {
         "en" : {
@@ -1939,22 +1955,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ses traductions et ses rééditions en seront des éditions."
-          }
-        }
-      }
-    },
-    "create_book.new_work.public_notice" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The work and this book will be public on inventaire.io."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’œuvre et ce livre seront publics sur inventaire.io."
           }
         }
       }

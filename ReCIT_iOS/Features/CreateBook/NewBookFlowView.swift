@@ -87,17 +87,22 @@ struct NewBookFlowView: View {
                     NewEditionView(
                         draft: $draft,
                         failure: failure,
-                        onPublish: create,
+                        onPublish: publish,
                         onClose: { dismiss() },
-                        onPickCoverURL: pickCoverURL
+                        onPickCoverURL: pickCoverURL,
+                        onFindWork: { path = [] },
+                        onOpenNewWork: { path.append(.newWork) },
+                        onOpenProperty: { path.append(.property(.opening($0, in: draft.properties))) },
+                        onAddIdentifier: { path.append(.property(.identifierCatalog($0))) }
                     )
                 case .newWork:
-                    NewWorkView(
-                        draft: $draft,
-                        failure: failure,
-                        onPublish: publishNewWork,
-                        onClose: { dismiss() },
-                        onPickCoverURL: pickCoverURL
+                    NewWorkView(draft: $draft)
+                case .property(let step):
+                    EditionPropertyDestination(
+                        step: step,
+                        properties: $draft.properties,
+                        push: { path.append(.property($0)) },
+                        pop: { path.removeLast(min($0, path.count)) }
                     )
                 case .recognisedWork(let uri):
                     WorkMatchView(
@@ -143,11 +148,12 @@ struct NewBookFlowView: View {
         path = [.edition]
     }
 
-    /// None of the works fits: the reader describes one, named after the search.
+    /// None of the works fits: the reader describes one, named after the search — on its own
+    /// screen, over the edition's form, since it needs an author before anything is published.
     private func startNewWork(titled query: String) {
         draft.startNewWork(titled: query)
         failure = nil
-        path = [.newWork]
+        path = [.edition, .newWork]
     }
 
     /// A cover from the web, over whichever form asked for it.
@@ -155,14 +161,15 @@ struct NewBookFlowView: View {
         path.append(.coverFromURL)
     }
 
-    /// What publishing a new work does: ask before writing.
+    /// What « Publier » does: for a work being created, ask before writing.
     ///
     /// The reconnaissance pass writes nothing and can recognise a work this book is an edition
     /// of, which the search did not offer — in which case the reader is shown it and decides,
     /// and the publication happens from that screen. Asked at most once: a reader who answered
     /// « no, another work » is not asked again on a retry.
-    private func publishNewWork() async {
-        if draft.hasAnsweredWorkQuestion == false,
+    private func publish() async {
+        if draft.workUri == nil,
+           draft.hasAnsweredWorkQuestion == false,
            let uri = await creationModel.recogniseWork(draft: draft) {
             path.append(.recognisedWork(uri: uri))
             return
@@ -189,6 +196,16 @@ struct NewBookFlowView: View {
         failure = nil
 
         do {
+            // The publishers, collections and people nobody has entered yet exist before
+            // `resolve` names them. Each one created is kept in the draft at once: a failure
+            // further on does not create it twice.
+            try await creationModel.createPendingEntities(
+                of: draft.properties,
+                language: draft.language?.code ?? ResolveRequestBuilder.defaultLabelLanguage
+            ) { id, uri in
+                draft.properties.entityCreated(id: id, uri: uri)
+            }
+
             let uri: String = try await creationModel.createEdition(draft: draft)
 
             // Same defaults as the scanner's own add, so a book that had to be created first is

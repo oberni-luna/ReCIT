@@ -130,6 +130,25 @@ final class EntityCreationModel {
         return response?.resolvedWorkUri
     }
 
+    /// Creates the publishers, collections and people a new edition names that inventaire.io
+    /// does not have — publishers first, a collection under its publisher — before `resolve` names
+    /// them by uri. Each one created is handed to `onCreated` as it lands, so that a failure
+    /// halfway keeps what exists and a retry does not create it twice.
+    func createPendingEntities(
+        of properties: EditionProperties,
+        language: String,
+        onCreated: (UUID, String) -> Void
+    ) async throws {
+        var properties: EditionProperties = properties
+        while let pending = properties.pendingEntities.first(where: {
+            EntityCreationKind(for: $0.property, publisherUri: properties.publisherUri) != nil
+        }), let kind = EntityCreationKind(for: pending.property, publisherUri: properties.publisherUri) {
+            let uri: String = try await createEntity(label: pending.entity.trimmedLabel, language: language, kind: kind)
+            properties.entityCreated(id: pending.entity.id, uri: uri)
+            onCreated(pending.entity.id, uri)
+        }
+    }
+
     /// Creates the edition — and, as needed, its work and its author — and answers with the
     /// **canonical** uri of the edition.
     ///

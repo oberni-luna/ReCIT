@@ -2,30 +2,18 @@
 //  NewWorkView.swift
 //  ReCIT_iOS
 //
-//  « Nouvelle œuvre » — none of the works found was the book, so the work is described along
-//  with the edition, in one form. Frame `V5` of « Nouveau livre v2 » in the Figma file; it
-//  replaces the two-field form of PRD 0015.
+//  « Nouvelle œuvre » — the work the new book is an edition of, when the search found none: its
+//  title and who wrote it. Pushed over « Nouvelle édition » when « Créer l'œuvre » is chosen, and
+//  from its row afterwards; the shape of `E5` in the Figma section `Modifier l'édition · Toutes
+//  les données`. Nothing is published from here: the edition's form publishes the work with it.
 //
-//  The work first: its title, carried over from the search, and who wrote it — one author or
-//  several, each picked from inventaire.io or created. Then this edition: its cover, its ISBN,
-//  and its title, which follows the work's until the reader makes it their own.
-//
-//  See PRD 0026.
+//  See PRD 0026 and PRD 0027.
 //
 
 import SwiftUI
 
 struct NewWorkView: View {
     @Binding var draft: NewBookDraft
-
-    /// What went wrong last time, in the reader's terms. `nil` until something does.
-    let failure: CreateBookFailure?
-
-    let onPublish: () async -> Void
-    let onClose: () -> Void
-
-    /// Pushes « Image depuis une URL » for the cover.
-    let onPickCoverURL: () -> Void
 
     /// The work's title, written through the draft so the edition's can follow it.
     private var workTitle: Binding<String> {
@@ -37,16 +25,6 @@ struct NewWorkView: View {
 
     var body: some View {
         Form {
-            if let failure {
-                Section {
-                    CreateBookFailureBanner(failure: failure)
-                }
-                .listRowSeparator(.hidden)
-                .listSectionSeparator(.hidden)
-            }
-
-            BibliographicDataNotice()
-
             Section {
                 TextField("create_book.new_work.title_field", text: workTitle)
                     .accessibilityIdentifier("e2e.createBook.workTitle")
@@ -96,29 +74,6 @@ struct NewWorkView: View {
                 CreateBookSectionHeader("create_book.new_work.section")
             } footer: {
                 CreateBookSectionFooter("create_book.new_work.help")
-            }
-
-            Section {
-                CreateBookCoverRow(isbn: draft.isbn, imageData: $draft.cover, onPickURL: onPickCoverURL)
-
-                TextField("create_book.title_field", text: $draft.title)
-                    .accessibilityIdentifier("e2e.createBook.title")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundDefault)
-                    .withLabel(label: "create_book.title_field")
-            } header: {
-                CreateBookSectionHeader("create_book.new_work.edition_section")
-            } footer: {
-                CreateBookEditionNotes(draft: draft, notice: "create_book.new_work.public_notice")
-            }
-
-            Section {} footer: {
-                CreateBookPublishFooter(
-                    failure: failure,
-                    isPublishable: draft.isPublishable,
-                    onPublish: onPublish,
-                    onClose: onClose
-                )
             }
         }
         .applyListBackground()

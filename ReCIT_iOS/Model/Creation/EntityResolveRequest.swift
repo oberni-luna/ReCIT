@@ -44,7 +44,8 @@ struct EntityResolveRequest: Codable, Equatable, Sendable {
     struct Seed: Codable, Equatable, Sendable {
         var uri: String?
         var labels: [String: String]?
-        var claims: [String: [String]]?
+        /// Typed values: a number of pages goes out as a JSON number (`ClaimLiteral`).
+        var claims: [String: [ClaimLiteral]]?
         /// Only an edition seed carries one: the url of a cover the server should attach. Ours
         /// is the one it has just been handed by the upload; without it, `enrich` goes looking
         /// for one from the ISBN.
@@ -54,7 +55,7 @@ struct EntityResolveRequest: Codable, Equatable, Sendable {
             .init(uri: uri)
         }
 
-        static func described(label: String, language: String, claims: [String: [String]]? = nil) -> Seed {
+        static func described(label: String, language: String, claims: [String: [ClaimLiteral]]? = nil) -> Seed {
             .init(labels: [language: label], claims: claims)
         }
     }

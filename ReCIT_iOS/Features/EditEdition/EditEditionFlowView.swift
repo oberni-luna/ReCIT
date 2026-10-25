@@ -68,7 +68,7 @@ struct EditEditionFlowView: View {
                             onOpenWork: { path.append(.workDetail(id: $0)) },
                             onPickCoverURL: { path.append(.coverFromURL) },
                             onOpenProperty: open,
-                            onAddIdentifier: { path.append(.identifierCatalog($0)) }
+                            onAddIdentifier: { path.append(.property(.identifierCatalog($0))) }
                         )
                     }
                 }
@@ -127,36 +127,13 @@ struct EditEditionFlowView: View {
                         // sent anywhere.
                         edit?.coverData = jpeg
                     }
-                case .values(let uri):
-                    if let property = EditionProperty.named(uri) {
-                        EditionEntityValuesView(property: property, properties: properties) {
-                            path.append(.picker(property: uri))
-                        }
-                    }
-                case .picker(let uri):
-                    if let property = EditionProperty.named(uri) {
-                        // Pops itself once an entity is picked or created.
-                        EntityPickerView(
-                            property: property,
-                            hasPublisher: edit?.properties.entities(of: .publisher).isEmpty == false
-                        ) { entity in
-                            edit?.properties.add(entity, to: property)
-                        }
-                    }
-                case .publicationDate:
-                    PublicationDateView(properties: properties)
-                case .identifierCatalog(let group):
-                    IdentifierCatalogView(group: group) { property in
-                        path.append(.identifierInput(property: property.uri))
-                    }
-                case .identifierInput(let uri):
-                    if let property = EditionProperty.named(uri) {
-                        IdentifierInputView(property: property) { literal in
-                            edit?.properties.addLiteral(literal, to: property)
-                            // Back past the catalogue, to the form.
-                            path.removeLast(min(2, path.count))
-                        }
-                    }
+                case .property(let step):
+                    EditionPropertyDestination(
+                        step: step,
+                        properties: properties,
+                        push: { path.append(.property($0)) },
+                        pop: { path.removeLast(min($0, path.count)) }
+                    )
                 }
             }
         }
@@ -189,16 +166,9 @@ struct EditEditionFlowView: View {
         )
     }
 
-    /// Pushes what changes `property`: the date's screen, or — for an entity — the list of its
-    /// values, or the search straight away when there are none.
+    /// Pushes what changes `property`.
     private func open(_ property: EditionProperty) {
-        if property == .publicationDate {
-            path.append(.publicationDate)
-        } else if edit?.properties.entities(of: property).isEmpty == false {
-            path.append(.values(property: property.uri))
-        } else {
-            path.append(.picker(property: property.uri))
-        }
+        path.append(.property(.opening(property, in: edit?.properties ?? .init())))
     }
 
     /// Reads the edition's claims, then its works and its cover.

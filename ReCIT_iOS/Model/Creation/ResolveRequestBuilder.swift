@@ -9,6 +9,9 @@
 //  The rules, all of them one sentence long:
 //
 //  - The ISBN travels normalized, as `wdt:P212`. It is the only thing the app is certain of.
+//  - Everything else the reader said about the edition — subtitle, publisher, date, language,
+//    format, contributors, identifiers — travels in the edition seed, each entity by its uri:
+//    the ones to create are created before this request is built.
 //  - `wdt:P1476` is the title of *this edition*, which is not the title of the work: a
 //    translation, a reissue and a boxed set share a work and disagree about their covers.
 //  - An author already on inventaire is named by uri; one being created is described by label.
@@ -27,6 +30,7 @@ enum ResolveRequestBuilder {
     private enum Property {
         static let isbn13: String = "wdt:P212"
         static let editionTitle: String = "wdt:P1476"
+        static let subtitle: String = "wdt:P1680"
         static let language: String = "wdt:P407"
         static let editionOf: String = "wdt:P629"
     }
@@ -50,22 +54,28 @@ enum ResolveRequestBuilder {
         // reader's.
         let labelLanguage: String = draft.language?.code ?? language
 
-        var editionClaims: [String: [String]] = [
-            Property.isbn13: [draft.normalizedISBN],
-            Property.editionTitle: [draft.trimmedTitle]
-        ]
+        // The catalogue's values first — publisher, date, language, format, contributors,
+        // identifiers —, then what this builder decides about.
+        var editionClaims: [String: [ClaimLiteral]] = draft.properties.claims
+        editionClaims[Property.isbn13] = [.string(draft.normalizedISBN)]
+        editionClaims[Property.editionTitle] = [.string(draft.trimmedTitle)]
 
-        // Omitted rather than guessed. A wrong language on a public edition is read by everyone
-        // afterwards as a fact somebody checked.
-        if let languageUri = draft.language?.uri {
-            editionClaims[Property.language] = [languageUri]
+        if draft.trimmedSubtitle.isEmpty == false {
+            editionClaims[Property.subtitle] = [.string(draft.trimmedSubtitle)]
+        }
+
+        // The language is the form's, which the ISBN filled in. Omitted rather than guessed when
+        // neither said: a wrong language on a public edition is read by everyone afterwards as a
+        // fact somebody checked.
+        if editionClaims[Property.language] == nil, draft.properties.entities(of: .language).isEmpty, let languageUri = draft.language?.uri {
+            editionClaims[Property.language] = [.string(languageUri)]
         }
 
         // A work the reader picked or recognised is pointed at, not described a second time: the
         // edition claims to be an edition *of it*, and the work seed names it by uri. Describing
         // it again would offer the server a work to create next to the one it just found.
         if let workUri = draft.workUri {
-            editionClaims[Property.editionOf] = [workUri]
+            editionClaims[Property.editionOf] = [.string(workUri)]
         }
 
         // An uploaded cover is offered, never required: `enrich` is what covers the books

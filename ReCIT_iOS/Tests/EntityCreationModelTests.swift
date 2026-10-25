@@ -264,4 +264,32 @@ struct EntityCreationModelTests {
             try await model.createEdition(draft: self.draft)
         }
     }
+
+    // MARK: - The entities a new edition names
+
+    @Test("Publishers are created before collections, each handed back as it lands")
+    func createsPendingEntities() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities", jsonSequence: [
+            #"{ "entity": { "uri": "inv:publisher" } }"#,
+            #"{ "entity": { "uri": "inv:collection" } }"#
+        ])
+
+        var properties: EditionProperties = .init()
+        properties.add(.init(label: "Nature writing"), to: .collection)
+        properties.add(.init(label: "Le Sous-Bois"), to: .publisher)
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+        var created: [String] = []
+        try await model.createPendingEntities(of: properties, language: "fr") { id, uri in
+            properties.entityCreated(id: id, uri: uri)
+            created.append(uri)
+        }
+
+        #expect(created == ["inv:publisher", "inv:collection"])
+        #expect(properties.pendingEntities.isEmpty)
+
+        let collection: EntityCreationRequest = try JSONDecoder().decode(EntityCreationRequest.self, from: mock.sentPayloads[1])
+        #expect(collection.claims["wdt:P123"] == ["inv:publisher"])
+    }
 }

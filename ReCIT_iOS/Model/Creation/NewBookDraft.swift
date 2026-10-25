@@ -9,7 +9,9 @@
 //  Two shapes, decided by the work search the sheet opens on. A work inventaire.io already has:
 //  `workUri` names it, and only the edition is described — its title, its cover. A work of the
 //  reader's own: its title and its authors are described too, and created with the edition.
-//  The ISBN comes from the camera and is never edited.
+//  The ISBN comes from the camera and is never edited. Everything else inventaire.io accepts on
+//  an edition — publisher, date, format, contributors, identifiers — is `properties`, the same
+//  value « Modifier l'édition » holds.
 //
 //  See PRD 0015 and PRD 0026.
 //
@@ -25,6 +27,12 @@ struct NewBookDraft: Equatable, Sendable {
     /// The title printed on *this* edition's cover, which is not necessarily the work's: a
     /// translation, a reissue and a boxed set share a work and disagree about their covers.
     var title: String = ""
+
+    /// The subtitle printed on this edition, if any.
+    var subtitle: String = ""
+
+    /// The publisher, collection, date, language, format, contributors, identifiers and links.
+    var properties: EditionProperties = .init()
 
     /// The title of the work being created, when none of the works found was the book.
     var workTitle: String = ""
@@ -59,7 +67,14 @@ struct NewBookDraft: Equatable, Sendable {
     /// What the ISBN says about the language of the book, once the server has been asked.
     /// `nil` until then, and `nil` for good if the call fails — in which case the edition is
     /// published without a language claim rather than with a guessed one.
-    var language: EditionLanguage?
+    var language: EditionLanguage? {
+        didSet {
+            // What the ISBN says becomes the edition's language, unless the reader has chosen
+            // one: the form shows it, and the reader can change it there.
+            guard let language, properties.entities(of: .language).isEmpty else { return }
+            properties.add(.init(uri: language.uri, label: language.localizedName ?? language.code), to: .language)
+        }
+    }
 
     /// The cover as the forms set it: a new picture, or none. Either way the one already
     /// uploaded, if the reader is retrying after a failure, no longer stands — the next
@@ -89,6 +104,10 @@ struct NewBookDraft: Equatable, Sendable {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    var trimmedSubtitle: String {
+        subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     var trimmedWorkTitle: String {
         workTitle.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -104,8 +123,29 @@ struct NewBookDraft: Equatable, Sendable {
     /// while a work that already exists brings its own.
     var isPublishable: Bool {
         guard trimmedTitle.isEmpty == false else { return false }
+
+        // A collection is created under its publisher: one with no publisher to be created
+        // under could not be.
+        let collectionsToCreate: Bool = properties.pendingEntities.contains { $0.property == .collection }
+        guard collectionsToCreate == false || properties.entities(of: .publisher).isEmpty == false else { return false }
+
         if workUri != nil { return true }
         return trimmedWorkTitle.isEmpty == false && namedAuthors.isEmpty == false
+    }
+
+    /// Whether the draft names a work: one inventaire.io has, or one being described.
+    var hasWork: Bool {
+        workUri != nil || trimmedWorkTitle.isEmpty == false
+    }
+
+    /// What a swipe on « Détacher » takes away: the work, picked or being described. The
+    /// reader goes back to the search for another.
+    mutating func detachWork() {
+        chosenWork = nil
+        workUri = nil
+        workTitle = ""
+        authors = []
+        hasAnsweredWorkQuestion = false
     }
 
     /// Whether the edition's title is still the one this draft gave it — empty, or copied from

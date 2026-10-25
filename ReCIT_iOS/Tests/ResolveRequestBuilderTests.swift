@@ -336,4 +336,47 @@ struct ResolveRequestBuilderTests {
         #expect(body.contains("\"uri\"") == false)
         #expect(body.contains("null") == false)
     }
+
+    // MARK: - The edition's properties
+
+    @Test("Every property the reader gave travels in the edition seed, counts as numbers")
+    func propertiesInTheEditionSeed() throws {
+        var draft: NewBookDraft = draft(workUri: "wd:Q1130619")
+        draft.subtitle = "  roman "
+        draft.properties.add(.init(uri: "wd:Q336718", label: "Gallimard"), to: .publisher)
+        draft.properties.add(.init(uri: "wd:Q1860", label: "anglais"), to: .language)
+        draft.properties.setLiteral(.integer(342), for: .numberOfPages)
+        draft.properties.setLiteral("1971", for: .publicationDate)
+
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(for: draft, create: true, language: "fr")
+        let claims: [String: [ClaimLiteral]] = try #require(request.entries.first?.edition.claims)
+
+        #expect(claims["wdt:P1680"] == ["roman"])
+        #expect(claims["wdt:P123"] == ["wd:Q336718"])
+        #expect(claims["wdt:P407"] == ["wd:Q1860"])
+        #expect(claims["wdt:P1104"] == [.integer(342)])
+        #expect(claims["wdt:P577"] == ["1971"])
+        #expect(claims["wdt:P629"] == ["wd:Q1130619"])
+
+        let json: String = String(decoding: try JSONEncoder().encode(request), as: UTF8.self)
+        #expect(json.contains(#""wdt:P1104":[342]"#))
+    }
+
+    @Test("A language chosen in the form wins over the ISBN's")
+    func chosenLanguageWins() throws {
+        var draft: NewBookDraft = draft(language: french)
+        draft.properties.add(.init(uri: "wd:Q1860", label: "anglais"), to: .language)
+
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(for: draft, create: true)
+        #expect(request.entries.first?.edition.claims?["wdt:P407"] == ["wd:Q1860"])
+    }
+
+    @Test("An entity still to create is not named in the seed")
+    func pendingEntityLeftOut() {
+        var draft: NewBookDraft = draft(workUri: "wd:Q1130619")
+        draft.properties.add(.init(label: "Le Sous-Bois"), to: .publisher)
+
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(for: draft, create: true)
+        #expect(request.entries.first?.edition.claims?["wdt:P123"] == nil)
+    }
 }

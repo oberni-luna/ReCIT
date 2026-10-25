@@ -17,13 +17,6 @@ enum EditEditionStep: Hashable {
     /// The search for an author to add to the work with this id.
     case workAuthor(id: UUID)
     case coverFromURL
-    /// The entities one property names, to take some away or add one.
-    case values(property: String)
-    /// The search for an entity to add to a property.
-    case picker(property: String)
-    case publicationDate
-    /// The catalogues an identifier — or the kinds of links — can be added to.
-    case identifierCatalog(EditionProperty.Group)
-    /// Typing one identifier or link.
-    case identifierInput(property: String)
+    /// One of the screens of the catalogue's properties.
+    case property(EditionPropertyStep)
 }

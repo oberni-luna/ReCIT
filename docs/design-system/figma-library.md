@@ -4,6 +4,14 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Proposition du 2026-10-25 — `Fiche livre · Données bibliographiques`** (`744:2382`, page `Inventaire`, sous
+  `Œuvre & édition`, clair seul) : la fiche d'une édition gagne tout en bas une section « Données bibliographiques »
+  d'une seule rangée, « Modifier », qui ouvre le formulaire de l'édition (la forme de `V3 · Nouvelle édition`,
+  pré-remplie). Deux frames — `Édition · Je possède · Complète` (`744:2383`, toute la longueur, 393 × 1 506) et
+  `Édition · Je possède · Défilée jusqu'en bas` (`744:2482`, 393 × 852) — et `Spec · Fiche livre · Données
+  bibliographiques` (`744:24535`). **Aucun composant nouveau** : `Section Header` et `Row / Link` Tinted, le reste
+  cloné de `Œuvre & édition`. **Implémentée le même jour** ([feature 0049](../features/0049-edit-an-edition.md)) ;
+  le formulaire n'est pas maquetté, et le code y ajoute un sous-titre que `V3` n'a pas.
 - **Passe du 2026-10-03 — `Profil · À propos & version`** (`528:16519`, page `Screens`, mode clair seul) :
   `V1 · Profil · À propos & version` (`528:16520`, clone de `A0 · Profil · Sans Réseau` `499:14070`) — une entrée
   `Row / Link` Tinted « À propos d'inventaire.io » entre les transactions et « Se déconnecter », et un pied de page

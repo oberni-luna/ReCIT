@@ -5,7 +5,7 @@
 //  The sentence under a section of the book creation, in the app's footnote rather than the
 //  system's: `Note` (`101:236`), Footnote / Secondary, in the Figma file.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

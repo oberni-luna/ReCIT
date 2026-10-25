@@ -7,7 +7,7 @@
 //  (`bibliographic_data_settings.svelte`, inventaire-client) — its wiki page about entities,
 //  the project's chat room about them, and the reader's own contributions.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Foundation

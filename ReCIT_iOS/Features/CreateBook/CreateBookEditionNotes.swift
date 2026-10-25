@@ -6,7 +6,7 @@
 //  what is written here becomes public — said of the edition alone in « Nouvelle édition », of
 //  the work and the edition in « Nouvelle œuvre ».
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import SwiftUI

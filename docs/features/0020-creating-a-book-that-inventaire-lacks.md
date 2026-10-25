@@ -4,6 +4,12 @@ Shipped on 2026-09-18. Les sept issues 0090–0096 ont été supprimées à ce c
 avec elles ; git les garde. L'issue 0097 — la même chose depuis une recherche — reste ouverte et
 n'est pas dans cette v1.
 
+**Remplacé le 2026-10-25** par la [feature 0047](0047-new-book-work-first.md) : la feuille commence
+maintenant par chercher l'œuvre, et le formulaire titre-auteur décrit ci-dessous n'existe plus.
+Le reste — `autocreate`, la passe à blanc, la langue de l'ISBN, les échecs, les brouillons — vaut
+toujours, à deux corrections près que 0047 décrit : une œuvre reconnue est maintenant nommée dans
+l'entrée `resolve`, et une couverture uploadée part en URL absolue.
+
 ## Ce que ça fait
 
 On scanne une pile de livres. Un sur cinq ne donnait rien : la rangée montait, affichait le

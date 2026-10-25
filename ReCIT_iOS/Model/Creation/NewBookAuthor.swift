@@ -8,7 +8,7 @@
 //  That single distinction is what keeps the base free of twin authors. Two « Ursula K. Le
 //  Guin » split her bibliography in half, and only a human with merge rights can put it back.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import Foundation

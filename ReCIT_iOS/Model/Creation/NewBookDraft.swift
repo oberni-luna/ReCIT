@@ -11,7 +11,7 @@
 //  reader's own: its title and its authors are described too, and created with the edition.
 //  The ISBN comes from the camera and is never edited.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import Foundation

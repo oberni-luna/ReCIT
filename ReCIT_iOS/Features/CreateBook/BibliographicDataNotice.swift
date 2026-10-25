@@ -14,7 +14,7 @@
 //  A whole section, so a screen places it in one line and it takes its own row's insets and
 //  background off — it is a card of its own, not a row of a card.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

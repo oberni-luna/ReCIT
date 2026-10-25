@@ -5,7 +5,7 @@
 //  What leaves the device as a cover, whichever way it came in: a JPEG no longer than 1600
 //  points on its longest edge, or nothing when the bytes are not an image.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Testing

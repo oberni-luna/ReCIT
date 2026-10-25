@@ -5,7 +5,7 @@
 //  The line a work is recognised by in the search of « Nouveau livre » — « Kim Stanley Robinson
 //  · 2020 » — asserted on the pure type that composes it. Network-free.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Foundation

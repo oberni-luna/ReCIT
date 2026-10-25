@@ -8,7 +8,7 @@
 //  label.
 //
 //  `EntityResultDTO` cannot be reused: it requires `type` and `descriptions`, which are not
-//  asked for here. See PRD 0021.
+//  asked for here. See PRD 0026.
 //
 
 import Foundation

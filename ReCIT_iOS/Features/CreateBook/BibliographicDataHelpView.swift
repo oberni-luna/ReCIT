@@ -11,7 +11,7 @@
 //  it gives. « Voir mes contributions » needs to know who is asking, and is left out when that
 //  is not known.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

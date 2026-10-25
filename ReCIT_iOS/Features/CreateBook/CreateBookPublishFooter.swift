@@ -8,7 +8,7 @@
 //  Publishing waits for the server, and the sheet stays open until it answers: nothing about
 //  this write is optimistic, `EntityCreationModel` says why at length.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import SwiftUI

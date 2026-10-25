@@ -15,7 +15,7 @@
 //  Loaded through the cookieless session: the address is on somebody else's server, which has
 //  no business with the reader's cookies, and nothing to hand back to them either.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import UIKit

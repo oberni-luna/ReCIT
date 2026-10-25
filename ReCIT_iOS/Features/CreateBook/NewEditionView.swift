@@ -9,7 +9,7 @@
 //  the reconnaissance pass, since the work is named by its uri. What is left is this edition —
 //  its cover, its ISBN, and its title, which starts as the work's.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

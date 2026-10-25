@@ -10,7 +10,7 @@
 //  several, each picked from inventaire.io or created. Then this edition: its cover, its ISBN,
 //  and its title, which follows the work's until the reader makes it their own.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

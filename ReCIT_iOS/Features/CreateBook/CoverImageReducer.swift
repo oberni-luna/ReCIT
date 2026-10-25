@@ -10,7 +10,7 @@
 //  turning a *SwiftUI view* into an image, which is not what this is. Here a picture is being
 //  resampled.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import UIKit

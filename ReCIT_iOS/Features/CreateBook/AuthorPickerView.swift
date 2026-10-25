@@ -18,7 +18,7 @@
 //  several, and the screen that pushed this one decides whether the answer replaces an author
 //  or adds one.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import SwiftUI

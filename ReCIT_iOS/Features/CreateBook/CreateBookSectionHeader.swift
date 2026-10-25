@@ -5,7 +5,7 @@
 //  The header of a section in the book creation, in the app's section header style rather than
 //  the system's: `Section Header` (`28:164`) in the Figma file, as the Réseau screens set theirs.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

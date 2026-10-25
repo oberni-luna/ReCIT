@@ -6,7 +6,7 @@
 //  and from the notice's « En savoir plus ». One sheet, set up once by `NewBookFlowView`, so
 //  that every way of asking opens the same one.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

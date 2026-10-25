@@ -9,7 +9,7 @@
 //  the ones its `isUrl` accepts — http or https, with a host — and the app checks that before
 //  anything is loaded.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Foundation

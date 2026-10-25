@@ -9,7 +9,7 @@
 //  into the store would leave a trail of works nobody asked for. Only the one picked travels, in
 //  the draft, and only its uri reaches the server.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Foundation

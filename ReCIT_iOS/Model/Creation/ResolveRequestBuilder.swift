@@ -15,7 +15,7 @@
 //    Same for the work. That single distinction is what keeps the base free of twins.
 //  - A work that exists is named, never left out, and sends no author: it has its own.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import Foundation

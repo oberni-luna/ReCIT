@@ -5,7 +5,7 @@
 //  The « ? » at the trailing end of every navigation bar of the book creation, which opens the
 //  help about bibliographic data. `Chrome / Sheet Nav Bar`'s `Show trailing` in the Figma file.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

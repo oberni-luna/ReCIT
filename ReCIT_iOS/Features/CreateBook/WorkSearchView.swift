@@ -14,7 +14,7 @@
 //  search people and walk from an author to their works. Each result is completed by
 //  `EntityCreationModel.describeWorks`, for the authors and the year a cover is recognised by.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

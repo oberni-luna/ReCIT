@@ -5,7 +5,7 @@
 //  Which addresses a cover can be taken from — the ones `resolve` will fetch, http or https
 //  with a host — and the image search that helps find one. Pure and network-free.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Foundation

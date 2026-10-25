@@ -8,7 +8,7 @@
 //  follows from the answer: a work picked, or one to create, and on the way to creating it the
 //  work inventaire.io recognised after all.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Foundation

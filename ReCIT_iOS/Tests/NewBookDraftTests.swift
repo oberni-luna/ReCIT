@@ -5,7 +5,7 @@
 //  What the draft of a book being created does on its own, before anything is sent: which work
 //  it is attached to, what its edition is called, and when it is enough to publish.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Foundation

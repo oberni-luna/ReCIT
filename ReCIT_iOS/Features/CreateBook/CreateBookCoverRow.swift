@@ -14,7 +14,7 @@
 //  The ISBN is shown and not editable: it is the one fact the app is certain of, read off the
 //  barcode a moment ago, and the whole form exists because the *rest* is unknown.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import PhotosUI

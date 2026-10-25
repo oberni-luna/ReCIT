@@ -10,7 +10,7 @@
 //  that writes the choice into the draft before pushing, so the disclosure chevron is drawn here
 //  when the row leads somewhere, and left out when it only recalls a choice already made.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import SwiftUI

@@ -9,7 +9,7 @@
 //  A contributor who fears having made a duplicate will not press the button again, and the
 //  book stays in their hand for nothing.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import SwiftUI

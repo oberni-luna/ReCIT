@@ -13,7 +13,7 @@
 //
 //  What leaves this file is JPEG bytes, reduced by `CoverImageReducer`.
 //
-//  See PRD 0015 and PRD 0021.
+//  See PRD 0015 and PRD 0026.
 //
 
 import SwiftUI

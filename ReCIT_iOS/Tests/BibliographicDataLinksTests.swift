@@ -5,7 +5,7 @@
 //  The three places the help about bibliographic data points to — the same ones
 //  inventaire.io's own notice gives.
 //
-//  See PRD 0021.
+//  See PRD 0026.
 //
 
 import Foundation

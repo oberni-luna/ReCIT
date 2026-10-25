@@ -8,8 +8,8 @@
 //  `action300` and the `person.2` glyph 24 pt; at 32 pt the initials drop to `action200` —
 //  `action300` fills a 32 pt disc — and the glyph to 18 pt. Every side from 44 up takes the
 //  large type, every side below it the small one, and the glyph keeps the proportion of the
-//  drawn size it is nearest to. Under 32 pt there is no mark at all, only the tinted fill: a
-//  graph dot is 24 pt, and initials at that size are smaller than any text style (Q37).
+//  drawn size it is nearest to. Under 32 pt there is no mark at all, only the tinted fill: the
+//  Réseau graph's dots were 24 pt, and initials at that size are smaller than any text style (Q37).
 //
 
 import CoreGraphics

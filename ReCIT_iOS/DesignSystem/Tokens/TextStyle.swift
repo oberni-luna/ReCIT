@@ -92,7 +92,7 @@ public extension DesignSystem {
         }
 
         /// The font at `dynamicTypeSize` — what `textStyle(_:)` draws with, so that a view whose
-        /// environment caps the text size (`.dynamicTypeSize(...)`, the Réseau graph at
+        /// environment caps the text size (`.dynamicTypeSize(...)`, as the Réseau graph did at
         /// `.xxxLarge`) gets the capped size. `uiFont` scales to the app's own size, which a
         /// SwiftUI cap never reaches: the cap used to be silently ignored by every design-system
         /// style (PRD 0019, Q43).

@@ -3,8 +3,8 @@
 //  ReCIT_iOSTests
 //
 //  A design-system style follows the text size of the view it is drawn in — the environment's,
-//  cap included — not only the app's. The Réseau graph caps its text at `.xxxLarge` (PRD 0019,
-//  Q43), and a cap the fonts ignored was no cap: `uiFont` is scaled once, to the app's size,
+//  cap included — not only the app's. The Réseau graph capped its text at `.xxxLarge` (PRD 0019,
+//  Q43; the graph left with feature 0048), and a cap the fonts ignored was no cap: `uiFont` is scaled once, to the app's size,
 //  where `.dynamicTypeSize(...)` never reaches.
 //
 

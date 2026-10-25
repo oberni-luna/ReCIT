@@ -6,7 +6,7 @@
 //  invitations waiting on me first, since nothing else will tell me about them, then my groups,
 //  then the requests I sent that nobody has answered, and the ways to find or start one.
 //
-//  Sections only, like `FriendsSegmentView`, listed by `NetworkSegmentContent`. The groups
+//  Sections only, like `FriendsSegmentView`, so it slots under the segmented control. The groups
 //  are read from the store through `@Query` (ADR 0001), so they are there from the moment the
 //  app opens, offline too, and answering an invitation moves the group from one section to the
 //  other on the spot. `MyGroups` does the sorting; `GroupModel` knows who I am.

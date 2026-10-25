@@ -4,8 +4,7 @@
 //
 //  Réseau › Amis — frame `A1`. The two sections the Profil used to carry, moved without being
 //  redrawn: the invitations waiting on me, then my friends and the way to add more (feature
-//  0018). Sections only: `NetworkSegmentContent` puts them in a list of their own, under the
-//  segmented control `NetworkView` keeps in a band above every segment.
+//  0018). Sections only, so it slots under the segmented control of `NetworkView`'s list.
 //
 
 import SwiftUI

@@ -2,8 +2,8 @@
 //  ReaderInitials.swift
 //  ReCIT_iOS
 //
-//  The letters a reader without a photo is drawn with — on a tinted disc, in the lists and in
-//  the network graph (PRD 0019, Q20).
+//  The letters a reader without a photo is drawn with — on a tinted disc, in the lists (PRD 0019,
+//  Q20).
 //
 //  inventaire.io usernames are handles, not names: « olivier_berni », « JeanLuc », « Léa ». A
 //  handle made of several words gets one letter per word, so « olivier_berni » reads « OB » and
@@ -14,8 +14,8 @@
 //  Letters are grapheme clusters, never bytes or scalars, so an accent stays on its letter
 //  (« Aïcha » → « AÏ ») and an emoji stays whole.
 //
-//  `nonisolated`: the target defaults to the main actor, and this is arithmetic on a string that
-//  the graph's pure modules call off it.
+//  `nonisolated`: the target defaults to the main actor, and this is arithmetic on a string, safe
+//  to call off it.
 //
 
 import Foundation

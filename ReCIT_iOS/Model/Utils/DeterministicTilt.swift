@@ -21,13 +21,10 @@
 //  It never touches `String.hashValue`, which is **seeded per process**: the leans would be
 //  different on every launch, a failure that looks perfect within any single run.
 //
-//  `nonisolated`: the target defaults to the main actor, and the Réseau graph's placement seeds
-//  its relaxation from here, off it (PRD 0019, Q16, Q45).
-//
 
 import Foundation
 
-nonisolated enum DeterministicTilt {
+enum DeterministicTilt {
 
     /// How many distinct angles the range is cut into. Odd, so dead upright is reachable:
     /// a pile where nothing is ever straight reads as a rendering bug, not as handling.

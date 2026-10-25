@@ -69,7 +69,7 @@ struct EditionClaimsTests {
             "claims": { "wdt:P1476": ["Penss et les plis du monde"], "wdt:P629": ["inv:work"] } } } }
         """).first
 
-        #expect(claims?.workUri == "inv:work")
+        #expect(claims?.workUris == ["inv:work"])
         #expect(claims?.labelLanguage == "fr")
     }
 

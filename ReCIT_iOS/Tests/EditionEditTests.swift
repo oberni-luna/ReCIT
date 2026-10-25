@@ -28,7 +28,9 @@ struct EditionEditTests {
             title: title,
             subtitle: subtitle,
             coverHash: coverHash,
-            isbn: "978-2-37049-300-2"
+            isbn: "978-2-37049-300-2",
+            // An edition always names a work: one with none cannot be saved.
+            workUris: ["inv:work"]
         )
     }
 

@@ -30,18 +30,27 @@ enum EntityLabel {
         _ labels: [String: String]?,
         originalLang: String? = nil
     ) -> String? {
+        language(of: labels, originalLang: originalLang).flatMap { labels?[$0] }
+    }
+
+    /// The language of the label `resolve` picks — the one a renamed entity's new label is
+    /// written in, so that the name shown is the name replaced.
+    static func language(
+        of labels: [String: String]?,
+        originalLang: String? = nil
+    ) -> String? {
         guard let labels else { return nil }
 
         let preferred: [String?] = ["fr", "en", "mul", originalLang]
         for case let language? in preferred {
             if let label = labels[language], label.isEmpty == false {
-                return label
+                return language
             }
         }
 
         return labels
             .filter { $0.value.isEmpty == false }
             .min { $0.key < $1.key }?
-            .value
+            .key
     }
 }

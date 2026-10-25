@@ -2,9 +2,9 @@
 //  EditionWork.swift
 //  ReCIT_iOS
 //
-//  The work an edition is an edition of, as « Modifier l'édition » shows it: its title and its
-//  authors. The one the edition had when the form opened, one picked from the search, or one
-//  just created.
+//  A work an edition is an edition of, as inventaire.io holds it: its title and its authors. One
+//  the edition had when the form opened, one picked from the search, or one just created. What
+//  the form changes about it is a `WorkEdit`.
 //
 //  Its authors can be added to only when it is one of inventaire.io's own (`inv:`): a Wikidata
 //  work's authors are edited on Wikidata, through an account this app does not hold.
@@ -14,23 +14,27 @@ import Foundation
 
 struct EditionWork: Equatable, Sendable {
     let uri: String
-    let title: String
+    var title: String
     /// Who wrote it. Read from the server, each carries its uri; picked from the search, only
     /// its name — the search answers names.
     var authors: [NewBookAuthor]
     /// The picture the row shows.
     var imageUrl: String?
+    /// The language of the label shown as its title: the one a new title is written in.
+    var titleLanguage: String?
 
     init(
         uri: String,
         title: String,
         authors: [NewBookAuthor] = [],
-        imageUrl: String? = nil
+        imageUrl: String? = nil,
+        titleLanguage: String? = nil
     ) {
         self.uri = uri
         self.title = title
         self.authors = authors
         self.imageUrl = imageUrl
+        self.titleLanguage = titleLanguage
     }
 
     /// A work picked from the search.

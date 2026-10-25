@@ -2,19 +2,15 @@
 //  EditEditionView.swift
 //  ReCIT_iOS
 //
-//  « Modifier l'édition » — the form behind the « Modifier » of the book screen's « Données
-//  bibliographiques ». The shape of `V3 · Nouvelle édition` in the Figma file, filled with what
-//  inventaire.io holds: the work it is an edition of, the cover, the ISBN shown and not
-//  editable, the title, the subtitle.
+//  « Modifier l'édition » — the form behind the book screen's « Données bibliographiques »:
+//  everything inventaire.io holds about an edition, filled from the server. Frame `E1` of the
+//  Figma section `Modifier l'édition · Toutes les données`.
 //
-//  « Édition de » comes first, as in `V3`, and does more here: the work is changed through the
-//  same search as a new book's (`V2`), or created when the search finds none — titled in place,
-//  given authors below it. Authors are added to an existing work the same way, through the
-//  creation's author search; those added are listed until saved, and can be swiped away.
-//
-//  Under the title, every other property inventaire.io accepts on an edition (`EditionProperty`):
-//  « Publication », « Format », « Ont aussi fait cette édition », « Bases bibliographiques » and
-//  « Autres données » — `E1` of the Figma section `Modifier l'édition · Toutes les données`.
+//  « Édition de » comes first: the works the edition is an edition of, each opening « Modifier
+//  l'œuvre », detached with a swipe, added through the same search as a new book's (`V2`) or
+//  created when it finds none. Then the cover and ISBN — shown, not editable —, the title and
+//  the subtitle, and every other property of the catalogue (`EditionProperty`): « Publication »,
+//  « Format », « Ont aussi fait cette édition », « Bases bibliographiques » and « Sur le web ».
 //
 //  « Enregistrer » is pinned at the foot of the sheet (`E3`), and waits for the server:
 //  `EntityCreationModel` says why nothing about writing into the open database is optimistic. It
@@ -31,11 +27,11 @@ struct EditEditionView: View {
 
     let onSave: () async -> Void
 
-    /// Pushes the search for the edition's work.
-    let onChooseWork: () -> Void
+    /// Pushes the search for a work to add.
+    let onAddWork: () -> Void
 
-    /// Pushes the search for an author to add to the work.
-    let onAddAuthor: () -> Void
+    /// Pushes « Modifier l'œuvre » for the work with this id.
+    let onOpenWork: (UUID) -> Void
 
     /// Pushes « Image depuis une URL » for the cover.
     let onPickCoverURL: () -> Void
@@ -43,12 +39,6 @@ struct EditEditionView: View {
     let onOpenProperty: (EditionProperty) -> Void
     /// Pushes the list of catalogues an identifier — or a link — is added to.
     let onAddIdentifier: (EditionProperty.Group) -> Void
-
-    private var workFooter: LocalizedStringKey {
-        if edit.isCreatingWork { return "edit_edition.work.new_help" }
-        if edit.work?.isEditable == false { return "edit_edition.work.wikidata_help" }
-        return "edit_edition.work.help"
-    }
 
     var body: some View {
         Form {
@@ -65,45 +55,12 @@ struct EditEditionView: View {
 
             BibliographicDataNotice()
 
-            Section {
-                if edit.isCreatingWork {
-                    TextField("create_book.new_work.title_field", text: $edit.newWorkTitle)
-                        .accessibilityIdentifier("e2e.editEdition.workTitle")
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundDefault)
-                        .withLabel(label: "create_book.new_work.title_field")
-                } else if let work = edit.work {
-                    Button(action: onChooseWork) {
-                        WorkRow(work: work.candidate, showsDisclosure: true)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("e2e.editEdition.work")
-                }
-
-                ForEach(edit.addedAuthors) { author in
-                    EditEditionAddedAuthorRow(author: author)
-                }
-                .onDelete { offsets in
-                    edit.removeAddedAuthors(atOffsets: offsets)
-                }
-
-                if edit.canAddAuthors {
-                    EditEditionActionRow(title: "edit_edition.work.add_author", action: onAddAuthor)
-                        .accessibilityIdentifier("e2e.editEdition.addAuthor")
-                }
-
-                if edit.work == nil {
-                    EditEditionActionRow(
-                        title: edit.isCreatingWork ? "edit_edition.work.change" : "edit_edition.work.choose",
-                        action: onChooseWork
-                    )
-                    .accessibilityIdentifier("e2e.editEdition.chooseWork")
-                }
-            } header: {
-                CreateBookSectionHeader("create_book.edition.of")
-            } footer: {
-                CreateBookSectionFooter(workFooter)
-            }
+            EditionWorksSection(
+                works: edit.works,
+                onOpen: onOpenWork,
+                onDetach: { edit.detachWork(id: $0) },
+                onAdd: onAddWork
+            )
 
             Section {
                 CreateBookCoverRow(

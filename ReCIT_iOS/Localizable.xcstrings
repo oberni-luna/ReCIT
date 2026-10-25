@@ -3366,54 +3366,6 @@
         }
       }
     },
-    "edit_edition.work.change" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose another work"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir une autre œuvre"
-          }
-        }
-      }
-    },
-    "edit_edition.work.choose" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose the work"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir l’œuvre"
-          }
-        }
-      }
-    },
-    "edit_edition.work.help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The work this book is an edition of, with its authors. Not the right one? Choose another, or create it."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’œuvre dont ce livre est une édition, avec ses auteur·ices. Ce n’est pas la bonne ? Choisissez-en une autre, ou créez-la."
-          }
-        }
-      }
-    },
     "edit_edition.work.new_author" : {
       "localizations" : {
         "en" : {
@@ -3426,22 +3378,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Créé·e sur inventaire.io à l’enregistrement"
-          }
-        }
-      }
-    },
-    "edit_edition.work.new_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Created on inventaire.io when you save, with at least one author."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Créée sur inventaire.io à l’enregistrement, avec au moins un·e auteur·ice."
           }
         }
       }
@@ -3478,18 +3414,178 @@
         }
       }
     },
-    "edit_edition.work.wikidata_help" : {
+    "edit_edition.works.add" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This work lives on Wikidata: its authors are edited there."
+            "value" : "Add a work"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cette œuvre vit sur Wikidata : ses auteur·ices se modifient là-bas."
+            "value" : "Ajouter une œuvre"
+          }
+        }
+      }
+    },
+    "edit_edition.works.detach" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detach"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Détacher"
+          }
+        }
+      }
+    },
+    "edit_edition.works.empty_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An edition belongs to at least one work: add one to save."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une édition est celle d’une œuvre au moins : ajoutez-en une pour pouvoir enregistrer."
+          }
+        }
+      }
+    },
+    "edit_edition.works.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch a work to edit it. Swipe it to the left to detach it from this edition. A collection of works has several."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez une œuvre pour la modifier. Glissez-la vers la gauche pour la détacher de cette édition. Un recueil en réunit plusieurs."
+          }
+        }
+      }
+    },
+    "edit_edition.works.new_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch the new work to give it an author: it can’t be created without one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez la nouvelle œuvre pour lui donner un·e auteur·ice : elle ne se crée pas sans."
+          }
+        }
+      }
+    },
+    "edit_work.add_other_author" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add another author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un·e autre auteur·ice"
+          }
+        }
+      }
+    },
+    "edit_work.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’œuvre"
+          }
+        }
+      }
+    },
+    "edit_work.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you change here applies to every edition of this work, and is sent by « Save » when you go back. Swipe an author to the left to remove them from the work."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que vous changez ici vaut pour toutes les éditions de cette œuvre, et part avec « Enregistrer », au retour. Glissez un·e auteur·ice vers la gauche pour l’enlever de l’œuvre."
+          }
+        }
+      }
+    },
+    "edit_work.new_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name who wrote it: the work is created with its authors when the edition is saved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nommez qui l’a écrite : l’œuvre se crée avec ses auteur·ices, à l’enregistrement de l’édition."
+          }
+        }
+      }
+    },
+    "edit_work.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier l’œuvre"
+          }
+        }
+      }
+    },
+    "edit_work.wikidata_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This work lives on Wikidata: its title and authors are edited there."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette œuvre vit sur Wikidata : son titre et ses auteur·ices s’y modifient."
           }
         }
       }

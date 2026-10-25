@@ -1,15 +1,15 @@
 //
-//  EditEditionAddedAuthorRow.swift
+//  EditWorkAuthorRow.swift
 //  ReCIT_iOS
 //
-//  An author added to the edition's work, not saved yet: the name, and under it what tells them
-//  apart — the search's description for someone inventaire.io has, or that they will be created
-//  for someone it does not.
+//  An author of a work in « Modifier l'œuvre »: the name, and under it what tells them apart —
+//  the search's description for someone inventaire.io has, or that they will be created for
+//  someone it does not.
 //
 
 import SwiftUI
 
-struct EditEditionAddedAuthorRow: View {
+struct EditWorkAuthorRow: View {
     let author: NewBookAuthor
 
     var body: some View {

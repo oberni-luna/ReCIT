@@ -3,7 +3,8 @@
 //  ReCIT_iOS
 //
 //  One request of a save, as `EditionEdit.nextStep` lists them: what has to exist before the
-//  claims can name it — a picture, an author, a work — then the claims, one at a time.
+//  claims can name it — a picture, an author, a work, a publisher — then the claims, one at a
+//  time, then the works' new titles.
 //
 
 import Foundation
@@ -13,11 +14,13 @@ enum EditionEditStep: Equatable, Sendable {
     case uploadCover(Data)
     /// Create an author inventaire.io does not have, labelled with its name.
     case createAuthor(id: UUID, label: String, language: String)
-    /// Create the work the edition is an edition of, with its authors.
-    case createWork(label: String, language: String, authorUris: [String])
+    /// Create a work the edition is an edition of, with its authors.
+    case createWork(id: UUID, label: String, language: String, authorUris: [String])
     /// Create a publisher, a collection or a person the edition names, labelled with the name
     /// the reader typed.
     case createEntity(id: UUID, label: String, language: String, kind: EntityCreationKind)
     /// Change one claim.
     case claim(EditionClaimUpdate)
+    /// Rename a work.
+    case label(EntityLabelUpdate)
 }

@@ -29,8 +29,9 @@ struct EditionClaims: Equatable, Sendable {
     let isbn: String
     /// The ISBN-10, when it is shown under an ISBN-13. Never sent: the server infers it.
     let isbn10: String?
-    /// The work this is an edition of, `wdt:P629`. `nil` for an edition attached to none.
-    var workUri: String?
+    /// The works this is an edition of, `wdt:P629`: one, several for a collection of works, none
+    /// for an edition attached to nothing.
+    var workUris: [String]
     /// The language the edition's own labels were written in: the one the labels of a work or
     /// an author created from the form are written in too.
     let labelLanguage: String?
@@ -44,7 +45,7 @@ struct EditionClaims: Equatable, Sendable {
         coverHash: String? = nil,
         isbn: String = "",
         isbn10: String? = nil,
-        workUri: String? = nil,
+        workUris: [String] = [],
         labelLanguage: String? = nil,
         properties: EditionProperties = .init()
     ) {
@@ -54,7 +55,7 @@ struct EditionClaims: Equatable, Sendable {
         self.coverHash = coverHash
         self.isbn = isbn
         self.isbn10 = isbn10
-        self.workUri = workUri
+        self.workUris = workUris
         self.labelLanguage = labelLanguage
         self.properties = properties
     }
@@ -77,7 +78,7 @@ struct EditionClaims: Equatable, Sendable {
             coverHash: dto.firstValue(of: EditableClaimProperty.cover.rawValue),
             isbn: isbn13 ?? isbn10 ?? "",
             isbn10: isbn13 == nil ? nil : isbn10,
-            workUri: dto.firstValue(of: EditableClaimProperty.work.rawValue),
+            workUris: dto.claims?[EditableClaimProperty.work.rawValue]?.compactMap { $0.getStringValue() } ?? [],
             labelLanguage: dto.originalLang,
             properties: .init(claims: dto.claims ?? [:], labels: labels)
         )

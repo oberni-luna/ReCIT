@@ -165,9 +165,11 @@ struct EntityCreationModelEditionTests {
         """)
 
         let model: EntityCreationModel = .init(apiService: MockAPIService(), publicAPIService: publicMock)
-        let work: EditionWork = try await model.describeWork(uri: "inv:work")
+        let works: [EditionWork] = try await model.describeWorks(uris: ["inv:work"])
+        let work: EditionWork = try #require(works.first)
 
         #expect(work.title == "Penss et les plis du monde")
+        #expect(work.titleLanguage == "fr")
         #expect(work.authors.map(\.uri) == ["wd:Q3177937"])
         #expect(work.authors.map(\.trimmedName) == ["Jérémie Moreau"])
         #expect(publicMock.recordedRequests.first?.endpoint.contains("relatives=wdt:P50") == true)
@@ -182,9 +184,12 @@ struct EntityCreationModelEditionTests {
             #"{ "entity": { "uri": "inv:work" } }"#
         ])
 
-        var edit: EditionEdit = .init(original: original, originalWork: .init(uri: "inv:old", title: "Lucioles"))
+        var old: EditionClaims = original
+        old.workUris = ["inv:old"]
+        var edit: EditionEdit = .init(original: old, originalWorks: [.init(uri: "inv:old", title: "Lucioles")])
+        edit.detachWork(id: edit.works[0].id)
         edit.startNewWork(titled: "Lucioles, l'œuvre")
-        edit.addAuthor(.init(name: "Lucie Durand"))
+        edit.works[0].addAuthor(.init(name: "Lucie Durand"))
 
         let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
         let saved: EditionEdit = try await model.saveEdition(edit)
@@ -192,9 +197,10 @@ struct EntityCreationModelEditionTests {
         #expect(mock.recordedRequests.map(\.endpoint) == [
             "/api/entities",
             "/api/entities",
+            "/api/entities/update-claim",
             "/api/entities/update-claim"
         ])
-        #expect(mock.recordedRequests.map(\.method) == ["POST", "POST", "PUT"])
+        #expect(mock.recordedRequests.map(\.method) == ["POST", "POST", "PUT", "PUT"])
 
         let author: EntityCreationRequest = try JSONDecoder().decode(EntityCreationRequest.self, from: mock.sentPayloads[0])
         #expect(author.labels.values.first == "Lucie Durand")
@@ -204,10 +210,13 @@ struct EntityCreationModelEditionTests {
         #expect(work.labels.values.first == "Lucioles, l'œuvre")
         #expect(work.claims == ["wdt:P31": ["wd:Q47461344"], "wdt:P50": ["inv:author"]])
 
-        let claim: EditionClaimUpdate = try JSONDecoder().decode(EditionClaimUpdate.self, from: mock.sentPayloads[2])
+        // The old work is detached, then the new one claimed.
+        let detached: EditionClaimUpdate = try JSONDecoder().decode(EditionClaimUpdate.self, from: mock.sentPayloads[2])
+        #expect(detached == .init(uri: original.uri, property: .work, oldValue: "inv:old", newValue: nil))
+        let claim: EditionClaimUpdate = try JSONDecoder().decode(EditionClaimUpdate.self, from: mock.sentPayloads[3])
         #expect(claim == .init(uri: original.uri, property: .work, oldValue: nil, newValue: "inv:work"))
 
-        #expect(saved.original.workUri == "inv:work")
+        #expect(saved.original.workUris == ["inv:work"])
         #expect(saved.hasChanges == false)
     }
 
@@ -221,8 +230,8 @@ struct EntityCreationModelEditionTests {
         }
 
         var edit: EditionEdit = .init(original: original)
-        edit.startNewWork(titled: "Lucioles")
-        edit.addAuthor(.init(name: "Lucie Durand"))
+        let id: UUID = edit.startNewWork(titled: "Lucioles")
+        edit.works[0].addAuthor(.init(name: "Lucie Durand"))
 
         let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
 
@@ -234,8 +243,32 @@ struct EntityCreationModelEditionTests {
         }
 
         let partial: EditionEdit = try #require(halfway)
-        #expect(partial.addedAuthors.map(\.uri) == ["inv:author"])
-        #expect(partial.nextStep == .createWork(label: "Lucioles", language: partial.labelLanguage, authorUris: ["inv:author"]))
+        #expect(partial.works[0].authors.map(\.uri) == ["inv:author"])
+        #expect(partial.nextStep == .createWork(id: id, label: "Lucioles", language: partial.labelLanguage, authorUris: ["inv:author"]))
+    }
+
+    @Test("A work renamed is sent as a label, after the claims")
+    func renamesTheWork() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/update-claim", json: #"{ "ok": true }"#)
+        mock.stub("/api/entities/update-label", json: #"{ "ok": true }"#)
+
+        var withWork: EditionClaims = original
+        withWork.workUris = ["inv:work"]
+        var edit: EditionEdit = .init(
+            original: withWork,
+            originalWorks: [.init(uri: "inv:work", title: "Lucioles", authors: [.init(name: "Lucie Durand", uri: "inv:lucie")], titleLanguage: "fr")]
+        )
+        edit.works[0].title = "Lucioles, quinze fictions"
+        edit.works[0].removeAuthors(atOffsets: [0])
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+        let saved: EditionEdit = try await model.saveEdition(edit)
+
+        #expect(mock.recordedRequests.map(\.endpoint) == ["/api/entities/update-claim", "/api/entities/update-label"])
+        let label: EntityLabelUpdate = try JSONDecoder().decode(EntityLabelUpdate.self, from: mock.sentPayloads[1])
+        #expect(label == .init(uri: "inv:work", lang: "fr", value: "Lucioles, quinze fictions"))
+        #expect(saved.hasChanges == false)
     }
 
     // MARK: - The catalogue's properties
@@ -272,7 +305,7 @@ struct EntityCreationModelEditionTests {
             #"{ "entity": { "uri": "inv:collection" } }"#
         ])
 
-        var edit: EditionEdit = .init(original: .init(uri: original.uri, title: "Lucioles", labelLanguage: "fr"))
+        var edit: EditionEdit = .init(original: .init(uri: original.uri, title: "Lucioles", workUris: ["inv:work"], labelLanguage: "fr"))
         edit.properties.add(.init(label: "Nature writing"), to: .collection)
         edit.properties.add(.init(label: "Le Sous-Bois"), to: .publisher)
         edit.properties.setLiteral(.integer(256), for: .numberOfPages)

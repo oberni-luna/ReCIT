@@ -34,6 +34,7 @@ struct EditionIdentifiersSection: View {
                     Button("edit_edition.remove", role: .destructive) {
                         remove(entry.value, from: entry.property)
                     }
+                    .tint(.foregroundError)
                 }
             }
 

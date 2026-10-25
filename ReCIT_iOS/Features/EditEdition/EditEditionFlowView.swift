@@ -2,10 +2,10 @@
 //  EditEditionFlowView.swift
 //  ReCIT_iOS
 //
-//  The sheet the book screen's « Modifier » opens: what inventaire.io holds about the edition and
-//  its work, read fresh, then the form, and what it pushes over itself — the search for the work
-//  (`V2 · Quelle œuvre ?` of « Nouveau livre v2 »), the search for an author, « Image depuis une
-//  URL ».
+//  The sheet the book screen's « Données bibliographiques » opens: what inventaire.io holds about
+//  the edition and its works, read fresh, then the form, and what it pushes over itself — the
+//  search for a work (`V2 · Quelle œuvre ?` of « Nouveau livre v2 »), « Modifier l'œuvre » and
+//  its author search, « Image depuis une URL », and the screens of the catalogue's properties.
 //
 //  A sheet with its own navigation stack rather than a screen pushed onto the book's: the book
 //  screen's stack belongs to its tab, and the form, like the creation's, has screens of its own
@@ -14,8 +14,8 @@
 //  The local edition is read for its uri only. What the form starts from comes from the server,
 //  because each change has to name the value it replaces (`EditionClaims`). Saving writes what
 //  landed back into the local edition — on a full success, and on a partial one too, since what
-//  landed is what inventaire.io now shows — and reads the work again when it moved or gained an
-//  author, so the book screen names who wrote it.
+//  landed is what inventaire.io now shows — and reads the works again when they moved or
+//  changed, so the book screen names who wrote them.
 //
 
 import SwiftUI
@@ -64,8 +64,8 @@ struct EditEditionFlowView: View {
                             edit: binding,
                             failure: failure,
                             onSave: save,
-                            onChooseWork: { path.append(.work) },
-                            onAddAuthor: { path.append(.author) },
+                            onAddWork: { path.append(.work) },
+                            onOpenWork: { path.append(.workDetail(id: $0)) },
                             onPickCoverURL: { path.append(.coverFromURL) },
                             onOpenProperty: open,
                             onAddIdentifier: { path.append(.identifierCatalog($0)) }
@@ -89,27 +89,38 @@ struct EditEditionFlowView: View {
                     WorkSearchView(
                         isbn: edit?.original.isbn ?? "",
                         onChoose: { candidate in
-                            edit?.choose(candidate)
+                            edit?.addWork(candidate)
                             path.removeLast()
                         },
                         onCreate: { query in
-                            edit?.startNewWork(titled: query)
+                            // The new work's own screen in place of the search: it needs an
+                            // author before it can be saved.
                             path.removeLast()
+                            if let id = edit?.startNewWork(titled: query) {
+                                path.append(.workDetail(id: id))
+                            }
                         },
                         emptyTitle: "edit_edition.work.search_empty.title",
                         emptyMessage: "edit_edition.work.search_empty.message"
                     )
-                    .navigationTitle(String(localized: "edit_edition.work.choose"))
+                    .navigationTitle(String(localized: "edit_edition.works.add"))
                     .navigationBarTitleDisplayMode(.inline)
-                case .author:
+                case .workDetail(let id):
+                    if let work = work(id) {
+                        EditWorkView(work: work) {
+                            path.append(.workAuthor(id: id))
+                        }
+                    }
+                case .workAuthor(let id):
                     // Pops itself once an author is picked or created.
                     AuthorPickerView(initialQuery: "") { author in
-                        edit?.addAuthor(author)
+                        guard let index = edit?.works.firstIndex(where: { $0.id == id }) else { return }
+                        edit?.works[index].addAuthor(author)
                     }
                 case .coverFromURL:
                     CoverURLView(
                         // The work's title first, which is what a cover is known by.
-                        searchedTitle: edit?.work?.title ?? edit?.trimmedTitle ?? edition.title,
+                        searchedTitle: edit?.works.first?.trimmedTitle ?? edit?.trimmedTitle ?? edition.title,
                         isbn: edit?.original.normalizedISBN ?? ""
                     ) { jpeg, _ in
                         // `update-claim` takes a hash: the bytes are uploaded, the address is not
@@ -158,6 +169,18 @@ struct EditEditionFlowView: View {
         }
     }
 
+    /// One work of the form, for « Modifier l'œuvre ». `nil` once it has been detached.
+    private func work(_ id: UUID) -> Binding<WorkEdit>? {
+        guard let current = edit?.works.first(where: { $0.id == id }) else { return nil }
+        return Binding(
+            get: { edit?.works.first(where: { $0.id == id }) ?? current },
+            set: { newValue in
+                guard let index = edit?.works.firstIndex(where: { $0.id == id }) else { return }
+                edit?.works[index] = newValue
+            }
+        )
+    }
+
     /// The form's properties, for the screens pushed over it.
     private var properties: Binding<EditionProperties> {
         Binding(
@@ -178,10 +201,10 @@ struct EditEditionFlowView: View {
         }
     }
 
-    /// Reads the edition's claims, then its work and its cover.
+    /// Reads the edition's claims, then its works and its cover.
     ///
-    /// The work is part of what the form needs: its authors are what an added author is checked
-    /// against, and its uri is what a new work replaces. The cover is a nicety: when it does not
+    /// The works are part of what the form needs: their titles and authors are what « Modifier
+    /// l'œuvre » starts from and compares against. The cover is a nicety: when it does not
     /// download, the form opens with an empty frame, and a picture added there replaces the one
     /// the edition has.
     private func load() async {
@@ -190,13 +213,14 @@ struct EditEditionFlowView: View {
         do {
             let claims: EditionClaims = try await creationModel.editableEdition(uri: edition.uri)
 
-            var work: EditionWork?
-            if let workUri = claims.workUri {
-                work = try await creationModel.describeWork(uri: workUri)
-                work?.imageUrl = edition.image
+            // The edition's cover stands for its works' in their rows.
+            let works: [EditionWork] = try await creationModel.describeWorks(uris: claims.workUris).map { work in
+                var work: EditionWork = work
+                work.imageUrl = work.imageUrl ?? edition.image
+                return work
             }
 
-            var loaded: EditionEdit = .init(original: claims, originalWork: work)
+            var loaded: EditionEdit = .init(original: claims, originalWorks: works)
 
             if let hash = claims.coverHash,
                let url = creationModel.coverURL(hash: hash),
@@ -236,8 +260,8 @@ struct EditEditionFlowView: View {
     }
 
     /// Writes into the store what landed between `before` and `after`: the edition's own claims
-    /// directly, its work by reading it again — the work an edition points at, and the authors
-    /// that work names, live in other entities than the one the form changed.
+    /// directly, its works by reading them again — the works an edition points at, and the
+    /// authors they name, live in other entities than the one the form changed.
     private func show(
         _ after: EditionEdit,
         since before: EditionEdit
@@ -249,18 +273,19 @@ struct EditEditionFlowView: View {
             modelContext: modelContext
         )
 
-        guard let workUri = after.original.workUri else { return }
+        let worksMoved: Bool = Set(after.original.workUris) != Set(before.original.workUris)
+        let worksChanged: Bool = worksMoved || before.works.contains(where: \.hasChanges)
+        guard worksChanged else { return }
 
-        let workMoved: Bool = workUri != before.original.workUri
-        let gainedAuthors: Bool = after.originalWork?.authors.count != before.originalWork?.authors.count
-        guard workMoved || gainedAuthors else { return }
-
-        guard let work = try? await entityModel.refreshWork(modelContext: modelContext, uri: workUri),
-              edition.isStillInTheStore else { return }
-
-        if workMoved {
-            edition.works = [work]
-            try? modelContext.save()
+        var works: [Work] = []
+        for uri in after.original.workUris {
+            if let work = try? await entityModel.refreshWork(modelContext: modelContext, uri: uri) {
+                works.append(work)
+            }
         }
+
+        guard worksMoved, edition.isStillInTheStore else { return }
+        edition.works = works
+        try? modelContext.save()
     }
 }

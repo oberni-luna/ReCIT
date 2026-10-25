@@ -16,9 +16,9 @@
 //  that half-succeeded would leave a work without its edition on a public website. So the call
 //  is awaited, and the form stays open until the server has spoken.
 //
-//  It also changes an edition that exists — its title, its subtitle, its cover, the work it is
-//  an edition of, that work's authors — from the book screen's « Modifier ». Same open
-//  database, same reasons not to be optimistic.
+//  It also changes an edition that exists — everything inventaire.io accepts on it, the works
+//  it is an edition of, their titles and authors — from the book screen's « Données
+//  bibliographiques ». Same open database, same reasons not to be optimistic.
 //
 //  See PRD 0015.
 //
@@ -204,30 +204,41 @@ final class EntityCreationModel {
         apiService.absoluteImageUrl(EntityImageHash.path(of: hash)).flatMap(URL.init(string:))
     }
 
-    /// The work an edition is an edition of, with its authors' names and uris — what the form
-    /// shows, and what it checks an added author against. Public, so cookieless; the authors come
-    /// in the same envelope, asked as relatives.
-    func describeWork(uri: String) async throws -> EditionWork {
+    /// The works an edition is an edition of, in the order asked, with their authors' names and
+    /// uris — what the form shows, and what « Modifier l'œuvre » changes. Public, so cookieless;
+    /// the authors come in the same envelope, asked as relatives. A work the answer does not hold
+    /// is left out rather than failing the whole form.
+    func describeWorks(uris: [String]) async throws -> [EditionWork] {
+        guard uris.isEmpty == false else { return [] }
+
         let response: WorkSummariesDTO? = try await publicAPIService.fetchData(
-            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=labels|claims&lang=fr&relatives=wdt:P50",
+            fromEndpoint: "/api/entities/by-uris?uris=\(uris.joined(separator: "|"))&attributes=labels|claims&lang=fr&relatives=wdt:P50",
             debug: false
         )
 
-        guard let entities = response?.entities, let work = entities[uri] else {
-            throw NetworkError.badResponse
-        }
+        guard let entities = response?.entities else { throw NetworkError.badResponse }
 
-        let authors: [NewBookAuthor] = work.values(of: .author).compactMap { authorUri in
-            guard let name = entities[authorUri]?.label else { return nil }
-            return .init(name: name, uri: authorUri)
-        }
+        return uris.compactMap { uri in
+            guard let work = entities[uri] ?? entities.values.first(where: { $0.uri == uri }) else { return nil }
 
-        return .init(uri: uri, title: work.label ?? "", authors: authors)
+            let authors: [NewBookAuthor] = work.values(of: .author).compactMap { authorUri in
+                guard let name = entities[authorUri]?.label else { return nil }
+                return .init(name: name, uri: authorUri)
+            }
+
+            return .init(
+                uri: uri,
+                title: work.label ?? "",
+                authors: authors,
+                titleLanguage: EntityLabel.language(of: work.labels)
+            )
+        }
     }
 
     /// Runs what the form changed, one request at a time in the order `EditionEdit.nextStep`
-    /// gives — the picture, the authors and the work that do not exist yet, then the claims —
-    /// and answers the edit with everything landed.
+    /// gives — the picture, the authors, works, publishers, collections and people that do not
+    /// exist yet, then the claims, then the works' new titles — and answers the edit with
+    /// everything landed.
     ///
     /// Unlike a new book's, a new cover is not an ornament here: it may be the whole change the
     /// reader asked for, so an upload that does not land is a failure like any other.
@@ -264,7 +275,7 @@ final class EntityCreationModel {
                     )
                     edit.authorCreated(id: id, uri: uri)
 
-                case .createWork(let label, let language, let authorUris):
+                case .createWork(let id, let label, let language, let authorUris):
                     let uri: String = try await createEntity(
                         label: label,
                         language: language,
@@ -273,7 +284,7 @@ final class EntityCreationModel {
                             EditableClaimProperty.author.rawValue: authorUris
                         ]
                     )
-                    edit.workCreated(uri: uri)
+                    edit.workCreated(id: id, uri: uri)
 
                 case .createEntity(let id, let label, let language, let kind):
                     let uri: String = try await createEntity(label: label, language: language, kind: kind)
@@ -282,6 +293,15 @@ final class EntityCreationModel {
                 case .claim(let update):
                     let _: OkStatusDTO? = try await apiService.send(
                         toEndpoint: "/api/entities/update-claim",
+                        method: "PUT",
+                        payload: update,
+                        debug: true
+                    )
+                    edit.landed(update)
+
+                case .label(let update):
+                    let _: OkStatusDTO? = try await apiService.send(
+                        toEndpoint: "/api/entities/update-label",
                         method: "PUT",
                         payload: update,
                         debug: true

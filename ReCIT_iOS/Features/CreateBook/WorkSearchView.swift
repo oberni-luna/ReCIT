@@ -48,6 +48,8 @@ struct WorkSearchView: View {
 
     var body: some View {
         List {
+            BibliographicDataNotice()
+
             if trimmedQuery.isEmpty {
                 Section {
                     EmptyStateView(
@@ -70,9 +72,9 @@ struct WorkSearchView: View {
                         .buttonStyle(.plain)
                     }
                 } header: {
-                    Text("create_book.search.results")
+                    CreateBookSectionHeader("create_book.search.results")
                 } footer: {
-                    Text("create_book.search.why_existing")
+                    CreateBookSectionFooter("create_book.search.why_existing")
                 }
 
                 Section {
@@ -87,7 +89,7 @@ struct WorkSearchView: View {
                     }
                 } footer: {
                     if hasSearched {
-                        Text("create_book.search.no_result")
+                        CreateBookSectionFooter("create_book.search.no_result")
                     }
                 }
             }
@@ -100,6 +102,7 @@ struct WorkSearchView: View {
             prompt: Text("create_book.search.prompt")
         )
         .autocorrectionDisabled()
+        .bibliographicDataHelpButton()
         .accessibilityIdentifier("e2e.createBook.search")
         .task(id: query) {
             await search()

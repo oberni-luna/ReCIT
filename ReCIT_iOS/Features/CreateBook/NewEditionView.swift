@@ -36,14 +36,16 @@ struct NewEditionView: View {
                 .listSectionSeparator(.hidden)
             }
 
+            BibliographicDataNotice()
+
             if let work = draft.chosenWork {
                 Section {
                     WorkRow(work: work)
                         .accessibilityIdentifier("e2e.createBook.edition.work")
                 } header: {
-                    Text("create_book.edition.of")
+                    CreateBookSectionHeader("create_book.edition.of")
                 } footer: {
-                    Text("create_book.edition.of_help")
+                    CreateBookSectionFooter("create_book.edition.of_help")
                 }
             }
 
@@ -60,7 +62,7 @@ struct NewEditionView: View {
                     .foregroundStyle(.foregroundDefault)
                     .withLabel(label: "create_book.title_field")
             } footer: {
-                Text("create_book.edition.title_help")
+                CreateBookSectionFooter("create_book.edition.title_help")
             }
 
             Section {} footer: {
@@ -75,5 +77,6 @@ struct NewEditionView: View {
         .applyListBackground()
         .navigationTitle(String(localized: "create_book.edition.title"))
         .navigationBarTitleDisplayMode(.inline)
+        .bibliographicDataHelpButton()
     }
 }

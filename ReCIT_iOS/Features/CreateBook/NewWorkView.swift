@@ -45,6 +45,8 @@ struct NewWorkView: View {
                 .listSectionSeparator(.hidden)
             }
 
+            BibliographicDataNotice()
+
             Section {
                 TextField("create_book.new_work.title_field", text: workTitle)
                     .accessibilityIdentifier("e2e.createBook.workTitle")
@@ -91,9 +93,9 @@ struct NewWorkView: View {
                     .accessibilityIdentifier("e2e.createBook.addAuthor")
                 }
             } header: {
-                Text("create_book.new_work.section")
+                CreateBookSectionHeader("create_book.new_work.section")
             } footer: {
-                Text("create_book.new_work.help")
+                CreateBookSectionFooter("create_book.new_work.help")
             }
 
             Section {
@@ -105,7 +107,7 @@ struct NewWorkView: View {
                     .foregroundStyle(.foregroundDefault)
                     .withLabel(label: "create_book.title_field")
             } header: {
-                Text("create_book.new_work.edition_section")
+                CreateBookSectionHeader("create_book.new_work.edition_section")
             } footer: {
                 CreateBookEditionNotes(draft: draft, notice: "create_book.new_work.public_notice")
             }
@@ -122,6 +124,7 @@ struct NewWorkView: View {
         .applyListBackground()
         .navigationTitle(String(localized: "create_book.new_work.title"))
         .navigationBarTitleDisplayMode(.inline)
+        .bibliographicDataHelpButton()
     }
 }
 

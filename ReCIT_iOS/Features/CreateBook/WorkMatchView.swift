@@ -66,13 +66,15 @@ struct WorkMatchView: View {
                 .listSectionSeparator(.hidden)
             }
 
+            BibliographicDataNotice()
+
             Section {
                 WorkRow(work: candidate)
                     .accessibilityIdentifier("e2e.createBook.work")
             } header: {
-                Text("create_book.work.header")
+                CreateBookSectionHeader("create_book.work.header")
             } footer: {
-                Text("create_book.work.lead")
+                CreateBookSectionFooter("create_book.work.lead")
             }
 
             Section {
@@ -94,7 +96,7 @@ struct WorkMatchView: View {
                 }
                 .accessibilityIdentifier("e2e.createBook.work.otherWork")
             } header: {
-                Text("create_book.work.what_you_publish")
+                CreateBookSectionHeader("create_book.work.what_you_publish")
             }
 
             Section {} footer: {
@@ -109,6 +111,7 @@ struct WorkMatchView: View {
         .applyListBackground()
         .navigationTitle(String(localized: "create_book.work.title"))
         .navigationBarTitleDisplayMode(.inline)
+        .bibliographicDataHelpButton()
         .task {
             // The default answer is the safe one: one more edition of the work that exists.
             // Set before the fetch, so a reader who publishes straight away gets it.

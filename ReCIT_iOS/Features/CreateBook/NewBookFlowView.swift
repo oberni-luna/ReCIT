@@ -45,6 +45,10 @@ struct NewBookFlowView: View {
     /// What went wrong last time, in the reader's terms. `nil` until something does.
     @State private var failure: CreateBookFailure?
 
+    /// Whether the help about bibliographic data is up, asked for by any screen's « ? » or by
+    /// the notice's « En savoir plus ».
+    @State private var isShowingHelp: Bool = false
+
     /// Whether the book now exists. Its draft is then done with, and must not be handed back to
     /// the session on the way out.
     @State private var isPublished: Bool = false
@@ -107,6 +111,10 @@ struct NewBookFlowView: View {
                     CoverURLView(draft: $draft)
                 }
             }
+        }
+        .environment(\.showBibliographicDataHelp, .init { isShowingHelp = true })
+        .sheet(isPresented: $isShowingHelp) {
+            BibliographicDataHelpView()
         }
         .task {
             // Asked once, as the sheet opens, and never blocking: the reader can describe the

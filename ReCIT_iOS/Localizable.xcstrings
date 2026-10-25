@@ -423,6 +423,166 @@
         }
       }
     },
+    "create_book.help.chat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask a question on the project’s chat"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poser une question sur le chat du projet"
+          }
+        }
+      }
+    },
+    "create_book.help.contributions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See my contributions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir mes contributions"
+          }
+        }
+      }
+    },
+    "create_book.help.from" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where they come from"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D’où elles viennent"
+          }
+        }
+      }
+    },
+    "create_book.help.from_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostly from Wikidata, the open database behind Wikipedia. What is missing there, inventaire.io creates in its own database, under the CC0 licence."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surtout de Wikidata, la base ouverte qui sert Wikipédia. Ce qui y manque, inventaire.io le crée dans sa propre base, sous licence CC0."
+          }
+        }
+      }
+    },
+    "create_book.help.further" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Further"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller plus loin"
+          }
+        }
+      }
+    },
+    "create_book.help.publish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you publish"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que vous publiez"
+          }
+        }
+      }
+    },
+    "create_book.help.publish_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you enter is public as soon as it is sent, and editable by anyone. Improving it improves Wikidata and the projects that use it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que vous saisissez est public dès l’envoi, et modifiable par tous. L’améliorer, c’est améliorer Wikidata et les projets qui s’en servent."
+          }
+        }
+      }
+    },
+    "create_book.help.what" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What they are"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que c’est"
+          }
+        }
+      }
+    },
+    "create_book.help.what_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They describe works, editions, authors and publishers: inventaire.io’s « entities »."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elles décrivent les œuvres, les éditions, les auteur·ices et les maisons d’édition : les « entités » d’inventaire.io."
+          }
+        }
+      }
+    },
+    "create_book.help.wiki" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data on the inventaire.io wiki"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données sur le wiki d’inventaire.io"
+          }
+        }
+      }
+    },
     "create_book.new_work.add_author" : {
       "localizations" : {
         "en" : {
@@ -531,6 +691,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Titre de l’œuvre"
+          }
+        }
+      }
+    },
+    "create_book.notice.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Works, editions and authors come from Wikidata and from inventaire.io’s own database. What you enter becomes public, under the CC0 licence, and editable by anyone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tous."
+          }
+        }
+      }
+    },
+    "create_book.notice.learn_more" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learn more"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En savoir plus"
+          }
+        }
+      }
+    },
+    "create_book.notice.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliographic data"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Données bibliographiques"
           }
         }
       }

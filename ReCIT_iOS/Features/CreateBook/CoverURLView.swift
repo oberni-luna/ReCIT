@@ -41,6 +41,8 @@ struct CoverURLView: View {
 
     var body: some View {
         Form {
+            BibliographicDataNotice()
+
             Section {
                 Button {
                     if let url = CoverAddress.googleImagesURL(title: searchedTitle, isbn: draft.normalizedISBN) {
@@ -56,9 +58,9 @@ struct CoverURLView: View {
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("e2e.createBook.coverUrl.search")
             } header: {
-                Text("create_book.cover_url.find")
+                CreateBookSectionHeader("create_book.cover_url.find")
             } footer: {
-                Text("create_book.cover_url.find_help")
+                CreateBookSectionFooter("create_book.cover_url.find_help")
             }
 
             Section {
@@ -83,9 +85,9 @@ struct CoverURLView: View {
                 CoverURLPreviewView(preview: preview)
                     .frame(maxWidth: .infinity)
             } header: {
-                Text("create_book.cover_url.address")
+                CreateBookSectionHeader("create_book.cover_url.address")
             } footer: {
-                Text(footer)
+                CreateBookSectionFooter(footer)
             }
 
             Section {} footer: {
@@ -103,6 +105,7 @@ struct CoverURLView: View {
         .applyListBackground()
         .navigationTitle(String(localized: "create_book.cover_url.title"))
         .navigationBarTitleDisplayMode(.inline)
+        .bibliographicDataHelpButton()
         .task(id: address) {
             await loadPreview()
         }

@@ -7,982 +7,6 @@
     ", " : {
 
     },
-    "create_book.cover.add" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add a cover"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter une couverture"
-          }
-        }
-      }
-    },
-    "create_book.cover.camera" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Take a photo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prendre une photo"
-          }
-        }
-      }
-    },
-    "create_book.cover.change" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Change the cover"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Changer la couverture"
-          }
-        }
-      }
-    },
-    "create_book.cover.file" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a file"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir un fichier"
-          }
-        }
-      }
-    },
-    "create_book.cover.photos" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose from Photos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir dans Photos"
-          }
-        }
-      }
-    },
-    "create_book.cover.remove" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove the cover"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirer la couverture"
-          }
-        }
-      }
-    },
-    "create_book.cover.replace" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Replace with"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remplacer par"
-          }
-        }
-      }
-    },
-    "create_book.cover.url" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "From a URL…"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Depuis une URL…"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.address" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Image address"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adresse de l’image"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.check" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Check that this is this edition: the cover will be public."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vérifiez que c’est cette édition : la couverture sera publique."
-          }
-        }
-      }
-    },
-    "create_book.cover_url.dimensions %lld %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld × %2$lld px"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld × %2$lld px"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.failed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This link does not lead to an image"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce lien ne mène pas à une image"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.field" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Image URL"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL de l’image"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.find" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Find an image"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trouver une image"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.find_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens in Safari. Copy the image’s address, then come back."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "S’ouvre dans Safari. Copiez l’adresse de l’image, puis revenez."
-          }
-        }
-      }
-    },
-    "create_book.cover_url.help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "An https:// address that leads to an image: .jpg, .png or .webp."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une adresse en https:// qui mène à une image : .jpg, .png ou .webp."
-          }
-        }
-      }
-    },
-    "create_book.cover_url.not_an_image" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This is the address of a page, not of an image: copy the image’s own."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "C’est l’adresse d’une page, pas d’une image : copiez celle de l’image elle-même."
-          }
-        }
-      }
-    },
-    "create_book.cover_url.placeholder" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "https://…"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "https://…"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.preview_placeholder" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The preview shows here"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’aperçu s’affiche ici"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.search" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search Google Images for the title and the ISBN"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chercher le titre et l’ISBN sur Google Images"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Image from a URL"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Image depuis une URL"
-          }
-        }
-      }
-    },
-    "create_book.cover_url.use" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use this image"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utiliser cette image"
-          }
-        }
-      }
-    },
-    "create_book.edition.of" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edition of"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Édition de"
-          }
-        }
-      }
-    },
-    "create_book.edition.of_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The work and its author come from inventaire.io: nothing to type again. Not this one? Go back to the search."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’œuvre et son auteur viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Revenez à la recherche."
-          }
-        }
-      }
-    },
-    "create_book.edition.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New edition"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouvelle édition"
-          }
-        }
-      }
-    },
-    "create_book.edition.title_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Taken from the work. Correct it if the cover says otherwise: a translation, a subtitle."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repris de l’œuvre. Corrigez-le s’il diffère de la couverture : une traduction, un sous-titre."
-          }
-        }
-      }
-    },
-    "create_book.help.chat" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ask a question on the project’s chat"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Poser une question sur le chat du projet"
-          }
-        }
-      }
-    },
-    "create_book.help.contributions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "See my contributions"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voir mes contributions"
-          }
-        }
-      }
-    },
-    "create_book.help.from" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Where they come from"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "D’où elles viennent"
-          }
-        }
-      }
-    },
-    "create_book.help.from_body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostly from Wikidata, the open database behind Wikipedia. What is missing there, inventaire.io creates in its own database, under the CC0 licence."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Surtout de Wikidata, la base ouverte qui sert Wikipédia. Ce qui y manque, inventaire.io le crée dans sa propre base, sous licence CC0."
-          }
-        }
-      }
-    },
-    "create_book.help.further" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Further"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aller plus loin"
-          }
-        }
-      }
-    },
-    "create_book.help.publish" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What you publish"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce que vous publiez"
-          }
-        }
-      }
-    },
-    "create_book.help.publish_body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What you enter is public as soon as it is sent, and editable by anyone. Improving it improves Wikidata and the projects that use it."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce que vous saisissez est public dès l’envoi, et modifiable par tous. L’améliorer, c’est améliorer Wikidata et les projets qui s’en servent."
-          }
-        }
-      }
-    },
-    "create_book.help.what" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What they are"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce que c’est"
-          }
-        }
-      }
-    },
-    "create_book.help.what_body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "They describe works, editions, authors and publishers: inventaire.io’s « entities »."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elles décrivent les œuvres, les éditions, les auteur·ices et les maisons d’édition : les « entités » d’inventaire.io."
-          }
-        }
-      }
-    },
-    "create_book.help.wiki" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Data on the inventaire.io wiki"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les données sur le wiki d’inventaire.io"
-          }
-        }
-      }
-    },
-    "create_book.new_work.add_author" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add another author"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter un·e autre auteur·ice"
-          }
-        }
-      }
-    },
-    "create_book.new_work.edition_section" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This edition"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette édition"
-          }
-        }
-      }
-    },
-    "create_book.new_work.help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Its translations and reissues will be editions of it."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ses traductions et ses rééditions en seront des éditions."
-          }
-        }
-      }
-    },
-    "create_book.new_work.public_notice" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The work and this book will be public on inventaire.io."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’œuvre et ce livre seront publics sur inventaire.io."
-          }
-        }
-      }
-    },
-    "create_book.new_work.section" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The work"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’œuvre"
-          }
-        }
-      }
-    },
-    "create_book.new_work.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New work"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouvelle œuvre"
-          }
-        }
-      }
-    },
-    "create_book.new_work.title_field" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Title of the work"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Titre de l’œuvre"
-          }
-        }
-      }
-    },
-    "create_book.notice.body" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Works, editions and authors come from Wikidata and from inventaire.io’s own database. What you enter becomes public, under the CC0 licence, and editable by anyone."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tous."
-          }
-        }
-      }
-    },
-    "create_book.notice.learn_more" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Learn more"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En savoir plus"
-          }
-        }
-      }
-    },
-    "create_book.notice.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliographic data"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Données bibliographiques"
-          }
-        }
-      }
-    },
-    "create_book.search.create %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create the work « %@ »"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Créer l’œuvre « %@ »"
-          }
-        }
-      }
-    },
-    "create_book.search.empty.message %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "inventaire.io does not know ISBN %@ yet. Search for its title or its author: if the work is already there, there will be almost nothing left to type."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "inventaire.io ne connaît pas encore l’ISBN %@. Cherchez le titre ou l’auteur·ice : si l’œuvre y est déjà, il ne restera presque rien à saisir."
-          }
-        }
-      }
-    },
-    "create_book.search.empty.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Which book is it?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De quel livre s’agit-il ?"
-          }
-        }
-      }
-    },
-    "create_book.search.no_result" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No work of that name on inventaire.io. Check the spelling, or search for the author, before creating one."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune œuvre de ce nom sur inventaire.io. Vérifiez l’orthographe, ou cherchez l’auteur·ice, avant d’en créer une."
-          }
-        }
-      }
-    },
-    "create_book.search.none_match" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "None of these: create the work"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune ne correspond : créer l’œuvre"
-          }
-        }
-      }
-    },
-    "create_book.search.prompt" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Title or author"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Titre ou auteur·ice"
-          }
-        }
-      }
-    },
-    "create_book.search.results" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Works on inventaire.io"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Œuvres sur inventaire.io"
-          }
-        }
-      }
-    },
-    "create_book.search.why_existing" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick the work this book is an edition of, even if it is a translation or another cover: that is what avoids a duplicate."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prenez l’œuvre dont ce livre est une édition, même si c’est une traduction ou une autre couverture : c’est ce qui évite un doublon."
-          }
-        }
-      }
-    },
-    "create_book.work.another_book" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No, another work"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Non, une autre œuvre"
-          }
-        }
-      }
-    },
-    "create_book.work.another_book_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Same title, another text: yours is created beside it."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Même titre, autre texte : la vôtre est créée à côté."
-          }
-        }
-      }
-    },
-    "create_book.work.lead" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The search did not offer it, but inventaire.io recognises it by its title and its author."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La recherche ne l’a pas proposée, mais inventaire.io la reconnaît à son titre et à son auteur."
-          }
-        }
-      }
-    },
-    "create_book.work.one_more_edition" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "An edition of this work"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une édition de cette œuvre"
-          }
-        }
-      }
-    },
-    "create_book.work.one_more_edition_help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing else is created: neither a work nor an author."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rien d’autre n’est créé : ni œuvre, ni auteur·ice."
-          }
-        }
-      }
-    },
-    "create_book.work.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Work already known"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Œuvre déjà connue"
-          }
-        }
-      }
-    },
-    "create_book.work.what_you_publish" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What you publish"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce que vous publiez"
-          }
-        }
-      }
-    },
     "🥲" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2117,6 +1141,423 @@
         }
       }
     },
+    "create_book.cover_url.address" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image address"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse de l’image"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.check" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check that this is this edition: the cover will be public."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiez que c’est cette édition : la couverture sera publique."
+          }
+        }
+      }
+    },
+    "create_book.cover_url.dimensions %lld %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld × %2$lld px"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld × %2$lld px"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This link does not lead to an image"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce lien ne mène pas à une image"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.field" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image URL"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL de l’image"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.find" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find an image"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver une image"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.find_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens in Safari. Copy the image’s address, then come back."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S’ouvre dans Safari. Copiez l’adresse de l’image, puis revenez."
+          }
+        }
+      }
+    },
+    "create_book.cover_url.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An https:// address that leads to an image: .jpg, .png or .webp."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une adresse en https:// qui mène à une image : .jpg, .png ou .webp."
+          }
+        }
+      }
+    },
+    "create_book.cover_url.not_an_image" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the address of a page, not of an image: copy the image’s own."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C’est l’adresse d’une page, pas d’une image : copiez celle de l’image elle-même."
+          }
+        }
+      }
+    },
+    "create_book.cover_url.placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://…"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.preview_placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The preview shows here"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’aperçu s’affiche ici"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.search" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search Google Images for the title and the ISBN"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher le titre et l’ISBN sur Google Images"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image from a URL"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image depuis une URL"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.use" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use this image"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser cette image"
+          }
+        }
+      }
+    },
+    "create_book.cover.add" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a cover"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une couverture"
+          }
+        }
+      }
+    },
+    "create_book.cover.camera" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take a photo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre une photo"
+          }
+        }
+      }
+    },
+    "create_book.cover.change" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change the cover"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer la couverture"
+          }
+        }
+      }
+    },
+    "create_book.cover.file" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a file"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un fichier"
+          }
+        }
+      }
+    },
+    "create_book.cover.photos" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose from Photos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir dans Photos"
+          }
+        }
+      }
+    },
+    "create_book.cover.remove" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove the cover"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer la couverture"
+          }
+        }
+      }
+    },
+    "create_book.cover.replace" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace with"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplacer par"
+          }
+        }
+      }
+    },
+    "create_book.cover.url" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From a URL…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuis une URL…"
+          }
+        }
+      }
+    },
+    "create_book.edition.of" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edition of"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Édition de"
+          }
+        }
+      }
+    },
+    "create_book.edition.of_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The work and its author come from inventaire.io: nothing to type again. Not this one? Go back to the search."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’œuvre et son auteur viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Revenez à la recherche."
+          }
+        }
+      }
+    },
+    "create_book.edition.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle édition"
+          }
+        }
+      }
+    },
+    "create_book.edition.title_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken from the work. Correct it if the cover says otherwise: a translation, a subtitle."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repris de l’œuvre. Corrigez-le s’il diffère de la couverture : une traduction, un sous-titre."
+          }
+        }
+      }
+    },
     "create_book.failure.account.body" : {
       "localizations" : {
         "en" : {
@@ -2213,6 +1654,166 @@
         }
       }
     },
+    "create_book.help.chat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask a question on the project’s chat"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poser une question sur le chat du projet"
+          }
+        }
+      }
+    },
+    "create_book.help.contributions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See my contributions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir mes contributions"
+          }
+        }
+      }
+    },
+    "create_book.help.from" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where they come from"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D’où elles viennent"
+          }
+        }
+      }
+    },
+    "create_book.help.from_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostly from Wikidata, the open database behind Wikipedia. What is missing there, inventaire.io creates in its own database, under the CC0 licence."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surtout de Wikidata, la base ouverte qui sert Wikipédia. Ce qui y manque, inventaire.io le crée dans sa propre base, sous licence CC0."
+          }
+        }
+      }
+    },
+    "create_book.help.further" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Further"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller plus loin"
+          }
+        }
+      }
+    },
+    "create_book.help.publish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you publish"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que vous publiez"
+          }
+        }
+      }
+    },
+    "create_book.help.publish_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you enter is public as soon as it is sent, and editable by anyone. Improving it improves Wikidata and the projects that use it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que vous saisissez est public dès l’envoi, et modifiable par tous. L’améliorer, c’est améliorer Wikidata et les projets qui s’en servent."
+          }
+        }
+      }
+    },
+    "create_book.help.what" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What they are"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que c’est"
+          }
+        }
+      }
+    },
+    "create_book.help.what_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They describe works, editions, authors and publishers: inventaire.io’s « entities »."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elles décrivent les œuvres, les éditions, les auteur·ices et les maisons d’édition : les « entités » d’inventaire.io."
+          }
+        }
+      }
+    },
+    "create_book.help.wiki" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data on the inventaire.io wiki"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données sur le wiki d’inventaire.io"
+          }
+        }
+      }
+    },
     "create_book.isbn" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2258,6 +1859,166 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Langue, déduite de l’ISBN : %@"
+          }
+        }
+      }
+    },
+    "create_book.new_work.add_author" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add another author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un·e autre auteur·ice"
+          }
+        }
+      }
+    },
+    "create_book.new_work.edition_section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette édition"
+          }
+        }
+      }
+    },
+    "create_book.new_work.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its translations and reissues will be editions of it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses traductions et ses rééditions en seront des éditions."
+          }
+        }
+      }
+    },
+    "create_book.new_work.public_notice" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The work and this book will be public on inventaire.io."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’œuvre et ce livre seront publics sur inventaire.io."
+          }
+        }
+      }
+    },
+    "create_book.new_work.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’œuvre"
+          }
+        }
+      }
+    },
+    "create_book.new_work.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle œuvre"
+          }
+        }
+      }
+    },
+    "create_book.new_work.title_field" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title of the work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titre de l’œuvre"
+          }
+        }
+      }
+    },
+    "create_book.notice.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Works, editions and authors come from Wikidata and from inventaire.io’s own database. What you enter becomes public, under the CC0 licence, and editable by anyone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tous."
+          }
+        }
+      }
+    },
+    "create_book.notice.learn_more" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learn more"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En savoir plus"
+          }
+        }
+      }
+    },
+    "create_book.notice.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliographic data"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Données bibliographiques"
           }
         }
       }
@@ -2310,6 +2071,134 @@
         }
       }
     },
+    "create_book.search.create %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create the work « %@ »"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer l’œuvre « %@ »"
+          }
+        }
+      }
+    },
+    "create_book.search.empty.message %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io does not know ISBN %@ yet. Search for its title or its author: if the work is already there, there will be almost nothing left to type."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io ne connaît pas encore l’ISBN %@. Cherchez le titre ou l’auteur·ice : si l’œuvre y est déjà, il ne restera presque rien à saisir."
+          }
+        }
+      }
+    },
+    "create_book.search.empty.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which book is it?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De quel livre s’agit-il ?"
+          }
+        }
+      }
+    },
+    "create_book.search.no_result" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No work of that name on inventaire.io. Check the spelling, or search for the author, before creating one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune œuvre de ce nom sur inventaire.io. Vérifiez l’orthographe, ou cherchez l’auteur·ice, avant d’en créer une."
+          }
+        }
+      }
+    },
+    "create_book.search.none_match" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of these: create the work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune ne correspond : créer l’œuvre"
+          }
+        }
+      }
+    },
+    "create_book.search.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title or author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titre ou auteur·ice"
+          }
+        }
+      }
+    },
+    "create_book.search.results" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Works on inventaire.io"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Œuvres sur inventaire.io"
+          }
+        }
+      }
+    },
+    "create_book.search.why_existing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick the work this book is an edition of, even if it is a translation or another cover: that is what avoids a duplicate."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prenez l’œuvre dont ce livre est une édition, même si c’est une traduction ou une autre couverture : c’est ce qui évite un doublon."
+          }
+        }
+      }
+    },
     "create_book.title" : {
       "localizations" : {
         "en" : {
@@ -2342,6 +2231,38 @@
         }
       }
     },
+    "create_book.work.another_book" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No, another work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non, une autre œuvre"
+          }
+        }
+      }
+    },
+    "create_book.work.another_book_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same title, another text: yours is created beside it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Même titre, autre texte : la vôtre est créée à côté."
+          }
+        }
+      }
+    },
     "create_book.work.header" : {
       "localizations" : {
         "en" : {
@@ -2354,6 +2275,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sur inventaire.io"
+          }
+        }
+      }
+    },
+    "create_book.work.lead" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The search did not offer it, but inventaire.io recognises it by its title and its author."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La recherche ne l’a pas proposée, mais inventaire.io la reconnaît à son titre et à son auteur."
+          }
+        }
+      }
+    },
+    "create_book.work.one_more_edition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An edition of this work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une édition de cette œuvre"
+          }
+        }
+      }
+    },
+    "create_book.work.one_more_edition_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing else is created: neither a work nor an author."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien d’autre n’est créé : ni œuvre, ni auteur·ice."
+          }
+        }
+      }
+    },
+    "create_book.work.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work already known"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Œuvre déjà connue"
+          }
+        }
+      }
+    },
+    "create_book.work.what_you_publish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you publish"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que vous publiez"
           }
         }
       }

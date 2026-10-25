@@ -53,4 +53,13 @@ struct CoverAddressTests {
 
         #expect(components.queryItems?.first(where: { $0.name == "q" })?.value == "9782493373052")
     }
+
+    /// The Google app's universal links take every `/search` but Safari's own.
+    @Test("The image search says it is Safari's, so the Google app leaves it to the browser")
+    func googleImagesSearchStaysInTheBrowser() throws {
+        let url: URL = try #require(CoverAddress.googleImagesURL(title: "Étincelles écosocialistes", isbn: "9782493373052"))
+        let components: URLComponents = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false))
+
+        #expect(components.queryItems?.first(where: { $0.name == "client" })?.value == "safari")
+    }
 }

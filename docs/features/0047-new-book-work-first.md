@@ -45,7 +45,10 @@ sources sous « Remplacer par » (`V12`). Quelle que soit la source, l'image par
 
 **Image depuis une URL** (`V9`–`V11`) :
 
-- un lien qui cherche le titre de l'œuvre et l'ISBN sur Google Images, dans Safari ;
+- un lien qui cherche le titre de l'œuvre et l'ISBN sur Google Images, dans le navigateur par
+  défaut. L'app Google revendique `/search` en lien universel sur tous les domaines Google, sauf
+  les recherches marquées `client=safari` : le lien porte ce paramètre, sans quoi il ouvrirait
+  l'app Google là où elle est installée ;
 - le champ d'adresse, et un `PasteButton` : l'appui du lecteur vaut autorisation, sans alerte du
   presse-papiers ;
 - un aperçu chargé dès que l'adresse est une URL http(s), décodé, avec sa taille en pixels.

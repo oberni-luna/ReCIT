@@ -32,6 +32,11 @@ enum CoverAddress {
 
     /// A Google Images search for the book: the title of the work and the ISBN, which together
     /// find this edition's cover more often than either alone.
+    ///
+    /// `client=safari` keeps the search in the browser. The Google app claims `/search` as a
+    /// universal link on every Google host, so where it is installed it would take the search
+    /// away from the browser the address has to be copied from — except for the searches Safari
+    /// makes itself, which its `apple-app-site-association` excludes by that parameter.
     static func googleImagesURL(title: String, isbn: String) -> URL? {
         let terms: String = [title, isbn]
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -41,7 +46,8 @@ enum CoverAddress {
         var components: URLComponents? = .init(string: "https://www.google.com/search")
         components?.queryItems = [
             .init(name: "tbm", value: "isch"),
-            .init(name: "q", value: terms)
+            .init(name: "q", value: terms),
+            .init(name: "client", value: "safari")
         ]
         return components?.url
     }

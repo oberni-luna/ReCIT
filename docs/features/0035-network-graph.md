@@ -1,5 +1,9 @@
 # The Réseau network as a graph
 
+> **Removed on 2026-10-25 by [feature 0048](0048-network-graph-removed.md).** « Tout », the graph and its e2e step
+> left the code; the Réseau tab is Amis | Groupes again, its control the list's first row. What it needed underneath
+> — groups in the store, the sync order, the avatar fallback, `textStyle` following a capped Dynamic Type — stays.
+
 Shipped on 2026-10-13, **in `DEBUG` only**: the « Tout » segment is compiled out of Release builds until the device review
 ([issue 0113](../issues/0113-network-graph-device-review.md)) lifts the `#if DEBUG` for 1.4.0. What it needed underneath —
 groups kept in the store, the new sync order, the shared avatar fallback — ships in every build.

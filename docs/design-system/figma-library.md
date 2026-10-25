@@ -120,6 +120,9 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   pour le « + » ; tuile compacte au rayon `radius/medium` (8) au lieu de 14 ; SF Symbols `minus`, `scope`,
   `person.badge.plus`, `arrow.clockwise` ; entre ×0,6 et ×1, les nœuds pleins rétrécissent avec le réseau (non
   dessiné) ; ni R4, ni les comptes de livres de R5 / R6. Détail dans la feature.
+  **Retirée du code le 2026-10-25** ([feature 0048](../features/0048-network-graph-removed.md)) : « Tout », le
+  graphe et leurs composants sont supprimés, le contrôle segmenté redevient Amis | Groupes en première ligne de
+  liste. La section Figma reste, comme point de départ si le graphe revient.
 - **Implémentation du 2026-09-27 — `Réseau · Onglet & Groupes`** (`499:14069`) : l'onglet Réseau et la
   gestion des groupes sont implémentés ([feature 0028](../features/0028-network-tab-and-groups.md)). Écarts, le code
   faisant foi : création et réglages en feuilles et non en écrans poussés ; pas de pilule « Rejoindre » dans la

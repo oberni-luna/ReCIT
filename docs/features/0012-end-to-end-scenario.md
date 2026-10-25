@@ -33,11 +33,9 @@ The journey, in order:
    Woolf, « Livres contenant » for « Des souris et des hommes » — adding a copy of each of those
    three to the inventory;
 5. open « Ranger mes livres », create two étagères, drag a book onto each, apply;
-6. open Réseau › « Tout », touch a group in the graph, open it from its sheet, come back — **non
-   joué** when the test account belongs to no group (see *What the Réseau graph added*);
-7. create a list and put two works in it;
-8. delete all of it — the list, the two étagères, every book;
-9. sign out.
+6. create a list and put two works in it;
+7. delete all of it — the list, the two étagères, every book;
+8. sign out.
 
 Every name the run creates carries a timestamp (`E2E Romans 0829-141207`), so a run that failed
 halfway and left an étagère behind cannot block the next one.
@@ -154,39 +152,14 @@ things under the scenario's feet and added one step.
 Identifiers added for it: `e2e.book.otherEditions` (`BookDetailView`) and `e2e.book.noEdition`
 (`BookAbsenceView`).
 
-## What the Réseau graph added (2026-10-13)
+## What the Réseau graph added (2026-10-13), and took back (2026-10-25)
 
-Issue 0111 gave the scenario a step for the graph of PRD 0019, « Réseau · Tout : un groupe ouvert
-depuis le graphe », between closing « Ranger mes livres » and creating the list — far from the
-cleanup, so a sheet left up cannot cost the account its leftovers. It opens the Réseau tab
-(`E2EDriver.Tab.network`, whose root is recognised by `e2e.network.segment`), selects « Tout »
-by its title inside that control, waits for « Vous » to be placed, touches a group, checks the
-sheet, taps « Ouvrir le groupe », waits for the group's screen, and goes back to the graph.
-
-- **« Tout » exists in `DEBUG` only** (PRD 0019, Q47). The `ReCIT_iOSE2E` scheme tests in Debug;
-  a scheme switched to Release would make this row KO with a sentence that says so.
-- **The nodes are not touched as buttons.** The graph hit-tests a touch against its camera, so a
-  node is found by `e2e.network.graph.node.<id>` — the transparent frame VoiceOver reads over
-  it, which lets touches through — and touched at the centre of its frame, by coordinate.
-- **A group is told from a reader by its sheet**, not by its identifier: both carry the server's
-  CouchDB id. The step lists the node identifiers (`E2EDriver.identifiers(startingWith:)`),
-  leaves out `…node.me`, and probes in tree order, which is VoiceOver's reading order (issue
-  0110) — « Vous », friend requests, invitations, groups, then friends — so the first node
-  touched is a group whenever there is one and few requests wait. The
-  sheet answers: `…sheet.openGroup` for a group, `…sheet.viewProfile` for a reader. At most eight
-  nodes are probed, each from a closed sheet.
-- **It reports non joué, not KO**, when « Tout » shows its empty state (no friend, no group) or
-  when no probed node is a group: that is the test account's network, not a defect of the app.
-- The sheet is dragged down by coordinate after the step's screenshot, whatever the outcome, so
-  the list steps that follow find the tab bar uncovered.
-
-Identifiers it relies on, all existing in the app: `e2e.network.segment` (`NetworkSegmentBand`),
-`e2e.network.graph` (`NetworkGraphView`), `e2e.network.graph.node.<id>` (`NetworkNodeAccessibilityFrame`),
-`e2e.network.graph.sheet` (`NetworkNodeSheet`), `e2e.network.graph.sheet.openGroup`
-(`NetworkGroupSheet`), `e2e.network.graph.sheet.viewProfile` (`NetworkReaderSheet`),
-`e2e.network.empty.addFriends` (`NetworkFirstStepsCard`) and `e2e.group.members`
-(`GroupDetailView`). Written and compiled; like every step, it has not been run until Olivier
-runs the scenario.
+Issue 0111 gave the scenario a step between closing « Ranger mes livres » and creating the list:
+« Réseau · Tout : un groupe ouvert depuis le graphe », which touched a group in the graph of
+PRD 0019 and opened it from its sheet. It left with the graph itself
+([feature 0048](0048-network-graph-removed.md)), and with it `E2EDriver.Tab.network` and
+`E2EDriver.identifiers(startingWith:)`: the scenario no longer visits Réseau. Commit `432a6be` has
+the step, should the graph come back.
 
 ## What iOS 26 cost
 

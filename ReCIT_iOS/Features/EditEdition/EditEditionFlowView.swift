@@ -2,17 +2,20 @@
 //  EditEditionFlowView.swift
 //  ReCIT_iOS
 //
-//  The sheet the book screen's « Modifier » opens: what inventaire.io holds about the edition,
-//  read fresh, then the form, and « Image depuis une URL » pushed over it.
+//  The sheet the book screen's « Modifier » opens: what inventaire.io holds about the edition and
+//  its work, read fresh, then the form, and what it pushes over itself — the search for the work
+//  (`V2 · Quelle œuvre ?` of « Nouveau livre v2 »), the search for an author, « Image depuis une
+//  URL ».
 //
 //  A sheet with its own navigation stack rather than a screen pushed onto the book's: the book
-//  screen's stack belongs to its tab, and the form, like the creation's, has a screen of its own
+//  screen's stack belongs to its tab, and the form, like the creation's, has screens of its own
 //  to push and a « ? » that opens the help in a sheet of its own.
 //
 //  The local edition is read for its uri only. What the form starts from comes from the server,
-//  because each change has to name the value it replaces (`EditionClaims`). Saving writes the
-//  claims that landed back into the local edition — on a full success, and on a partial one too,
-//  since what landed is what inventaire.io now shows.
+//  because each change has to name the value it replaces (`EditionClaims`). Saving writes what
+//  landed back into the local edition — on a full success, and on a partial one too, since what
+//  landed is what inventaire.io now shows — and reads the work again when it moved or gained an
+//  author, so the book screen names who wrote it.
 //
 
 import SwiftUI
@@ -20,6 +23,7 @@ import SwiftData
 
 struct EditEditionFlowView: View {
     @Environment(EntityCreationModel.self) private var creationModel
+    @Environment(EntityModel.self) private var entityModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -60,6 +64,8 @@ struct EditEditionFlowView: View {
                             edit: binding,
                             failure: failure,
                             onSave: save,
+                            onChooseWork: { path.append(.work) },
+                            onAddAuthor: { path.append(.author) },
                             onPickCoverURL: { path.append(.coverFromURL) }
                         )
                     }
@@ -77,10 +83,31 @@ struct EditEditionFlowView: View {
             }
             .navigationDestination(for: EditEditionStep.self) { step in
                 switch step {
+                case .work:
+                    WorkSearchView(
+                        isbn: edit?.original.isbn ?? "",
+                        onChoose: { candidate in
+                            edit?.choose(candidate)
+                            path.removeLast()
+                        },
+                        onCreate: { query in
+                            edit?.startNewWork(titled: query)
+                            path.removeLast()
+                        },
+                        emptyTitle: "edit_edition.work.search_empty.title",
+                        emptyMessage: "edit_edition.work.search_empty.message"
+                    )
+                    .navigationTitle(String(localized: "edit_edition.work.choose"))
+                    .navigationBarTitleDisplayMode(.inline)
+                case .author:
+                    // Pops itself once an author is picked or created.
+                    AuthorPickerView(initialQuery: "") { author in
+                        edit?.addAuthor(author)
+                    }
                 case .coverFromURL:
                     CoverURLView(
                         // The work's title first, which is what a cover is known by.
-                        searchedTitle: edition.works.first?.title ?? edit?.trimmedTitle ?? edition.title,
+                        searchedTitle: edit?.work?.title ?? edit?.trimmedTitle ?? edition.title,
                         isbn: edit?.original.normalizedISBN ?? ""
                     ) { jpeg, _ in
                         // `update-claim` takes a hash: the bytes are uploaded, the address is not
@@ -99,16 +126,25 @@ struct EditEditionFlowView: View {
         }
     }
 
-    /// Reads the edition's claims, then its cover, so the frame shows the picture it has.
+    /// Reads the edition's claims, then its work and its cover.
     ///
-    /// The cover is a nicety: when it does not download, the form opens with an empty frame,
-    /// and a picture added there replaces the one the edition has.
+    /// The work is part of what the form needs: its authors are what an added author is checked
+    /// against, and its uri is what a new work replaces. The cover is a nicety: when it does not
+    /// download, the form opens with an empty frame, and a picture added there replaces the one
+    /// the edition has.
     private func load() async {
         phase = .loading
 
         do {
             let claims: EditionClaims = try await creationModel.editableEdition(uri: edition.uri)
-            var loaded: EditionEdit = .init(original: claims)
+
+            var work: EditionWork?
+            if let workUri = claims.workUri {
+                work = try await creationModel.describeWork(uri: workUri)
+                work?.imageUrl = edition.image
+            }
+
+            var loaded: EditionEdit = .init(original: claims, originalWork: work)
 
             if let hash = claims.coverHash,
                let url = creationModel.coverURL(hash: hash),
@@ -125,35 +161,54 @@ struct EditEditionFlowView: View {
 
     /// Sends what changed, then shows it on the book screen.
     ///
-    /// A failure leaves the form as it is, with everything typed still there, and the claims
-    /// that did land already moved out of what the next try sends.
+    /// A failure leaves the form as it is, with everything typed still there, and what did land
+    /// already moved out of what the next try sends.
     private func save() async {
         guard let current = edit else { return }
         failure = nil
 
         do {
             let saved: EditionEdit = try await creationModel.saveEdition(current)
-            creationModel.apply(
-                saved.original,
-                since: current.original,
-                to: edition,
-                modelContext: modelContext
-            )
+            await show(saved, since: current)
             edit = saved
             dismiss()
         } catch let saveFailure as EditionSaveFailure {
-            creationModel.apply(
-                saveFailure.edit.original,
-                since: current.original,
-                to: edition,
-                modelContext: modelContext
-            )
+            await show(saveFailure.edit, since: current)
             edit = saveFailure.edit
             failure = .init(error: saveFailure.underlying)
             Haptics.Notification.error.play()
         } catch {
             failure = .init(error: error)
             Haptics.Notification.error.play()
+        }
+    }
+
+    /// Writes into the store what landed between `before` and `after`: the edition's own claims
+    /// directly, its work by reading it again — the work an edition points at, and the authors
+    /// that work names, live in other entities than the one the form changed.
+    private func show(
+        _ after: EditionEdit,
+        since before: EditionEdit
+    ) async {
+        creationModel.apply(
+            after.original,
+            since: before.original,
+            to: edition,
+            modelContext: modelContext
+        )
+
+        guard let workUri = after.original.workUri else { return }
+
+        let workMoved: Bool = workUri != before.original.workUri
+        let gainedAuthors: Bool = after.originalWork?.authors.count != before.originalWork?.authors.count
+        guard workMoved || gainedAuthors else { return }
+
+        guard let work = try? await entityModel.refreshWork(modelContext: modelContext, uri: workUri),
+              edition.isStillInTheStore else { return }
+
+        if workMoved {
+            edition.works = [work]
+            try? modelContext.save()
         }
     }
 }

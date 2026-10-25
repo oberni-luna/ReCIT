@@ -18,6 +18,8 @@ struct EditableEditionsDTO: Codable {
 
 struct EditableEditionDTO: Codable {
     let uri: String
+    /// The language the entity's labels were first written in — asked with `info`.
+    let originalLang: String?
     let claims: [String: [ClaimValue]]?
 
     /// The first string value of a claim. Editions carry one title, one subtitle, one cover.

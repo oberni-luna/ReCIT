@@ -16,8 +16,9 @@
 //  that half-succeeded would leave a work without its edition on a public website. So the call
 //  is awaited, and the form stays open until the server has spoken.
 //
-//  It also changes an edition that exists — its title, its subtitle, its cover — from the
-//  book screen's « Modifier ». Same open database, same reasons not to be optimistic.
+//  It also changes an edition that exists — its title, its subtitle, its cover, the work it is
+//  an edition of, that work's authors — from the book screen's « Modifier ». Same open
+//  database, same reasons not to be optimistic.
 //
 //  See PRD 0015.
 //
@@ -179,44 +180,114 @@ final class EntityCreationModel {
         apiService.absoluteImageUrl(EntityImageHash.path(of: hash)).flatMap(URL.init(string:))
     }
 
-    /// Sends what the form changed — the picture first, when there is a new one, then one
-    /// `update-claim` per claim — and answers the edit with everything landed.
+    /// The work an edition is an edition of, with its authors' names and uris — what the form
+    /// shows, and what it checks an added author against. Public, so cookieless; the authors come
+    /// in the same envelope, asked as relatives.
+    func describeWork(uri: String) async throws -> EditionWork {
+        let response: WorkSummariesDTO? = try await publicAPIService.fetchData(
+            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=labels|claims&lang=fr&relatives=wdt:P50",
+            debug: false
+        )
+
+        guard let entities = response?.entities, let work = entities[uri] else {
+            throw NetworkError.badResponse
+        }
+
+        let authors: [NewBookAuthor] = work.values(of: .author).compactMap { authorUri in
+            guard let name = entities[authorUri]?.label else { return nil }
+            return .init(name: name, uri: authorUri)
+        }
+
+        return .init(uri: uri, title: work.label ?? "", authors: authors)
+    }
+
+    /// Runs what the form changed, one request at a time in the order `EditionEdit.nextStep`
+    /// gives — the picture, the authors and the work that do not exist yet, then the claims —
+    /// and answers the edit with everything landed.
     ///
     /// Unlike a new book's, a new cover is not an ornament here: it may be the whole change the
     /// reader asked for, so an upload that does not land is a failure like any other.
     ///
-    /// Throws `EditionSaveFailure`, which carries the edit as far as it got: the claims that
-    /// landed have moved into its `original`, and are not sent again.
+    /// Throws `EditionSaveFailure`, which carries the edit as far as it got: what landed has
+    /// moved into it, and is neither sent nor created again.
     func saveEdition(_ edit: EditionEdit) async throws -> EditionEdit {
         var edit: EditionEdit = edit
+        // Every step lands or throws; a step that did neither would loop for ever.
+        var budget: Int = 100
 
         do {
-            if let imageData = edit.coverToUpload {
-                let path: String? = try await apiService.upload(
-                    imageData: imageData,
-                    fileName: "cover.jpg",
-                    fieldName: "cover",
-                    container: "entities",
-                    debug: false
-                )
-                guard let hash = EntityImageHash.from(path) else { throw NetworkError.badResponse }
-                edit.uploadedCoverHash = hash
-            }
+            while let step = edit.nextStep {
+                budget -= 1
+                guard budget > 0 else { throw NetworkError.badResponse }
 
-            for update in edit.claimUpdates {
-                let _: OkStatusDTO? = try await apiService.send(
-                    toEndpoint: "/api/entities/update-claim",
-                    method: "PUT",
-                    payload: update,
-                    debug: true
-                )
-                edit.landed(update)
+                switch step {
+                case .uploadCover(let imageData):
+                    let path: String? = try await apiService.upload(
+                        imageData: imageData,
+                        fileName: "cover.jpg",
+                        fieldName: "cover",
+                        container: "entities",
+                        debug: false
+                    )
+                    guard let hash = EntityImageHash.from(path) else { throw NetworkError.badResponse }
+                    edit.coverUploaded(hash: hash)
+
+                case .createAuthor(let id, let label, let language):
+                    let uri: String = try await createEntity(
+                        label: label,
+                        language: language,
+                        claims: [WikidataProperty.instanceOf.rawValue: [Self.human]]
+                    )
+                    edit.authorCreated(id: id, uri: uri)
+
+                case .createWork(let label, let language, let authorUris):
+                    let uri: String = try await createEntity(
+                        label: label,
+                        language: language,
+                        claims: [
+                            WikidataProperty.instanceOf.rawValue: [Self.literaryWork],
+                            EditableClaimProperty.author.rawValue: authorUris
+                        ]
+                    )
+                    edit.workCreated(uri: uri)
+
+                case .claim(let update):
+                    let _: OkStatusDTO? = try await apiService.send(
+                        toEndpoint: "/api/entities/update-claim",
+                        method: "PUT",
+                        payload: update,
+                        debug: true
+                    )
+                    edit.landed(update)
+                }
             }
 
             return edit
         } catch {
             throw EditionSaveFailure(edit: edit, underlying: error)
         }
+    }
+
+    /// `wdt:P31` of an author — human — and of a work — literary work —, the classes the
+    /// website gives the entities it creates.
+    private static let human: String = "wd:Q5"
+    private static let literaryWork: String = "wd:Q47461344"
+
+    /// Creates one entity on inventaire.io, and answers the uri it was created under.
+    private func createEntity(
+        label: String,
+        language: String,
+        claims: [String: [String]]
+    ) async throws -> String {
+        let response: CreatedEntityDTO? = try await apiService.send(
+            toEndpoint: "/api/entities",
+            method: "POST",
+            payload: EntityCreationRequest(labels: [language: label], claims: claims),
+            debug: true
+        )
+
+        guard let uri = response?.entity.uri else { throw NetworkError.badResponse }
+        return uri
     }
 
     /// Writes into the local edition what moved on the server between `before` and `after`, so

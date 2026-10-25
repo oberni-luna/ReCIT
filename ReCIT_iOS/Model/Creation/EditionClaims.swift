@@ -24,19 +24,28 @@ struct EditionClaims: Equatable, Sendable {
     /// As inventaire.io prints it, hyphens included: the ISBN-13, or the ISBN-10 when there is
     /// no other. Empty for an edition with neither.
     let isbn: String
+    /// The work this is an edition of, `wdt:P629`. `nil` for an edition attached to none.
+    var workUri: String?
+    /// The language the edition's own labels were written in: the one the labels of a work or
+    /// an author created from the form are written in too.
+    let labelLanguage: String?
 
     init(
         uri: String,
         title: String,
         subtitle: String? = nil,
         coverHash: String? = nil,
-        isbn: String = ""
+        isbn: String = "",
+        workUri: String? = nil,
+        labelLanguage: String? = nil
     ) {
         self.uri = uri
         self.title = title
         self.subtitle = subtitle
         self.coverHash = coverHash
         self.isbn = isbn
+        self.workUri = workUri
+        self.labelLanguage = labelLanguage
     }
 
     /// Reads one entity of a `by-uris` answer. Answers `nil` for anything but an `inv:`
@@ -46,12 +55,14 @@ struct EditionClaims: Equatable, Sendable {
 
         self.init(
             uri: dto.uri,
-            title: dto.firstValue(of: EditableEditionProperty.title.rawValue) ?? "",
-            subtitle: dto.firstValue(of: EditableEditionProperty.subtitle.rawValue),
-            coverHash: dto.firstValue(of: EditableEditionProperty.cover.rawValue),
+            title: dto.firstValue(of: EditableClaimProperty.title.rawValue) ?? "",
+            subtitle: dto.firstValue(of: EditableClaimProperty.subtitle.rawValue),
+            coverHash: dto.firstValue(of: EditableClaimProperty.cover.rawValue),
             isbn: dto.firstValue(of: WikidataProperty.isbn13.rawValue)
                 ?? dto.firstValue(of: WikidataProperty.isbn10.rawValue)
-                ?? ""
+                ?? "",
+            workUri: dto.firstValue(of: EditableClaimProperty.work.rawValue),
+            labelLanguage: dto.originalLang
         )
     }
 

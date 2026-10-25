@@ -2,11 +2,11 @@
 //  EditionClaimUpdate.swift
 //  ReCIT_iOS
 //
-//  One change to one claim of an edition, as `PUT /api/entities/update-claim` takes it: the
-//  value it replaces and the value it puts in its place.
+//  One change to one claim — of the edition, or of its work — as `PUT /api/entities/update-claim`
+//  takes it: the value it replaces and the value it puts in its place.
 //
 //  Either side can be missing, and is then **left out** of the body rather than sent as `null`:
-//  no old value adds a claim the edition did not have, no new value removes the claim. The
+//  no old value adds a claim the entity did not have, no new value removes the claim. The
 //  server reads an empty string the same way, but an absent key says it without relying on that.
 //
 
@@ -14,7 +14,7 @@ import Foundation
 
 struct EditionClaimUpdate: Codable, Equatable, Sendable {
     let uri: String
-    let property: EditableEditionProperty
+    let property: EditableClaimProperty
     let oldValue: String?
     let newValue: String?
 

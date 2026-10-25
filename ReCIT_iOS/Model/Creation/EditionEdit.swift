@@ -3,13 +3,19 @@
 //  ReCIT_iOS
 //
 //  What the reader has changed in « Modifier l'édition », and what that comes to on the wire. A
-//  value type with no opinion about the network: the form fills it, `EntityCreationModel` sends
-//  the updates it lists, and tells it which ones landed.
+//  value type with no opinion about the network: the form fills it, `EntityCreationModel` runs
+//  the steps it lists, and tells it which ones landed.
 //
-//  **A change half sent is finished, not redone.** Each claim is its own request, so a title can
-//  land and a cover fail. `landed(_:)` moves `original` to what the server now holds, and the
-//  retry lists only what is left — sending the title again would name, as the value it
-//  replaces, a title the edition no longer has.
+//  Besides the edition's own title, subtitle and cover, the form changes the work the edition is
+//  an edition of — another one inventaire.io has, or one created from here — and adds authors to
+//  that work. Whatever has to exist before a claim can name it goes first: the picture, the
+//  authors inventaire.io does not have, the work being created. Then the claims, one at a time.
+//
+//  **A change half sent is finished, not redone.** Each step is its own request, so a title can
+//  land and a cover fail. Each one landed moves into `original`, `originalWork` or an author's
+//  `uri`, and the retry lists only what is left — creating an author twice would put a twin on a
+//  public database, and sending the title again would name, as the value it replaces, a title
+//  the edition no longer has.
 //
 
 import Foundation
@@ -25,9 +31,21 @@ struct EditionEdit: Equatable, Sendable {
         case removed
     }
 
+    /// What became of the work since the form opened.
+    enum WorkChange: Equatable, Sendable {
+        case unchanged
+        /// Another work inventaire.io has: picked from the search, or just created.
+        case existing(EditionWork)
+        /// A work to create, titled `newWorkTitle`, written by the authors added.
+        case new
+    }
+
     /// The edition as the server holds it — when the form opened, then after each change that
     /// landed.
     private(set) var original: EditionClaims
+
+    /// The work `original.workUri` names, described. `nil` for an edition attached to none.
+    private(set) var originalWork: EditionWork?
 
     var title: String
     var subtitle: String
@@ -42,15 +60,28 @@ struct EditionEdit: Equatable, Sendable {
     /// edition without sending the same picture twice.
     var uploadedCoverHash: String?
 
+    private(set) var workChange: WorkChange = .unchanged
+
+    /// The title of the work being created.
+    var newWorkTitle: String = ""
+
+    /// The authors added to the work shown. One inventaire.io does not have gets its `uri` once
+    /// created, so a retry does not create it twice.
+    private(set) var addedAuthors: [NewBookAuthor] = []
+
     init(
         original: EditionClaims,
+        originalWork: EditionWork? = nil,
         originalCoverData: Data? = nil
     ) {
         self.original = original
+        self.originalWork = originalWork
         self.originalCoverData = originalCoverData
         title = original.title
         subtitle = original.subtitle ?? ""
     }
+
+    // MARK: - The cover
 
     /// The picture the cover frame shows, and the binding it writes through: a picture set
     /// replaces the edition's, none removes it.
@@ -73,6 +104,85 @@ struct EditionEdit: Equatable, Sendable {
         }
     }
 
+    /// The picture to upload before the cover's claim can be sent: a replacing one whose hash
+    /// is not known yet.
+    var coverToUpload: Data? {
+        guard case .replaced(let data) = cover, uploadedCoverHash == nil else { return nil }
+        return data
+    }
+
+    // MARK: - The work and its authors
+
+    /// The work the form shows: the one chosen, or the edition's. `nil` for an edition attached
+    /// to none, and while a work is being created.
+    var work: EditionWork? {
+        switch workChange {
+        case .unchanged: originalWork
+        case .existing(let work): work
+        case .new: nil
+        }
+    }
+
+    var isCreatingWork: Bool {
+        workChange == .new
+    }
+
+    var trimmedNewWorkTitle: String {
+        newWorkTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Whether authors can be added to the work shown: one being created, or one of
+    /// inventaire.io's own.
+    var canAddAuthors: Bool {
+        isCreatingWork || work?.isEditable == true
+    }
+
+    /// Makes the edition an edition of `candidate`. Picking the work it already has undoes the
+    /// change rather than sending it.
+    mutating func choose(_ candidate: WorkCandidate) {
+        workChange = candidate.uri == originalWork?.uri ? .unchanged : .existing(.init(candidate: candidate))
+
+        let authorsOnTheWork: [NewBookAuthor] = work?.authors ?? []
+        addedAuthors.removeAll { added in
+            authorsOnTheWork.contains { Self.isSamePerson($0, added) }
+        }
+    }
+
+    /// None of the works found is the book's: one is created, named after the search.
+    mutating func startNewWork(titled query: String) {
+        workChange = .new
+        newWorkTitle = NewBookDraft.capitalizingFirstLetter(query.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
+    /// Adds an author to the work shown — unless they are on it already, or added already.
+    mutating func addAuthor(_ author: NewBookAuthor) {
+        guard author.trimmedName.isEmpty == false,
+              isOnTheWork(author) == false,
+              addedAuthors.contains(where: { Self.isSamePerson($0, author) }) == false else { return }
+
+        addedAuthors.append(author)
+    }
+
+    /// What a swipe on the list of added authors takes away.
+    mutating func removeAddedAuthors(atOffsets offsets: IndexSet) {
+        for index in offsets.sorted(by: >) where addedAuthors.indices.contains(index) {
+            addedAuthors.remove(at: index)
+        }
+    }
+
+    private func isOnTheWork(_ author: NewBookAuthor) -> Bool {
+        (work?.authors ?? []).contains { Self.isSamePerson($0, author) }
+    }
+
+    /// The same uri, or — when one side has none, as authors picked from the search do — the
+    /// same name.
+    private static func isSamePerson(_ lhs: NewBookAuthor, _ rhs: NewBookAuthor) -> Bool {
+        if let left = lhs.uri, let right = rhs.uri { return left == right }
+        return lhs.trimmedName.localizedCaseInsensitiveCompare(rhs.trimmedName) == .orderedSame
+    }
+
+    // MARK: - What there is to send
+
     var trimmedTitle: String {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -90,24 +200,52 @@ struct EditionEdit: Equatable, Sendable {
     }
 
     var hasChanges: Bool {
-        trimmedTitle != originalTitle || trimmedSubtitle != originalSubtitle || cover != .unchanged
+        trimmedTitle != originalTitle
+            || trimmedSubtitle != originalSubtitle
+            || cover != .unchanged
+            || workChange != .unchanged
+            || addedAuthors.isEmpty == false
     }
 
     /// Whether there is something to send, and it can be sent. An edition without a title is
-    /// unreadable in every list it appears in, so the title cannot be emptied.
+    /// unreadable in every list it appears in, and a work created without a title or an author
+    /// is the kind of orphan that has to be repaired by hand on the website afterwards.
     var isSaveable: Bool {
-        trimmedTitle.isEmpty == false && hasChanges
+        guard trimmedTitle.isEmpty == false, hasChanges else { return false }
+
+        if isCreatingWork {
+            return trimmedNewWorkTitle.isEmpty == false && addedAuthors.isEmpty == false
+        }
+        return addedAuthors.isEmpty || work?.isEditable == true
     }
 
-    /// The picture to upload before the cover's claim can be sent: a replacing one whose hash
-    /// is not known yet.
-    var coverToUpload: Data? {
-        guard case .replaced(let data) = cover, uploadedCoverHash == nil else { return nil }
-        return data
+    /// The language the labels of a created author or work are written in: the edition's own,
+    /// or the reader's when the edition does not say.
+    var labelLanguage: String {
+        original.labelLanguage ?? ResolveRequestBuilder.defaultLabelLanguage
     }
 
-    /// The claims to send, in order: title, subtitle, cover. A replacing cover is listed once its
-    /// hash is known, which takes the upload first.
+    /// The next request of the save, or `nil` once everything has landed.
+    var nextStep: EditionEditStep? {
+        if let data = coverToUpload {
+            return .uploadCover(data)
+        }
+        if let author = addedAuthors.first(where: { $0.uri == nil }) {
+            return .createAuthor(id: author.id, label: author.trimmedName, language: labelLanguage)
+        }
+        if isCreatingWork {
+            return .createWork(
+                label: trimmedNewWorkTitle,
+                language: labelLanguage,
+                authorUris: addedAuthors.compactMap(\.uri)
+            )
+        }
+        return claimUpdates.first.map { .claim($0) }
+    }
+
+    /// The claims to send, in order: the edition's title, subtitle, cover and work, then the
+    /// authors added to its work. A replacing cover is listed once its hash is known, an author
+    /// once it exists, and nothing about a work being created until it is.
     var claimUpdates: [EditionClaimUpdate] {
         var updates: [EditionClaimUpdate] = []
 
@@ -130,10 +268,40 @@ struct EditionEdit: Equatable, Sendable {
             break
         }
 
+        if case .existing(let target) = workChange {
+            updates.append(update(.work, from: original.workUri, to: target.uri))
+        }
+
+        if let target = work, target.isEditable {
+            for case let uri? in addedAuthors.map(\.uri) {
+                updates.append(update(.author, of: target.uri, from: nil, to: uri))
+            }
+        }
+
         return updates
     }
 
-    /// Records that `update` landed: `original` now holds its new value, so it drops out of
+    // MARK: - What landed
+
+    /// Records the hash a new cover was filed under.
+    mutating func coverUploaded(hash: String) {
+        uploadedCoverHash = hash
+    }
+
+    /// Records the uri an author was created under: it is named from now on.
+    mutating func authorCreated(id: UUID, uri: String) {
+        guard let index = addedAuthors.firstIndex(where: { $0.id == id }) else { return }
+        addedAuthors[index].uri = uri
+    }
+
+    /// Records the work created: it is a work inventaire.io has now, written by the authors
+    /// added, and only the edition's claim on it is left to send.
+    mutating func workCreated(uri: String) {
+        workChange = .existing(.init(uri: uri, title: trimmedNewWorkTitle, authors: addedAuthors))
+        addedAuthors = []
+    }
+
+    /// Records that `update` landed: what it changed now holds its new value, so it drops out of
     /// `claimUpdates`.
     mutating func landed(_ update: EditionClaimUpdate) {
         switch update.property {
@@ -146,18 +314,34 @@ struct EditionEdit: Equatable, Sendable {
             originalCoverData = coverData
             cover = .unchanged
             uploadedCoverHash = nil
+        case .work:
+            original.workUri = update.newValue
+            if case .existing(let target) = workChange {
+                originalWork = target
+            }
+            workChange = .unchanged
+        case .author:
+            guard let index = addedAuthors.firstIndex(where: { $0.uri == update.newValue }) else { return }
+            let author: NewBookAuthor = addedAuthors.remove(at: index)
+            if case .existing(var target) = workChange, target.uri == update.uri {
+                target.authors.append(author)
+                workChange = .existing(target)
+            } else if originalWork?.uri == update.uri {
+                originalWork?.authors.append(author)
+            }
         }
     }
 
-    /// An update naming the value it replaces. An empty value on either side is no value: no
-    /// old one adds the claim, no new one removes it.
+    /// An update naming the value it replaces, on the edition unless said otherwise. An empty
+    /// value on either side is no value: no old one adds the claim, no new one removes it.
     private func update(
-        _ property: EditableEditionProperty,
+        _ property: EditableClaimProperty,
+        of uri: String? = nil,
         from oldValue: String?,
         to newValue: String?
     ) -> EditionClaimUpdate {
         .init(
-            uri: original.uri,
+            uri: uri ?? original.uri,
             property: property,
             oldValue: oldValue?.isEmpty == true ? nil : oldValue,
             newValue: newValue?.isEmpty == true ? nil : newValue

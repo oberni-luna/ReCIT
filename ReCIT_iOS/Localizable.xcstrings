@@ -2806,6 +2806,7 @@
       }
     },
     "edit_edition.isbn" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2849,6 +2850,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Modifier l’édition"
+          }
+        }
+      }
+    },
+    "edit_edition.work.add_author" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add an author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un·e auteur·ice"
+          }
+        }
+      }
+    },
+    "edit_edition.work.change" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose another work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir une autre œuvre"
+          }
+        }
+      }
+    },
+    "edit_edition.work.choose" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the work"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir l’œuvre"
+          }
+        }
+      }
+    },
+    "edit_edition.work.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The work this book is an edition of, with its authors. Not the right one? Choose another, or create it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’œuvre dont ce livre est une édition, avec ses auteur·ices. Ce n’est pas la bonne ? Choisissez-en une autre, ou créez-la."
+          }
+        }
+      }
+    },
+    "edit_edition.work.new_author" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Created on inventaire.io when you save"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créé·e sur inventaire.io à l’enregistrement"
+          }
+        }
+      }
+    },
+    "edit_edition.work.new_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Created on inventaire.io when you save, with at least one author."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créée sur inventaire.io à l’enregistrement, avec au moins un·e auteur·ice."
+          }
+        }
+      }
+    },
+    "edit_edition.work.search_empty.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for its title or its author. If the work is not on inventaire.io, you can create it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cherchez son titre ou son auteur·ice. Si l’œuvre n’est pas sur inventaire.io, vous pourrez la créer."
+          }
+        }
+      }
+    },
+    "edit_edition.work.search_empty.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which work is this an edition of?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De quelle œuvre est-ce une édition ?"
+          }
+        }
+      }
+    },
+    "edit_edition.work.wikidata_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This work lives on Wikidata: its authors are edited there."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette œuvre vit sur Wikidata : ses auteur·ices se modifient là-bas."
           }
         }
       }

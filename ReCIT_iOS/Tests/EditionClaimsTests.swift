@@ -56,6 +56,17 @@ struct EditionClaimsTests {
         #expect(claims?.normalizedISBN == "9782370493002")
     }
 
+    @Test("The work and the label language are read with the edition")
+    func readsWorkAndLanguage() throws {
+        let claims: EditionClaims? = try decode("""
+        { "entities": { "inv:1": { "uri": "inv:1", "originalLang": "fr",
+            "claims": { "wdt:P1476": ["Penss et les plis du monde"], "wdt:P629": ["inv:work"] } } } }
+        """).first
+
+        #expect(claims?.workUri == "inv:work")
+        #expect(claims?.labelLanguage == "fr")
+    }
+
     @Test("Without an ISBN-13 the ISBN-10 is shown; without a title, an empty one")
     func sparseEdition() throws {
         let claims: EditionClaims? = try decode("""

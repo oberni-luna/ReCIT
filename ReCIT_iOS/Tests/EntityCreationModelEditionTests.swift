@@ -148,6 +148,93 @@ struct EntityCreationModelEditionTests {
         #expect(saved.hasChanges == false)
     }
 
+    // MARK: - The work
+
+    @Test("The work is described with its authors, by name and uri")
+    func describesTheWork() async throws {
+        let publicMock: MockAPIService = .init()
+        publicMock.stub("/api/entities/by-uris", json: """
+        { "entities": {
+            "inv:work": { "uri": "inv:work", "labels": { "fr": "Penss et les plis du monde" },
+                          "claims": { "wdt:P50": ["wd:Q3177937"] } },
+            "wd:Q3177937": { "uri": "wd:Q3177937", "labels": { "fr": "Jérémie Moreau" } }
+        } }
+        """)
+
+        let model: EntityCreationModel = .init(apiService: MockAPIService(), publicAPIService: publicMock)
+        let work: EditionWork = try await model.describeWork(uri: "inv:work")
+
+        #expect(work.title == "Penss et les plis du monde")
+        #expect(work.authors.map(\.uri) == ["wd:Q3177937"])
+        #expect(work.authors.map(\.trimmedName) == ["Jérémie Moreau"])
+        #expect(publicMock.recordedRequests.first?.endpoint.contains("relatives=wdt:P50") == true)
+    }
+
+    @Test("A new work goes up after its new author, then the edition is pointed at it")
+    func createsAuthorThenWorkThenClaim() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/update-claim", json: #"{ "ok": true }"#)
+        mock.stub("/api/entities", jsonSequence: [
+            #"{ "entity": { "uri": "inv:author" } }"#,
+            #"{ "entity": { "uri": "inv:work" } }"#
+        ])
+
+        var edit: EditionEdit = .init(original: original, originalWork: .init(uri: "inv:old", title: "Lucioles"))
+        edit.startNewWork(titled: "Lucioles, l'œuvre")
+        edit.addAuthor(.init(name: "Lucie Durand"))
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+        let saved: EditionEdit = try await model.saveEdition(edit)
+
+        #expect(mock.recordedRequests.map(\.endpoint) == [
+            "/api/entities",
+            "/api/entities",
+            "/api/entities/update-claim"
+        ])
+        #expect(mock.recordedRequests.map(\.method) == ["POST", "POST", "PUT"])
+
+        let author: EntityCreationRequest = try JSONDecoder().decode(EntityCreationRequest.self, from: mock.sentPayloads[0])
+        #expect(author.labels.values.first == "Lucie Durand")
+        #expect(author.claims == ["wdt:P31": ["wd:Q5"]])
+
+        let work: EntityCreationRequest = try JSONDecoder().decode(EntityCreationRequest.self, from: mock.sentPayloads[1])
+        #expect(work.labels.values.first == "Lucioles, l'œuvre")
+        #expect(work.claims == ["wdt:P31": ["wd:Q47461344"], "wdt:P50": ["inv:author"]])
+
+        let claim: EditionClaimUpdate = try JSONDecoder().decode(EditionClaimUpdate.self, from: mock.sentPayloads[2])
+        #expect(claim == .init(uri: original.uri, property: .work, oldValue: nil, newValue: "inv:work"))
+
+        #expect(saved.original.workUri == "inv:work")
+        #expect(saved.hasChanges == false)
+    }
+
+    @Test("A work that fails to be created leaves its author created, and the retry reuses them")
+    func failedWorkKeepsItsAuthor() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/update-claim", json: #"{ "ok": true }"#)
+        mock.stub("/api/entities", jsonSequence: [#"{ "entity": { "uri": "inv:author" } }"#])
+        mock.onSend = { index in
+            if index == 1 { throw NetworkError.badStatus(code: 500, message: nil) }
+        }
+
+        var edit: EditionEdit = .init(original: original)
+        edit.startNewWork(titled: "Lucioles")
+        edit.addAuthor(.init(name: "Lucie Durand"))
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+
+        var halfway: EditionEdit?
+        do {
+            _ = try await model.saveEdition(edit)
+        } catch let failure as EditionSaveFailure {
+            halfway = failure.edit
+        }
+
+        let partial: EditionEdit = try #require(halfway)
+        #expect(partial.addedAuthors.map(\.uri) == ["inv:author"])
+        #expect(partial.nextStep == .createWork(label: "Lucioles", language: partial.labelLanguage, authorUris: ["inv:author"]))
+    }
+
     // MARK: - The local edition
 
     @Test("Only what moved is written into the local edition")

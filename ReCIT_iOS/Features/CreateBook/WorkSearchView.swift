@@ -14,6 +14,10 @@
 //  search people and walk from an author to their works. Each result is completed by
 //  `EntityCreationModel.describeWorks`, for the authors and the year a cover is recognised by.
 //
+//  « Modifier l'édition » pushes the same screen to change the work an edition belongs to, with
+//  its own words before anything is typed: there, the ISBN is known, and saying it is not would
+//  be false.
+//
 //  See PRD 0026.
 //
 
@@ -32,6 +36,11 @@ struct WorkSearchView: View {
 
     /// None of the works fits: one is created, named after what was searched.
     let onCreate: (String) -> Void
+
+    /// What the screen says before anything is typed. By default a new book's: inventaire.io
+    /// does not know this ISBN.
+    var emptyTitle: LocalizedStringKey = "create_book.search.empty.title"
+    var emptyMessage: LocalizedStringKey?
 
     @State private var query: String = ""
     @State private var results: [WorkCandidate] = []
@@ -54,8 +63,8 @@ struct WorkSearchView: View {
                 Section {
                     EmptyStateView(
                         glyph: "magnifyingglass",
-                        title: "create_book.search.empty.title",
-                        message: "create_book.search.empty.message \(isbn)"
+                        title: emptyTitle,
+                        message: emptyMessage ?? "create_book.search.empty.message \(isbn)"
                     )
                     .padding(.vertical, .xLarge)
                 }

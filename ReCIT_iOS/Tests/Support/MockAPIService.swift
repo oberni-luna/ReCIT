@@ -18,6 +18,9 @@ final class MockAPIService: APIServicing {
     }
 
     private var stubs: [(match: String, stub: Stub)] = []
+    /// Answers given one after the other, before `stubs` are looked at: two calls to one
+    /// endpoint that must answer differently — two entities created, two uris.
+    private var sequences: [(match: String, answers: [Data])] = []
     /// What an upload answers, and how it fails. Kept apart from `stubs`, which decode JSON
     /// into a `Codable`: an upload answers one url.
     var uploadedImageUrl: String?
@@ -43,6 +46,11 @@ final class MockAPIService: APIServicing {
 
     func stub(_ match: String, error: Error) {
         stubs.append((match, .failure(error)))
+    }
+
+    /// `match` answers each of `jsons` in turn, then falls back on `stubs`.
+    func stub(_ match: String, jsonSequence jsons: [String]) {
+        sequences.append((match, jsons.map { Data($0.utf8) }))
     }
 
     /// Replaces what `match` answers, keeping its place in the order: a server whose answer
@@ -114,6 +122,11 @@ final class MockAPIService: APIServicing {
     // MARK: - Helpers
 
     private func decodeStub<R: Decodable>(for endpoint: String) throws -> R? {
+        if let index = sequences.firstIndex(where: { endpoint.hasSuffix($0.match) && $0.answers.isEmpty == false }) {
+            let data: Data = sequences[index].answers.removeFirst()
+            return try JSONDecoder().decode(R.self, from: data)
+        }
+
         guard let match = stubs.first(where: { endpoint.contains($0.match) }) else {
             throw NetworkError.badStatus(code: 404, message: "No stub registered for \(endpoint)")
         }

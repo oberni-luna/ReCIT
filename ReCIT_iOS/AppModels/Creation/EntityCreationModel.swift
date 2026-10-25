@@ -160,20 +160,44 @@ final class EntityCreationModel {
     /// What inventaire.io holds about the edition, read fresh to open « Modifier l'édition »:
     /// the values the form starts from, and the ones each change has to name as replaced.
     ///
+    /// The publishers, collections and people its claims name come in the same envelope, asked
+    /// as relatives, with their labels. Languages are not relatives `by-uris` knows: those, and
+    /// anything else left unnamed, are asked for in a second call — and keep their uri as a name
+    /// when it fails, which is ugly but not wrong.
+    ///
     /// Public, so cookieless. Throws when the answer holds no `inv:` edition — a Wikidata one,
     /// or nothing at all: there is then nothing the form could send.
     func editableEdition(uri: String) async throws -> EditionClaims {
         let response: EditableEditionsDTO? = try await publicAPIService.fetchData(
-            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=info|claims",
+            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=info|claims|labels&lang=fr&relatives=\(Self.namedRelatives)",
             debug: false
         )
 
-        guard let claims = response?.entities.values.lazy.compactMap(EditionClaims.init(dto:)).first else {
+        guard let entities = response?.entities,
+              let edition = entities[response?.redirects?[uri] ?? uri]
+                ?? entities.values.first(where: { EditionClaims(dto: $0) != nil }),
+              let unnamed = EditionClaims(dto: edition) else {
             throw NetworkError.badResponse
         }
 
-        return claims
+        var labels: [String: String] = entities.compactMapValues(\.displayName)
+        let missing: [String] = unnamed.properties.entityUris.filter { labels[$0] == nil }
+        if missing.isEmpty == false {
+            let named: EditableEditionsDTO? = try? await publicAPIService.fetchData(
+                fromEndpoint: "/api/entities/by-uris?uris=\(missing.joined(separator: "|"))&attributes=labels&lang=fr",
+                debug: false
+            )
+            labels.merge(named?.entities.compactMapValues(\.displayName) ?? [:]) { known, _ in known }
+        }
+
+        return EditionClaims(dto: edition, labels: labels) ?? unnamed
     }
+
+    /// The claims of an edition whose values `by-uris` can bring along, with their labels.
+    private static let namedRelatives: String = EditionProperty.all
+        .filter { $0.searchType != nil && $0.searchType != .languages }
+        .map(\.uri)
+        .joined(separator: "|")
 
     /// Where the picture filed under `hash` is served from.
     func coverURL(hash: String) -> URL? {
@@ -251,6 +275,10 @@ final class EntityCreationModel {
                     )
                     edit.workCreated(uri: uri)
 
+                case .createEntity(let id, let label, let language, let kind):
+                    let uri: String = try await createEntity(label: label, language: language, kind: kind)
+                    edit.entityCreated(id: id, uri: uri)
+
                 case .claim(let update):
                     let _: OkStatusDTO? = try await apiService.send(
                         toEndpoint: "/api/entities/update-claim",
@@ -268,10 +296,44 @@ final class EntityCreationModel {
         }
     }
 
-    /// `wdt:P31` of an author — human — and of a work — literary work —, the classes the
-    /// website gives the entities it creates.
+    /// `wdt:P31` of an author — human —, of a work — literary work —, of a publisher and of an
+    /// editorial collection: the classes the website gives the entities it creates.
     private static let human: String = "wd:Q5"
     private static let literaryWork: String = "wd:Q47461344"
+    private static let publisher: String = "wd:Q2085381"
+    private static let editorialCollection: String = "wd:Q20655472"
+
+    /// Creates a publisher, a collection or a person an edition names. A collection has no label:
+    /// its name is a title, and it is created under its publisher, as the website requires.
+    private func createEntity(
+        label: String,
+        language: String,
+        kind: EntityCreationKind
+    ) async throws -> String {
+        switch kind {
+        case .human:
+            try await createEntity(
+                label: label,
+                language: language,
+                claims: [WikidataProperty.instanceOf.rawValue: [Self.human]]
+            )
+        case .publisher:
+            try await createEntity(
+                label: label,
+                language: language,
+                claims: [WikidataProperty.instanceOf.rawValue: [Self.publisher]]
+            )
+        case .collection(let publisherUri):
+            try await createEntity(
+                labels: [:],
+                claims: [
+                    WikidataProperty.instanceOf.rawValue: [Self.editorialCollection],
+                    WikidataProperty.title.rawValue: [label],
+                    WikidataProperty.publisher.rawValue: [publisherUri]
+                ]
+            )
+        }
+    }
 
     /// Creates one entity on inventaire.io, and answers the uri it was created under.
     private func createEntity(
@@ -279,10 +341,17 @@ final class EntityCreationModel {
         language: String,
         claims: [String: [String]]
     ) async throws -> String {
+        try await createEntity(labels: [language: label], claims: claims)
+    }
+
+    private func createEntity(
+        labels: [String: String],
+        claims: [String: [String]]
+    ) async throws -> String {
         let response: CreatedEntityDTO? = try await apiService.send(
             toEndpoint: "/api/entities",
             method: "POST",
-            payload: EntityCreationRequest(labels: [language: label], claims: claims),
+            payload: EntityCreationRequest(labels: labels, claims: claims),
             debug: true
         )
 
@@ -314,6 +383,14 @@ final class EntityCreationModel {
         }
         if after.coverHash != before.coverHash {
             edition.image = after.coverHash.flatMap { apiService.absoluteImageUrl(EntityImageHash.path(of: $0)) }
+        }
+        let pages: ClaimLiteral? = after.properties.literal(of: .numberOfPages)
+        if pages != before.properties.literal(of: .numberOfPages) {
+            if case .integer(let count) = pages {
+                edition.numberOfPages = count
+            } else {
+                edition.numberOfPages = nil
+            }
         }
         try? modelContext.save()
     }

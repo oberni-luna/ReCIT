@@ -15,6 +15,9 @@ enum EditionEditStep: Equatable, Sendable {
     case createAuthor(id: UUID, label: String, language: String)
     /// Create the work the edition is an edition of, with its authors.
     case createWork(label: String, language: String, authorUris: [String])
+    /// Create a publisher, a collection or a person the edition names, labelled with the name
+    /// the reader typed.
+    case createEntity(id: UUID, label: String, language: String, kind: EntityCreationKind)
     /// Change one claim.
     case claim(EditionClaimUpdate)
 }

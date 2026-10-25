@@ -2,8 +2,9 @@
 //  EditionClaimsTests.swift
 //  ReCIT_iOSTests
 //
-//  Reading an edition to change it: the canonical `inv:` uri behind an `isbn:` one, the three
-//  claims the form edits, the hash an upload answers, and the body `update-claim` is sent.
+//  Reading an edition to change it: the canonical `inv:` uri behind an `isbn:` one, the claims
+//  the form edits — the catalogue's among them —, the hash an upload answers, and the body
+//  `update-claim` is sent.
 //
 
 import Foundation
@@ -39,19 +40,24 @@ struct EditionClaimsTests {
 
     private func decode(_ json: String) throws -> [EditionClaims] {
         let dto: EditableEditionsDTO = try JSONDecoder().decode(EditableEditionsDTO.self, from: Data(json.utf8))
-        return dto.entities.values.compactMap(EditionClaims.init(dto:))
+        return dto.entities.values.compactMap { EditionClaims(dto: $0) }
     }
 
     @Test("An ISBN edition is read under the inv: uri it redirects to")
     func readsTheCanonicalEdition() throws {
         let claims: EditionClaims? = try decode(answer).first
 
+        var pages: EditionProperties = .init()
+        pages.setLiteral(.integer(256), for: .numberOfPages)
+
         #expect(claims == .init(
             uri: "inv:69c1353d3d6a4fb21005c0d7367e1eb4",
             title: "Lucioles",
             subtitle: "15 fictions pour des futurs écologiques",
             coverHash: "75407f010cff3581bd373cc8ada59ad9259bf17a",
-            isbn: "978-2-37049-300-2"
+            isbn: "978-2-37049-300-2",
+            isbn10: "2-37049-300-3",
+            properties: pages
         ))
         #expect(claims?.normalizedISBN == "9782370493002")
     }
@@ -74,6 +80,8 @@ struct EditionClaimsTests {
         """).first
 
         #expect(claims?.isbn == "2-37049-300-3")
+        // Shown once, as the ISBN, not a second time under it.
+        #expect(claims?.isbn10 == nil)
         #expect(claims?.title == "")
         #expect(claims?.subtitle == nil)
         #expect(claims?.coverHash == nil)

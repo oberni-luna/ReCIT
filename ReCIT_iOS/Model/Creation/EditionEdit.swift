@@ -7,9 +7,11 @@
 //  the steps it lists, and tells it which ones landed.
 //
 //  Besides the edition's own title, subtitle and cover, the form changes the work the edition is
-//  an edition of — another one inventaire.io has, or one created from here — and adds authors to
-//  that work. Whatever has to exist before a claim can name it goes first: the picture, the
-//  authors inventaire.io does not have, the work being created. Then the claims, one at a time.
+//  an edition of — another one inventaire.io has, or one created from here — adds authors to
+//  that work, and changes every other property of the catalogue (`EditionProperties`). Whatever
+//  has to exist before a claim can name it goes first: the picture, the authors inventaire.io
+//  does not have, the work being created, the publishers, collections and people the edition
+//  names. Then the claims, one at a time.
 //
 //  **A change half sent is finished, not redone.** Each step is its own request, so a title can
 //  land and a cover fail. Each one landed moves into `original`, `originalWork` or an author's
@@ -69,6 +71,9 @@ struct EditionEdit: Equatable, Sendable {
     /// created, so a retry does not create it twice.
     private(set) var addedAuthors: [NewBookAuthor] = []
 
+    /// The publisher, date, format, contributors, identifiers and links, as the form has them.
+    var properties: EditionProperties
+
     init(
         original: EditionClaims,
         originalWork: EditionWork? = nil,
@@ -79,6 +84,7 @@ struct EditionEdit: Equatable, Sendable {
         self.originalCoverData = originalCoverData
         title = original.title
         subtitle = original.subtitle ?? ""
+        properties = original.properties
     }
 
     // MARK: - The cover
@@ -205,6 +211,7 @@ struct EditionEdit: Equatable, Sendable {
             || cover != .unchanged
             || workChange != .unchanged
             || addedAuthors.isEmpty == false
+            || properties.differs(from: original.properties)
     }
 
     /// Whether there is something to send, and it can be sent. An edition without a title is
@@ -212,6 +219,11 @@ struct EditionEdit: Equatable, Sendable {
     /// is the kind of orphan that has to be repaired by hand on the website afterwards.
     var isSaveable: Bool {
         guard trimmedTitle.isEmpty == false, hasChanges else { return false }
+
+        // A collection is created under its publisher: one with no publisher to be created
+        // under would stay unsent.
+        let collectionsToCreate: Bool = properties.pendingEntities.contains { $0.property == .collection }
+        guard collectionsToCreate == false || properties.entities(of: .publisher).isEmpty == false else { return false }
 
         if isCreatingWork {
             return trimmedNewWorkTitle.isEmpty == false && addedAuthors.isEmpty == false
@@ -239,6 +251,10 @@ struct EditionEdit: Equatable, Sendable {
                 language: labelLanguage,
                 authorUris: addedAuthors.compactMap(\.uri)
             )
+        }
+        for pending in properties.pendingEntities {
+            guard let kind = EntityCreationKind(for: pending.property, publisherUri: properties.publisherUri) else { continue }
+            return .createEntity(id: pending.entity.id, label: pending.entity.trimmedLabel, language: labelLanguage, kind: kind)
         }
         return claimUpdates.first.map { .claim($0) }
     }
@@ -272,6 +288,8 @@ struct EditionEdit: Equatable, Sendable {
             updates.append(update(.work, from: original.workUri, to: target.uri))
         }
 
+        updates += properties.updates(since: original.properties, on: original.uri)
+
         if let target = work, target.isEditable {
             for case let uri? in addedAuthors.map(\.uri) {
                 updates.append(update(.author, of: target.uri, from: nil, to: uri))
@@ -294,6 +312,11 @@ struct EditionEdit: Equatable, Sendable {
         addedAuthors[index].uri = uri
     }
 
+    /// Records the uri a publisher, a collection or a person was created under.
+    mutating func entityCreated(id: UUID, uri: String) {
+        properties.entityCreated(id: id, uri: uri)
+    }
+
     /// Records the work created: it is a work inventaire.io has now, written by the authors
     /// added, and only the edition's claim on it is left to send.
     mutating func workCreated(uri: String) {
@@ -304,24 +327,28 @@ struct EditionEdit: Equatable, Sendable {
     /// Records that `update` landed: what it changed now holds its new value, so it drops out of
     /// `claimUpdates`.
     mutating func landed(_ update: EditionClaimUpdate) {
-        switch update.property {
+        let newValue: String? = update.newValue?.string
+
+        switch EditableClaimProperty(rawValue: update.property) {
         case .title:
-            original.title = update.newValue ?? ""
+            original.title = newValue ?? ""
         case .subtitle:
-            original.subtitle = update.newValue
+            original.subtitle = newValue
         case .cover:
-            original.coverHash = update.newValue
+            original.coverHash = newValue
             originalCoverData = coverData
             cover = .unchanged
             uploadedCoverHash = nil
         case .work:
-            original.workUri = update.newValue
+            original.workUri = newValue
             if case .existing(let target) = workChange {
                 originalWork = target
             }
             workChange = .unchanged
+        case nil:
+            original.properties.apply(update, from: properties)
         case .author:
-            guard let index = addedAuthors.firstIndex(where: { $0.uri == update.newValue }) else { return }
+            guard let index = addedAuthors.firstIndex(where: { $0.uri == newValue }) else { return }
             let author: NewBookAuthor = addedAuthors.remove(at: index)
             if case .existing(var target) = workChange, target.uri == update.uri {
                 target.authors.append(author)

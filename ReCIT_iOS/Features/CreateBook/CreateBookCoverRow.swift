@@ -14,7 +14,9 @@
 //  « Ajouter une couverture » in it is the invitation.
 //
 //  The ISBN is shown and not editable: it is the one fact the app is certain of, read off the
-//  barcode a moment ago, and the whole form exists because the *rest* is unknown.
+//  barcode a moment ago, and the whole form exists because the *rest* is unknown. An edition
+//  being changed shows its ISBN-10 under it, and nothing at all when it has no ISBN — a label
+//  over an empty line read as a field left blank.
 //
 //  See PRD 0015 and PRD 0026.
 //
@@ -28,6 +30,8 @@ struct CreateBookCoverRow: View {
     /// What the ISBN is called above it: read off the barcode in a new book, simply « ISBN » in
     /// an edition being changed.
     var isbnLabel: String = "create_book.isbn"
+    /// The ISBN-10, shown under the ISBN when there is one.
+    var isbn10: String?
     /// The picture, as JPEG bytes; `nil` is none.
     @Binding var imageData: Data?
 
@@ -64,12 +68,23 @@ struct CreateBookCoverRow: View {
             .accessibilityLabel(Text(imageData == nil ? "create_book.cover.add" : "create_book.cover.change"))
             .accessibilityIdentifier("e2e.createBook.cover")
 
-            Text(isbn)
-                .textStyle(.content300)
-                .foregroundStyle(.foregroundDefault)
-                .accessibilityIdentifier("e2e.createBook.isbn")
-                .withLabel(label: isbnLabel)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: .small) {
+                if isbn.isEmpty == false {
+                    Text(isbn)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundDefault)
+                        .accessibilityIdentifier("e2e.createBook.isbn")
+                        .withLabel(label: isbnLabel)
+                }
+
+                if let isbn10, isbn10.isEmpty == false {
+                    Text(isbn10)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundDefault)
+                        .withLabel(label: "edit_edition.isbn10")
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .fullScreenCover(isPresented: $isCapturingCover) {
             CoverCaptureView { data in

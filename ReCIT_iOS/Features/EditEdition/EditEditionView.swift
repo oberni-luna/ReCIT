@@ -12,9 +12,13 @@
 //  given authors below it. Authors are added to an existing work the same way, through the
 //  creation's author search; those added are listed until saved, and can be swiped away.
 //
-//  « Enregistrer » sits at the foot, as « Publier » does in the creation forms, and waits for
-//  the server: `EntityCreationModel` says why nothing about writing into the open database is
-//  optimistic. It stays disabled until something has changed, and while the title is empty.
+//  Under the title, every other property inventaire.io accepts on an edition (`EditionProperty`):
+//  « Publication », « Format », « Ont aussi fait cette édition », « Bases bibliographiques » and
+//  « Autres données » — `E1` of the Figma section `Modifier l'édition · Toutes les données`.
+//
+//  « Enregistrer » is pinned at the foot of the sheet (`E3`), and waits for the server:
+//  `EntityCreationModel` says why nothing about writing into the open database is optimistic. It
+//  stays disabled until something has changed, and while the title is empty.
 //
 
 import SwiftUI
@@ -35,6 +39,10 @@ struct EditEditionView: View {
 
     /// Pushes « Image depuis une URL » for the cover.
     let onPickCoverURL: () -> Void
+    /// Pushes the screen that changes one property of the catalogue: an entity's, the date.
+    let onOpenProperty: (EditionProperty) -> Void
+    /// Pushes the list of catalogues an identifier — or a link — is added to.
+    let onAddIdentifier: (EditionProperty.Group) -> Void
 
     private var workFooter: LocalizedStringKey {
         if edit.isCreatingWork { return "edit_edition.work.new_help" }
@@ -100,10 +108,15 @@ struct EditEditionView: View {
             Section {
                 CreateBookCoverRow(
                     isbn: edit.original.isbn,
-                    isbnLabel: "edit_edition.isbn",
+                    isbnLabel: edit.original.isbn10 == nil ? "edit_edition.isbn" : "edit_edition.isbn13",
+                    isbn10: edit.original.isbn10,
                     imageData: $edit.coverData,
                     onPickURL: onPickCoverURL
                 )
+            } header: {
+                CreateBookSectionHeader("edit_edition.cover.header")
+            } footer: {
+                CreateBookSectionFooter("edit_edition.cover.footer")
             }
 
             Section {
@@ -118,23 +131,32 @@ struct EditEditionView: View {
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundDefault)
                     .withLabel(label: "edit_edition.subtitle_field")
+            } header: {
+                CreateBookSectionHeader("edit_edition.title.header")
             }
 
-            Section {} footer: {
-                AsyncButton(
-                    action: onSave,
-                    actionOptions: [.showProgressView],
-                    label: {
-                        Text(failure?.isWorthRetrying == true ? "create_book.retry" : "action.save")
-                            .frame(maxWidth: .infinity)
-                    }
-                )
-                .buttonStyle(.primary())
-                .disabled(edit.isSaveable == false)
-                .accessibilityIdentifier("e2e.editEdition.save")
+            EditionPublicationSection(properties: edit.properties, onOpen: onOpenProperty)
+
+            EditionFormatSection(properties: $edit.properties)
+
+            EditionContributorsSection(properties: edit.properties, onOpen: onOpenProperty)
+
+            EditionIdentifiersSection(group: .databases, properties: $edit.properties) {
+                onAddIdentifier(.databases)
+            }
+
+            EditionIdentifiersSection(group: .links, properties: $edit.properties) {
+                onAddIdentifier(.links)
             }
         }
         .applyListBackground()
+        .safeAreaInset(edge: .bottom) {
+            EditEditionSaveBar(
+                title: failure?.isWorthRetrying == true ? "create_book.retry" : "action.save",
+                isEnabled: edit.isSaveable,
+                onSave: onSave
+            )
+        }
         .bibliographicDataHelpButton()
     }
 }

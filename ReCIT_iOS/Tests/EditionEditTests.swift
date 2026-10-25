@@ -80,7 +80,7 @@ struct EditionEditTests {
     func subtitleAddedAndRemoved() {
         var adding: EditionEdit = .init(original: claims(subtitle: nil))
         adding.subtitle = "Tome I"
-        #expect(adding.claimUpdates.map(\.property) == [.subtitle])
+        #expect(adding.claimUpdates.map(\.property) == [EditableClaimProperty.subtitle.rawValue])
         #expect(adding.claimUpdates.first?.oldValue == nil)
         #expect(adding.claimUpdates.first?.newValue == "Tome I")
 
@@ -144,7 +144,7 @@ struct EditionEditTests {
         edit.landed(title)
 
         #expect(edit.original.title == "Lucioles II")
-        #expect(edit.claimUpdates.map(\.property) == [.cover])
+        #expect(edit.claimUpdates.map(\.property) == [EditableClaimProperty.cover.rawValue])
 
         edit.landed(edit.claimUpdates[0])
 

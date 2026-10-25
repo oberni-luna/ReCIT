@@ -4,7 +4,8 @@
 //
 //  The claims « Modifier l'édition » can change. On the edition: its title, its subtitle, its
 //  cover, and the work it is an edition of. On that work: its authors, which can be added to.
-//  The rest of what inventaire.io knows — the publisher, the date — is left to the website.
+//  The rest of what an edition says — publisher, date, format, contributors, identifiers — is
+//  the catalogue's (`EditionProperty`), named by its uri.
 //
 //  `invp:P2` is not a Wikidata property: it is inventaire.io's own, and holds the hash a cover
 //  was filed under, never a url.

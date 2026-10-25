@@ -51,8 +51,11 @@ struct EntityCreationModelEditionTests {
 
         #expect(claims == original)
         #expect(mock.recordedRequests.isEmpty)
-        #expect(publicMock.recordedRequests.first?.endpoint
-            == "/api/entities/by-uris?uris=isbn:9782370493002&attributes=info|claims")
+        let endpoint: String = publicMock.recordedRequests.first?.endpoint ?? ""
+        #expect(endpoint.hasPrefix("/api/entities/by-uris?uris=isbn:9782370493002&attributes=info|claims|labels"))
+        #expect(endpoint.contains("relatives=wdt:P123|wdt:P195|wdt:P655"))
+        // Nothing named, so no second call for labels.
+        #expect(publicMock.recordedRequests.count == 1)
     }
 
     @Test("An answer with no inv: edition is a failure")
@@ -137,14 +140,14 @@ struct EntityCreationModelEditionTests {
         let partial: EditionEdit = try #require(halfway)
         #expect(partial.original.title == "Lucioles II")
         #expect(partial.uploadedCoverHash == newHash)
-        #expect(partial.claimUpdates.map(\.property) == [.cover])
+        #expect(partial.claimUpdates.map(\.property) == [EditableClaimProperty.cover.rawValue])
 
         mock.onSend = nil
         let saved: EditionEdit = try await model.saveEdition(partial)
 
         // One upload in all: the retry hangs the picture already sent.
         #expect(mock.uploadedImageSizes.count == 1)
-        #expect(try sentUpdates(mock).map(\.property) == [.title, .cover, .cover])
+        #expect(try sentUpdates(mock).map(\.property) == [EditableClaimProperty.title.rawValue, EditableClaimProperty.cover.rawValue, EditableClaimProperty.cover.rawValue])
         #expect(saved.hasChanges == false)
     }
 
@@ -233,6 +236,82 @@ struct EntityCreationModelEditionTests {
         let partial: EditionEdit = try #require(halfway)
         #expect(partial.addedAuthors.map(\.uri) == ["inv:author"])
         #expect(partial.nextStep == .createWork(label: "Lucioles", language: partial.labelLanguage, authorUris: ["inv:author"]))
+    }
+
+    // MARK: - The catalogue's properties
+
+    @Test("The entities an edition names are read with their labels, languages in a second call")
+    func readsNamedProperties() async throws {
+        let publicMock: MockAPIService = .init()
+        publicMock.stub("uris=isbn:9782370493002", json: """
+        { "entities": {
+            "inv:69c1353d3d6a4fb21005c0d7367e1eb4": { "uri": "inv:69c1353d3d6a4fb21005c0d7367e1eb4", "type": "edition",
+              "claims": { "wdt:P1476": ["Lucioles"], "wdt:P123": ["inv:publisher"], "wdt:P407": ["wd:Q150"], "wdt:P1104": [256] } },
+            "inv:publisher": { "uri": "inv:publisher", "type": "publisher", "labels": { "fr": "Le Sous-Bois" } }
+          },
+          "redirects": { "isbn:9782370493002": "inv:69c1353d3d6a4fb21005c0d7367e1eb4" } }
+        """)
+        publicMock.stub("uris=wd:Q150", json: #"{ "entities": { "wd:Q150": { "uri": "wd:Q150", "labels": { "fr": "français" } } } }"#)
+
+        let model: EntityCreationModel = .init(apiService: MockAPIService(), publicAPIService: publicMock)
+        let claims: EditionClaims = try await model.editableEdition(uri: "isbn:9782370493002")
+
+        #expect(claims.uri == "inv:69c1353d3d6a4fb21005c0d7367e1eb4")
+        #expect(claims.properties.entities(of: .publisher).map(\.label) == ["Le Sous-Bois"])
+        #expect(claims.properties.entities(of: .language).map(\.label) == ["français"])
+        #expect(claims.properties.literal(of: .numberOfPages) == .integer(256))
+        #expect(publicMock.recordedRequests.count == 2)
+    }
+
+    @Test("A new publisher is created, then a collection under it, then the claims — a count as a number")
+    func createsPublisherThenCollection() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/entities/update-claim", json: #"{ "ok": true }"#)
+        mock.stub("/api/entities", jsonSequence: [
+            #"{ "entity": { "uri": "inv:publisher" } }"#,
+            #"{ "entity": { "uri": "inv:collection" } }"#
+        ])
+
+        var edit: EditionEdit = .init(original: .init(uri: original.uri, title: "Lucioles", labelLanguage: "fr"))
+        edit.properties.add(.init(label: "Nature writing"), to: .collection)
+        edit.properties.add(.init(label: "Le Sous-Bois"), to: .publisher)
+        edit.properties.setLiteral(.integer(256), for: .numberOfPages)
+        #expect(edit.isSaveable)
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+        let saved: EditionEdit = try await model.saveEdition(edit)
+
+        #expect(mock.recordedRequests.map(\.endpoint) == [
+            "/api/entities",
+            "/api/entities",
+            "/api/entities/update-claim",
+            "/api/entities/update-claim",
+            "/api/entities/update-claim"
+        ])
+
+        let publisher: EntityCreationRequest = try JSONDecoder().decode(EntityCreationRequest.self, from: mock.sentPayloads[0])
+        #expect(publisher.labels == ["fr": "Le Sous-Bois"])
+        #expect(publisher.claims == ["wdt:P31": ["wd:Q2085381"]])
+
+        let collection: EntityCreationRequest = try JSONDecoder().decode(EntityCreationRequest.self, from: mock.sentPayloads[1])
+        #expect(collection.labels.isEmpty)
+        #expect(collection.claims == ["wdt:P31": ["wd:Q20655472"], "wdt:P1476": ["Nature writing"], "wdt:P123": ["inv:publisher"]])
+
+        let updates: [EditionClaimUpdate] = try mock.sentPayloads.dropFirst(2).map {
+            try JSONDecoder().decode(EditionClaimUpdate.self, from: $0)
+        }
+        #expect(updates.map(\.newValue) == [.string("inv:publisher"), .string("inv:collection"), .integer(256)])
+        #expect(String(decoding: mock.sentPayloads[4], as: UTF8.self).contains(#""new-value":256"#))
+        #expect(saved.hasChanges == false)
+    }
+
+    @Test("A collection to create with no publisher cannot be saved")
+    func collectionNeedsPublisher() {
+        var edit: EditionEdit = .init(original: .init(uri: original.uri, title: "Lucioles"))
+        edit.properties.add(.init(label: "Nature writing"), to: .collection)
+
+        #expect(edit.hasChanges)
+        #expect(edit.isSaveable == false)
     }
 
     // MARK: - The local edition

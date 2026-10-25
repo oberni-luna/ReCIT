@@ -5,29 +5,52 @@
 //  The first row of the edition: its cover, and the ISBN the camera read. `Form / Cover ISBN`
 //  (`701:511`) in the Figma file, shared by « Nouvelle édition » and « Nouvelle œuvre ».
 //
+//  The cover is a menu of where a picture can come from (`V8`): the camera, where there is one,
+//  Photos, Files. Once one is set the same menu offers to take it away first, then to replace it
+//  from the same sources (`V12`). A work nobody has created has no cover, and `enrich` finds
+//  none for an ISBN nobody knows: the frame of a new work is usually empty (`V7`), and saying
+//  « Ajouter une couverture » in it is the invitation.
+//
 //  The ISBN is shown and not editable: it is the one fact the app is certain of, read off the
 //  barcode a moment ago, and the whole form exists because the *rest* is unknown.
 //
 //  See PRD 0015 and PRD 0021.
 //
 
+import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct CreateBookCoverRow: View {
     @Binding var draft: NewBookDraft
 
-    /// Whether the camera is up. The cover is the one thing in this form that is taken rather
-    /// than typed.
     @State private var isCapturingCover: Bool = false
+    @State private var isPickingPhoto: Bool = false
+    @State private var pickedPhoto: PhotosPickerItem?
+    @State private var isImportingFile: Bool = false
 
     var body: some View {
         HStack(alignment: .top, spacing: .medium) {
-            Button {
-                isCapturingCover = true
+            Menu {
+                if draft.coverImageData != nil {
+                    Button("create_book.cover.remove", systemImage: "trash", role: .destructive) {
+                        setCover(nil)
+                    }
+
+                    Section("create_book.cover.replace") {
+                        sources
+                    }
+                } else {
+                    sources
+                }
             } label: {
                 CreateBookCoverSlot(imageData: draft.coverImageData)
             }
+            // The frame is the control, not the row: a plain button keeps a tap on the ISBN
+            // beside it from opening the menu.
+            .menuStyle(.button)
             .buttonStyle(.plain)
+            .accessibilityLabel(Text(draft.coverImageData == nil ? "create_book.cover.add" : "create_book.cover.change"))
             .accessibilityIdentifier("e2e.createBook.cover")
 
             Text(draft.isbn)
@@ -39,21 +62,65 @@ struct CreateBookCoverRow: View {
         }
         .fullScreenCover(isPresented: $isCapturingCover) {
             CoverCaptureView { data in
-                draft.coverImageData = data
-                // A new photograph invalidates the one already uploaded, if the reader is
-                // retrying after a failure: the next publication sends this one.
-                draft.coverImageUrl = nil
+                setCover(data)
             }
             .ignoresSafeArea()
         }
+        .photosPicker(isPresented: $isPickingPhoto, selection: $pickedPhoto, matching: .images)
+        .onChange(of: pickedPhoto) { _, item in
+            guard let item else { return }
+            pickedPhoto = nil
+
+            Task {
+                guard let data = try? await item.loadTransferable(type: Data.self),
+                      let jpeg = CoverImageReducer.jpegData(from: data) else { return }
+                setCover(jpeg)
+            }
+        }
+        .fileImporter(isPresented: $isImportingFile, allowedContentTypes: [.image]) { result in
+            guard case .success(let url) = result else { return }
+            // A file from Files lives outside the sandbox: it is read under the access the
+            // picker granted, and only for as long as it takes.
+            let isAccessing: Bool = url.startAccessingSecurityScopedResource()
+            defer { if isAccessing { url.stopAccessingSecurityScopedResource() } }
+
+            guard let data = try? Data(contentsOf: url),
+                  let jpeg = CoverImageReducer.jpegData(from: data) else { return }
+            setCover(jpeg)
+        }
+    }
+
+    /// Where a picture can come from, in the order of the menu.
+    @ViewBuilder
+    private var sources: some View {
+        if CoverCaptureView.isCameraAvailable {
+            Button("create_book.cover.camera", systemImage: "camera") {
+                isCapturingCover = true
+            }
+        }
+
+        Button("create_book.cover.photos", systemImage: "photo.on.rectangle") {
+            isPickingPhoto = true
+        }
+
+        Button("create_book.cover.file", systemImage: "folder") {
+            isImportingFile = true
+        }
+    }
+
+    /// A new picture, or none. Either way the one already uploaded, if the reader is retrying
+    /// after a failure, no longer stands: the next publication sends what is here now.
+    private func setCover(_ data: Data?) {
+        draft.coverImageData = data
+        draft.coverImageUrl = nil
     }
 }
 
-/// The cover slot: a photograph taken, or a dashed frame inviting one.
+/// The cover slot: the picture chosen, or a dashed frame inviting one.
 ///
 /// Facultative, and drawn so: a dashed outline rather than a filled control, because the book
-/// is published with or without it. What it is for is written under it, since a camera glyph
-/// alone in a form about a book could as easily mean the barcode.
+/// is published with or without it. What it is for is written under the glyph, since a picture
+/// glyph alone in a form about a book could as easily mean anything.
 private struct CreateBookCoverSlot: View {
     let imageData: Data?
 
@@ -71,7 +138,6 @@ private struct CreateBookCoverSlot: View {
                         )
                 }
             }
-            .accessibilityLabel(Text("create_book.cover.take"))
     }
 
     @ViewBuilder
@@ -82,15 +148,15 @@ private struct CreateBookCoverSlot: View {
                 .scaledToFill()
         } else {
             VStack(spacing: .small) {
-                Image(systemName: "camera")
+                Image(systemName: "photo")
                     .foregroundStyle(.foregroundTinted)
 
-                Text("create_book.cover.take")
+                Text("create_book.cover.add")
                     .textStyle(.caption200)
                     .foregroundStyle(.foregroundSecondary)
                     .multilineTextAlignment(.center)
-                    // 88 points is narrower than a long French word: without this, « photo-
-                    // graphier » broke across two lines mid-syllable.
+                    // 88 points is narrower than a long French word: without this, « couver-
+                    // ture » broke across two lines mid-syllable.
                     .minimumScaleFactor(0.8)
             }
             .padding(.all, .small)

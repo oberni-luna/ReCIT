@@ -76,15 +76,19 @@ final class EntityCreationModel {
         return WorkCandidate.candidates(from: results, entities: response?.entities ?? [:])
     }
 
-    /// Sends the cover the reader photographed, and answers the url inventaire.io filed it
-    /// under — or `nil`, which is not a failure worth stopping for.
+    /// Sends the cover the reader chose, and answers the url inventaire.io filed it under —
+    /// or `nil`, which is not a failure worth stopping for.
     ///
     /// The image is an ornament; the book is the point. `enrich` already goes looking for a
     /// cover from the ISBN, so an upload that does not land costs a picture and nothing else.
     /// That is why this answers an optional instead of throwing: the caller has no decision to
     /// make about it.
+    ///
+    /// The url is made **absolute**. The upload answers a path, `/img/entities/…`, and the
+    /// edition seed's `image` must be a url the server can fetch: `resolve` refuses anything
+    /// else (`isUrl` in `sanitize_seed.ts`) — the whole entry, not just the picture.
     func uploadCover(imageData: Data) async -> String? {
-        try? await apiService.upload(
+        let path: String? = try? await apiService.upload(
             imageData: imageData,
             fileName: "cover.jpg",
             // The server indexes what it answers by the form field name it was given, so this
@@ -93,6 +97,8 @@ final class EntityCreationModel {
             container: "entities",
             debug: false
         )
+
+        return apiService.absoluteImageUrl(path)
     }
 
     /// Asks inventaire.io what it already knows about this book, **without writing anything**.

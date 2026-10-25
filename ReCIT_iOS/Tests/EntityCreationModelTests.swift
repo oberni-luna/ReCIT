@@ -80,6 +80,18 @@ struct EntityCreationModelTests {
         #expect(mock.recordedRequests.first?.method == "POST")
     }
 
+    /// The upload answers a path; `resolve` refuses an edition seed whose image is not a url,
+    /// and refuses the whole entry with it.
+    @Test("An uploaded cover comes back as an absolute url")
+    func coverUploadAnswersAnAbsoluteUrl() async throws {
+        let mock: MockAPIService = .init()
+        mock.uploadedImageUrl = "/img/entities/abc123"
+
+        let model: EntityCreationModel = .init(apiService: mock, publicAPIService: MockAPIService())
+
+        #expect(await model.uploadCover(imageData: Data("jpeg".utf8)) == "https://test.local/img/entities/abc123")
+    }
+
     /// The image is an ornament; the book is the point. `enrich` covers the books nobody
     /// photographed, so a failed upload costs a picture and nothing else.
     @Test("A cover that will not upload answers nothing, and throws nothing")

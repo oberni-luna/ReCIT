@@ -24,6 +24,9 @@ struct NewWorkView: View {
     let onPublish: () async -> Void
     let onClose: () -> Void
 
+    /// Pushes « Image depuis une URL » for the cover.
+    let onPickCoverURL: () -> Void
+
     /// The work's title, written through the draft so the edition's can follow it.
     private var workTitle: Binding<String> {
         .init(
@@ -94,7 +97,7 @@ struct NewWorkView: View {
             }
 
             Section {
-                CreateBookCoverRow(draft: $draft)
+                CreateBookCoverRow(draft: $draft, onPickURL: onPickCoverURL)
 
                 TextField("create_book.title_field", text: $draft.title)
                     .accessibilityIdentifier("e2e.createBook.title")

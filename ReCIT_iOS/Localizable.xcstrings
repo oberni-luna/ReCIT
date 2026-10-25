@@ -119,6 +119,246 @@
         }
       }
     },
+    "create_book.cover.url" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From a URL…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuis une URL…"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.address" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image address"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse de l’image"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.check" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check that this is this edition: the cover will be public."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiez que c’est cette édition : la couverture sera publique."
+          }
+        }
+      }
+    },
+    "create_book.cover_url.dimensions %lld %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld × %2$lld px"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld × %2$lld px"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This link does not lead to an image"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce lien ne mène pas à une image"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.field" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image URL"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL de l’image"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.find" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find an image"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver une image"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.find_help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens in Safari. Copy the image’s address, then come back."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S’ouvre dans Safari. Copiez l’adresse de l’image, puis revenez."
+          }
+        }
+      }
+    },
+    "create_book.cover_url.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An https:// address that leads to an image: .jpg, .png or .webp."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une adresse en https:// qui mène à une image : .jpg, .png ou .webp."
+          }
+        }
+      }
+    },
+    "create_book.cover_url.not_an_image" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the address of a page, not of an image: copy the image’s own."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C’est l’adresse d’une page, pas d’une image : copiez celle de l’image elle-même."
+          }
+        }
+      }
+    },
+    "create_book.cover_url.placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://…"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.preview_placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The preview shows here"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’aperçu s’affiche ici"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.search" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search Google Images for the title and the ISBN"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher le titre et l’ISBN sur Google Images"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image from a URL"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image depuis une URL"
+          }
+        }
+      }
+    },
+    "create_book.cover_url.use" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use this image"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser cette image"
+          }
+        }
+      }
+    },
     "create_book.edition.of" : {
       "localizations" : {
         "en" : {

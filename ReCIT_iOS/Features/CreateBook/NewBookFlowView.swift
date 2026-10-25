@@ -84,14 +84,16 @@ struct NewBookFlowView: View {
                         draft: $draft,
                         failure: failure,
                         onPublish: create,
-                        onClose: { dismiss() }
+                        onClose: { dismiss() },
+                        onPickCoverURL: pickCoverURL
                     )
                 case .newWork:
                     NewWorkView(
                         draft: $draft,
                         failure: failure,
                         onPublish: publishNewWork,
-                        onClose: { dismiss() }
+                        onClose: { dismiss() },
+                        onPickCoverURL: pickCoverURL
                     )
                 case .recognisedWork(let uri):
                     WorkMatchView(
@@ -101,6 +103,8 @@ struct NewBookFlowView: View {
                         onPublish: create,
                         onClose: { dismiss() }
                     )
+                case .coverFromURL:
+                    CoverURLView(draft: $draft)
                 }
             }
         }
@@ -129,6 +133,11 @@ struct NewBookFlowView: View {
         draft.startNewWork(titled: query)
         failure = nil
         path = [.newWork]
+    }
+
+    /// A cover from the web, over whichever form asked for it.
+    private func pickCoverURL() {
+        path.append(.coverFromURL)
     }
 
     /// What publishing a new work does: ask before writing.

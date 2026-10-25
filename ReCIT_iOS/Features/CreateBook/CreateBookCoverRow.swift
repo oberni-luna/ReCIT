@@ -6,7 +6,7 @@
 //  (`701:511`) in the Figma file, shared by « Nouvelle édition » and « Nouvelle œuvre ».
 //
 //  The cover is a menu of where a picture can come from (`V8`): the camera, where there is one,
-//  Photos, Files. Once one is set the same menu offers to take it away first, then to replace it
+//  Photos, Files, an address on the web. Once one is set the same menu offers to take it away first, then to replace it
 //  from the same sources (`V12`). A work nobody has created has no cover, and `enrich` finds
 //  none for an ISBN nobody knows: the frame of a new work is usually empty (`V7`), and saying
 //  « Ajouter une couverture » in it is the invitation.
@@ -23,6 +23,10 @@ import UniformTypeIdentifiers
 
 struct CreateBookCoverRow: View {
     @Binding var draft: NewBookDraft
+
+    /// Pushes « Image depuis une URL », which the row cannot do itself: the screen it pushes
+    /// belongs to the sheet's navigation stack.
+    let onPickURL: () -> Void
 
     @State private var isCapturingCover: Bool = false
     @State private var isPickingPhoto: Bool = false
@@ -106,6 +110,8 @@ struct CreateBookCoverRow: View {
         Button("create_book.cover.file", systemImage: "folder") {
             isImportingFile = true
         }
+
+        Button("create_book.cover.url", systemImage: "link", action: onPickURL)
     }
 
     /// A new picture, or none. Either way the one already uploaded, if the reader is retrying

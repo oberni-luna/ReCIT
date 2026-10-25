@@ -23,6 +23,9 @@ enum NewBookStep: Hashable {
     /// « Œuvre déjà connue » — the reconnaissance pass found the work being created.
     case recognisedWork(uri: String)
 
+    /// « Image depuis une URL » — a cover found on the web, for either form.
+    case coverFromURL
+
     /// Where a draft left from an earlier attempt reopens: on the screen it was being written
     /// in, rather than on a search the reader has already answered.
     static func resuming(_ draft: NewBookDraft) -> [NewBookStep] {

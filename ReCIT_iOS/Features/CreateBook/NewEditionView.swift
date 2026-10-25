@@ -23,6 +23,9 @@ struct NewEditionView: View {
     let onPublish: () async -> Void
     let onClose: () -> Void
 
+    /// Pushes « Image depuis une URL » for the cover.
+    let onPickCoverURL: () -> Void
+
     var body: some View {
         Form {
             if let failure {
@@ -45,7 +48,7 @@ struct NewEditionView: View {
             }
 
             Section {
-                CreateBookCoverRow(draft: $draft)
+                CreateBookCoverRow(draft: $draft, onPickURL: onPickCoverURL)
             } footer: {
                 CreateBookEditionNotes(draft: draft)
             }

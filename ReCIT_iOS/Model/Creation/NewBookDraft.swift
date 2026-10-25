@@ -61,6 +61,24 @@ struct NewBookDraft: Equatable, Sendable {
     /// published without a language claim rather than with a guessed one.
     var language: EditionLanguage?
 
+    /// The cover as the forms set it: a new picture, or none. Either way the one already
+    /// uploaded, if the reader is retrying after a failure, no longer stands — the next
+    /// publication sends what is here now.
+    var cover: Data? {
+        get { coverImageData }
+        set {
+            coverImageData = newValue
+            coverImageUrl = nil
+        }
+    }
+
+    /// The title the image search for a cover asks for: the work's, which is what a cover is
+    /// known by, or this edition's when there is no work title yet.
+    var coverSearchTitle: String {
+        let work: String = chosenWork?.title ?? trimmedWorkTitle
+        return work.isEmpty ? trimmedTitle : work
+    }
+
     /// The ISBN without its separators, which is the form inventaire.io keys editions by.
     /// `X` survives, being a legitimate ISBN-10 check character.
     var normalizedISBN: String {

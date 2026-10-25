@@ -50,7 +50,7 @@ struct NewEditionView: View {
             }
 
             Section {
-                CreateBookCoverRow(draft: $draft, onPickURL: onPickCoverURL)
+                CreateBookCoverRow(isbn: draft.isbn, imageData: $draft.cover, onPickURL: onPickCoverURL)
             } footer: {
                 CreateBookEditionNotes(draft: draft)
             }

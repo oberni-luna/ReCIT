@@ -28,6 +28,12 @@ final class MockAPIService: APIServicing {
     /// Called with each fetched endpoint before its stub answers — the moment a test can change
     /// the store under a model that is waiting on the network.
     var onFetch: ((String) -> Void)?
+    /// The JSON bodies sent with a payload, in order: what a test reads when several calls share
+    /// an endpoint, and the endpoint alone does not say which one was which.
+    private(set) var sentPayloads: [Data] = []
+    /// Called with the index of each send that carries a payload, before its stub answers. A
+    /// throw fails that call alone — the second of three to one endpoint, say.
+    var onSend: ((Int) throws -> Void)?
 
     // MARK: - Stubbing
 
@@ -67,6 +73,9 @@ final class MockAPIService: APIServicing {
         debug: Bool
     ) async throws -> U? {
         recordedRequests.append((endpoint, method))
+        let index: Int = sentPayloads.count
+        sentPayloads.append((try? JSONEncoder().encode(payload)) ?? Data())
+        try onSend?(index)
         return try decodeStub(for: endpoint)
     }
 

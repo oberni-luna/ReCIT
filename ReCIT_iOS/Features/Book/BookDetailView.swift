@@ -24,6 +24,8 @@ struct BookDetailView: View {
     @State private var viewModel: BookViewModel
     @State private var nextEntityDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
+    /// The edition « Modifier » opened the form of, while the sheet is up.
+    @State private var editedEdition: Edition?
     /// How many times this screen has been asked to load. Bumped by « Réessayer », and the
     /// `.task` key — which is how a retry re-runs a call that nothing else about the screen has
     /// changed. One way in, so loading, the book, the two absences and the failure are decided
@@ -74,6 +76,7 @@ struct BookDetailView: View {
                     otherEditionsSection()
                     communitySection(edition: edition)
                     myCopySection(edition: edition)
+                    bibliographicDataSection(edition: edition)
                 }
                 .applyListBackground()
                 // Keyed on the works rather than on the edition, because a cached edition can
@@ -117,6 +120,9 @@ struct BookDetailView: View {
                     transition: TransactionStateMachine.requestTransition
                 )
             }
+        }
+        .sheet(item: $editedEdition) { edition in
+            EditEditionFlowView(edition: edition)
         }
         .task(id: attempt) {
             await viewModel.load(entityModel: entityModel, modelContext: modelContext)
@@ -221,6 +227,17 @@ struct BookDetailView: View {
     func myCopySection(edition: Edition) -> some View {
         if let item = iOwn(edition) {
             BookMyCopySection(item: item)
+        }
+    }
+
+    /// « Données bibliographiques », last: « Modifier » opens the edition's form. Absent for a
+    /// Wikidata edition, which this app cannot write to.
+    @ViewBuilder
+    func bibliographicDataSection(edition: Edition) -> some View {
+        if EditionClaims.canEdit(uri: edition.uri) {
+            BookBibliographicDataSection {
+                editedEdition = edition
+            }
         }
     }
 

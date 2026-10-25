@@ -9,13 +9,32 @@
 //  A contributor who fears having made a duplicate will not press the button again, and the
 //  book stays in their hand for nothing.
 //
+//  « Modifier l'édition » puts its own words in the same banner: nothing is created there, and a
+//  change half sent is finished by trying again.
+//
 //  See PRD 0015 and PRD 0026.
 //
 
 import SwiftUI
 
 struct CreateBookFailureBanner: View {
-    let failure: CreateBookFailure
+    let title: String.LocalizationValue
+    let explanation: String.LocalizationValue
+
+    init(
+        title: String.LocalizationValue,
+        explanation: String.LocalizationValue
+    ) {
+        self.title = title
+        self.explanation = explanation
+    }
+
+    init(failure: CreateBookFailure) {
+        self.init(
+            title: failure.title,
+            explanation: failure.explanation
+        )
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: .small) {
@@ -23,11 +42,11 @@ struct CreateBookFailureBanner: View {
                 .foregroundStyle(.foregroundError)
 
             VStack(alignment: .leading, spacing: .xSmall) {
-                Text(String(localized: failure.title))
+                Text(String(localized: title))
                     .textStyle(.content400Bold)
                     .foregroundStyle(.foregroundError)
 
-                Text(String(localized: failure.explanation))
+                Text(String(localized: explanation))
                     .textStyle(.footnote200)
                     .foregroundStyle(.foregroundDefault)
             }

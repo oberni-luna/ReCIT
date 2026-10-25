@@ -99,7 +99,7 @@ struct NewWorkView: View {
             }
 
             Section {
-                CreateBookCoverRow(draft: $draft, onPickURL: onPickCoverURL)
+                CreateBookCoverRow(isbn: draft.isbn, imageData: $draft.cover, onPickURL: onPickCoverURL)
 
                 TextField("create_book.title_field", text: $draft.title)
                     .accessibilityIdentifier("e2e.createBook.title")

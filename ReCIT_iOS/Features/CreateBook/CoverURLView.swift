@@ -11,9 +11,11 @@
 //  preview is loaded as soon as the address is one, and « Utiliser cette image » waits for an
 //  image to be shown.
 //
-//  The address is what goes to inventaire.io, as the edition seed's `image`: `resolve` fetches
-//  it itself, so nothing is uploaded from here. The bytes loaded for the preview only fill the
-//  cover frame of the form.
+//  For a new book, the address is what goes to inventaire.io, as the edition seed's `image`:
+//  `resolve` fetches it itself, so nothing is uploaded from here, and the bytes loaded for the
+//  preview only fill the cover frame of the form. « Modifier l'édition » uploads those bytes
+//  instead: `update-claim` takes a hash, not an address. Which is why the screen hands back
+//  both and lets the form choose.
 //
 //  See PRD 0026.
 //
@@ -24,7 +26,12 @@ struct CoverURLView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
 
-    @Binding var draft: NewBookDraft
+    /// What the image search asks for, with the ISBN.
+    let searchedTitle: String
+    /// Without separators.
+    let isbn: String
+    /// Handed the image chosen — its reduced JPEG, and the address it came from.
+    let onUse: (Data, URL) -> Void
 
     @State private var address: String = ""
     @State private var preview: CoverURLPreview = .empty
@@ -32,20 +39,13 @@ struct CoverURLView: View {
     /// Long enough that typing an address does not fetch every prefix of it.
     private static let debounce: Duration = .milliseconds(400)
 
-    /// The title the image search asks for: the work's, which is what a cover is known by, or
-    /// this edition's when there is no work title yet.
-    private var searchedTitle: String {
-        let workTitle: String = draft.chosenWork?.title ?? draft.trimmedWorkTitle
-        return workTitle.isEmpty ? draft.trimmedTitle : workTitle
-    }
-
     var body: some View {
         Form {
             BibliographicDataNotice()
 
             Section {
                 Button {
-                    if let url = CoverAddress.googleImagesURL(title: searchedTitle, isbn: draft.normalizedISBN) {
+                    if let url = CoverAddress.googleImagesURL(title: searchedTitle, isbn: isbn) {
                         openURL(url)
                     }
                 } label: {
@@ -141,14 +141,13 @@ struct CoverURLView: View {
         preview = loaded
     }
 
-    /// The address becomes the edition's cover: what inventaire.io will fetch, and — loaded once
-    /// already — what the form's frame shows meanwhile.
+    /// The image becomes the edition's cover: the form that pushed this screen decides what of
+    /// it goes to inventaire.io.
     private func use() {
         guard case .loaded(let jpeg, _, _) = preview,
               let url = CoverAddress.url(from: address) else { return }
 
-        draft.coverImageData = jpeg
-        draft.coverImageUrl = url.absoluteString
+        onUse(jpeg, url)
         dismiss()
     }
 }

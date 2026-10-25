@@ -16,10 +16,14 @@
 //  that half-succeeded would leave a work without its edition on a public website. So the call
 //  is awaited, and the form stays open until the server has spoken.
 //
+//  It also changes an edition that exists — its title, its subtitle, its cover — from the
+//  book screen's « Modifier ». Same open database, same reasons not to be optimistic.
+//
 //  See PRD 0015.
 //
 
 import Foundation
+import SwiftData
 
 @MainActor
 @Observable
@@ -148,5 +152,98 @@ final class EntityCreationModel {
         }
 
         return uri
+    }
+
+    // MARK: - Changing an edition
+
+    /// What inventaire.io holds about the edition, read fresh to open « Modifier l'édition »:
+    /// the values the form starts from, and the ones each change has to name as replaced.
+    ///
+    /// Public, so cookieless. Throws when the answer holds no `inv:` edition — a Wikidata one,
+    /// or nothing at all: there is then nothing the form could send.
+    func editableEdition(uri: String) async throws -> EditionClaims {
+        let response: EditableEditionsDTO? = try await publicAPIService.fetchData(
+            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=info|claims",
+            debug: false
+        )
+
+        guard let claims = response?.entities.values.lazy.compactMap(EditionClaims.init(dto:)).first else {
+            throw NetworkError.badResponse
+        }
+
+        return claims
+    }
+
+    /// Where the picture filed under `hash` is served from.
+    func coverURL(hash: String) -> URL? {
+        apiService.absoluteImageUrl(EntityImageHash.path(of: hash)).flatMap(URL.init(string:))
+    }
+
+    /// Sends what the form changed — the picture first, when there is a new one, then one
+    /// `update-claim` per claim — and answers the edit with everything landed.
+    ///
+    /// Unlike a new book's, a new cover is not an ornament here: it may be the whole change the
+    /// reader asked for, so an upload that does not land is a failure like any other.
+    ///
+    /// Throws `EditionSaveFailure`, which carries the edit as far as it got: the claims that
+    /// landed have moved into its `original`, and are not sent again.
+    func saveEdition(_ edit: EditionEdit) async throws -> EditionEdit {
+        var edit: EditionEdit = edit
+
+        do {
+            if let imageData = edit.coverToUpload {
+                let path: String? = try await apiService.upload(
+                    imageData: imageData,
+                    fileName: "cover.jpg",
+                    fieldName: "cover",
+                    container: "entities",
+                    debug: false
+                )
+                guard let hash = EntityImageHash.from(path) else { throw NetworkError.badResponse }
+                edit.uploadedCoverHash = hash
+            }
+
+            for update in edit.claimUpdates {
+                let _: OkStatusDTO? = try await apiService.send(
+                    toEndpoint: "/api/entities/update-claim",
+                    method: "PUT",
+                    payload: update,
+                    debug: true
+                )
+                edit.landed(update)
+            }
+
+            return edit
+        } catch {
+            throw EditionSaveFailure(edit: edit, underlying: error)
+        }
+    }
+
+    /// Writes into the local edition what moved on the server between `before` and `after`, so
+    /// the book screen shows it at once.
+    ///
+    /// After the server has answered, never before: the local store is a cache of inventaire.io,
+    /// and this change is not optimistic. Written directly rather than read back, because a read
+    /// straight after a write can be served from a cache the write has not reached yet. Only
+    /// what moved: the local image may come from somewhere other than `invp:P2`, and a cover
+    /// nobody touched must not be cleared for having no hash.
+    func apply(
+        _ after: EditionClaims,
+        since before: EditionClaims,
+        to edition: Edition,
+        modelContext: ModelContext
+    ) {
+        guard edition.isStillInTheStore, after != before else { return }
+
+        if after.title != before.title, after.title.isEmpty == false {
+            edition.title = after.title
+        }
+        if after.subtitle != before.subtitle {
+            edition.subtitle = after.subtitle
+        }
+        if after.coverHash != before.coverHash {
+            edition.image = after.coverHash.flatMap { apiService.absoluteImageUrl(EntityImageHash.path(of: $0)) }
+        }
+        try? modelContext.save()
     }
 }

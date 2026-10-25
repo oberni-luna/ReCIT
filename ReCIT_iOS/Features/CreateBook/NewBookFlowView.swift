@@ -108,7 +108,14 @@ struct NewBookFlowView: View {
                         onClose: { dismiss() }
                     )
                 case .coverFromURL:
-                    CoverURLView(draft: $draft)
+                    CoverURLView(
+                        searchedTitle: draft.coverSearchTitle,
+                        isbn: draft.normalizedISBN
+                    ) { jpeg, url in
+                        // The address is what `resolve` fetches; the bytes fill the frame.
+                        draft.coverImageData = jpeg
+                        draft.coverImageUrl = url.absoluteString
+                    }
                 }
             }
         }

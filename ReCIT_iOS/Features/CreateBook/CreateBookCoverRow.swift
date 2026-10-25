@@ -3,7 +3,9 @@
 //  ReCIT_iOS
 //
 //  The first row of the edition: its cover, and the ISBN the camera read. `Form / Cover ISBN`
-//  (`701:511`) in the Figma file, shared by « Nouvelle édition » and « Nouvelle œuvre ».
+//  (`701:511`) in the Figma file, shared by « Nouvelle édition », « Nouvelle œuvre » and
+//  « Modifier l'édition ». It knows a picture and an ISBN, not what they belong to: each form
+//  binds the picture to its own draft.
 //
 //  The cover is a menu of where a picture can come from (`V8`): the camera, where there is one,
 //  Photos, Files, an address on the web. Once one is set the same menu offers to take it away first, then to replace it
@@ -22,7 +24,12 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct CreateBookCoverRow: View {
-    @Binding var draft: NewBookDraft
+    let isbn: String
+    /// What the ISBN is called above it: read off the barcode in a new book, simply « ISBN » in
+    /// an edition being changed.
+    var isbnLabel: String = "create_book.isbn"
+    /// The picture, as JPEG bytes; `nil` is none.
+    @Binding var imageData: Data?
 
     /// Pushes « Image depuis une URL », which the row cannot do itself: the screen it pushes
     /// belongs to the sheet's navigation stack.
@@ -36,7 +43,7 @@ struct CreateBookCoverRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: .medium) {
             Menu {
-                if draft.coverImageData != nil {
+                if imageData != nil {
                     Button("create_book.cover.remove", systemImage: "trash", role: .destructive) {
                         setCover(nil)
                     }
@@ -48,20 +55,20 @@ struct CreateBookCoverRow: View {
                     sources
                 }
             } label: {
-                CreateBookCoverSlot(imageData: draft.coverImageData)
+                CreateBookCoverSlot(imageData: imageData)
             }
             // The frame is the control, not the row: a plain button keeps a tap on the ISBN
             // beside it from opening the menu.
             .menuStyle(.button)
             .buttonStyle(.plain)
-            .accessibilityLabel(Text(draft.coverImageData == nil ? "create_book.cover.add" : "create_book.cover.change"))
+            .accessibilityLabel(Text(imageData == nil ? "create_book.cover.add" : "create_book.cover.change"))
             .accessibilityIdentifier("e2e.createBook.cover")
 
-            Text(draft.isbn)
+            Text(isbn)
                 .textStyle(.content300)
                 .foregroundStyle(.foregroundDefault)
                 .accessibilityIdentifier("e2e.createBook.isbn")
-                .withLabel(label: "create_book.isbn")
+                .withLabel(label: isbnLabel)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .fullScreenCover(isPresented: $isCapturingCover) {
@@ -114,11 +121,10 @@ struct CreateBookCoverRow: View {
         Button("create_book.cover.url", systemImage: "link", action: onPickURL)
     }
 
-    /// A new picture, or none. Either way the one already uploaded, if the reader is retrying
-    /// after a failure, no longer stands: the next publication sends what is here now.
+    /// A new picture, or none. What that undoes — an upload already made for the old one — is
+    /// the draft's business, behind the binding.
     private func setCover(_ data: Data?) {
-        draft.coverImageData = data
-        draft.coverImageUrl = nil
+        imageData = data
     }
 }
 

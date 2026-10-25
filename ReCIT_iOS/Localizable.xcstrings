@@ -896,6 +896,22 @@
         }
       }
     },
+    "book.bibliographic_data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliographic data"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Données bibliographiques"
+          }
+        }
+      }
+    },
     "book.no_edition.message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2689,6 +2705,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre nom d'utilisateur restera réservé et ne pourra pas servir à un nouveau compte."
+          }
+        }
+      }
+    },
+    "edit_edition.failure.account.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your inventaire.io session has expired. Sign in again, then save: what you wrote is kept."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre session inventaire.io a expiré. Reconnectez-vous, puis enregistrez : ce que vous avez écrit est gardé."
+          }
+        }
+      }
+    },
+    "edit_edition.failure.account.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editing needs an account"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier demande un compte"
+          }
+        }
+      }
+    },
+    "edit_edition.failure.network.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io did not answer. What you wrote is kept here, and trying again sends only what has not gone through."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io n’a pas répondu. Ce que vous avez écrit est gardé ici, et réessayer n’envoie que ce qui n’est pas passé."
+          }
+        }
+      }
+    },
+    "edit_edition.failure.network.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change did not go through"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’enregistrement n’est pas passé"
+          }
+        }
+      }
+    },
+    "edit_edition.failure.refused.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The title or the cover may not be accepted as they are — this edition can also be edited on inventaire.io itself."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le titre ou la couverture ne sont peut-être pas acceptés tels quels — cette édition peut aussi être modifiée sur inventaire.io même."
+          }
+        }
+      }
+    },
+    "edit_edition.failure.refused.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refused this change"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io a refusé cette modification"
+          }
+        }
+      }
+    },
+    "edit_edition.isbn" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN"
+          }
+        }
+      }
+    },
+    "edit_edition.subtitle_field" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtitle of this edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-titre de cette édition"
+          }
+        }
+      }
+    },
+    "edit_edition.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit edition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier l’édition"
           }
         }
       }

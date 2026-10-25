@@ -3,13 +3,15 @@
 //  ReCIT_iOS
 //
 //  What the reader has told us about a book inventaire.io does not have yet. A value type with
-//  no opinion about the network: the form fills it, `ResolveRequestBuilder` turns it into a
+//  no opinion about the network: the screens fill it, `ResolveRequestBuilder` turns it into a
 //  request, and nothing else reads it.
 //
-//  Only two fields are asked for — the title and the author — because they are the only two
-//  the barcode cannot answer. The ISBN comes from the camera and is never edited.
+//  Two shapes, decided by the work search the sheet opens on. A work inventaire.io already has:
+//  `workUri` names it, and only the edition is described — its title, its cover. A work of the
+//  reader's own: its title and its authors are described too, and created with the edition.
+//  The ISBN comes from the camera and is never edited.
 //
-//  See PRD 0015.
+//  See PRD 0015 and PRD 0021.
 //
 
 import Foundation
@@ -20,32 +22,28 @@ struct NewBookDraft: Equatable, Sendable {
     /// the wire.
     let isbn: String
 
-    /// The title printed on *this* edition's cover, which is not necessarily the work's.
+    /// The title printed on *this* edition's cover, which is not necessarily the work's: a
+    /// translation, a reissue and a boxed set share a work and disagree about their covers.
     var title: String = ""
 
-    /// The author's name as the reader typed it. Becomes a label on a new author entity — or
-    /// nothing at all, once an existing author has been chosen (issue 0093).
-    var authorName: String = ""
+    /// The title of the work being created, when none of the works found was the book.
+    var workTitle: String = ""
 
-    /// The uri of an author inventaire.io already has, once one has been chosen. `nil` means
-    /// the author is being created: the seed then carries labels instead. That single
-    /// distinction is what keeps the base free of twin authors.
-    var authorUri: String?
+    /// Who wrote the work being created — one or several, each either an author inventaire.io
+    /// already has or one created with the book.
+    var authors: [NewBookAuthor] = []
 
-    /// What told this author apart from a namesake, kept only to show it back in the form.
-    var authorDescription: String?
-
-    /// The cover the reader photographed, as JPEG bytes, before it has been sent anywhere.
+    /// The cover, as JPEG bytes, before it has been sent anywhere.
     var coverImageData: Data?
 
-    /// Where that photograph ended up once uploaded. `nil` when there was no photograph, and
-    /// `nil` when the upload failed — in which case the book is published without it and the
-    /// server goes looking for a cover from the ISBN.
+    /// Where that cover can be fetched from by inventaire.io: the url the upload answered, made
+    /// absolute. `nil` when there is no cover, and `nil` when the upload failed — in which case
+    /// the book is published without it and the server goes looking for one from the ISBN.
     var coverImageUrl: String?
 
-    /// The uri of a work inventaire.io already has, when the reader has agreed that this book
-    /// is one more edition of it — picked from the search, or recognised by the reconnaissance
-    /// pass. `nil` means a work is being created alongside the edition.
+    /// The uri of a work inventaire.io already has, when this book is one more edition of it —
+    /// picked from the search, or recognised by the reconnaissance pass. `nil` means a work is
+    /// being created alongside the edition.
     var workUri: String?
 
     /// The work picked from the search, kept to show it back at the head of « Nouvelle
@@ -54,7 +52,7 @@ struct NewBookDraft: Equatable, Sendable {
     var chosenWork: WorkCandidate?
 
     /// Whether the question « inventaire knows this work — is it yours? » has been put. Asked
-    /// at most once per draft: a reader who answered « no, it is another book » must not be
+    /// at most once per draft: a reader who answered « no, it is another work » must not be
     /// asked again on the retry.
     var hasAnsweredWorkQuestion: Bool = false
 
@@ -73,28 +71,37 @@ struct NewBookDraft: Equatable, Sendable {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    var trimmedAuthorName: String {
-        authorName.trimmingCharacters(in: .whitespacesAndNewlines)
+    var trimmedWorkTitle: String {
+        workTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// The authors worth sending: a row left without a name is no author.
+    var namedAuthors: [NewBookAuthor] {
+        authors.filter { $0.trimmedName.isEmpty == false }
     }
 
     /// Whether there is enough to publish. An edition with no title is unreadable in every list
-    /// it will appear in. A work being created needs its author too — one with none is the kind
-    /// of orphan that has to be repaired by hand on the website afterwards — while a work that
-    /// already exists brings its own.
+    /// it will appear in. A work being created needs its title and an author too — one with
+    /// none is the kind of orphan that has to be repaired by hand on the website afterwards —
+    /// while a work that already exists brings its own.
     var isPublishable: Bool {
         guard trimmedTitle.isEmpty == false else { return false }
-        return workUri != nil || trimmedAuthorName.isEmpty == false
+        if workUri != nil { return true }
+        return trimmedWorkTitle.isEmpty == false && namedAuthors.isEmpty == false
+    }
+
+    /// Whether the edition's title is still the one this draft gave it — empty, or copied from
+    /// a work — rather than one the reader typed. Only then does it follow the work's.
+    private var titleFollowsWork: Bool {
+        trimmedTitle.isEmpty || title == workTitle || title == chosenWork?.title
     }
 
     /// Attaches the edition to a work inventaire.io already has.
     ///
     /// The edition's title starts as the work's, which is right for a reissue and one correction
-    /// away for a translation. It is only replaced while the reader has not made it their own:
-    /// empty, or still the title of the work picked before this one.
+    /// away for a translation.
     mutating func choose(_ work: WorkCandidate) {
-        if trimmedTitle.isEmpty || title == chosenWork?.title {
-            title = work.title
-        }
+        if titleFollowsWork { title = work.title }
         chosenWork = work
         workUri = work.uri
         // Picked by the reader from the search: there is nothing left for the reconnaissance
@@ -105,12 +112,19 @@ struct NewBookDraft: Equatable, Sendable {
     /// Leaves the works the search proposed, to describe one of the reader's own, named after
     /// what they searched for.
     mutating func startNewWork(titled query: String) {
-        if trimmedTitle.isEmpty || title == chosenWork?.title {
-            title = Self.capitalizingFirstLetter(query.trimmingCharacters(in: .whitespacesAndNewlines))
-        }
+        let named: String = Self.capitalizingFirstLetter(query.trimmingCharacters(in: .whitespacesAndNewlines))
+        if titleFollowsWork { title = named }
+        workTitle = named
         chosenWork = nil
         workUri = nil
         hasAnsweredWorkQuestion = false
+    }
+
+    /// Renames the work being created, carrying the edition's title along while the reader has
+    /// not made it their own.
+    mutating func renameWork(_ newTitle: String) {
+        if titleFollowsWork { title = newTitle }
+        workTitle = newTitle
     }
 
     /// A title as a search is typed — « étincelles écosocialistes » — made into one as a cover

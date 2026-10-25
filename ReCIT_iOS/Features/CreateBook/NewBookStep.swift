@@ -27,7 +27,7 @@ enum NewBookStep: Hashable {
     /// in, rather than on a search the reader has already answered.
     static func resuming(_ draft: NewBookDraft) -> [NewBookStep] {
         if draft.chosenWork != nil { return [.edition] }
-        if draft.trimmedTitle.isEmpty == false { return [.newWork] }
+        if draft.trimmedWorkTitle.isEmpty == false { return [.newWork] }
         return []
     }
 }

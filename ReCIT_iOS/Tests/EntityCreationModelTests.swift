@@ -20,7 +20,8 @@ struct EntityCreationModelTests {
     private let draft: NewBookDraft = .init(
         isbn: "978-2-38019-274-1",
         title: "La Main gauche de la nuit",
-        authorName: "Ursula K. Le Guin"
+        workTitle: "La Main gauche de la nuit",
+        authors: [.init(name: "Ursula K. Le Guin")]
     )
 
     // MARK: - What the ISBN says about the language

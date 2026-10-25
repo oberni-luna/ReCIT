@@ -2,8 +2,9 @@
 //  CreateBookEditionNotes.swift
 //  ReCIT_iOS
 //
-//  The two sentences under the cover and the ISBN: the language the ISBN gave, when it gave
-//  one, and that what is written here becomes public.
+//  The sentences under the edition: the language the ISBN gave, when it gave one, and that
+//  what is written here becomes public — said of the edition alone in « Nouvelle édition », of
+//  the work and the edition in « Nouvelle œuvre ».
 //
 //  See PRD 0015 and PRD 0021.
 //
@@ -12,6 +13,7 @@ import SwiftUI
 
 struct CreateBookEditionNotes: View {
     let draft: NewBookDraft
+    var notice: LocalizedStringKey = "create_book.public_notice"
 
     var body: some View {
         VStack(alignment: .leading, spacing: .xSmall) {
@@ -22,7 +24,7 @@ struct CreateBookEditionNotes: View {
                     .accessibilityIdentifier("e2e.createBook.language")
             }
 
-            Text("create_book.public_notice")
+            Text(notice)
         }
         .textStyle(.footnote200)
         .foregroundStyle(.foregroundSecondary)

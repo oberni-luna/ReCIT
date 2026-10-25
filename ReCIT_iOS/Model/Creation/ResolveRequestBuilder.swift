@@ -13,8 +13,9 @@
 //    translation, a reissue and a boxed set share a work and disagree about their covers.
 //  - An author already on inventaire is named by uri; one being created is described by label.
 //    Same for the work. That single distinction is what keeps the base free of twins.
+//  - A work that exists is named, never left out, and sends no author: it has its own.
 //
-//  See PRD 0015.
+//  See PRD 0015 and PRD 0021.
 //
 
 import Foundation
@@ -81,22 +82,27 @@ enum ResolveRequestBuilder {
         let works: [EntityResolveRequest.Seed] = if let workUri = draft.workUri {
             [.named(workUri)]
         } else {
-            [.described(label: draft.trimmedTitle, language: labelLanguage)]
+            [.described(label: draft.trimmedWorkTitle, language: labelLanguage)]
         }
 
         // Named, not described, as soon as the reader has picked someone who exists. Sending a
         // description where a uri was available is how a database of this kind fills with
         // twins, and merging two authors is not something a phone can undo.
-        let author: EntityResolveRequest.Seed = if let uri = draft.authorUri {
-            .named(uri)
-        } else {
-            .described(label: draft.trimmedAuthorName, language: labelLanguage)
-        }
-
-        // Only a work being created needs its authors: one that exists already has them. An
-        // author seed sent beside an existing work would still be resolved — and, failing that,
+        //
+        // And only for a work being created: one that exists already has its authors. An author
+        // seed sent beside an existing work would still be resolved — and, failing that,
         // created — on its own (`create_unresolved_entry.ts`).
-        let authors: [EntityResolveRequest.Seed]? = draft.workUri == nil ? [author] : nil
+        let authors: [EntityResolveRequest.Seed]? = if draft.workUri != nil {
+            nil
+        } else {
+            draft.namedAuthors.map { author -> EntityResolveRequest.Seed in
+                if let uri = author.uri {
+                    .named(uri)
+                } else {
+                    .described(label: author.trimmedName, language: labelLanguage)
+                }
+            }
+        }
 
         return .init(
             entries: [.init(edition: edition, works: works, authors: authors)],

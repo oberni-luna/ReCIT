@@ -33,6 +33,35 @@ struct WorkCandidate: Hashable, Identifiable, Sendable {
 
     let imageUrl: String?
 
+    /// The candidate a stored work makes: the one the reconnaissance pass recognised, drawn as
+    /// the search's results are.
+    init(work: Work) {
+        self.init(
+            uri: work.uri,
+            title: work.title,
+            authors: work.authors.map(\.name),
+            year: work.publicationDate.map { String(Calendar.current.component(.year, from: $0)) },
+            summary: work.subtitle,
+            imageUrl: work.image
+        )
+    }
+
+    init(
+        uri: String,
+        title: String,
+        authors: [String],
+        year: String?,
+        summary: String?,
+        imageUrl: String?
+    ) {
+        self.uri = uri
+        self.title = title
+        self.authors = authors
+        self.year = year
+        self.summary = summary
+        self.imageUrl = imageUrl
+    }
+
     /// The line under the title: « Kim Stanley Robinson · 2020 », or the search's description.
     var detail: String? {
         Self.byline(authors: authors, year: year) ?? summary

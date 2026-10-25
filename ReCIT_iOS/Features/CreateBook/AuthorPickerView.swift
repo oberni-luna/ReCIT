@@ -14,7 +14,11 @@
 //  it does not search as you type, and asking it to would be a second search with different
 //  results.
 //
-//  See PRD 0015.
+//  It answers one author and knows nothing of the draft: the work being created can have
+//  several, and the screen that pushed this one decides whether the answer replaces an author
+//  or adds one.
+//
+//  See PRD 0015 and PRD 0021.
 //
 
 import SwiftUI
@@ -23,7 +27,12 @@ struct AuthorPickerView: View {
     @Environment(SearchModel.self) private var searchModel
     @Environment(\.dismiss) private var dismiss
 
-    @Binding var draft: NewBookDraft
+    /// The name the search starts from: the author being replaced, so that coming back to
+    /// change one starts from them. Empty for an author being added.
+    let initialQuery: String
+
+    /// Handed the author picked or created. The screen pops itself afterwards.
+    let onChoose: (NewBookAuthor) -> Void
 
     @State private var query: String = ""
     @State private var results: [SearchResult] = []
@@ -86,7 +95,7 @@ struct AuthorPickerView: View {
         .onAppear {
             // The name already typed, if there is one, is the search everybody expects to see
             // run: coming back to change an author starts from that author.
-            if query.isEmpty { query = draft.authorName }
+            if query.isEmpty { query = initialQuery }
         }
     }
 
@@ -111,18 +120,14 @@ struct AuthorPickerView: View {
     /// An author inventaire.io already has: named by uri from here on, so the server reuses
     /// the entity instead of making a second one.
     private func choose(_ result: SearchResult) {
-        draft.authorName = result.title
-        draft.authorUri = result.uri
-        draft.authorDescription = result.description
+        onChoose(.init(name: result.title, uri: result.uri, description: result.description))
         dismiss()
     }
 
     /// An author nobody has entered yet: described by label, and created by the server along
     /// with the book.
     private func createAuthor() {
-        draft.authorName = trimmedQuery
-        draft.authorUri = nil
-        draft.authorDescription = nil
+        onChoose(.init(name: trimmedQuery))
         dismiss()
     }
 }

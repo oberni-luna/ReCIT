@@ -2,18 +2,19 @@
 //  WorkMatchView.swift
 //  ReCIT_iOS
 //
-//  « inventaire.io knows this book, but not this edition. » The screen that stands between a
-//  reader and a second work of the same name.
+//  « Œuvre déjà connue » — the search did not offer it, but inventaire.io recognises the work
+//  being created by its title and its author. The screen that stands between a reader and a
+//  second work of the same name. Frame `V6` of « Nouveau livre v2 » in the Figma file.
 //
 //  It is shown only when the reconnaissance pass recognised a work — the `resolve` call made
-//  with `create: false`, which writes nothing. When nothing was recognised the reader never
-//  sees it and the book is published straight away.
+//  with `create: false`, which writes nothing — and only on the way to creating one: a work
+//  picked from the search is named by its uri and needs no such pass.
 //
 //  The work is drawn from SwiftData, refreshed on appearance, as ADR 0001 asks: the model
 //  layer answered a uri, the view reads the object. Which is also why the title shown here can
 //  differ from the one typed in the form — that is the point of the screen.
 //
-//  See PRD 0015.
+//  See PRD 0015 and PRD 0021.
 //
 
 import SwiftUI
@@ -29,26 +30,45 @@ struct WorkMatchView: View {
     /// copied: the answer belongs to the draft, which survives this screen.
     @Binding var draft: NewBookDraft
 
+    /// What went wrong last time, in the reader's terms. `nil` until something does.
+    let failure: CreateBookFailure?
+
     /// Publishes with whatever has just been decided.
     let onPublish: () async -> Void
+    let onClose: () -> Void
 
     @State private var work: Work?
 
+    /// The work as the row draws it: the one inventaire.io has once it has been read, and until
+    /// then what the reader typed — the same title, give or take a capital.
+    private var candidate: WorkCandidate {
+        if let work {
+            .init(work: work)
+        } else {
+            .init(
+                uri: workUri,
+                title: draft.trimmedWorkTitle,
+                authors: draft.namedAuthors.map(\.trimmedName),
+                year: nil,
+                summary: nil,
+                imageUrl: nil
+            )
+        }
+    }
+
     var body: some View {
         Form {
-            Section {
-                VStack(alignment: .leading, spacing: .xSmall) {
-                    Text(work?.title ?? draft.trimmedTitle)
-                        .textStyle(.content400Bold)
-                        .foregroundStyle(.foregroundDefault)
-
-                    if let authors = work?.authors, authors.isEmpty == false {
-                        Text(authors.map(\.name).joined(separator: ", "))
-                            .textStyle(.footnote200)
-                            .foregroundStyle(.foregroundSecondary)
-                    }
+            if let failure {
+                Section {
+                    CreateBookFailureBanner(failure: failure)
                 }
-                .accessibilityIdentifier("e2e.createBook.work")
+                .listRowSeparator(.hidden)
+                .listSectionSeparator(.hidden)
+            }
+
+            Section {
+                WorkRow(work: candidate)
+                    .accessibilityIdentifier("e2e.createBook.work")
             } header: {
                 Text("create_book.work.header")
             } footer: {
@@ -74,20 +94,16 @@ struct WorkMatchView: View {
                 }
                 .accessibilityIdentifier("e2e.createBook.work.otherWork")
             } header: {
-                Text("create_book.work.what_you_create")
+                Text("create_book.work.what_you_publish")
             }
 
             Section {} footer: {
-                AsyncButton(
-                    action: onPublish,
-                    actionOptions: [.showProgressView],
-                    label: {
-                        Text("create_book.work.publish_edition")
-                            .frame(maxWidth: .infinity)
-                    }
+                CreateBookPublishFooter(
+                    failure: failure,
+                    isPublishable: draft.isPublishable,
+                    onPublish: onPublish,
+                    onClose: onClose
                 )
-                .buttonStyle(.primary())
-                .accessibilityIdentifier("e2e.createBook.work.publish")
             }
         }
         .applyListBackground()
@@ -101,10 +117,20 @@ struct WorkMatchView: View {
 
             work = try? await entityModel.refreshWork(modelContext: modelContext, uri: workUri)
         }
+        .onDisappear {
+            // Back to « Nouvelle œuvre » without publishing: the question goes with the screen,
+            // so the work being described is the reader's own again, and the next publication
+            // asks anew.
+            if draft.workUri == workUri, draft.chosenWork == nil {
+                draft.workUri = nil
+                draft.hasAnsweredWorkQuestion = false
+            }
+        }
     }
 }
 
-/// One of the two answers, with what it costs written under it.
+/// One of the two answers, with what it costs written under it. `Form / Choice Row` (`701:555`)
+/// in the Figma file.
 private struct WorkMatchChoice: View {
     let title: LocalizedStringKey
     let explanation: LocalizedStringKey
@@ -131,5 +157,6 @@ private struct WorkMatchChoice: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

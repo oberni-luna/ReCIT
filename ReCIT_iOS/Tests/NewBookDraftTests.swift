@@ -84,6 +84,7 @@ struct NewBookDraftTests {
 
         draft.startNewWork(titled: " étincelles écosocialistes ")
 
+        #expect(draft.workTitle == "Étincelles écosocialistes")
         #expect(draft.title == "Étincelles écosocialistes")
         #expect(draft.workUri == nil)
         #expect(draft.hasAnsweredWorkQuestion == false)
@@ -99,6 +100,57 @@ struct NewBookDraftTests {
         #expect(draft.chosenWork == nil)
         #expect(draft.workUri == nil)
         #expect(draft.title == "Étincelles écosocialistes")
+    }
+
+    @Test("The edition's title follows the work's while the reader has not changed it")
+    func renameWorkCarriesTheTitle() {
+        var draft: NewBookDraft = .init(isbn: "9782493373052")
+
+        draft.startNewWork(titled: "étincelles")
+        draft.renameWork("Étincelles écosocialistes")
+
+        #expect(draft.title == "Étincelles écosocialistes")
+    }
+
+    @Test("A title the reader typed stays when the work is renamed")
+    func renameWorkKeepsATypedTitle() {
+        var draft: NewBookDraft = .init(isbn: "9782493373052")
+
+        draft.startNewWork(titled: "étincelles écosocialistes")
+        draft.title = "Étincelles écosocialistes (poche)"
+        draft.renameWork("Étincelles écosocialistes !")
+
+        #expect(draft.title == "Étincelles écosocialistes (poche)")
+    }
+
+    @Test("A work being created needs its title, an author, and the edition's title")
+    func newWorkPublishability() {
+        var draft: NewBookDraft = .init(isbn: "9782493373052")
+        draft.startNewWork(titled: "étincelles écosocialistes")
+        #expect(draft.isPublishable == false)
+
+        draft.authors = [.init(name: "  ")]
+        #expect(draft.isPublishable == false)
+
+        draft.authors = [.init(name: "Michael Löwy", uri: "wd:Q560474")]
+        #expect(draft.isPublishable)
+
+        draft.title = ""
+        #expect(draft.isPublishable == false)
+    }
+
+    // MARK: - Where a draft reopens
+
+    @Test("A draft reopens on the screen it was left on")
+    func resumingSteps() {
+        var draft: NewBookDraft = .init(isbn: "9782494289857")
+        #expect(NewBookStep.resuming(draft).isEmpty)
+
+        draft.startNewWork(titled: "étincelles écosocialistes")
+        #expect(NewBookStep.resuming(draft) == [.newWork])
+
+        draft.choose(ministry)
+        #expect(NewBookStep.resuming(draft) == [.edition])
     }
 
     @Test("Only the first letter is raised")

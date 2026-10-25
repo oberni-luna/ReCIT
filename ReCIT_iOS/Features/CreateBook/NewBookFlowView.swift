@@ -45,6 +45,10 @@ struct NewBookFlowView: View {
     /// What went wrong last time, in the reader's terms. `nil` until something does.
     @State private var failure: CreateBookFailure?
 
+    /// Whether the book now exists. Its draft is then done with, and must not be handed back to
+    /// the session on the way out.
+    @State private var isPublished: Bool = false
+
     init(
         draft: NewBookDraft,
         onCreated: @escaping (ScannedBook) -> Void,
@@ -83,7 +87,7 @@ struct NewBookFlowView: View {
                         onClose: { dismiss() }
                     )
                 case .newWork:
-                    CreateBookView(
+                    NewWorkView(
                         draft: $draft,
                         failure: failure,
                         onPublish: publishNewWork,
@@ -93,7 +97,9 @@ struct NewBookFlowView: View {
                     WorkMatchView(
                         workUri: uri,
                         draft: $draft,
-                        onPublish: create
+                        failure: failure,
+                        onPublish: create,
+                        onClose: { dismiss() }
                     )
                 }
             }
@@ -106,6 +112,7 @@ struct NewBookFlowView: View {
         .onDisappear {
             // Whatever took the sheet away — the close button, a swipe, a publication that
             // failed and a reader who walked off — what was typed stays with the session.
+            guard isPublished == false else { return }
             onKeepDraft(draft)
         }
     }
@@ -129,7 +136,7 @@ struct NewBookFlowView: View {
     /// The reconnaissance pass writes nothing and can recognise a work this book is an edition
     /// of, which the search did not offer — in which case the reader is shown it and decides,
     /// and the publication happens from that screen. Asked at most once: a reader who answered
-    /// « no, it is another work » is not asked again on a retry.
+    /// « no, another work » is not asked again on a retry.
     private func publishNewWork() async {
         if draft.hasAnsweredWorkQuestion == false,
            let uri = await creationModel.recogniseWork(draft: draft) {
@@ -170,11 +177,12 @@ struct NewBookFlowView: View {
                 forUser: user
             )
 
+            isPublished = true
             onCreated(
                 .init(
                     uri: uri,
                     title: draft.trimmedTitle,
-                    authors: draft.chosenWork?.authors ?? [draft.trimmedAuthorName],
+                    authors: draft.chosenWork?.authors ?? draft.namedAuthors.map(\.trimmedName),
                     coverImageUrl: nil,
                     code: draft.isbn
                 )

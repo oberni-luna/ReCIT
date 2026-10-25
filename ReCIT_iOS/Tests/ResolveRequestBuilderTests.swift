@@ -19,6 +19,7 @@ struct ResolveRequestBuilderTests {
     private func draft(
         isbn: String = "978-2-38019-274-1",
         title: String = "La Main gauche de la nuit",
+        workTitle: String = "La Main gauche de la nuit",
         author: String = "Ursula K. Le Guin",
         authorUri: String? = nil,
         workUri: String? = nil,
@@ -28,8 +29,8 @@ struct ResolveRequestBuilderTests {
         .init(
             isbn: isbn,
             title: title,
-            authorName: author,
-            authorUri: authorUri,
+            workTitle: workTitle,
+            authors: [.init(name: author, uri: authorUri)],
             coverImageUrl: coverImageUrl,
             workUri: workUri,
             language: language
@@ -63,7 +64,7 @@ struct ResolveRequestBuilderTests {
     @Test("Whitespace typed around a title or a name does not reach the server")
     func fieldsAreTrimmed() throws {
         let request: EntityResolveRequest = ResolveRequestBuilder.request(
-            for: draft(title: "  Les Dépossédés \n", author: " Ursula K. Le Guin "),
+            for: draft(title: "  Les Dépossédés \n", workTitle: " Les Dépossédés ", author: " Ursula K. Le Guin "),
             create: true,
             language: "fr"
         )
@@ -153,6 +154,46 @@ struct ResolveRequestBuilderTests {
         let author: EntityResolveRequest.Seed = try #require(request.entries.first?.authors?.first)
         #expect(author.uri == nil)
         #expect(author.labels == ["fr": "Ursula K. Le Guin"])
+    }
+
+    /// A work can have several authors; each is named or described on its own terms.
+    @Test("Every author of a work being created is sent, named or described")
+    func severalAuthorsAreSent() throws {
+        var several: NewBookDraft = draft()
+        several.authors = [
+            .init(name: "Michel Pinçon", uri: "wd:Q3311181"),
+            .init(name: "Monique Pinçon-Charlot")
+        ]
+
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(for: several, create: true, language: "fr")
+
+        let authors: [EntityResolveRequest.Seed] = try #require(request.entries.first?.authors)
+        #expect(authors == [.named("wd:Q3311181"), .described(label: "Monique Pinçon-Charlot", language: "fr")])
+    }
+
+    @Test("An author row left without a name is not sent")
+    func blankAuthorIsDropped() throws {
+        var blank: NewBookDraft = draft()
+        blank.authors.append(.init(name: "  "))
+
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(for: blank, create: true, language: "fr")
+
+        #expect(try #require(request.entries.first?.authors).count == 1)
+    }
+
+    /// The work is the text; the edition is this cover. A translation shares the first and not
+    /// the second.
+    @Test("The work is described by its own title, the edition by the cover's")
+    func workAndEditionKeepTheirTitles() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(title: "La Main gauche de la nuit", workTitle: "The Left Hand of Darkness"),
+            create: true,
+            language: "en"
+        )
+
+        let entry: EntityResolveRequest.Entry = try #require(request.entries.first)
+        #expect(entry.works?.first?.labels == ["en": "The Left Hand of Darkness"])
+        #expect(entry.edition.claims?["wdt:P1476"] == ["La Main gauche de la nuit"])
     }
 
     // MARK: - The cover

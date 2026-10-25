@@ -230,7 +230,7 @@ struct BookDetailView: View {
         }
     }
 
-    /// « Données bibliographiques », last: « Modifier » opens the edition's form. Absent for a
+    /// « Données bibliographiques », last: its one row opens the edition's form. Absent for a
     /// Wikidata edition, which this app cannot write to.
     @ViewBuilder
     func bibliographicDataSection(edition: Edition) -> some View {

@@ -912,6 +912,22 @@
         }
       }
     },
+    "book.bibliographic_data.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enriching the bibliographic data enriches inventaire.io’s open database."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enrichir les données bibliographiques permet d’enrichir la base de données open data de inventaire.io."
+          }
+        }
+      }
+    },
     "book.no_edition.message" : {
       "extractionState" : "manual",
       "localizations" : {

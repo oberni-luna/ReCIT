@@ -6,6 +6,11 @@ monde », dont l'œuvre n'avait pas d'auteur. Maquette : la section Figma `Fiche
 (`744:2382`), frames `744:2383` (toute la longueur) et `744:2482` (défilée jusqu'en bas), spec `744:24535` ; pour la
 recherche de l'œuvre, `V2 · Quelle œuvre ?` de `Nouveau livre v2` (`712:21368`).
 
+> **Prolongée le même jour par la [feature 0050](0050-every-bibliographic-datum.md)** : le formulaire montre
+> désormais toutes les propriétés de l'édition, liste ses œuvres, ajoute les auteur·ices dans « Modifier l'œuvre »
+> et épingle « Enregistrer » ; la fiche finit sur une rangée « Données bibliographiques ». Ce qui suit décrit l'état
+> d'avant.
+
 ## Ce que c'est
 
 La fiche d'une édition se termine sur une section **« Données bibliographiques »** d'une seule rangée, **« Modifier »**,

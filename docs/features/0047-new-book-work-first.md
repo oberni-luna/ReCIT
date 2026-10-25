@@ -6,6 +6,10 @@ commits, un par issue. Il remplace le formulaire de la [feature 0020](0020-creat
 maquette. Le PRD et les issues étaient un échafaudage et n'ont jamais été commités. Ils ont été
 numérotés au-delà de tous les numéros que citent déjà les autres features.
 
+
+> **Mise à jour le 2026-10-25 ([feature 0050](0050-every-bibliographic-datum.md))** : « Nouvelle édition » (`V3`) et
+> la moitié édition de « Nouvelle œuvre » (`V5`) cèdent la place au formulaire de « Modifier l'édition », en création ;
+> « Nouvelle œuvre » ne garde que le titre et les auteur·ices de l'œuvre.
 ## Ce que ça fait
 
 Un scan ne trouve pas l'édition, la rangée inconnue porte son « + », et la feuille s'ouvre sur une

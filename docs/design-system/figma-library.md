@@ -4,6 +4,16 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
 
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Proposition du 2026-10-25 — `Modifier l'édition · Toutes les données`** (`750:2508`, page `Inventaire`, sous
+  `Fiche livre · Données bibliographiques`) : le formulaire « Modifier l'édition » avec **tout ce qu'inventaire.io
+  permet de dire d'une édition**, et le même écran pour l'ajout depuis le scanner. « Édition de » liste les œuvres :
+  on en ajoute, on en détache une d'un glissement, et en toucher une ouvre « Modifier l'œuvre », la forme de `V5`.
+  « Enregistrer » est épinglé en bas. Six frames — `E1` toute la hauteur, clair (`750:2509`) et sombre (`752:2856`),
+  `E2` depuis le scanner (`752:2917`), `E3` à l'ouverture (`758:3589`), `E4` détacher (`758:3657`), `E5` modifier
+  l'œuvre (`758:3803`) — et `Spec · Modifier l'édition · Toutes les données` (`754:3472`). **Un composant nouveau**,
+  `Form / Swipe Row` (`757:607`) ; `Action Bar / Attached` réutilisée ; `Form / Labeled Value`, `Form / Group` et
+  `Form / Cover ISBN` étendus, éteints par défaut. **Implémentée le même jour**
+  ([feature 0050](../features/0050-every-bibliographic-datum.md)), avec des écarts. Détail en fin de fichier.
 - **Proposition du 2026-10-25 — `Fiche livre · Données bibliographiques`** (`744:2382`, page `Inventaire`, sous
   `Œuvre & édition`, clair seul) : la fiche d'une édition gagne tout en bas une section « Données bibliographiques »
   d'une seule rangée, « Modifier », qui ouvre le formulaire de l'édition (la forme de `V3 · Nouvelle édition`,
@@ -12,6 +22,10 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   bibliographiques` (`744:24535`). **Aucun composant nouveau** : `Section Header` et `Row / Link` Tinted, le reste
   cloné de `Œuvre & édition`. **Implémentée le même jour** ([feature 0049](../features/0049-edit-an-edition.md)) ;
   le formulaire n'est pas maquetté, et le code y ajoute un sous-titre que `V3` n'a pas.
+  **Retouchée à la main le même jour** dans `744:2383` : le bas de la fiche est une seule rangée `Row / Link`
+  Tinted « Données bibliographiques », sans en-tête de section, suivie d'une note `Footnote/footnote200` « Enrichir
+  les données bibliographiques permet d'enrichir la base de données open data de inventaire.io ». `744:2482` n'est
+  plus dans la section. Le code la suit depuis la [feature 0050](../features/0050-every-bibliographic-datum.md).
 - **Passe du 2026-10-03 — `Profil · À propos & version`** (`528:16519`, page `Screens`, mode clair seul) :
   `V1 · Profil · À propos & version` (`528:16520`, clone de `A0 · Profil · Sans Réseau` `499:14070`) — une entrée
   `Row / Link` Tinted « À propos d'inventaire.io » entre les transactions et « Se déconnecter », et un pied de page
@@ -2279,3 +2293,154 @@ Cinq écarts restants, le code faisant foi :
 `Action / Pill` a trouvé son équivalent Swift à cette occasion : `DesignSystem/ButtonStyles/PillButtonStyle.swift`,
 mêmes couples de tokens que `Button / Large`, à la taille d'un contrôle de fin de rangée. `Cell / Relation` et
 `Cell / Invitation` sont `ReaderRowView` et `InvitationRowView` dans `Features/Community/`.
+
+---
+
+# Modifier l'édition · Toutes les données (proposition du 2026-10-25)
+
+**Implémentée le 2026-10-25** ([feature 0050](../features/0050-every-bibliographic-datum.md)) ; les écarts du code
+sont en fin de section. Le formulaire livré par la [feature 0049](../features/0049-edit-an-edition.md) ne modifiait
+que l'œuvre, la couverture, le titre et le sous-titre. Celui-ci montre et modifie **toutes les propriétés qu'inventaire.io accepte sur une édition**. C'est aussi l'écran de
+l'ajout depuis le scanner : il remplacerait `V3` de « Nouveau livre v2 », et `V5` y devient l'écran d'une œuvre.
+Section `Modifier l'édition · Toutes les données` (`750:2508`, page `Inventaire`, `x = 0`, `y = 13425`), sous
+`Fiche livre · Données bibliographiques`. Panneau `Spec · Modifier l'édition · Toutes les données` (`754:3472`).
+
+Affinée le même jour, à la demande : « Édition de » ajoute une **œuvre**, plus un·e auteur·ice ; les auteur·ices
+s'ajoutent dans l'écran de l'œuvre ; une œuvre se détache d'un glissement ; « Enregistrer » est épinglé en bas.
+
+## Table des écrans
+
+| Frame | node id | Ce qu'il montre |
+|---|---|---|
+| `E1 · Modifier l'édition · Tout · Light` | `750:2509` | La feuille de la fiche livre, toute sa hauteur (393 × 2 744). Huit sections remplies en partie, la barre fixe « Enregistrer » au bout |
+| `E1 · Modifier l'édition · Tout · Dark` | `752:2856` | Le même, mode `Dark` épinglé, indicateur d'accueil `Theme=Dark` |
+| `E2 · Nouvelle édition · Depuis le scanner · Light` | `752:2917` | Après le choix de l'œuvre (`V2`) : cadre de couverture vide, ISBN du code-barres, titre repris de l'œuvre, langue déduite, le reste en invite ; « Publier et ajouter à mes livres » dans la barre fixe (393 × 2 680) |
+| `E3 · Modifier l'édition · À l'ouverture · Light` | `758:3589` | `E1` tel qu'il s'ouvre (852) : la barre fixe par-dessus le contenu |
+| `E4 · Détacher une œuvre · Light` | `758:3657` | Deux œuvres, la seconde glissée vers la gauche, « Détacher » révélé ; encart fermé |
+| `E5 · Modifier l'œuvre · Light` | `758:3803` | Poussé depuis une œuvre de « Édition de » : la forme de `V5`, remplie — titre de l'œuvre, auteur, « Ajouter un·e autre auteur·ice ». Retour en `chevron.left` |
+
+Les sections, dans l'ordre : l'encart « Données bibliographiques », « Édition de », « Couverture et ISBN », « Titre »,
+« Publication », « Format », « Ont aussi fait cette édition », « Bases bibliographiques », « Autres données ».
+
+## Les œuvres de l'édition
+
+- « Édition de » liste les œuvres de l'édition (`wdt:P629` : un recueil en réunit plusieurs), puis « Ajouter une
+  œuvre », qui pousse la recherche `V2`. Son « Créer l'œuvre » pousse `V5` vide, « Nouvelle œuvre ».
+- **Toucher une œuvre** pousse `E5`, « Modifier l'œuvre » : la forme de `V5`, remplie de ce que la ligne montrait.
+  C'est là, et seulement là, qu'on ajoute ou enlève un·e auteur·ice. Ses changements partent avec « Enregistrer » au
+  retour : une seule sauvegarde pour toute la feuille. Une œuvre Wikidata s'y montre en lecture seule.
+- **Glisser une œuvre vers la gauche** révèle « Détacher » (`E4`, `.swipeActions(edge: .trailing)`). L'édition
+  cesse d'en être une édition ; l'œuvre reste sur inventaire.io.
+- Une édition sans œuvre ne s'enregistre pas (`P629` obligatoire) : « Enregistrer » se désactive jusqu'à ce qu'on
+  en ajoute une.
+
+## La barre fixe
+
+« Enregistrer » (« Publier et ajouter à mes livres » en création) est épinglé en bas de la feuille, par
+`safeAreaInset(edge: .bottom)` : `Action Bar / Attached` (`361:354`), ses deux boutons ronds éteints, dans un cadre
+`barre fixe (safeAreaInset)` sur `background/default` qui ajoute 34 de zone sûre (113 en tout). Dans les frames
+toute hauteur, la barre est au bout ; dans `E3` et `E4`, elle est en position absolue, contrainte en bas, par-dessus
+le contenu.
+
+## Ce qu'inventaire.io permet sur une édition — vérifié le 2026-10-25
+
+Source : `GET /api/data/properties` (les `subjectTypes` qui contiennent `edition`), et
+`app/modules/entities/lib/editor/properties_per_type.ts` dans inventaire-client (priorités, libellés, propriétés
+obligatoires, catégories repliées).
+
+| Section | Propriétés |
+|---|---|
+| Édition de | `wdt:P629`, obligatoire, multivaluée (un recueil peut réunir plusieurs œuvres) |
+| Couverture et ISBN | `invp:P2` · ISBN-13 `wdt:P212` · ISBN-10 `wdt:P957` |
+| Titre | `wdt:P1476`, obligatoire · sous-titre `wdt:P1680` |
+| Publication | maison d'édition `wdt:P123` · collection `wdt:P195` · date `wdt:P577` · langue `wdt:P407`, obligatoire |
+| Format | format `wdt:P437` (six valeurs : broché, relié, poche, album BD, livre numérique, livre audio) · pages `wdt:P1104` · volumes `wdt:P2635` |
+| Ont aussi fait cette édition | traduction `P655` · illustrations `P110` · illustration de couverture `P736` · préface `P2679` · postface `P2680` · direction éditoriale `P98` |
+| Bases bibliographiques | 22 identifiants : VIAF `P214`, GND `P227`, OCLC `P243`, BnF `P268`, DOI `P356`, Open Library `P648`, Google Books `P675`, BNE `P950`, SUDOC `P1025`, SWB `P1044`, BN argentine `P1143`, LCCN `P1144`, LIBRIS `P1182`, ISFDB `P1234`, DNB `P1292`, HathiTrust `P1844`, Goodreads `P2969`, Runeberg `P3155`, CNB tchèque `P3184`, British Library `P5199`, NooSFere `P6901`, BookBrainz `P12351` |
+| Autres données | liens : site officiel `P856`, blog `P1581`, X `P2002`, Instagram `P2003`, Facebook `P2013`, YouTube `P2397`, Mastodon `P4033`, TikTok `P7085`, Threads `P11892`, Bluesky `P12361` · différente de `P1889` |
+
+Ne sont pas montrés, comme sur le site : `wdt:P31`, qui n'a qu'une valeur permise pour une édition, ainsi que
+`invp:P1` et `invp:P3`, cachés par inventaire-client. Sur le site, « Bases bibliographiques » et « Présence sur le
+web » sont repliées. Ici, une section vide se réduit à son bouton « Ajouter … ».
+
+## Composants
+
+| Composant | node id | Ajout | Rôle |
+|---|---|---|---|
+| `Form / Swipe Row` | `757:607` (`x = 10800`, `y = 2526`) | **Nouveau.** `Row#757:0` (INSTANCE_SWAP, `Form / Work Row` par défaut), `Action#757:1` (TEXT, « Détacher ») | Un rang glissé vers la gauche, son action de fin révélée. 361 de large, découpé, aligné à droite : le `contenu` (fond `background/default`, padding 12 / 16) déborde à gauche de la largeur de l'action, l'`action` (96, pleine hauteur) apparaît à droite, aux couleurs de `Button / Large` Destructive (`background/error`, `foreground/error`). Se pose dans un slot de `Form / Group` dont la cellule a ses paddings surchargés à 0 |
+| `Action Bar / Attached` | `361:354` | Réutilisée, `Show borrow` et `Show list` éteints | La barre fixe |
+| `Form / Labeled Value` | `701:500` | Axe `Trailing` ∈ {None, Chevron, Menu} ; variantes `748:14`, `748:21`, `748:28`, `748:35` | Chevron : un choix poussé (maison d'édition, collection, langue, personne). Menu : un `Picker` en menu (date, format). Les variantes d'origine sont renommées `…, Trailing=None` |
+| `Form / Group` | `702:520` | `Row 4..6` (`748:9`, `748:11`, `748:13`), `Show row 4..6` (`748:8`, `748:10`, `748:12`) | Six rangs pour « Ont aussi fait cette édition » |
+| `Form / Cover ISBN` | `701:511` | `Show ISBN-10#748:14` ; les ISBN rangés dans `identifiants` (`748:24453`) | L'ISBN-10 sous l'ISBN-13 |
+
+Les extensions sont éteintes par défaut : les écrans existants n'en voient rien. Compte : **74 composants** sur
+`Screens · Components`.
+
+## Comportement proposé
+
+- **Un seul écran**, pour modifier (`E1`, « Enregistrer ») comme pour créer (`E2`, « Publier et ajouter à mes
+  livres »). Ne changent que le titre, le bouton et ce qui est pré-rempli : l'ISBN du code-barres, l'œuvre choisie,
+  son titre, la langue déduite de l'ISBN.
+- **Obligatoires** : l'œuvre, le titre et la langue (`requiredPropertiesPerType` d'inventaire-client). Sans eux, le
+  bouton reste désactivé.
+- **Chevron** : pousse une recherche sur inventaire.io, avec « Créer « … » » en dernier, comme le choix
+  d'auteur·ice. Un rôle peut nommer plusieurs personnes : l'écran poussé les liste.
+- **Menu** : la date (jour, mois ou année seule) et le format.
+- **Bases et liens** : « Ajouter … » pousse la liste, puis un champ validé par le format de la base. Une valeur
+  s'efface d'un glissement.
+- **Sur le fil** : un `update-claim` par valeur qui change. Ajouter une œuvre envoie `P629` sans ancienne valeur, la
+  détacher sans nouvelle valeur. Le titre d'une œuvre est un label (`update-label`), ses auteur·ices des `P50` sur
+  l'œuvre. Une maison d'édition, une collection ou une personne inconnue est d'abord créée par
+  `POST /api/entities`. En création, `resolve` porte toutes les valeurs dans la graine d'édition.
+
+## Tranché à l'implémentation (2026-10-25)
+
+1. **Le glissement** va vers la gauche, l'action à droite (`.swipeActions(edge: .trailing)`).
+2. **L'ISBN reste en lecture seule** : le serveur réserve `wdt:P212` aux admins (`updateAccessLevel: 'admin'`) et
+   déduit `wdt:P957`. Le site ne le permet pas à un compte ordinaire non plus.
+3. **Les liens vers des réseaux sociaux sont montrés**, puisque inventaire.io les accepte.
+
+## Ce qui n'est pas maquetté
+
+- Les écrans poussés : maison d'édition, collection, personne, langue, liste des bases, saisie d'un identifiant,
+  « Différente de ».
+- Les menus de date et de format, l'état d'échec, le clavier.
+- `E5` pour une œuvre Wikidata (en lecture seule), et l'état sans œuvre après un « Détacher ».
+- Le mode sombre, sauf pour `E1`.
+- **Données de maquette inventées** : maison d'édition, traductrice, date, nombre de pages, identifiants, et la
+  seconde œuvre « Le Bureau des oublis ». Le livre est celui des frames `L` et `V` (*Le Ministère des Rêves*, ISBN
+  `9782494289857`), et son ISBN-10 est calculé.
+
+## Divergences relevées dans le code
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| D-ME1 | `Features/CreateBook/CreateBookCoverRow.swift`, via `EditEditionView` | Quand l'édition n'a pas d'ISBN, le libellé « ISBN » s'affiche quand même, sans valeur. C'est le cas de *Dans la forêt* sur la capture du 2026-10-25. `E1` montre l'ISBN en champ, avec une invite quand il manque | corrigée (feature 0050) : rien ne s'affiche sans ISBN |
+| D-ME2 | `BookBibliographicDataSection.swift` | La maquette `744:2383`, retouchée à la main le 2026-10-25, n'a plus qu'une rangée teintée « Données bibliographiques », sans en-tête, et une note « Enrichir les données bibliographiques… ». Le code montrait encore l'en-tête « Données bibliographiques » et une rangée « Modifier » | corrigée (feature 0050) |
+| D-ME3 | `EditEditionView.swift` | Le code livré ajoute des auteur·ices depuis l'écran de l'édition, n'y montre qu'une œuvre et pose « Enregistrer » au pied du formulaire. La maquette met les auteur·ices dans l'écran de l'œuvre (`E5`), liste les œuvres et épingle la barre | corrigée (feature 0050) |
+
+## Écarts du code livré (feature 0050)
+
+- « Autres données » devient « Sur le web », sans « Différente de » (`wdt:P1889`) : `/api/search` ne cherche pas
+  les éditions.
+- L'ISBN-13 et l'ISBN-10 sont des textes, pas des champs (voir « Tranché »).
+- Les actions de glissement suivent le système — fond rouge (`.tint(.foregroundError)`), libellé blanc — et non
+  `Form / Swipe Row` (`background/error`, libellé `foreground/error`).
+- La date est un écran poussé (précision année / mois / jour), pas un menu.
+- `E5` n'a pas de barre fixe : ses changements partent avec l'« Enregistrer » de l'édition, au retour.
+
+## Ce que la construction a appris
+
+- **Ajouter un axe de variantes à un jeu existant** : renommer les variantes d'origine avec la nouvelle valeur
+  (`State=Filled, Trailing=None`), puis cloner. Les textes déplacés dans un nouveau cadre perdent leur
+  `componentPropertyReferences`, qu'il faut rebrancher à la main.
+- **Un slot échangé garde la hauteur fixe de l'ancien rang** : `Form / Swipe Row` posé à la place d'un
+  `Form / Entity Row` sortait à 44 de haut, coupé, jusqu'à `layoutSizingVertical = 'HUG'` sur l'instance.
+- **Un débordement à gauche** s'obtient par un auto-layout horizontal de largeur fixe, découpé, aligné à droite
+  (`primaryAxisAlignItems = 'MAX'`) : c'est ce qui fait le rang glissé.
+- **`sips` ignore `--cropOffset`** : pour lire une capture haute par morceaux, découper avec CoreGraphics.
+
+## Audit
+
+Les 6 frames : **0 dessin brut**. Hors instances, seuls les conteneurs `feuille`, `formulaire`, `section · …` et
+`barre fixe (safeAreaInset)`. Pas de chevauchement de section sur `Inventaire`.

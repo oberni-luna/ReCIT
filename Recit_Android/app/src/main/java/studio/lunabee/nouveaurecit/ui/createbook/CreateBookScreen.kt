@@ -76,6 +76,7 @@ import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.SearchResult
 import studio.lunabee.nouveaurecit.data.creation.CreateBookFailure
+import studio.lunabee.nouveaurecit.data.creation.NewBookAuthor
 import studio.lunabee.nouveaurecit.data.creation.NewBookDraft
 import studio.lunabee.nouveaurecit.data.db.AuthorEntity
 import studio.lunabee.nouveaurecit.data.db.WorkEntity
@@ -228,17 +229,19 @@ private fun CreateBookAuthorRow(draft: NewBookDraft, onClick: () -> Unit) {
             .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // The scanner's form names one author, the first of the draft's.
+        val author: NewBookAuthor? = draft.namedAuthors.firstOrNull()
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
             FootnoteText(stringResource(R.string.create_book_author_field))
-            if (draft.trimmedAuthorName.isEmpty()) {
+            if (author == null) {
                 Text(
                     text = stringResource(R.string.create_book_author_choose),
                     style = RecitTheme.typography.content300,
                     color = RecitTheme.colors.foregroundPlaceholder,
                 )
             } else {
-                Text(text = draft.trimmedAuthorName, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
-                draft.authorDescription?.takeIf(String::isNotBlank)?.let { description ->
+                Text(text = author.trimmedName, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
+                author.description?.takeIf(String::isNotBlank)?.let { description ->
                     Text(
                         text = description,
                         style = RecitTheme.typography.footnote200,

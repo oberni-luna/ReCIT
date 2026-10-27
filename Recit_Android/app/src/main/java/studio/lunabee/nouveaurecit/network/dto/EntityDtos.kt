@@ -99,4 +99,8 @@ object WikidataProperty {
     const val LANGUAGE: String = "wdt:P407"
     const val GENRE: String = "wdt:P136"
     const val SUMMARY: String = "wdt:P268"
+    const val INSTANCE_OF: String = "wdt:P31"
+    const val PUBLISHER: String = "wdt:P123"
+    const val ISBN_13: String = "wdt:P212"
+    const val ISBN_10: String = "wdt:P957"
 }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.SearchResult
 import studio.lunabee.nouveaurecit.data.creation.CreateBookFailure
+import studio.lunabee.nouveaurecit.data.creation.NewBookAuthor
 import studio.lunabee.nouveaurecit.data.creation.NewBookDraft
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.TransactionType
@@ -68,7 +69,7 @@ class CreateBookSession(
         if (draft.language == null) {
             scope.launch {
                 val language = container.creation.editionLanguage(draft.isbn) ?: return@launch
-                updateDraft { it.copy(language = language) }
+                updateDraft { it.withLanguage(language) }
             }
         }
     }
@@ -81,7 +82,7 @@ class CreateBookSession(
     /** The picker opens on the name already chosen: coming back to change an author starts from that author. */
     fun openAuthorPicker() {
         _state.update { it.copy(page = CreateBookPage.Author) }
-        if (_state.value.authorQuery.isEmpty()) searchAuthors(draft.authorName)
+        if (_state.value.authorQuery.isEmpty()) searchAuthors(draft.authors.firstOrNull()?.name.orEmpty())
     }
 
     /** Back one page; `false` on the form itself, whose way back is closing. */
@@ -119,7 +120,7 @@ class CreateBookSession(
 
     /** An author inventaire.io has: named by uri from now on, so the server reuses it. */
     fun chooseAuthor(result: SearchResult) {
-        updateDraft { it.copy(authorName = result.label, authorUri = result.uri, authorDescription = result.description) }
+        updateDraft { it.copy(authors = listOf(NewBookAuthor(name = result.label, uri = result.uri, description = result.description))) }
         _state.update { it.copy(page = CreateBookPage.Form) }
     }
 
@@ -127,7 +128,7 @@ class CreateBookSession(
     fun createAuthor() {
         val name: String = _state.value.authorQuery.trim()
         if (name.isEmpty()) return
-        updateDraft { it.copy(authorName = name, authorUri = null, authorDescription = null) }
+        updateDraft { it.copy(authors = listOf(NewBookAuthor(name = name))) }
         _state.update { it.copy(page = CreateBookPage.Form) }
     }
 
@@ -177,6 +178,11 @@ class CreateBookSession(
                 val url: String? = bytes?.let { container.creation.uploadCover(it) }
                 updateDraft { it.copy(coverImageUrl = url) }
             }
+            // The publishers, collections and people nobody has entered yet exist before `resolve` names
+            // them; each is kept in the draft as it lands, so a failure further on does not create it twice.
+            container.creation.createPendingEntities(draft.properties, draft.labelLanguage) { id, created ->
+                updateDraft { it.entityCreated(id, created) }
+            }
             val uri: String = container.creation.createEdition(draft)
             // Same defaults as the scanner's own add, so a created book is indistinguishable afterwards.
             container.inventory.postNewItem(uri, me, TransactionType.Inventorying, listOf(Visibility.Friends))
@@ -185,7 +191,7 @@ class CreateBookSession(
                 ScannedBook(
                     uri = uri,
                     title = draft.trimmedTitle,
-                    authors = listOf(draft.trimmedAuthorName),
+                    authors = draft.chosenWork?.authors ?: draft.namedAuthors.map { it.trimmedName },
                     coverImageUrl = ImageUrl.absolute(draft.coverImageUrl),
                     code = draft.isbn,
                 ),

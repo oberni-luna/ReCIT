@@ -13,6 +13,9 @@ struct EntityResultsDTO: Codable {
 
 struct EntityResultDTO: Codable {
     let uri: String
+    /// The id of the entity's inventaire.io document, for an entity that has one. Its `inv:` uri
+    /// is the only one a merge takes as `from`: an edition's canonical uri is often `isbn:…`.
+    let invId: String?
     let lastrevid: Int?
     /// Absent when inventaire.io cannot map the entity's Wikidata `P31` to one of its types —
     /// `wd:Q4233718` (« anonyme ») is one, and a required field failed a friend's whole sync.

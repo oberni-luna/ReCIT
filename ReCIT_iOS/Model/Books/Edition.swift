@@ -30,6 +30,26 @@ public class Edition: Identifiable, Entity {
     /// thickness. `nil` until fetched (and when the edition has no such claim).
     var numberOfPages: Int?
 
+    /// What tells this edition apart from the other editions of its work, on the line under its
+    /// title in « Éditions » and in the duplicate detection: the ISBN as the server writes it
+    /// (`wdt:P212`, else `wdt:P957`), the publisher and collection with their names, and the
+    /// publication date as given (`1995`, `1995-03-01`). All optional, so SwiftData migrates
+    /// lightly; all filled by `update(entityDto:)`, which never empties one. See PRD 0028.
+    var isbn: String?
+    var publisherUri: String?
+    var publisherName: String?
+    var collectionUri: String?
+    var collectionName: String?
+    var publicationDate: String?
+
+    /// `inv:<id>` for an edition inventaire.io holds a document for — the only uri a merge takes
+    /// as `from`. An edition's own `uri` is often `isbn:…`, and a Wikidata edition has none.
+    var invUri: String?
+
+    /// The editions this one has been declared different from (`wdt:P1889`). A pair listed here,
+    /// in either direction, is never proposed as a duplicate, and the server refuses to merge it.
+    var differentFromUris: [String] = []
+
     @Relationship(deleteRule: .nullify, inverse: \InventoryItem.edition) var items: [InventoryItem] = []
 
     var authors: [Author] {
@@ -91,6 +111,7 @@ public class Edition: Identifiable, Entity {
             authorNames: [],
             image: apiService.absoluteImageUrl(entityDto.image?.url ?? "")
         )
+        mergeBibliographicClaims(from: entityDto)
     }
 
     /// Takes the author names an item's snapshot carries. The entity never gives any, so the
@@ -125,6 +146,44 @@ public class Edition: Identifiable, Entity {
         }
         if let image = apiService.absoluteImageUrl(entityDto.image?.url ?? ""), !image.isEmpty {
             self.image = image
+        }
+        mergeBibliographicClaims(from: entityDto)
+    }
+
+    /// The year of `publicationDate`, as « Éditions » shows it.
+    var publicationYear: String? {
+        EditionBibliographicClaims.year(of: publicationDate)
+    }
+
+    /// Takes the ISBN, publisher, collection, date, page count and `wdt:P1889` the entity carries.
+    /// A claim the payload does not carry leaves the value held — a sparse answer is not a
+    /// removal (ADR 0001, invariant 2). A publisher that changed drops the name of the old one.
+    private func mergeBibliographicClaims(from entityDto: EntityResultDTO) {
+        let claims: EditionBibliographicClaims = .init(claims: entityDto.claims)
+
+        if let invId = entityDto.invId, invId.isEmpty == false, entityDto.uri.hasPrefix("wd:") == false {
+            invUri = "inv:\(invId)"
+        }
+        if let isbn = claims.isbn {
+            self.isbn = isbn
+        }
+        if let publisherUri = claims.publisherUri, publisherUri != self.publisherUri {
+            self.publisherUri = publisherUri
+            publisherName = nil
+        }
+        if let collectionUri = claims.collectionUri, collectionUri != self.collectionUri {
+            self.collectionUri = collectionUri
+            collectionName = nil
+        }
+        if let publicationDate = claims.publicationDate {
+            self.publicationDate = publicationDate
+        }
+        if let numberOfPages = claims.numberOfPages {
+            self.numberOfPages = numberOfPages
+        }
+        let differentFrom: [String] = claims.differentFromUris.filter { differentFromUris.contains($0) == false }
+        if differentFrom.isEmpty == false {
+            differentFromUris.append(contentsOf: differentFrom)
         }
     }
 }

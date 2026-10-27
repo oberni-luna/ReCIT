@@ -16,8 +16,15 @@ struct WorkEditionPicker: View {
     @State private var nextEntityDestination: NavigationDestination?
 
     let work: Work
-    let editions: [Edition]
+    /// The editions are still being fetched: an empty list is not an answer yet.
+    let isLoading: Bool
     @Binding var path: NavigationPath
+
+    /// Read off the observed work rather than handed in: an edition a merge removes leaves the
+    /// list by itself, and is never read once it is gone (PRD 0028).
+    private var editions: [Edition] {
+        work.editions.sorted(by: Self.listOrder)
+    }
 
     var body: some View {
         List {
@@ -64,24 +71,15 @@ struct WorkEditionPicker: View {
     @ViewBuilder
     var editionsSection: some View {
         Section {
-            if editions.isEmpty {
+            if editions.isEmpty && isLoading {
                 ProgressView()
             } else {
                 ForEach(editions) { edition in
-                    let result: SearchResult = .init(
-                        id: edition.uri,
-                        uri: edition.uri,
-                        title: edition.title,
-                        description: edition.subtitle,
-                        imageUrl: edition.image,
-                        score: 0,
-                        type: .works
-                    )
                     Button {
                         path.append(NavigationDestination.book(anchor: .edition(uri: edition.uri)))
                     } label: {
                         NavigationLink(value: UUID()) {
-                            SearchResultCell(result: result)
+                            EditionCell(edition: edition)
                         }
                     }
                     .buttonStyle(.plain)
@@ -92,6 +90,22 @@ struct WorkEditionPicker: View {
             Text("work.editions.header \(work.title)")
                 .textStyle(.action200)
                 .foregroundStyle(.foregroundSecondary)
+        }
+    }
+
+    /// Oldest first, as a publication history reads; an edition without a date last; then by
+    /// title, then by uri, so the order never moves between two visits.
+    static func listOrder(_ lhs: Edition, _ rhs: Edition) -> Bool {
+        switch (lhs.publicationYear, rhs.publicationYear) {
+        case let (left?, right?) where left != right:
+            return left < right
+        case (.some, nil):
+            return true
+        case (nil, .some):
+            return false
+        default:
+            let titles: ComparisonResult = lhs.title.localizedStandardCompare(rhs.title)
+            return titles == .orderedSame ? lhs.uri < rhs.uri : titles == .orderedAscending
         }
     }
 }

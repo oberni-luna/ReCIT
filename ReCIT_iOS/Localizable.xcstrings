@@ -4645,6 +4645,22 @@
         }
       }
     },
+    "edition.isbn %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISBN %@"
+          }
+        }
+      }
+    },
     "edition.my_inventory" : {
       "localizations" : {
         "en" : {
@@ -4657,6 +4673,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dans mon inventaire"
+          }
+        }
+      }
+    },
+    "edition.no_isbn" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No ISBN"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans ISBN"
           }
         }
       }

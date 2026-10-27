@@ -316,6 +316,73 @@ final class EntityModel {
         return editions
     }
 
+    /// Every edition of `work`, fetched afresh and upserted in place — the screen « Éditions »'s
+    /// revalidation (PRD 0028).
+    ///
+    /// Unlike `getWorkEditions`, an edition already held is fetched again too: that method takes
+    /// a cached edition as it is, so one cached before editions carried an ISBN would never gain
+    /// one, and the duplicate detection would never see it. The publishers' and collections'
+    /// names are read once, for those not known yet.
+    ///
+    /// An edition this work used to list and the server no longer names — merged into another,
+    /// most often — is detached from the work rather than deleted: other works, items and lists
+    /// may still point at it. A failed call changes nothing.
+    func refreshWorkEditions(modelContext: ModelContext, work: Work) async throws {
+        let endpoint: String = "/api/entities/reverse-claims?property=wdt:P629&value=\(work.uri)&refresh=false"
+        guard let uris = (try await apiService.fetchData(fromEndpoint: endpoint) as WorkEditionsDTO?)?.uris,
+              let editionDtos = try await fetchEntities(modelContext: modelContext, uris: uris)
+        else { return }
+
+        var listed: Set<String> = .init(uris)
+        for editionDto in editionDtos {
+            let works: [Work] = try await resolveEditionWorks(from: editionDto, modelContext: modelContext)
+            let edition: Edition = try modelContext.upsertEdition(editionDto, works: works, apiService: apiService)
+            edition.mergeWorks([work])
+            listed.insert(edition.uri)
+        }
+
+        for edition in work.editions where listed.contains(edition.uri) == false {
+            edition.works.removeAll { $0.uri == work.uri }
+        }
+
+        await nameRelatives(of: work.editions)
+        try modelContext.save()
+    }
+
+    /// Fills the publisher and collection names `editions` lack, in one `by-uris` call. A
+    /// collection has no label, only a title — `EditableEditionDTO.displayName` reads both. A
+    /// failure leaves the names unknown; the row shows what it has.
+    private func nameRelatives(of editions: [Edition]) async {
+        let missing: [String] = Array(Set(
+            editions.compactMap { $0.publisherName == nil ? $0.publisherUri : nil }
+            + editions.compactMap { $0.collectionName == nil ? $0.collectionUri : nil }
+        )).sorted()
+        guard missing.isEmpty == false else { return }
+
+        var names: [String: String] = [:]
+        for batch in missing.splitInSubArrays(of: 50) {
+            let endpoint: String = "/api/entities/by-uris?uris=\(batch.joined(separator: "|"))&attributes=info|labels|claims&lang=fr"
+            guard let response: EditableEditionsDTO = try? await apiService.fetchData(fromEndpoint: endpoint) else { continue }
+            for (key, entity) in response.entities {
+                guard let name = entity.displayName else { continue }
+                names[key] = name
+                names[entity.uri] = name
+            }
+            for (asked, canonical) in response.redirects ?? [:] {
+                names[asked] = names[canonical]
+            }
+        }
+
+        for edition in editions {
+            if edition.publisherName == nil, let uri = edition.publisherUri {
+                edition.publisherName = names[uri]
+            }
+            if edition.collectionName == nil, let uri = edition.collectionUri {
+                edition.collectionName = names[uri]
+            }
+        }
+    }
+
     // MARK: - Editions
 
     func getOrFetchEditions(modelContext: ModelContext, uris: [String]) async throws -> [Edition]? {

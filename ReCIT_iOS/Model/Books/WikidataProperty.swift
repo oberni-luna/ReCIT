@@ -24,6 +24,7 @@ enum WikidataProperty: String {
     case numberOfPages           = "wdt:P1104" // number of pages
     case goodreadsEditionID      = "wdt:P2969" // Goodreads version/edition ID
     case series                  = "wdt:P179"  // series
+    case differentFrom           = "wdt:P1889" // different from
 
     // Identifiers / authority fileswdt:
     case isni                    = "wdt:P213"  // International Standard Name Identifier
@@ -60,6 +61,7 @@ enum WikidataProperty: String {
         case .numberOfPages: return "number of pages"
         case .goodreadsEditionID: return "Goodreads version/edition ID"
         case .series: return "series"
+        case .differentFrom: return "different from"
 
         case .isni: return "International Standard Name Identifier"
         case .viaf: return "Virtual International Authority File"

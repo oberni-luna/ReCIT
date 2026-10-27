@@ -39,12 +39,12 @@ struct WorkEditionGatewayView: View {
             case .loadingWork:
                 ProgressView()
             case .loadingEditions(let work):
-                WorkEditionPicker(work: work, editions: [], path: $path)
+                WorkEditionPicker(work: work, isLoading: true, path: $path)
             case .loaded(let work, let editions):
                 if editions.count == 1, let edition = editions.first {
                     BookDetailView(anchor: .edition(uri: edition.uri), path: $path)
                 } else {
-                    WorkEditionPicker(work: work, editions: editions, path: $path)
+                    WorkEditionPicker(work: work, isLoading: false, path: $path)
                 }
             case .error(let error):
                 Text("error.with_message \(error.localizedDescription)")
@@ -80,8 +80,10 @@ struct WorkEditionGatewayView: View {
                 viewState = .loadingEditions(work: work)
             }
 
-            let editions: [Edition] = try await entityModel.getWorkEditions(modelContext: modelContext, work: work) ?? work.editions
-            viewState = .loaded(work: work, editions: editions)
+            // Every edition afresh, not only the new ones: the list shows each one's ISBN,
+            // publisher and date, and compares them (PRD 0028).
+            try await entityModel.refreshWorkEditions(modelContext: modelContext, work: work)
+            viewState = .loaded(work: work, editions: work.editions)
         } catch {
             if cached == nil {
                 viewState = .error(error: error)

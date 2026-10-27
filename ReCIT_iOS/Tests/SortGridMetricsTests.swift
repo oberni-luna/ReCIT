@@ -165,6 +165,78 @@ struct SortGridMetricsTests {
         #expect(abs(cover.height - cover.width / SortGridMetrics.coverAspectRatio) < 0.01)
     }
 
+    /// A cover too tall for the band narrows rather than flattens, on the narrow two-column
+    /// grid of a phone as on a wide screen's cards.
+    @Test func everyPiledCoverKeepsItsTwoToThreeShape() {
+        for width in widths + wideWidths {
+            let metrics: SortGridMetrics = .init(containerWidth: width)
+
+            for columns in [2, metrics.shelfColumnCount(forShelfCount: 12)] {
+                let cardWidth: CGFloat = metrics.shelfCardWidth(columns: columns)
+
+                for isSingleCover in [false, true] {
+                    let cover: CGSize = SortGridMetrics.pileCoverSize(width: cardWidth, isSingleCover: isSingleCover)
+
+                    #expect(abs(cover.height - cover.width / SortGridMetrics.coverAspectRatio) < 0.01)
+                }
+            }
+        }
+    }
+
+    /// The book card's cover: 2:3, and inside its band, at every width.
+    @Test func everyBookCoverKeepsItsTwoToThreeShapeInsideItsBand() {
+        for width in widths + wideWidths {
+            let cardWidth: CGFloat = SortGridMetrics(containerWidth: width).bookColumnWidth
+            let cover: CGSize = SortGridMetrics.bookCoverSize(width: cardWidth)
+
+            #expect(abs(cover.height - cover.width / SortGridMetrics.coverAspectRatio) < 0.01)
+            #expect(cover.height <= SortGridMetrics.bookArtHeight + 0.01)
+        }
+    }
+
+    // MARK: - Wider than a phone
+
+    /// The iPhone Duo: folded, unfolded in portrait, unfolded in landscape.
+    private let wideWidths: [CGFloat] = [466, 669, 951]
+
+    /// The ceilings sit above every phone's value, so a phone lays out exactly as before.
+    @Test func aPhoneKeepsThreeColumnsOfEach() {
+        for width in widths {
+            let metrics: SortGridMetrics = .init(containerWidth: width)
+
+            #expect(metrics.shelfColumnCount(forShelfCount: 12) == SortGridMetrics.columnCount)
+            #expect(metrics.bookColumnCount == SortGridMetrics.columnCount)
+            #expect(metrics.shelfCardWidth(columns: 2) == metrics.shelfColumnWidth(columns: 2))
+        }
+    }
+
+    /// A wide screen adds columns rather than stretching cards past their ceiling.
+    @Test func aWideScreenAddsColumnsInsteadOfStretchingThem() {
+        for width in wideWidths {
+            let metrics: SortGridMetrics = .init(containerWidth: width)
+            let columns: Int = metrics.shelfColumnCount(forShelfCount: 12)
+
+            #expect(metrics.shelfCardWidth(columns: columns) <= SortGridMetrics.maxShelfCardWidth)
+            #expect(metrics.shelfCardWidth(columns: 2) <= SortGridMetrics.maxShelfCardWidth)
+            #expect(metrics.bookColumnWidth <= SortGridMetrics.maxBookCardWidth)
+        }
+        #expect(SortGridMetrics(containerWidth: 669).shelfColumnCount(forShelfCount: 12) == 4)
+        #expect(SortGridMetrics(containerWidth: 669).bookColumnCount == 5)
+    }
+
+    /// The peek survives the extra columns: whatever their count, 40 pt of the next card show.
+    @Test func aWideCarouselStillLeavesRoomForAPeek() {
+        for width in wideWidths {
+            let metrics: SortGridMetrics = .init(containerWidth: width)
+            let columns: CGFloat = .init(metrics.bookColumnCount)
+            let laidOut: CGFloat = SortGridMetrics.shelfSpacing
+                + metrics.bookColumnWidth * columns
+                + SortGridMetrics.bookSpacing * columns
+
+            #expect(width - laidOut > SortGridMetrics.bookPeek - 0.01)
+        }
+    }
+
     /// Half the drop, so the fan reaches as far above the front cover as below it.
     @Test func theFanIsLiftedByHalfItsDrop() {
         let inset: CGFloat = SortGridMetrics.pileVerticalInset(width: 172.5)

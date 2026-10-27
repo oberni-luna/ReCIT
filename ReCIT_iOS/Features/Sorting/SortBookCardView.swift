@@ -72,12 +72,8 @@ struct SortBookCardView: View {
     }
 
     /// As wide as the card allows without touching its neighbour, and as tall as that width
-    /// makes it — capped at the art's height so a tall format does not push the title out.
+    /// makes it — narrowed, never squashed, where that would be taller than the art band.
     private var coverSize: CGSize {
-        let coverWidth: CGFloat = width * 0.62
-        return .init(
-            width: coverWidth,
-            height: min(SortGridMetrics.bookArtHeight, coverWidth / SortGridMetrics.coverAspectRatio)
-        )
+        SortGridMetrics.bookCoverSize(width: width)
     }
 }

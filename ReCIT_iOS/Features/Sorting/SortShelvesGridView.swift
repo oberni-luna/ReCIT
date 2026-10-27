@@ -104,13 +104,14 @@ struct SortShelvesGridView: View {
 
     /// Two columns for a collection of two étagères or fewer, three above that. Three narrow
     /// cards with two empty slots beside them read as a screen that failed to load, not as a
-    /// small library — and on this screen the cards are the only thing worth looking at.
+    /// small library — and on this screen the cards are the only thing worth looking at. A
+    /// screen wider than a phone gets more columns rather than wider cards.
     private var columnCount: Int {
-        SortGridMetrics.columnCount(forShelfCount: sections.count)
+        metrics.shelfColumnCount(forShelfCount: sections.count)
     }
 
     private var cardWidth: CGFloat {
-        metrics.shelfColumnWidth(columns: columnCount)
+        metrics.shelfCardWidth(columns: columnCount)
     }
 
     /// Fixed widths rather than flexible: the cards are sized by `SortGridMetrics` so the grid

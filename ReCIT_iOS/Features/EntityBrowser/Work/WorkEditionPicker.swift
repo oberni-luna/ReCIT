@@ -27,9 +27,12 @@ struct WorkEditionPicker: View {
     }
 
     var body: some View {
+        let duplicates: EditionDuplicates = EditionDuplicateDetector.detect(editions.map(EditionFacts.init))
+
         List {
             headerSection
-            editionsSection
+            EditionDuplicatesBanner(work: work, duplicates: duplicates)
+            editionsSection(duplicates: duplicates)
         }
         .listStyle(.insetGrouped)
         .applyListBackground()
@@ -69,7 +72,7 @@ struct WorkEditionPicker: View {
     }
 
     @ViewBuilder
-    var editionsSection: some View {
+    func editionsSection(duplicates: EditionDuplicates) -> some View {
         Section {
             if editions.isEmpty && isLoading {
                 ProgressView()
@@ -79,7 +82,7 @@ struct WorkEditionPicker: View {
                         path.append(NavigationDestination.book(anchor: .edition(uri: edition.uri)))
                     } label: {
                         NavigationLink(value: UUID()) {
-                            EditionCell(edition: edition)
+                            EditionCell(edition: edition, tag: duplicates.tags[edition.uri])
                         }
                     }
                     .buttonStyle(.plain)

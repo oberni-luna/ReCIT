@@ -47,6 +47,11 @@ public class Work: Identifiable, Entity {
     /// otherwise open somewhere else. See ADR 0002, Move 3.
     var preferredEditionUri: String?
 
+    /// The duplicate pairs « Éditions » showed when its banner was closed (`EditionDuplicates
+    /// .signature`). The banner stays closed while the pairs are the same, and comes back when
+    /// they change. Local, optional, migrated lightly. See PRD 0028.
+    var dismissedDuplicatesSignature: String?
+
     @Relationship(inverse: \Author.works) var authors: [Author] = []
     @Relationship(inverse: \Edition.works) var editions: [Edition] = []
 

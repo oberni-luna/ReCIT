@@ -23,6 +23,7 @@ struct EditionCell: View {
 
     let edition: Edition
     var leading: Leading = .none
+    var tag: EditionDuplicateTag?
 
     var body: some View {
         HStack(spacing: .sMedium) {
@@ -53,8 +54,21 @@ struct EditionCell: View {
         .accessibilityAddTraits(leading == .on ? .isSelected : [])
     }
 
-    @ViewBuilder
+    /// The ISBN and its tag on one line, the tag under it when the line no longer fits.
     private var isbnLine: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: .small) {
+                isbn
+                tagLabel
+            }
+            VStack(alignment: .leading, spacing: .xSmall) {
+                isbn
+                tagLabel
+            }
+        }
+    }
+
+    private var isbn: some View {
         Group {
             if let isbn = edition.isbn {
                 Text("edition.isbn \(isbn)")
@@ -64,6 +78,15 @@ struct EditionCell: View {
         }
         .textStyle(.footnote200Bold)
         .foregroundStyle(.foregroundDefault)
+        .fixedSize()
+    }
+
+    @ViewBuilder
+    private var tagLabel: some View {
+        if let tag {
+            EditionDuplicateTagLabel(tag: tag)
+                .fixedSize()
+        }
     }
 
     /// « Gallimard · Folio classique · 1998 », with whatever of the three is known.

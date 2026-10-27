@@ -31,7 +31,9 @@ struct WorkEditionPicker: View {
 
         List {
             headerSection
-            EditionDuplicatesBanner(work: work, duplicates: duplicates)
+            EditionDuplicatesBanner(work: work, duplicates: duplicates) {
+                path.append(NavigationDestination.editionDuplicates(workUri: work.uri))
+            }
             editionsSection(duplicates: duplicates)
         }
         .listStyle(.insetGrouped)

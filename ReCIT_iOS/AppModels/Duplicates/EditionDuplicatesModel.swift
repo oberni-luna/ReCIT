@@ -18,6 +18,18 @@ final class EditionDuplicatesModel {
         self.apiService = apiService
     }
 
+    // MARK: - Copies
+
+    /// How many copies of `uri` this account can see on inventaire.io — « 3 exemplaires » in the
+    /// review. Not every copy in the database: a private one is not counted. `nil` when the call
+    /// fails, and the review then says nothing.
+    func copyCount(uri: String) async -> Int? {
+        let response: ItemsTotalDTO? = try? await apiService.fetchData(
+            fromEndpoint: "/api/items/by-entities?uris=\(uri)&limit=1"
+        )
+        return response?.total
+    }
+
     // MARK: - Reports waiting on inventaire.io's team
 
     /// Records, on each of the work's editions, the merge tasks that wait on it as the edition

@@ -24,6 +24,8 @@ struct EditionCell: View {
     let edition: Edition
     var leading: Leading = .none
     var tag: EditionDuplicateTag?
+    /// « 3 exemplaires », after the details — the review's, where it helps choose.
+    var copyCount: Int?
 
     var body: some View {
         HStack(spacing: .sMedium) {
@@ -40,7 +42,7 @@ struct EditionCell: View {
                     .textStyle(.content400Bold)
                     .foregroundStyle(.foregroundDefault)
 
-                if let details = EditionCell.details(of: edition) {
+                if let details = details {
                     Text(details)
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundSecondary)
@@ -87,6 +89,12 @@ struct EditionCell: View {
             EditionDuplicateTagLabel(tag: tag)
                 .fixedSize()
         }
+    }
+
+    private var details: String? {
+        let copies: String? = copyCount.map { String(localized: "duplicates.copies \($0)") }
+        let parts: [String] = [EditionCell.details(of: edition), copies].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     /// « Gallimard · Folio classique · 1998 », with whatever of the three is known.

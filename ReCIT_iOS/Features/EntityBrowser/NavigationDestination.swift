@@ -48,6 +48,10 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case groupMembers(id: String)
     /// My friends, to invite into a group.
     case inviteToGroup(id: String)
+    /// The duplicates « Éditions » found among a work's editions, one at a time. Pushed from the
+    /// banner's « Les comparer »; the screen reads the work by uri and finds the pairs again
+    /// (PRD 0028).
+    case editionDuplicates(workUri: String)
     var id: String {
         switch self {
         case .author(let uri):
@@ -86,6 +90,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "groupMembers:\(id)"
         case .inviteToGroup(let id):
             return "inviteToGroup:\(id)"
+        case .editionDuplicates(let workUri):
+            return "editionDuplicates:\(workUri)"
         }
     }
 
@@ -171,6 +177,8 @@ extension NavigationDestination {
           GroupMembersView(groupId: id, path: path)
       case .inviteToGroup(let id):
           InviteToGroupView(groupId: id)
+      case .editionDuplicates(let workUri):
+          EditionDuplicatesReview(workUri: workUri)
       }
     }
 }

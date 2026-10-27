@@ -26,7 +26,7 @@ struct EditWorkView: View {
     }
 
     var body: some View {
-        Form {
+        DesignSystem.Form {
             Section {
                 TextField("create_book.new_work.title_field", text: $work.title)
                     .disabled(work.isEditable == false)
@@ -56,7 +56,6 @@ struct EditWorkView: View {
                 CreateBookSectionFooter(footer)
             }
         }
-        .applyListBackground()
         .navigationTitle(String(localized: work.isNew ? "create_book.new_work.title" : "edit_work.title"))
         .navigationBarTitleDisplayMode(.inline)
         .bibliographicDataHelpButton()

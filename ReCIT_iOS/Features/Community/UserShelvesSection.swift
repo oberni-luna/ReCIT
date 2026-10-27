@@ -43,13 +43,12 @@ struct UserShelvesSection: View {
     /// layout pass, which is what `hasWidth` reads.
     @State private var availableWidth: CGFloat = 0
 
-    /// Same proportions as the inventory's own carousel, so an étagère is the same object
-    /// on both screens: the card takes most of the width and the next one peeks.
-    private let widthRatio: CGFloat = 0.86
     private let horizontalPadding: CGFloat = 12
     private let gutter: CGFloat = 14
 
-    private var cardWidth: CGFloat { availableWidth * widthRatio }
+    /// Same width as the inventory's own carousel, so an étagère is the same object on both
+    /// screens: the card takes most of a phone's width and the next one peeks.
+    private var cardWidth: CGFloat { ShelfCardMetrics.carouselCardWidth(containerWidth: availableWidth) }
     private var hasWidth: Bool { availableWidth > 0 }
 
     init(user: User, path: Binding<NavigationPath>) {

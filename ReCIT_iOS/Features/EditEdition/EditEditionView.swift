@@ -41,7 +41,7 @@ struct EditEditionView: View {
     let onAddIdentifier: (EditionProperty.Group) -> Void
 
     var body: some View {
-        Form {
+        DesignSystem.Form {
             if let failure {
                 Section {
                     CreateBookFailureBanner(
@@ -106,7 +106,6 @@ struct EditEditionView: View {
                 onAddIdentifier(.links)
             }
         }
-        .applyListBackground()
         .safeAreaInset(edge: .bottom) {
             EditEditionSaveBar(
                 title: failure?.isWorthRetrying == true ? "create_book.retry" : "action.save",

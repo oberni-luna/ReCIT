@@ -11,6 +11,7 @@ extension View {
     ///
     /// `backgroundSecondary` unless told otherwise. A tab's root asks for `backgroundGrouped`,
     /// a sheet for `backgroundGroupedElevated`: the two only differ from the default in dark.
+    /// A form asks for `backgroundForm`, through `DesignSystem.Form` and `DesignSystem.FormList`.
     ///
     /// The colour is placed in a background that ignores **every** safe-area region, keyboard
     /// included, and not simply handed to `.background(_:)`. A list under a keyboard has its

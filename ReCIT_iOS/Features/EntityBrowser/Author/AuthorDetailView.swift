@@ -83,6 +83,7 @@ struct AuthorDetailView: View {
                 }
             }
             .applyListBackground()
+            .readableContentMargins()
             .navigationTitle("nav.author")
         case .error(error: let error):
             Text("error.with_message \(error.localizedDescription)")

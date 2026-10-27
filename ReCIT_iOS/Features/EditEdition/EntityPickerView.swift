@@ -40,7 +40,7 @@ struct EntityPickerView: View {
     }
 
     var body: some View {
-        List {
+        DesignSystem.FormList {
             if results.isEmpty == false {
                 Section {
                     ForEach(results) { result in
@@ -83,7 +83,6 @@ struct EntityPickerView: View {
                 }
             }
         }
-        .applyListBackground()
         .searchable(text: $query, prompt: Text("entity_picker.prompt"))
         .autocorrectionDisabled()
         .navigationTitle(String(localized: String.LocalizationValue(property.label)))

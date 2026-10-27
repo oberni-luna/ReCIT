@@ -40,7 +40,7 @@ struct CoverURLView: View {
     private static let debounce: Duration = .milliseconds(400)
 
     var body: some View {
-        Form {
+        DesignSystem.Form {
             BibliographicDataNotice()
 
             Section {
@@ -102,7 +102,6 @@ struct CoverURLView: View {
                 .accessibilityIdentifier("e2e.createBook.coverUrl.use")
             }
         }
-        .applyListBackground()
         .navigationTitle(String(localized: "create_book.cover_url.title"))
         .navigationBarTitleDisplayMode(.inline)
         .bibliographicDataHelpButton()

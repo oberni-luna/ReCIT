@@ -24,7 +24,7 @@ struct NewWorkView: View {
     }
 
     var body: some View {
-        Form {
+        DesignSystem.Form {
             Section {
                 TextField("create_book.new_work.title_field", text: workTitle)
                     .accessibilityIdentifier("e2e.createBook.workTitle")
@@ -76,7 +76,6 @@ struct NewWorkView: View {
                 CreateBookSectionFooter("create_book.new_work.help")
             }
         }
-        .applyListBackground()
         .navigationTitle(String(localized: "create_book.new_work.title"))
         .navigationBarTitleDisplayMode(.inline)
         .bibliographicDataHelpButton()

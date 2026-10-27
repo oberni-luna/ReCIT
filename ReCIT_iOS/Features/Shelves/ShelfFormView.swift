@@ -115,7 +115,7 @@ struct ShelfFormView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            DesignSystem.Form {
                 Section {
                     TextField("shelf.form.name", text: $name)
                         .textStyle(.content300)
@@ -175,7 +175,6 @@ struct ShelfFormView: View {
                     }
                 }
             }
-            .applyListBackground()
             .navigationTitle(isEditing ? "shelf.form.edit_title" : "shelf.form.create_title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

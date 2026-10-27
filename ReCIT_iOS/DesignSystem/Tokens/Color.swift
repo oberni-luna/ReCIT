@@ -27,6 +27,8 @@ public extension DesignSystem {
         case backgroundSecondary
         case backgroundGrouped
         case backgroundGroupedElevated
+        case backgroundForm
+        case backgroundFormCell
         case backgroundTinted
         case backgroundTintedInverse
         case backgroundError
@@ -77,6 +79,14 @@ public extension DesignSystem {
             // grey, so its backdrop sits one step above black — between the two, not on either.
             case .backgroundGroupedElevated:
                     .init(light:.init("color/gray/50"), dark:.init("color/gray/900"))
+            // Behind a form, and under each of its cards. The pair swaps in dark: grey cards on
+            // black, where the form's old grey ground swallowed the system's grey cells. In
+            // Figma the two alias `background/secondary` and `background/default`, crossed;
+            // the colorsets are named here because nesting two dynamic colours does not resolve.
+            case .backgroundForm:
+                    .init(light:.init("color/gray/50"), dark:.init("color/gray/1000"))
+            case .backgroundFormCell:
+                    .init(light:.init("color/gray/0"), dark:.init("color/gray/800"))
             case .backgroundTinted:
                     .init(light:.init("color/green/100"), dark:.init("color/green/900"))
             case .backgroundTintedInverse:

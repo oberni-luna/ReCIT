@@ -47,7 +47,7 @@ struct AuthorPickerView: View {
     }
 
     var body: some View {
-        List {
+        DesignSystem.FormList {
             if results.isEmpty == false {
                 Section {
                     ForEach(results) { result in
@@ -83,7 +83,6 @@ struct AuthorPickerView: View {
                 }
             }
         }
-        .applyListBackground()
         .searchable(text: $query, prompt: Text("create_book.author_field"))
         .autocorrectionDisabled()
         .navigationTitle(String(localized: "create_book.author_field"))

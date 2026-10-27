@@ -19,6 +19,12 @@
 //    horizontally and a row that ends flush at the edge looks finished. 16 pt margin,
 //    12 pt gutters, and 40 pt of the next card showing — so 100,33 on 393.
 //
+//  **On a screen wider than a phone** — the unfolded iPhone Duo, 669 pt in portrait and 951 in
+//  landscape — the same formulas would draw three cards 200 to 300 pt wide, with art bands
+//  that stay 106 pt tall. So both columns have a ceiling, above every phone's value, and the
+//  surface adds columns rather than stretching them past it: a phone lays out exactly as
+//  before, and a wide screen shows more étagères and more books at their usual size.
+//
 //  Cover art reserves a **2:3 frame before its image exists**. Neither Nuke nor `Edition`
 //  knows an image's ratio until the bytes arrive, so a pile of five would re-lay itself out
 //  five times while the grid scrolls. A book of an unusual format is centred in its frame
@@ -40,6 +46,13 @@ struct SortGridMetrics: Equatable, Sendable {
     static let bookPeek: CGFloat = 40
     /// How many columns the design lays the grid on when the collection fills it.
     static let columnCount: Int = 3
+
+    /// The widest an étagère card grows. Above the widest phone's two-column card (191 pt on
+    /// 430), so it only bites on a wider screen, where the grid adds columns instead.
+    static let maxShelfCardWidth: CGFloat = 200
+    /// The widest a book card grows. Above the widest phone's (113 pt on 430); a wider screen
+    /// shows more cards in the carousel rather than wider ones.
+    static let maxBookCardWidth: CGFloat = 120
 
     /// Above how many étagères the grid uses its full three columns.
     static let narrowGridThreshold: Int = 2
@@ -79,6 +92,22 @@ struct SortGridMetrics: Equatable, Sendable {
         shelfCount <= narrowGridThreshold ? 2 : columnCount
     }
 
+    /// How many columns this width lays `shelfCount` étagères on. A small collection keeps its
+    /// two; a full one gets three, and more where three would draw cards wider than
+    /// `maxShelfCardWidth`. A phone never reaches the "more".
+    func shelfColumnCount(forShelfCount shelfCount: Int) -> Int {
+        let base: Int = Self.columnCount(forShelfCount: shelfCount)
+        guard base == Self.columnCount else { return base }
+        let fitting: CGFloat = (containerWidth - Self.shelfSpacing) / (Self.maxShelfCardWidth + Self.shelfSpacing)
+        return max(base, Int(fitting.rounded(.up)))
+    }
+
+    /// One étagère card's width on a grid of `columns`, never wider than `maxShelfCardWidth`.
+    /// It is what the grid draws; `shelfColumnWidth(columns:)` is the formula under it.
+    func shelfCardWidth(columns: Int) -> CGFloat {
+        min(Self.maxShelfCardWidth, shelfColumnWidth(columns: columns))
+    }
+
     /// One étagère card's width on a grid of `columns`: `(width − (columns + 1) × 16) / columns`.
     /// The owner's formula, generalised — at three columns it still gives 109,67 on a 393 pt
     /// screen.
@@ -93,11 +122,19 @@ struct SortGridMetrics: Equatable, Sendable {
         shelfColumnWidth(columns: Self.columnCount)
     }
 
-    /// One book card's width: one margin, three columns, **three** gutters — two between
-    /// the visible cards and one before the card that peeks — and the peek itself.
-    /// `(width − 16 − 3 × 12 − 40) / 3`.
+    /// How many book cards the carousel shows before the peek: three on a phone, more where
+    /// three would be wider than `maxBookCardWidth`.
+    var bookColumnCount: Int {
+        let fitting: CGFloat = (containerWidth - Self.shelfSpacing - Self.bookPeek)
+            / (Self.maxBookCardWidth + Self.bookSpacing)
+        return max(Self.columnCount, Int(fitting.rounded(.up)))
+    }
+
+    /// One book card's width: one margin, the visible columns, as many gutters — one between
+    /// each pair of visible cards and one before the card that peeks — and the peek itself.
+    /// `(width − 16 − n × 12 − 40) / n`, with `n` three on every phone.
     var bookColumnWidth: CGFloat {
-        let columns: CGFloat = .init(Self.columnCount)
+        let columns: CGFloat = .init(bookColumnCount)
         let taken: CGFloat = Self.shelfSpacing + Self.bookSpacing * columns + Self.bookPeek
         return max(0, (containerWidth - taken) / columns)
     }
@@ -105,6 +142,14 @@ struct SortGridMetrics: Equatable, Sendable {
     /// A cover drawn `width` wide, in its reserved 2:3 frame.
     static func coverSize(width: CGFloat) -> CGSize {
         .init(width: width, height: width / coverAspectRatio)
+    }
+
+    /// The cover on a book card `width` wide: 62 % of the card, unless that is too tall for
+    /// the art band — then as tall as the band and as wide as 2:3 allows. Capping the height
+    /// alone turned a wide card's cover into a landscape crop.
+    static func bookCoverSize(width: CGFloat) -> CGSize {
+        let coverWidth: CGFloat = min(width * 0.62, bookArtHeight * coverAspectRatio)
+        return coverSize(width: coverWidth)
     }
 
     // MARK: - The pile's geometry
@@ -135,22 +180,21 @@ struct SortGridMetrics: Equatable, Sendable {
     }
 
     /// One cover's frame on a card `width` wide, clamped so the fan — its drop and its lean
-    /// included — stays inside `artHeight`.
+    /// included — stays inside `artHeight`, and always 2:3.
     ///
-    /// A cover leaning by `θ` claims `w·sin θ + h·cos θ` of height, so the tallest that still
-    /// fits under `artHeight − drop` is `(artHeight − drop − w·sin θ) / cos θ`. Below that
-    /// bound the book keeps its own 2:3 proportions; above it, it is the height that gives.
+    /// A cover `w` wide and `w / r` tall, leaning by `θ`, claims `w·sin θ + (w / r)·cos θ` of
+    /// height, so the widest that still fits under `artHeight − drop` is
+    /// `(artHeight − drop) / (sin θ + cos θ / r)`. Below that bound the cover takes its share of
+    /// the card; above it, it narrows. It used to keep its width and lose height instead, which
+    /// drew a squat cover on the two-column grid and a landscape one on a wide screen.
     static func pileCoverSize(width: CGFloat, isSingleCover: Bool) -> CGSize {
-        let coverWidth: CGFloat = width * (isSingleCover ? singleCoverWidthShare : pileCoverWidthShare)
+        let shareWidth: CGFloat = width * (isSingleCover ? singleCoverWidthShare : pileCoverWidthShare)
         // One cover fans nowhere, but it leans like any other.
         let drop: CGFloat = isSingleCover ? 0 : pileFanDrop(width: width)
         let tilt: CGFloat = .init(SortPile.tiltAmplitude * .pi / 180)
-        let leanWidth: CGFloat = coverWidth * sin(tilt)
-        let available: CGFloat = max(0, artHeight - drop - leanWidth)
-        return .init(
-            width: coverWidth,
-            height: min(coverWidth / coverAspectRatio, available / cos(tilt))
-        )
+        let available: CGFloat = max(0, artHeight - drop)
+        let fittingWidth: CGFloat = available / (sin(tilt) + cos(tilt) / coverAspectRatio)
+        return coverSize(width: min(shareWidth, fittingWidth))
     }
 
     /// The height the carousel claims, so the anchored panel can reserve it before the

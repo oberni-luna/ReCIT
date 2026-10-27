@@ -85,9 +85,10 @@ struct ForgotPasswordView: View {
 
             Spacer(minLength: .zero)
         }
+        // Held to a readable column, centred, on a screen wider than a phone.
+        .readableWidth()
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
-        .frame(maxWidth: .infinity)
     }
 
     private var actionsBar: some View {
@@ -101,6 +102,7 @@ struct ForgotPasswordView: View {
         )
         .buttonStyle(.primary())
         .disabled(email.allSatisfy(\.isWhitespace))
+        .readableWidth()
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
         .background { AuthActionsBackground() }

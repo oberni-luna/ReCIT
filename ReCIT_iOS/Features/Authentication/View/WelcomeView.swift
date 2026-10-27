@@ -94,6 +94,9 @@ struct WelcomeView: View {
 
             note
         }
+        // On a screen wider than a phone the block keeps a readable column, centred: the wall
+        // behind it is what fills the width.
+        .readableWidth()
     }
 
     /// The name, the tagline, and the sentence that replaced the three value rows.

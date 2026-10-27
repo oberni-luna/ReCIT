@@ -23,7 +23,7 @@ struct IdentifierInputView: View {
     }
 
     var body: some View {
-        Form {
+        DesignSystem.Form {
             Section {
                 TextField(property.example ?? "", text: $text)
                     .textInputAutocapitalization(.never)
@@ -57,7 +57,6 @@ struct IdentifierInputView: View {
                 .accessibilityIdentifier("e2e.editEdition.identifier.add")
             }
         }
-        .applyListBackground()
         .navigationTitle(name)
         .navigationBarTitleDisplayMode(.inline)
     }

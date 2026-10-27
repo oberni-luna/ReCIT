@@ -54,7 +54,7 @@ struct ShelvesContent: View {
 
     var body: some View {
         GeometryReader { geo in
-            let cardWidth: CGFloat = geo.size.width * 0.86
+            let cardWidth: CGFloat = ShelfCardMetrics.carouselCardWidth(containerWidth: geo.size.width)
             ScrollView {
                 if syncState != .synced {
                     InventorySyncBanner(title: "sync.inventory.mine.title", state: syncState)
@@ -99,7 +99,7 @@ struct ShelvesContent: View {
 
                 ShelfSectionHeader(title: String(localized: "shelves.all_books_header \(myItems.count)"))
                     .padding(.top, .large)
-                allBooksList
+                allBooksList(columns: Self.allBooksColumnCount(containerWidth: geo.size.width))
             }
             // Frozen while a shelf is being scrubbed, so the slide can't scroll the page.
             .scrollDisabled(focus.isArmed)
@@ -168,7 +168,8 @@ struct ShelvesContent: View {
         }
     }
 
-    /// Horizontal, snapping carousel of shelf cards (~86% width, next card peeking).
+    /// Horizontal, snapping carousel of shelf cards (~86% width on a phone, next card peeking;
+    /// several side by side on a wider screen — `ShelfCardMetrics.carouselCardWidth`).
     /// Nested inside the page's vertical scroll; only this scrolls horizontally.
     private func shelvesCarousel(cardWidth: CGFloat) -> some View {
         ScrollView(.horizontal) {
@@ -187,21 +188,65 @@ struct ShelvesContent: View {
         .scrollDisabled(focus.isArmed)
     }
 
-    private var allBooksList: some View {
-        LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(myItems) { item in
-                NavigationLink(value: NavigationDestination.book(anchor: .item(item))) {
-                    InventoryCell(item: item, filterParameter: .userInventory)
-                        .padding(.horizontal, .medium)
-                        .padding(.vertical, .small)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
+    /// Above this width « Tous les livres » runs on two columns: the unfolded iPhone Duo in
+    /// landscape (951 pt), where a single column drew rows some 880 pt wide around a short
+    /// title. Unfolded in portrait (669 pt) and on every phone it stays one column.
+    static let twoColumnThreshold: CGFloat = 700
+
+    static func allBooksColumnCount(containerWidth: CGFloat) -> Int {
+        containerWidth > twoColumnThreshold ? 2 : 1
+    }
+
+    /// Every book I own, newest first. One column on a phone; side by side, one rule under each
+    /// row, on a wide screen. No swipe on either: a book leaves an étagère from the étagère's
+    /// own screen, and the cell's menu covers the rest.
+    @ViewBuilder
+    private func allBooksList(columns: Int) -> some View {
+        if columns > 1 {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                // Keyed on the row's first book by its persistent id, which stays readable on a
+                // copy deleted mid-sync where its `_id` would not (issue 0065).
+                ForEach(bookRows(columns: columns), id: \.first?.id) { row in
+                    HStack(alignment: .top, spacing: 0) {
+                        ForEach(row) { item in
+                            bookLink(item)
+                        }
+                        // A short last row keeps its book in the first column, at its width.
+                        if row.count < columns {
+                            Color.clear.frame(maxWidth: .infinity, maxHeight: 0)
+                        }
+                    }
+                    Divider()
+                        .padding(.leading, .medium)
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("e2e.inventoryBook")
-                Divider()
-                    .padding(.leading, .medium)
+            }
+        } else {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                ForEach(myItems) { item in
+                    bookLink(item)
+                    Divider()
+                        .padding(.leading, .medium)
+                }
             }
         }
+    }
+
+    /// The books in rows of `columns`, in the list's order, read left to right.
+    private func bookRows(columns: Int) -> [[InventoryItem]] {
+        stride(from: 0, to: myItems.count, by: columns).map { start in
+            Array(myItems[start..<min(start + columns, myItems.count)])
+        }
+    }
+
+    private func bookLink(_ item: InventoryItem) -> some View {
+        NavigationLink(value: NavigationDestination.book(anchor: .item(item))) {
+            InventoryCell(item: item, filterParameter: .userInventory)
+                .padding(.horizontal, .medium)
+                .padding(.vertical, .small)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("e2e.inventoryBook")
     }
 }

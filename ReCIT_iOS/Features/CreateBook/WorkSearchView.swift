@@ -56,7 +56,7 @@ struct WorkSearchView: View {
     }
 
     var body: some View {
-        List {
+        DesignSystem.FormList {
             BibliographicDataNotice()
 
             if trimmedQuery.isEmpty {
@@ -103,7 +103,6 @@ struct WorkSearchView: View {
                 }
             }
         }
-        .applyListBackground()
         .searchable(
             text: $query,
             isPresented: $isSearchPresented,

@@ -128,19 +128,30 @@ fun EditionPropertyPage(
     }
 }
 
-/** A page pushed over a form: its bar, the grouped background, the keyboard kept clear of its content. */
+/**
+ * A page pushed over a form: its bar, the grouped background, the keyboard kept clear of its content.
+ * [navigationIcon], when given, replaces the back arrow — the root of a flow closes rather than goes back.
+ */
 @Composable
 fun FormPageScaffold(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
+    navigationIcon: (@Composable () -> Unit)? = null,
     bottomBar: @Composable () -> Unit = {},
     content: LazyListScope.() -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { RecitTopBar(title = title, onBack = onBack, actions = actions) },
+        topBar = {
+            RecitTopBar(
+                title = title,
+                onBack = if (navigationIcon == null) onBack else null,
+                actions = actions,
+                navigationIcon = navigationIcon ?: {},
+            )
+        },
         bottomBar = bottomBar,
         containerColor = RecitTheme.colors.backgroundGrouped,
     ) { padding ->

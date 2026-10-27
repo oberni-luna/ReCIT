@@ -211,7 +211,7 @@ private fun EditEditionSections(state: EditEditionUiState, edit: EditionEdit, vi
 
 /** Over the form while it saves: nothing is touched until the server has answered. */
 @Composable
-private fun SavingShield() {
+internal fun SavingShield() {
     val interaction: MutableInteractionSource = remember { MutableInteractionSource() }
     Box(Modifier.fillMaxSize().clickable(interactionSource = interaction, indication = null, onClick = {}))
 }

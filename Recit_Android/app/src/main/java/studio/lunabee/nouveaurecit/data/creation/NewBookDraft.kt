@@ -123,6 +123,31 @@ data class NewBookDraft(
     fun renameWork(newTitle: String): NewBookDraft =
         copy(title = if (titleFollowsWork) newTitle else title, workTitle = newTitle)
 
+    /** An author added to the work being created, unless they are on it already. */
+    fun addAuthor(author: NewBookAuthor): NewBookDraft {
+        if (author.trimmedName.isEmpty() || authors.any { WorkEdit.isSamePerson(it, author) }) return this
+        return copy(authors = authors + author)
+    }
+
+    /** What a swipe on one of the work's authors takes away. */
+    fun removeAuthor(index: Int): NewBookDraft = copy(authors = authors.filterIndexed { position, _ -> position != index })
+
+    /**
+     * Whether « Publier » asks the dry run first: only for a work being created, and once — a work picked
+     * from the search is named in `resolve`, and « no, another work » is not asked again on a retry.
+     */
+    val asksWhichWork: Boolean get() = workUri == null && !hasAnsweredWorkQuestion
+
+    /** The dry run recognised [uri]: the safe answer is the default, one more edition of the work that exists. */
+    fun recognised(uri: String): NewBookDraft = copy(workUri = uri, hasAnsweredWorkQuestion = true)
+
+    /**
+     * Back from « Œuvre déjà connue » without publishing: the question goes with the page, so the work being
+     * described is the user's own again, and the next publication asks anew. A work picked stays picked.
+     */
+    fun leavingRecognised(uri: String): NewBookDraft =
+        if (workUri == uri && chosenWork == null) copy(workUri = null, hasAnsweredWorkQuestion = false) else this
+
     /** Records the uri a publisher, a collection or a person the edition names was created under. */
     fun entityCreated(id: UUID, uri: String): NewBookDraft = copy(properties = properties.entityCreated(id, uri))
 

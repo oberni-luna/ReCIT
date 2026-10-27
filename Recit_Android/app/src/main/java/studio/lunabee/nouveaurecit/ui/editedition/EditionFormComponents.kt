@@ -401,18 +401,29 @@ fun BibliographicDataHelpButton(onClick: () -> Unit) {
 
 /**
  * `EditEditionSaveBar`: the primary action pinned at the foot of the screen — the form is long, and
- * saving it must not mean scrolling to its end.
+ * saving it must not mean scrolling to its end. [below] goes under it — the scanner's « Garder le
+ * brouillon » after a failure.
  */
 @Composable
-fun FormActionBar(text: String, onClick: () -> Unit, enabled: Boolean, isLoading: Boolean, modifier: Modifier = Modifier) {
-    Box(
+fun FormActionBar(
+    text: String,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier,
+    below: @Composable ColumnScope.() -> Unit = {},
+) {
+    Column(
         modifier
             .fillMaxWidth()
             .background(RecitTheme.colors.backgroundGrouped)
             .navigationBarsPadding()
             .padding(horizontal = Spacing.medium, vertical = Spacing.small),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
     ) {
         PrimaryButton(text = text, onClick = onClick, enabled = enabled, isLoading = isLoading)
+        below()
     }
 }
 

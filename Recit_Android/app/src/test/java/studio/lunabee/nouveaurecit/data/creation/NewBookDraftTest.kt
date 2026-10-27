@@ -145,6 +145,54 @@ class NewBookDraftTest {
         assertEquals("inv:publisher", draft.properties.publisherUri)
     }
 
+    // The work's authors
+
+    @Test
+    fun anAuthorIsAddedOnceAndABlankOneNever() {
+        val lem = NewBookAuthor(name = "Stanisław Lem", uri = "wd:Q40662")
+        val draft: NewBookDraft = NewBookDraft(isbn = "9782494289857").startNewWork("solaris")
+            .addAuthor(lem)
+            .addAuthor(NewBookAuthor(name = "stanisław lem"))
+            .addAuthor(NewBookAuthor(name = "  "))
+        assertEquals(listOf(lem), draft.authors)
+        assertTrue(draft.isPublishable)
+    }
+
+    @Test
+    fun removingTheLastAuthorLeavesAWorkThatCannotBePublished() {
+        val draft: NewBookDraft = NewBookDraft(isbn = "9782494289857").startNewWork("solaris")
+            .addAuthor(NewBookAuthor(name = "Stanisław Lem"))
+            .addAuthor(NewBookAuthor(name = "Jean-Michel Jarre"))
+        assertEquals(listOf("Stanisław Lem"), draft.removeAuthor(1).authors.map { it.name })
+        assertFalse(draft.removeAuthor(1).removeAuthor(0).isPublishable)
+    }
+
+    // The dry run's question
+
+    @Test
+    fun onlyAWorkBeingDescribedIsAskedAboutAndOnlyOnce() {
+        val blank = NewBookDraft(isbn = "9782494289857")
+        assertTrue(blank.startNewWork("solaris").asksWhichWork)
+        assertFalse(blank.choose(ministry).asksWhichWork)
+        assertFalse(blank.startNewWork("solaris").recognised("wd:Q1130619").copy(workUri = null).asksWhichWork)
+    }
+
+    @Test
+    fun aRecognisedWorkIsTheDefaultAnswerUntilThePageIsLeft() {
+        val described: NewBookDraft = NewBookDraft(isbn = "9782494289857").startNewWork("solaris")
+        val recognised: NewBookDraft = described.recognised("wd:Q1130619")
+        assertEquals("wd:Q1130619", recognised.workUri)
+        assertEquals(described, recognised.leavingRecognised("wd:Q1130619"))
+    }
+
+    @Test
+    fun leavingTheRecognisedWorkKeepsAPickedWorkAndAnotherAnswer() {
+        val picked: NewBookDraft = NewBookDraft(isbn = "9782494289857").choose(ministry)
+        assertEquals(picked, picked.leavingRecognised("wd:Q123"))
+        val another: NewBookDraft = NewBookDraft(isbn = "9782494289857").startNewWork("solaris").recognised("wd:Q1").copy(workUri = null)
+        assertEquals(another, another.leavingRecognised("wd:Q1"))
+    }
+
     @Test
     fun onlyTheFirstLetterIsRaised() {
         assertEquals("Le Guin et moi", NewBookDraft.capitalizingFirstLetter("le Guin et moi"))

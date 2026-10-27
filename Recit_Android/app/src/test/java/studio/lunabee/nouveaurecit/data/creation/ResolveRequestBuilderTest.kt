@@ -157,6 +157,38 @@ class ResolveRequestBuilderTest {
     }
 
     @Test
+    fun aScannedBookOfANewWorkSendsEveryDatumOfTheFormOnceItsEntitiesExist() {
+        val translator = EditionEntityValue(label = "Jean-Michel Jarre")
+        val properties: EditionProperties = EditionProperties()
+            .add(EditionEntityValue(uri = "wd:Q336718", label = "Gallimard"), EditionProperty.Publisher)
+            .add(translator, EditionProperty.contributors.first())
+            .setLiteral(ClaimLiteral.Text("wd:Q193934"), EditionProperty.Format)
+            .addLiteral(ClaimLiteral.Text("123735831"), EditionProperty.databases.first())
+            .addLiteral(ClaimLiteral.Text("https://example.org/solaris"), EditionProperty.links.first())
+        val scanned: NewBookDraft = NewBookDraft(isbn = "978-2-07-036002-4", properties = properties)
+            .startNewWork("solaris")
+            .addAuthor(NewBookAuthor(name = "Stanisław Lem", uri = "wd:Q40662"))
+            .copy(subtitle = "roman")
+            .withLanguage(french)
+            .entityCreated(translator.id, "inv:translator")
+
+        val entry: EntityResolveRequest.Entry = entry(scanned)
+        val claims: Map<String, List<ClaimLiteral>> = entry.edition.claims!!
+        assertEquals(text("9782070360024"), claims["wdt:P212"])
+        assertEquals(text("Solaris"), claims["wdt:P1476"])
+        assertEquals(text("roman"), claims["wdt:P1680"])
+        assertEquals(text("wd:Q336718"), claims["wdt:P123"])
+        assertEquals(text("wd:Q150"), claims["wdt:P407"])
+        assertEquals(text("inv:translator"), claims["wdt:P655"])
+        assertEquals(text("wd:Q193934"), claims["wdt:P437"])
+        assertEquals(text("123735831"), claims["wdt:P268"])
+        assertEquals(text("https://example.org/solaris"), claims[EditionProperty.links.first().uri])
+        assertNull(claims["wdt:P629"])
+        assertEquals("Solaris", entry.works?.single()?.labels?.get("fr"))
+        assertEquals(listOf(EntityResolveRequest.Seed.named("wd:Q40662")), entry.authors)
+    }
+
+    @Test
     fun anEntityStillToCreateIsNotNamedInTheSeed() {
         val pending: NewBookDraft = draft.copy(
             workUri = "wd:Q1130619",

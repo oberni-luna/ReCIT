@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.ui.editedition
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,7 +49,8 @@ import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 /**
  * `WorkSearchView`: the works inventaire.io has, found by title or by author, each with who wrote it and
  * when; creating one comes last. [emptyTitle] and [emptyMessage] are what the page says before anything
- * is typed — « Modifier l'édition » and the scanner's « Nouvelle édition » each have their own.
+ * is typed — « Modifier l'édition » and the scanner's « Nouveau livre » each have their own. The scanner's
+ * opens on it, and [closes]: its way back is a cross that closes the whole creation.
  */
 @Composable
 fun WorkSearchPage(
@@ -59,9 +63,19 @@ fun WorkSearchPage(
     onCreate: (String) -> Unit,
     onHelp: () -> Unit,
     onBack: () -> Unit,
+    closes: Boolean = false,
 ) {
     val query: String = search.trimmedQuery
-    FormPageScaffold(title = title, onBack = onBack, actions = { BibliographicDataHelpButton(onHelp) }) {
+    val close: (@Composable () -> Unit)? = if (closes) {
+        {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_close))
+            }
+        }
+    } else {
+        null
+    }
+    FormPageScaffold(title = title, onBack = onBack, actions = { BibliographicDataHelpButton(onHelp) }, navigationIcon = close) {
         item(key = "field") { PickerSearchField(search.query, onQueryChange, stringResource(R.string.create_book_search_prompt)) }
         item(key = "notice") { BibliographicDataNotice(onLearnMore = onHelp, modifier = Modifier.padding(vertical = Spacing.small)) }
         when {
@@ -102,6 +116,9 @@ fun WorkSearchPage(
  * `EditWorkView`: one work of the edition — its title and its authors, the only place they change: an
  * author belongs to the work, for every edition of it. Nothing is sent from here; what changes goes with
  * « Enregistrer ». A Wikidata work is shown and not changed.
+ *
+ * The scanner's « Nouvelle œuvre » is this page over the work its draft describes, with its own [footer]:
+ * there, the work is published with the edition.
  */
 @Composable
 fun EditWorkPage(
@@ -111,12 +128,12 @@ fun EditWorkPage(
     onAddAuthor: () -> Unit,
     onHelp: () -> Unit,
     onBack: () -> Unit,
-) {
-    val footer: Int = when (EditionFormRules.workFooter(work)) {
+    @StringRes footer: Int = when (EditionFormRules.workFooter(work)) {
         EditionFormRules.WorkFooter.Wikidata -> R.string.edit_work_wikidata_help
         EditionFormRules.WorkFooter.New -> R.string.edit_work_new_help
         EditionFormRules.WorkFooter.Default -> R.string.edit_work_help
-    }
+    },
+) {
     FormPageScaffold(
         title = stringResource(if (work.isNew) R.string.create_book_new_work_title else R.string.edit_work_title),
         onBack = onBack,

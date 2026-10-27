@@ -508,7 +508,7 @@ Portées `[]` et aucune `codeSyntax`, comme toute primitive — et parce qu'aucu
 
 Six sont consommées depuis le 2026-09-06 : `white-01` (`background/disable` D, `border/default` D), `white-03`
 (`foreground/placeholder` D), `white-05` (`foreground/disable` D), `white-06` (`foreground/secondary` D),
-`black-01` (`border/default` L), `black-04` (`foreground/placeholder` L), `black-05` (`foreground/secondary` L).
+`black-01` (`border/default` L), `black-04` (`foreground/placeholder` L, `background/shade` D depuis le 2026-10-27), `black-05` (`foreground/secondary` L).
 Les douze autres restent un stock.
 
 `color/black-01` fait doublon de valeur avec `color/gray/1000 10%`, qui vient du catalogue et reste la primitive
@@ -551,8 +551,9 @@ valeur fixe, donc pas de variable.
 | `background/secondary` | `gray/50` | `gray/800` | `.backgroundSecondary` |
 | `background/grouped` | `gray/50` | `gray/1000` | `.backgroundGrouped` — **code seul**, voir D-R8 |
 | `background/grouped-elevated` | `gray/50` | `gray/900` | `.backgroundGroupedElevated` — **code seul**, voir D-R8 |
-| `background/form` | → `background/secondary` | → `background/default` | `.backgroundForm` — voir D-FF1 |
-| `background/form-cell` | → `background/default` | → `background/secondary` | `.backgroundFormCell` — voir D-FF1 |
+| `background/form` | → `background/secondary` | → `background/secondary` | `.backgroundForm` — voir D-FF1, D-FF2 |
+| `background/form-cell` | → `background/default` | → `background/shade` | `.backgroundFormCell` — voir D-FF1, D-FF2 |
+| `background/shade` | `#000000` @ 0 % | → **`black-04`** | `.backgroundShade` — voir D-FF2, D-FF3 |
 | `background/tinted` | `green/100` | `green/900` | `.backgroundTinted` |
 | `background/tinted-inverse` | `green/800` | `green/200` | `.backgroundTintedInverse` |
 | `background/error` | `red/100` | **`gray/700`** | `.backgroundError` — voir D7 |
@@ -565,9 +566,11 @@ valeur fixe, donc pas de variable.
 les deux paires sont égales par construction, pas par coïncidence. Si l'une doit bouger, il faut d'abord scinder le
 `case` dans `Color.swift`.
 
-**Cinq tokens sont des voiles**, pas des couleurs : `foreground/disable` (sombre), `foreground/secondary`,
-`foreground/placeholder`, `background/disable` (sombre) et `border/default` aliasent les primitives d'alpha
-`color/white-0x` / `color/black-0x`. Ils prennent donc la teinte de ce qui est derrière eux, au lieu de ne bien se
+**Six tokens sont des voiles**, pas des couleurs : `foreground/disable` (sombre), `foreground/secondary`,
+`foreground/placeholder`, `background/disable` (sombre), `border/default` et, depuis le 2026-10-27,
+`background/shade` aliasent les primitives d'alpha `color/white-0x` / `color/black-0x`. `background/form-cell` en
+sombre en est un par alias : la carte d'un formulaire assombrit le fond qu'elle couvre au lieu d'avoir son propre
+gris. Ils prennent donc la teinte de ce qui est derrière eux, au lieu de ne bien se
 lire que sur un seul fond — c'est le raisonnement de D49, étendu le 2026-09-06 aux quatre autres. Côté Swift ils
 s'écrivent `.black.opacity(x)` / `.white.opacity(x)` : aucun `.colorset` ne les porte.
 
@@ -2502,6 +2505,8 @@ elle, les cartes restent `background/default` et disparaissent sur le fond noir.
 | # | Où | Constat | Statut |
 |---|---|---|---|
 | D-FF1 | `DesignSystem/Tokens/Color.swift` | `background/form` et `background/form-cell` sont nés dans Figma : le code peignait les formulaires avec `.applyListBackground()` (`background/secondary`) et des cellules au fond système | **résolue** le 2026-10-27 — `.backgroundForm` et `.backgroundFormCell` dans `Color.swift`, posés par `DesignSystem.Form` (`DesignSystem/List/DesignSystem+Form.swift`) sur les 13 `Form` de l'app et par `DesignSystem.FormList` sur les 6 `List` poussées depuis un formulaire (`WorkSearchView`, `AuthorPickerView`, `BibliographicDataHelpView`, `EntityPickerView`, `EditionEntityValuesView`, `IdentifierCatalogView`). Un rang qui pose son propre `listRowBackground` le garde (l'encart des données). Vu sur le simulateur, clair et sombre, sur « Create new list » et « Edit edition ». Dans le code, les deux couleurs nomment leurs colorsets au lieu d'aliaser les sémantiques |
+| D-FF2 | `DesignSystem/Tokens/Color.swift` | Le 2026-10-27, en sombre, le code passe les formulaires à l'allure de la fiche livre — cartes un cran **sous** un fond `gray/800`, au lieu de cartes `gray/800` sur du noir — pendant que Figma aliasait encore `background/default` et `background/secondary`. Figma suit le même jour : `background/form` → `background/secondary` dans les deux modes, `background/form-cell` → `background/shade` en sombre, variable nouvelle (`784:14830`) : transparente en clair, `color/black-04` en sombre | **résolue** le 2026-10-27 — `.backgroundShade` dans `Color.swift` (`.black.opacity(0)` / `.black.opacity(0.4)`) ; `.backgroundFormCell` en sombre vaut le même voile, écrit en toutes lettres parce qu'une couleur dynamique imbriquée ne se résout pas. La fiche livre (`BookDetailView`, `BookResolvingView`) passe par `.backgroundForm` / `.backgroundFormCell` au lieu de `background/secondary` et du gris de cellule système. Vu sur le simulateur, clair et sombre, sur « Create new list » et la fiche livre |
+| D-FF3 | Figma — `background/shade`, `background/form`, `background/form-cell` | `background/shade` a les scopes `ALL_SCOPES` (les autres `background/*` sont en `FRAME_FILL`, `SHAPE_FILL`) et pas de description. Les descriptions de `background/form` et `background/form-cell` disent encore « Dark: background/default » / « background/secondary » et « not yet in Color.swift » | ouverte — à corriger dans Figma |
 
 ## Ce que la construction a appris
 

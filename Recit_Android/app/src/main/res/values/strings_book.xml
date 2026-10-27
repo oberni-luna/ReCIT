@@ -27,6 +27,10 @@
     <string name="book_no_edition_title">Aucune édition pour ce livre</string>
     <string name="book_no_edition_message">inventaire.io connaît ce titre, mais n’a aucune édition à en montrer.</string>
 
+    <!-- Cover, full screen (iOS 0029) -->
+    <string name="entity_cover_enlarge">Agrandir la couverture</string>
+    <string name="entity_cover">Couverture</string>
+
     <!-- Sections -->
     <string name="entity_summary_label">Résumé</string>
     <string name="author_unknown">Auteur inconnu</string>

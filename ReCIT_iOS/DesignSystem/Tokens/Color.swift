@@ -29,6 +29,7 @@ public extension DesignSystem {
         case backgroundGroupedElevated
         case backgroundForm
         case backgroundFormCell
+        case backgroundShade
         case backgroundTinted
         case backgroundTintedInverse
         case backgroundError
@@ -46,7 +47,7 @@ public extension DesignSystem {
                 .init(light:.init("color/gray/900"), dark:.init("color/gray/50"))
             case .foregroundInverse:
                 .init(light:.init("color/gray/50"), dark:.init("color/gray/900"))
-            // Five tokens are veils, not colours: they are stated as an alpha over black or
+            // Six tokens are veils, not colours: they are stated as an alpha over black or
             // white so they take the tint of whatever sits behind them. They have no colorset —
             // in Figma they alias the `color/white-0x` / `color/black-0x` primitives, which have
             // no counterpart in Assets.xcassets either.
@@ -79,14 +80,21 @@ public extension DesignSystem {
             // grey, so its backdrop sits one step above black — between the two, not on either.
             case .backgroundGroupedElevated:
                     .init(light:.init("color/gray/50"), dark:.init("color/gray/900"))
-            // Behind a form, and under each of its cards. The pair swaps in dark: grey cards on
-            // black, where the form's old grey ground swallowed the system's grey cells. In
-            // Figma the two alias `background/secondary` and `background/default`, crossed;
-            // the colorsets are named here because nesting two dynamic colours does not resolve.
+            // Behind a form and the book screen, and under each of their cards. In dark the
+            // cards sit a step *below* the ground — `backgroundShade` over `gray/800` — the book
+            // screen's look, which the forms copy. The cards are named rather than left to the
+            // system, whose cell grey rises to the ground's own in a sheet and melted into it.
+            // The values are spelled out because nesting two dynamic colours does not resolve:
+            // in Figma the pair aliases `background/secondary`, then `background/default` and
+            // `background/shade`.
             case .backgroundForm:
-                    .init(light:.init("color/gray/50"), dark:.init("color/gray/1000"))
+                    .init(light:.init("color/gray/50"), dark:.init("color/gray/800"))
             case .backgroundFormCell:
-                    .init(light:.init("color/gray/0"), dark:.init("color/gray/800"))
+                    .init(light:.init("color/gray/0"), dark: .black.opacity(0.4))
+            // The sixth veil: a shade that darkens whatever it lies on, by nothing in light.
+            // `color/black-04` in dark, the form card's fill.
+            case .backgroundShade:
+                    .init(light: .black.opacity(0), dark: .black.opacity(0.4))
             case .backgroundTinted:
                     .init(light:.init("color/green/100"), dark:.init("color/green/900"))
             case .backgroundTintedInverse:

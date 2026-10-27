@@ -28,6 +28,7 @@ struct BookResolvingView: View {
                 ProgressView()
                     .frame(maxWidth: .infinity)
                     .listRowSeparator(.hidden)
+                    .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
             } header: {
                 EntityHeaderView(
                     title: placeholder.title,
@@ -36,7 +37,7 @@ struct BookResolvingView: View {
                 )
             }
         }
-        .applyListBackground()
+        .applyListBackground(.backgroundForm)
         .accessibilityIdentifier("e2e.book.resolving")
     }
 }

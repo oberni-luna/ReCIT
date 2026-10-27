@@ -71,14 +71,19 @@ struct BookDetailView: View {
                     ProgressView()
                 }
             case .loaded(let edition):
+                // On the forms' ground and cards, so the screen and the edition form it opens
+                // stay one surface — and the cards stop following the system's grey.
                 List {
-                    headerSection(edition: edition)
-                    otherEditionsSection()
-                    communitySection(edition: edition)
-                    myCopySection(edition: edition)
-                    bibliographicDataSection(edition: edition)
+                    Group {
+                        headerSection(edition: edition)
+                        otherEditionsSection()
+                        communitySection(edition: edition)
+                        myCopySection(edition: edition)
+                        bibliographicDataSection(edition: edition)
+                    }
+                    .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
                 }
-                .applyListBackground()
+                .applyListBackground(.backgroundForm)
                 .readableContentMargins()
                 // Keyed on the works rather than on the edition, because a cached edition can
                 // gain a work when the background refresh lands, and that new work needs asking

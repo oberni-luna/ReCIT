@@ -40,7 +40,7 @@ import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.TintedTextButton
-import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
+import studio.lunabee.nouveaurecit.ui.book.InventoryItemRowWithActions
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
@@ -103,9 +103,9 @@ fun ShelfScreen(destination: Destination.Shelf, navigator: Navigator) {
             items(state.books, key = { it.item.id }) { row ->
                 val open: () -> Unit = { navigator.push(Destination.Book(BookAnchor.Item(row.item.id))) }
                 if (state.isMine) {
-                    RemovableRow(row = row, shelfName = shelfName, onOpen = open, onRemove = { viewModel.remove(row.item.id) })
+                    RemovableRow(row = row, shelfName = shelfName, onOpen = open, onPush = navigator::push, onRemove = { viewModel.remove(row.item.id) })
                 } else {
-                    InventoryItemRow(row = row, showsOwner = false, onClick = open)
+                    InventoryItemRowWithActions(row = row, showsOwner = false, onClick = open, onPush = navigator::push)
                 }
                 HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
             }
@@ -157,7 +157,7 @@ private fun visibilityLabel(visibility: ShelfVisibility): Int = when (visibility
 
 /** `.swipeActions(edge: .trailing, allowsFullSwipe: true)` — « Retirer de %@ ». */
 @Composable
-private fun RemovableRow(row: ItemRow, shelfName: String, onOpen: () -> Unit, onRemove: () -> Unit) {
+private fun RemovableRow(row: ItemRow, shelfName: String, onOpen: () -> Unit, onPush: (Destination) -> Unit, onRemove: () -> Unit) {
     val dismissState: SwipeToDismissBoxState = rememberSwipeToDismissBoxState()
     SwipeToDismissBox(
         state = dismissState,
@@ -182,10 +182,11 @@ private fun RemovableRow(row: ItemRow, shelfName: String, onOpen: () -> Unit, on
             }
         },
     ) {
-        InventoryItemRow(
+        InventoryItemRowWithActions(
             row = row,
             showsOwner = false,
             onClick = onOpen,
+            onPush = onPush,
             modifier = Modifier.background(RecitTheme.colors.backgroundDefault),
         )
     }

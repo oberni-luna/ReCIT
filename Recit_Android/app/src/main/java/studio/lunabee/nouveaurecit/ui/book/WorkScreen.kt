@@ -1,6 +1,6 @@
 package studio.lunabee.nouveaurecit.ui.book
 
-import android.content.Context
+import android.content.res.Resources
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +57,7 @@ fun WorkScreen(destination: Destination.Work, navigator: Navigator) {
 @Composable
 private fun EditionPicker(state: WorkUiState, viewModel: WorkViewModel, navigator: Navigator) {
     val messenger: Messenger = LocalMessenger.current
-    val context: Context = LocalContext.current
+    val resources: Resources = LocalResources.current
     val scope: CoroutineScope = rememberCoroutineScope()
     var createsList: Boolean by rememberSaveable { mutableStateOf(false) }
 
@@ -71,12 +71,12 @@ private fun EditionPicker(state: WorkUiState, viewModel: WorkViewModel, navigato
                         MoreActionsMenu(
                             listOf(
                                 listMenuLine(
-                                    context = context,
+                                    resources = resources,
                                     entries = state.myLists,
                                     onToggle = { entry ->
                                         scope.launch {
                                             if (viewModel.toggleList(entry)) {
-                                                showMembership(messenger, context, entry) { navigator.push(Destination.EntityList(entry.id)) }
+                                                showMembership(messenger, resources, entry) { navigator.push(Destination.EntityList(entry.id)) }
                                             }
                                         }
                                     },

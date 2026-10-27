@@ -24,7 +24,7 @@ import studio.lunabee.nouveaurecit.designsystem.TagLabel
  * `InventoryCell`, drawn as a [BookRow]: cover, title, authors, subtitle, and under them only what
  * says something — a transaction other than « Inventorié », and for somebody else's copy
  * « Appartient à **name** ». Shared by every list of copies (inventory, shelf, search, a friend's
- * profile).
+ * profile), which draw it through `InventoryItemRowWithActions` for the long press's menu.
  */
 @Composable
 fun InventoryItemRow(
@@ -32,6 +32,8 @@ fun InventoryItemRow(
     showsOwner: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
 ) {
     val transaction: TransactionType = row.item.transaction
     val owner: String? = row.owner?.username?.takeIf { showsOwner }
@@ -41,6 +43,8 @@ fun InventoryItemRow(
         imageUrl = row.image,
         onClick = onClick,
         modifier = modifier,
+        onLongClick = onLongClick,
+        onLongClickLabel = onLongClickLabel,
         authors = row.authorNames.joinToString(", "),
         subtitle = row.subtitle,
         footer = if (showsTransaction || owner != null) {

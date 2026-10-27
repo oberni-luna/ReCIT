@@ -22,7 +22,7 @@ import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
-import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
+import studio.lunabee.nouveaurecit.ui.book.InventoryItemRowWithActions
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
@@ -44,10 +44,11 @@ fun FriendsLatestBooksScreen(navigator: Navigator) {
     ) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding)) {
             items(items, key = { it.item.id }) { row ->
-                InventoryItemRow(
+                InventoryItemRowWithActions(
                     row = row,
                     showsOwner = true,
                     onClick = { navigator.push(Destination.Book(BookAnchor.Item(row.item.id))) },
+                    onPush = navigator::push,
                 )
                 HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
             }

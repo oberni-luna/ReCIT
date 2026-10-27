@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.creation.EditionClaims
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
@@ -191,7 +193,37 @@ private fun BookContent(state: BookUiState, viewModel: BookViewModel, navigator:
         otherEditions(state, navigator)
         community(state, navigator)
         myCopy(state, viewModel)
+        bibliographicData(edition.uri, navigator)
     }
+}
+
+/**
+ * `BookBibliographicDataSection`: last, after the reader's own copy — correcting the record is the rarer
+ * gesture. One tinted row, no section header (the row names the section), and the note on what it is for.
+ * Offered for every edition but a Wikidata one, owned or not: inventaire.io's data are open to every
+ * account. The store's uri is passed on, so the form writes what it saved back under it.
+ */
+private fun LazyListScope.bibliographicData(editionUri: String, navigator: Navigator) {
+    if (!EditionClaims.canEdit(editionUri)) return
+    item(key = "bibliographic-data-gap") { Spacer(Modifier.height(Spacing.large)) }
+    item(key = "bibliographic-data") {
+        CellSurface(onClick = { navigator.push(Destination.EditEdition(editionUri)) }) {
+            Text(
+                text = stringResource(R.string.book_bibliographic_data),
+                style = RecitTheme.typography.action300,
+                color = RecitTheme.colors.foregroundTinted,
+            )
+        }
+    }
+    item(key = "bibliographic-data-footer") {
+        Text(
+            text = stringResource(R.string.book_bibliographic_data_footer),
+            style = RecitTheme.typography.footnote200,
+            color = RecitTheme.colors.foregroundSecondary,
+            modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small),
+        )
+    }
+    item(key = "bibliographic-data-end") { Spacer(Modifier.height(Spacing.large)) }
 }
 
 private fun LazyListScope.otherEditions(state: BookUiState, navigator: Navigator) {

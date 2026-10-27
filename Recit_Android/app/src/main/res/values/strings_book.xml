@@ -54,4 +54,8 @@
     <string name="author_birth_date">Né·e le %1$s</string>
     <string name="author_life_dates">%1$s – %2$s</string>
     <string name="author_works_header">Œuvres de %1$s</string>
+
+    <!-- « Données bibliographiques », the screen's last row (issue 0144) -->
+    <string name="book_bibliographic_data">Données bibliographiques</string>
+    <string name="book_bibliographic_data_footer">Enrichir les données bibliographiques permet d’enrichir la base de données open data de inventaire.io.</string>
 </resources>

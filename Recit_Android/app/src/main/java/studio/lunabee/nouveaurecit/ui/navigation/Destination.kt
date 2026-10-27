@@ -28,6 +28,12 @@ sealed interface Destination : NavKey {
 
     @Serializable data class Book(val anchor: BookAnchor) : Destination
 
+    /**
+     * « Modifier l'édition » (issue 0144), for the edition the store keeps under [uri] — `isbn:…` for one
+     * opened from its ISBN: the form reads the canonical one from the server, and writes back under this one.
+     */
+    @Serializable data class EditEdition(val uri: String) : Destination
+
     @Serializable data class User(val id: String) : Destination
 
     @Serializable data class EntityList(val id: String) : Destination

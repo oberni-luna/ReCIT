@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import studio.lunabee.nouveaurecit.ui.book.AuthorScreen
 import studio.lunabee.nouveaurecit.ui.book.BookScreen
 import studio.lunabee.nouveaurecit.ui.book.WorkScreen
+import studio.lunabee.nouveaurecit.ui.editedition.EditEditionScreen
 import studio.lunabee.nouveaurecit.ui.inventory.InventoryScreen
 import studio.lunabee.nouveaurecit.ui.inventory.ShelfScreen
 import studio.lunabee.nouveaurecit.ui.lists.EntityListScreen
@@ -37,6 +38,7 @@ fun EntryProviderScope<NavKey>.appEntries(navigator: Navigator) {
     entry<Destination.Author> { AuthorScreen(it, navigator) }
     entry<Destination.Work> { WorkScreen(it, navigator) }
     entry<Destination.Book> { BookScreen(it, navigator) }
+    entry<Destination.EditEdition> { EditEditionScreen(it, navigator) }
     entry<Destination.User> { UserScreen(it, navigator) }
     entry<Destination.EntityList> { EntityListScreen(it, navigator) }
     entry<Destination.Shelf> { ShelfScreen(it, navigator) }

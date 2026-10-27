@@ -1,6 +1,7 @@
 package studio.lunabee.nouveaurecit.network.dto
 
 import kotlinx.serialization.Serializable
+import studio.lunabee.nouveaurecit.data.creation.ClaimLiteral
 
 /**
  * `EntityResolveRequest`: the body of `POST /api/entities/resolve`, the one endpoint that carries the
@@ -33,18 +34,22 @@ data class EntityResolveRequest(
         val authors: List<Seed>? = null,
     )
 
-    /** A uri **or** a description, never usefully both. Only an edition seed carries an [image]. */
+    /**
+     * A uri **or** a description, never usefully both. Only an edition seed carries an [image]. Claims keep
+     * their type: a number of pages goes out as a JSON number ([ClaimLiteral]).
+     */
     @Serializable
     data class Seed(
         val uri: String? = null,
         val labels: Map<String, String>? = null,
-        val claims: Map<String, List<String>>? = null,
+        val claims: Map<String, List<ClaimLiteral>>? = null,
         val image: String? = null,
     ) {
         companion object {
             fun named(uri: String): Seed = Seed(uri = uri)
 
-            fun described(label: String, language: String): Seed = Seed(labels = mapOf(language to label))
+            fun described(label: String, language: String, claims: Map<String, List<ClaimLiteral>>? = null): Seed =
+                Seed(labels = mapOf(language to label), claims = claims)
         }
     }
 }

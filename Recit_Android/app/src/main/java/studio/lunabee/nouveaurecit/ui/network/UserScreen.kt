@@ -58,7 +58,7 @@ import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
-import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
+import studio.lunabee.nouveaurecit.ui.book.InventoryItemRowWithActions
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
@@ -255,10 +255,11 @@ private fun UserContent(
                     }
                     items.forEachIndexed { index, row ->
                         if (index > 0 || syncState != FirstSyncState.Synced) HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
-                        InventoryItemRow(
+                        InventoryItemRowWithActions(
                             row = row,
                             showsOwner = false,
                             onClick = { navigator.push(Destination.Book(BookAnchor.Item(row.item.id))) },
+                            onPush = navigator::push,
                         )
                     }
                 }

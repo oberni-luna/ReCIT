@@ -124,6 +124,14 @@ interface EntityDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun linkWorkAuthors(links: List<WorkAuthorCrossRef>)
 
+    /** An edition detached from works it no longer names (« Modifier l'édition »). */
+    @Query("DELETE FROM edition_works WHERE editionUri = :editionUri AND workUri IN (:workUris)")
+    suspend fun unlinkEditionWorks(editionUri: String, workUris: List<String>)
+
+    /** A work relieved of authors it no longer names (« Modifier l'œuvre »). */
+    @Query("DELETE FROM work_authors WHERE workUri = :workUri AND authorUri IN (:authorUris)")
+    suspend fun unlinkWorkAuthors(workUri: String, authorUris: List<String>)
+
     @Query("UPDATE works SET preferredEditionUri = :editionUri WHERE uri = :workUri")
     suspend fun setPreferredEdition(workUri: String, editionUri: String)
 

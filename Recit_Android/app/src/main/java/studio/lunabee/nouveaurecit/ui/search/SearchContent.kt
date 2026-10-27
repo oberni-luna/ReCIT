@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Search
@@ -50,8 +50,8 @@ import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingInlineRow
 import studio.lunabee.nouveaurecit.designsystem.TintedTextButton
+import studio.lunabee.nouveaurecit.ui.book.InventoryItemRowWithActions
 import studio.lunabee.nouveaurecit.ui.common.BookRow
-import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
 import studio.lunabee.nouveaurecit.ui.common.LargeTitleRefreshBox
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
@@ -143,10 +143,11 @@ internal fun SearchContent(
                 }
                 itemsIndexed(local.items, key = { _, row -> "local.${row.item.id}" }) { index, row ->
                     Column(Modifier.groupedCell(index, local.items.size, RecitTheme.colors.backgroundGroupedCell)) {
-                        InventoryItemRow(
+                        InventoryItemRowWithActions(
                             row = row,
                             showsOwner = row.item.ownerId != myUserId,
                             onClick = { onPush(Destination.Book(BookAnchor.Item(row.item.id))) },
+                            onPush = onPush,
                         )
                         if (index < local.items.lastIndex) {
                             HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)

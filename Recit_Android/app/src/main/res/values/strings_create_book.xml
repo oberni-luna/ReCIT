@@ -1,44 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Creating a book inventaire.io lacks (feature 0020). French values of ReCIT_iOS/Localizable.xcstrings
-  (create_book.*, scanner.action.create_book), keys with '.' turned into '_' under a create_book_
-  prefix. The cover's two ways in are Android's own: the camera, or the photos when no camera app answers.
+  Creating a book inventaire.io lacks (feature 0020, iOS 0047 and 0050). French values of
+  ReCIT_iOS/Localizable.xcstrings (create_book.*, scanner.action.create_book), keys with '.' turned into
+  '_' under a create_book_ prefix. What « Nouvelle édition » shares with « Modifier l'édition » lives in
+  strings_edit_edition.xml.
 -->
 <resources>
     <string name="create_book_row_action">Créer ce livre sur inventaire.io</string>
 
     <string name="create_book_title">Nouveau livre</string>
+    <string name="create_book_search_empty_title">De quel livre s’agit-il ?</string>
+    <string name="create_book_search_empty_message">inventaire.io ne connaît pas encore l’ISBN %1$s. Cherchez le titre ou l’auteur·ice : si l’œuvre y est déjà, il ne restera presque rien à saisir.</string>
+
+    <string name="create_book_edition_title">Nouvelle édition</string>
+    <string name="create_book_edition_of_help">L’œuvre et son auteur viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Touchez-la pour revenir à la recherche, ou glissez-la pour la détacher.</string>
+    <string name="create_book_edition_new_work_help">Touchez la nouvelle œuvre pour la nommer et lui donner ses auteur·ices : elle est publiée avec cette édition.</string>
+    <string name="create_book_edition_no_work_help">Un livre est l’édition d’une œuvre : retrouvez-la, ou créez-la, pour publier.</string>
+    <string name="create_book_edition_title_help">Repris de l’œuvre. Corrigez-le s’il diffère de la couverture : une traduction, un sous-titre.</string>
     <string name="create_book_isbn">ISBN, lu sur le code-barres</string>
-    <string name="create_book_language">Langue, déduite de l’ISBN : %1$s</string>
-    <string name="create_book_public_notice">Ce livre rejoindra inventaire.io, la base ouverte : ce que vous écrivez ici sera public, et modifiable par les autres lecteurs.</string>
+    <string name="create_book_language">Langue, déduite de l’ISBN : %1$s</string>
+    <string name="create_book_public_notice">Ce livre rejoindra inventaire.io, la base ouverte : ce que vous écrivez ici sera public, et modifiable par les autres lecteurs.</string>
     <string name="create_book_title_field">Titre de cette édition</string>
-    <string name="create_book_title_help">Le titre tel qu’il est imprimé sur la couverture, et l’auteur qui l’a écrit. Rien d’autre n’est demandé.</string>
-    <string name="create_book_cover_take">Photo de couverture</string>
     <string name="create_book_publish">Publier et ajouter à mes livres</string>
     <string name="create_book_retry">Réessayer</string>
     <string name="create_book_keep_draft">Garder le brouillon et revenir</string>
 
+    <string name="create_book_new_work_help">Ses traductions et ses rééditions en seront des éditions.</string>
+
     <string name="create_book_author_field">Auteur</string>
-    <string name="create_book_author_choose">Choisir l’auteur</string>
     <string name="create_book_author_create">Créer « %1$s »</string>
     <string name="create_book_author_existing">Déjà sur inventaire.io</string>
-    <string name="create_book_author_why_existing">Prenez l’auteur déjà présent si vous le reconnaissez : c’est ce qui évite un doublon dans la base.</string>
+    <string name="create_book_author_why_existing">Prenez l’auteur déjà présent si vous le reconnaissez : c’est ce qui évite un doublon dans la base.</string>
     <string name="create_book_author_no_result">Aucun auteur de ce nom sur inventaire.io pour l’instant.</string>
 
-    <string name="create_book_work_title">Ce livre est connu</string>
+    <string name="create_book_work_title">Œuvre déjà connue</string>
     <string name="create_book_work_header">Sur inventaire.io</string>
-    <string name="create_book_work_lead">inventaire.io connaît cette œuvre, mais pas cette édition.</string>
-    <string name="create_book_work_what_you_create">Ce que vous créez</string>
-    <string name="create_book_work_one_more_edition">Une édition de plus</string>
-    <string name="create_book_work_one_more_edition_help">Votre livre est rattaché à l’œuvre ci-dessus. Ni l’œuvre ni son auteur ne sont dupliqués.</string>
-    <string name="create_book_work_another_book">Non, c’est un autre livre</string>
-    <string name="create_book_work_another_book_help">Créer aussi une œuvre à part — seulement si le texte diffère, pas si c’est la couverture qui change.</string>
-    <string name="create_book_work_publish_edition">Publier cette édition</string>
+    <string name="create_book_work_lead">La recherche ne l’a pas proposée, mais inventaire.io la reconnaît à son titre et à son auteur.</string>
+    <string name="create_book_work_what_you_publish">Ce que vous publiez</string>
+    <string name="create_book_work_one_more_edition">Une édition de cette œuvre</string>
+    <string name="create_book_work_one_more_edition_help">Rien d’autre n’est créé : ni œuvre, ni auteur·ice.</string>
+    <string name="create_book_work_another_book">Non, une autre œuvre</string>
+    <string name="create_book_work_another_book_help">Même titre, autre texte : la vôtre est créée à côté.</string>
 
     <string name="create_book_failure_account_title">Contribuer demande un compte</string>
     <string name="create_book_failure_account_body">Votre session inventaire.io a expiré. Rien n’a été créé. Reconnectez-vous, puis publiez ce livre.</string>
     <string name="create_book_failure_refused_title">inventaire.io a refusé ce livre</string>
-    <string name="create_book_failure_refused_body">Rien n’a été créé. L’ISBN ou le titre ne sont peut-être pas acceptés tels quels — ce livre peut être ajouté sur inventaire.io même.</string>
+    <string name="create_book_failure_refused_body">Rien n’a été créé. L’ISBN ou le titre ne sont peut-être pas acceptés tels quels — ce livre peut être ajouté sur inventaire.io même.</string>
     <string name="create_book_failure_network_title">La publication n’est pas passée</string>
-    <string name="create_book_failure_network_body">inventaire.io n’a pas répondu. Rien n’a été créé là-bas, et rien n’est perdu ici : ce que vous avez écrit est gardé, et réessayer ne fait pas de doublon.</string>
+    <string name="create_book_failure_network_body">inventaire.io n’a pas répondu. Rien n’a été créé là-bas, et rien n’est perdu ici : ce que vous avez écrit est gardé, et réessayer ne fait pas de doublon.</string>
 </resources>

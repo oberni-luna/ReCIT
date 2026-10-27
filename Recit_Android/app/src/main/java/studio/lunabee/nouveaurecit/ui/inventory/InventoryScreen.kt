@@ -35,7 +35,7 @@ import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingPlaceholder
-import studio.lunabee.nouveaurecit.ui.common.InventoryItemRow
+import studio.lunabee.nouveaurecit.ui.book.InventoryItemRowWithActions
 import studio.lunabee.nouveaurecit.ui.common.LargeTitleRefreshBox
 import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
@@ -173,10 +173,11 @@ private fun InventoryContent(
                 }
             }
             items(items, key = { it.item.id }) { row ->
-                InventoryItemRow(
+                InventoryItemRowWithActions(
                     row = row,
                     showsOwner = false,
                     onClick = { navigator.push(Destination.Book(BookAnchor.Item(row.item.id))) },
+                    onPush = navigator::push,
                 )
                 HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
             }

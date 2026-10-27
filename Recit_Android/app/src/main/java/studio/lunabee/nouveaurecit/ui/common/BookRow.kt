@@ -1,6 +1,6 @@
 package studio.lunabee.nouveaurecit.ui.common
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +26,7 @@ import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
  *
  * [trailing] sits at the end of the line, centred (a check mark in a picker).
  * [isPerson] swaps the cover for a round portrait that falls back on initials.
+ * [onLongClick], when set, answers a long press — named [onLongClickLabel] for TalkBack.
  */
 @Composable
 fun BookRow(
@@ -38,11 +39,13 @@ fun BookRow(
     isPerson: Boolean = false,
     footer: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .combinedClickable(onLongClickLabel = onLongClickLabel, onLongClick = onLongClick, onClick = onClick)
             .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
         verticalAlignment = if (isPerson) Alignment.CenterVertically else Alignment.Top,

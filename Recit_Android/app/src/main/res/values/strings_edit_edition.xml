@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  « Modifier l'édition » and the pages it pushes (iOS features 0049, 0050; issue 0144). French values of
+  ReCIT_iOS/Localizable.xcstrings (edit_edition.*, edit_work.*, edition_property.*, edition_format.*,
+  entity_picker.*, and the create_book.* the form shares with the scanner's « Nouvelle édition »), keys
+  with '.' turned into '_'. The edition_property_* names are the ones EditionProperty.labelKey gives.
+  edition_property_names_and is Android's own: the « et » of a list of names, which iOS formats itself.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- The form -->
+    <string name="edit_edition_title">Modifier l’édition</string>
+    <string name="edit_edition_title_header">Titre</string>
+    <string name="edit_edition_subtitle_field">Sous-titre de cette édition</string>
+    <string name="edit_edition_cover_header">Couverture et ISBN</string>
+    <string name="edit_edition_cover_footer">Touchez la couverture pour la remplacer ou la retirer. L’ISBN ne se change pas d’ici : c’est par lui que le livre est retrouvé au scan.</string>
+    <string name="edit_edition_isbn">ISBN</string>
+    <string name="edit_edition_isbn10">ISBN-10</string>
+    <string name="edit_edition_isbn13">ISBN-13</string>
+    <string name="edit_edition_remove">Retirer</string>
+
+    <string name="edit_edition_works_add">Ajouter une œuvre</string>
+    <string name="edit_edition_works_detach">Détacher</string>
+    <string name="edit_edition_works_empty_help">Une édition est celle d’une œuvre au moins : ajoutez-en une pour pouvoir enregistrer.</string>
+    <string name="edit_edition_works_help">Touchez une œuvre pour la modifier. Glissez-la vers la gauche pour la détacher de cette édition. Un recueil en réunit plusieurs.</string>
+    <string name="edit_edition_works_new_help">Touchez la nouvelle œuvre pour lui donner un·e auteur·ice : elle ne se crée pas sans.</string>
+    <string name="edit_edition_work_add_author">Ajouter un·e auteur·ice</string>
+    <string name="edit_edition_work_new_author">Créé·e sur inventaire.io à l’enregistrement</string>
+    <string name="edit_edition_work_search_empty_title">De quelle œuvre est-ce une édition ?</string>
+    <string name="edit_edition_work_search_empty_message">Cherchez son titre ou son auteur·ice. Si l’œuvre n’est pas sur inventaire.io, vous pourrez la créer.</string>
+
+    <string name="edit_edition_publication_header">Publication</string>
+    <string name="edit_edition_publication_footer">Maison d’édition et collection se choisissent parmi celles d’inventaire.io, ou se créent. Une année seule suffit pour la date.</string>
+    <string name="edit_edition_format_header">Format</string>
+    <string name="edit_edition_format_footer">Broché, relié, poche, album, livre numérique ou livre audio.</string>
+    <string name="edit_edition_contributors_header">Ont aussi fait cette édition</string>
+    <string name="edit_edition_contributors_footer">Les auteur·ices de l’œuvre sont dans « Édition de ». Ici, celles et ceux qui ont fait cette édition-ci. Chaque rôle peut en nommer plusieurs.</string>
+    <string name="edit_edition_databases_header">Bases bibliographiques</string>
+    <string name="edit_edition_databases_footer">BnF, Open Library, SUDOC, VIAF… vingt-deux bases en tout. Glissez un identifiant pour le retirer.</string>
+    <string name="edit_edition_databases_add">Ajouter un identifiant</string>
+    <string name="edit_edition_links_header">Sur le web</string>
+    <string name="edit_edition_links_footer">Site officiel, blog, réseaux sociaux. Glissez un lien pour le retirer.</string>
+    <string name="edit_edition_links_add">Ajouter un lien</string>
+
+    <!-- The pages it pushes -->
+    <string name="edit_edition_values_add">Ajouter</string>
+    <string name="edit_edition_values_footer">Glissez vers la gauche pour retirer.</string>
+    <string name="edit_edition_date_precision">Précision</string>
+    <string name="edit_edition_date_year">Année</string>
+    <string name="edit_edition_date_month">Mois</string>
+    <string name="edit_edition_date_day">Jour</string>
+    <string name="edit_edition_date_footer">Pas plus précis que ce que le livre imprime : souvent l’année seule.</string>
+    <string name="edit_edition_date_remove">Retirer la date</string>
+    <string name="edit_edition_identifiers_add">Ajouter</string>
+    <string name="edit_edition_identifiers_catalog_footer">L’identifiant est vérifié au format de la base avant d’être ajouté.</string>
+    <string name="edit_edition_identifiers_example" tools:ignore="Typos">Exemple : %1$s</string>
+    <string name="edit_edition_identifiers_invalid">Ce n’est pas un identifiant %1$s valide.</string>
+
+    <string name="edit_work_title">Modifier l’œuvre</string>
+    <string name="edit_work_header">L’œuvre</string>
+    <string name="edit_work_add_other_author">Ajouter un·e autre auteur·ice</string>
+    <string name="edit_work_help">Ce que vous changez ici vaut pour toutes les éditions de cette œuvre, et part avec « Enregistrer », au retour. Glissez un·e auteur·ice vers la gauche pour l’enlever de l’œuvre.</string>
+    <string name="edit_work_new_help">Nommez qui l’a écrite : l’œuvre se crée avec ses auteur·ices, à l’enregistrement de l’édition.</string>
+    <string name="edit_work_wikidata_help">Cette œuvre vit sur Wikidata : son titre et ses auteur·ices s’y modifient.</string>
+
+    <string name="entity_picker_prompt">Rechercher</string>
+    <string name="entity_picker_existing">Déjà sur inventaire.io</string>
+    <string name="entity_picker_why_existing">Choisir une entrée existante évite de créer un double, que seul·e un·e admin pourrait fusionner.</string>
+    <string name="entity_picker_create">Créer « %1$s »</string>
+    <string name="entity_picker_no_result">Rien de ce nom sur inventaire.io.</string>
+    <string name="entity_picker_collection_needs_publisher">Une collection se crée sous sa maison d’édition : choisissez d’abord la maison d’édition.</string>
+
+    <!-- What a save that did not land in full says -->
+    <string name="edit_edition_failure_account_title">Modifier demande un compte</string>
+    <string name="edit_edition_failure_account_body">Votre session inventaire.io a expiré. Reconnectez-vous, puis enregistrez : ce que vous avez écrit est gardé.</string>
+    <string name="edit_edition_failure_refused_title">inventaire.io a refusé cette modification</string>
+    <string name="edit_edition_failure_refused_body">Le titre ou la couverture ne sont peut-être pas acceptés tels quels — cette édition peut aussi être modifiée sur inventaire.io même.</string>
+    <string name="edit_edition_failure_network_title">L’enregistrement n’est pas passé</string>
+    <string name="edit_edition_failure_network_body">inventaire.io n’a pas répondu. Ce que vous avez écrit est gardé ici, et réessayer n’envoie que ce qui n’est pas passé.</string>
+
+    <!-- The catalogue's properties -->
+    <string name="edition_property_publisher">Maison d’édition</string>
+    <string name="edition_property_publisher_placeholder">Choisir une maison d’édition</string>
+    <string name="edition_property_collection">Collection</string>
+    <string name="edition_property_collection_placeholder">Choisir une collection</string>
+    <string name="edition_property_publication_date">Date de publication</string>
+    <string name="edition_property_publication_date_placeholder">Ajouter une date</string>
+    <string name="edition_property_language">Langue de cette édition</string>
+    <string name="edition_property_language_placeholder">Choisir une langue</string>
+    <string name="edition_property_format">Format</string>
+    <string name="edition_property_format_placeholder">Choisir un format</string>
+    <string name="edition_property_pages">Nombre de pages</string>
+    <string name="edition_property_volumes">Nombre de volumes</string>
+    <string name="edition_property_count_placeholder">Ajouter</string>
+    <string name="edition_property_person_placeholder">Ajouter</string>
+    <string name="edition_property_names_and">et</string>
+
+    <string name="edition_property_translator">Traduction</string>
+    <string name="edition_property_illustrator">Illustrations</string>
+    <string name="edition_property_cover_artist">Illustration de couverture</string>
+    <string name="edition_property_preface">Préface</string>
+    <string name="edition_property_afterword">Postface</string>
+    <string name="edition_property_editor">Direction éditoriale</string>
+
+    <string name="edition_property_bnf">BnF</string>
+    <string name="edition_property_open_library">Open Library</string>
+    <string name="edition_property_sudoc">SUDOC</string>
+    <string name="edition_property_viaf">VIAF</string>
+    <string name="edition_property_oclc">OCLC</string>
+    <string name="edition_property_google_books">Google Books</string>
+    <string name="edition_property_goodreads">Goodreads</string>
+    <string name="edition_property_bookbrainz">BookBrainz</string>
+    <string name="edition_property_noosfere">NooSFere</string>
+    <string name="edition_property_isfdb">ISFDB</string>
+    <string name="edition_property_dnb">DNB</string>
+    <string name="edition_property_gnd">GND</string>
+    <string name="edition_property_swb">SWB</string>
+    <string name="edition_property_bne">BNE</string>
+    <string name="edition_property_lccn">Bibliothèque du Congrès (LCCN)</string>
+    <string name="edition_property_british_library">British Library</string>
+    <string name="edition_property_libris">LIBRIS</string>
+    <string name="edition_property_bn_argentina">Bibliothèque nationale d’Argentine</string>
+    <string name="edition_property_czech_national_bibliography">Bibliographie nationale tchèque</string>
+    <string name="edition_property_hathitrust">HathiTrust</string>
+    <string name="edition_property_runeberg">Projet Runeberg</string>
+    <string name="edition_property_doi">DOI</string>
+
+    <string name="edition_property_official_website">Site officiel</string>
+    <string name="edition_property_blog">Blog</string>
+    <string name="edition_property_mastodon">Mastodon</string>
+    <string name="edition_property_bluesky">Bluesky</string>
+    <string name="edition_property_instagram">Instagram</string>
+    <string name="edition_property_facebook">Facebook</string>
+    <string name="edition_property_x">X</string>
+    <string name="edition_property_youtube">YouTube</string>
+    <string name="edition_property_threads">Threads</string>
+    <string name="edition_property_tiktok">TikTok</string>
+
+    <string name="edition_format_paperback">Broché</string>
+    <string name="edition_format_hardback">Relié</string>
+    <string name="edition_format_pocket">Poche</string>
+    <string name="edition_format_comic_album">Album de bande dessinée</string>
+    <string name="edition_format_ebook">Livre numérique</string>
+    <string name="edition_format_audiobook">Livre audio</string>
+    <string name="edition_format_none">Aucun</string>
+
+    <!-- Shared with the scanner's « Nouvelle édition » -->
+    <string name="create_book_edition_of">Édition de</string>
+    <string name="create_book_new_work_title">Nouvelle œuvre</string>
+    <string name="create_book_new_work_title_field">Titre de l’œuvre</string>
+
+    <string name="create_book_cover_add">Ajouter une couverture</string>
+    <string name="create_book_cover_change">Changer la couverture</string>
+    <string name="create_book_cover_camera">Prendre une photo</string>
+    <string name="create_book_cover_photos">Choisir dans la galerie</string>
+    <string name="create_book_cover_remove">Retirer la couverture</string>
+    <string name="create_book_cover_replace">Remplacer par</string>
+
+    <string name="create_book_search_prompt">Titre ou auteur·ice</string>
+    <string name="create_book_search_results">Œuvres sur inventaire.io</string>
+    <string name="create_book_search_why_existing">Prenez l’œuvre dont ce livre est une édition, même si c’est une traduction ou une autre couverture : c’est ce qui évite un doublon.</string>
+    <string name="create_book_search_none_match">Aucune ne correspond : créer l’œuvre</string>
+    <string name="create_book_search_create">Créer l’œuvre « %1$s »</string>
+    <string name="create_book_search_no_result">Aucune œuvre de ce nom sur inventaire.io. Vérifiez l’orthographe, ou cherchez l’auteur·ice, avant d’en créer une.</string>
+
+    <string name="create_book_notice_title">Données bibliographiques</string>
+    <string name="create_book_notice_body">Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tous.</string>
+    <string name="create_book_notice_learn_more">En savoir plus</string>
+
+    <string name="create_book_help_what">Ce que c’est</string>
+    <string name="create_book_help_what_body">Elles décrivent les œuvres, les éditions, les auteur·ices et les maisons d’édition : les « entités » d’inventaire.io.</string>
+    <string name="create_book_help_from">D’où elles viennent</string>
+    <string name="create_book_help_from_body">Surtout de Wikidata, la base ouverte qui sert Wikipédia. Ce qui y manque, inventaire.io le crée dans sa propre base, sous licence CC0.</string>
+    <string name="create_book_help_publish">Ce que vous publiez</string>
+    <string name="create_book_help_publish_body">Ce que vous saisissez est public dès l’envoi, et modifiable par tous. L’améliorer, c’est améliorer Wikidata et les projets qui s’en servent.</string>
+    <string name="create_book_help_further">Aller plus loin</string>
+    <string name="create_book_help_wiki">Les données sur le wiki d’inventaire.io</string>
+    <string name="create_book_help_chat">Poser une question sur le chat du projet</string>
+    <string name="create_book_help_contributions">Voir mes contributions</string>
+</resources>

@@ -19,10 +19,17 @@ package studio.lunabee.nouveaurecit.data.model
  */
 object EntityLabel {
     /** The label to display, or `null` when the entity has none. */
-    fun resolve(labels: Map<String, String>?, originalLang: String? = null): String? {
+    fun resolve(labels: Map<String, String>?, originalLang: String? = null): String? =
+        language(labels, originalLang)?.let { labels?.get(it) }
+
+    /**
+     * The language of the label [resolve] picks — the one a renamed work's new title is written in
+     * (`update-label` replaces a label in one language).
+     */
+    fun language(labels: Map<String, String>?, originalLang: String? = null): String? {
         if (labels == null) return null
         val preferred: List<String> = listOfNotNull("fr", "en", "mul", originalLang)
-        return preferred.firstNotNullOfOrNull { language -> labels[language]?.takeIf { it.isNotEmpty() } }
-            ?: labels.filterValues { it.isNotEmpty() }.minByOrNull { it.key }?.value
+        return preferred.firstOrNull { language -> labels[language]?.isNotEmpty() == true }
+            ?: labels.filterValues { it.isNotEmpty() }.minByOrNull { it.key }?.key
     }
 }

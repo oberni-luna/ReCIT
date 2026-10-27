@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,83 +50,103 @@ internal sealed interface MenuLine {
 }
 
 /**
- * The toolbar's « … » (`Menu` labelled `action.more`): a `DropdownMenu`, whose submenus open as a
- * second `DropdownMenu` on the same anchor, headed by the submenu's name and a way back — « Ajouter
- * à %s » / « Retirer de %s » per entry, then the creation line. Glyphs in the label colour, as on
- * iOS; a destructive action is red, glyph included.
+ * The toolbar's « … » (`Menu` labelled `action.more`): an icon button over an [ActionsDropdown].
  */
 @Composable
 internal fun MoreActionsMenu(lines: List<MenuLine>) {
     var expanded: Boolean by remember { mutableStateOf(false) }
-    var submenu: MenuLine.Membership? by remember { mutableStateOf(null) }
-    val iconTint = RecitTheme.colors.foregroundDefault
 
     Box {
         IconButton(onClick = { expanded = true }) {
             Icon(painterResource(R.drawable.ic_more), contentDescription = stringResource(R.string.action_more))
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, containerColor = RecitTheme.colors.backgroundRaised) {
-            lines.forEach { line ->
-                val tint: Color = if ((line as? MenuLine.Action)?.isDestructive == true) RecitTheme.colors.foregroundError else iconTint
-                DropdownMenuItem(
-                    text = { Text(line.label, style = RecitTheme.typography.content400, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                    leadingIcon = { Icon(line.icon, contentDescription = null, tint = tint) },
-                    trailingIcon = if (line is MenuLine.Membership) {
-                        { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = iconTint) }
-                    } else {
-                        null
-                    },
-                    onClick = {
-                        expanded = false
-                        when (line) {
-                            is MenuLine.Action -> line.onClick()
-                            is MenuLine.Membership -> submenu = line
+        ActionsDropdown(expanded = expanded, onDismiss = { expanded = false }, lines = lines)
+    }
+}
+
+/**
+ * The menu itself, anchored on whatever it is placed beside — the toolbar's « … » or a book row
+ * held down. A `DropdownMenu`, whose submenus open as a second `DropdownMenu` on the same anchor,
+ * headed by the submenu's name and a way back — « Ajouter à %s » / « Retirer de %s » per entry,
+ * then the creation line. Glyphs in the label colour, as on iOS; a destructive action is red,
+ * glyph included.
+ *
+ * [expanded] stays `true` while either level is open; [onDismiss] runs once the whole menu closes,
+ * whether a line was picked or the user tapped away.
+ */
+@Composable
+internal fun ActionsDropdown(expanded: Boolean, onDismiss: () -> Unit, lines: List<MenuLine>) {
+    var submenu: MenuLine.Membership? by remember { mutableStateOf(null) }
+    val iconTint = RecitTheme.colors.foregroundDefault
+    val close: () -> Unit = {
+        submenu = null
+        onDismiss()
+    }
+    // Closed from outside: the next opening starts on the first level.
+    LaunchedEffect(expanded) {
+        if (!expanded) submenu = null
+    }
+
+    DropdownMenu(expanded = expanded && submenu == null, onDismissRequest = close, containerColor = RecitTheme.colors.backgroundRaised) {
+        lines.forEach { line ->
+            val tint: Color = if ((line as? MenuLine.Action)?.isDestructive == true) RecitTheme.colors.foregroundError else iconTint
+            DropdownMenuItem(
+                text = { Text(line.label, style = RecitTheme.typography.content400, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                leadingIcon = { Icon(line.icon, contentDescription = null, tint = tint) },
+                trailingIcon = if (line is MenuLine.Membership) {
+                    { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = iconTint) }
+                } else {
+                    null
+                },
+                onClick = {
+                    when (line) {
+                        is MenuLine.Action -> {
+                            close()
+                            line.onClick()
                         }
-                    },
-                )
-            }
-        }
-        val open: MenuLine.Membership? = submenu
-        DropdownMenu(expanded = open != null, onDismissRequest = { submenu = null }, containerColor = RecitTheme.colors.backgroundRaised) {
-            if (open != null) {
-                DropdownMenuItem(
-                    text = { Text(open.label, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault) },
-                    leadingIcon = {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back), tint = iconTint)
-                    },
-                    onClick = {
-                        submenu = null
-                        expanded = true
-                    },
-                )
-                HorizontalDivider()
-                open.entries.forEach { entry ->
-                    val label: String = if (entry.isMember) {
-                        stringResource(R.string.action_remove_from_named, entry.name)
-                    } else {
-                        stringResource(R.string.action_add_to_named, entry.name)
+                        is MenuLine.Membership -> submenu = line
                     }
-                    DropdownMenuItem(
-                        text = { Text(label, style = RecitTheme.typography.content400, color = RecitTheme.colors.foregroundDefault, maxLines = 2) },
-                        leadingIcon = {
-                            Icon(if (entry.isMember) Icons.Filled.RemoveCircleOutline else Icons.Filled.Add, contentDescription = null, tint = iconTint)
-                        },
-                        onClick = {
-                            submenu = null
-                            open.onToggle(entry)
-                        },
-                    )
+                },
+            )
+        }
+    }
+    val open: MenuLine.Membership? = submenu.takeIf { expanded }
+    DropdownMenu(expanded = open != null, onDismissRequest = close, containerColor = RecitTheme.colors.backgroundRaised) {
+        if (open != null) {
+            DropdownMenuItem(
+                text = { Text(open.label, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault) },
+                leadingIcon = {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back), tint = iconTint)
+                },
+                onClick = { submenu = null },
+            )
+            HorizontalDivider()
+            open.entries.forEach { entry ->
+                val label: String = if (entry.isMember) {
+                    stringResource(R.string.action_remove_from_named, entry.name)
+                } else {
+                    stringResource(R.string.action_add_to_named, entry.name)
                 }
-                if (open.entries.isNotEmpty()) HorizontalDivider()
                 DropdownMenuItem(
-                    text = { Text(open.creationLabel, style = RecitTheme.typography.content400, color = RecitTheme.colors.foregroundDefault) },
-                    leadingIcon = { Icon(Icons.Filled.AddCircleOutline, contentDescription = null, tint = iconTint) },
+                    text = { Text(label, style = RecitTheme.typography.content400, color = RecitTheme.colors.foregroundDefault, maxLines = 2) },
+                    leadingIcon = {
+                        Icon(if (entry.isMember) Icons.Filled.RemoveCircleOutline else Icons.Filled.Add, contentDescription = null, tint = iconTint)
+                    },
                     onClick = {
-                        submenu = null
-                        open.onCreate()
+                        close()
+                        open.onToggle(entry)
                     },
                 )
             }
+            if (open.entries.isNotEmpty()) HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text(open.creationLabel, style = RecitTheme.typography.content400, color = RecitTheme.colors.foregroundDefault) },
+                leadingIcon = { Icon(Icons.Filled.AddCircleOutline, contentDescription = null, tint = iconTint) },
+                onClick = {
+                    close()
+                    open.onCreate()
+                },
+            )
         }
     }
 }

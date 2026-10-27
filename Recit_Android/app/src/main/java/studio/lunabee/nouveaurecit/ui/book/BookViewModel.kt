@@ -21,12 +21,8 @@ import studio.lunabee.nouveaurecit.data.db.AuthorEntity
 import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.EditionWithWorks
 import studio.lunabee.nouveaurecit.data.db.ItemRow
-import studio.lunabee.nouveaurecit.data.db.ShelfWithItems
-import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.db.WorkEntity
-import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.data.model.TransactionType
-import studio.lunabee.nouveaurecit.data.model.Visibility
 import studio.lunabee.nouveaurecit.network.NetworkError
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 
@@ -45,6 +41,10 @@ data class BookUiState(
 ) {
     /** Listes hold works: an edition behind several works offers no list menu at all. */
     val singleWorkUri: String? get() = works.singleOrNull()?.uri
+
+    /** What the « … » menu reads; `null` until the edition is on screen. */
+    val actions: BookActionsState?
+        get() = edition?.let { BookActionsState(it.uri, myItem?.item?.id, myShelves, myLists, singleWorkUri) }
 }
 
 /** `BookViewModel.ViewState`. */
@@ -68,9 +68,6 @@ sealed interface SummaryState {
     data object Empty : SummaryState
 }
 
-/** `MembershipMenuEntry`: one étagère or list of the « … » menu, and whether the book is in it. */
-data class MembershipEntry(val id: String, val name: String, val isMember: Boolean)
-
 /**
  * `Features/Book/BookViewModel.swift` + the reads of `BookDetailView` and `BookActions`: resolves a
  * [BookAnchor] to an edition — cache first, then a refresh that upserts in place — and exposes
@@ -93,51 +90,16 @@ class BookViewModel(
 
     private val editionUri: Flow<String?> = phase.map { (it as? BookPhase.Loaded)?.editionUri }.distinctUntilChanged()
 
-    private val editionWithWorks: Flow<EditionWithWorks?> = editionUri.flatMapLatest { uri ->
-        uri?.let(container.entities.entities::observeEditionWithWorks) ?: flowOf(null)
-    }
+    /** The « … » menu's reads and writes, shared with the long press of a book row. */
+    val actions: BookActions = BookActions(container, editionUri)
+
+    private val editionWithWorks: Flow<EditionWithWorks?> = actions.editionWithWorks
 
     private val authors: Flow<List<AuthorEntity>> = editionWithWorks
         .map { it?.works.orEmpty().map(WorkEntity::uri) }
         .distinctUntilChanged()
         .flatMapLatest { uris -> if (uris.isEmpty()) flowOf(emptyList()) else container.entities.entities.observeAuthorsOfWorks(uris) }
         .map { list -> list.distinctBy { it.uri }.sortedBy { it.name } }
-
-    private val items: Flow<List<ItemRow>> = editionUri.flatMapLatest { uri ->
-        uri?.let(container.inventory::observeItemsOfEdition) ?: flowOf(emptyList())
-    }
-
-    private val myUserId: Flow<String?> = container.users.myUserId
-
-    private val ownership: Flow<Pair<ItemRow?, List<ItemRow>>> = combine(items, myUserId) { rows, me ->
-        val mine: ItemRow? = rows.firstOrNull { me != null && it.item.ownerId == me }
-        mine to rows.filter { it.item.ownerId != me && it.owner != null }
-    }
-
-    private val shelves: Flow<List<MembershipEntry>> = combine(myUserId, ownership.map { it.first?.item?.id }.distinctUntilChanged()) { me, itemId ->
-        me to itemId
-    }.flatMapLatest { (me, itemId) ->
-        if (me == null || itemId == null) {
-            flowOf(emptyList())
-        } else {
-            combine(container.shelves.observeShelvesOf(me), container.shelves.observeShelfIdsOf(itemId)) { all: List<ShelfWithItems>, memberIds: List<String> ->
-                all.map { MembershipEntry(it.shelf.id, it.shelf.name, it.shelf.id in memberIds) }
-            }
-        }
-    }
-
-    private val lists: Flow<List<MembershipEntry>> = combine(
-        container.lists.observeLists(),
-        editionWithWorks.map { it?.works?.singleOrNull()?.uri }.distinctUntilChanged(),
-    ) { all, workUri ->
-        if (workUri == null) {
-            emptyList()
-        } else {
-            all.filter { it.list.type == EntityListType.Work }
-                .sortedBy { it.list.name.lowercase() }
-                .map { list -> MembershipEntry(list.list.id, list.list.name, list.elements.any { it.uri == workUri }) }
-        }
-    }
 
     private val summary: Flow<SummaryState> = editionWithWorks
         .map { it?.edition?.uri to it?.works?.firstOrNull()?.uri }
@@ -155,15 +117,15 @@ class BookViewModel(
             }
         }
 
-    private val membership: Flow<Pair<List<MembershipEntry>, List<MembershipEntry>>> = combine(shelves, lists) { s, l -> s to l }
+    private val membership: Flow<Pair<List<MembershipEntry>, List<MembershipEntry>>> = combine(actions.myShelves, actions.myLists) { s, l -> s to l }
 
-    private val content: Flow<BookUiState> = combine(editionWithWorks, authors, ownership, summary, membership) { edition, authorList, (mine, others), summaryState, (shelfEntries, listEntries) ->
+    private val content: Flow<BookUiState> = combine(editionWithWorks, authors, actions.ownership, summary, membership) { edition, authorList, owned, summaryState, (shelfEntries, listEntries) ->
         BookUiState(
             edition = edition?.edition,
             works = edition?.works.orEmpty(),
             authors = authorList,
-            myItem = mine,
-            othersItems = others,
+            myItem = owned.mine,
+            othersItems = owned.others,
             summary = summaryState,
             myShelves = shelfEntries,
             myLists = listEntries,
@@ -247,56 +209,12 @@ class BookViewModel(
 
     // Actions ---------------------------------------------------------------------------------
 
-    fun toggleShelf(entry: MembershipEntry) {
-        val itemId: String = state.value.myItem?.item?.id ?: return
-        backgroundScope.launch {
-            if (entry.isMember) container.shelves.removeItem(entry.id, itemId) else container.shelves.addItem(entry.id, itemId)
-        }
-    }
-
-    /** Adding is optimistic; removing is server-first, so it answers whether it worked. */
-    suspend fun toggleList(entry: MembershipEntry): Boolean {
-        val workUri: String = state.value.singleWorkUri ?: return false
-        return if (entry.isMember) {
-            report { container.lists.removeEntities(entry.id, listOf(workUri)) }
-        } else {
-            container.lists.addEntities(entry.id, listOf(workUri))
-            true
-        }
-    }
-
-    /** Server-first: `true` once the server said `ok` and the row is gone. */
-    suspend fun removeMyItem(): Boolean {
-        val itemId: String = state.value.myItem?.item?.id ?: return false
-        return report { container.inventory.removeItem(itemId) }
-    }
-
-    /** `POST /api/items`, server-first. [AddOutcome.NoUser] is said by the screen; a failure is reported. */
-    suspend fun addToInventory(): AddOutcome {
-        val uri: String = state.value.edition?.uri ?: return AddOutcome.Failed
-        val me: UserEntity = container.users.myUser() ?: return AddOutcome.NoUser
-        val ok: Boolean = report { container.inventory.postNewItem(uri, me, TransactionType.Inventorying, listOf(Visibility.Friends)) }
-        return if (ok) AddOutcome.Added else AddOutcome.Failed
-    }
-
     fun commitNotes(itemId: String, details: String) {
         backgroundScope.launch { container.inventory.updateDetails(itemId, details) }
     }
 
     fun updateTransaction(itemId: String, type: TransactionType) {
         backgroundScope.launch { container.inventory.updateTransaction(itemId, type) }
-    }
-
-    enum class AddOutcome { Added, NoUser, Failed }
-
-    private suspend fun report(block: suspend () -> Unit): Boolean = try {
-        block()
-        true
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (error: Exception) {
-        container.errorReporter.report(error)
-        false
     }
 
     private suspend fun <T> quietly(block: suspend () -> T): T? = try {

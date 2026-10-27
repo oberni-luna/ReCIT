@@ -12,7 +12,7 @@ for a later version: a new endpoint or SDK changes the form.
 | Package name | `studio.lunabee.nouveaurecit.android` (permanent once uploaded) |
 | Debug package | `studio.lunabee.nouveaurecit.android.dev` |
 | Name | Ex-libris |
-| Default language | fr-FR (the app exists only in French) |
+| Default language | en-US for the listing, with a fr-FR translation; the app itself exists only in French |
 | Price | Free, no ads, no in-app purchase |
 | Signing | Play App Signing; the upload key's path and passwords are read from `~/.gradle/gradle.properties` (`EXLIBRIS_UPLOAD_*`, see `app/build.gradle.kts`) |
 

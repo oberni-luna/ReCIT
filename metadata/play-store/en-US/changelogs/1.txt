@@ -1,1 +1,1 @@
-First release of Ex-libris on Android: scanner, shelves, search, lists and a network of readers.
+First release of Ex-libris on Android: scanner, shelves, search, lists, friends and groups.

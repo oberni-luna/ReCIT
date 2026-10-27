@@ -1,1 +1,1 @@
-Première version d'Ex-libris sur Android : scanner, étagères, recherche, listes et réseau de lecteur·ices.
+Première version d'Ex-libris sur Android : scanner, étagères, recherche, listes, ami·es et groupes.

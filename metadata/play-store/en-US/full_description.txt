@@ -12,6 +12,9 @@ One field searches your books, your friends' books and the whole inventaire.io c
 BUILD A NETWORK OF READERS
 Invite your friends, see what they have just shelved, and browse the shelves they share.
 
+JOIN GROUPS
+A book club, a family, a team: join a group, answer an invitation, or start your own and invite people to it.
+
 MAKE LISTS
 Books you want to read, favourites, a bibliography: gather works and authors into lists.
 

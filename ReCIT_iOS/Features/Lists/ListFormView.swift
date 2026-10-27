@@ -146,6 +146,7 @@ struct ListFormView: View {
                 .listSectionSeparator(.hidden)
             }
             .navigationTitle(isCreating ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.close", systemImage: "xmark") {

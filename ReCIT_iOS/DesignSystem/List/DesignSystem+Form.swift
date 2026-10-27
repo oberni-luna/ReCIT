@@ -9,6 +9,10 @@ extension DesignSystem {
     ///
     /// `backgroundForm` behind, `backgroundFormCell` under every row: grey under white in
     /// light, black under grey in dark. A row that sets its own `listRowBackground` keeps it.
+    ///
+    /// The title is always inline: a large one says nothing the form's first field does not,
+    /// and on a wide screen it sat at the bar's margin while the rows narrowed to the readable
+    /// column.
     struct Form<Content: View>: View {
         @ViewBuilder let content: Content
 
@@ -18,6 +22,8 @@ extension DesignSystem {
                     .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
             }
             .applyListBackground(.backgroundForm)
+            .readableContentMargins()
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }

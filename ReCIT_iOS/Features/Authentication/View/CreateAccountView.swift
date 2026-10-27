@@ -144,9 +144,10 @@ struct CreateAccountView: View {
 
             Spacer(minLength: .zero)
         }
+        // Held to a readable column, centred, on a screen wider than a phone.
+        .readableWidth()
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
-        .frame(maxWidth: .infinity)
     }
 
     private var actionsBar: some View {
@@ -168,6 +169,7 @@ struct CreateAccountView: View {
                 .tint(.foregroundTinted)
                 .multilineTextAlignment(.center)
         }
+        .readableWidth()
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
         .background { AuthActionsBackground() }

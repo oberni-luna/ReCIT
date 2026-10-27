@@ -79,6 +79,7 @@ struct BookDetailView: View {
                     bibliographicDataSection(edition: edition)
                 }
                 .applyListBackground()
+                .readableContentMargins()
                 // Keyed on the works rather than on the edition, because a cached edition can
                 // gain a work when the background refresh lands, and that new work needs asking
                 // about too.

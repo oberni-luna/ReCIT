@@ -147,9 +147,10 @@ struct LoginView: View {
 
             Spacer(minLength: .zero)
         }
+        // Held to a readable column, centred, on a screen wider than a phone.
+        .readableWidth()
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
-        .frame(maxWidth: .infinity)
     }
 
     private var actionsBar: some View {
@@ -167,6 +168,7 @@ struct LoginView: View {
         // refusal — and inventaire.io rate-limits sign-ins, so that refusal is not free.
         .disabled(username.isEmpty)
         .accessibilityIdentifier("e2e.login.submit")
+        .readableWidth()
         .padding(.horizontal, .medium)
         .padding(.vertical, .large)
         .background { AuthActionsBackground() }

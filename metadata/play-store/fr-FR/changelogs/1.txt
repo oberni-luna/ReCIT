@@ -1,1 +1,1 @@
-Première version d'Ex-libris sur Android : scanner, étagères, recherche, listes, ami·es et groupes.
+Première version Android d’Ex-libris, l’app mobile qui s’appuie sur inventaire.io pour construire une base de données bibliographique Open Data.

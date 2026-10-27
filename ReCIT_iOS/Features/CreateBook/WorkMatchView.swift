@@ -57,7 +57,7 @@ struct WorkMatchView: View {
     }
 
     var body: some View {
-        Form {
+        DesignSystem.Form {
             if let failure {
                 Section {
                     CreateBookFailureBanner(failure: failure)
@@ -108,7 +108,6 @@ struct WorkMatchView: View {
                 )
             }
         }
-        .applyListBackground()
         .navigationTitle(String(localized: "create_book.work.title"))
         .navigationBarTitleDisplayMode(.inline)
         .bibliographicDataHelpButton()

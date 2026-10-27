@@ -67,7 +67,7 @@ struct ListFormView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            DesignSystem.Form {
                 // Not asked when the book has already answered: a list opened from a book
                 // holds that book's work, and the value is forced in the initializer.
                 if isCreating, isFilingIntoNewList == false {
@@ -145,7 +145,6 @@ struct ListFormView: View {
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
             }
-            .applyListBackground()
             .navigationTitle(isCreating ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

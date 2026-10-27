@@ -34,7 +34,7 @@ struct CreateGroupView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            DesignSystem.Form {
                 Section {
                     TextField("groups.form.name", text: $name)
                         .textStyle(.content300)
@@ -73,7 +73,6 @@ struct CreateGroupView: View {
                     }
                 }
             }
-            .applyListBackground()
             .navigationTitle("groups.form.new")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

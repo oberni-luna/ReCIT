@@ -27,7 +27,7 @@ struct BibliographicDataHelpView: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            DesignSystem.FormList {
                 BibliographicDataHelpParagraph(
                     header: "create_book.help.what",
                     text: "create_book.help.what_body"
@@ -59,7 +59,6 @@ struct BibliographicDataHelpView: View {
                     CreateBookSectionHeader("create_book.help.further")
                 }
             }
-            .applyListBackground()
             .navigationTitle(String(localized: "create_book.notice.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

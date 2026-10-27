@@ -61,7 +61,7 @@ struct TransactionFormView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            DesignSystem.Form {
                 Section { } header: {
                     Text(.transactionFormHeader(transaction.item.edition?.title ?? "", transaction.owner.username))
                         .textStyle(.title50)
@@ -106,7 +106,6 @@ struct TransactionFormView: View {
                     .listSectionSeparator(.hidden)
                 }
             }
-            .applyListBackground()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.close", systemImage: "xmark") {

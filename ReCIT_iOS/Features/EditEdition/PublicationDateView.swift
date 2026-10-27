@@ -28,7 +28,7 @@ struct PublicationDateView: View {
     }
 
     var body: some View {
-        Form {
+        DesignSystem.Form {
             Section {
                 Picker("edit_edition.date.precision", selection: $date.precision) {
                     Text("edit_edition.date.year").tag(PublicationDate.Precision.year)
@@ -70,7 +70,6 @@ struct PublicationDateView: View {
                 }
             }
         }
-        .applyListBackground()
         .navigationTitle(String(localized: String.LocalizationValue(EditionProperty.publicationDate.label)))
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: date) { _, newValue in

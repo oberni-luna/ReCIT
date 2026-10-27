@@ -2,6 +2,13 @@
 
 Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ; Figma en est le reflet.
 
+- **Passe du 2026-10-27 — le fond des formulaires** : deux variables nouvelles dans `Color`,
+  `background/form` (`background/secondary` en clair, `background/default` en sombre) et `background/form-cell`
+  (l'inverse : `background/default` / `background/secondary`). En sombre, un formulaire passe d'un fond `gray/800`
+  sous des cartes noires à un fond noir sous des cartes `gray/800`, comme les listes groupées d'iOS ; en clair rien ne
+  bouge. `Form / Group` (`702:520`) et le `contenu` de `Form / Swipe Row` (`757:608`) sont sur `background/form-cell` ;
+  la `feuille` de 40 écrans de formulaire est sur `background/form`. Passés au code le même jour :
+  `DesignSystem.Form` et `DesignSystem.FormList` (D-FF1, résolue). Détail en fin de fichier.
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
 - **Proposition du 2026-10-25 — `Modifier l'édition · Toutes les données`** (`750:2508`, page `Inventaire`, sous
@@ -432,7 +439,7 @@ cadre sans qu'aucun contrôle ne le voie.
 | Collection | id | Modes (id) | Variables |
 |---|---|---|---|
 | `Primitives` | `VariableCollectionId:4:2` | `Value` (`4:0`) | 48 |
-| `Color` | `VariableCollectionId:4:3` | `Light` (`4:1`), `Dark` (`4:2`) | 30 |
+| `Color` | `VariableCollectionId:4:3` | `Light` (`4:1`), `Dark` (`4:2`) | 32 |
 | `Spacing` | `VariableCollectionId:4:4` | `Value` (`4:3`) | 11 |
 | `Radius` | `VariableCollectionId:4:5` | `Value` (`4:4`) | 8 |
 | `Sizing` | `VariableCollectionId:4:6` | `Value` (`4:5`) | 4 |
@@ -544,6 +551,8 @@ valeur fixe, donc pas de variable.
 | `background/secondary` | `gray/50` | `gray/800` | `.backgroundSecondary` |
 | `background/grouped` | `gray/50` | `gray/1000` | `.backgroundGrouped` — **code seul**, voir D-R8 |
 | `background/grouped-elevated` | `gray/50` | `gray/900` | `.backgroundGroupedElevated` — **code seul**, voir D-R8 |
+| `background/form` | → `background/secondary` | → `background/default` | `.backgroundForm` — voir D-FF1 |
+| `background/form-cell` | → `background/default` | → `background/secondary` | `.backgroundFormCell` — voir D-FF1 |
 | `background/tinted` | `green/100` | `green/900` | `.backgroundTinted` |
 | `background/tinted-inverse` | `green/800` | `green/200` | `.backgroundTintedInverse` |
 | `background/error` | `red/100` | **`gray/700`** | `.backgroundError` — voir D7 |
@@ -2444,3 +2453,61 @@ Les extensions sont éteintes par défaut : les écrans existants n'en voient ri
 
 Les 6 frames : **0 dessin brut**. Hors instances, seuls les conteneurs `feuille`, `formulaire`, `section · …` et
 `barre fixe (safeAreaInset)`. Pas de chevauchement de section sur `Inventaire`.
+
+---
+
+# Le fond des formulaires — passe du 2026-10-27
+
+En sombre, un formulaire était un fond `background/secondary` (`gray/800`) sous des cartes `background/default`
+(noir) : des trous noirs dans une feuille grise. Il prend désormais le fond par défaut, noir, et ses cartes passent
+en `gray/800` — la disposition des listes groupées d'iOS en sombre. Le clair ne change pas.
+
+## Les deux variables
+
+| Variable | id | Light | Dark | Code syntax iOS |
+|---|---|---|---|---|
+| `background/form` | `VariableID:779:10270` | alias `background/secondary` | alias `background/default` | `DesignSystem.Color.backgroundForm` |
+| `background/form-cell` | `VariableID:779:10271` | alias `background/default` | alias `background/secondary` | `DesignSystem.Color.backgroundFormCell` |
+
+Portées `FRAME_FILL`, `SHAPE_FILL`. **Exception à la convention des alias** : ce sont des alias vers deux
+*sémantiques*, pas vers des primitives. Le rôle est « le fond secondaire en clair, le fond par défaut en sombre » ;
+si l'un des deux bouge, le formulaire doit suivre. `background/form-cell` est nécessaire à `background/form` : sans
+elle, les cartes restent `background/default` et disparaissent sur le fond noir.
+
+## Ce qui est lié
+
+- **Composants** (`Screens · Components`) : le fond de `Form / Group` (`702:520`) et le `contenu` de
+  `Form / Swipe Row` (`757:608`) sont sur `background/form-cell`.
+- **Écrans** : la frame `feuille` des écrans suivants est sur `background/form`, et chaque instance de
+  `Form / Group` qui y surchargeait le fond est rebranchée sur `background/form-cell` (106 fonds de carte,
+  contenus de `Form / Swipe Row` compris).
+  - page `Scan et ajout` : `Nouveau livre · Tel que livré` (`L1` → `L8`), `Nouveau livre v2` (`V1` → `V13`) et
+    `Nouveau livre v2 dark` (ses 13 frames, `777:*`) ;
+  - page `Inventaire` : `Modifier l'édition · Toutes les données` (`E1` clair et sombre, `E2` → `E5`).
+- Les 12 frames de `Nouveau livre v2 dark` qui héritaient le mode Dark de leur section l'épinglent désormais sur
+  elles-mêmes, comme `V1` (`777:13442`) et `E1 · Dark` le faisaient déjà.
+
+## Ce qui ne l'est pas
+
+- **La `barre fixe (safeAreaInset)` et `Action Bar / Attached`** restent sur `background/default` : en sombre, la
+  barre d'« Enregistrer » se fond dans le fond noir, comme dans l'app.
+- **Les feuilles de `Doublons · ISBN et signalement`** (`A3`, `B2`, `B3`) : des feuilles, pas des formulaires, sans
+  `Form / Group`.
+- **« Modifier la liste »** (`ListFormView`) n'a pas de maquette ; c'est pourtant le premier formulaire où le fond
+  sombre se voit.
+- Les pages `Archive` et `Screens iPad`.
+
+## Divergence
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| D-FF1 | `DesignSystem/Tokens/Color.swift` | `background/form` et `background/form-cell` sont nés dans Figma : le code peignait les formulaires avec `.applyListBackground()` (`background/secondary`) et des cellules au fond système | **résolue** le 2026-10-27 — `.backgroundForm` et `.backgroundFormCell` dans `Color.swift`, posés par `DesignSystem.Form` (`DesignSystem/List/DesignSystem+Form.swift`) sur les 13 `Form` de l'app et par `DesignSystem.FormList` sur les 6 `List` poussées depuis un formulaire (`WorkSearchView`, `AuthorPickerView`, `BibliographicDataHelpView`, `EntityPickerView`, `EditionEntityValuesView`, `IdentifierCatalogView`). Un rang qui pose son propre `listRowBackground` le garde (l'encart des données). Vu sur le simulateur, clair et sombre, sur « Create new list » et « Edit edition ». Dans le code, les deux couleurs nomment leurs colorsets au lieu d'aliaser les sémantiques |
+
+## Ce que la construction a appris
+
+- **Une surcharge de fill sur une instance s'affiche avec sa couleur de base, résolue dans le mode du composant
+  maître.** Lier `background/form-cell` sur les cartes d'un écran sombre les a laissées **blanches** : la base
+  stockée était la valeur claire. La feuille, simple frame, s'est résolue en noir. Épingler le mode sur la frame
+  n'a rien changé ; seule la base résolue en Dark (le `paint(token, MODES.Dark)` du préambule) corrige. Les écrans
+  clairs et `E1 · Dark` sont sortis justes, ce dernier sans qu'on sache pourquoi : capturer chaque mode.
+

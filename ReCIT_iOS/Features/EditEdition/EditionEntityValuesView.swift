@@ -16,7 +16,7 @@ struct EditionEntityValuesView: View {
     let onAdd: () -> Void
 
     var body: some View {
-        List {
+        DesignSystem.FormList {
             Section {
                 ForEach(properties.entities(of: property)) { entity in
                     VStack(alignment: .leading, spacing: .xxSmall) {
@@ -46,7 +46,6 @@ struct EditionEntityValuesView: View {
                 CreateBookSectionFooter("edit_edition.values.footer")
             }
         }
-        .applyListBackground()
         .navigationTitle(String(localized: String.LocalizationValue(property.label)))
         .navigationBarTitleDisplayMode(.inline)
     }

@@ -14,7 +14,7 @@ struct IdentifierCatalogView: View {
     let onChoose: (EditionProperty) -> Void
 
     var body: some View {
-        List {
+        DesignSystem.FormList {
             Section {
                 ForEach(EditionProperty.properties(in: group)) { property in
                     Button {
@@ -32,7 +32,6 @@ struct IdentifierCatalogView: View {
                 CreateBookSectionFooter("edit_edition.identifiers.catalog_footer")
             }
         }
-        .applyListBackground()
         .navigationTitle(String(localized: group == .databases ? "edit_edition.databases.add" : "edit_edition.links.add"))
         .navigationBarTitleDisplayMode(.inline)
     }

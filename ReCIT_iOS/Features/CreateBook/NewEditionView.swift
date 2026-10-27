@@ -38,7 +38,7 @@ struct NewEditionView: View {
     let onAddIdentifier: (EditionProperty.Group) -> Void
 
     var body: some View {
-        Form {
+        DesignSystem.Form {
             if let failure {
                 Section {
                     CreateBookFailureBanner(failure: failure)
@@ -91,7 +91,6 @@ struct NewEditionView: View {
                 onAddIdentifier(.links)
             }
         }
-        .applyListBackground()
         .safeAreaInset(edge: .bottom) {
             FormActionBar {
                 CreateBookPublishFooter(

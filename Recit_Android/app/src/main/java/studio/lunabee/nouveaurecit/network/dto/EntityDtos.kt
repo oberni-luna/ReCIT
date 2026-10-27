@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.network.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -82,7 +83,8 @@ data class SearchResultDto(
     val label: String,
     val description: String? = null,
     val image: String? = null,
-    val score: Double? = null,
+    /** The server names it `_score`. Read as `score`, it was always `null`, and the search's sort by score did nothing. */
+    @SerialName("_score") val score: Double? = null,
 )
 
 /** `wdt:` properties read by the app — `Model/Books/WikidataProperty.swift`. */

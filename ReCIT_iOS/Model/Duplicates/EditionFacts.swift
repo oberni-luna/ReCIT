@@ -60,6 +60,7 @@ struct EditionFacts: Equatable, Hashable, Sendable {
             publisherUri: edition.publisherUri,
             year: edition.publicationYear,
             differentFrom: Set(edition.differentFromUris),
+            reportedMergeTargets: Set(edition.pendingMergeTargetUris),
             completeness: data.filter { $0 }.count
         )
     }

@@ -13,6 +13,9 @@ struct RootView: View {
     @State var userModel: UserModel
     @State var listModel: ListModel
     @State var entityModel: EntityModel
+    /// Duplicate editions on inventaire.io: their merge tasks, merging them, declaring them
+    /// different (PRD 0028).
+    @State var editionDuplicatesModel: EditionDuplicatesModel
     @State var searchModel: SearchModel
     @State var inventoryModel: InventoryModel
     @State var shelfModel: ShelfModel
@@ -69,6 +72,7 @@ struct RootView: View {
         _listModel = State(initialValue: ListModel(apiService: apiService, errorReporter: errorReporter))
         let entityModel: EntityModel = .init(apiService: apiService)
         _entityModel = State(initialValue: entityModel)
+        _editionDuplicatesModel = State(initialValue: EditionDuplicatesModel(apiService: apiService))
         _searchModel = State(initialValue: SearchModel(apiService: apiService))
         _inventoryModel = State(initialValue: InventoryModel(apiService: apiService, errorReporter: errorReporter))
         let shelfModel: ShelfModel = .init(apiService: apiService, errorReporter: errorReporter)
@@ -139,6 +143,7 @@ struct RootView: View {
                     .environment(userModel)
                     .environment(listModel)
                     .environment(entityModel)
+                    .environment(editionDuplicatesModel)
                     .environment(searchModel)
                     .environment(inventoryModel)
                     .environment(shelfModel)

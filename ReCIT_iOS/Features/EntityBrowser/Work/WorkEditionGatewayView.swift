@@ -20,6 +20,7 @@ import SwiftData
 
 struct WorkEditionGatewayView: View {
     @Environment(EntityModel.self) private var entityModel
+    @Environment(EditionDuplicatesModel.self) private var editionDuplicatesModel
     @Environment(\.modelContext) private var modelContext
 
     enum ViewState {
@@ -84,6 +85,7 @@ struct WorkEditionGatewayView: View {
             // publisher and date, and compares them (PRD 0028).
             try await entityModel.refreshWorkEditions(modelContext: modelContext, work: work)
             viewState = .loaded(work: work, editions: work.editions)
+            await editionDuplicatesModel.refreshPendingReports(modelContext: modelContext, work: work)
         } catch {
             if cached == nil {
                 viewState = .error(error: error)

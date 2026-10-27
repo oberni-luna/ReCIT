@@ -50,6 +50,11 @@ public class Edition: Identifiable, Entity {
     /// in either direction, is never proposed as a duplicate, and the server refuses to merge it.
     var differentFromUris: [String] = []
 
+    /// The editions inventaire.io's team has an open merge task for, this one being the edition
+    /// that would disappear (`GET /api/tasks/by-uris`). Not a claim: a successful answer replaces
+    /// it whole, so a closed task takes its « Doublon signalé » away. See PRD 0028.
+    var pendingMergeTargetUris: [String] = []
+
     @Relationship(deleteRule: .nullify, inverse: \InventoryItem.edition) var items: [InventoryItem] = []
 
     var authors: [Author] {

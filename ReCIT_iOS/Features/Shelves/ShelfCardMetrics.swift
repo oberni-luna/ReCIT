@@ -28,6 +28,19 @@ struct ShelfCardMetrics: Equatable {
     /// edge of the card.
     static let horizontalMargin: CGFloat = 24
 
+    /// The share of the screen a carousel card takes, so the next one peeks.
+    static let carouselShare: CGFloat = 0.86
+    /// The widest a carousel card grows: what the widest phone draws (0,86 × 430). Every size
+    /// above follows the width, so without a ceiling an unfolded iPhone Duo drew one étagère
+    /// over most of the screen — and, in landscape, a lone book some 400 pt tall.
+    static let maxCarouselCardWidth: CGFloat = 370
+
+    /// The card width the carousel gives a container `containerWidth` wide: its share, up to
+    /// the ceiling. A wider screen shows more étagères side by side rather than bigger ones.
+    static func carouselCardWidth(containerWidth: CGFloat) -> CGFloat {
+        min(containerWidth * carouselShare, maxCarouselCardWidth)
+    }
+
     /// Where a finger still counts as being on this étagère: the books, the plank, and the
     /// room above where a grown book reaches. In the card's own coordinates.
     var touchBox: CGRect {

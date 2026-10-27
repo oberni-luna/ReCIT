@@ -14,8 +14,8 @@ android {
         applicationId = "studio.lunabee.exlibris.android"
         minSdk = 28
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
     }
 
     // The upload key lives outside the repository: its path and passwords are read from

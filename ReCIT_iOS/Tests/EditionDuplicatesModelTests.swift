@@ -81,6 +81,46 @@ struct EditionDuplicatesModelTests {
         return .init(context: context, work: work, kept: kept, gone: gone)
     }
 
+    private func pair(_ store: Store) throws -> EditionDuplicatePair {
+        try #require(EditionDuplicateDetector.detect(store.work.editions.map(EditionFacts.init)).pairs.first)
+    }
+
+    // MARK: - « Ce ne sont pas les mêmes »
+
+    @Test("« Ce ne sont pas les mêmes » writes wdt:P1889 on the inv: edition, and the pair is gone at once")
+    func notTheSameWritesTheClaim() async throws {
+        let store: Store = try store()
+        let recorder: Recorder = .init()
+        let api: APIService = service(recorder: recorder) { _ in (200, #"{"ok":true}"#) }
+        let model: EditionDuplicatesModel = .init(apiService: api)
+
+        let task: Task<Void, Never>? = model.markNotTheSame(try pair(store), modelContext: store.context)
+        #expect(store.gone.differentFromUris == ["wd:Q1"])
+        #expect(EditionDuplicateDetector.detect(store.work.editions.map(EditionFacts.init)).pairs.isEmpty)
+        await task?.value
+
+        let request: Sent = try #require(recorder.requests.first)
+        #expect(request.method == "PUT")
+        #expect(request.url.path == "/api/entities/update-claim")
+        let body: [String: String] = try JSONDecoder().decode([String: String].self, from: try #require(request.body))
+        #expect(body == ["uri": "inv:A", "property": "wdt:P1889", "new-value": "wd:Q1"])
+        #expect(store.gone.differentFromUris == ["wd:Q1"])
+    }
+
+    @Test("A refused claim brings the pair back and is reported")
+    func notTheSameRevertsOnFailure() async throws {
+        let store: Store = try store()
+        let reporter: AppErrorReporter = .init()
+        let api: APIService = service(recorder: .init()) { _ in (403, #"{"status_verbose":"forbidden"}"#) }
+        let model: EditionDuplicatesModel = .init(apiService: api, errorReporter: reporter)
+
+        await model.markNotTheSame(try pair(store), modelContext: store.context)?.value
+
+        #expect(store.gone.differentFromUris.isEmpty)
+        #expect(EditionDuplicateDetector.detect(store.work.editions.map(EditionFacts.init)).pairs.count == 1)
+        #expect(reporter.lastFailure != nil)
+    }
+
     // MARK: - Pending reports
 
     @Test("An open merge task tags both editions « Doublon signalé »")

@@ -2,8 +2,8 @@
 //  EditionDuplicatesModel.swift
 //  ReCIT_iOS
 //
-//  What « Éditions » asks inventaire.io about the duplicates it found: the merge tasks already
-//  waiting on them. PRD 0028.
+//  What « Éditions » asks inventaire.io about the duplicates it found, and what it tells it: the
+//  merge tasks already waiting on them, and « these two are not the same ». PRD 0028.
 //
 
 import Foundation
@@ -11,11 +11,61 @@ import SwiftData
 
 @MainActor
 @Observable
-final class EditionDuplicatesModel {
+final class EditionDuplicatesModel: OptimisticMutating {
     private let apiService: APIServicing
+    var errorReporter: AppErrorReporter?
 
-    init(apiService: APIServicing) {
+    init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
+        self.errorReporter = errorReporter
+    }
+
+    // MARK: - « Ce ne sont pas les mêmes »
+
+    /// Declares the two editions of `pair` different on inventaire.io: `wdt:P1889` (« different
+    /// from »), which the server accepts on an edition, written on the pair's `inv:` edition —
+    /// the one that would have disappeared, when both are. Everybody stops being offered the pair,
+    /// and the server will refuse to merge it.
+    ///
+    /// Optimistic (ADR 0001, invariant 3): a claim added in place has a clean inverse. The pair
+    /// leaves the review at once; a refusal brings it back and is reported.
+    @discardableResult
+    func markNotTheSame(_ pair: EditionDuplicatePair, modelContext: ModelContext) -> Task<Void, Never>? {
+        let kept: EditionFacts = MergeChoice.proposedKeep(in: pair)
+        let dropped: EditionFacts = pair.other(than: kept.uri)
+        let subject: EditionFacts = dropped.mergeUri != nil ? dropped : kept
+        let subjectUri: String = subject.uri
+        guard let claimUri = subject.mergeUri,
+              let edition = try? modelContext.fetch(FetchDescriptor<Edition>(predicate: #Predicate { $0.uri == subjectUri })).first
+        else { return nil }
+
+        let other: String = pair.other(than: subject.uri).uri
+        guard edition.differentFromUris.contains(other) == false else { return nil }
+        let update: EditionClaimUpdate = .init(
+            uri: claimUri,
+            property: WikidataProperty.differentFrom.rawValue,
+            oldValue: nil,
+            newValue: .string(other)
+        )
+
+        return optimistic(
+            modelContext,
+            subjects: [edition],
+            apply: {
+                edition.differentFromUris.append(other)
+            },
+            revert: {
+                edition.differentFromUris.removeAll { $0 == other }
+            },
+            request: { [apiService] in
+                let _: OkStatusDTO? = try await apiService.send(
+                    toEndpoint: "/api/entities/update-claim",
+                    method: "PUT",
+                    payload: update,
+                    debug: false
+                )
+            }
+        )
     }
 
     // MARK: - Copies

@@ -31,11 +31,14 @@ struct EditionDifferencesSection: View {
                 .textStyle(.action200)
                 .foregroundStyle(.foregroundSecondary)
         } footer: {
-            if comparison.sameProperties.isEmpty == false {
-                Text("duplicates.review.same \(comparison.sameProperties.map(Self.inlineName).formatted(.list(type: .and)))")
-                    .textStyle(.footnote200)
-                    .foregroundStyle(.foregroundSecondary)
+            VStack(alignment: .leading, spacing: .small) {
+                if comparison.sameProperties.isEmpty == false {
+                    Text("duplicates.review.same \(comparison.sameProperties.map(Self.inlineName).formatted(.list(type: .and)))")
+                }
+                Text("duplicates.review.public_note")
             }
+            .textStyle(.footnote200)
+            .foregroundStyle(.foregroundSecondary)
         }
     }
 

@@ -72,7 +72,7 @@ struct RootView: View {
         _listModel = State(initialValue: ListModel(apiService: apiService, errorReporter: errorReporter))
         let entityModel: EntityModel = .init(apiService: apiService)
         _entityModel = State(initialValue: entityModel)
-        _editionDuplicatesModel = State(initialValue: EditionDuplicatesModel(apiService: apiService))
+        _editionDuplicatesModel = State(initialValue: EditionDuplicatesModel(apiService: apiService, errorReporter: errorReporter))
         _searchModel = State(initialValue: SearchModel(apiService: apiService))
         _inventoryModel = State(initialValue: InventoryModel(apiService: apiService, errorReporter: errorReporter))
         let shelfModel: ShelfModel = .init(apiService: apiService, errorReporter: errorReporter)

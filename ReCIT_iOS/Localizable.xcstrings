@@ -3333,6 +3333,22 @@
         }
       }
     },
+    "duplicates.review.public_note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Both answers are written on inventaire.io, for everybody: a merge cannot be undone from the app, and two editions declared different are no longer offered to anyone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les deux réponses s’écrivent sur inventaire.io, pour tout le monde : une fusion ne se défait pas depuis l’app, et deux éditions déclarées différentes ne sont plus proposées à personne."
+          }
+        }
+      }
+    },
     "duplicates.review.quoted %@" : {
       "localizations" : {
         "en" : {

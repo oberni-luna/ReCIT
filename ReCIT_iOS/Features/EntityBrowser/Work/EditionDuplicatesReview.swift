@@ -18,6 +18,7 @@ import SwiftData
 
 struct EditionDuplicatesReview: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(EditionDuplicatesModel.self) private var duplicatesModel
 
     @Query private var works: [Work]
@@ -87,12 +88,16 @@ struct EditionDuplicatesReview: View {
                     .disabled(true)
 
                     Button {
+                        guard let pair = remaining.first else { return }
+                        duplicatesModel.markNotTheSame(pair, modelContext: modelContext)
+                        decided += 1
                     } label: {
                         Text("duplicates.review.not_the_same")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.secondary())
-                    .disabled(true)
+                    .disabled(remaining.isEmpty)
+                    .accessibilityIdentifier("e2e.duplicates.notTheSame")
                 }
             }
         }

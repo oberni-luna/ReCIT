@@ -9,8 +9,8 @@ for a later version: a new endpoint or SDK changes the form.
 | Field | Value |
 |---|---|
 | Account | Lunabee Studio (organisation — no 12-tester closed test required) |
-| Package name | `studio.lunabee.nouveaurecit.android` (permanent once uploaded) |
-| Debug package | `studio.lunabee.nouveaurecit.android.dev` |
+| Package name | `studio.lunabee.exlibris.android` (permanent once uploaded) |
+| Debug package | `studio.lunabee.exlibris.android.dev` |
 | Name | Ex-libris |
 | Default language | en-US for the listing, with a fr-FR translation; the app itself exists only in French |
 | Price | Free, no ads, no in-app purchase |

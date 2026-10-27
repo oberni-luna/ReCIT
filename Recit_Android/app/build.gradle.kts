@@ -11,7 +11,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "studio.lunabee.nouveaurecit.android"
+        applicationId = "studio.lunabee.exlibris.android"
         minSdk = 28
         targetSdk = 37
         versionCode = 1

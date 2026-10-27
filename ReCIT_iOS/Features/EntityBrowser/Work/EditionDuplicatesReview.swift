@@ -4,7 +4,8 @@
 //
 //  « Doublon 1 sur 2 » — the duplicates of « Éditions », one pair at a time: which edition to
 //  keep, what differs between the two, and the two answers at the foot of the screen.
-//  « Suivant » leaves the pair for later. When no pair is left the screen goes back to the list.
+//  « Suivant » leaves the pair for later. When no pair is left the screen goes back to the list,
+//  where one SnackBar says what was merged and what was reported.
 //  `C2 · Doublon probable · 1 sur 2` (`770:5186`) in the Figma file.
 //
 //  The pairs are found again from the store at every render, not handed in: once a pair is
@@ -13,13 +14,16 @@
 //  See PRD 0028.
 //
 
+import LBSnackBar
 import SwiftUI
 import SwiftData
 
 struct EditionDuplicatesReview: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.snackBar) private var snackBar
     @Environment(EditionDuplicatesModel.self) private var duplicatesModel
+    @Environment(AppErrorReporter.self) private var errorReporter
 
     @Query private var works: [Work]
 
@@ -30,6 +34,9 @@ struct EditionDuplicatesReview: View {
     /// The edition the reader chose to keep, by pair id. The proposal otherwise.
     @State private var keptUris: [String: String] = [:]
     @State private var copyCounts: [String: Int] = [:]
+    /// A merge is on its way: nothing else is sent until inventaire.io has answered.
+    @State private var isMerging: Bool = false
+    @State private var summary: DuplicatesReviewSummary = .init()
 
     init(workUri: String) {
         _works = Query(filter: #Predicate<Work> { $0.uri == workUri })
@@ -79,13 +86,17 @@ struct EditionDuplicatesReview: View {
         .safeAreaInset(edge: .bottom) {
             FormActionBar {
                 VStack(spacing: .xSmall) {
-                    Button {
-                    } label: {
-                        Text("duplicates.review.merge")
-                            .frame(maxWidth: .infinity)
-                    }
+                    AsyncButton(
+                        action: { await merge(remaining.first) },
+                        actionOptions: [.disableButton, .showProgressView],
+                        label: {
+                            Text("duplicates.review.merge")
+                                .frame(maxWidth: .infinity)
+                        }
+                    )
                     .buttonStyle(.primary())
-                    .disabled(true)
+                    .disabled(remaining.isEmpty || isMerging)
+                    .accessibilityIdentifier("e2e.duplicates.merge")
 
                     Button {
                         guard let pair = remaining.first else { return }
@@ -96,15 +107,47 @@ struct EditionDuplicatesReview: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.secondary())
-                    .disabled(remaining.isEmpty)
+                    .disabled(remaining.isEmpty || isMerging)
                     .accessibilityIdentifier("e2e.duplicates.notTheSame")
                 }
             }
         }
+        .navigationBarBackButtonHidden(isMerging)
         .onChange(of: remaining.first?.id, initial: true) { _, id in
             if id == nil {
                 dismiss()
             }
+        }
+        .onDisappear {
+            if let message = summary.message {
+                snackBar.show {
+                    SnackBarView(title: message, onDismiss: nil)
+                }
+            }
+        }
+    }
+
+    /// Sends the merge of `pair` and waits for inventaire.io. The store changes only once it has
+    /// answered — see `EditionDuplicatesModel.merge`. A refusal is said in the SnackBar and leaves
+    /// the pair where it is.
+    private func merge(_ pair: EditionDuplicatePair?) async {
+        guard let pair, let work, isMerging == false else { return }
+        let keptUri: String = keptUri(in: pair)
+        let kept: EditionFacts = pair.first.uri == keptUri ? pair.first : pair.second
+
+        isMerging = true
+        defer { isMerging = false }
+        do {
+            let outcome: MergeOutcome = try await duplicatesModel.merge(
+                pair,
+                keeping: kept,
+                work: work,
+                modelContext: modelContext
+            )
+            summary.record(outcome)
+            decided += 1
+        } catch {
+            errorReporter.report(error)
         }
     }
 

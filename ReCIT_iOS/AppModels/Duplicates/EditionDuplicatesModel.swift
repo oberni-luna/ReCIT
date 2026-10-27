@@ -3,7 +3,8 @@
 //  ReCIT_iOS
 //
 //  What « Éditions » asks inventaire.io about the duplicates it found, and what it tells it: the
-//  merge tasks already waiting on them, and « these two are not the same ». PRD 0028.
+//  merge tasks already waiting on them, the merge itself, and « these two are not the same ».
+//  PRD 0028.
 //
 
 import Foundation
@@ -13,11 +14,100 @@ import SwiftData
 @Observable
 final class EditionDuplicatesModel: OptimisticMutating {
     private let apiService: APIServicing
+    /// Resynchronises the work after a merge. Optional so a test can leave the resync out.
+    private let entityModel: EntityModel?
     var errorReporter: AppErrorReporter?
 
-    init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
+    init(
+        apiService: APIServicing,
+        entityModel: EntityModel? = nil,
+        errorReporter: AppErrorReporter? = nil
+    ) {
         self.apiService = apiService
+        self.entityModel = entityModel
         self.errorReporter = errorReporter
+    }
+
+    // MARK: - Fusionner
+
+    /// Merges the edition of `pair` that is not `kept` into `kept`, on inventaire.io.
+    ///
+    /// **Not optimistic, on purpose.** A merge cannot be undone by this account — `revert-merge`
+    /// is for dataadmins — and it changes the public database everybody uses. So the server is
+    /// asked first, and the store follows only what it answered (ADR 0001's exception for
+    /// deletions, and the rule of the lists):
+    ///
+    /// - `.merged`: the copies held here of the edition that disappears are filed under the one
+    ///   kept, a work that opened on it opens on the one kept, the edition is deleted, and the
+    ///   work's editions are fetched again.
+    /// - `.reported`: the edition notes the task, and its row says « Doublon signalé ».
+    ///
+    /// Throws `MergeFailure` for a refusal; a `401` and any other failure go out as they came.
+    /// Either way the store is not touched.
+    func merge(
+        _ pair: EditionDuplicatePair,
+        keeping kept: EditionFacts,
+        work: Work,
+        modelContext: ModelContext
+    ) async throws -> MergeOutcome {
+        guard let request = MergeChoice.request(keeping: kept, in: pair) else { throw MergeFailure.refused }
+
+        let response: MergeResponseDTO?
+        do {
+            response = try await apiService.send(
+                toEndpoint: "/api/entities/merge",
+                method: "PUT",
+                payload: request,
+                debug: true
+            )
+        } catch {
+            throw MergeFailure.classify(error)
+        }
+        guard let response, let outcome = MergeOutcome(response: response) else {
+            throw NetworkError.badResponse
+        }
+
+        let goneUri: String = pair.other(than: kept.uri).uri
+        switch outcome {
+        case .merged:
+            try fold(editionUri: goneUri, into: kept.uri, modelContext: modelContext)
+            if let entityModel, work.isStillInTheStore {
+                try? await entityModel.refreshWorkEditions(modelContext: modelContext, work: work)
+            }
+        case .reported:
+            if let gone = edition(uri: goneUri, modelContext: modelContext),
+               gone.pendingMergeTargetUris.contains(request.to) == false {
+                gone.pendingMergeTargetUris.append(request.to)
+                try modelContext.save()
+            }
+        }
+        return outcome
+    }
+
+    /// What a merge the server made means for the store: the edition `editionUri` is now a
+    /// redirection to `keptUri`.
+    private func fold(editionUri: String, into keptUri: String, modelContext: ModelContext) throws {
+        guard let gone = edition(uri: editionUri, modelContext: modelContext) else { return }
+
+        if let kept = edition(uri: keptUri, modelContext: modelContext) {
+            for item in gone.items {
+                item.edition = kept
+            }
+            kept.mergeWorks(gone.works)
+        }
+        let preferring: [Work] = try modelContext.fetch(
+            FetchDescriptor<Work>(predicate: #Predicate { $0.preferredEditionUri == editionUri })
+        )
+        for work in preferring {
+            work.preferredEditionUri = keptUri
+        }
+
+        modelContext.delete(gone)
+        try modelContext.save()
+    }
+
+    private func edition(uri: String, modelContext: ModelContext) -> Edition? {
+        try? modelContext.fetch(FetchDescriptor<Edition>(predicate: #Predicate { $0.uri == uri })).first
     }
 
     // MARK: - « Ce ne sont pas les mêmes »
@@ -34,9 +124,8 @@ final class EditionDuplicatesModel: OptimisticMutating {
         let kept: EditionFacts = MergeChoice.proposedKeep(in: pair)
         let dropped: EditionFacts = pair.other(than: kept.uri)
         let subject: EditionFacts = dropped.mergeUri != nil ? dropped : kept
-        let subjectUri: String = subject.uri
         guard let claimUri = subject.mergeUri,
-              let edition = try? modelContext.fetch(FetchDescriptor<Edition>(predicate: #Predicate { $0.uri == subjectUri })).first
+              let edition = edition(uri: subject.uri, modelContext: modelContext)
         else { return nil }
 
         let other: String = pair.other(than: subject.uri).uri

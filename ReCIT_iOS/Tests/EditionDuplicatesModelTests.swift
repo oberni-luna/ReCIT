@@ -85,6 +85,120 @@ struct EditionDuplicatesModelTests {
         try #require(EditionDuplicateDetector.detect(store.work.editions.map(EditionFacts.init)).pairs.first)
     }
 
+    // MARK: - Fusionner
+
+    @Test("A merge sends { from, to } and, once done, files the copies under the edition kept and deletes the other")
+    func mergeFolds() async throws {
+        let store: Store = try store()
+        let item: InventoryItem = Fixture.inventoryItem(id: "I1", edition: store.gone)
+        store.context.insert(item)
+        store.work.preferredEditionUri = "inv:A"
+        try store.context.save()
+        let recorder: Recorder = .init()
+        let api: APIService = service(recorder: recorder) { _ in (200, #"{"ok":true}"#) }
+        let pair: EditionDuplicatePair = try pair(store)
+        let kept: EditionFacts = MergeChoice.proposedKeep(in: pair)
+
+        let outcome: MergeOutcome = try await EditionDuplicatesModel(apiService: api)
+            .merge(pair, keeping: kept, work: store.work, modelContext: store.context)
+
+        #expect(outcome == .merged)
+        let request: Sent = try #require(recorder.requests.first)
+        #expect(request.method == "PUT")
+        #expect(request.url.path == "/api/entities/merge")
+        let body: EditionMergeRequest = try JSONDecoder().decode(EditionMergeRequest.self, from: try #require(request.body))
+        #expect(body == .init(from: "inv:A", to: "wd:Q1"))
+        #expect(try store.context.fetch(FetchDescriptor<Edition>()).map(\.uri) == ["wd:Q1"])
+        #expect(item.edition?.uri == "wd:Q1")
+        #expect(store.work.preferredEditionUri == "wd:Q1")
+        #expect(store.work.editions.map(\.uri) == ["wd:Q1"])
+    }
+
+    @Test("A merge the server hands to its team deletes nothing and tags the pair « Doublon signalé »")
+    func mergeReported() async throws {
+        let store: Store = try store()
+        let api: APIService = service(recorder: .init()) { _ in (200, #"{"ok":true,"taskId":"T1"}"#) }
+        let pair: EditionDuplicatePair = try pair(store)
+
+        let outcome: MergeOutcome = try await EditionDuplicatesModel(apiService: api)
+            .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), work: store.work, modelContext: store.context)
+
+        #expect(outcome == .reported(taskId: "T1"))
+        #expect(try store.context.fetch(FetchDescriptor<Edition>()).count == 2)
+        #expect(store.gone.pendingMergeTargetUris == ["wd:Q1"])
+        #expect(EditionDuplicateDetector.detect(store.work.editions.map(EditionFacts.init)).tags["inv:A"] == .reported)
+    }
+
+    @Test(
+        "A refused merge is said in the reader's words and leaves the store as it was",
+        arguments: [
+            ("can't merge editions with different ISBNs", MergeFailure.differentIsbns),
+            ("entities have conflicting properties", .conflictingProperties),
+            ("entities are referring to one antoher", .relatedEntities),
+            ("'from' entity is already a redirection", .alreadyRedirected),
+            ("type don't match: edition / work", .refused)
+        ]
+    )
+    func mergeRefused(message: String, failure: MergeFailure) async throws {
+        let store: Store = try store()
+        let api: APIService = service(recorder: .init()) { _ in
+            (400, #"{"status":400,"status_verbose":"\#(message)"}"#)
+        }
+        let pair: EditionDuplicatePair = try pair(store)
+
+        await #expect(throws: failure) {
+            try await EditionDuplicatesModel(apiService: api)
+                .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), work: store.work, modelContext: store.context)
+        }
+        #expect(try store.context.fetch(FetchDescriptor<Edition>()).count == 2)
+        #expect(store.gone.pendingMergeTargetUris.isEmpty)
+    }
+
+    @Test("A 401 goes out as it came: a session gone is not a refusal")
+    func mergeUnauthorized() async throws {
+        let store: Store = try store()
+        let api: APIService = service(recorder: .init()) { _ in (401, "{}") }
+        let pair: EditionDuplicatePair = try pair(store)
+
+        do {
+            _ = try await EditionDuplicatesModel(apiService: api)
+                .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), work: store.work, modelContext: store.context)
+            Issue.record("A 401 must throw")
+        } catch NetworkError.badStatus(let code, _) {
+            #expect(code == 401)
+        }
+        #expect(try store.context.fetch(FetchDescriptor<Edition>()).count == 2)
+    }
+
+    @Test("Keeping the edition that cannot be kept sends nothing")
+    func mergeTheWrongWay() async throws {
+        let store: Store = try store()
+        let recorder: Recorder = .init()
+        let api: APIService = service(recorder: recorder) { _ in (200, #"{"ok":true}"#) }
+        let pair: EditionDuplicatePair = try pair(store)
+        let inv: EditionFacts = pair.first.isWikidata ? pair.second : pair.first
+
+        await #expect(throws: MergeFailure.refused) {
+            try await EditionDuplicatesModel(apiService: api)
+                .merge(pair, keeping: inv, work: store.work, modelContext: store.context)
+        }
+        #expect(recorder.requests.isEmpty)
+    }
+
+    @Test("The SnackBar counts what was merged and what was reported")
+    func summary() {
+        var summary: DuplicatesReviewSummary = .init()
+        #expect(summary.message == nil)
+
+        summary.record(.merged)
+        summary.record(.reported(taskId: "T1"))
+        summary.record(.reported(taskId: "T2"))
+
+        #expect(summary.merged == 1)
+        #expect(summary.reported == 2)
+        #expect(summary.message != nil)
+    }
+
     // MARK: - « Ce ne sont pas les mêmes »
 
     @Test("« Ce ne sont pas les mêmes » writes wdt:P1889 on the inv: edition, and the pair is gone at once")

@@ -2933,6 +2933,86 @@
         }
       }
     },
+    "duplicates.merge.error.already_merged" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This edition has already been merged into another one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette édition a déjà été fusionnée dans une autre."
+          }
+        }
+      }
+    },
+    "duplicates.merge.error.conflicting_properties" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refuses: their ISBNs contradict each other."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refuse : leurs ISBN se contredisent."
+          }
+        }
+      }
+    },
+    "duplicates.merge.error.different_isbns" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refuses: these two editions do not have the same ISBN."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refuse : ces deux éditions n’ont pas le même ISBN."
+          }
+        }
+      }
+    },
+    "duplicates.merge.error.refused" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refused the merge."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io a refusé la fusion."
+          }
+        }
+      }
+    },
+    "duplicates.merge.error.related" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refuses: one of the two editions refers to the other."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io refuse : l’une des deux éditions cite l’autre."
+          }
+        }
+      }
+    },
     "duplicates.property_inline.cover" : {
       "localizations" : {
         "en" : {
@@ -3393,6 +3473,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doublon %1$lld sur %2$lld"
+          }
+        }
+      }
+    },
+    "duplicates.summary.merged %lld" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "The two editions are now one."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pairs of editions are now one each."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Les deux éditions n’en font plus qu’une."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld paires d’éditions n’en font plus qu’une chacune."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "duplicates.summary.reported %lld" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A duplicate was reported to the inventaire.io team."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld duplicates were reported to the inventaire.io team."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un doublon est signalé à l’équipe d’inventaire.io."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld doublons sont signalés à l’équipe d’inventaire.io."
+                }
+              }
+            }
           }
         }
       }

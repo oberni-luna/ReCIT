@@ -92,6 +92,19 @@ struct ProfileView: View {
             }
 
             Section {
+                NavigationLink(value: NavigationDestination.accountSettings) {
+                    Text("profile.account_settings")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundTinted)
+                }
+                .accessibilityIdentifier("e2e.profile.account")
+            } header: {
+                Text("profile.settings")
+                    .textStyle(.action200)
+                    .foregroundStyle(.foregroundSecondary)
+            }
+
+            Section {
                 if syncStatus.shouldShowPlaceholder(.transactions) {
                     SyncingInlineRow()
                 } else {

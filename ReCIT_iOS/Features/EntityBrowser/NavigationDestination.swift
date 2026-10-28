@@ -38,6 +38,10 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case deleteAccount
     /// « Modifier le profil », pushed from the Profil for the account signed in.
     case editProfile(user: User)
+    /// « Compte et connexion », and the two screens it pushes.
+    case accountSettings
+    case changeEmail
+    case changePassword
     /// What inventaire.io is, and the app's place on it. Pushed from the Profil's
     /// « À propos d'inventaire.io » row; it carries nothing.
     case aboutInventaire
@@ -84,6 +88,12 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "deleteAccount"
         case .editProfile(let user):
             return "editProfile-\(user._id)"
+        case .accountSettings:
+            return "accountSettings"
+        case .changeEmail:
+            return "changeEmail"
+        case .changePassword:
+            return "changePassword"
         case .aboutInventaire:
             return "aboutInventaire"
         case .group(let id):
@@ -173,6 +183,12 @@ extension NavigationDestination {
           DeleteAccountView()
       case .editProfile(let user):
           EditProfileView(user: user)
+      case .accountSettings:
+          AccountSettingsView()
+      case .changeEmail:
+          ChangeEmailView()
+      case .changePassword:
+          ChangePasswordView()
       case .aboutInventaire:
           AboutInventaireView()
       case .group(let id):

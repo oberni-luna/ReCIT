@@ -38,6 +38,9 @@ final class UserModel: OptimisticMutating {
     /// tests can await completion; not observed by the UI.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
 
+    /// The same, for the last optimistic write to the account's settings.
+    @ObservationIgnored var inFlightAccountTask: Task<Void, Never>?
+
     init(
         apiService: APIServicing,
         errorReporter: AppErrorReporter? = nil,

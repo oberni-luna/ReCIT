@@ -95,7 +95,8 @@ struct EntityPickerView: View {
 
     /// Runs the search a beat after the last keystroke; a new query cancels this one.
     private func search() async {
-        guard let type = property.searchType, trimmedQuery.count >= 2 else {
+        let types: [SearchResultType] = property.searchTypes
+        guard types.isEmpty == false, trimmedQuery.count >= 2 else {
             results = []
             hasSearched = false
             return
@@ -104,7 +105,7 @@ struct EntityPickerView: View {
         try? await Task.sleep(for: EntityPickerView.debounce)
         guard Task.isCancelled == false else { return }
 
-        results = (try? await searchModel.searchEntity(query: trimmedQuery, entityTypes: [type])) ?? []
+        results = (try? await searchModel.searchEntity(query: trimmedQuery, entityTypes: types)) ?? []
         hasSearched = true
     }
 }

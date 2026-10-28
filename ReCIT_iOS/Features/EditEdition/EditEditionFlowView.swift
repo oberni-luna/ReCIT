@@ -7,6 +7,11 @@
 //  search for a work (`V2 · Quelle œuvre ?` of « Nouveau livre v2 »), « Modifier l'œuvre » and
 //  its author search, « Image depuis une URL », and the screens of the catalogue's properties.
 //
+//  A work inventaire.io has opens the whole of « Modifier l'œuvre » (`EditEntityView`), saved by
+//  its own « Enregistrer »; a work being created, or a Wikidata one, keeps the title and authors
+//  of `EditWorkView`, saved with the edition. The entities those screens change are held here,
+//  keyed by uri, for as long as their screen is on the stack.
+//
 //  A sheet with its own navigation stack rather than a screen pushed onto the book's: the book
 //  screen's stack belongs to its tab, and the form, like the creation's, has screens of its own
 //  to push and a « ? » that opens the help in a sheet of its own.
@@ -39,6 +44,11 @@ struct EditEditionFlowView: View {
     @State private var edit: EditionEdit?
     @State private var path: [EditEditionStep] = []
 
+    /// The works and people pushed over the form, as their screens change them.
+    @State private var entities: [String: EntityEdit] = [:]
+    /// What went wrong at the last save of each of them.
+    @State private var entityFailures: [String: CreateBookFailure] = [:]
+
     /// What went wrong at the last save, in the reader's terms. `nil` until something does.
     @State private var failure: CreateBookFailure?
 
@@ -65,7 +75,7 @@ struct EditEditionFlowView: View {
                             failure: failure,
                             onSave: save,
                             onAddWork: { path.append(.work) },
-                            onOpenWork: { path.append(.workDetail(id: $0)) },
+                            onOpenWork: openWork,
                             onPickCoverURL: { path.append(.coverFromURL) },
                             onOpenProperty: open,
                             onAddIdentifier: { path.append(.property(.identifierCatalog($0))) }
@@ -134,8 +144,32 @@ struct EditEditionFlowView: View {
                         push: { path.append(.property($0)) },
                         pop: { path.removeLast(min($0, path.count)) }
                     )
+                case .entity(let uri):
+                    EditEntityView(
+                        uri: uri,
+                        edit: entity(uri),
+                        failure: entityFailures[uri],
+                        onSave: { await saveEntity(uri) },
+                        onLeave: { popEntity(uri) },
+                        onOpenProperty: { property in
+                            path.append(.entityProperty(uri: uri, step: .opening(property, in: entities[uri]?.properties ?? .init())))
+                        },
+                        onPick: { path.append(.entityProperty(uri: uri, step: .picker(property: $0.uri))) },
+                        onAddIdentifier: { path.append(.entityProperty(uri: uri, step: .identifierCatalog($0))) },
+                        onOpenEntity: { path.append(.entity(uri: $0)) }
+                    )
+                case .entityProperty(let uri, let step):
+                    EditionPropertyDestination(
+                        step: step,
+                        properties: entityProperties(uri),
+                        push: { path.append(.entityProperty(uri: uri, step: $0)) },
+                        pop: { path.removeLast(min($0, path.count)) }
+                    )
                 }
             }
+        }
+        .onChange(of: path) { _, newPath in
+            forgetEntities(notIn: newPath)
         }
         .environment(\.showBibliographicDataHelp, .init { isShowingHelp = true })
         .sheet(isPresented: $isShowingHelp) {
@@ -143,6 +177,95 @@ struct EditEditionFlowView: View {
         }
         .task(id: attempt) {
             await load()
+        }
+    }
+
+    /// Pushes the screen of a work of « Édition de »: the whole of « Modifier l'œuvre » for one
+    /// inventaire.io has, the title and authors of `EditWorkView` for one being created or one
+    /// of Wikidata's.
+    private func openWork(_ id: UUID) {
+        guard let work = edit?.works.first(where: { $0.id == id }),
+              work.isNew == false, work.isEditable, let uri = work.uri else {
+            path.append(.workDetail(id: id))
+            return
+        }
+        path.append(.entity(uri: uri))
+    }
+
+    /// The work or person with this uri, as its screen changes it. `nil` until it is read.
+    private func entity(_ uri: String) -> Binding<EntityEdit?> {
+        Binding(
+            get: { entities[uri] },
+            set: { entities[uri] = $0 }
+        )
+    }
+
+    /// Its properties, for the screens pushed over it.
+    private func entityProperties(_ uri: String) -> Binding<EditionProperties> {
+        Binding(
+            get: { entities[uri]?.properties ?? .init() },
+            set: { entities[uri]?.properties = $0 }
+        )
+    }
+
+    /// Drops what the screens no longer on the stack were changing: going back to one reads it
+    /// afresh.
+    private func forgetEntities(notIn path: [EditEditionStep]) {
+        let shown: Set<String> = Set(path.compactMap { step in
+            guard case .entity(let uri) = step else { return nil }
+            return uri
+        })
+        for uri in entities.keys where shown.contains(uri) == false {
+            entities[uri] = nil
+            entityFailures[uri] = nil
+        }
+    }
+
+    /// Takes the entity's screen off the stack, with whatever it had pushed — after a save, or
+    /// dropping what was not saved.
+    private func popEntity(_ uri: String) {
+        guard let index = path.lastIndex(of: .entity(uri: uri)) else { return }
+        path.removeSubrange(index...)
+    }
+
+    /// Sends what the work's or the person's screen changed, shows it beneath, then goes back.
+    ///
+    /// A failure leaves the screen as it is, everything typed still there, and what did land
+    /// already moved out of what the next try sends.
+    private func saveEntity(_ uri: String) async {
+        guard let current = entities[uri] else { return }
+        entityFailures[uri] = nil
+
+        do {
+            let saved: EntityEdit = try await creationModel.saveEntity(current)
+            entities[uri] = saved
+            await show(saved)
+            popEntity(uri)
+        } catch let saveFailure as EntitySaveFailure {
+            entities[uri] = saveFailure.edit
+            entityFailures[uri] = .init(error: saveFailure.underlying)
+            Haptics.Notification.error.play()
+        } catch {
+            entityFailures[uri] = .init(error: error)
+            Haptics.Notification.error.play()
+        }
+    }
+
+    /// Shows a saved work or person on the screens beneath it, and in the store: a work's row in
+    /// « Édition de », a person's name wherever it is named.
+    private func show(_ saved: EntityEdit) async {
+        switch saved.catalogue {
+        case .work:
+            edit?.workSaved(saved.editionWork)
+            _ = try? await entityModel.refreshWork(modelContext: modelContext, uri: saved.uri)
+        case .human:
+            edit?.rename(uri: saved.uri, label: saved.displayName)
+            for uri in entities.keys where uri != saved.uri {
+                entities[uri]?.rename(uri: saved.uri, label: saved.displayName)
+            }
+            _ = try? await entityModel.refreshAuthor(modelContext: modelContext, uri: saved.uri)
+        case .edition:
+            break
         }
     }
 

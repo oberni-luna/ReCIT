@@ -13,10 +13,12 @@ import SwiftUI
 struct EditionIdentifiersSection: View {
     let group: EditionProperty.Group
     @Binding var properties: EditionProperties
+    /// What the section's foot says, when the catalogue is not an edition's.
+    var footer: LocalizedStringKey?
     let onAdd: () -> Void
 
     private var entries: [EditionIdentifierEntry] {
-        EditionProperty.properties(in: group).flatMap { property in
+        properties.catalogue.properties(in: group).flatMap { property in
             properties.values(of: property).compactMap(\.claim).map { EditionIdentifierEntry(property: property, value: $0) }
         }
     }
@@ -46,7 +48,7 @@ struct EditionIdentifiersSection: View {
         } header: {
             CreateBookSectionHeader(group == .databases ? "edit_edition.databases.header" : "edit_edition.links.header")
         } footer: {
-            CreateBookSectionFooter(group == .databases ? "edit_edition.databases.footer" : "edit_edition.links.footer")
+            CreateBookSectionFooter(footer ?? (group == .databases ? "edit_edition.databases.footer" : "edit_edition.links.footer"))
         }
     }
 

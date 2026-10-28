@@ -11,12 +11,14 @@ import SwiftUI
 
 struct IdentifierCatalogView: View {
     let group: EditionProperty.Group
+    /// The catalogue of the form it was pushed from: an edition's, a work's, a person's.
+    var catalogue: EditionProperty.Catalogue = .edition
     let onChoose: (EditionProperty) -> Void
 
     var body: some View {
         DesignSystem.FormList {
             Section {
-                ForEach(EditionProperty.properties(in: group)) { property in
+                ForEach(catalogue.properties(in: group)) { property in
                     Button {
                         onChoose(property)
                     } label: {

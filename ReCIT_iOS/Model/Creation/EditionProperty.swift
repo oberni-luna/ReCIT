@@ -115,6 +115,14 @@ struct EditionProperty: Hashable, Sendable, Identifiable {
         return choices
     }
 
+    /// The name of the choice `uri` is, as the form prints it. A value the list does not hold —
+    /// set on the website before the list changed — is printed as its uri.
+    func choiceName(of uri: String?) -> String? {
+        guard let uri else { return nil }
+        guard let choice = choices.first(where: { $0.uri == uri }) else { return uri }
+        return String(localized: String.LocalizationValue(choice.label))
+    }
+
     /// Whether an entity nobody has entered can be created from the form: a person, a
     /// publisher, a collection. A language is chosen among those Wikidata has, and nobody is
     /// created only to be told apart from (« À ne pas confondre avec »).

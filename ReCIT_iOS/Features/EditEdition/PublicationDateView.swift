@@ -12,19 +12,25 @@ import SwiftUI
 struct PublicationDateView: View {
     @Environment(\.dismiss) private var dismiss
 
+    /// The date set here: an edition's publication, a work's first one, a person's birth or death.
+    let property: EditionProperty
     @Binding var properties: EditionProperties
 
     @State private var date: PublicationDate
 
-    init(properties: Binding<EditionProperties>) {
+    init(
+        property: EditionProperty = .publicationDate,
+        properties: Binding<EditionProperties>
+    ) {
+        self.property = property
         _properties = properties
-        let current: PublicationDate? = properties.wrappedValue.literal(of: .publicationDate)?.string.flatMap(PublicationDate.init)
+        let current: PublicationDate? = properties.wrappedValue.literal(of: property)?.string.flatMap(PublicationDate.init)
         let thisYear: Int = Calendar(identifier: .gregorian).component(.year, from: .now)
         _date = State(initialValue: current ?? .init(year: thisYear, precision: .year))
     }
 
     private var hasDate: Bool {
-        properties.literal(of: .publicationDate) != nil
+        properties.literal(of: property) != nil
     }
 
     var body: some View {
@@ -64,16 +70,16 @@ struct PublicationDateView: View {
             if hasDate {
                 Section {
                     Button("edit_edition.date.remove", role: .destructive) {
-                        properties.setLiteral(nil, for: .publicationDate)
+                        properties.setLiteral(nil, for: property)
                         dismiss()
                     }
                 }
             }
         }
-        .navigationTitle(String(localized: String.LocalizationValue(EditionProperty.publicationDate.label)))
+        .navigationTitle(String(localized: String.LocalizationValue(property.label)))
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: date) { _, newValue in
-            properties.setLiteral(.string(newValue.claim), for: .publicationDate)
+            properties.setLiteral(.string(newValue.claim), for: property)
         }
     }
 }

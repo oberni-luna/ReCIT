@@ -19,4 +19,7 @@ enum GroupTransitionError: Error, Equatable {
     case missingTarget
     /// The last admin cannot leave while there are members left.
     case lastAdmin
+    /// A group with another admin cannot be emptied, and so not deleted: no one can remove an
+    /// admin but themselves.
+    case otherAdmins
 }

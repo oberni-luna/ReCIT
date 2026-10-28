@@ -232,6 +232,80 @@ struct GroupModelTests {
         #expect(GroupFixture.makeModel(MockAPIService(), defaults: defaults).myUserId == nil)
     }
 
+    @Test("Deleting removes each member, then leaves, then forgets the group")
+    func deleteGroup() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/groups/kick", json: #"{"ok":true}"#)
+        mock.stub("/api/groups/leave", json: #"{"ok":true}"#)
+        // Read afresh before anything is sent: « late » joined after the sync.
+        mock.stub(
+            "/api/groups/by-id",
+            json: #"{"group":"# + GroupFixture.groupJSON(id: "g", admins: ["me"], members: ["m", "late"]) + #","users":[]}"#
+        )
+        mock.stub("/api/users/by-ids", json: GroupFixture.usersJSON([]))
+        mock.stub("/api/groups", json: GroupFixture.groupsJSON([GroupFixture.groupJSON(id: "g", admins: ["me"], members: ["m"])]))
+        let model: GroupModel = GroupFixture.makeModel(mock)
+        try await model.syncMyGroups(myUserId: "me", modelContext: context)
+
+        try await model.deleteGroup(id: "g", modelContext: context)
+
+        let writes: [String] = mock.recordedRequests.filter { $0.method == "PUT" }.map(\.endpoint)
+        #expect(writes == ["/api/groups/kick", "/api/groups/kick", "/api/groups/leave"])
+        let payloads: [GroupActionPayload] = try mock.sentPayloads.map {
+            try JSONDecoder().decode(GroupActionPayload.self, from: $0)
+        }
+        #expect(payloads.map(\.user) == ["m", "late", nil])
+        #expect(payloads.allSatisfy { $0.group == "g" })
+        #expect(try GroupFixture.stored(context).isEmpty)
+        #expect(model.group(id: "g", in: context) == nil)
+    }
+
+    @Test("A group with another admin is not deleted, and nothing is sent")
+    func deleteGroupWithAnotherAdmin() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let mock: MockAPIService = .init()
+        mock.stub(
+            "/api/groups/by-id",
+            json: #"{"group":"# + GroupFixture.groupJSON(id: "g", admins: ["me", "other"], members: ["m"]) + #","users":[]}"#
+        )
+        mock.stub("/api/users/by-ids", json: GroupFixture.usersJSON([]))
+        mock.stub("/api/groups", json: GroupFixture.groupsJSON([GroupFixture.groupJSON(id: "g", admins: ["me"])]))
+        let model: GroupModel = GroupFixture.makeModel(mock)
+        try await model.syncMyGroups(myUserId: "me", modelContext: context)
+
+        await #expect(throws: GroupTransitionError.otherAdmins) {
+            try await model.deleteGroup(id: "g", modelContext: context)
+        }
+        #expect(mock.recordedRequests.contains { $0.method == "PUT" } == false)
+        #expect(try GroupFixture.stored(context).map(\._id) == ["g"])
+    }
+
+    @Test("A refused removal stops the deletion before leaving, and reads the group again")
+    func deleteGroupStopsOnARefusal() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/groups/kick", json: #"{"ok":true}"#)
+        mock.stub("/api/groups/leave", json: #"{"ok":true}"#)
+        mock.stub("/api/groups/by-id?id=g", jsonSequence: [
+            #"{"group":"# + GroupFixture.groupJSON(id: "g", admins: ["me"], members: ["m", "n"]) + #","users":[]}"#,
+            #"{"group":"# + GroupFixture.groupJSON(id: "g", admins: ["me"], members: ["n"]) + #","users":[]}"#
+        ])
+        mock.stub("/api/users/by-ids", json: GroupFixture.usersJSON([]))
+        mock.stub("/api/groups", json: GroupFixture.groupsJSON([GroupFixture.groupJSON(id: "g", admins: ["me"], members: ["m", "n"])]))
+        mock.onSend = { index in
+            if index == 1 { throw NetworkError.badStatus(code: 500, message: nil) }
+        }
+        let model: GroupModel = GroupFixture.makeModel(mock)
+        try await model.syncMyGroups(myUserId: "me", modelContext: context)
+
+        await #expect(throws: NetworkError.self) {
+            try await model.deleteGroup(id: "g", modelContext: context)
+        }
+        #expect(mock.recordedRequests.contains { $0.endpoint == "/api/groups/leave" } == false)
+        #expect(model.group(id: "g", in: context)?.members.map(\.user) == ["n"])
+    }
+
     @Test("The search keeps the server's ranking")
     func search() async throws {
         let mock: MockAPIService = .init()

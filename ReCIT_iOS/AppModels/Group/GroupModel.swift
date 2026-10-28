@@ -14,8 +14,8 @@
 //
 //  **Writes are optimistic** (ADR 0001): a gesture is applied to the group first, through the
 //  same transition the server runs (`ReaderGroup.applying`), then sent in a task this model owns;
-//  a refusal puts the previous value back and speaks through the snack bar. Creating a group is
-//  the exception — see `createGroup`.
+//  a refusal puts the previous value back and speaks through the snack bar. Creating and
+//  deleting a group are the exceptions — see `createGroup` and `deleteGroup`.
 //
 //  **The sync is an upsert with a deletion scope** (feature 0019): every stored group is in its
 //  charge, except one whose read failed. A group I left, or whose invitation was withdrawn, is
@@ -277,6 +277,41 @@ final class GroupModel: OptimisticMutating {
                 try await self?.putSetting(setting, groupId: groupId)
             }
         )
+    }
+
+    // MARK: - Deleting
+
+    /// Deletes a group I am the only admin of, then forgets it.
+    ///
+    /// **inventaire.io has no deletion.** It drops a group once its last admin leaves, and that
+    /// admin may only leave an empty group (`ReaderGroup.canDelete`). So the group is read
+    /// afresh — someone may have joined since the screen opened —, each member is removed by a
+    /// `kick`, and I leave last.
+    ///
+    /// **Not optimistic**, like `createGroup`: it cannot be taken back, and it takes one call per
+    /// member. A refusal halfway stops there. The members already removed stay removed, and the
+    /// group is read again so that the screen shows who is left.
+    func deleteGroup(id groupId: String, modelContext: ModelContext) async throws {
+        guard let myUserId else { throw CancellationError() }
+
+        let group: ReaderGroup = try await fetchGroup(id: groupId, modelContext: modelContext)
+        guard group.canDelete(myUserId) else { throw GroupTransitionError.otherAdmins }
+
+        do {
+            for member in group.members {
+                try await put(.kick, groupId: groupId, target: member.user)
+            }
+            try await put(.leave, groupId: groupId, target: nil)
+        } catch {
+            _ = try? await fetchGroup(id: groupId, modelContext: modelContext)
+            throw error
+        }
+
+        if let stored = storedGroup(id: groupId, in: modelContext) {
+            modelContext.delete(stored)
+        }
+        visitedGroups[groupId] = nil
+        try modelContext.save()
     }
 
     // MARK: - Signing out

@@ -7304,6 +7304,122 @@
         }
       }
     },
+    "groups.delete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete the group"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le groupe"
+          }
+        }
+      }
+    },
+    "groups.delete.confirm %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer « %@ » ?"
+          }
+        }
+      }
+    },
+    "groups.delete.confirm.message %lld" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "The group will disappear from inventaire.io. This cannot be undone."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Its member will be removed, then the group will disappear from inventaire.io. This cannot be undone."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Its %lld members will be removed, then the group will disappear from inventaire.io. This cannot be undone."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Le groupe disparaîtra d’inventaire.io. Impossible de revenir en arrière."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Son membre en sera retiré, puis le groupe disparaîtra d’inventaire.io. Impossible de revenir en arrière."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ses %lld membres en seront retirés, puis le groupe disparaîtra d’inventaire.io. Impossible de revenir en arrière."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "groups.delete.other_admins" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another admin is in the group: only the sole admin can delete it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un autre admin est dans le groupe : seul l’unique admin peut le supprimer."
+          }
+        }
+      }
+    },
+    "groups.deleted %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group “%@” deleted"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Groupe « %@ » supprimé"
+          }
+        }
+      }
+    },
     "groups.detail.load_failed" : {
       "localizations" : {
         "en" : {

@@ -17,13 +17,21 @@
 //  inset: from the last thing under the header to the next section's title, the distance is the
 //  same with or without them.
 //
+//  **Deleting is the admin's last menu entry.** inventaire.io has no deletion, so it removes
+//  every member and then leaves (`GroupModel.deleteGroup`); the entry is greyed when another
+//  admin is there, since no one can remove an admin. A success says so in the SnackBar and goes
+//  back to the list; a failure says so and stays.
+//
 
+import LBSnackBar
 import SwiftUI
 import SwiftData
 
 struct GroupDetailView: View {
     @Environment(GroupModel.self) private var groupModel
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.snackBar) private var snackBar
+    @Environment(\.dismiss) private var dismiss
 
     @Query(sort: \User.username) private var allUsers: [User]
     @Query private var storedGroups: [StoredGroup]
@@ -34,6 +42,8 @@ struct GroupDetailView: View {
     @State private var loadFailed: Bool = false
     @State private var isConfirmingLeave: Bool = false
     @State private var isEditingSettings: Bool = false
+    @State private var isConfirmingDeletion: Bool = false
+    @State private var isDeleting: Bool = false
 
     /// How many members the screen shows before « Voir les N membres ».
     private static let membersPreviewCount: Int = 5
@@ -100,6 +110,20 @@ struct GroupDetailView: View {
             }
             Button("action.cancel", role: .cancel) {}
         }
+        .confirmationDialog(
+            "groups.delete.confirm \(group?.name ?? "")",
+            isPresented: $isConfirmingDeletion,
+            titleVisibility: .visible
+        ) {
+            Button("groups.delete", role: .destructive) {
+                Task { await deleteGroup() }
+            }
+            Button("action.cancel", role: .cancel) {}
+        } message: {
+            Text("groups.delete.confirm.message \(group?.members.count ?? 0)")
+        }
+        // Going back halfway would leave `dismiss()` to close whatever is on screen by then.
+        .navigationBarBackButtonHidden(isDeleting)
     }
 
     @ViewBuilder
@@ -179,10 +203,31 @@ struct GroupDetailView: View {
         return usersByID[invitorId]?.username
     }
 
+    private func deleteGroup() async {
+        let name: String = group?.name ?? ""
+        isDeleting = true
+        defer { isDeleting = false }
+        do {
+            try await groupModel.deleteGroup(id: groupId, modelContext: modelContext)
+            snackBar.show {
+                SnackBarView(title: String(localized: "groups.deleted \(name)"), onDismiss: nil)
+            }
+            dismiss()
+        } catch GroupTransitionError.otherAdmins {
+            snackBar.show {
+                SnackBarView(title: String(localized: "groups.delete.other_admins"), onDismiss: nil)
+            }
+        } catch {
+            snackBar.show { SnackBarView.error(error) }
+        }
+    }
+
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
-            if myRole?.belongs == true {
+            if isDeleting {
+                ProgressView()
+            } else if myRole?.belongs == true {
                 Menu {
                     Group {
                         if myRole == .admin {
@@ -203,11 +248,31 @@ struct GroupDetailView: View {
                         .accessibilityIdentifier("e2e.group.leave")
                     }
                     .tint(.foregroundDefault)
+
+                    if myRole == .admin {
+                        Section {
+                            deleteButton
+                        }
+                    }
                 } label: {
                     Label("action.more", systemImage: "ellipsis")
                 }
                 .accessibilityIdentifier("e2e.group.menu")
             }
         }
+    }
+
+    private var deleteButton: some View {
+        let canDelete: Bool = group.map { $0.canDelete(groupModel.myUserId ?? "") } ?? false
+        return Button(role: .destructive) {
+            isConfirmingDeletion = true
+        } label: {
+            Label("groups.delete", systemImage: "trash")
+            if canDelete == false {
+                Text("groups.delete.other_admins")
+            }
+        }
+        .disabled(canDelete == false)
+        .accessibilityIdentifier("e2e.group.delete")
     }
 }

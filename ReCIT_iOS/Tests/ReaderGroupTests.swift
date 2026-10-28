@@ -153,6 +153,14 @@ struct ReaderGroupTests {
         #expect(try group(members: ["m"]).applying(.leave, by: "m").role(of: "m") == nil)
     }
 
+    @Test("Only the one admin can delete a group, whoever else is in it")
+    func canDelete() {
+        #expect(group().canDelete("admin"))
+        #expect(group(members: ["m", "n"]).canDelete("admin"))
+        #expect(group(admins: ["admin", "b"]).canDelete("admin") == false)
+        #expect(group(members: ["m"]).canDelete("m") == false)
+    }
+
     @MainActor
     @Test("The buttons under a group's header are left out only for a member who may leave")
     func actionsSectionContent() {

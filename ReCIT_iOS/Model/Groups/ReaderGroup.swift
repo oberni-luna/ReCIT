@@ -81,6 +81,14 @@ struct ReaderGroup: Identifiable, Equatable, Sendable {
         return admins.count > 1 || members.isEmpty
     }
 
+    /// Whether `userId` can delete the group. inventaire.io has no deletion: it drops a group
+    /// once its last admin leaves (`deleteGroupIfEmpty`, on `group:leave`), and that admin may
+    /// only leave an empty group. The members can be removed first, but not the other admins —
+    /// `kick` refuses one (`target user is also a group admin`). So only the one admin can.
+    func canDelete(_ userId: String) -> Bool {
+        admins.map(\.user) == [userId]
+    }
+
     /// The group as it will be once `actor` has done `action`, to `target` when the gesture is
     /// about someone else.
     ///

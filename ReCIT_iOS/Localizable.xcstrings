@@ -247,6 +247,86 @@
         }
       }
     },
+    "edit_profile.position.add" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a position"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une position"
+          }
+        }
+      }
+    },
+    "edit_profile.position.edit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change the position"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier la position"
+          }
+        }
+      }
+    },
+    "edit_profile.position.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It shows your books to readers and groups near you. It is public: place it at the scale of a neighbourhood, not of your door."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elle fait apparaître vos livres aux lecteurs et aux groupes proches. Elle est publique : placez-la à l’échelle du quartier, pas de votre porte."
+          }
+        }
+      }
+    },
+    "edit_profile.position.header" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        }
+      }
+    },
+    "edit_profile.position.none" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a position, your books are not shown to readers near you. Your friends still see them."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans position, vos livres n’apparaissent pas aux lecteurs proches. Vos amis les voient toujours."
+          }
+        }
+      }
+    },
     "edit_profile.public.footer" : {
       "localizations" : {
         "en" : {
@@ -307,6 +387,134 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Modifier le profil"
+          }
+        }
+      }
+    },
+    "profile_position.confirm" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valider"
+          }
+        }
+      }
+    },
+    "profile_position.map" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map of your position"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carte de votre position"
+          }
+        }
+      }
+    },
+    "profile_position.map.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move the map to place the pin. The app rounds the position to about a kilometre before sending it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplacez la carte pour poser l’épingle. L’app arrondit la position à un kilomètre environ avant de l’envoyer."
+          }
+        }
+      }
+    },
+    "profile_position.remove" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove my position"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer ma position"
+          }
+        }
+      }
+    },
+    "profile_position.remove.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a position, your books are not shown to readers near you. Your friends still see them."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans position, vos livres n’apparaissent plus aux lecteurs proches. Vos amis les voient toujours."
+          }
+        }
+      }
+    },
+    "profile_position.search" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for a town or an address"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher une ville ou une adresse"
+          }
+        }
+      }
+    },
+    "profile_position.search.empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No place found"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun lieu trouvé"
+          }
+        }
+      }
+    },
+    "profile_position.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
           }
         }
       }

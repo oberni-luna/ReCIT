@@ -10,6 +10,8 @@
 //  A refusal part of the way keeps what went through, says what did not, and the next
 //  « Enregistrer » sends only the rest. The screen closes once everything has landed.
 //
+//  The position is placed on a screen of its own, which hands it back to the draft.
+//
 //  The name is checked while it is typed, the way the sign-up form checks it, and a name taken
 //  or a bio too long greys « Enregistrer » out before anything is sent.
 //
@@ -28,6 +30,7 @@ struct EditProfileView: View {
     @State private var draft: ProfileDraft
     @State private var usernameCheck: FieldAvailability = .init(field: .username)
     @State private var failure: ProfileSaveFailure?
+    @State private var isPlacingPosition: Bool = false
 
     /// The pause before a name is asked about: the availability endpoint answers `429` to a
     /// request a keystroke.
@@ -79,6 +82,13 @@ struct EditProfileView: View {
                     CreateBookSectionFooter("edit_profile.public.footer")
                 }
             }
+
+            ProfilePositionSection(position: draft.position) {
+                isPlacingPosition = true
+            }
+        }
+        .navigationDestination(isPresented: $isPlacingPosition) {
+            ProfilePositionView(draft: $draft)
         }
         .navigationTitle("edit_profile.title")
         .formActionBar {

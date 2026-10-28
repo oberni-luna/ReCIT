@@ -97,6 +97,15 @@ struct ProfileDraftTests {
         #expect(draft.position == .init(latitude: 48.86, longitude: 2.35))
     }
 
+    @Test("A position placed then removed again, where there was none, is no change")
+    func placedThenRemoved() {
+        var draft: ProfileDraft = .init(username: "x", bio: "", position: nil, hasPicture: false)
+        draft.place(at: .init(latitude: 45.5, longitude: 5.9))
+        #expect(draft.changes == [.position(.init(latitude: 45.5, longitude: 5.9))])
+        draft.place(at: nil)
+        #expect(draft.changes.isEmpty)
+    }
+
     @Test("What landed is not sent again")
     func landedIsNotResent() {
         var draft: ProfileDraft = draft()

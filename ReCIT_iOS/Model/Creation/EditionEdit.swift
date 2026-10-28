@@ -127,6 +127,25 @@ struct EditionEdit: Equatable, Sendable {
         works.removeAll { $0.id == id }
     }
 
+    /// Shows a work as « Modifier l'œuvre » just saved it, in place of the row that opened it.
+    /// The work's picture is the edition's: the row keeps the one it had.
+    mutating func workSaved(_ work: EditionWork) {
+        guard let index = works.firstIndex(where: { $0.uri == work.uri }) else { return }
+        var saved: EditionWork = work
+        saved.imageUrl = works[index].imageUrl
+        works[index] = .init(original: saved, id: works[index].id)
+    }
+
+    /// Shows a person under the name « Modifier l'auteur·ice » just saved: among the works'
+    /// authors and among the people the edition names.
+    mutating func rename(uri: String, label: String) {
+        for index in works.indices {
+            works[index].renameAuthor(uri: uri, name: label)
+        }
+        properties.rename(uri: uri, label: label)
+        original.properties.rename(uri: uri, label: label)
+    }
+
     /// The uris of the works listed that exist.
     var workUris: [String] {
         works.compactMap(\.uri)

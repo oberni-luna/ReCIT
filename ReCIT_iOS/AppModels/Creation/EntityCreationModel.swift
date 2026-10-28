@@ -18,7 +18,9 @@
 //
 //  It also changes an edition that exists — everything inventaire.io accepts on it, the works
 //  it is an edition of, their titles and authors — from the book screen's « Données
-//  bibliographiques ». Same open database, same reasons not to be optimistic.
+//  bibliographiques ». Same open database, same reasons not to be optimistic. And it changes
+//  a work or a person on their own, from « Modifier l'œuvre » and « Modifier l'auteur·ice »
+//  (PRD 0030), each saved by its own « Enregistrer ».
 //
 //  See PRD 0015.
 //
@@ -332,6 +334,96 @@ final class EntityCreationModel {
             return edit
         } catch {
             throw EditionSaveFailure(edit: edit, underlying: error)
+        }
+    }
+
+    // MARK: - Changing a work or a person
+
+    /// What inventaire.io holds about a work or a person, read fresh to open « Modifier l'œuvre »
+    /// or « Modifier l'auteur·ice »: its labels and every property of its catalogue, the
+    /// entities they name labelled by a second call. `relatives` is not asked: it does not know
+    /// every property a work or a person can name. A name that does not come keeps the uri.
+    ///
+    /// Public, so cookieless. Throws when the answer holds neither a work nor a person.
+    func editableEntity(uri: String) async throws -> EntityEdit {
+        let response: EditableEditionsDTO? = try await publicAPIService.fetchData(
+            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=info|claims|labels&lang=fr",
+            debug: false
+        )
+
+        guard let entities = response?.entities,
+              let entity = entities[response?.redirects?[uri] ?? uri] ?? entities.values.first,
+              let catalogue = EditionProperty.Catalogue(entityType: entity.type),
+              catalogue != .edition else {
+            throw NetworkError.badResponse
+        }
+
+        let claims: [String: [ClaimValue]] = entity.claims ?? [:]
+        let unnamed: EditionProperties = .init(claims: claims, labels: [:], catalogue: catalogue)
+        var labels: [String: String] = [:]
+        if unnamed.entityUris.isEmpty == false {
+            let named: EditableEditionsDTO? = try? await publicAPIService.fetchData(
+                fromEndpoint: "/api/entities/by-uris?uris=\(Array(Set(unnamed.entityUris)).sorted().joined(separator: "|"))&attributes=labels&lang=fr",
+                debug: false
+            )
+            labels = named?.entities.compactMapValues(\.displayName) ?? [:]
+        }
+
+        return .init(
+            uri: entity.uri,
+            labels: entity.labels ?? [:],
+            properties: .init(claims: claims, labels: labels, catalogue: catalogue),
+            originalLanguage: entity.originalLang
+        )
+    }
+
+    /// Runs what « Modifier l'œuvre » or « Modifier l'auteur·ice » changed, one request at a
+    /// time in the order `EntityEdit.nextStep` gives — the people to create, the claims, the
+    /// labels — and answers the edit with everything landed.
+    ///
+    /// Throws `EntitySaveFailure`, which carries the edit as far as it got.
+    func saveEntity(_ edit: EntityEdit) async throws -> EntityEdit {
+        var edit: EntityEdit = edit
+        // Every step lands or throws; a step that did neither would loop for ever.
+        var budget: Int = 200
+
+        do {
+            while let step = edit.nextStep {
+                budget -= 1
+                guard budget > 0 else { throw NetworkError.badResponse }
+
+                switch step {
+                case .createEntity(let id, let label, let language, let kind):
+                    let uri: String = try await createEntity(label: label, language: language, kind: kind)
+                    edit.entityCreated(id: id, uri: uri)
+
+                case .claim(let update):
+                    let _: OkStatusDTO? = try await apiService.send(
+                        toEndpoint: "/api/entities/update-claim",
+                        method: "PUT",
+                        payload: update,
+                        debug: true
+                    )
+                    edit.landed(update)
+
+                case .label(let update):
+                    let _: OkStatusDTO? = try await apiService.send(
+                        toEndpoint: "/api/entities/update-label",
+                        method: "PUT",
+                        payload: update,
+                        debug: true
+                    )
+                    edit.landed(update)
+
+                case .uploadCover, .createAuthor, .createWork:
+                    // Not steps of a work or a person: `EntityEdit` never lists them.
+                    throw NetworkError.badResponse
+                }
+            }
+
+            return edit
+        } catch {
+            throw EntitySaveFailure(edit: edit, underlying: error)
         }
     }
 

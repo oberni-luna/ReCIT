@@ -31,9 +31,13 @@ struct WorkEdit: Identifiable, Equatable, Sendable {
     /// The picture the row shows.
     var imageUrl: String?
 
-    /// A work inventaire.io or Wikidata has.
-    init(original: EditionWork) {
-        id = .init()
+    /// A work inventaire.io or Wikidata has. `id` keeps a row's identity when the work it shows
+    /// is read again — saved from « Modifier l'œuvre ».
+    init(
+        original: EditionWork,
+        id: UUID = .init()
+    ) {
+        self.id = id
         self.original = original
         title = original.title
         authors = original.authors
@@ -134,6 +138,17 @@ struct WorkEdit: Identifiable, Equatable, Sendable {
         }
         if let added, let author = authors.first(where: { $0.uri == added }) {
             original?.authors.append(author)
+        }
+    }
+
+    /// Shows an author under a new name: one just renamed in « Modifier l'auteur·ice ». Names
+    /// are not sent, so the work has no more changes than before.
+    mutating func renameAuthor(uri: String, name: String) {
+        for index in authors.indices where authors[index].uri == uri {
+            authors[index].name = name
+        }
+        for index in (original?.authors ?? []).indices where original?.authors[index].uri == uri {
+            original?.authors[index].name = name
         }
     }
 

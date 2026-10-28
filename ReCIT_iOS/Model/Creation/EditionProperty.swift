@@ -17,6 +17,12 @@
 //  An identifier's pattern is the server's own (`properties_values_constraints.ts`), so a value
 //  refused here would have been refused there, with a less useful message.
 //
+//  A work's and a person's properties are catalogues of their own (`Catalogue`), read the same
+//  way on 2026-10-28: « Modifier l'œuvre » and « Modifier l'auteur·ice » show them through the
+//  same rows and pushed screens. The same uri can be a different property there — a work's
+//  `wdt:P407` is its original language, and `wdt:P648` takes an `OL…W` where an edition takes an
+//  `OL…M` — so a uri is always read in the catalogue of the form it belongs to.
+//
 
 import Foundation
 
@@ -31,6 +37,16 @@ struct EditionProperty: Hashable, Sendable, Identifiable {
         case format
         /// An entity found by `/api/search` with this type, or created.
         case entity(SearchResultType)
+        /// An entity found by `/api/search` among several types — a work's main subject can be a
+        /// genre, a movement, a person or a work. Never created from the form.
+        case anyEntity([SearchResultType])
+        /// One value among a fixed few, each an entity uri the server allows: a work's type, its
+        /// form.
+        case choice([EditionPropertyChoice])
+        /// Free text: a pseudonym.
+        case text
+        /// A positive whole number the server keeps as a string: a rank in a series.
+        case ordinal
         /// An identifier in a catalogue, checked against the server's pattern.
         case identifier(pattern: String, example: String)
         /// A web address.
@@ -44,6 +60,23 @@ struct EditionProperty: Hashable, Sendable, Identifiable {
         case contributors
         case databases
         case links
+        /// A work's or a person's first section: what it is, its language, its dates.
+        case general
+        /// A work's authors.
+        case authors
+        /// The other people who made a work.
+        case roles
+        /// The roles of a comic: penciller, inker, colorist, letterer.
+        case comics
+        case series
+        /// A work's genres and main subjects.
+        case subjects
+        /// A work's relations with other works.
+        case relations
+        /// A person's movement and influences.
+        case influences
+        /// « À ne pas confondre avec ».
+        case misc
     }
 
     let uri: String
@@ -55,18 +88,41 @@ struct EditionProperty: Hashable, Sendable, Identifiable {
 
     var id: String { uri }
 
-    /// The type to search for, for a property whose values are entities.
+    /// The type to search for, for a property whose values are entities of one type: the type
+    /// an entity created from the form is given.
     var searchType: SearchResultType? {
         guard case .entity(let type) = kind else { return nil }
         return type
     }
 
+    /// Every type the search looks among, for a property whose values are entities.
+    var searchTypes: [SearchResultType] {
+        switch kind {
+        case .entity(let type): [type]
+        case .anyEntity(let types): types
+        default: []
+        }
+    }
+
+    /// Whether the values are entities, named by uri.
+    var isEntity: Bool {
+        searchTypes.isEmpty == false
+    }
+
+    /// The values a `.choice` property allows.
+    var choices: [EditionPropertyChoice] {
+        guard case .choice(let choices) = kind else { return [] }
+        return choices
+    }
+
     /// Whether an entity nobody has entered can be created from the form: a person, a
-    /// publisher, a collection. A language is chosen among those Wikidata has.
+    /// publisher, a collection. A language is chosen among those Wikidata has, and nobody is
+    /// created only to be told apart from (« À ne pas confondre avec »).
     var allowsCreation: Bool {
+        guard group != .misc else { return false }
         switch searchType {
-        case .humans, .publishers, .collections: true
-        default: false
+        case .humans, .publishers, .collections: return true
+        default: return false
         }
     }
 
@@ -80,6 +136,14 @@ struct EditionProperty: Hashable, Sendable, Identifiable {
         case .integer:
             guard let integer = Int(trimmed), integer > 0 else { return nil }
             return .integer(integer)
+        case .ordinal:
+            guard trimmed.allSatisfy(\.isASCII), let integer = Int(trimmed), integer > 0 else { return nil }
+            return .string(String(integer))
+        case .text:
+            // Wikidata's limit, which the server aligns on.
+            return trimmed.count <= 400 ? .string(trimmed) : nil
+        case .choice(let choices):
+            return choices.contains { $0.uri == trimmed } ? .string(trimmed) : nil
         case .date:
             return PublicationDate(trimmed).map { .string($0.claim) }
         case .identifier(let pattern, _):
@@ -90,7 +154,7 @@ struct EditionProperty: Hashable, Sendable, Identifiable {
                   let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https",
                   url.host() != nil else { return nil }
             return .string(trimmed)
-        case .format, .entity:
+        case .format, .entity, .anyEntity:
             return .string(trimmed)
         }
     }
@@ -105,11 +169,13 @@ struct EditionProperty: Hashable, Sendable, Identifiable {
     }
 
     /// The small rewrites the server makes before it validates: the BnF's `cb` prefix, the `@` a
-    /// Mastodon handle is often copied with.
+    /// Mastodon handle is often copied with, the spaces an ISNI is printed with.
     private static func normalize(_ value: String, for uri: String) -> String {
         switch uri {
         case "wdt:P268":
             value.hasPrefix("cb") ? String(value.dropFirst(2)) : value
+        case "wdt:P213":
+            value.filter { $0.isWhitespace == false }
         case "wdt:P4033":
             value.hasPrefix("@") ? String(value.dropFirst()) : value
         default:
@@ -197,15 +263,15 @@ extension EditionProperty {
         all.filter { $0.group == group }
     }
 
-    private static func person(_ uri: String, _ label: String) -> EditionProperty {
-        .init(uri: uri, kind: .entity(.humans), group: .contributors, isMultivalued: true, label: label)
+    static func person(_ uri: String, _ label: String, group: Group = .contributors) -> EditionProperty {
+        .init(uri: uri, kind: .entity(.humans), group: group, isMultivalued: true, label: label)
     }
 
-    private static func database(_ uri: String, _ label: String, _ pattern: String, _ example: String) -> EditionProperty {
+    static func database(_ uri: String, _ label: String, _ pattern: String, _ example: String) -> EditionProperty {
         .init(uri: uri, kind: .identifier(pattern: pattern, example: example), group: .databases, isMultivalued: true, label: label)
     }
 
-    private static func link(_ uri: String, _ label: String, _ pattern: String, _ example: String) -> EditionProperty {
+    static func link(_ uri: String, _ label: String, _ pattern: String, _ example: String) -> EditionProperty {
         .init(uri: uri, kind: .identifier(pattern: pattern, example: example), group: .links, isMultivalued: true, label: label)
     }
 }

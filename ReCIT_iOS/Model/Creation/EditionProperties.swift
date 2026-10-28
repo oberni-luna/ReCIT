@@ -12,16 +12,26 @@
 //  single-valued property sends one update that names the value it replaces; a multivalued one
 //  sends one update per value added or taken away.
 //
+//  The same values serve a work and a person, in « Modifier l'œuvre » and « Modifier
+//  l'auteur·ice »: they then hold that catalogue's properties (`EditionProperty.Catalogue`).
+//
 
 import Foundation
 
 struct EditionProperties: Equatable, Sendable {
 
+    /// The properties these values can hold: an edition's, a work's or a person's.
+    let catalogue: EditionProperty.Catalogue
+
     /// The values, keyed by property uri, in the order they were read or added. A property with
     /// no value has no key.
     private(set) var values: [String: [EditionClaimValue]]
 
-    init(values: [String: [EditionClaimValue]] = [:]) {
+    init(
+        values: [String: [EditionClaimValue]] = [:],
+        catalogue: EditionProperty.Catalogue = .edition
+    ) {
+        self.catalogue = catalogue
         self.values = values.filter { $0.value.isEmpty == false }
     }
 
@@ -29,19 +39,20 @@ struct EditionProperties: Equatable, Sendable {
     /// `labels`, keyed by uri; one the server did not name keeps its uri as its label.
     init(
         claims: [String: [ClaimValue]],
-        labels: [String: String]
+        labels: [String: String],
+        catalogue: EditionProperty.Catalogue = .edition
     ) {
         var values: [String: [EditionClaimValue]] = [:]
-        for property in EditionProperty.all {
+        for property in catalogue.properties {
             let literals: [ClaimLiteral] = claims[property.uri]?.compactMap(ClaimLiteral.init) ?? []
             guard literals.isEmpty == false else { continue }
 
             values[property.uri] = literals.map { literal in
-                guard property.searchType != nil, let uri = literal.string else { return .literal(literal) }
+                guard property.isEntity, let uri = literal.string else { return .literal(literal) }
                 return .entity(.init(uri: uri, label: labels[uri] ?? uri))
             }
         }
-        self.init(values: values)
+        self.init(values: values, catalogue: catalogue)
     }
 
     // MARK: - Reading
@@ -61,13 +72,13 @@ struct EditionProperties: Equatable, Sendable {
 
     /// Every entity uri the values name, for the call that fetches their labels.
     var entityUris: [String] {
-        EditionProperty.all.flatMap { entities(of: $0).compactMap(\.uri) }
+        catalogue.properties.flatMap { entities(of: $0).compactMap(\.uri) }
     }
 
     /// The entities still to be created, in the order the save creates them: people and
     /// publishers first, collections last — a collection is created with its publisher's uri.
     var pendingEntities: [(property: EditionProperty, entity: EditionEntityValue)] {
-        let pending: [(property: EditionProperty, entity: EditionEntityValue)] = EditionProperty.all.flatMap { property in
+        let pending: [(property: EditionProperty, entity: EditionEntityValue)] = catalogue.properties.flatMap { property in
             entities(of: property).filter { $0.uri == nil }.map { (property: property, entity: $0) }
         }
         return pending.filter { $0.property != .collection } + pending.filter { $0.property == .collection }
@@ -82,7 +93,7 @@ struct EditionProperties: Equatable, Sendable {
     /// left out: it has no uri yet.
     var claims: [String: [ClaimLiteral]] {
         var claims: [String: [ClaimLiteral]] = [:]
-        for property in EditionProperty.all {
+        for property in catalogue.properties {
             let literals: [ClaimLiteral] = values(of: property).compactMap(\.claim)
             if literals.isEmpty == false { claims[property.uri] = literals }
         }
@@ -122,6 +133,19 @@ struct EditionProperties: Equatable, Sendable {
         values[property.uri] = current.isEmpty ? nil : current
     }
 
+    /// Gives the entity named by `uri` a new name, wherever it is a value: a person renamed in
+    /// « Modifier l'auteur·ice » is shown under that name by the forms beneath it. Names are
+    /// not sent, so this changes nothing the save compares.
+    mutating func rename(uri: String, label: String) {
+        for (key, current) in values {
+            values[key] = current.map { value in
+                guard case .entity(var entity) = value, entity.uri == uri else { return value }
+                entity.label = label
+                return .entity(entity)
+            }
+        }
+    }
+
     /// Records the uri an entity was created under: the claim that names it can go now.
     mutating func entityCreated(id: UUID, uri: String) {
         for (key, current) in values {
@@ -139,7 +163,7 @@ struct EditionProperties: Equatable, Sendable {
     /// still to be created are not listed until they exist.
     func updates(since original: EditionProperties, on uri: String) -> [EditionClaimUpdate] {
         var updates: [EditionClaimUpdate] = []
-        for property in EditionProperty.all {
+        for property in catalogue.properties {
             let before: [ClaimLiteral] = original.values(of: property).compactMap(\.claim)
             let after: [ClaimLiteral] = values(of: property).compactMap(\.claim)
 
@@ -160,7 +184,7 @@ struct EditionProperties: Equatable, Sendable {
     /// Records that `update` landed on the server, so it drops out of `updates(since:on:)`. The
     /// value added is taken from `current`, which holds its name.
     mutating func apply(_ update: EditionClaimUpdate, from current: EditionProperties) {
-        guard let property = EditionProperty.named(update.property) else { return }
+        guard let property = catalogue.property(named: update.property) else { return }
         var values: [EditionClaimValue] = values(of: property)
 
         if let old = update.oldValue {

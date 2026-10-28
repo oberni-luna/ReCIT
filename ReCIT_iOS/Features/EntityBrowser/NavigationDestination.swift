@@ -42,6 +42,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case accountSettings
     case changeEmail
     case changePassword
+    /// « Notifications par e-mail ».
+    case notificationSettings
     /// What inventaire.io is, and the app's place on it. Pushed from the Profil's
     /// « À propos d'inventaire.io » row; it carries nothing.
     case aboutInventaire
@@ -94,6 +96,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "changeEmail"
         case .changePassword:
             return "changePassword"
+        case .notificationSettings:
+            return "notificationSettings"
         case .aboutInventaire:
             return "aboutInventaire"
         case .group(let id):
@@ -189,6 +193,8 @@ extension NavigationDestination {
           ChangeEmailView()
       case .changePassword:
           ChangePasswordView()
+      case .notificationSettings:
+          NotificationSettingsView()
       case .aboutInventaire:
           AboutInventaireView()
       case .group(let id):

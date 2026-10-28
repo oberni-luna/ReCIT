@@ -98,6 +98,13 @@ struct ProfileView: View {
                         .foregroundStyle(.foregroundTinted)
                 }
                 .accessibilityIdentifier("e2e.profile.account")
+
+                NavigationLink(value: NavigationDestination.notificationSettings) {
+                    Text("profile.notification_settings")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundTinted)
+                }
+                .accessibilityIdentifier("e2e.profile.notifications")
             } header: {
                 Text("profile.settings")
                     .textStyle(.action200)

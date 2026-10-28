@@ -75,6 +75,20 @@ struct UserModelAccountTests {
         #expect(reporter.lastFailure != nil)
     }
 
+    @Test("A notification switch sends its key under settings.notifications")
+    func notificationAttribute() async throws {
+        let mock: MockAPIService = .init()
+        mock.stub("/api/user", json: #"{"ok":true}"#)
+        let (model, context) = try model(mock)
+
+        model.setNotification(.groupAcceptRequest, to: false, modelContext: context)
+        await model.inFlightAccountTask?.value
+
+        #expect(body(mock, at: 0).contains(#""attribute":"settings.notifications.group_acceptRequest""#))
+        #expect(body(mock, at: 0).contains(#""value":false"#))
+        #expect(model.account?.isEnabled(.groupAcceptRequest) == false)
+    }
+
     @Test("Setting a value the account already has sends nothing")
     func sameValueSendsNothing() throws {
         let mock: MockAPIService = .init()

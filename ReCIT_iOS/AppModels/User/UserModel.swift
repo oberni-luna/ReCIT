@@ -12,8 +12,15 @@ import SwiftData
 @Observable
 final class UserModel: OptimisticMutating {
 
-    private let apiService: APIServicing
+    let apiService: APIServicing
     var myUser: User?
+
+    /// What only the owner sees of the account — its address, its language, its switches. Read
+    /// with `myUser` from `GET /api/user`, held here and never stored. See `AccountSettings`.
+    var account: AccountSettings?
+
+    /// Every `PUT /api/user` goes through it: the server refuses two within a second.
+    @ObservationIgnored let userUpdatePacer: RequestPacer
 
     /// Shared channel used to surface a background optimistic failure to the UI.
     var errorReporter: AppErrorReporter?
@@ -31,9 +38,14 @@ final class UserModel: OptimisticMutating {
     /// tests can await completion; not observed by the UI.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
 
-    init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
+    init(
+        apiService: APIServicing,
+        errorReporter: AppErrorReporter? = nil,
+        userUpdateInterval: Duration = .milliseconds(1_100)
+    ) {
         self.apiService = apiService
         self.errorReporter = errorReporter
+        self.userUpdatePacer = .init(interval: userUpdateInterval)
     }
 
     func start(inventoryModel: InventoryModel, shelfModel: ShelfModel) {
@@ -45,6 +57,7 @@ final class UserModel: OptimisticMutating {
         let userDTO: UserDTO? = try await apiService.fetchData(fromEndpoint: "/api/user")
         if let userDTO {
             let mySyncedUser = User(userDTO: userDTO, baseUrl: apiService.baseUrl())
+            account = .init(userDTO: userDTO)
             let user = try getLocalUser(modelContext: modelContext, _id: mySyncedUser._id)
 
             if let user {
@@ -306,6 +319,7 @@ final class UserModel: OptimisticMutating {
     /// Idempotent: on an empty store it deletes nothing and saves nothing worth the name.
     func wipeUserData(modelContext: ModelContext) throws {
         myUser = nil
+        account = nil
         try deleteUserOwnedRows(in: modelContext)
         try modelContext.save()
     }
@@ -338,6 +352,7 @@ final class UserModel: OptimisticMutating {
         }
 
         myUser = nil
+        account = nil
         try wipeLocalStore(modelContext: modelContext)
     }
 

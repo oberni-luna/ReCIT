@@ -29,6 +29,9 @@ public class User: Identifiable, Equatable {
     /// not write a Swift default into the rows already in the store, so a non-optional property
     /// added here would trap on the first read of every existing install.
     var created: Double?
+    /// The few lines the reader wrote about themself, or `nil` if the server has not said.
+    /// Optional for the reason `created` is.
+    var bio: String?
     /// Timestamp (ms) of the last successful inventory sync, or `nil` if this
     /// user's inventory has never been synced. Used to show a syncing placeholder
     /// instead of an ambiguous empty inventory.
@@ -66,7 +69,8 @@ public class User: Identifiable, Equatable {
         avatarURLValue: String?,
         itemCount: Int,
         lastItemAdded: Double = 0,
-        created: Double? = nil
+        created: Double? = nil,
+        bio: String? = nil
     ) {
         self._id = _id
         self._rev = _rev
@@ -77,6 +81,7 @@ public class User: Identifiable, Equatable {
         self.itemCount = itemCount
         self.lastItemAdded = lastItemAdded
         self.created = created
+        self.bio = bio
     }
 
     /// The day the account was opened, for a view to format. `nil` when the server has not said
@@ -118,6 +123,9 @@ public class User: Identifiable, Equatable {
         if let created = user.created {
             self.created = created
         }
+        if let bio = user.bio {
+            self.bio = bio
+        }
         self.itemCount = user.itemCount
         self.lastItemAdded = user.lastItemAdded
     }
@@ -141,7 +149,8 @@ public class User: Identifiable, Equatable {
             avatarURLValue: AbsoluteImageURL.resolve(picture, baseUrl: baseUrl),
             itemCount: userDTO.snapshot?.values.map { $0.`items:count` }.max() ?? 0,
             lastItemAdded: userDTO.snapshot?.values.map { $0.`items:last-add` ?? 0 }.max() ?? 0,
-            created: userDTO.created
+            created: userDTO.created,
+            bio: userDTO.bio
         )
     }
 }

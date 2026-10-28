@@ -37,6 +37,12 @@ struct UserHeaderView: View {
             }
             .textStyle(.content300)
             .foregroundStyle(.foregroundDefault)
+
+            if let bio = user.bio, bio.isEmpty == false {
+                Text(bio)
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundSecondary)
+            }
         }
     }
 }

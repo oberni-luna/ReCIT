@@ -82,6 +82,13 @@ struct ProfileView: View {
 
             Section {
                 UserHeaderView(user: user)
+
+                NavigationLink(value: NavigationDestination.editProfile(user: user)) {
+                    Text("profile.edit")
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundTinted)
+                }
+                .accessibilityIdentifier("e2e.profile.edit")
             }
 
             Section {

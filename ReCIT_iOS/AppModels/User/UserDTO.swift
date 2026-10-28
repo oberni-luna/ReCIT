@@ -27,6 +27,17 @@ struct UserDTO: Codable {
     /// cell already reads. Optional because the soft-deleted users the server keeps around to
     /// hold a username are the one shape that might not carry it.
     let created: Double?
+    /// The few lines a reader writes about themself. Public: `/api/users/by-ids` serves it for
+    /// anyone, which is why it lives on `User` and not with the owner's settings below.
+    let bio: String?
+    /// Whether the address has been confirmed through the link inventaire.io mailed. Served to
+    /// the owner only, on `GET /api/user`, like the three fields after it.
+    let validEmail: Bool?
+    /// Whether the account can be followed from the fediverse.
+    let fediversable: Bool?
+    /// Days between two activity summaries; the server reads an absent value as 20.
+    let summaryPeriodicity: Int?
+    let settings: UserSettingsDTO?
 }
 
 //"snapshot": {

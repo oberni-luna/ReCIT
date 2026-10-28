@@ -8,7 +8,8 @@
 //  its author search, « Image depuis une URL », and the screens of the catalogue's properties.
 //
 //  A work inventaire.io has opens the whole of « Modifier l'œuvre » (`EditEntityView`), saved by
-//  its own « Enregistrer »; a work being created, or a Wikidata one, keeps the title and authors
+//  its own « Enregistrer », and so does a person — « Modifier l'auteur·ice » — touched among a
+//  work's authors or in the list of a role; a work being created, or a Wikidata one, keeps the title and authors
 //  of `EditWorkView`, saved with the edition. The entities those screens change are held here,
 //  keyed by uri, for as long as their screen is on the stack.
 //
@@ -142,7 +143,8 @@ struct EditEditionFlowView: View {
                         step: step,
                         properties: properties,
                         push: { path.append(.property($0)) },
-                        pop: { path.removeLast(min($0, path.count)) }
+                        pop: { path.removeLast(min($0, path.count)) },
+                        openEntity: { path.append(.entity(uri: $0)) }
                     )
                 case .entity(let uri):
                     EditEntityView(
@@ -163,7 +165,8 @@ struct EditEditionFlowView: View {
                         step: step,
                         properties: entityProperties(uri),
                         push: { path.append(.entityProperty(uri: uri, step: $0)) },
-                        pop: { path.removeLast(min($0, path.count)) }
+                        pop: { path.removeLast(min($0, path.count)) },
+                        openEntity: { path.append(.entity(uri: $0)) }
                     )
                 }
             }

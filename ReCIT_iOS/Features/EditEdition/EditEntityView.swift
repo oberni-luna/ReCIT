@@ -125,7 +125,13 @@ struct EditEntityView: View {
                 onAddIdentifier: onAddIdentifier,
                 onOpenEntity: onOpenEntity
             )
-        case .human, .edition:
+        case .human:
+            EditAuthorFormView(
+                edit: binding,
+                onOpenProperty: onOpenProperty,
+                onAddIdentifier: onAddIdentifier
+            )
+        case .edition:
             EmptyView()
         }
     }

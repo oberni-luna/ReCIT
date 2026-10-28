@@ -2,6 +2,23 @@
 
 Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ; Figma en est le reflet.
 
+- **Proposition du 2026-10-28 — `Edition de profil`** (`800:3908`, page `Profil`, à droite de `Profil`, clair
+  seul) : tout ce que `PUT /api/user` d'inventaire.io laisse modifier au compte. Rangée 1 « Profil public » :
+  `A1 · Profil` (`807:712`, « Modifier le profil » sous l'en-tête, section « Réglages »), `A2 · Modifier le profil`
+  (`807:1168` — photo, nom d'utilisateur, bio, position, « Enregistrer » épinglé), `A3 · Photo` (`809:881`, menu
+  appareil / Photos / Gravatar / Retirer), `A4 · Nom pris, bio trop longue` (`809:1013`), `A5 · Position`
+  (`810:1094`). Rangée 2 « Compte et notifications », sans bouton, chaque réglage écrit seul : `A6 · Compte et
+  connexion` (`810:1522`), `A7 · Mot de passe` (`810:1954`), `A8 · Adresse e-mail` (`810:2325`),
+  `A9 · Notifications par e-mail` (`810:2690`). Panneau `Spec · Édition de profil` (`811:1380`) : l'attribut serveur
+  de chaque champ, et cinq points à trancher. **Trois composants nouveaux** sur `Screens · Components` :
+  `Form / Avatar Picker` (`803:616`), `Form / Text Area` (`803:637`, Tone ∈ {Default, Error}) et
+  `Form / Map Preview` (`803:638`, dessin de remplacement de MapKit, contraintes SCALE / CENTER pour s'agrandir).
+  Les écrans sont des clones de la coque d'`E3` (`758:3589`) ; leurs cartes sont des `list group` encartés sur
+  `background/form-cell`, pas des `Form / Group`, parce que `Row / Toggle` fait 361 et déborde d'un slot de 329.
+  Pièges : dans une instance, l'opacité **d'un paint** bindé se perd — la poser sur le calque ; le libellé du bouton
+  d'`Action Bar / Attached` se règle par `children[0].children[0]` (`findOne` ne l'a pas trouvé après un
+  `setProperties` sur la barre de navigation). **Implémentée le même jour**
+  ([feature 0055](../features/0055-profile-editing.md)), avec des écarts listés là.
 - **Passe du 2026-10-27 — le fond des formulaires** : deux variables nouvelles dans `Color`,
   `background/form` (`background/secondary` en clair, `background/default` en sombre) et `background/form-cell`
   (l'inverse : `background/default` / `background/secondary`). En sombre, un formulaire passe d'un fond `gray/800`

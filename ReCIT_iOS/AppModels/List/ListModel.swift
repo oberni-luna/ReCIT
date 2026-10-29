@@ -208,7 +208,36 @@ final class ListModel: OptimisticMutating {
         }
     }
 
-    // TODO: Implement update item in a list to add comment
+    /// Optimistically writes the reader's comment on an element: the store holds the new text at
+    /// once, `/api/lists/update-element` is called in the background, and a failure puts the
+    /// previous text back and is surfaced through the shared channel (ADR 0001).
+    ///
+    /// Nothing is sent when the text has not changed, nor for an element still carrying its
+    /// optimistic id: the server does not know that id yet, and the field that calls this is
+    /// disabled until the add has been reconciled.
+    func updateComment(modelContext: ModelContext, item: EntityListItem, comment: String) {
+        let previous: String = item.comment
+        let elementId: String = item._id
+        guard comment != previous, OptimisticID.isOptimistic(elementId) == false else { return }
+
+        inFlightTask = optimistic(
+            modelContext,
+            subjects: [item],
+            apply: {
+                item.comment = comment
+            },
+            revert: {
+                item.comment = previous
+            },
+            request: { [weak self] in
+                guard let self else { return }
+                guard try await self.updateElementInList(elementId: elementId, comment: comment) != nil else {
+                    throw NetworkError.badResponse
+                }
+            }
+        )
+    }
+
     // TODO: add optionnal comment when adding an element to a list
     func updateElementInList(elementId: String, comment: String) async throws -> ListElementDTO? {
         let updateListElementDTO: UpdateListElementDTO = .init(id: elementId, comment: comment)

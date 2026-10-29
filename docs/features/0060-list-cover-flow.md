@@ -80,6 +80,12 @@ aside.
 - **« Retirer de la liste » is red**, like every removal in the app since the swipes were tinted — the mockup drew it
   green.
 - **No « Créer ce livre » from this scanner**: `NewBookFlowView` files the created book into the inventory as well.
+- **The growing comment is kept above the keyboard from UIKit.** Below the comment the list ended at « Retirer de la
+  liste », so it was already scrolled as far as it goes and each new line went under the keyboard; and neither
+  `ScrollViewReader` nor `ScrollPosition` moved this `List`. While the comment is focused, a transparent row as tall as
+  the keyboard ends the list, and **`ListKeyboardReveal`** — an empty `UIViewRepresentable` behind the comment row —
+  moves the list's scroll view by what the row overruns the keyboard, on every edit. The keyboard's frame comes from
+  `keyboardWillShowNotification`.
 - **The comment field has `fixedSize(vertical:)`**: laid out while the block faded in under a title on two lines, it
   kept a clipped height.
 

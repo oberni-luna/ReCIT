@@ -22,16 +22,24 @@ struct ListCommentRow: View {
     let item: EntityListItem
     let listType: EntityListType
     var isFocused: FocusState<Bool>.Binding
+    /// Told of every edit, so the screen can keep the growing field above the keyboard.
+    let onEdit: () -> Void
 
     @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
 
     @State private var draft: String
 
-    init(item: EntityListItem, listType: EntityListType, isFocused: FocusState<Bool>.Binding) {
+    init(
+        item: EntityListItem,
+        listType: EntityListType,
+        isFocused: FocusState<Bool>.Binding,
+        onEdit: @escaping () -> Void
+    ) {
         self.item = item
         self.listType = listType
         self.isFocused = isFocused
+        self.onEdit = onEdit
         _draft = State(initialValue: item.comment)
     }
 
@@ -61,6 +69,11 @@ struct ListCommentRow: View {
             guard focused == false else { return }
 
             save()
+        }
+        .onChange(of: draft) {
+            guard isFocused.wrappedValue else { return }
+
+            onEdit()
         }
         .onChange(of: item.comment) { _, comment in
             // A sync or a reverted write moves the stored text; a draft being typed keeps its own.

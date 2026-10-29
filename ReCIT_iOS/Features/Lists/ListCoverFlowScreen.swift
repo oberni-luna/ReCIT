@@ -28,6 +28,8 @@
 
 import SwiftData
 import SwiftUI
+// The keyboard's frame, which the list keeps to itself.
+import UIKit
 
 struct ListCoverFlowScreen: View {
     let list: EntityList
@@ -45,6 +47,14 @@ struct ListCoverFlowScreen: View {
     @State private var isPresentingSearch: Bool = false
     @State private var isPresentingScanner: Bool = false
     @FocusState private var isCommentFocused: Bool
+    /// Bumped by every edit of the comment and by its focus: what makes the list follow the field
+    /// as it grows (`ListKeyboardReveal`).
+    @State private var commentEdits: Int = 0
+    /// The top of the keyboard on screen, `.infinity` when it is down. Read from UIKit: the list
+    /// keeps the keyboard to itself.
+    @State private var keyboardTop: CGFloat = .infinity
+    /// The keyboard's height, for the room left under the list while the comment is written.
+    @State private var keyboardHeight: CGFloat = 0
 
     init(list: EntityList, path: Binding<NavigationPath>) {
         self.list = list
@@ -74,7 +84,90 @@ struct ListCoverFlowScreen: View {
         list.type == .author ? "list.detail.open.author" : "list.detail.open.work"
     }
 
+    /// The room left under the list while the comment is written, when the keyboard's own height
+    /// is not known yet.
+    private static let minimumKeyboardRoom: CGFloat = 320
+
     var body: some View {
+        rows
+        .task {
+            for await notification in NotificationCenter.default.notifications(
+                named: UIResponder.keyboardWillShowNotification
+            ) {
+                let frame: CGRect? = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+                keyboardTop = frame?.minY ?? .infinity
+                keyboardHeight = frame?.height ?? 0
+            }
+        }
+        .task {
+            for await _ in NotificationCenter.default.notifications(
+                named: UIResponder.keyboardWillHideNotification
+            ) {
+                keyboardTop = .infinity
+            }
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .formActionBar(isPresented: isCommentFocused == false) {
+            ListAddBar(
+                listType: list.type,
+                onScan: { isPresentingScanner = true },
+                onSearch: { isPresentingSearch = true }
+            )
+        }
+        .fullScreenCover(isPresented: $isPresentingScanner) {
+            ListScanView(
+                list: list,
+                existingURIs: Set(uris),
+                onAdd: add,
+                onShow: show
+            )
+        }
+        .sheet(isPresented: $isPresentingSearch) {
+            ListAddSearchView(
+                list: list,
+                existingURIs: Set(uris),
+                onAdd: add,
+                onShow: show
+            )
+        }
+        .toolbar(.hidden, for: .tabBar)
+        .toolbar {
+            // The comment spans lines, so the return key starts a new one: this is the way to
+            // say the comment is done, and leaving the field is what writes it.
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+
+                Button("action.ok") {
+                    isCommentFocused = false
+                }
+            }
+        }
+        .onChange(of: isCommentFocused) { _, focused in
+            if focused {
+                commentEdits += 1
+            }
+        }
+        .onAppear {
+            if selectedURI == nil {
+                selectedURI = uris.first
+            }
+        }
+        .onChange(of: uris) { oldURIs, newURIs in
+            keepSelection(from: oldURIs, to: newURIs)
+        }
+        .task(id: uris) {
+            switch list.type {
+            case .work:
+                _ = try? await entityModel.getOrFetchWorks(modelContext: modelContext, uris: uris)
+            case .author:
+                _ = try? await entityModel.getOrFetchAuthors(modelContext: modelContext, uris: uris)
+            case .publisher:
+                break
+            }
+        }
+    }
+
+    private var rows: some View {
         DesignSystem.FormList {
             if liveItems.isEmpty {
                 Section {
@@ -116,8 +209,12 @@ struct ListCoverFlowScreen: View {
                             ListCommentRow(
                                 item: selectedItem,
                                 listType: list.type,
-                                isFocused: $isCommentFocused
+                                isFocused: $isCommentFocused,
+                                onEdit: { commentEdits += 1 }
                             )
+                        }
+                        .background {
+                            ListKeyboardReveal(trigger: commentEdits, keyboardTop: keyboardTop)
                         }
 
                         Button(openLabel) {
@@ -145,59 +242,21 @@ struct ListCoverFlowScreen: View {
                     }
                 }
             }
-        }
-        .scrollDismissesKeyboard(.interactively)
-        .formActionBar(isPresented: isCommentFocused == false) {
-            ListAddBar(
-                listType: list.type,
-                onScan: { isPresentingScanner = true },
-                onSearch: { isPresentingSearch = true }
-            )
-        }
-        .fullScreenCover(isPresented: $isPresentingScanner) {
-            ListScanView(
-                list: list,
-                existingURIs: Set(uris),
-                onAdd: add,
-                onShow: show
-            )
-        }
-        .sheet(isPresented: $isPresentingSearch) {
-            ListAddSearchView(
-                list: list,
-                existingURIs: Set(uris),
-                onAdd: add,
-                onShow: show
-            )
-        }
-        .toolbar(.hidden, for: .tabBar)
-        .toolbar {
-            // The comment spans lines, so the return key starts a new one: this is the way to
-            // say the comment is done, and leaving the field is what writes it.
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
 
-                Button("action.ok") {
-                    isCommentFocused = false
+            // Room for the comment to rise into. Below the comment the list holds only « Retirer de
+            // la liste » and its footer: it was already scrolled as far as it goes, so neither the
+            // caret nor `ListKeyboardReveal` could take the growing field any higher, and each new line
+            // went under the keyboard. A transparent row as tall as the keyboard, while the
+            // comment is being written.
+            if isCommentFocused {
+                Section {
+                    Color.clear
+                        // At least a keyboard's worth even before its frame is known: a hardware
+                        // keyboard first reports a sliver, and the room has to be there already.
+                        .frame(height: max(keyboardHeight, Self.minimumKeyboardRoom))
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(.init())
                 }
-            }
-        }
-        .onAppear {
-            if selectedURI == nil {
-                selectedURI = uris.first
-            }
-        }
-        .onChange(of: uris) { oldURIs, newURIs in
-            keepSelection(from: oldURIs, to: newURIs)
-        }
-        .task(id: uris) {
-            switch list.type {
-            case .work:
-                _ = try? await entityModel.getOrFetchWorks(modelContext: modelContext, uris: uris)
-            case .author:
-                _ = try? await entityModel.getOrFetchAuthors(modelContext: modelContext, uris: uris)
-            case .publisher:
-                break
             }
         }
     }

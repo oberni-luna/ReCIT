@@ -72,7 +72,7 @@ final class EditionDuplicatesModel: OptimisticMutating {
         case .merged:
             try fold(editionUri: goneUri, into: kept.uri, modelContext: modelContext)
             if let entityModel, work.isStillInTheStore {
-                try? await entityModel.refreshWorkEditions(modelContext: modelContext, work: work)
+                try? await entityModel.refreshWorkEditions(modelContext: modelContext, work: work, refreshing: [kept.uri])
             }
         case .reported:
             if let gone = edition(uri: goneUri, modelContext: modelContext),

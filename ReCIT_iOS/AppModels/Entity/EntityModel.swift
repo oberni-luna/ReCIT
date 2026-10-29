@@ -102,8 +102,8 @@ final class EntityModel {
     ///
     /// This is the search's route to a book: `/api/search` cannot return editions, so a tapped
     /// result names a work and the app picks the edition. It ranks over DTOs through
-    /// `WorkEditionResolver` and **persists only the winner** — going through `getWorkEditions`
-    /// would insert every edition the work has, 127 of them for *1984*, on one tap.
+    /// `WorkEditionResolver` and **persists only the winner** — inserting every edition the work
+    /// has would be 127 of them for *1984*, on one tap.
     ///
     /// `heldEditionUris` is read here rather than inside the resolver: the ranking must not know
     /// what a `ModelContext` is.
@@ -299,46 +299,61 @@ final class EntityModel {
         return works
     }
 
-    func getWorkEditions(modelContext: ModelContext, work: Work) async throws -> [Edition]? {
+    /// The uris of `work`'s editions, in one `reverse-claims` call, nothing fetched or stored:
+    /// what the book screen needs to know whether to offer « Autres éditions ». Inserting them
+    /// all, as it once did, froze it for minutes on « L'Appel de la forêt »'s 7742 editions.
+    func workEditionUris(work: Work) async throws -> [String] {
         let endpoint: String = "/api/entities/reverse-claims?property=wdt:P629&value=\(work.uri)&refresh=false"
         let response: WorkEditionsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
-
-        guard let editionUris = response?.uris else { return nil }
-        guard let editions = try? await getOrFetchEditions(modelContext: modelContext, uris: editionUris) else {
-            return nil
-        }
-
-        for edition in editions {
-            edition.mergeWorks([work])
-        }
-
-        try modelContext.save()
-        return editions
+        return response?.uris ?? []
     }
 
-    /// Every edition of `work`, fetched afresh and upserted in place — the screen « Éditions »'s
-    /// revalidation (PRD 0028).
+    /// The editions of `work`, upserted in place — the screen « Éditions »'s revalidation
+    /// (PRD 0028).
     ///
-    /// Unlike `getWorkEditions`, an edition already held is fetched again too: that method takes
-    /// a cached edition as it is, so one cached before editions carried an ISBN would never gain
-    /// one, and the duplicate detection would never see it. The publishers' and collections'
-    /// names are read once, for those not known yet.
+    /// The editions not held yet, or held but not listed under this work, are fetched first,
+    /// fifty to a call, and saved call by call, so the list fills as they come. The ones already
+    /// listed are fetched again too once a day (`Work.editionsNeedRefresh`), and those in
+    /// `refreshing` always: an edition taken from the cache as it is, cached before editions
+    /// carried an ISBN, would never gain one, and the duplicate detection would never see it. A work can have thousands of editions — « L'Appel de la
+    /// forêt » has 7742 —, which is why that second pass is not made at every visit. The
+    /// publishers' and collections' names are read once, for those not known yet.
     ///
     /// An edition this work used to list and the server no longer names — merged into another,
     /// most often — is detached from the work rather than deleted: other works, items and lists
-    /// may still point at it. A failed call changes nothing.
-    func refreshWorkEditions(modelContext: ModelContext, work: Work) async throws {
+    /// may still point at it. A failed call keeps the calls before it and detaches nothing.
+    func refreshWorkEditions(
+        modelContext: ModelContext,
+        work: Work,
+        refreshing: Set<String> = [],
+        now: Date = .now
+    ) async throws {
         let endpoint: String = "/api/entities/reverse-claims?property=wdt:P629&value=\(work.uri)&refresh=false"
-        guard let uris = (try await apiService.fetchData(fromEndpoint: endpoint) as WorkEditionsDTO?)?.uris,
-              let editionDtos = try await fetchEntities(modelContext: modelContext, uris: uris)
-        else { return }
+        guard let uris = (try await apiService.fetchData(fromEndpoint: endpoint) as WorkEditionsDTO?)?.uris else { return }
+
+        let refreshesAll: Bool = work.editionsNeedRefresh(at: now)
+        let listedHere: Set<String> = .init(work.editions.map(\.uri))
+        let missing: [String] = uris.filter { listedHere.contains($0) == false || refreshing.contains($0) }
+        let missingSet: Set<String> = .init(missing)
+        let held: [String] = refreshesAll ? uris.filter { missingSet.contains($0) == false } : []
 
         var listed: Set<String> = .init(uris)
-        for editionDto in editionDtos {
-            let works: [Work] = try await resolveEditionWorks(from: editionDto, modelContext: modelContext)
-            let edition: Edition = try modelContext.upsertEdition(editionDto, works: works, apiService: apiService)
-            edition.mergeWorks([work])
-            listed.insert(edition.uri)
+        var works: [String: Work] = [work.uri: work]
+        for batch in (missing + held).splitInSubArrays(of: 50) {
+            guard let editionDtos = try await fetchEntities(modelContext: modelContext, uris: batch) else { continue }
+            let stored: [String: Edition] = try modelContext.editions(uris: editionDtos.map(\.uri))
+            for editionDto in editionDtos {
+                let editionWorks: [Work] = await resolveEditionWorks(from: editionDto, among: &works, modelContext: modelContext)
+                let edition: Edition = try modelContext.upsertEdition(
+                    editionDto,
+                    works: editionWorks,
+                    apiService: apiService,
+                    held: stored
+                )
+                edition.mergeWorks([work])
+                listed.insert(edition.uri)
+            }
+            try modelContext.save()
         }
 
         for edition in work.editions where listed.contains(edition.uri) == false {
@@ -346,6 +361,9 @@ final class EntityModel {
         }
 
         await nameRelatives(of: work.editions)
+        if refreshesAll {
+            work.editionsRefreshedAt = now
+        }
         try modelContext.save()
     }
 
@@ -384,51 +402,6 @@ final class EntityModel {
     }
 
     // MARK: - Editions
-
-    func getOrFetchEditions(modelContext: ModelContext, uris: [String]) async throws -> [Edition]? {
-        var editions: [Edition] = []
-        var urisToFetch: [String] = []
-        var editionsNeedingWorks: [Edition] = []
-
-        for uri in uris {
-            if let edition = try? getLocalEdition(modelContext: modelContext, uri: uri) {
-                editions.append(edition)
-                if edition.works.isEmpty {
-                    editionsNeedingWorks.append(edition)
-                }
-            } else {
-                urisToFetch.append(uri)
-            }
-        }
-
-        // Fetch new editions from the API and resolve their works and authors
-        if let editionsDto = try await fetchEntities(modelContext: modelContext, uris: urisToFetch) {
-            for editionDto in editionsDto {
-                let works: [Work] = try await resolveEditionWorks(
-                    from: editionDto,
-                    modelContext: modelContext
-                )
-                editions.append(try modelContext.upsertEdition(editionDto, works: works, apiService: apiService))
-            }
-        }
-
-        // Resolve works for local editions that don't have any yet
-        if !editionsNeedingWorks.isEmpty {
-            let urisToRefetch: [String] = editionsNeedingWorks.map(\.uri)
-            if let editionDtos = try await fetchEntities(modelContext: modelContext, uris: urisToRefetch) {
-                for editionDto in editionDtos {
-                    guard let edition = editionsNeedingWorks.first(where: { $0.uri == editionDto.uri }) else { continue }
-                    edition.mergeWorks(try await resolveEditionWorks(
-                        from: editionDto,
-                        modelContext: modelContext
-                    ))
-                }
-            }
-        }
-
-        try modelContext.save()
-        return editions
-    }
 
     func getLocalEdition(modelContext: ModelContext, uri: String) throws -> Edition? {
         let predicate: Predicate<Edition> = #Predicate { object in
@@ -487,6 +460,24 @@ final class EntityModel {
     // MARK: - Private helpers
 
     /// Extracts work URIs from an edition DTO's claims and fetches the associated works and their authors.
+    /// `resolveEditionWorks`, through `works`: the editions of one work nearly all name that
+    /// work, and it is looked up once rather than once per edition.
+    private func resolveEditionWorks(
+        from editionDto: EntityResultDTO,
+        among works: inout [String: Work],
+        modelContext: ModelContext
+    ) async -> [Work] {
+        let workUris: [String] = editionDto.claims[WikidataProperty.editionOf.rawValue]?
+            .compactMap { $0.getStringValue() } ?? []
+        let unknown: [String] = workUris.filter { works[$0] == nil }
+        if unknown.isEmpty == false {
+            for fetched in (try? await getOrFetchWorks(modelContext: modelContext, uris: unknown)) ?? [] {
+                works[fetched.uri] = fetched
+            }
+        }
+        return workUris.compactMap { works[$0] }
+    }
+
     private func resolveEditionWorks(
         from editionDto: EntityResultDTO,
         modelContext: ModelContext

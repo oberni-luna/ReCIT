@@ -12,7 +12,7 @@
 
 import Foundation
 
-struct EditionFacts: Equatable, Hashable, Sendable {
+nonisolated struct EditionFacts: Equatable, Hashable, Sendable {
     let uri: String
     let mergeUri: String?
     let isbn: String?
@@ -43,6 +43,7 @@ struct EditionFacts: Equatable, Hashable, Sendable {
         self.completeness = completeness
     }
 
+    @MainActor
     init(edition: Edition) {
         let data: [Bool] = [
             edition.isbn != nil,

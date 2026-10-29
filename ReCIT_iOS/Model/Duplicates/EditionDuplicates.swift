@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct EditionDuplicates: Equatable, Sendable {
+nonisolated struct EditionDuplicates: Equatable, Sendable {
     let pairs: [EditionDuplicatePair]
     let tags: [String: EditionDuplicateTag]
 

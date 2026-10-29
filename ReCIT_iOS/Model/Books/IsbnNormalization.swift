@@ -18,7 +18,7 @@
 
 import Foundation
 
-enum IsbnNormalization {
+nonisolated enum IsbnNormalization {
 
     /// The ISBN-13 `raw` stands for, as thirteen digits — or `nil` when `raw` has the shape of neither.
     static func normalized(_ raw: String?) -> String? {

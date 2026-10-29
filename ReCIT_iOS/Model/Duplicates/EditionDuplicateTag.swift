@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum EditionDuplicateTag: Equatable, Hashable, Sendable {
+nonisolated enum EditionDuplicateTag: Equatable, Hashable, Sendable {
     case sameIsbn
     case probable
     case reported

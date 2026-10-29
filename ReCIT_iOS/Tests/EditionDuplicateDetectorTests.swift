@@ -213,6 +213,33 @@ struct EditionDuplicateDetectorTests {
         #expect(EditionDuplicates.none.signature.isEmpty)
     }
 
+    @Test("Thousands of editions are compared by ISBN and by publisher and year, not pair by pair")
+    func thousandsOfEditions() {
+        func isbn(_ index: Int) -> String {
+            "978\(1_000_000_000 + index)"
+        }
+        var editions: [EditionFacts] = (0..<8000).map { index in
+            inv("\(index)", isbn: isbn(index), publisher: "wd:P\(index % 40)", year: "\(1900 + index % 100)")
+        }
+        editions += [
+            inv("same", isbn: isbn(42)),
+            inv("probable", publisher: "wd:P7", year: "1907"),
+            inv("reported", isbn: isbn(99), reported: ["inv:99"])
+        ]
+
+        let result: EditionDuplicates = EditionDuplicateDetector.detect(editions)
+
+        // « probable » meets every edition of P7 in 1907, one in 200; those have ISBNs that differ.
+        #expect(result.count(of: .sameIsbn) == 1)
+        #expect(result.count(of: .probable) == 40)
+        #expect(result.pairs.allSatisfy { $0.reason == .sameIsbn || $0.contains("inv:probable") })
+        #expect(result.tags["inv:same"] == .sameIsbn)
+        #expect(result.tags["inv:42"] == .sameIsbn)
+        #expect(result.tags["inv:probable"] == .probable)
+        #expect(result.tags["inv:99"] == .reported)
+        #expect(result.tags["inv:reported"] == .reported)
+    }
+
     // MARK: - Which one is kept
 
     @Test("A Wikidata edition is always kept, and the other cannot be")

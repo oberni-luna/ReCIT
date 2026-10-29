@@ -14,27 +14,40 @@ import SwiftData
 
 struct WorkEditionPicker: View {
     @State private var nextEntityDestination: NavigationDestination?
+    /// The order and the duplicates, worked out off the main actor; `nil` until the first time.
+    @State private var listing: EditionListing?
+    /// The editions in `listing`'s order, resolved once per listing rather than at every render.
+    @State private var orderedEditions: [Edition] = []
+    /// Coming back from « Les comparer » lists again: a pair declared different changes no count.
+    @State private var appearances: Int = 0
 
     let work: Work
     /// The editions are still being fetched: an empty list is not an answer yet.
     let isLoading: Bool
+    /// Moves each time the gateway has written to the editions, so the list is worked out again.
+    let revision: Int
     @Binding var path: NavigationPath
 
-    /// Read off the observed work rather than handed in: an edition a merge removes leaves the
-    /// list by itself, and is never read once it is gone (PRD 0028).
-    private var editions: [Edition] {
-        work.editions.sorted(by: Self.listOrder)
+    /// What the list is worked out again for. `count` follows the observed work: a sync adding
+    /// editions, a merge removing one.
+    private struct ListingKey: Equatable {
+        let count: Int
+        let revision: Int
+        let appearances: Int
     }
 
     var body: some View {
-        let duplicates: EditionDuplicates = EditionDuplicateDetector.detect(editions.map(EditionFacts.init))
+        let duplicates: EditionDuplicates = listing?.duplicates ?? .none
+        // An edition a merge removes leaves the list by itself, and is never read once it is
+        // gone (PRD 0028).
+        let editions: [Edition] = orderedEditions.filter(\.isStillInTheStore)
 
         List {
             headerSection
             EditionDuplicatesBanner(work: work, duplicates: duplicates) {
                 path.append(NavigationDestination.editionDuplicates(workUri: work.uri))
             }
-            editionsSection(duplicates: duplicates)
+            editionsSection(editions: editions, duplicates: duplicates)
         }
         .listStyle(.insetGrouped)
         .applyListBackground()
@@ -54,6 +67,36 @@ struct WorkEditionPicker: View {
                 nextEntityDestination = nil
             }
         }
+        .onAppear {
+            appearances += 1
+        }
+        .task(id: ListingKey(count: work.editions.count, revision: revision, appearances: appearances)) {
+            await relist()
+        }
+    }
+
+    /// Reads what the order and the detection need on the main actor, then works the list out
+    /// away from it.
+    private func relist() async {
+        // A sync writes its editions fifty at a time: changes in a row make one listing.
+        if listing != nil {
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+            } catch {
+                return
+            }
+        }
+
+        let editions: [Edition] = work.editions.filter(\.isStillInTheStore)
+        let listing: EditionListing = await EditionListing.computed(
+            entries: editions.map(EditionListing.Entry.init),
+            facts: editions.map(EditionFacts.init)
+        )
+        guard Task.isCancelled == false else { return }
+
+        let byUri: [String: Edition] = .init(editions.map { ($0.uri, $0) }, uniquingKeysWith: { first, _ in first })
+        orderedEditions = listing.order.compactMap { byUri[$0] }
+        self.listing = listing
     }
 
     @ViewBuilder
@@ -75,9 +118,9 @@ struct WorkEditionPicker: View {
     }
 
     @ViewBuilder
-    func editionsSection(duplicates: EditionDuplicates) -> some View {
+    func editionsSection(editions: [Edition], duplicates: EditionDuplicates) -> some View {
         Section {
-            if editions.isEmpty && isLoading {
+            if editions.isEmpty && (isLoading || listing == nil) {
                 ProgressView()
             } else {
                 ForEach(editions) { edition in
@@ -96,22 +139,6 @@ struct WorkEditionPicker: View {
             Text("work.editions.header \(work.title)")
                 .textStyle(.action200)
                 .foregroundStyle(.foregroundSecondary)
-        }
-    }
-
-    /// Oldest first, as a publication history reads; an edition without a date last; then by
-    /// title, then by uri, so the order never moves between two visits.
-    static func listOrder(_ lhs: Edition, _ rhs: Edition) -> Bool {
-        switch (lhs.publicationYear, rhs.publicationYear) {
-        case let (left?, right?) where left != right:
-            return left < right
-        case (.some, nil):
-            return true
-        case (nil, .some):
-            return false
-        default:
-            let titles: ComparisonResult = lhs.title.localizedStandardCompare(rhs.title)
-            return titles == .orderedSame ? lhs.uri < rhs.uri : titles == .orderedAscending
         }
     }
 }

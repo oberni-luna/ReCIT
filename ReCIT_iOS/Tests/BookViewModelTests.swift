@@ -225,7 +225,7 @@ struct BookViewModelTests {
     // MARK: - worksWithOtherEditions
 
     /// Builds an edition whose single work also exists in `siblingUris` other
-    /// editions, all pre-cached so `getWorkEditions` needs no `by-uris` fetch.
+    /// editions, all pre-cached.
     private func makeWorkWithEditions(
         context: ModelContext,
         workUri: String,

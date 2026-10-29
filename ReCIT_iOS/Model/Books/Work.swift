@@ -52,6 +52,11 @@ public class Work: Identifiable, Entity {
     /// they change. Local, optional, migrated lightly. See PRD 0028.
     var dismissedDuplicatesSignature: String?
 
+    /// When « Éditions » last fetched every edition of this work again, `nil` if never. Until a
+    /// day has passed only the editions not held yet are fetched: a work can have thousands
+    /// (« L'Appel de la forêt » has 7742), fifty to a call. Local, optional, migrated lightly.
+    var editionsRefreshedAt: Date?
+
     @Relationship(inverse: \Author.works) var authors: [Author] = []
     @Relationship(inverse: \Edition.works) var editions: [Edition] = []
 
@@ -112,6 +117,14 @@ public class Work: Identifiable, Entity {
 
     /// Adds the authors this work does not list yet. By uri, so a work that arrives once under
     /// each of its authors ends up with all of them, and none twice.
+    /// How long the editions held are trusted before « Éditions » fetches them all again.
+    static let editionsFreshness: TimeInterval = 24 * 60 * 60
+
+    func editionsNeedRefresh(at now: Date) -> Bool {
+        guard let editionsRefreshedAt else { return true }
+        return now.timeIntervalSince(editionsRefreshedAt) > Self.editionsFreshness
+    }
+
     func mergeAuthors(_ newAuthors: [Author]) {
         var known: Set<String> = .init(authors.map(\.uri))
         for author in newAuthors where known.insert(author.uri).inserted {

@@ -62,10 +62,23 @@ extension ModelContext {
     }
 
     /// Merges `dto` into the store's editions, adding `works` to the ones it already has.
+    ///
+    /// `held`, when given, is what the store holds of the uris being upserted, read by the caller
+    /// in one fetch (`editions(uris:)`): a batch of fifty is one query rather than fifty.
     @discardableResult
-    func upsertEdition(_ dto: EntityResultDTO, works: [Work], apiService: APIServicing) throws -> Edition {
+    func upsertEdition(
+        _ dto: EntityResultDTO,
+        works: [Work],
+        apiService: APIServicing,
+        held: [String: Edition]? = nil
+    ) throws -> Edition {
         let uri: String = dto.uri
-        if let edition = try fetch(FetchDescriptor<Edition>(predicate: #Predicate { $0.uri == uri })).first {
+        let existing: Edition? = if let held {
+            held[uri]
+        } else {
+            try fetch(FetchDescriptor<Edition>(predicate: #Predicate { $0.uri == uri })).first
+        }
+        if let edition = existing {
             edition.update(entityDto: dto, apiService: apiService)
             edition.mergeWorks(works)
             return edition
@@ -74,6 +87,12 @@ extension ModelContext {
         insert(edition)
         edition.mergeWorks(works)
         return edition
+    }
+
+    /// The editions the store holds among `uris`, by uri, in one query.
+    func editions(uris: [String]) throws -> [String: Edition] {
+        let editions: [Edition] = try fetch(FetchDescriptor<Edition>(predicate: #Predicate { uris.contains($0.uri) }))
+        return .init(editions.map { ($0.uri, $0) }, uniquingKeysWith: { first, _ in first })
     }
 
     /// The edition an inventory item names, from the store when it is there, otherwise made from

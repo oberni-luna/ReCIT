@@ -150,8 +150,8 @@ final class BookViewModel {
     ) async {
         var result: [Work] = []
         for work in edition.works {
-            let editions: [Edition] = (try? await entityModel.getWorkEditions(modelContext: modelContext, work: work)) ?? []
-            if editions.count > 1 {
+            let uris: [String] = (try? await entityModel.workEditionUris(work: work)) ?? []
+            if uris.count > 1 {
                 result.append(work)
             }
         }

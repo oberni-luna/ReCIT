@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct EditionDuplicatePair: Equatable, Hashable, Identifiable, Sendable {
+nonisolated struct EditionDuplicatePair: Equatable, Hashable, Identifiable, Sendable {
     let first: EditionFacts
     let second: EditionFacts
     let reason: EditionDuplicateReason

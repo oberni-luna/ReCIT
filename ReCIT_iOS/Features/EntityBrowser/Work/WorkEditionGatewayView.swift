@@ -33,6 +33,8 @@ struct WorkEditionGatewayView: View {
     let workUri: String
     @Binding var path: NavigationPath
     @State private var viewState: ViewState = .loadingWork
+    /// Moves each time `load` has written to the editions, for the picker to list them again.
+    @State private var revision: Int = 0
 
     var body: some View {
         Group {
@@ -40,12 +42,12 @@ struct WorkEditionGatewayView: View {
             case .loadingWork:
                 ProgressView()
             case .loadingEditions(let work):
-                WorkEditionPicker(work: work, isLoading: true, path: $path)
+                WorkEditionPicker(work: work, isLoading: true, revision: revision, path: $path)
             case .loaded(let work, let editions):
                 if editions.count == 1, let edition = editions.first {
                     BookDetailView(anchor: .edition(uri: edition.uri), path: $path)
                 } else {
-                    WorkEditionPicker(work: work, isLoading: false, path: $path)
+                    WorkEditionPicker(work: work, isLoading: false, revision: revision, path: $path)
                 }
             case .error(let error):
                 Text("error.with_message \(error.localizedDescription)")
@@ -81,11 +83,17 @@ struct WorkEditionGatewayView: View {
                 viewState = .loadingEditions(work: work)
             }
 
-            // Every edition afresh, not only the new ones: the list shows each one's ISBN,
-            // publisher and date, and compares them (PRD 0028).
+            // The editions held are fetched again only once a day: the list shows each one's ISBN,
+            // publisher and date, and compares them (PRD 0028), but a work can have thousands.
+            // The merge tasks follow the same rhythm, one call per fifty editions.
+            let wasStale: Bool = work.editionsNeedRefresh(at: .now)
             try await entityModel.refreshWorkEditions(modelContext: modelContext, work: work)
             viewState = .loaded(work: work, editions: work.editions)
-            await editionDuplicatesModel.refreshPendingReports(modelContext: modelContext, work: work)
+            revision += 1
+            if wasStale {
+                await editionDuplicatesModel.refreshPendingReports(modelContext: modelContext, work: work)
+                revision += 1
+            }
         } catch {
             if cached == nil {
                 viewState = .error(error: error)

@@ -10,9 +10,8 @@
 //    1. `reverse-claims` on `wdt:P629` — the uris of the work's editions
 //    2. `by-uris` in batches of 50 — their language, title claim and cover
 //
-//  **It deliberately does not go through `EntityModel.getWorkEditions`.** That method inserts
-//  every edition it reads, resolves each one's works, and saves — 127 objects for *1984*, on one
-//  tap, on the main actor. This resolver ranks over DTOs and hands back a single uri; persisting
+//  **It deliberately stores nothing.** Inserting every edition read, resolving each one's works,
+//  and saving was 127 objects for *1984*, on one tap, on the main actor. This resolver ranks over DTOs and hands back a single uri; persisting
 //  it is the caller's job, through the existing `refreshEdition`, which upserts (ADR 0001,
 //  invariant 2).
 //

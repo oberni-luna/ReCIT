@@ -171,6 +171,49 @@ struct EditionBibliographicClaimsTests {
         #expect(kept.publisherName == "Gallimard")
         #expect(work.editions.map(\.uri) == ["inv:E1"])
         #expect(try context.fetch(FetchDescriptor<Edition>()).count == 2)
+        #expect(work.editionsRefreshedAt != nil)
+    }
+
+    @Test("Within a day, « Éditions » fetches only the editions the work does not list yet, and those it is asked to")
+    func refreshWorkEditionsWithinADay() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let work: Work = .init(uri: "wd:W1", lastrevid: 1, title: "L'Appel de la forêt")
+        let held: Edition = .init(uri: "inv:E1", title: "Folio", lang: "fr", authorNames: [])
+        context.insert(work)
+        context.insert(held)
+        held.mergeWorks([work])
+        let refreshedAt: Date = .now
+        work.editionsRefreshedAt = refreshedAt
+        try context.save()
+
+        let api: MockAPIService = .init()
+        api.stub("reverse-claims", json: #"{"uris":["inv:E1","inv:E2"]}"#)
+        api.stub("uris=inv:E2&", json: #"""
+        {"entities":{"inv:E2":{"uri":"inv:E2","invId":"E2","type":"edition","labels":{},
+         "claims":{"wdt:P629":["wd:W1"],"wdt:P212":["978-2-07-036822-8"]}}}}
+        """#)
+        api.stub("uris=inv:E1&", json: #"""
+        {"entities":{"inv:E1":{"uri":"inv:E1","invId":"E1","type":"edition","labels":{},
+         "claims":{"wdt:P629":["wd:W1"],"wdt:P212":["978-2-08-070112-3"]}}}}
+        """#)
+        let model: EntityModel = .init(apiService: api)
+
+        try await model.refreshWorkEditions(modelContext: context, work: work, now: refreshedAt.addingTimeInterval(60))
+
+        #expect(Set(work.editions.map(\.uri)) == ["inv:E1", "inv:E2"])
+        #expect(held.isbn == nil)
+        #expect(api.recordedRequests.contains { $0.endpoint.contains("uris=inv:E1&") } == false)
+        #expect(work.editionsRefreshedAt == refreshedAt)
+
+        try await model.refreshWorkEditions(
+            modelContext: context,
+            work: work,
+            refreshing: ["inv:E1"],
+            now: refreshedAt.addingTimeInterval(120)
+        )
+
+        #expect(held.isbn == "978-2-08-070112-3")
+        #expect(api.recordedRequests.filter { $0.endpoint.contains("uris=inv:E2&") }.count == 1)
     }
 
     // MARK: - Row
@@ -202,6 +245,7 @@ struct EditionBibliographicClaimsTests {
             edition("inv:1", "A", "1995")
         ]
 
-        #expect(editions.sorted(by: WorkEditionPicker.listOrder).map(\.uri) == ["inv:1", "inv:2", "inv:3", "inv:4"])
+        let listing: EditionListing = .make(entries: editions.map(EditionListing.Entry.init), facts: [])
+        #expect(listing.order == ["inv:1", "inv:2", "inv:3", "inv:4"])
     }
 }

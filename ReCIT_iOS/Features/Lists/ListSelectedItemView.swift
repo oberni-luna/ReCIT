@@ -111,6 +111,9 @@ struct ListSelectedItemView: View {
                     )
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundDefault)
+                    // A vertical field laid out while the block fades in kept a clipped height
+                    // when the title above it wrapped; its own height has to win.
+                    .fixedSize(horizontal: false, vertical: true)
                     .focused(isCommentFocused)
                     .disabled(OptimisticID.isOptimistic(item._id))
                 }

@@ -37,6 +37,7 @@ struct ListCoverFlowScreen: View {
     @State private var selectedURI: String?
     /// The uri an add has just asked for, selected as soon as the list holds it.
     @State private var selectAfterAdd: String?
+    @State private var isPresentingSearch: Bool = false
     @FocusState private var isCommentFocused: Bool
 
     init(list: EntityList, path: Binding<NavigationPath>) {
@@ -104,7 +105,15 @@ struct ListCoverFlowScreen: View {
             ListAddBar(
                 listType: list.type,
                 onScan: {},
-                onSearch: {}
+                onSearch: { isPresentingSearch = true }
+            )
+        }
+        .sheet(isPresented: $isPresentingSearch) {
+            ListAddSearchView(
+                list: list,
+                existingURIs: Set(uris),
+                onAdd: add,
+                onShow: show
             )
         }
         .toolbar(.hidden, for: .tabBar)
@@ -157,6 +166,26 @@ struct ListCoverFlowScreen: View {
 
         let formerIndex: Int = oldURIs.firstIndex(of: selectedURI) ?? 0
         self.selectedURI = newURIs.isEmpty ? nil : newURIs[min(formerIndex, newURIs.count - 1)]
+    }
+
+    /// Adds what the scanner or the search chose, and has the list land on the first of it as
+    /// soon as it holds it — which, the add being optimistic, is at once.
+    private func add(_ addedURIs: [String]) {
+        guard let first = addedURIs.first else { return }
+
+        selectAfterAdd = first
+        listModel.addEntitiesToList(
+            modelContext: modelContext,
+            list: list,
+            entityUris: addedURIs
+        )
+    }
+
+    /// Lands on an element the list already holds.
+    private func show(_ uri: String) {
+        withAnimation(.snappy) {
+            selectedURI = uri
+        }
     }
 
     private func open(_ uri: String) {

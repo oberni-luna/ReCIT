@@ -182,6 +182,71 @@ final class ListModel: OptimisticMutating {
         )
     }
 
+    /// Moves an element into another list, with its comment — « Déplacer dans une autre liste ».
+    ///
+    /// **Server-first, not optimistic**, in three calls that each wait for the one before: add the
+    /// uri to `destination`, write the comment on the element just created, take the uri out of
+    /// `source`. A failure stops the rest, so the element is never taken out of a list before it
+    /// has landed in the other; at worst it is in both. Whatever did land on the server is in the
+    /// store before the error is thrown, so the screen shows what the server holds.
+    ///
+    /// A destination that already holds the uri creates nothing (`alreadyInList`): the element is
+    /// then only taken out of `source`, and the destination keeps its own comment.
+    func moveElement(
+        modelContext: ModelContext,
+        item: EntityListItem,
+        from source: EntityList,
+        to destination: EntityList
+    ) async throws {
+        let uri: String = item.uri
+        let comment: String = item.comment
+        let sourceId: String = source._id
+
+        guard let response: AddToListResponseDTO = try await apiService.send(
+            toEndpoint: "/api/lists/add-elements",
+            method: "PUT",
+            payload: AddToListDTO(id: destination._id, uris: [uri]),
+            debug: true
+        ) else {
+            throw NetworkError.badResponse
+        }
+
+        var landed: [ListElementDTO] = response.createdElements
+        do {
+            if comment.isEmpty == false, let element = landed.first {
+                guard let commented = try await updateElementInList(elementId: element._id, comment: comment) else {
+                    throw NetworkError.badResponse
+                }
+                landed = [commented]
+            }
+        } catch {
+            try file(landed, into: destination, modelContext: modelContext)
+            throw error
+        }
+        try file(landed, into: destination, modelContext: modelContext)
+
+        try await deleteElementsInList(
+            modelContext: modelContext,
+            listId: sourceId,
+            elementIds: [uri]
+        )
+    }
+
+    /// Inserts elements the server has created into a list of the store, unless the list has left
+    /// it during the round trip or already holds them.
+    private func file(_ elements: [ListElementDTO], into list: EntityList, modelContext: ModelContext) throws {
+        guard list.isStillInTheStore else { return }
+
+        let baseUrl: String = apiService.baseUrl()
+        let heldIDs: Set<String> = .init(list.elements.map(\._id))
+        for element in elements where heldIDs.contains(element._id) == false {
+            let item: EntityListItem = .init(listElementDTO: element, listType: list.type, baseUrl: baseUrl)
+            modelContext.insert(item)
+            list.elements.append(item)
+        }
+        try modelContext.save()
+    }
+
     // TODO: Implement remove item from list
 //    {id: "97e848f4af0a5ffe2886648ee2bc648b", uris: ["inv:fd0bbd368cb02d614a3b29857f960fbe"]}
     func deleteElementsInList(modelContext: ModelContext, listId: String, elementIds: [String]) async throws {

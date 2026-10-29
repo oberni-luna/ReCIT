@@ -443,36 +443,53 @@
         }
       }
     },
-    "list.detail.open.work" : {
+    "list.detail.move" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "See the book"
+            "value" : "Move to another list"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voir la fiche du livre"
+            "value" : "Déplacer dans une autre liste"
           }
         }
       }
     },
-    "list.detail.open.author" : {
+    "list.detail.move.already" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "See the author"
+            "value" : "Already in this list"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voir la fiche de l’auteur·ice"
+            "value" : "Déjà dans cette liste"
+          }
+        }
+      }
+    },
+    "list.detail.moved_to_named %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moved to “%@”"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplacé dans « %@ »"
           }
         }
       }

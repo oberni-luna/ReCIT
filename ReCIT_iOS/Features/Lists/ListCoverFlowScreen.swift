@@ -11,8 +11,9 @@
 //  it dissolves into it.
 //
 //  An inset grouped list, the forms' (`DesignSystem.FormList`): the cover flow and the title are
-//  a first row on the screen's ground, edge to edge, and the comment, the way to the book's page and the
-//  way out of the list are rows with the system's own corners.
+//  a first row on the screen's ground, edge to edge, and the comment, the move to another list and the
+//  way out of the list are rows with the system's own corners. The way to the book's page is the
+//  cover in front.
 //
 //  **The selection survives the list changing under it.** It is a uri, so an element whose
 //  optimistic id is replaced by the server's stays selected; an element removed hands the
@@ -78,10 +79,6 @@ struct ListCoverFlowScreen: View {
 
     private var selectedItem: EntityListItem? {
         liveItems.first { $0.uri == selectedURI }
-    }
-
-    private var openLabel: LocalizedStringKey {
-        list.type == .author ? "list.detail.open.author" : "list.detail.open.work"
     }
 
     /// The room left under the list while the comment is written, when the keyboard's own height
@@ -217,11 +214,12 @@ struct ListCoverFlowScreen: View {
                             ListKeyboardReveal(trigger: commentEdits, keyboardTop: keyboardTop)
                         }
 
-                        Button(openLabel) {
-                            open(selectedItem.uri)
-                        }
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundTinted)
+                        // No way to the element's page here: the cover in front opens it.
+                        ListMoveRow(
+                            item: selectedItem,
+                            list: list,
+                            isCommentFocused: isCommentFocused
+                        )
                     }
                 }
 

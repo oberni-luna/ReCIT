@@ -2,6 +2,46 @@
 
 Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ; Figma en est le reflet.
 
+- **Proposition du 2026-10-29 — `Liste détails`** (`843:12721`, page `Liste`, à droite des trois sections de
+  la page, clair seul) : le détail d'une liste en deux parties. En haut, un cover flow sans reflet ni compteur sur
+  `background/form` — la couverture de face (172 × 258, `radius/book`, `Shadow/Thumbnail`) est la sélection, les
+  autres sont des vecteurs en trapèze (62 de large, bord extérieur 234, bord intérieur 200 — le côté proche de la
+  couverture de face est le plus court, il fuit vers le centre —, chevauchement 38) dont le remplissage image
+  est étiré en `CROP` à transformée identité, assombris de 3 % par rang. En bas, titre et auteur·ice centrés, une
+  carte `background/form-cell` avec `Form / Text Area` « Mon commentaire » (compteur masqué, enregistré à la sortie
+  du champ, optimiste, par `ListModel.updateElementInList`) et `Row / Link` Tinted « Voir la fiche du livre », une
+  carte `Row / Link` « Retirer de la liste », puis « Ajouté le … » en `Note` Footnote Secondary. **La tab bar est
+  remplacée par une barre fixe** comme celle des formulaires (`barre fixe (safeAreaInset)`, `background/default`,
+  filet `border/default` en haut) : le libellé « Ajouter un livre » en `Caption/caption200` secondaire au-dessus
+  de deux `Action / Pill` Prominent « Scanner » et « Rechercher » ; « Ajouter un·e auteur·ice » et « Rechercher »
+  seul pour une liste d'auteur·ices. Rangée 1 : `C1 · Liste · Cover flow` (`847:366`), `C2 · Liste · Livre
+  suivant, sans commentaire` (`848:422`, placeholder en `foreground/placeholder`), `C3 · Liste d'auteur·ices ·
+  Rechercher seul` (`855:1101`, un disque de 200 de face et des ellipses de 64 × 184 de biais), `C4 · Liste ·
+  Commentaire, clavier ouvert` (`861:839` — tout l'écran remonte et passe sous la barre de navigation, la barre
+  d'ajout reste sous le clavier ; clavier AZERTY dessiné à la main, aucun composant n'en existait). **Un livre à
+  la fois.** Rangée 2, « Ajouter en scannant » : `A1 · Scanner · À l'ouverture` (`857:479`), `A2 · Scanner ·
+  Livre reconnu` (`857:513`, l'aperçu et le « + » rond du scanner de l'inventaire, clonés de `S0` `313:7883` ;
+  « + » ajoute l'œuvre de l'édition et ferme le scanner), `A3 · Scanner · Déjà dans la liste` (`862:790`, alerte
+  « Ce livre est déjà dans « À lire cet été » — Vous voulez vraiment l'ajouter en double ? »), `A4 · Scanner ·
+  Un recueil, quelle œuvre ?` (`862:819`, dialogue de confirmation, une ligne par œuvre et « Toutes les
+  œuvres »), `A5 · Liste · Retour, sur le livre ajouté` (`857:641`). Un ISBN inconnu suit le scanner de
+  l'inventaire (« Créer ce livre sur inventaire.io »), sans écran. L'image de caméra est celle de `S0`
+  (`313:7882`), qui porte sa propre barre d'état. Rangée 3, « Ajouter en cherchant » :
+  `R1 · Rechercher · À l'ouverture` (`858:588`), `R2 · Rechercher · Résultats` (`858:669`, un « + » par
+  résultat qui ajoute et ferme la feuille, une coche inerte sur ce qui est déjà dans la liste),
+  `R3 · Liste d'auteur·ices · Résultats` (`858:1023`) — des clones de `V2 · Quelle œuvre ? · Résultats`
+  (`712:21368`), sections « Dans mes livres et chez mes amis » et « Œuvres sur inventaire.io », ou
+  « Auteur·ices sur inventaire.io » seule. `Spec · Liste · Cover flow` (`848:500`) : les décisions, plus de point
+  ouvert. Le clavier, l'alerte et le dialogue sont en Inter, à la place de SF Pro.
+  **Un composant nouveau**, `List / Add Result` (`855:645`, `Screens · Components`, State ∈ {Add, Added}) :
+  `Cell / Entity` puis « + » sur `background/tinted` ou la coche pleine `foreground/tinted`. Piège : la cellule
+  garde 69 de haut même avec `Show owner` — une troisième ligne déborde, l'état va donc dans le sous-titre.
+  **Huit couvertures et huit portraits importés** depuis inventaire.io et Wikimedia Commons
+  (`Assets · couvertures de la liste`, `846:2145`), leurs `imageHash` réutilisables. Chrome cloné de
+  `H · Liste vide · Tel quel · Light` (`213:6935`). **Implémentée le même jour**
+  ([feature 0060](../features/0060-list-cover-flow.md)), avec des écarts : « Retirer de la liste » en rouge comme
+  tous les retraits de l'app ; l'alerte de `A3` n'offre pas d'ajouter en double — inventaire.io refuse les doublons
+  dans une liste — mais « Le voir » / « Continuer » ; la perspective est un `rotation3DEffect`, pas des trapèzes.
 - **Proposition du 2026-10-28 — `Edition de profil`** (`800:3908`, page `Profil`, à droite de `Profil`, clair
   seul) : tout ce que `PUT /api/user` d'inventaire.io laisse modifier au compte. Rangée 1 « Profil public » :
   `A1 · Profil` (`807:712`, « Modifier le profil » sous l'en-tête, section « Réglages »), `A2 · Modifier le profil`

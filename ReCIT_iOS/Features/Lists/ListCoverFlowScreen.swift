@@ -38,6 +38,7 @@ struct ListCoverFlowScreen: View {
     /// The uri an add has just asked for, selected as soon as the list holds it.
     @State private var selectAfterAdd: String?
     @State private var isPresentingSearch: Bool = false
+    @State private var isPresentingScanner: Bool = false
     @FocusState private var isCommentFocused: Bool
 
     init(list: EntityList, path: Binding<NavigationPath>) {
@@ -104,8 +105,16 @@ struct ListCoverFlowScreen: View {
         .formActionBar(isPresented: isCommentFocused == false) {
             ListAddBar(
                 listType: list.type,
-                onScan: {},
+                onScan: { isPresentingScanner = true },
                 onSearch: { isPresentingSearch = true }
+            )
+        }
+        .fullScreenCover(isPresented: $isPresentingScanner) {
+            ListScanView(
+                list: list,
+                existingURIs: Set(uris),
+                onAdd: add,
+                onShow: show
             )
         }
         .sheet(isPresented: $isPresentingSearch) {

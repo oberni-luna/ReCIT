@@ -150,7 +150,13 @@ private struct AuthorListItemRow: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("e2e.listItemRow")
             .swipeActions(edge: .trailing) {
-                Button("action.delete", systemImage: "trash", role: .destructive) {
+                // Named after the list, with the étagère's icon: the entry leaves this list, nothing
+                // is deleted.
+                Button(
+                    "action.remove_from_named \(listItem.list?.name ?? "")",
+                    systemImage: "tray.and.arrow.up",
+                    role: .destructive
+                ) {
                     Task {
                         try? await listModel.deleteElementsInList(
                             modelContext: modelContext,
@@ -244,7 +250,13 @@ private struct WorkListItemRow: View {
                 placement: .contextMenu
             )
             .swipeActions(edge: .trailing) {
-                Button("action.delete", systemImage: "trash", role: .destructive) {
+                // Named after the list, with the étagère's icon: the entry leaves this list, nothing
+                // is deleted.
+                Button(
+                    "action.remove_from_named \(listItem.list?.name ?? "")",
+                    systemImage: "tray.and.arrow.up",
+                    role: .destructive
+                ) {
                     Task {
                         try? await listModel.deleteElementsInList(
                             modelContext: modelContext,

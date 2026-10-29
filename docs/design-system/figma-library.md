@@ -9,7 +9,8 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   couverture de face est le plus court, il fuit vers le centre —, chevauchement 38) dont le remplissage image
   est étiré en `CROP` à transformée identité, assombris de 3 % par rang. En bas, titre et auteur·ice centrés, une
   carte `background/form-cell` avec `Form / Text Area` « Mon commentaire » (compteur masqué, enregistré à la sortie
-  du champ, optimiste, par `ListModel.updateElementInList`) et `Row / Link` Tinted « Voir la fiche du livre », une
+  du champ, optimiste, par `ListModel.updateElementInList`) et `Row / Link` Tinted « Voir la fiche du livre » (**divergence** : le code
+  affiche « Déplacer dans une autre liste » à sa place depuis la feature 0061), une
   carte `Row / Link` « Retirer de la liste », puis « Ajouté le … » en `Note` Footnote Secondary. **La tab bar est
   remplacée par une barre fixe** comme celle des formulaires (`barre fixe (safeAreaInset)`, `background/default`,
   filet `border/default` en haut) : le libellé « Ajouter un livre » en `Caption/caption200` secondaire au-dessus

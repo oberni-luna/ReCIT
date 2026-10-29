@@ -7424,6 +7424,7 @@
       }
     },
     "edit_edition.isbn10" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7440,6 +7441,7 @@
       }
     },
     "edit_edition.isbn13" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7840,6 +7842,7 @@
       }
     },
     "edit_work.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

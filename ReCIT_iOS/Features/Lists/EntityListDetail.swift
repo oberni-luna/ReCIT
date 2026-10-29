@@ -159,6 +159,8 @@ private struct AuthorListItemRow: View {
                         )
                     }
                 }
+                // The app's tint would otherwise win over the role, and paint it pale green.
+                .tint(.foregroundError)
             }
         }
     }
@@ -251,6 +253,8 @@ private struct WorkListItemRow: View {
                         )
                     }
                 }
+                // The app's tint would otherwise win over the role, and paint it pale green.
+                .tint(.foregroundError)
             }
         }
     }

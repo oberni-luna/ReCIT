@@ -102,8 +102,8 @@ struct ShelfDetailView: View {
                     // shelf is not a gesture that exists, and a swipe that reveals an
                     // action only to refuse it is worse than no swipe at all.
                     //
-                    // Destructive, for the system's red: the book leaves the étagère, and the
-                    // accent's pale green read as a harmless action.
+                    // Destructive, and tinted red by hand: the app's tint wins over the role, and
+                    // its pale green read as a harmless action.
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         if isMine {
                             Button(
@@ -113,6 +113,7 @@ struct ShelfDetailView: View {
                             ) {
                                 shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
                             }
+                            .tint(.foregroundError)
                         }
                     }
                 }

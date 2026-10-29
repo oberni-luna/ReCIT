@@ -93,6 +93,8 @@ struct SortShelfDetailView: View {
                 ) {
                     unshelve(book, from: section)
                 }
+                // The app's tint would otherwise win over the role, and paint it pale green.
+                .tint(.foregroundError)
                 .disabled(session.isBusy)
             }
         }

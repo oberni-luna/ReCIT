@@ -26,6 +26,16 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   bouge. `Form / Group` (`702:520`) et le `contenu` de `Form / Swipe Row` (`757:608`) sont sur `background/form-cell` ;
   la `feuille` de 40 écrans de formulaire est sur `background/form`. Passés au code le même jour :
   `DesignSystem.Form` et `DesignSystem.FormList` (D-FF1, résolue). Détail en fin de fichier.
+- **Proposition du 2026-10-29 — `Éditions · Filtre par langue`** (`831:7654`, page `Inventaire`, en bas de la page,
+  clair seul) : l'en-tête « Éditions de … » porte à droite la langue affichée, un toucher ouvre un menu qui la change,
+  la langue du téléphone par défaut. `L1 · Éditions · En français` (`831:7657`, clone de `C1` `770:4774`, toute la
+  longueur, sans le bandeau), `L2 · Éditions · Choix de la langue` (`831:7849`, défilée, menu ouvert sous le
+  libellé) et `Spec · Éditions · Filtre par langue` (`831:9045`, quatre points à trancher). Données réelles de
+  *L'Appel de la forêt* lues dans le store du simulateur : 7 742 éditions, dont **5 613 sans langue**. **Un composant
+  nouveau**, `Chrome / Menu Row · Choice` (`830:23605`, `Screens · Components`) — coche, libellé, compte —,
+  `Section Header` (`28:164`) étendu, `Icon` à 36 variantes. **Implémentée le même jour**
+  ([feature 0058](../features/0058-editions-language-filter.md)), avec le menu d'iOS au lieu du composant. Détail en fin
+  de fichier.
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
 - **Passe du 2026-10-27 — le fond des formulaires** : deux variables nouvelles dans `Color`,
@@ -986,7 +996,7 @@ retoucher un seul nœud.
 | `Tokens` | `0:1` | 6 sections, 9 planches de tokens |
 | `Components` | `20:2` | Les 3 composants qui **miroitent le package** design system |
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
-| `Inventaire` | `737:22197` | `Étagères` (`734:22155`), `Étagère vide · Première étape` (`734:22157`), `Ranger mes livres` (`97:3755`), `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Inventaire` (`495:13490`), `Œuvre & édition` (`351:9412`), `Fiche livre · Données bibliographiques` (`744:2382`, proposition), `Modifier l'édition · Toutes les données` (`750:2508`, proposition), `Doublons · ISBN et signalement` (`767:4172`), `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, proposition) |
+| `Inventaire` | `737:22197` | `Étagères` (`734:22155`), `Étagère vide · Première étape` (`734:22157`), `Ranger mes livres` (`97:3755`), `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Inventaire` (`495:13490`), `Œuvre & édition` (`351:9412`), `Fiche livre · Données bibliographiques` (`744:2382`, proposition), `Modifier l'édition · Toutes les données` (`750:2508`, proposition), `Doublons · ISBN et signalement` (`767:4172`), `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, proposition), `Éditions · Filtre par langue` (`831:7654`, proposition) |
 | `Liste` | `737:22198` | `Listes` (`735:22155`), `Listes · Aucune liste` (`735:22157`), `Liste ouverte, vide` (`735:22159`) |
 | `Réseau` | `737:22199` | `Réseau · Onglet & Groupes` (`499:14069`), `Réseau · Ajouter des amis lecteurs` (`407:10422`), `Synchronisation · Amis` (`735:22163`), `Réseau · Graphe` (`512:15486`) |
 | `Profil` | `737:22200` | `Profil` (`588:17841`), `Transactions` (`735:22166`) |
@@ -2940,4 +2950,44 @@ elle, les cartes restent `background/default` et disparaissent sur le fond noir.
   stockée était la valeur claire. La feuille, simple frame, s'est résolue en noir. Épingler le mode sur la frame
   n'a rien changé ; seule la base résolue en Dark (le `paint(token, MODES.Dark)` du préambule) corrige. Les écrans
   clairs et `E1 · Dark` sont sortis justes, ce dernier sans qu'on sache pourquoi : capturer chaque mode.
+
+# Éditions · Filtre par langue — proposition du 2026-10-29
+
+Une œuvre peut avoir des milliers d'éditions : *L'Appel de la forêt* en a 7 742 sur inventaire.io, et l'écran
+« Éditions » les listait toutes. La proposition filtre la liste par langue, depuis l'en-tête de section. Section
+`Éditions · Filtre par langue` (`831:7654`) sur la page `Inventaire`, sous `Modifier l'édition, l'œuvre et
+l'auteur·ice · V2`. **Clair seul.** **Implémentée le même jour** ([feature
+0058](../features/0058-editions-language-filter.md)).
+
+| Frame | node id | Ce qu'elle montre |
+|---|---|---|
+| `L1 · Éditions · En français · Light` | `831:7657` | Clone de `C1 · Éditions · Doublons probables` (`770:4774`) : *L'Appel de la forêt*, cinq éditions françaises réelles (Nathan 1967 → Librairie générale française 1986), le libellé « Français » à droite de l'en-tête. Le bandeau des doublons est retiré, ses paires étant celles de Monte-Cristo |
+| `L2 · Éditions · Choix de la langue · Light` | `831:7849` | Défilée (conteneur `scroll`, en-tête à y = 140), `Chrome / Menu Scrim` puis le menu `menu · langues` ancré sous le libellé : « Toutes les langues » (7 742), sept langues par nombre d'éditions, « Langue non renseignée » (5 613) |
+| `Spec · Éditions · Filtre par langue` | `831:9045` | Le libellé, le menu, la valeur par défaut, ce que le filtre touche, les données, quatre points à trancher |
+
+Le menu `menu · langues` est un frame brut qui reprend le fond, le rayon 13 et l'ombre de `Chrome / Menu Panel`
+Light (valeurs brutes, comme le composant) : le panneau n'a que quatre rangs à slots, il en faut neuf et deux
+séparateurs de section.
+
+## Composants
+
+| Composant | node id | Changement |
+|---|---|---|
+| `Chrome / Menu Row · Choice` | `830:23605` | **Nouveau.** Une entrée de Picker dans un Menu : place de coche de 20 gardée même éteinte (libellés alignés), `Label`, `Detail` (le compte, style et couleur du titre de `Chrome / Menu Panel · Section`), `Show detail`, `Selected`. Un seul composant, sans variante `Theme` : textes bindés aux variables |
+| `Section Header` | `28:164` | **Étendu, éteint par défaut.** Un `Trailing glyph` après le libellé de l'action (16 pt, trait `foreground/tinted`), avec `Show trailing glyph` (false), `Trailing glyph` (INSTANCE_SWAP, `chevron.up.chevron.down`) et `Show leading glyph` (true). Le `Label` se tronque en fin de ligne, sur une ligne. Les instances existantes ne bougent pas |
+| `Icon` | `21:60` | **36 variantes** : `checkmark` (`830:651`), la coche de `checkmark.circle` sans le cercle, agrandie à 14 × 10 |
+
+## Ce que la construction a appris
+
+- **Un glyphe de 12 pt au trait 1,8 ne lit plus `chevron.up.chevron.down`** : les deux chevrons (4 × 2) se fondent
+  en un point. Le glyphe de queue est à 16.
+- **`resize()` repasse un composant en hauteur fixe** : la rangée `Choice` faisait 45 et ses textes débordaient ;
+  `counterAxisSizingMode = "AUTO"` après le redimensionnement.
+
+## Écarts du code — 2026-10-29
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| D-LF1 | `Features/EntityBrowser/Work/EditionLanguageMenu.swift` | Le menu est celui d'iOS (matière, police système, coche, comptes en sous-titre) : `Chrome / Menu Row · Choice` et `menu · langues` n'en sont qu'une figure | ouverte — le code fait foi |
+| D-LF2 | idem | Le glyphe du libellé est `chevron.up.chevron.down` en `.imageScale(.small)`, pas le `Trailing glyph` de 16 pt | ouverte |
 

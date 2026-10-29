@@ -88,7 +88,8 @@ struct SortShelfDetailView: View {
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(
                     "action.remove_from_shelf_named \(section.name ?? "")",
-                    systemImage: "tray.and.arrow.up"
+                    systemImage: "tray.and.arrow.up",
+                    role: .destructive
                 ) {
                     unshelve(book, from: section)
                 }

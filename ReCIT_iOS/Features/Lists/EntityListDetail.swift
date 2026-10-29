@@ -150,7 +150,7 @@ private struct AuthorListItemRow: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("e2e.listItemRow")
             .swipeActions(edge: .trailing) {
-                Button("action.delete", systemImage: "trash") {
+                Button("action.delete", systemImage: "trash", role: .destructive) {
                     Task {
                         try? await listModel.deleteElementsInList(
                             modelContext: modelContext,
@@ -242,7 +242,7 @@ private struct WorkListItemRow: View {
                 placement: .contextMenu
             )
             .swipeActions(edge: .trailing) {
-                Button("action.delete", systemImage: "trash") {
+                Button("action.delete", systemImage: "trash", role: .destructive) {
                     Task {
                         try? await listModel.deleteElementsInList(
                             modelContext: modelContext,

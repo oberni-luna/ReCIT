@@ -141,6 +141,9 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
                     imageUrl: result.imageUrl
                 )
             )
+        case .editions:
+            // The edition an ISBN named: the very book, nothing left to pick.
+            return .book(anchor: .edition(uri: result.uri))
         case .humans:
             return .author(uri: result.uri)
         case .inventoryItem:

@@ -40,6 +40,9 @@ struct SearchResult: Identifiable, Hashable {
 
 enum SearchResultType: String {
     case works = "works"
+    /// Never asked of `/api/search`, which cannot return one: an edition comes back only from
+    /// an ISBN typed in Recherche — see `IsbnQuery`.
+    case editions = "editions"
     case humans = "humans"
     case genres = "genres"
     case publishers = "publishers"

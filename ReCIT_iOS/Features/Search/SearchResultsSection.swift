@@ -23,8 +23,9 @@ import SwiftUI
 struct SearchResultsSection: View {
     let results: [SearchResult]
 
+    /// The books — works, and the edition an ISBN names, which is a book too.
     private var works: [SearchResult] {
-        results.filter { $0.type == .works }
+        results.filter { $0.type == .works || $0.type == .editions }
     }
 
     private var humans: [SearchResult] {

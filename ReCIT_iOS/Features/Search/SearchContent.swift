@@ -63,6 +63,8 @@ struct SearchContent: View {
     @Binding var submission: SearchSuggestion?
 
     @Environment(SearchModel.self) private var searchModel
+    @Environment(EntityModel.self) private var entityModel
+    @Environment(\.modelContext) private var modelContext
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(RecentSearchStore.self) private var recentSearchStore
 
@@ -353,10 +355,7 @@ struct SearchContent: View {
         guard !Task.isCancelled else { return }
 
         do {
-            let results: [SearchResult] = try await searchModel.searchEntity(
-                query: activeAttempt.submission.query,
-                entityTypes: activeAttempt.submission.entityTypes
-            )
+            let results: [SearchResult] = try await remoteResults(for: activeAttempt.submission)
             remoteState = .loaded(results)
             answered = activeAttempt
         } catch {
@@ -370,6 +369,30 @@ struct SearchContent: View {
             answered = activeAttempt
             errorReporter.report(error)
         }
+    }
+
+    /// What inventaire.io answers to `submission`.
+    ///
+    /// **An ISBN is not searched, it is looked up.** `/api/search` reads one as a handful of
+    /// numbers and finds every title holding a « 2 »; the website asks for the edition by its
+    /// `isbn:` uri instead, and so does this — the same call as the scanner, `autocreate`
+    /// included, so an ISBN the scanner would resolve resolves here too. An ISBN nothing knows
+    /// comes back as no result, which is what it is. Only the people-only suggestion still
+    /// searches the text: nobody is named with an ISBN, and that row asked for names.
+    private func remoteResults(for submission: SearchSuggestion) async throws -> [SearchResult] {
+        if submission.kind != .humans, let isbn = IsbnQuery.isbn(in: submission.query) {
+            let edition: Edition? = try await entityModel.refreshEdition(
+                modelContext: modelContext,
+                uri: "isbn:\(isbn)",
+                autocreate: true
+            )
+            return edition.map { [SearchResult(edition: $0)] } ?? []
+        }
+
+        return try await searchModel.searchEntity(
+            query: submission.query,
+            entityTypes: submission.entityTypes
+        )
     }
 }
 

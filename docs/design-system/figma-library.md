@@ -28,6 +28,32 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   `DesignSystem.Form` et `DesignSystem.FormList` (D-FF1, résolue). Détail en fin de fichier.
 - **fileKey** : `S7IvC6GvlcUFe5IgbtvQq6`
 - **Lien** : https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits
+- **Passe du 2026-10-27 — le fond des formulaires** : deux variables nouvelles dans `Color`,
+  `background/form` (`background/secondary` en clair, `background/default` en sombre) et `background/form-cell`
+  (l'inverse : `background/default` / `background/secondary`). En sombre, un formulaire passe d'un fond `gray/800`
+  sous des cartes noires à un fond noir sous des cartes `gray/800`, comme les listes groupées d'iOS ; en clair rien ne
+  bouge. `Form / Group` (`702:520`) et le `contenu` de `Form / Swipe Row` (`757:608`) sont sur `background/form-cell` ;
+  la `feuille` de 40 écrans de formulaire est sur `background/form`. Passés au code le même jour :
+  `DesignSystem.Form` et `DesignSystem.FormList` (D-FF1, résolue). Détail en fin de fichier.
+- **Rangement du 2026-10-25 — plus de page `Screens`** : ses écrans sont répartis sur une page par fonctionnalité —
+  `Inventaire`, `Liste`, `Réseau`, `Profil`, `Search`, `Scan et ajout`, et `Accueil & compte`, que la liste demandée
+  n'avait pas — pour ce qui est dans l'app, et sur `Archive` pour les essais, les pistes non retenues, les « Tel
+  quel » remplacés et les réplications périmées. Ids et contenu de la page dans la [carte des
+  pages](#carte-des-pages-mise-à-jour). Chaque section porte en tête une note Inter 24 (`note · rangement`) qui dit
+  sa feature et ce qui est parti en archive. **Les node ids des frames ne changent pas** : « page `Screens` » dans
+  les entrées ci-dessous est historique. Sections renommées : `Onboarding` → `Mise en route` (`73:2829`),
+  `Astuces · TipKit` → `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Progression` →
+  `Synchronisation · Inventaire` (`495:13490`), `Empty states` → `États vides · 2026-08-28` (`199:5924`, archive),
+  `Profil` (`400:10440`) → `Profil · avant 0028 et 0034` (archive). `Scan · Repère` (`313:7880`), vide, est supprimée ;
+  les sections coupées en deux ont gagné une section sœur (ids `734:*` à `737:*`). Trois légendes de colonne des États
+  vides (« Tel quel », « Proposé », « Spécification ») sont supprimées, devenues fausses à la remise en page. La page
+  `Screens iPad` n'est pas touchée.
+- **Proposition du 2026-10-28 — `Modifier l'édition, l'œuvre et l'auteur·ice · V2`** (`814:5090`, page
+  `Inventaire`, en bas de la page) : un double de `750:2508` où `E5` est remplacé par deux écrans complets.
+  « Modifier l'œuvre » (`W1`) montre **tout ce qu'inventaire.io accepte sur une œuvre** ; « Modifier l'auteur·ice »
+  (`A1`), nouveau, tout ce qu'il accepte sur une personne. Reliés en prototype à `E1`. Aucun composant nouveau.
+  **Implémentée le même jour** ([feature 0057](../features/0057-edit-works-and-authors.md)). Détail en fin de
+  fichier.
 - **Proposition du 2026-10-25 — `Modifier l'édition · Toutes les données`** (`750:2508`, page `Inventaire`, sous
   `Fiche livre · Données bibliographiques`) : le formulaire « Modifier l'édition » avec **tout ce qu'inventaire.io
   permet de dire d'une édition**, et le même écran pour l'ajout depuis le scanner. « Édition de » liste les œuvres :
@@ -50,6 +76,23 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   Tinted « Données bibliographiques », sans en-tête de section, suivie d'une note `Footnote/footnote200` « Enrichir
   les données bibliographiques permet d'enrichir la base de données open data de inventaire.io ». `744:2482` n'est
   plus dans la section. Le code la suit depuis la [feature 0050](../features/0050-every-bibliographic-datum.md).
+- **Proposition du 2026-10-25 — `Nouveau livre v2`** (`712:21292`, page `Screens`, sous `Nouveau livre · Tel que
+  livré`, clair seul) : quand un scan ne trouve pas l'édition, chercher d'abord l'**œuvre** ; trouvée, il ne reste
+  que l'édition à décrire, introuvable, on la crée avec l'édition. Six frames `V1` → `V6` et
+  `Spec · Nouveau livre v2` (`713:21515`). Une seconde rangée, `Couverture d'une nouvelle œuvre` : `V7` → `V13` et
+  `Spec · Couverture d'une nouvelle œuvre, et l'encart des données` (`718:21971`). L'encart « Données
+  bibliographiques » et le « ? » de barre qui le rouvre en feuille sont posés sur toute la section. **Quatre
+  composants nouveaux** (`Form / Work Row` `711:21157`, `Form / Image Preview` `716:615`, `Form / Notice` `722:595`,
+  `Chrome / Menu Panel · Section` `722:756`), quatre glyphes de plus dans `Icon`, une quatrième ligne dans
+  `Chrome / Menu Panel` et un bouton de queue dans `Chrome / Sheet Nav Bar`. **Rien n'est implémenté.** Détail en fin
+  de fichier.
+- **Passe du 2026-10-25 — `Nouveau livre · Tel que livré`** (`704:20545`, page `Screens`, sous `Créer un livre
+  absent`, clair seul) : le formulaire de création d'un livre inconnu **tel que le code le montre**
+  (feature 0020), et non plus la proposition d'avant le code. Huit frames `L1` → `L8`, la feuille et ses écrans
+  poussés, plus `Spec · Nouveau livre (livré)` (`706:21066`). **Onze composants nouveaux** sur `Screens · Components` —
+  la famille `Form / *`, une carte de section à slots et ses rangs, plus `Chrome / Sheet Nav Bar` et
+  `Chrome / Sheet Backdrop` — et quatre glyphes de plus dans `Icon`. Détail, constats sur le code et divergences en
+  fin de fichier.
 - **Passe du 2026-10-03 — `Profil · À propos & version`** (`528:16519`, page `Screens`, mode clair seul) :
   `V1 · Profil · À propos & version` (`528:16520`, clone de `A0 · Profil · Sans Réseau` `499:14070`) — une entrée
   `Row / Link` Tinted « À propos d'inventaire.io » entre les transactions et « Se déconnecter », et un pied de page
@@ -169,6 +212,18 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   **Retirée du code le 2026-10-25** ([feature 0048](../features/0048-network-graph-removed.md)) : « Tout », le
   graphe et leurs composants sont supprimés, le contrôle segmenté redevient Amis | Groupes en première ligne de
   liste. La section Figma reste, comme point de départ si le graphe revient.
+- **Essais du 2026-10-23 — `Réseau · Graphe · Livres (essais)`** (`683:19881`, page `Screens`, sous `Réseau ·
+  Graphe`) : quatre pistes pour mettre les livres des inventaires dans le graphe, **rien de tranché**. `L-A · Piles
+  par lecteur` (`683:19901`, une pile de couvertures contre chaque avatar, le nombre sous le nom), `L-B · Livres en
+  commun` (`683:19946`, les livres possédés par deux lecteurs au moins, reliés en pointillé à chacun), `L-C · Lecteur
+  touché, ses livres en orbite` (`683:19991`, depuis R2d : ses dix derniers livres autour de lui, la feuille ouvre sa
+  bibliothèque) et `L-D · Livres à emprunter` (`683:20044`, les exemplaires prêtés, donnés ou vendus, étiquetés), plus
+  le panneau `Pistes · Livres dans le graphe` (`687:20545`) et ses questions. Composants locaux, à ne pas publier :
+  `Graph / Book` (`683:19883`, 24 × 36, `radius/book`, `Shadow/Painted Book`, propriété `Show band` pour un dos
+  peint), `Graph / Book · Pile` (`683:19885`), `Graph / Book · Tag` (`683:19898`, Kind ∈ {Prêt, Don, Vente}) et
+  `Graph / Book · More` (`683:19899`, « + N »). **Aucun token nouveau** ; Don et Vente empruntent `color/yellow/300`
+  et `background/secondary`. Couvertures de maquette : les trois images déjà dans le fichier et des dos peints. Chrome
+  hérité de R1′ (onglet Profil), en retard sur l'app.
 - **Implémentation du 2026-09-27 — `Réseau · Onglet & Groupes`** (`499:14069`) : l'onglet Réseau et la
   gestion des groupes sont implémentés ([feature 0028](../features/0028-network-tab-and-groups.md)). Écarts, le code
   faisant foi : création et réglages en feuilles et non en écrans poussés ; pas de pilule « Rejoindre » dans la
@@ -254,7 +309,10 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   le chrome. `C1` et `C5` sont des clones de `S0 · Existant · Livre reconnu`, tab bar retirée (le scanner est un
   `fullScreenCover`). Ce qui manque au système est listé dans le panneau : pas de glyphe `book.badge.plus`, pas de
   chrome de feuille modale, `Field` sans état erreur ni lecture seule. **Rien n'est implémenté** — c'est une
-  proposition, et l'arbitrage A/B/C reste à rendre.
+  proposition, et l'arbitrage A/B/C reste à rendre. *Mis à jour le 2026-10-25 :* A a été retenue et la fonctionnalité
+  livrée le jour même ([feature 0020](../features/0020-creating-a-book-that-inventaire-lacks.md)), avec des écarts
+  — feuille et non plein écran, boutons qui défilent, pas de « Revoir mes informations » en C4. L'état livré est
+  maquetté dans `Nouveau livre · Tel que livré` (`704:20545`) ; cette section reste pour mémoire.
 - **Passe du 2026-09-12 — `Réseau · Ajouter des amis lecteurs`** : le parcours d'ajout d'un ami lecteur, dans les
   deux sens. Section `Réseau · Ajouter des amis lecteurs` (`407:10422`) sur la page `Screens` : 11 frames en clair
   seul, deux composants nouveaux (`Cell / Relation`, `Cell / Invitation`) et un panneau `Spec · Réseau`
@@ -928,7 +986,15 @@ retoucher un seul nœud.
 | `Tokens` | `0:1` | 6 sections, 9 planches de tokens |
 | `Components` | `20:2` | Les 3 composants qui **miroitent le package** design system |
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
-| `Screens` | `20:4` | 16 frames d'écran + 8 panneaux de spécification, puis les sections `Onboarding` (`73:2829`) et `Ranger mes livres` (`97:3755`), puis `Scan · Repère` (`313:7880`), `Recherche unifiée` (`334:8624`) et `Créer un livre absent` (`433:11445`) |
+| `Inventaire` | `737:22197` | `Étagères` (`734:22155`), `Étagère vide · Première étape` (`734:22157`), `Ranger mes livres` (`97:3755`), `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Inventaire` (`495:13490`), `Œuvre & édition` (`351:9412`), `Fiche livre · Données bibliographiques` (`744:2382`, proposition), `Modifier l'édition · Toutes les données` (`750:2508`, proposition), `Doublons · ISBN et signalement` (`767:4172`), `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, proposition) |
+| `Liste` | `737:22198` | `Listes` (`735:22155`), `Listes · Aucune liste` (`735:22157`), `Liste ouverte, vide` (`735:22159`) |
+| `Réseau` | `737:22199` | `Réseau · Onglet & Groupes` (`499:14069`), `Réseau · Ajouter des amis lecteurs` (`407:10422`), `Synchronisation · Amis` (`735:22163`), `Réseau · Graphe` (`512:15486`) |
+| `Profil` | `737:22200` | `Profil` (`588:17841`), `Transactions` (`735:22166`) |
+| `Search` | `737:22201` | `Recherche unifiée` (`334:8624`), `Recherche · Aucun résultat` (`736:22156`) |
+| `Scan et ajout` | `737:22202` | `Scanner` (`327:8637`), `Mise en route` (`73:2829`), `Nouveau livre · Tel que livré` (`704:20545`), `Nouveau livre v2` (`712:21292`, en cours, rien d'implémenté) |
+| `Accueil & compte` | `737:22203` | `Accueil` (`736:22162`), `Accueil & compte` (`222:7167`) |
+| `Archive` | `737:22204` | 27 sections en colonnes par fonctionnalité, chacune sous un titre Inter Bold 96 : les pistes non retenues, les « Tel quel » remplacés, les réplications périmées |
+| `Screens (vide — à supprimer)` | `20:4` | Vidée le 2026-10-25 ; le connecteur refuse de supprimer une page (`Removing this node is not allowed`) |
 
 La séparation entre `Components` et `Screens · Components` est intentionnelle : `Components` ne contient que ce qui
 existe dans `DesignSystem/` côté Swift (les deux `ButtonStyle`, le `LabelStyle` de tag). Tout le reste — le chrome iOS
@@ -1033,7 +1099,9 @@ factorisation : **0 dessin brut** sur les 16 frames.
 À coller en tête de tout `use_figma` qui compose un écran. Complète le préambule des tokens.
 
 ```js
-const page = figma.root.children.find(p => p.name === 'Screens');
+// La page de la fonctionnalité (`Inventaire`, `Liste`, `Réseau`, `Profil`, `Search`, `Scan et ajout`,
+// `Accueil & compte`) — il n'y a plus de page `Screens` depuis le 2026-10-25.
+const page = figma.root.children.find(p => p.name === 'Inventaire');
 await figma.setCurrentPageAsync(page);
 // Charger TOUTES les faces avant d'instancier : un style de texte bindé les résout à la pose.
 for (const [family, style] of [
@@ -2325,6 +2393,272 @@ mêmes couples de tokens que `Button / Large`, à la taille d'un contrôle de fi
 
 ---
 
+# Nouveau livre — tel que livré (passe du 2026-10-25, `extract-screens`)
+
+Le formulaire qui s'ouvre quand un scan ne trouve rien, **répliqué depuis le code** de la
+[feature 0020](../features/0020-creating-a-book-that-inventaire-lacks.md) (`Features/CreateBook/`). La section
+`Créer un livre absent` (`433:11445`), juste au-dessus, est la proposition d'avant le code et reste pour mémoire :
+le code s'en est écarté. Clair seul, à la demande. Section `Nouveau livre · Tel que livré` (`704:20545`, page
+`Screens`, `x = 4666`, `y = 22873`, 4464 × 1593), panneau `Spec · Nouveau livre (livré)` (`706:21066`).
+
+## Table des écrans
+
+| Frame | node id | Ce qu'il montre | Source Swift |
+|---|---|---|---|
+| `L1 · Nouveau livre · Vide` | `704:20546` | À l'ouverture : cadre photo en pointillés, invites, Publier désactivé, langue pas encore revenue | `CreateBook/CreateBookView.swift` |
+| `L2 · Nouveau livre · Rempli` | `704:20672` | Photo prise, titre saisi, auteur existant choisi avec sa description, langue déduite | idem |
+| `L3 · Échec · Réseau` | `705:20676` | `CreateBookFailure.network` : « Réessayer » + « Garder le brouillon et revenir » | idem + `Model/Creation/CreateBookFailure.swift` |
+| `L4 · Échec · Refusé` | `705:20826` | `.refused` (4xx hors 401 / 403) : le bouton reste « Publier et ajouter à mes livres » | idem |
+| `L5 · Échec · Compte requis` | `705:20969` | `.needsAccount` (401 / 403) | idem |
+| `L6 · Auteur · Résultats` | `705:21112` | Écran poussé : « Déjà sur inventaire.io », puis « Créer « … » » | `CreateBook/AuthorPickerView.swift` |
+| `L7 · Auteur · Aucun résultat` | `705:21226` | La seule ligne « Créer », et le pied « Aucun auteur de ce nom… » | idem |
+| `L8 · Ce livre est connu` | `705:21302` | Écran poussé quand la passe à blanc reconnaît l'œuvre : deux choix, « Une édition de plus » coché | `CreateBook/WorkMatchView.swift` |
+
+Livre de maquette : *Le Ministère des Rêves*, Momtchil Milanov, ISBN `9782494289857` — la couverture du composant
+`Livre` (`51:1765`, page `Brouillon de Olivier`), qui est aussi la photo de `Form / Cover Slot` State=Photo.
+
+## Composants ajoutés — `Screens · Components`
+
+Rangés en colonne à partir de `x = 10800` (rangs) et `x = 11400` (carte et chrome).
+
+| Composant | node id | Variantes | Propriétés | Rôle |
+|---|---|---|---|---|
+| `Form / Group` | `702:520` | — | `Row 1#702:0`, `Row 2#702:1`, `Row 3#702:3` (INSTANCE_SWAP), `Show row 2#702:2`, `Show row 3#702:4` | La carte d'une `Section` de `Form` encarté. Les slots portent les marges de rang (12 / 16), les rangs 2 et 3 leur `Separator` |
+| `Form / Labeled Value` | `701:500` | State ∈ {Filled, Placeholder} | `Label#701:0`, `Value#701:3` | `.withLabel(label:)` sur un champ ou une valeur : l'ISBN, le titre |
+| `Form / Cover Slot` | `701:510` | State ∈ {Empty, Photo} | — | `CreateBookCoverSlot`, 88 × 132 |
+| `Form / Cover ISBN` | `701:511` | — | (instances imbriquées `Cover`, `ISBN`) | Le premier rang du formulaire |
+| `Form / Author Row` | `701:536` | State ∈ {Placeholder, Chosen} | `Name#701:6`, `Description#701:9`, `Show description#701:12` | `CreateBookAuthorRow` et son chevron |
+| `Form / Entity Row` | `701:537` | — | `Title#701:15`, `Detail#701:16`, `Show detail#701:17` | `AuthorPickerRow` et la ligne d'œuvre de `WorkMatchView` |
+| `Form / Choice Row` | `701:555` | State ∈ {Selected, Unselected} | `Title#701:18`, `Explanation#701:21` | `WorkMatchChoice`, un bouton radio |
+| `Form / Action Row` | `701:556` | — | `Label#701:24`, `Glyph#701:25` (INSTANCE_SWAP) | Un `Label` teinté dans un rang : « Créer « … » » |
+| `Form / Failure Banner` | `701:561` | — | `Title#701:26`, `Body#701:27` | `CreateBookFailureBanner` |
+| `Chrome / Sheet Nav Bar` | `702:540` | — | `Title#702:5` ; instance exposée `Leading` (`Chrome / Glass Button`) | La barre d'une `NavigationStack` dans une `.sheet` iOS 26 : `xmark` à la racine, `chevron.left` poussé |
+| `Chrome / Sheet Backdrop` | `702:551` | — | — | Le scanner sombre reculé derrière la feuille. Couleurs **littérales**, comme tout le chrome |
+
+`Icon` (`21:60`) passe à **31 variantes** : `xmark` (`700:494`), `camera` (`700:499`),
+`exclamationmark.triangle` (`700:505`), `checkmark.circle.fill` (`700:512`), en ligne `y = 320`. Le dernier est le
+seul glyphe plein du jeu : un disque `Disc` en remplissage (`foreground/default`, à surcharger) et une coche `Check`
+en `background/default`.
+
+Chaque composant porte sa description (type Swift, métriques, pièges).
+
+## Recette de composition — une feuille
+
+Frame 393 × 852, mode `Light` épinglé, puis dans l'ordre :
+
+1. `Chrome / Sheet Backdrop` plein cadre, `Chrome / Status Bar` Theme=Dark par-dessus.
+2. Un conteneur `feuille` : auto-layout vertical, `x = 0`, `y = 69`, 393 × 783 fixe, `background/secondary`, coins
+   hauts `radius/rounded-large`, découpé. Dedans : `Chrome / Sheet Nav Bar` (FILL), éventuellement
+   `Chrome / Search Field`, puis la colonne `formulaire` (padding 16 / 16 / 24 / 16, gap `spacing/medium`).
+3. Une `section` par `Section` du code : `Section Header` facultatif, `Form / Group` (slots échangés, `Show row`
+   réglés), puis un pied `Note` Footnote / Secondary. Une section dont le pied porte des boutons devient un conteneur
+   `actions` (padding 12 / 16, gap `spacing/small`) de `Button / Large` en FILL.
+4. `Chrome / Home Indicator` Theme=Light en dernier, à `y = 818`.
+
+Pour régler un rang : `groupe.children[i].findOne(n => n.name === 'cell').children[0]` est l'instance du slot `i + 1`.
+
+## Ce qui n'est pas maquetté, et les écarts assumés
+
+- **Le mode sombre** — à la demande. Tout est bindé, sauf `Chrome / Sheet Backdrop`, qui est déjà sombre.
+- **La publication en cours** — le spinner d'`AsyncButton` (`.showProgressView`) n'est pas dessiné.
+- **L'appareil photo** (`CoverCaptureView`, `UIImagePickerController`) — c'est l'interface du système.
+- **Le clavier** de L6 / L7, alors qu'on y tape.
+- **Géométrie approchée, pas mesurée** : haut de feuille à 69, rayon de feuille 24, barre de 60, cartes au rayon
+  `radius/medium` (iOS 26 arrondit davantage ; c'est la convention du fichier).
+- **En-têtes de section** : police système dans le code, `Section Header` (Open Sans) ici.
+- **Emplacement du champ de `.searchable`** dans un écran poussé d'une feuille sous iOS 26 : pas vérifié. Il est posé
+  sous la barre.
+- **L3 à L5 coupent** « Garder le brouillon et revenir » au pli, volontairement : le formulaire en échec dépasse la
+  hauteur de la feuille, et c'est un constat (ci-dessous), pas un défaut de la maquette.
+
+## Constats sur le parcours — ce que la maquette fait voir
+
+Matière pour le travail sur les fonctionnalités. Aucun n'est corrigé.
+
+1. **Après un échec, la seconde sortie est sous le pli** (L3–L5) : bannière + brouillon + deux boutons dépassent la
+   feuille, donc « Garder le brouillon et revenir » ne se voit qu'en faisant défiler.
+2. **Refusé et Compte requis laissent « Publier et ajouter à mes livres » actif** (L4, L5) : la même entrée peut être
+   renvoyée telle quelle. La feature dit qu'une entrée refusée « n'offre pas de réessayer » — c'est vrai du libellé
+   (`isWorthRetrying == false`), pas du geste.
+3. **Compte requis demande de se reconnecter** sans aucun chemin pour le faire depuis la feuille (L5).
+4. **Rien ne dit pourquoi Publier est désactivé** (L1).
+5. **Une faute de frappe suffit pour qu'on propose de créer un auteur** (L7) : seul le pied de section met en garde.
+6. **L'œuvre reconnue n'a ni couverture, ni date, ni nombre d'éditions** (L8) : peu de prise pour trancher entre
+   « une édition de plus » et « un autre livre ». La proposition C4 en montrait davantage.
+
+## Divergences relevées dans le code — passe Nouveau livre
+
+| # | Où | Constat | Statut |
+|---|---|---|---|
+| D-NL1 | `Features/CreateBook/CreateBookView.swift:220-221` | Le commentaire de `create()` dit que l'issue 0096 donnera un visage à l'échec et « until then it is said on the shared snack bar » — périmé : l'échec est dit dans la feuille (`CreateBookFailureBanner`), et le `catch` juste en dessous le dit lui-même | ouverte |
+| D-NL2 | `CreateBookView.swift:120` et `:279` | Deux styles pour un même rôle de libellé : `.withLabel` (titre, ISBN) est en `caption200` (Open Sans), le libellé « Auteur » de `CreateBookAuthorRow` en `footnote200` (Alegreya) | ouverte |
+| D-NL3 | `CreateBookView.swift:115-120` | Le `TextField` du titre prend `create_book.title_field` comme invite **et** comme libellé : « Titre de cette édition » s'affiche deux fois quand il est vide | ouverte |
+| D-NL4 | `WorkMatchView.swift:40` / `AuthorPickerView.swift:135` | La ligne d'œuvre espace titre et détail de `xSmall` (4), le rang d'auteur de `xxSmall` (2), pour la même forme — `Form / Entity Row` prend 2 | ouverte — écart de 2 pt assumé |
+| D-NL5 | `docs/features/0020-creating-a-book-that-inventaire-lacks.md` | « Une entrée refusée le dit et n'offre pas de réessayer » : le bouton principal reste actif et republie (constat 2) | ouverte |
+| D-NL6 | Figma — `Chrome / Search Field` (`27:172`) | La variante `State=Typed` n'est pas reliée à `Placeholder#27:4` : le texte tapé (« mont ») se surcharge à la main sur l'instance | ouverte — surchargé dans L6 / L7 |
+
+## Ce que la construction a appris
+
+- **Un slot porte la marge, pas le rang.** `Form / Group` met le padding de cellule dans ses slots : les rangs
+  `Form / *` n'en ont pas, donc ils s'imbriquent aussi hors carte (l'ISBN de `Form / Cover ISBN` est un
+  `Form / Labeled Value`).
+- **Un composant créé par `createComponent()` + `resize()` refige l'axe principal** : `Form / Group` est sorti à
+  50 pt de haut, deux rangs coupés, jusqu'à `primaryAxisSizingMode = 'AUTO'` après le `resize`.
+- **Le jeu `Icon` se range à la main**, sur une grille de 64 ; un nouveau glyphe se fait en clonant `Glyph=plus`,
+  en remplaçant ses vecteurs par ceux d'un `createNodeFromSvg`, et en leur redonnant le trait bindé et des
+  contraintes `SCALE`.
+- **Un pied de section sur deux paragraphes** (langue + avis public) tient dans une seule `Note`, avec
+  `paragraphSpacing = 4` surchargé sur l'instance — deux `Note` empilées doubleraient leur padding.
+
+## Audit
+
+Factorisation, sur les 8 frames : **0 dessin brut**. Chaque frame : `◆ Chrome / Sheet Backdrop`,
+`◆ Chrome / Status Bar`, `▢ feuille`, `◆ Chrome / Home Indicator` ; dans `feuille`, seuls des conteneurs nommés
+(`formulaire`, `section · …`, `actions (pied de section)`). Composants nouveaux : 0 fill ou trait en dur sauf
+`Chrome / Sheet Backdrop` (chrome, voulu), 0 texte sans style, une description chacun. Aucun nom de composant
+dupliqué dans le fichier, aucune section qui en chevauche une autre. Compte : **69 composants** sur
+`Screens · Components`, 4 sur `Components`, 113 variables locales.
+
+---
+
+# Nouveau livre v2 — l'œuvre d'abord (proposition du 2026-10-25)
+
+Une proposition, pas une réplique du code : **rien n'est implémenté**. Quand un scan ne trouve pas l'édition, la
+feuille ne demande plus d'emblée titre et auteur ; elle demande d'abord **de quel livre** il s'agit, en cherchant
+l'œuvre sur inventaire.io. Une œuvre trouvée apporte ses auteur·ices et son titre, et il ne reste que l'édition à
+décrire. Rien de trouvé : on crée l'œuvre, puis l'édition, dans le même formulaire. Clair seul. Section
+`Nouveau livre v2` (`712:21292`, page `Screens`, `x = 4666`, `y = 24818`, 3991 × 2758), sous
+`Nouveau livre · Tel que livré` ; panneau `Spec · Nouveau livre v2` (`713:21515`).
+
+## Le parcours
+
+Scan sans résultat → « + » de la rangée (inchangé) → `V1`. Un résultat de `V2` pousse `V3`. La dernière ligne de
+`V2`, ou celle de `V4`, pousse `V5`. Au moment de publier `V5`, la passe à blanc peut encore reconnaître une
+œuvre : `V6`, qui remplace `L8` sur cette branche. `V3` n'a pas besoin de passe à blanc, puisque l'œuvre y est déjà
+nommée par son uri. Le choix d'auteur (`L6`, `L7`), les échecs (`L3`–`L5`) et les brouillons sont ceux de la v1.
+
+## Table des écrans
+
+| Frame | node id | Ce qu'il montre | Cloné de |
+|---|---|---|---|
+| `V1 · Quelle œuvre ? · À l'ouverture` | `712:21296` | Feuille « Nouveau livre », champ de recherche actif (« Titre ou auteur·ice »), `Empty State` Centered : « De quel livre s'agit-il ? » | `L6` |
+| `V2 · Quelle œuvre ? · Résultats` | `712:21368` | « ministère des rêves » : trois `Form / Work Row`, puis « Aucune ne correspond : créer l'œuvre » en dernier | `L6` |
+| `V3 · Nouvelle édition · Œuvre choisie` | `713:21206` | Poussé. « Édition de » rappelle l'œuvre (Trailing=None), puis couverture & ISBN, puis le titre de l'édition, pré-rempli avec celui de l'œuvre. Aucun champ auteur | `L2` |
+| `V4 · Quelle œuvre ? · Aucun résultat` | `712:21479` | « étincelles écosocialistes » : la seule ligne « Créer l'œuvre « … » », et le pied qui demande de vérifier l'orthographe | `L7` |
+| `V5 · Nouvelle œuvre` | `713:21319` | Poussé. « L'œuvre » (titre, auteur choisi, « Ajouter un·e autre auteur·ice »), puis « Cette édition » (couverture & ISBN, titre de l'édition) | `L2` |
+| `V6 · Œuvre déjà connue` | `713:21424` | La passe à blanc de `V5` reconnaît une œuvre : la ligne d'œuvre de `V2`, et deux choix, « Une édition de cette œuvre » coché | `L8` |
+
+### Seconde rangée — couverture d'une nouvelle œuvre
+
+Une œuvre que personne n'a créée n'a pas de couverture, et `enrich` ne trouve rien pour un ISBN inconnu : `V5`
+s'ouvre en réalité sans image. Rangée sous la première (titre `717:21398`, frames à `y = 1512` dans la section).
+
+| Frame | node id | Ce qu'il montre | Cloné de |
+|---|---|---|---|
+| `V7 · Nouvelle œuvre · Sans couverture` | `717:21401` | `V5` avec `Form / Cover Slot` Empty, glyphe `photo`, légende « Ajouter une couverture » | `V5` |
+| `V8 · Couverture · Choisir la source` | `717:21498` | `Chrome / Menu Scrim` + `Chrome / Menu Panel` sous le cadre : « Prendre une photo », « Choisir dans Photos », « Choisir un fichier », « Depuis une URL… » | `V7` |
+| `V9 · Image depuis une URL · Vide` | `718:21591` | Écran poussé : « Chercher le titre et l'ISBN sur Google Images », puis l'URL (invite), « Coller le lien copié », l'aperçu vide ; « Utiliser cette image » désactivé | `L6` |
+| `V10 · Image depuis une URL · Aperçu` | `718:21720` | Lien collé, image chargée et mesurée (600 × 900 px) ; le bouton s'active | `L6` |
+| `V11 · Image depuis une URL · Pas une image` | `718:21842` | Une adresse `google.com/imgres?…` : la page répond, pas l'image ; aperçu en erreur, bouton désactivé | `L6` |
+| `V12 · Couverture posée · Remplacer ou retirer` | `724:21922` | `V5` et son menu `Chrome / Menu Panel · Section`, ouvert au-dessus du cadre : « Retirer la couverture » (rouge, `trash`), puis « Remplacer par » et les quatre sources | `V5` |
+| `V13 · Aide · Données bibliographiques` | `724:22141` | La feuille du « ? » : trois sections (« Ce que c'est », « D'où elles viennent », « Ce que vous publiez ») et trois liens (wiki, chat du projet, mes contributions) | `V1` |
+
+« Choisir dans Photos » s'ajoute aux trois sources demandées (fichier, photo, URL) : c'est là que finit une image
+enregistrée depuis Safari. Caméra, Photos et Fichiers sont des interfaces du système, non dessinées. Le même menu
+sert `V3` et le formulaire livré. La recherche Google Images envoie `q=<titre de l'œuvre> <ISBN>`. Côté serveur,
+l'URL passe par `POST /api/images/convert-url` (`{url, container: "entities"}`, authentifié, 100 requêtes et 500 ms
+d'écart) : le serveur télécharge l'image lui-même et rend son chemin `/img/entities/…`. Les trois autres sources
+passent par l'upload multipart existant. Le chemin rendu part dans `image` de la **graine d'édition** : sur
+inventaire.io, la couverture appartient à l'édition, pas à l'œuvre.
+
+### L'encart « Données bibliographiques », et le « ? »
+
+En tête des écrans qui modifient des données bibliographiques (toute la section, pour l'instant), un encart
+`Form / Notice` résume en trois lignes celui d'inventaire.io, « À propos des données bibliographiques ». Sa source est
+`about_bibliographic_data.svelte` et `bibliographic_data_settings.svelte` dans inventaire-client, avec les textes
+français de `src/client/fr.json` dans inventaire-i18n. La page d'édition du site demande une connexion : le texte a
+été lu dans le code, pas sur la page.
+
+- **Il s'affiche tant qu'il n'a pas été fermé.** Il est dessiné sur `V1`, `V3` et `V7` ; les autres frames
+  montrent l'état fermé.
+- **Sa croix le ferme partout et pour de bon** (`@AppStorage`), comme le `localStorage` d'inventaire.io.
+- **Le « ? »** (`Chrome / Sheet Nav Bar`, `Show trailing`), présent sur chaque écran de la section, ouvre son contenu
+  entier en feuille (`V13`). « En savoir plus » fait de même.
+- **À l'ouverture, l'encart repousse « Publier » sous le pli** de `V3` et `V7`. C'est voulu : le bouton défile avec
+  le formulaire, comme dans le code livré.
+
+Livres de maquette : *Le Ministère des Rêves*, Momtchil Milanov (`V1`–`V3`, `Livre` Book=2, l'ISBN des frames `L`) ;
+*Étincelles écosocialistes*, Michael Löwy (`V4`–`V6`, `Livre` Book=3, ISBN `9782493373052` **inventé**). Les autres
+résultats de `V2` et toutes les années sont inventés.
+
+## Composants ajoutés — `Screens · Components`
+
+| Composant | node id | Variantes | Propriétés | Rôle |
+|---|---|---|---|---|
+| `Form / Work Row` | `711:21157` (`x = 10800`, `y = 1300`) | Cover ∈ {Photo, None} × Trailing ∈ {Chevron, None} — `711:21127`, `711:21137`, `711:21144`, `711:21152` | `Title#711:0`, `Detail#711:5` ; instance `Livre` exposée (Cover=Photo) | Une œuvre : couverture 36 × 54 (`radius/book`), titre `Content/content400Bold`, « auteur·ices · année » `Footnote/footnote200` secondaire, chevron de `Form / Author Row`. Sans marge propre : se pose dans un slot de `Form / Group` |
+| `Form / Image Preview` | `716:615` (`x = 10800`, `y = 1700`) | State ∈ {Empty, Loaded, Failed} — `716:594`, `716:602`, `716:607` | `Caption#716:3` ; instance `Livre` exposée (Loaded) | L'aperçu d'une image par URL : 120 × 180, `radius/medium`, légende `Caption/caption200` centrée. Empty en pointillés comme `Form / Cover Slot`, Failed sur `background/error`. Un `AsyncImage` et ses trois phases |
+| `Form / Notice` | `722:595` (`x = 11400`, `y = 1300`) | — | `Title`, `Body`, `Link` (TEXT) | L'encart des données bibliographiques : `background/tinted`, `radius/medium`, padding 12 / 12 / 12 / 16. Glyphe `questionmark.circle` à 20 teinté, titre `Content/content300`, corps `Footnote/footnote200`, lien `Footnote/footnote200Bold` teinté, `xmark` à 16 pour le fermer. 361 × 119 avec les textes par défaut |
+| `Chrome / Menu Panel · Section` | `722:756` (`x = 11400`, `y = 1500`) | — (clair seul) | `Section` (TEXT) ; `row 1` → `row 5` exposées | Un menu en deux sections : une ligne, une bande de 8 (noir 6 %), un en-tête `Footnote/footnote200` secondaire, quatre lignes. Matériau de `Chrome / Menu Panel`. La ligne destructive se fait en surchargeant `row 1` en `foreground/error` |
+
+Pourquoi pas `Cell / Entity` Type=Work : sa vignette est carrée, à 36, et sa marge est celle d'une liste plein
+écran. Pour reconnaître le livre qu'on tient, il faut la couverture entière. Compte : **73 composants** sur
+`Screens · Components`.
+
+Étendus par la seconde rangée :
+- **`Icon`** (`21:60`) passe à **35 variantes** : `photo` (`716:537`), `folder` (`716:544`), `link` (`716:550`) et
+  `questionmark.circle` (`722:546`), en ligne `y = 384`. Le jeu fait maintenant 352 × 408.
+- **`Chrome / Menu Panel`** (`350:363`) gagne `Show row 4`, éteinte par défaut.
+- **`Chrome / Sheet Nav Bar`** (`702:540`) gagne `Show trailing#722:0`, éteint par défaut. Le cadre `trailing`
+  porte un `Chrome / Glass Button` exposé, `Trailing`, au glyphe `questionmark.circle`. Éteint, le cadre de 44 garde
+  le titre centré.
+- Les deux interrupteurs sont éteints par défaut : les écrans existants n'en voient rien.
+
+## Ce qui part sur le fil
+
+- `V2` : `GET /api/search?types=works`, au fil de la frappe, comme le choix d'auteur.
+- `V3` : `POST /api/entities/resolve` avec **une seule graine, l'édition** : `wdt:P629` (l'uri de l'œuvre choisie),
+  `wdt:P212`, `wdt:P1476`, `wdt:P407`, `image`. Il n'y a ni graine d'œuvre ni graine d'auteur, parce que les
+  auteur·ices sont portés par l'œuvre (`wdt:P50`) et pas par l'édition.
+- `V5` : `resolve` comme dans la v1. L'œuvre est décrite par ses labels, les auteur·ices par uri ou par labels, et
+  il peut y en avoir plusieurs. La passe à blanc (`create: false`) précède `V5`, et `V5` seulement.
+
+## À trancher
+
+1. **La recherche d'œuvres trouve-t-elle par nom d'auteur·ice ?** Si ce n'est pas le cas, chercher avec
+   `types=works|humans` et faire pousser à un auteur la liste de ses œuvres (`author-works`).
+2. **Le titre de l'édition pré-rempli avec celui de l'œuvre** (`V3`, `V5`) aide pour une réédition. Il piège pour
+   une traduction dont le titre diffère.
+3. **Une édition rattachée à la mauvaise œuvre** se corrige par `update-claim` sur `wdt:P629`, ce que l'app ne sait
+   pas faire.
+4. **La capitalisation du titre** : on tape en minuscules (`V4`), et `V5` montre le titre recapitalisé. Reste à
+   décider si c'est l'app ou la personne qui le fait.
+5. **`V1` ne rappelle le livre scanné que par l'ISBN, dans la phrase.** Faut-il y reprendre la rangée du scanner ?
+
+## Tranché le 2026-10-25
+
+1. **Google Images** cherche le titre de l'œuvre **et l'ISBN**.
+2. **Droits** : rien de plus n'est dit à côté de « Utiliser cette image ».
+3. **Une couverture déjà posée** rouvre le même menu, avec « Retirer la couverture » d'abord et les sources sous
+   « Remplacer par » (`V12`).
+4. **Le même menu** sert aussi `V3` et le formulaire livré.
+
+## Ce que la construction a appris
+
+- **`isExposedInstance` exige un parent composant** : poser l'instance `Livre` dans son cadre, puis le cadre dans le
+  composant, **avant** de l'exposer. Sinon : « Instance must be contained within a component ».
+- **Recomposer un écran livré par clonage** (`L2`, `L6`, `L7`, `L8`) garde le chrome, les marges et les noms de
+  conteneurs. Atteindre un rang par le chemin de slot (`groupe.children[i]` → `cell` → `children[0]`) a marché
+  là où un `findOne` sur `mainComponent.name` n'a rien trouvé dans un clone frais.
+
+## Audit
+
+Les 13 frames : **0 dessin brut**. Hors instances, seuls des conteneurs nommés, et aucun texte resté de la v1
+(« Milanof », « Le Guin », « Garder… »). Pas de chevauchement de section. Le bouton principal finit au-dessus de
+l'indicateur d'accueil (818) partout, sauf là où l'encart est ouvert : `y = 812` en `V5`, 791 en `V9` et `V10`, 807
+en `V11`. Il passe sous le pli en `V3` (908) et en `V7` (947), à cause de l'encart.
+
+---
+
 # Modifier l'édition · Toutes les données (proposition du 2026-10-25)
 
 **Implémentée le 2026-10-25** ([feature 0050](../features/0050-every-bibliographic-datum.md)) ; les écarts du code
@@ -2476,6 +2810,79 @@ Les 6 frames : **0 dessin brut**. Hors instances, seuls les conteneurs `feuille`
 
 ---
 
+# Modifier l'édition, l'œuvre et l'auteur·ice · V2 (proposition du 2026-10-28)
+
+**Implémentée le 2026-10-28** ([feature 0057](../features/0057-edit-works-and-authors.md)) ; ses écarts avec le
+code y sont listés — le code fait foi. Section `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, page `Inventaire`,
+`x = 0`, `y = 21859`), un double de `750:2508` (V1, ci-dessus, laissée telle quelle). Panneau
+`Spec · Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5215`). `E5` n'y est plus : `W1` le remplace.
+
+## Table des écrans
+
+| Frame | node id | Ce qu'il montre |
+|---|---|---|
+| `V2 · E1 · Modifier l'édition · Tout · Light` / `Dark` | `814:5091` / `814:5132` | `E1` de la V1 ; la note de « Ont aussi fait cette édition » ajoute « Touchez une personne pour modifier sa fiche » |
+| `V2 · E2` → `V2 · E4` | `814:5173`, `814:5238`, `814:5279` | Inchangés |
+| `V2 · W1 · Modifier l'œuvre · Tout · Light` / `Dark` | `815:6686` / `815:7640` | Toute la hauteur (393 × 2 847), « Enregistrer » au bout. Neuf sections : L'œuvre, Auteur·ices, Ont aussi fait cette œuvre, Bande dessinée, Série, Genre et sujet, Liens avec d'autres œuvres, Bases bibliographiques, Autres données |
+| `V2 · A1 · Modifier l'auteur·ice · Tout · Light` / `Dark` | `815:7335` / `815:8028` | Toute la hauteur (393 × 1 405), « Enregistrer » au bout. Quatre sections : L'auteur·ice, Courant et influences, Bases bibliographiques, Autres données |
+
+`W1` et `A1` sont poussés dans la feuille de `E1` (chevron.left, « ? »). **Un écran, une entité, un
+« Enregistrer »** (décidé le 2026-10-28) : chacun a la barre fixe de `E1` (`Action Bar / Attached` dans
+`barre fixe (safeAreaInset)`, 113 avec la zone sûre). `W1` enregistre l'œuvre, `A1` l'auteur·ice, `E1` l'édition —
+y compris les œuvres ajoutées ou détachées, qui sont des `P629` de l'édition. Enregistrer `W1` ou `A1` envoie (non
+optimiste, comme la feature 0049) puis revient d'un cran ; ce qui avait changé dans `E1` y est toujours. Le bouton est
+éteint tant que rien n'a changé ; chevron.left sur des changements demande « Quitter sans enregistrer ? »
+(feature 0032). Une entité Wikidata s'ouvre sans barre.
+
+## Le parcours (prototype)
+
+Flow `V2 · Modifier l'édition, l'œuvre, l'auteur·ice`, départ sur `E1 Light`. Toucher une œuvre de `E1` ou `E3` →
+`W1` ; toucher l'auteur·ice de `W1` ou « Traduction » de `E1` → `A1` ; chevron.left → retour. Câblé en clair et en
+sombre. Une entité Wikidata s'ouvrirait en lecture seule (pas maquetté).
+
+## Ce qu'inventaire.io permet — vérifié le 2026-10-28
+
+Source : `GET /api/data/properties` (les `subjectTypes` `work` et `human`), `GET /api/data/property-values` (valeurs
+permises de `P31` et `P7937`), et `properties_per_type.ts` d'inventaire-client (priorités, libellés, catégories).
+
+| Œuvre (`W1`) | Propriétés |
+|---|---|
+| L'œuvre | titre : un label par langue · type `P31`, une valeur parmi six (œuvre littéraire, œuvre écrite, bande dessinée, roman graphique, manga, manhwa) · forme `P7937`, une valeur parmi 31 · langue originale `P407` · date de première publication `P577` |
+| Auteur·ices | `P50` |
+| Ont aussi fait cette œuvre | scénario `P58` · illustrations `P110` · direction éditoriale `P98` |
+| Bande dessinée | dessin `P10837` · encrage `P10836` · couleurs `P6338` · lettrage `P9191` |
+| Série | `P179` · rang `P1545` |
+| Genre et sujet | genre `P136` · sujet principal `P921` |
+| Liens avec d'autres œuvres | basée sur `P144` · inspirée de `P941` · publiée dans `P1433` · en réponse à `P2675` |
+| Bases bibliographiques (20) | `P214` `P227` `P243` `P244` `P268` `P269` `P648` `P950` `P1085` `P1274` `P1984` `P3631` `P4087` `P5331` `P5571` `P6221` `P7823` `P8383` `P10100` `P11308` |
+| Autres données | liens `P856` `P1581` `P2002` `P2003` `P2013` `P2397` `P4033` `P7085` `P11892` `P12361` · à ne pas confondre avec `P1889` |
+
+| Auteur·ice (`A1`) | Propriétés |
+|---|---|
+| L'auteur·ice | nom : un label par langue · pseudonymes `P742` (texte) · langues d'écriture `P1412` · naissance `P569` · mort `P570` |
+| Courant et influences | mouvement `P135` · influencé·e par `P737` |
+| Bases bibliographiques (29) | `P213` `P214` `P227` `P243` `P244` `P268` `P269` `P349` `P496` `P648` `P906` `P950` `P1006` `P1233` `P1960` `P1982` `P2607` `P2963` `P3630` `P4084` `P4285` `P4369` `P5361` `P5491` `P5570` `P7400` `P9707` `P12430` `P14412` |
+| Autres données | les dix liens d'une œuvre et LinkedIn `P6634` · à ne pas confondre avec `P1889` |
+
+Absents : `invp:P1`, `invp:P3` (cachés par inventaire-client), `P31` d'une personne (une seule valeur). Ni couverture
+ni portrait : `invp:P2` ne vaut que pour une édition.
+
+## Composants
+
+Ceux de la V1, aucun nouveau : `Section Header`, `Form / Group` (un par section), `Form / Labeled Value`,
+`Form / Author Row`, `Form / Action Row`, `Note`, le chrome de feuille. `Form / Group` plafonne à six rangs, d'où
+les rôles d'une œuvre en deux sections. Les glyphes des `Form / Action Row` sont teints en `VariableID:6:6` par
+surcharge, comme dans `E1` (le composant les livre en noir).
+
+## Tranché le 2026-10-28
+
+- Tous les rôles d'une œuvre restent montrés, bande dessinée comprise, comme sur le site — pour le moment.
+- Modifier une œuvre ou un·e auteur·ice touche toutes ses éditions ou œuvres : la note sous la première section le
+  dit, sans avertissement de plus.
+- Chaque écran a son « Enregistrer », plutôt qu'une seule sauvegarde au retour dans `E1` (ce que faisait `E5`).
+
+---
+
 # Le fond des formulaires — passe du 2026-10-27
 
 En sombre, un formulaire était un fond `background/secondary` (`gray/800`) sous des cartes `background/default`
@@ -2524,6 +2931,7 @@ elle, les cartes restent `background/default` et disparaissent sur le fond noir.
 | D-FF1 | `DesignSystem/Tokens/Color.swift` | `background/form` et `background/form-cell` sont nés dans Figma : le code peignait les formulaires avec `.applyListBackground()` (`background/secondary`) et des cellules au fond système | **résolue** le 2026-10-27 — `.backgroundForm` et `.backgroundFormCell` dans `Color.swift`, posés par `DesignSystem.Form` (`DesignSystem/List/DesignSystem+Form.swift`) sur les 13 `Form` de l'app et par `DesignSystem.FormList` sur les 6 `List` poussées depuis un formulaire (`WorkSearchView`, `AuthorPickerView`, `BibliographicDataHelpView`, `EntityPickerView`, `EditionEntityValuesView`, `IdentifierCatalogView`). Un rang qui pose son propre `listRowBackground` le garde (l'encart des données). Vu sur le simulateur, clair et sombre, sur « Create new list » et « Edit edition ». Dans le code, les deux couleurs nomment leurs colorsets au lieu d'aliaser les sémantiques |
 | D-FF2 | `DesignSystem/Tokens/Color.swift` | Le 2026-10-27, en sombre, le code passe les formulaires à l'allure de la fiche livre — cartes un cran **sous** un fond `gray/800`, au lieu de cartes `gray/800` sur du noir — pendant que Figma aliasait encore `background/default` et `background/secondary`. Figma suit le même jour : `background/form` → `background/secondary` dans les deux modes, `background/form-cell` → `background/shade` en sombre, variable nouvelle (`784:14830`) : transparente en clair, `color/black-04` en sombre | **résolue** le 2026-10-27 — `.backgroundShade` dans `Color.swift` (`.black.opacity(0)` / `.black.opacity(0.4)`) ; `.backgroundFormCell` en sombre vaut le même voile, écrit en toutes lettres parce qu'une couleur dynamique imbriquée ne se résout pas. La fiche livre (`BookDetailView`, `BookResolvingView`) passe par `.backgroundForm` / `.backgroundFormCell` au lieu de `background/secondary` et du gris de cellule système. Vu sur le simulateur, clair et sombre, sur « Create new list » et la fiche livre |
 | D-FF3 | Figma — `background/shade`, `background/form`, `background/form-cell` | `background/shade` a les scopes `ALL_SCOPES` (les autres `background/*` sont en `FRAME_FILL`, `SHAPE_FILL`) et pas de description. Les descriptions de `background/form` et `background/form-cell` disent encore « Dark: background/default » / « background/secondary » et « not yet in Color.swift » | ouverte — à corriger dans Figma |
+| D-FF4 | `Features/Components/FormActionBar.swift` | Depuis le 2026-10-27, la barre fixe d'un formulaire (« Enregistrer » de « Modifier l'édition », « Nouvelle édition », la revue des doublons) n'a plus de fond : à partir d'iOS 26, une `safeAreaBar` au-dessus de l'effet de bord de défilement `.soft` du système, qui estompe le formulaire sous le bouton ; avant iOS 26, le `.thinMaterial` sous un filet, jusqu'au bord bas de l'écran. Plus de `background/default` : en sombre, le noir de la barre et de la zone sûre tranchait sur le fond `gray/800` du formulaire. `Action Bar / Attached` et les `barre fixe (safeAreaInset)` des maquettes sont encore sur `background/default` | ouverte — le code fait foi ; Figma n'a pas de variable pour un matériau, un flou d'arrière-plan sur la barre l'imiterait |
 
 ## Ce que la construction a appris
 

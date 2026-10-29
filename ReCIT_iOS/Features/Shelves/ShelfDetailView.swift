@@ -101,9 +101,16 @@ struct ShelfDetailView: View {
                     // Offered only on my own étagère: taking a book off someone else's
                     // shelf is not a gesture that exists, and a swipe that reveals an
                     // action only to refuse it is worse than no swipe at all.
+                    //
+                    // Destructive, for the system's red: the book leaves the étagère, and the
+                    // accent's pale green read as a harmless action.
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         if isMine {
-                            Button("action.remove_from_shelf_named \(shelf.name)", systemImage: "tray.and.arrow.up") {
+                            Button(
+                                "action.remove_from_shelf_named \(shelf.name)",
+                                systemImage: "tray.and.arrow.up",
+                                role: .destructive
+                            ) {
                                 shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
                             }
                         }

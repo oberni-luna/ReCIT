@@ -20,6 +20,9 @@ struct WorkEditionPicker: View {
     @State private var orderedEditions: [Edition] = []
     /// Coming back from « Les comparer » lists again: a pair declared different changes no count.
     @State private var appearances: Int = 0
+    /// The language picked in the header's menu, `nil` until one is: the phone's is shown until
+    /// then, and follows the sync. Forgotten on leaving the screen.
+    @State private var chosenLanguage: EditionLanguageFilter?
 
     let work: Work
     /// The editions are still being fetched: an empty list is not an answer yet.
@@ -34,6 +37,7 @@ struct WorkEditionPicker: View {
         let count: Int
         let revision: Int
         let appearances: Int
+        let language: EditionLanguageFilter?
     }
 
     var body: some View {
@@ -45,7 +49,7 @@ struct WorkEditionPicker: View {
         List {
             headerSection
             EditionDuplicatesBanner(work: work, duplicates: duplicates) {
-                path.append(NavigationDestination.editionDuplicates(workUri: work.uri))
+                path.append(NavigationDestination.editionDuplicates(workUri: work.uri, language: listing?.language ?? .all))
             }
             editionsSection(editions: editions, duplicates: duplicates)
         }
@@ -70,7 +74,7 @@ struct WorkEditionPicker: View {
         .onAppear {
             appearances += 1
         }
-        .task(id: ListingKey(count: work.editions.count, revision: revision, appearances: appearances)) {
+        .task(id: ListingKey(count: work.editions.count, revision: revision, appearances: appearances, language: chosenLanguage)) {
             await relist()
         }
     }
@@ -78,8 +82,9 @@ struct WorkEditionPicker: View {
     /// Reads what the order and the detection need on the main actor, then works the list out
     /// away from it.
     private func relist() async {
-        // A sync writes its editions fifty at a time: changes in a row make one listing.
-        if listing != nil {
+        // A sync writes its editions fifty at a time: changes in a row make one listing. A
+        // language picked in the menu is shown at once.
+        if let listing, chosenLanguage == nil || listing.language == chosenLanguage {
             do {
                 try await Task.sleep(for: .milliseconds(300))
             } catch {
@@ -90,7 +95,9 @@ struct WorkEditionPicker: View {
         let editions: [Edition] = work.editions.filter(\.isStillInTheStore)
         let listing: EditionListing = await EditionListing.computed(
             entries: editions.map(EditionListing.Entry.init),
-            facts: editions.map(EditionFacts.init)
+            facts: editions.map(EditionFacts.init),
+            chosen: chosenLanguage,
+            phoneLanguage: Locale.current.language.languageCode?.identifier
         )
         guard Task.isCancelled == false else { return }
 
@@ -136,9 +143,24 @@ struct WorkEditionPicker: View {
                 }
             }
         } header: {
-            Text("work.editions.header \(work.title)")
-                .textStyle(.action200)
-                .foregroundStyle(.foregroundSecondary)
+            HStack(spacing: .small) {
+                Text("work.editions.header \(work.title)")
+                    .lineLimit(1)
+                    .foregroundStyle(.foregroundSecondary)
+
+                Spacer(minLength: 0)
+
+                if let listing {
+                    EditionLanguageMenu(
+                        options: listing.options,
+                        selection: .init(
+                            get: { listing.language },
+                            set: { chosenLanguage = $0 }
+                        )
+                    )
+                }
+            }
+            .textStyle(.action200)
         }
     }
 }

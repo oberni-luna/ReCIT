@@ -28,6 +28,25 @@ struct WorkEditionGatewayView: View {
         case loadingEditions(work: Work)
         case loaded(work: Work, editions: [Edition])
         case error(error: Error)
+
+        /// The one edition a work has, when the list is in and it is alone.
+        var singleEdition: Edition? {
+            guard case .loaded(_, let editions) = self, editions.count == 1 else { return nil }
+            return editions.first
+        }
+
+        var work: Work? {
+            switch self {
+            case .loadingEditions(let work), .loaded(let work, _):
+                work
+            case .loadingWork, .error:
+                nil
+            }
+        }
+
+        var isLoadingEditions: Bool {
+            if case .loadingEditions = self { true } else { false }
+        }
     }
 
     let workUri: String
@@ -38,19 +57,16 @@ struct WorkEditionGatewayView: View {
 
     var body: some View {
         Group {
-            switch viewState {
-            case .loadingWork:
-                ProgressView()
-            case .loadingEditions(let work):
-                WorkEditionPicker(work: work, isLoading: true, revision: revision, path: $path)
-            case .loaded(let work, let editions):
-                if editions.count == 1, let edition = editions.first {
-                    BookDetailView(anchor: .edition(uri: edition.uri), path: $path)
-                } else {
-                    WorkEditionPicker(work: work, isLoading: false, revision: revision, path: $path)
-                }
-            case .error(let error):
+            // One branch for the picker, loading or loaded: a branch of its own each time would
+            // make it a new view when the editions arrive, and forget the language picked.
+            if case .error(let error) = viewState {
                 Text("error.with_message \(error.localizedDescription)")
+            } else if let edition = viewState.singleEdition {
+                BookDetailView(anchor: .edition(uri: edition.uri), path: $path)
+            } else if let work = viewState.work {
+                WorkEditionPicker(work: work, isLoading: viewState.isLoadingEditions, revision: revision, path: $path)
+            } else {
+                ProgressView()
             }
         }
         .task {

@@ -58,8 +58,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case inviteToGroup(id: String)
     /// The duplicates « Éditions » found among a work's editions, one at a time. Pushed from the
     /// banner's « Les comparer »; the screen reads the work by uri and finds the pairs again
-    /// (PRD 0028).
-    case editionDuplicates(workUri: String)
+    /// (PRD 0028), among the editions in `language` — the one « Éditions » was showing.
+    case editionDuplicates(workUri: String, language: EditionLanguageFilter)
     var id: String {
         switch self {
         case .author(let uri):
@@ -108,8 +108,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "groupMembers:\(id)"
         case .inviteToGroup(let id):
             return "inviteToGroup:\(id)"
-        case .editionDuplicates(let workUri):
-            return "editionDuplicates:\(workUri)"
+        case .editionDuplicates(let workUri, let language):
+            return "editionDuplicates:\(workUri):\(language.id)"
         }
     }
 
@@ -205,8 +205,8 @@ extension NavigationDestination {
           GroupMembersView(groupId: id, path: path)
       case .inviteToGroup(let id):
           InviteToGroupView(groupId: id)
-      case .editionDuplicates(let workUri):
-          EditionDuplicatesReview(workUri: workUri)
+      case .editionDuplicates(let workUri, let language):
+          EditionDuplicatesReview(workUri: workUri, language: language)
       }
     }
 }

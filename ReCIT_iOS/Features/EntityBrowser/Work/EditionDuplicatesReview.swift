@@ -38,8 +38,12 @@ struct EditionDuplicatesReview: View {
     @State private var isMerging: Bool = false
     @State private var summary: DuplicatesReviewSummary = .init()
 
-    init(workUri: String) {
+    /// The language « Éditions » was showing: its pairs are the ones passed in review.
+    let language: EditionLanguageFilter
+
+    init(workUri: String, language: EditionLanguageFilter) {
         _works = Query(filter: #Predicate<Work> { $0.uri == workUri })
+        self.language = language
     }
 
     private var work: Work? {
@@ -48,7 +52,8 @@ struct EditionDuplicatesReview: View {
 
     private var remaining: [EditionDuplicatePair] {
         guard let work else { return [] }
-        return EditionDuplicateDetector.detect(work.editions.map(EditionFacts.init)).pairs
+        let editions: [Edition] = work.editions.filter { language.admits($0.lang) }
+        return EditionDuplicateDetector.detect(editions.map(EditionFacts.init)).pairs
             .filter { skipped.contains($0.id) == false }
     }
 

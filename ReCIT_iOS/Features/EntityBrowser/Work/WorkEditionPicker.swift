@@ -27,6 +27,8 @@ struct WorkEditionPicker: View {
     let work: Work
     /// The editions are still being fetched: an empty list is not an answer yet.
     let isLoading: Bool
+    /// The gateway is fetching the editions again: the ones listed may not be all of them.
+    let isRefreshing: Bool
     /// Moves each time the gateway has written to the editions, so the list is worked out again.
     let revision: Int
     @Binding var path: NavigationPath
@@ -126,8 +128,12 @@ struct WorkEditionPicker: View {
 
     @ViewBuilder
     func editionsSection(editions: [Edition], duplicates: EditionDuplicates) -> some View {
+        // The section's own spinner stands for the list while there is none: the header's would
+        // say the same thing twice.
+        let showsListSpinner: Bool = editions.isEmpty && (isLoading || listing == nil)
+
         Section {
-            if editions.isEmpty && (isLoading || listing == nil) {
+            if showsListSpinner {
                 ProgressView()
             } else {
                 ForEach(editions) { edition in
@@ -147,6 +153,10 @@ struct WorkEditionPicker: View {
                 Text("work.editions.header \(work.title)")
                     .lineLimit(1)
                     .foregroundStyle(.foregroundSecondary)
+
+                if isRefreshing && showsListSpinner == false {
+                    SectionLoadingIndicator()
+                }
 
                 Spacer(minLength: 0)
 

@@ -20,6 +20,8 @@ struct AuthorDetailView: View {
     }
 
     @State private var state: ViewState = .loadingAuthor
+    /// The author and their works are being fetched again, behind what the cache already shows.
+    @State private var isRefreshing: Bool = false
 
     let authorUri: String
     @Binding var path: NavigationPath
@@ -77,9 +79,15 @@ struct AuthorDetailView: View {
                         }
                     }
                 } header: {
-                    Text("author.works.header \(author.name)")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
+                    HStack(spacing: .small) {
+                        Text("author.works.header \(author.name)")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
+
+                        if isRefreshing {
+                            SectionLoadingIndicator()
+                        }
+                    }
                 }
             }
             .applyListBackground()
@@ -96,6 +104,9 @@ struct AuthorDetailView: View {
     /// stale-but-useful data keeps showing.
     @MainActor
     private func load() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
+
         let cached: Author? = entityModel.localAuthor(modelContext: modelContext, uri: authorUri)
         if let cached {
             state = cached.works.isEmpty

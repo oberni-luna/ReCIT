@@ -54,6 +54,9 @@ struct WorkEditionGatewayView: View {
     @State private var viewState: ViewState = .loadingWork
     /// Moves each time `load` has written to the editions, for the picker to list them again.
     @State private var revision: Int = 0
+    /// The work, its editions and their merge tasks are being fetched again, behind what the
+    /// cache already shows.
+    @State private var isRefreshing: Bool = false
 
     var body: some View {
         Group {
@@ -64,7 +67,13 @@ struct WorkEditionGatewayView: View {
             } else if let edition = viewState.singleEdition {
                 BookDetailView(anchor: .edition(uri: edition.uri), path: $path)
             } else if let work = viewState.work {
-                WorkEditionPicker(work: work, isLoading: viewState.isLoadingEditions, revision: revision, path: $path)
+                WorkEditionPicker(
+                    work: work,
+                    isLoading: viewState.isLoadingEditions,
+                    isRefreshing: isRefreshing,
+                    revision: revision,
+                    path: $path
+                )
             } else {
                 ProgressView()
             }
@@ -80,6 +89,9 @@ struct WorkEditionGatewayView: View {
     /// data keeps showing. Mirrors the old WorkDetailView.load.
     @MainActor
     private func load() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
+
         let cached: Work? = entityModel.localWork(modelContext: modelContext, uri: workUri)
         if let cached {
             viewState = cached.editions.isEmpty

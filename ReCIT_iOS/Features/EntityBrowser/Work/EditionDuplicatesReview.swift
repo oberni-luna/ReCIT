@@ -134,7 +134,7 @@ struct EditionDuplicatesReview: View {
     /// answered — see `EditionDuplicatesModel.merge`. A refusal is said in the SnackBar and leaves
     /// the pair where it is.
     private func merge(_ pair: EditionDuplicatePair?) async {
-        guard let pair, let work, isMerging == false else { return }
+        guard let pair, isMerging == false else { return }
         let keptUri: String = keptUri(in: pair)
         let kept: EditionFacts = pair.first.uri == keptUri ? pair.first : pair.second
 
@@ -144,7 +144,6 @@ struct EditionDuplicatesReview: View {
             let outcome: MergeOutcome = try await duplicatesModel.merge(
                 pair,
                 keeping: kept,
-                work: work,
                 modelContext: modelContext
             )
             summary.record(outcome)

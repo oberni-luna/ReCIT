@@ -53,7 +53,7 @@ renseignée » plutôt que sous la langue qu'elles ont sans doute.
   si bien que la liste se remplit au fil de l'eau. Les éditions déjà connues ne sont relues qu'une fois par jour
   (`Work.editionsRefreshedAt`, optionnel, migration légère), comme les tâches de fusion — qui étaient relues à
   chaque ouverture depuis la [feature 0051](0051-edition-duplicates.md). Après une fusion, seule l'édition gardée
-  est relue.
+  est relue, par `refreshEdition` et en arrière-plan : la revue n'attend plus la synchronisation de l'œuvre.
 - **La passerelle** (`WorkEditionGatewayView`) garde le picker dans une seule branche, du chargement à la liste
   complète : sans quoi il redevenait une vue neuve à l'arrivée des éditions, et oubliait la langue choisie.
 

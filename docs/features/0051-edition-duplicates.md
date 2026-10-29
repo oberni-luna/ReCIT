@@ -47,8 +47,10 @@ SnackBar résume : « Les deux éditions n'en font plus qu'une. Un doublon est s
 - **Fusionner** : `PUT /api/entities/merge`, corps `{ from, to }`. `from` est l'uri `inv:` de l'édition qui
   disparaît, `to` celle de l'édition gardée (`inv:` ou `wd:`).
   - `{ ok: true }` : la fusion est faite. Les exemplaires de ce téléphone passent à l'édition gardée, une œuvre qui
-    s'ouvrait sur l'édition disparue s'ouvre sur l'autre, l'édition est supprimée du store, puis l'œuvre et ses
-    éditions sont relues.
+    s'ouvrait sur l'édition disparue s'ouvre sur l'autre, l'édition est supprimée du store, puis l'édition gardée
+    est relue, en arrière-plan : la revue passe tout de suite à la paire suivante. Jusqu'au 2026-10-29, toute
+    l'œuvre était resynchronisée et la revue l'attendait — sur *L'Appel de la forêt*, « Fusionner » tournait sans
+    fin sur la paire suivante, le bouton retour masqué.
   - `{ ok: true, taskId }` : inventaire.io a confié la fusion à son équipe. Rien n'est supprimé ; l'édition note la
     tâche, et la paire porte « Doublon signalé ».
   - Un `400` devient une phrase, un cas par message du serveur (« can't merge editions with different ISBNs »,

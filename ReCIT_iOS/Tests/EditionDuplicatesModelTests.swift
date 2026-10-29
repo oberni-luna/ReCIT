@@ -100,7 +100,7 @@ struct EditionDuplicatesModelTests {
         let kept: EditionFacts = MergeChoice.proposedKeep(in: pair)
 
         let outcome: MergeOutcome = try await EditionDuplicatesModel(apiService: api)
-            .merge(pair, keeping: kept, work: store.work, modelContext: store.context)
+            .merge(pair, keeping: kept, modelContext: store.context)
 
         #expect(outcome == .merged)
         let request: Sent = try #require(recorder.requests.first)
@@ -114,6 +114,33 @@ struct EditionDuplicatesModelTests {
         #expect(store.work.editions.map(\.uri) == ["wd:Q1"])
     }
 
+    @Test("After a merge only the edition kept is read again, and the merge does not wait for it")
+    func mergeResyncsTheKeptEditionOnly() async throws {
+        let store: Store = try store()
+        let recorder: Recorder = .init()
+        let api: APIService = service(recorder: recorder) { request in
+            guard request.url?.path == "/api/entities/by-uris" else { return (200, #"{"ok":true}"#) }
+            return (200, #"""
+            {"entities":{"wd:Q1":{"uri":"wd:Q1","type":"edition","labels":{},
+             "claims":{"wdt:P629":["wd:W1"],"wdt:P212":["978-2-07-036822-8"],"wdt:P1104":[542]}}}}
+            """#)
+        }
+        let model: EditionDuplicatesModel = .init(apiService: api, entityModel: .init(apiService: api))
+        let pair: EditionDuplicatePair = try pair(store)
+
+        let outcome: MergeOutcome = try await model
+            .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), modelContext: store.context)
+        await model.keptEditionResync?.value
+
+        #expect(outcome == .merged)
+        let paths: [String] = recorder.requests.map(\.url.path)
+        #expect(paths.contains("/api/entities/reverse-claims") == false)
+        #expect(recorder.requests.filter { $0.url.path == "/api/entities/by-uris" }.map { $0.url.query ?? "" }
+            .allSatisfy { $0.contains("uris=wd:Q1&") })
+        #expect(store.kept.numberOfPages == 542)
+        #expect(store.work.editions.map(\.uri) == ["wd:Q1"])
+    }
+
     @Test("A merge the server hands to its team deletes nothing and tags the pair « Doublon signalé »")
     func mergeReported() async throws {
         let store: Store = try store()
@@ -121,7 +148,7 @@ struct EditionDuplicatesModelTests {
         let pair: EditionDuplicatePair = try pair(store)
 
         let outcome: MergeOutcome = try await EditionDuplicatesModel(apiService: api)
-            .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), work: store.work, modelContext: store.context)
+            .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), modelContext: store.context)
 
         #expect(outcome == .reported(taskId: "T1"))
         #expect(try store.context.fetch(FetchDescriptor<Edition>()).count == 2)
@@ -148,7 +175,7 @@ struct EditionDuplicatesModelTests {
 
         await #expect(throws: failure) {
             try await EditionDuplicatesModel(apiService: api)
-                .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), work: store.work, modelContext: store.context)
+                .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), modelContext: store.context)
         }
         #expect(try store.context.fetch(FetchDescriptor<Edition>()).count == 2)
         #expect(store.gone.pendingMergeTargetUris.isEmpty)
@@ -162,7 +189,7 @@ struct EditionDuplicatesModelTests {
 
         do {
             _ = try await EditionDuplicatesModel(apiService: api)
-                .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), work: store.work, modelContext: store.context)
+                .merge(pair, keeping: MergeChoice.proposedKeep(in: pair), modelContext: store.context)
             Issue.record("A 401 must throw")
         } catch NetworkError.badStatus(let code, _) {
             #expect(code == 401)
@@ -180,7 +207,7 @@ struct EditionDuplicatesModelTests {
 
         await #expect(throws: MergeFailure.refused) {
             try await EditionDuplicatesModel(apiService: api)
-                .merge(pair, keeping: inv, work: store.work, modelContext: store.context)
+                .merge(pair, keeping: inv, modelContext: store.context)
         }
         #expect(recorder.requests.isEmpty)
     }

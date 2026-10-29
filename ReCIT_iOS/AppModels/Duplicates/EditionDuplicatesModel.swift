@@ -14,9 +14,11 @@ import SwiftData
 @Observable
 final class EditionDuplicatesModel: OptimisticMutating {
     private let apiService: APIServicing
-    /// Resynchronises the work after a merge. Optional so a test can leave the resync out.
+    /// Reads the edition kept again after a merge. Optional so a test can leave the resync out.
     private let entityModel: EntityModel?
     var errorReporter: AppErrorReporter?
+    /// The edition kept being read again after the last merge — for a test to wait on.
+    private(set) var keptEditionResync: Task<Void, Never>?
 
     init(
         apiService: APIServicing,
@@ -39,7 +41,7 @@ final class EditionDuplicatesModel: OptimisticMutating {
     ///
     /// - `.merged`: the copies held here of the edition that disappears are filed under the one
     ///   kept, a work that opened on it opens on the one kept, the edition is deleted, and the
-    ///   work's editions are fetched again.
+    ///   one kept is read again — in the background: the review goes on to the next pair at once.
     /// - `.reported`: the edition notes the task, and its row says « Doublon signalé ».
     ///
     /// Throws `MergeFailure` for a refusal; a `401` and any other failure go out as they came.
@@ -47,7 +49,6 @@ final class EditionDuplicatesModel: OptimisticMutating {
     func merge(
         _ pair: EditionDuplicatePair,
         keeping kept: EditionFacts,
-        work: Work,
         modelContext: ModelContext
     ) async throws -> MergeOutcome {
         guard let request = MergeChoice.request(keeping: kept, in: pair) else { throw MergeFailure.refused }
@@ -71,9 +72,7 @@ final class EditionDuplicatesModel: OptimisticMutating {
         switch outcome {
         case .merged:
             try fold(editionUri: goneUri, into: kept.uri, modelContext: modelContext)
-            if let entityModel, work.isStillInTheStore {
-                try? await entityModel.refreshWorkEditions(modelContext: modelContext, work: work, refreshing: [kept.uri])
-            }
+            resync(keptUri: kept.uri, modelContext: modelContext)
         case .reported:
             if let gone = edition(uri: goneUri, modelContext: modelContext),
                gone.pendingMergeTargetUris.contains(request.to) == false {
@@ -104,6 +103,17 @@ final class EditionDuplicatesModel: OptimisticMutating {
 
         modelContext.delete(gone)
         try modelContext.save()
+    }
+
+    /// Reads the edition kept again, the server having maybe moved claims onto it. Only that one:
+    /// resyncing the whole work read every edition again when they were more than a day old —
+    /// 7 742 of them for *L'Appel de la forêt* — and the review waited on it, its « Fusionner »
+    /// spinning and its back button hidden. A failure leaves the store as `fold` left it.
+    private func resync(keptUri: String, modelContext: ModelContext) {
+        guard let entityModel else { return }
+        keptEditionResync = Task {
+            _ = try? await entityModel.refreshEdition(modelContext: modelContext, uri: keptUri)
+        }
     }
 
     private func edition(uri: String, modelContext: ModelContext) -> Edition? {

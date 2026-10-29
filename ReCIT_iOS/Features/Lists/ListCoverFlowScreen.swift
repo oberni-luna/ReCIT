@@ -5,18 +5,23 @@
 //  A list of works or of authors, as one screen in two halves: the cover flow on top, the
 //  element facing the reader below, and — in place of the tab bar — the bar to add one more.
 //
-//  **The swap between two books is a cross-fade.** The bottom half is keyed on the selected uri
-//  and replaced as a whole, under one short ease, while the covers above follow the finger at
-//  every frame. The text never jumps from one book to the next: it dissolves into it.
+//  **The swap between two books is a cross-fade.** Every row that speaks of the selected book is
+//  keyed on its uri (`ListCrossFade`) and replaced as a whole, under one short ease, while the
+//  covers above follow the finger at every frame. The text never jumps from one book to the next:
+//  it dissolves into it.
+//
+//  An inset grouped list, the forms' (`DesignSystem.FormList`): the cover flow and the title are
+//  a first row on the screen's ground, edge to edge, and the comment, the way to the book's page and the
+//  way out of the list are rows with the system's own corners.
 //
 //  **The selection survives the list changing under it.** It is a uri, so an element whose
 //  optimistic id is replaced by the server's stays selected; an element removed hands the
 //  selection to the one that took its place, or to the last one; and a uri asked for by an add
 //  (`selectAfterAdd`) is selected as soon as the list holds it.
 //
-//  The whole screen is one scroll view: with the comment field focused, the keyboard pushes it
-//  up and the cover flow goes under the navigation bar, and the add bar steps aside so that the
-//  keyboard is not topped with two buttons that have nothing to do with typing.
+//  The whole screen is one list: with the comment field focused, the keyboard pushes it up and
+//  the cover flow goes under the navigation bar, and the add bar steps aside so that the keyboard
+//  is not topped with two buttons that have nothing to do with typing.
 //
 //  See PRD 0029 and the `Liste détails` section of the Figma file (`843:12721`).
 //
@@ -65,43 +70,83 @@ struct ListCoverFlowScreen: View {
         liveItems.first { $0.uri == selectedURI }
     }
 
-    var body: some View {
-        ScrollView {
-            if liveItems.isEmpty {
-                Text("list.empty")
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundSecondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, .xxLarge)
-            } else {
-                VStack(spacing: .zero) {
-                    ListCoverFlowView(
-                        uris: uris,
-                        listType: list.type,
-                        selectedURI: $selectedURI,
-                        onOpen: open
-                    )
+    private var openLabel: LocalizedStringKey {
+        list.type == .author ? "list.detail.open.author" : "list.detail.open.work"
+    }
 
-                    ZStack(alignment: .top) {
-                        if let selectedItem {
-                            ListSelectedItemView(
-                                item: selectedItem,
-                                listType: list.type,
-                                isCommentFocused: $isCommentFocused,
-                                onOpen: { open(selectedItem.uri) },
-                                onRemove: { remove(selectedItem) }
-                            )
-                            .id(selectedItem.uri)
-                            .transition(.opacity)
+    var body: some View {
+        DesignSystem.FormList {
+            if liveItems.isEmpty {
+                Section {
+                    Text("list.empty")
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundSecondary)
+                }
+            } else {
+                // The cover flow and the title, edge to edge on the screen's own ground: a row
+                // dressed as a header. A real section header lays its horizontal scroll view out
+                // before it has a width, and the strip came up empty.
+                Section {
+                    VStack(spacing: .zero) {
+                        ListCoverFlowView(
+                            uris: uris,
+                            listType: list.type,
+                            selectedURI: $selectedURI,
+                            onOpen: open
+                        )
+
+                        if let selectedURI {
+                            ListCrossFade(id: selectedURI) {
+                                ListSelectedTitle(uri: selectedURI, listType: list.type)
+                            }
+                            .padding(.horizontal, .medium)
                         }
                     }
-                    .animation(.easeInOut(duration: 0.25), value: selectedURI)
-                    .padding(.bottom, .large)
+                    .listRowInsets(.init())
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+                // Edge to edge from iOS 26, so the turned covers are not cut at the section's
+                // margin; before it the section keeps the list's margins.
+                .listSectionHorizontalMargins(0)
+
+                Section {
+                    if let selectedItem {
+                        ListCrossFade(id: selectedItem.uri) {
+                            ListCommentRow(
+                                item: selectedItem,
+                                listType: list.type,
+                                isFocused: $isCommentFocused
+                            )
+                        }
+
+                        Button(openLabel) {
+                            open(selectedItem.uri)
+                        }
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundTinted)
+                    }
+                }
+
+                if let selectedItem {
+                    Section {
+                        Button("list.detail.remove", role: .destructive) {
+                            remove(selectedItem)
+                        }
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundError)
+                    } footer: {
+                        ListCrossFade(id: selectedItem.uri) {
+                            Text("list.detail.added \(selectedItem.created.formatted(.dateTime.day().month(.wide).year()))")
+                                .textStyle(.footnote200)
+                                .foregroundStyle(.foregroundSecondary)
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
                 }
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .applyListBackground(.backgroundForm)
         .formActionBar(isPresented: isCommentFocused == false) {
             ListAddBar(
                 listType: list.type,

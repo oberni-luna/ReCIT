@@ -5,14 +5,18 @@
 //  How each cover of a list's cover flow is turned, pushed aside, shrunk and shaded, given how
 //  far its centre sits from the centre of the strip.
 //
-//  The strip is a horizontal scroll view whose items all sit one `pitch` apart, so a swipe moves
-//  by whole covers and the scroll view's own snapping does the rest. That pitch is far narrower
-//  than a cover facing the reader: the covers on either side are drawn turned, and a turned cover
-//  is narrow. What makes room for the one in front is `push`, an extra offset that grows with the
-//  first pitch of distance and then stays put — so the neighbours slide out of the way as a cover
-//  comes to the centre, and the rest of the row keeps its rhythm behind them.
+//  The strip is a horizontal scroll view whose items all sit one `step` apart, so a swipe moves
+//  by whole covers and the scroll view's own snapping does the rest. The step is how far the
+//  finger travels per book; what the eye sees is another distance, `pitch`, the overlap of two
+//  turned covers. Drawn at the step, a finger moving 38 pt went one book further — too touchy —
+//  so each cover is drawn back from where the scroll view lays it to where the pitch puts it.
 //
-//  Everything grows over the first pitch and saturates after it: a cover half-way to the centre
+//  Both are far narrower than a cover facing the reader: the covers on either side are drawn
+//  turned, and a turned cover is narrow. What makes room for the one in front is `push`, an extra
+//  offset that grows with the first step of distance and then stays put — so the neighbours slide
+//  out of the way as a cover comes to the centre, and the rest of the row keeps its rhythm.
+//
+//  Everything grows over the first step and saturates after it: a cover half-way to the centre
 //  is half-turned, which is what makes a swipe read as a continuous movement rather than a cover
 //  jumping from one pose to the other. Only the shade keeps deepening with the rank, so the row
 //  fades back on both sides.
@@ -41,9 +45,13 @@ struct CoverFlowGeometry: Equatable, Sendable {
         let shade: Double
     }
 
-    /// The distance between two neighbours as the scroll view lays them out: the step one swipe
-    /// moves by, and the overlap of two turned covers (`38` in the mockup).
+    /// The distance between two neighbours as they are drawn: the overlap of two turned covers
+    /// (`38` in the mockup).
     static let pitch: CGFloat = 38
+
+    /// The distance between two neighbours as the scroll view lays them out: how far the finger
+    /// travels to move one book.
+    static let step: CGFloat = 64
 
     /// The gap between the cover in front and the turned edge of its neighbour.
     static let gapToFront: CGFloat = 14
@@ -75,16 +83,17 @@ struct CoverFlowGeometry: Equatable, Sendable {
         coverWidth / 2 + Self.gapToFront + turnedWidth / 2 - Self.pitch
     }
 
-    /// The placement of a cover whose centre is `distance` points from the strip's centre,
-    /// negative on the left.
+    /// The placement of a cover whose centre is `distance` points from the strip's centre as the
+    /// scroll view lays it out, negative on the left.
     func placement(distance: CGFloat) -> Placement {
-        let rank: CGFloat = distance / Self.pitch
+        let rank: CGFloat = distance / Self.step
         let turn: CGFloat = min(abs(rank), 1)
         let side: CGFloat = rank < 0 ? -1 : 1
 
         return .init(
             angle: Double(-side * turn) * Self.maxAngle,
-            offset: side * turn * push,
+            // Back from the step to the pitch, then aside to clear the front cover.
+            offset: rank * (Self.pitch - Self.step) + side * turn * push,
             scale: 1 - (1 - Self.turnedScale) * turn,
             shade: Self.shadePerRank * min(Double(abs(rank)), Self.maxShadedRank)
         )

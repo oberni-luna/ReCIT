@@ -24,7 +24,7 @@ struct CoverFlowGeometryTests {
 
     @Test("Both sides are mirrored")
     func sidesAreMirrored() {
-        for distance in [10, 38, 76, 200] as [CGFloat] {
+        for distance in [10, 38, 64, 128, 200] as [CGFloat] {
             let left: CoverFlowGeometry.Placement = geometry.placement(distance: -distance)
             let right: CoverFlowGeometry.Placement = geometry.placement(distance: distance)
 
@@ -35,22 +35,32 @@ struct CoverFlowGeometryTests {
         }
     }
 
-    @Test("A cover half a pitch away is half turned")
+    @Test("A cover half a step away is half turned")
     func halfwayIsHalfTurned() {
-        let placement: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.pitch / 2)
+        let placement: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.step / 2)
+        let drawnBack: CGFloat = (CoverFlowGeometry.pitch - CoverFlowGeometry.step) / 2
 
         #expect(placement.angle == -CoverFlowGeometry.maxAngle / 2)
-        #expect(abs(placement.offset - geometry.push / 2) < 0.001)
+        #expect(abs(placement.offset - drawnBack - geometry.push / 2) < 0.001)
     }
 
-    @Test("Turn, push and scale stop growing after one pitch")
-    func turnSaturatesAfterOnePitch() {
-        let first: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.pitch)
-        let third: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.pitch * 3)
+    @Test("Covers past the first are drawn one pitch apart, whatever the step")
+    func farCoversKeepThePitch() {
+        let second: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.step * 2)
+        let third: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.step * 3)
+        let secondCentre: CGFloat = CoverFlowGeometry.step * 2 + second.offset
+        let thirdCentre: CGFloat = CoverFlowGeometry.step * 3 + third.offset
+
+        #expect(abs(thirdCentre - secondCentre - CoverFlowGeometry.pitch) < 0.001)
+    }
+
+    @Test("Turn and scale stop growing after one step")
+    func turnSaturatesAfterOneStep() {
+        let first: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.step)
+        let third: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.step * 3)
 
         #expect(first.angle == -CoverFlowGeometry.maxAngle)
         #expect(third.angle == -CoverFlowGeometry.maxAngle)
-        #expect(first.offset == third.offset)
         #expect(first.scale == CoverFlowGeometry.turnedScale)
         #expect(third.scale == CoverFlowGeometry.turnedScale)
     }
@@ -58,7 +68,7 @@ struct CoverFlowGeometryTests {
     @Test("The shade deepens with the rank, up to a limit")
     func shadeDeepensThenStops() {
         let ranks: [Double] = [1, 2, 3, 4, 6].map { rank in
-            geometry.placement(distance: CoverFlowGeometry.pitch * rank).shade
+            geometry.placement(distance: CoverFlowGeometry.step * rank).shade
         }
 
         #expect(ranks[0] < ranks[1])
@@ -69,8 +79,8 @@ struct CoverFlowGeometryTests {
 
     @Test("The first neighbour clears the front cover by the gap")
     func firstNeighbourClearsTheFrontCover() {
-        let placement: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.pitch)
-        let neighbourCentre: CGFloat = CoverFlowGeometry.pitch + placement.offset
+        let placement: CoverFlowGeometry.Placement = geometry.placement(distance: CoverFlowGeometry.step)
+        let neighbourCentre: CGFloat = CoverFlowGeometry.step + placement.offset
         let neighbourInnerEdge: CGFloat = neighbourCentre - geometry.turnedWidth / 2
         let frontOuterEdge: CGFloat = geometry.coverWidth / 2
 

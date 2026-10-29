@@ -36,17 +36,22 @@ aside.
 
 - **`EntityListDetail`** keeps its toolbar, its edit sheet and its pop-when-gone; works and authors lists go to
   **`ListCoverFlowScreen`**, publishers lists keep the old « Cette liste est vide ». The old row views are gone.
-- **`ListCoverFlowScreen`** (`Features/Lists/`) — one `ScrollView`: **`ListCoverFlowView`** on top,
-  **`ListSelectedItemView`** keyed on the selected uri under `.transition(.opacity)` and a 0.25 s ease, the add bar
-  through `formActionBar(isPresented:)`, `.toolbar(.hidden, for: .tabBar)`. The selection is a **uri**, kept across
+- **`ListCoverFlowScreen`** (`Features/Lists/`) — an inset grouped list, `DesignSystem.FormList`: a first row on
+  the screen's ground, edge to edge (`listSectionHorizontalMargins(0)` from iOS 26), holding **`ListCoverFlowView`**
+  and **`ListSelectedTitle`**; then **`ListCommentRow`** and « Voir la fiche … », « Retirer de la liste » with « Ajouté
+  le … » as its footer. Every row about the selected book sits in a **`ListCrossFade`** keyed on its uri. The add bar
+  goes through `formActionBar(isPresented:)`, with the forms' `.primary()` buttons; `.toolbar(.hidden, for: .tabBar)`. The selection is a **uri**, kept across
   changes of the list: the uri an add asked for, else the same one, else the one that took the removed element's place.
-- **`ListCoverFlowView`** — a horizontal `ScrollView` with `scrollTargetBehavior(.viewAligned)` and
-  `scrollPosition(id:anchor: .center)`; every item laid out `CoverFlowGeometry.pitch` (38 pt) wide, content margins
-  centring the ends, `zIndex` following the distance to the selection, a selection haptic.
+- **`ListCoverFlowView`** — a horizontal `ScrollView` in a `GeometryReader`, with
+  `scrollTargetBehavior(.viewAligned(limitBehavior: .alwaysByOne))` and `scrollPosition(id:anchor: .center)`; a plain
+  `HStack` (a `LazyHStack` in a list row built nothing); every item laid out `CoverFlowGeometry.step` (64 pt) wide,
+  content margins centring the ends, `zIndex` following the distance to the selection, a selection haptic.
 - **`ListCoverFlowItem`** — the cover or the portrait, posed in `visualEffect` from its frame in the scroll view:
-  `scaleEffect`, `rotation3DEffect` (perspective 0.5), `offset`, `brightness`. Keeps `e2e.listItemRow`.
-- **`CoverFlowGeometry`** (`Model/CoverFlow/`, pure, tested) — angle up to 55°, push clearing the front cover by
-  14 pt, scale down to 0.9, shade 4 % per rank up to four; all but the shade saturate after one pitch.
+  `scaleEffect`, `rotation3DEffect` (perspective 0.5), `offset`, `brightness`, measured in the strip's named
+  coordinate space (inside a `List`, `.scrollView` was not the strip). Keeps `e2e.listItemRow`.
+- **`CoverFlowGeometry`** (`Model/CoverFlow/`, pure, tested) — the finger moves 64 pt (`step`) per book, the covers
+  are drawn 38 pt (`pitch`) apart; angle up to 55°, push clearing the front cover by 14 pt, scale down to 0.9, shade
+  4 % per rank up to four; all but the shade saturate after one step.
 - **`ListModel.updateComment`** — optimistic through `optimistic(...)`, `/api/lists/update-element`; nothing sent
   for an unchanged text or an element still on its optimistic id (the field is disabled meanwhile). Tested.
 - **`ListAddSearchView`**, **`ListAddResultRow`** — the sheet; `InventorySearchRanking` for the local section,
@@ -63,6 +68,10 @@ aside.
 
 - **A real scroll view, not a gesture of our own**: inertia, VoiceOver and the screen's vertical scroll come for free.
   The perspective is SwiftUI's `rotation3DEffect`, truer than the mockup's trapezoids.
+- **Less touchy after a first device pass**: laid out at the 38 pt overlap, 38 pt of finger moved one book and a
+  flick ran through the list. The scroll step became 64 pt, drawn back to 38 pt, and one book per swipe at most.
+- **An inset grouped list, not hand-drawn cards**: after the same pass, the rows take the system's corners, and the
+  add bar the forms' large buttons and their height.
 - **The selection is a uri**: an element added optimistically changes `_id` when the server answers.
 - **No « ajouter en double ».** The user asked for a confirmation offering to add a duplicate, but inventaire.io's
   `PUT /api/lists/add-elements` answers an uri already in the list with `alreadyInList` and creates nothing

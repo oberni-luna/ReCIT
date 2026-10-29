@@ -5,7 +5,7 @@
 //  One element of a list's cover flow: a work's cover, or an author's portrait in a disc, turned
 //  and pushed aside according to where it stands in the strip.
 //
-//  The pose is read in `visualEffect`, from the item's own frame in the scroll view, so it follows
+//  The pose is read in `visualEffect`, from the item's own frame in the strip, so it follows
 //  the finger at every frame without a single state change: the scroll view moves, the geometry
 //  answers, and nothing else is re-rendered. `CoverFlowGeometry` says what each distance means.
 //
@@ -24,7 +24,12 @@ struct ListCoverFlowItem: View {
     let listType: EntityListType
     let geometry: CoverFlowGeometry
     let size: CGSize
+    /// The visible width of the strip, whose centre is the front.
+    let stripWidth: CGFloat
     let action: () -> Void
+
+    /// The strip's own coordinate space, set on its scroll view.
+    static let stripSpace: String = "listCoverFlow.strip"
 
     @Query private var works: [Work]
     @Query private var authors: [Author]
@@ -34,12 +39,14 @@ struct ListCoverFlowItem: View {
         listType: EntityListType,
         geometry: CoverFlowGeometry,
         size: CGSize,
+        stripWidth: CGFloat,
         action: @escaping () -> Void
     ) {
         self.uri = uri
         self.listType = listType
         self.geometry = geometry
         self.size = size
+        self.stripWidth = stripWidth
         self.action = action
         _works = Query(filter: #Predicate<Work> { $0.uri == uri })
         _authors = Query(filter: #Predicate<Author> { $0.uri == uri })
@@ -67,9 +74,8 @@ struct ListCoverFlowItem: View {
         .accessibilityLabel(Text(entity?.title ?? ""))
         // What the end-to-end scenario counts to know the list holds something.
         .accessibilityIdentifier("e2e.listItemRow")
-        .visualEffect { [geometry] content, proxy in
-            let frame: CGRect = proxy.frame(in: .scrollView(axis: .horizontal))
-            let stripWidth: CGFloat = proxy.bounds(of: .scrollView(axis: .horizontal))?.width ?? frame.width
+        .visualEffect { [geometry, stripWidth] content, proxy in
+            let frame: CGRect = proxy.frame(in: .named(ListCoverFlowItem.stripSpace))
             let placement: CoverFlowGeometry.Placement = geometry.placement(distance: frame.midX - stripWidth / 2)
 
             return content

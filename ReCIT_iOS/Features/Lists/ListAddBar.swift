@@ -6,8 +6,8 @@
 //  « Scanner » and « Rechercher » side by side. A list of authors has nothing to scan, so it says
 //  « Ajouter un·e auteur·ice » over « Rechercher » alone.
 //
-//  Pinned through `formActionBar`, the bar the long forms use, so it sits on the same surface and
-//  follows the same soft edge.
+//  Pinned through `formActionBar`, the bar the long forms use, with their large buttons, so it sits
+//  on the same surface, follows the same soft edge and has the same height.
 //
 //  See PRD 0029.
 //
@@ -31,14 +31,14 @@ struct ListAddBar: View {
                         Label("list.detail.add.scan", systemImage: "barcode.viewfinder")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.pill(.prominent))
+                    .buttonStyle(.primary())
                 }
 
                 Button(action: onSearch) {
                     Label("list.detail.add.search", systemImage: "magnifyingglass")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.pill(.prominent))
+                .buttonStyle(.primary())
             }
         }
     }

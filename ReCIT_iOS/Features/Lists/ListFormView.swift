@@ -99,51 +99,48 @@ struct ListFormView: View {
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
+            }
+            .formActionBar {
+                VStack {
+                    AsyncButton(action: {
+                        await submit()
+                    },
+                                actionOptions: [.showProgressView],
+                                label: {
+                        Text(submitTitleKey)
+                            .frame(maxWidth: .infinity)
+                    })
+                    .buttonStyle(.primary())
+                    // Only the new mode refuses an empty name: the other two are left
+                    // exactly as they were.
+                    .disabled(isFilingIntoNewList && trimmedName.isEmpty)
+                    .accessibilityIdentifier("e2e.listForm.submit")
 
-                Section {} footer: {
-                    VStack {
+                    // Only an existing list can be deleted. The same test decides the
+                    // title and the type picker above: a list with no server id has
+                    // never existed, so offering to delete it asked the endpoint to
+                    // remove an empty id.
+                    if !isCreating {
                         AsyncButton(action: {
-                            await submit()
+                            do {
+                                try await listModel.deleteList(
+                                    modelContext: modelContext,
+                                    list: list
+                                )
+                                dismiss()
+                            } catch {
+                                snackBar.show { SnackBarView.error(error) }
+                            }
                         },
                                     actionOptions: [.showProgressView],
                                     label: {
-                            Text(submitTitleKey)
+                            Text("list.form.delete")
                                 .frame(maxWidth: .infinity)
                         })
-                        .buttonStyle(.primary())
-                        // Only the new mode refuses an empty name: the other two are left
-                        // exactly as they were.
-                        .disabled(isFilingIntoNewList && trimmedName.isEmpty)
-                        .accessibilityIdentifier("e2e.listForm.submit")
-
-                        // Only an existing list can be deleted. The same test decides the
-                        // title and the type picker above: a list with no server id has
-                        // never existed, so offering to delete it asked the endpoint to
-                        // remove an empty id.
-                        if !isCreating {
-                            AsyncButton(action: {
-                                do {
-                                    try await listModel.deleteList(
-                                        modelContext: modelContext,
-                                        list: list
-                                    )
-                                    dismiss()
-                                } catch {
-                                    snackBar.show { SnackBarView.error(error) }
-                                }
-                            },
-                                        actionOptions: [.showProgressView],
-                                        label: {
-                                Text("list.form.delete")
-                                    .frame(maxWidth: .infinity)
-                            })
-                            .buttonStyle(.destructive())
-                            .accessibilityIdentifier("e2e.listForm.delete")
-                        }
+                        .buttonStyle(.destructive())
+                        .accessibilityIdentifier("e2e.listForm.delete")
                     }
                 }
-                .listRowSeparator(.visible)
-                .listSectionSeparator(.hidden)
             }
             .navigationTitle(isCreating ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
             .navigationBarTitleDisplayMode(.inline)

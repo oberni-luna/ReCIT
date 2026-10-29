@@ -155,23 +155,22 @@ struct ShelfFormView: View {
                         .foregroundStyle(.foregroundDefault)
                     }
                 }
+            }
+            .formActionBar {
+                VStack {
+                    submitButton
 
-                Section {} footer: {
-                    VStack {
-                        submitButton
-
-                        // Edit only. There is nothing to delete while creating, and a
-                        // destructive button standing next to "Créer" would read as the
-                        // way out of the form rather than the way out of an étagère.
-                        if isEditing {
-                            Button(role: .destructive) {
-                                isConfirmingDelete = true
-                            } label: {
-                                Text("shelf.form.delete").frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.destructive())
-                            .accessibilityIdentifier("e2e.shelfForm.delete")
+                    // Edit only. There is nothing to delete while creating, and a
+                    // destructive button standing next to "Créer" would read as the
+                    // way out of the form rather than the way out of an étagère.
+                    if isEditing {
+                        Button(role: .destructive) {
+                            isConfirmingDelete = true
+                        } label: {
+                            Text("shelf.form.delete").frame(maxWidth: .infinity)
                         }
+                        .buttonStyle(.destructive())
+                        .accessibilityIdentifier("e2e.shelfForm.delete")
                     }
                 }
             }

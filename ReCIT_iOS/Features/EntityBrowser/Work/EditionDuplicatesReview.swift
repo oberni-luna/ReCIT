@@ -83,33 +83,31 @@ struct EditionDuplicatesReview: View {
                 .accessibilityIdentifier("e2e.duplicates.next")
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            FormActionBar {
-                VStack(spacing: .xSmall) {
-                    AsyncButton(
-                        action: { await merge(remaining.first) },
-                        actionOptions: [.disableButton, .showProgressView],
-                        label: {
-                            Text("duplicates.review.merge")
-                                .frame(maxWidth: .infinity)
-                        }
-                    )
-                    .buttonStyle(.primary())
-                    .disabled(remaining.isEmpty || isMerging)
-                    .accessibilityIdentifier("e2e.duplicates.merge")
-
-                    Button {
-                        guard let pair = remaining.first else { return }
-                        duplicatesModel.markNotTheSame(pair, modelContext: modelContext)
-                        decided += 1
-                    } label: {
-                        Text("duplicates.review.not_the_same")
+        .formActionBar {
+            VStack(spacing: .xSmall) {
+                AsyncButton(
+                    action: { await merge(remaining.first) },
+                    actionOptions: [.disableButton, .showProgressView],
+                    label: {
+                        Text("duplicates.review.merge")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.secondary())
-                    .disabled(remaining.isEmpty || isMerging)
-                    .accessibilityIdentifier("e2e.duplicates.notTheSame")
+                )
+                .buttonStyle(.primary())
+                .disabled(remaining.isEmpty || isMerging)
+                .accessibilityIdentifier("e2e.duplicates.merge")
+
+                Button {
+                    guard let pair = remaining.first else { return }
+                    duplicatesModel.markNotTheSame(pair, modelContext: modelContext)
+                    decided += 1
+                } label: {
+                    Text("duplicates.review.not_the_same")
+                        .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.secondary())
+                .disabled(remaining.isEmpty || isMerging)
+                .accessibilityIdentifier("e2e.duplicates.notTheSame")
             }
         }
         .navigationBarBackButtonHidden(isMerging)

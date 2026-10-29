@@ -117,10 +117,9 @@ struct SortUnshelvedPanelView<Tip: View, BarTip: View>: View {
             }
             .padding(.horizontal, .medium)
             .padding(.top, .medium)
-            // Half-opaque white from the rule down, over the gradient that is already there: the
-            // controls and the recap are the one thing on this screen that must stay readable
-            // whatever scrolls behind them.
-            .background(DesignSystem.Color.backgroundDefault.color.opacity(0.5))
+            // No surface of its own: the panel's gradient and blur run on under the controls, so
+            // the books and the buttons are one ground and the rule is all that parts them. The
+            // gradient is already at its whitest down here, which keeps the recap readable.
             // The one rule left in the region: the controls are separated from the books, not
             // the region from the grid. The grid's own edge is the gradient's business.
             //

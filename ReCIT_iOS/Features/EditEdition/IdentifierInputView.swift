@@ -44,18 +44,17 @@ struct IdentifierInputView: View {
                         .foregroundStyle(.foregroundSecondary)
                 }
             }
-
-            Section {} footer: {
-                Button {
-                    if let literal { onAdd(literal) }
-                } label: {
-                    Text("edit_edition.identifiers.add")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.primary())
-                .disabled(literal == nil)
-                .accessibilityIdentifier("e2e.editEdition.identifier.add")
+        }
+        .formActionBar {
+            Button {
+                if let literal { onAdd(literal) }
+            } label: {
+                Text("edit_edition.identifiers.add")
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.primary())
+            .disabled(literal == nil)
+            .accessibilityIdentifier("e2e.editEdition.identifier.add")
         }
         .navigationTitle(name)
         .navigationBarTitleDisplayMode(.inline)

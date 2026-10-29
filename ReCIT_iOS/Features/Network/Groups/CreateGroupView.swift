@@ -54,23 +54,22 @@ struct CreateGroupView: View {
                 }
 
                 GroupAccessSection(searchable: $searchable, open: $open)
+            }
+            .formActionBar {
+                VStack(spacing: .small) {
+                    AsyncButton(
+                        action: { await create() },
+                        actionOptions: [.showProgressView, .disableButton],
+                        label: {
+                            Text("groups.form.create")
+                                .frame(maxWidth: .infinity)
+                        }
+                    )
+                    .buttonStyle(.primary())
+                    .disabled(canSubmit == false)
+                    .accessibilityIdentifier("e2e.groupForm.create")
 
-                Section {} footer: {
-                    VStack(spacing: .small) {
-                        AsyncButton(
-                            action: { await create() },
-                            actionOptions: [.showProgressView, .disableButton],
-                            label: {
-                                Text("groups.form.create")
-                                    .frame(maxWidth: .infinity)
-                            }
-                        )
-                        .buttonStyle(.primary())
-                        .disabled(canSubmit == false)
-                        .accessibilityIdentifier("e2e.groupForm.create")
-
-                        GroupNote(failed ? "groups.form.create.failed" : "groups.form.create.note")
-                    }
+                    GroupNote(failed ? "groups.form.create.failed" : "groups.form.create.note")
                 }
             }
             .navigationTitle("groups.form.new")

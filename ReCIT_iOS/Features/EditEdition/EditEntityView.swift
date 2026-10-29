@@ -74,14 +74,12 @@ struct EditEntityView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            if edit?.isEditable == true {
-                EditEditionSaveBar(
-                    title: failure?.isWorthRetrying == true ? "create_book.retry" : "action.save",
-                    isEnabled: edit?.isSaveable == true,
-                    onSave: onSave
-                )
-            }
+        .formActionBar(isPresented: edit?.isEditable == true) {
+            EditEditionSaveBar(
+                title: failure?.isWorthRetrying == true ? "create_book.retry" : "action.save",
+                isEnabled: edit?.isSaveable == true,
+                onSave: onSave
+            )
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)

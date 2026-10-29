@@ -106,7 +106,7 @@ struct EditEditionView: View {
                 onAddIdentifier(.links)
             }
         }
-        .safeAreaInset(edge: .bottom) {
+        .formActionBar {
             EditEditionSaveBar(
                 title: failure?.isWorthRetrying == true ? "create_book.retry" : "action.save",
                 isEnabled: edit.isSaveable,

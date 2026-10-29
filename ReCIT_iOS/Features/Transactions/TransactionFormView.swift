@@ -87,23 +87,20 @@ struct TransactionFormView: View {
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
-
+            }
+            .formActionBar {
                 if let user = userModel.myUser {
-                    Section {} footer: {
-                        AsyncButton(
-                            action: { await submit(user: user) },
-                            actionOptions: [.showProgressView],
-                            label: {
-                                Text(submitLabel)
-                                    .frame(maxWidth: .infinity)
-                            }
-                        )
-                        .buttonStyle(.primary())
-                        .frame(maxWidth: .infinity)
-                        .disabled(isSubmitDisabled)
-                    }
-                    .listRowSeparator(.visible)
-                    .listSectionSeparator(.hidden)
+                    AsyncButton(
+                        action: { await submit(user: user) },
+                        actionOptions: [.showProgressView],
+                        label: {
+                            Text(submitLabel)
+                                .frame(maxWidth: .infinity)
+                        }
+                    )
+                    .buttonStyle(.primary())
+                    .frame(maxWidth: .infinity)
+                    .disabled(isSubmitDisabled)
                 }
             }
             .toolbar {

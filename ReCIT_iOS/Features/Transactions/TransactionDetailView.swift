@@ -56,24 +56,23 @@ struct TransactionDetailView: View {
                         }
                     }
                 }
-
-                if !transaction.state.isFinished {
-                    Section {} footer: {
-                        TransactionActionsBar(
-                            transaction: transaction,
-                            user: user,
-                            onEvent: { transition in
-                                await perform(transition: transition, author: user)
-                            },
-                            onMessage: {
-                                showMessageForm = true
-                            }
-                        )
-                    }
-                }
             }
         }
         .applyListBackground()
+        .formActionBar(isPresented: transaction.state.isFinished == false) {
+            if let user = userModel.myUser {
+                TransactionActionsBar(
+                    transaction: transaction,
+                    user: user,
+                    onEvent: { transition in
+                        await perform(transition: transition, author: user)
+                    },
+                    onMessage: {
+                        showMessageForm = true
+                    }
+                )
+            }
+        }
         .toolbar { toolbarContent }
         .sheet(isPresented: $showMessageForm) {
             TransactionFormView(transaction: transaction, transition: nil)

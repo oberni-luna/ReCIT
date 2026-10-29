@@ -91,15 +91,13 @@ struct NewEditionView: View {
                 onAddIdentifier(.links)
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            FormActionBar {
-                CreateBookPublishFooter(
-                    failure: failure,
-                    isPublishable: draft.isPublishable,
-                    onPublish: onPublish,
-                    onClose: onClose
-                )
-            }
+        .formActionBar {
+            CreateBookPublishFooter(
+                failure: failure,
+                isPublishable: draft.isPublishable,
+                onPublish: onPublish,
+                onClose: onClose
+            )
         }
         .navigationTitle(String(localized: "create_book.edition.title"))
         .navigationBarTitleDisplayMode(.inline)

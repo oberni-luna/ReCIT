@@ -89,18 +89,17 @@ struct CoverURLView: View {
             } footer: {
                 CreateBookSectionFooter(footer)
             }
-
-            Section {} footer: {
-                Button {
-                    use()
-                } label: {
-                    Text("create_book.cover_url.use")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.primary())
-                .disabled(isUsable == false)
-                .accessibilityIdentifier("e2e.createBook.coverUrl.use")
+        }
+        .formActionBar {
+            Button {
+                use()
+            } label: {
+                Text("create_book.cover_url.use")
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.primary())
+            .disabled(isUsable == false)
+            .accessibilityIdentifier("e2e.createBook.coverUrl.use")
         }
         .navigationTitle(String(localized: "create_book.cover_url.title"))
         .navigationBarTitleDisplayMode(.inline)

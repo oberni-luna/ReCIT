@@ -46,6 +46,16 @@
     <!-- Work -->
     <string name="nav_editions">Éditions</string>
     <string name="work_editions_header">Éditions de %1$s</string>
+    <string name="editions_language_all">Toutes les langues</string>
+    <string name="editions_language_unspecified">Langue non renseignée</string>
+    <string name="editions_language_menu">Langue : %1$s</string>
+    <plurals name="editions_language_count">
+        <item quantity="one">%1$d édition</item>
+        <item quantity="many">%1$d éditions</item>
+        <item quantity="other">%1$d éditions</item>
+    </plurals>
+    <!-- After « Œuvres de … » and « Éditions de … » while they are fetched (iOS feature 0059) -->
+    <string name="section_refreshing">Mise à jour en cours</string>
 
     <!-- Author -->
     <string name="nav_author">Auteur</string>

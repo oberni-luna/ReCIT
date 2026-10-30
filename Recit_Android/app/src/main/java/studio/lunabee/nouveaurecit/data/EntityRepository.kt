@@ -136,10 +136,24 @@ class EntityRepository(
         return response.uris
     }
 
-    suspend fun syncWorkEditions(workUri: String): List<EditionEntity> {
-        val editions: List<EditionEntity> = getOrFetchEditions(editionUris(workUri))
-        editions.forEach { linkEdition(it.uri, listOf(workUri)) }
-        return editions
+    /**
+     * The editions of a work the store does not hold yet, 50 at a time, each batch written as it lands —
+     * so « Éditions » fills as it goes rather than after the last of 7 742 (iOS feature 0058). An edition
+     * is linked to this work only: asking for the other works of every edition would multiply the calls,
+     * and links are only ever added.
+     */
+    suspend fun syncWorkEditions(workUri: String) {
+        val uris: List<String> = editionUris(workUri)
+        // Chunked: SQLite before 3.32 takes 999 arguments at most, and a work can have thousands of editions.
+        val held: Set<String> = uris.chunked(500).flatMap { dao.editions(it) }.map { it.uri }.toSet()
+        linkEditionsTo(workUri, held)
+        uris.filter { it !in held }.chunked(50).forEach { batch ->
+            fetchEntities(batch).forEach { dto -> upsertEdition(dto, listOf(workUri)) }
+        }
+    }
+
+    private suspend fun linkEditionsTo(workUri: String, editionUris: Collection<String>) {
+        dao.linkEditionWorks(editionUris.map { EditionWorkCrossRef(it, workUri) })
     }
 
     /** The Wikipedia extract: the French summary when inventaire.io has one, else the frwiki page. */

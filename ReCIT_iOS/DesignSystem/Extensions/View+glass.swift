@@ -29,4 +29,26 @@ extension View {
             background(.regularMaterial, in: .circle)
         }
     }
+
+    /// A glass capsule from iOS 26, a material capsule before it — the selected tab of a
+    /// strip of tabs, as in the Contacts card.
+    @ViewBuilder
+    func glassCapsule() -> some View {
+        if #available(iOS 26.0, *) {
+            glassEffect(.regular, in: .capsule)
+        } else {
+            background(.regularMaterial, in: .capsule)
+        }
+    }
+
+    /// The top edge's soft scroll-edge blur turned off from iOS 26, for a screen that draws its
+    /// own backdrop under the navigation bar. Nothing to turn off before.
+    @ViewBuilder
+    func topScrollEdgeEffectHidden() -> some View {
+        if #available(iOS 26.0, *) {
+            scrollEdgeEffectHidden(true, for: .top)
+        } else {
+            self
+        }
+    }
 }

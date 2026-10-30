@@ -2,9 +2,9 @@
 //  UserProfileTabPicker.swift
 //  ReCIT_iOS
 //
-//  Inventaire | Listes, pinned under the navigation bar once the header and the étagères have
-//  scrolled away. No band of its own: a grey strip the width of the screen read as a bar
-//  stuck under the bar, so the control floats over the rows that pass beneath it.
+//  Inventaire | Listes, at the foot of a reader's profile header: two words, the selected one
+//  in a glass capsule that slides to the other when it is chosen — the tabs of the Contacts
+//  card, quieter than a segmented control. See PRD 0031.
 //
 
 import SwiftUI
@@ -12,17 +12,37 @@ import SwiftUI
 struct UserProfileTabPicker: View {
     @Binding var selection: UserProfileTab
 
+    @Namespace private var capsule
+
     var body: some View {
-        Picker("user.segment", selection: $selection) {
+        HStack(spacing: .xSmall) {
             ForEach(UserProfileTab.allCases, id: \.self) { tab in
-                Text(tab.title)
-                    .tag(tab)
+                let isSelected: Bool = tab == selection
+                Button {
+                    withAnimation(.snappy) {
+                        selection = tab
+                    }
+                } label: {
+                    Text(tab.title)
+                        .textStyle(.action300)
+                        .foregroundStyle(isSelected ? .foregroundDefault : .foregroundSecondary)
+                        .padding(.horizontal, .medium)
+                        .padding(.vertical, .small)
+                        .background {
+                            if isSelected {
+                                Color.clear
+                                    .glassCapsule()
+                                    .matchedGeometryEffect(id: "selection", in: capsule)
+                            }
+                        }
+                        .contentShape(.capsule)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .padding(.horizontal, .medium)
-        .padding(.vertical, .small)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("user.segment")
         .accessibilityIdentifier("e2e.user.tabs")
     }
 }

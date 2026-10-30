@@ -8,14 +8,21 @@
 import SwiftUI
 import SwiftData
 
-/// A reader's profile: their picture and name at the head instead of a navigation title, their
-/// étagères, then Inventaire | Listes — tabs that stay pinned under the navigation bar once the
-/// header and the étagères have scrolled away. See PRD 0031 and the « Détail d'un amis » section
-/// of the Figma file (`865:17783`).
+/// A reader's profile, shaped like the Contacts card of Messages: a header held at the top —
+/// their picture, their name, their book count and the Inventaire | Listes tabs — that folds into
+/// the navigation bar as the page scrolls, and never stays half folded. Their bio and étagères
+/// scroll away under it; the tab's content follows. See PRD 0031 and the « Détail d'un amis »
+/// section of the Figma file (`865:17783`).
 ///
-/// A `ScrollView`, not a `List`: an inset grouped list does not pin its section headers, and the
-/// tabs have to stay. The rows are drawn on cards of their own (`CardRows`).
+/// A `ScrollView`, not a `List`, so the page can be offset under a header of its own and its
+/// scroll read. The rows are drawn on cards of their own (`CardRows`).
 struct UserDetailView: View {
+    /// Where the page's scroll stands, as `onScrollGeometryChange` reports it.
+    private struct ScrollPlace: Equatable {
+        let offset: CGFloat
+        let topInset: CGFloat
+    }
+
     @Environment(UserModel.self) private var userModel
     @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
@@ -26,6 +33,15 @@ struct UserDetailView: View {
     @State private var isConfirmingRemoval: Bool = false
     @State private var tab: UserProfileTab = .inventory
     @State private var listsLoad: UserListsTab.Load = .loading
+    /// The page's scroll, counted from rest, and the scroll view's top inset it is counted from.
+    @State private var scroll: ScrollPlace = .init(offset: 0, topInset: 0)
+    /// The header's full height from the top of the screen, unfolded — what the page is pushed
+    /// down by — and the bars' height above the page.
+    @State private var expandedHeaderHeight: CGFloat = 0
+    @State private var barsHeight: CGFloat = 0
+
+    @ScaledMetric(relativeTo: .largeTitle) private var nameHeight: CGFloat = 40
+    @ScaledMetric(relativeTo: .body) private var countHeight: CGFloat = 24
 
     let user: User
     @Binding var path: NavigationPath
@@ -40,29 +56,38 @@ struct UserDetailView: View {
         isMe || user.relation == .friend
     }
 
+    private var metrics: UserProfileStickyHeader.Metrics {
+        .init(nameHeight: nameHeight, countHeight: countHeight)
+    }
+
+    private var collapse: ProfileHeaderCollapse {
+        metrics.collapse
+    }
+
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: DesignSystem.Spacing.large.rawValue, pinnedViews: [.sectionHeaders]) {
-                UserProfileHeader(user: user)
-                    .padding(.top, .small)
+            LazyVStack(spacing: DesignSystem.Spacing.large.rawValue) {
+                if let bio = user.bio, bio.isEmpty == false {
+                    Text(bio)
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, .medium)
+                }
 
                 if showsInventory {
                     // Their étagères sit between who they are and what they own, which is the
                     // order the two are read in: a shelf says how the library is arranged, the
-                    // tabs below say what is in it.
+                    // tabs say what is in it.
                     UserShelvesSection(user: user, path: $path)
 
-                    Section {
-                        switch tab {
-                        case .inventory:
-                            UserInventoryTab(user: user, path: $path) { item in
-                                borrowFromItem = item
-                            }
-                        case .lists:
-                            UserListsTab(user: user, load: listsLoad, path: $path)
+                    switch tab {
+                    case .inventory:
+                        UserInventoryTab(user: user, path: $path) { item in
+                            borrowFromItem = item
                         }
-                    } header: {
-                        UserProfileTabPicker(selection: $tab)
+                    case .lists:
+                        UserListsTab(user: user, load: listsLoad, path: $path)
                     }
                 } else {
                     RelationActionsView(user: user)
@@ -76,8 +101,26 @@ struct UserDetailView: View {
                     .padding(.vertical, .large)
                 }
             }
+            .padding(.top, .small)
             .padding(.bottom, .large)
         }
+        // The page starts under the unfolded header; the bars' own height is already inset.
+        .contentMargins(.top, max(expandedHeaderHeight - barsHeight, 0), for: .scrollContent)
+        .onScrollGeometryChange(for: ScrollPlace.self) { geometry in
+            .init(
+                offset: geometry.contentOffset.y + geometry.contentInsets.top,
+                topInset: geometry.contentInsets.top
+            )
+        } action: { _, place in
+            scroll = place
+        }
+        .scrollTargetBehavior(ProfileHeaderSnapBehavior(collapse: collapse, topInset: scroll.topInset))
+        .overlay(alignment: .top) {
+            header
+        }
+        // The header draws its own backdrop under the bar, once the page passes under it.
+        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+        .topScrollEdgeEffectHidden()
         .applyListBackground(.backgroundForm)
         // Frozen while a book is being picked off an étagère, so the slide moves the
         // selection and not the page — the same rule the inventory's own carousel follows.
@@ -125,6 +168,28 @@ struct UserDetailView: View {
                 )
             }
         }
+    }
+
+    /// The header reaches up into the bars, so it reads their height from a reader that ignores
+    /// them — the one place a `GeometryReader` is the tool: `onGeometryChange` reports the frame,
+    /// not the insets a view has given up.
+    private var header: some View {
+        GeometryReader { proxy in
+            UserProfileStickyHeader(
+                user: user,
+                tab: showsInventory ? $tab : nil,
+                metrics: metrics,
+                progress: collapse.progress(at: scroll.offset),
+                isContentUnder: collapse.isContentUnder(at: scroll.offset),
+                topInset: proxy.safeAreaInsets.top
+            )
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                guard collapse.progress(at: scroll.offset) == 0 else { return }
+                expandedHeaderHeight = height
+                barsHeight = proxy.safeAreaInsets.top
+            }
+        }
+        .ignoresSafeArea(edges: .top)
     }
 
     /// A friend's lists are fetched each time their profile opens — not at launch, where every

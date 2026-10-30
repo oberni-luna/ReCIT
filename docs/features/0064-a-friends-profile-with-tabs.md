@@ -7,16 +7,22 @@ Mock-ups: Figma `S7IvC6GvlcUFe5IgbtvQq6`, section « Détail d'un amis » (`865:
 
 ## What it does
 
-The profile no longer opens under a navigation title that repeats the name. It opens on the reader:
+The profile no longer opens under a navigation title that repeats the name. It is shaped like the **Contacts card
+of Messages**:
 
-- **a header, centred** — their picture at 96 pt (the person glyph on a grey disc when they have none), their name
-  in `title50`, how many books they hold, their bio. The bar keeps the way back and « … » (remove from the
-  network, report) and shows no title;
-- **their étagères**, the carousel of 0019 unchanged, absent when they share none (F4);
-- **two tabs, Inventaire | Listes**, opening on Inventaire. Once the header and the étagères have scrolled away,
-  the tabs **stay pinned under the navigation bar**, with no band of their own — the control floats over the
-  tab's content, which scrolls under it. The mock-up (F3) drew a grey band; seen on a phone, it read as a second
-  bar, and went.
+- **a header held at the top** — their picture at 96 pt between the back button and « … » (the person glyph on a
+  grey disc when they have none), their name large (`title200`), how many books they hold, and **two tabs,
+  Inventaire | Listes**: two words, the selected one in a glass capsule (a material one before iOS 26) that slides
+  to the other. The bar keeps the way back and « … » (remove from the network, report) and shows no title;
+- **as the page scrolls, the header folds**: the picture shrinks to 40 pt in the navigation bar's row, the name to
+  six tenths of its size, the count fades out; the tabs stay. It **never rests half folded** — a scroll that ends
+  inside the fold is carried to the nearer end. Once folded, the page passes under it, behind a progressive blur
+  that fades out a little below the tabs, with a hairline at its foot;
+- **their bio and their étagères** (the carousel of 0019, absent when they share none, F4) scroll away under it,
+  as the Contacts card's call buttons do; the tab's content follows.
+
+The first build pinned a segmented control under a plain header, on a grey band; seen on a phone, the band read as a
+second bar, and the whole head was redone after Contacts. The mock-ups F1 to F5 still show the first version.
 
 **Inventaire** is the list the profile always showed: the first-sync bar while the books arrive, the books as they
 come, « Emprunter à … » on a long press. Its header « Inventaire de X » went: the tab says it.
@@ -53,13 +59,28 @@ attribute: SwiftData migrates it lightly, with no plan. A list stored before has
 `FriendListsTests` holds the five rules: the creator is stored, a friend's sync keeps mine (stamped or not) and
 prunes theirs, my sync claims and prunes the unstamped, `isCreated(byMe:)`, and unfriending.
 
-**The screen** (issue 0153). `UserDetailView` is a `ScrollView` over a `LazyVStack(pinnedViews: .sectionHeaders)`:
-an inset grouped `List` does not pin its headers, and the tabs have to stay. Rows sit on cards of their own,
+**The screen** (issue 0153). `UserDetailView` is a `ScrollView` over a `LazyVStack`, pushed down by
+`contentMargins(.top, …)` under `UserProfileStickyHeader`, an overlay. **The header is drawn under the navigation
+bar, not in it**: a bar is 44 pt tall and its principal item cannot hold a 96 pt picture. So the overlay ignores the
+top safe area, starts in the bar's row of buttons (`barOverlap`, 46 pt above the bar's foot), and the bar is made
+transparent (`toolbarBackgroundVisibility(.hidden)`, and from iOS 26 the top scroll-edge blur turned off, so only
+the header's own backdrop shows). The back button and « … » stay the system's, which keeps the swipe back; hiding
+the bar to draw our own would have lost it. Only the tabs take touches; the rest of the header lets them through.
+
+The fold is read with `onScrollGeometryChange` (offset counted from rest) and computed by `ProfileHeaderCollapse`,
+pure and tested: the progress, when the page is under the header, and where a scroll left inside the fold comes to
+rest, which `ProfileHeaderSnapBehavior` (a `ScrollTargetBehavior`) applies. The fold's length is known before it
+happens, from the header's own metrics: the picture's 56 pt, the name's lost height (`@ScaledMetric`) and the
+count's. The backdrop reuses `VariableBlurView`, with its private-API caveat. The header's top inset is read with a
+`GeometryReader` ignoring the top safe area — `onGeometryChange` gives a frame, not the insets given up.
+
+The tabs are `UserProfileTabPicker`, Buttons over a `matchedGeometryEffect` capsule; the glass is
+`View.glassCapsule()` and the edge effect `View.topScrollEdgeEffectHidden()`, both in `View+glass.swift`. Rows sit on cards of their own,
 `CardRows` (`Features/Components/`), with a hairline between two — the book screen's and the forms'
 `backgroundFormCell` on `backgroundForm`, corner radius `medium` as in the mock-up. The pieces:
-`UserProfileHeader`, `UserItemCountText` (lifted out of `UserHeaderView`, which my Profil keeps),
+`UserProfileStickyHeader`, `UserItemCountText` (lifted out of `UserHeaderView`, which my Profil keeps),
 `UserShelvesSection` (now a plain view, no longer a `List` section), `UserProfileTabPicker` over `UserProfileTab`,
-`UserInventoryTab`, `UserListsTab`. `ThumbnailSize.xlarge` is 96 pt.
+`UserInventoryTab`, `UserListsTab`.
 
 The title is set and then removed from the bar (`.toolbar(removing: .title)`), so the back button's long-press
 menu still names the screen.
@@ -88,10 +109,13 @@ Five strings: `user.segment`, `user.lists.empty.title %@`, `user.lists.empty.mes
 
 ## Not done, not verified
 
-- **Never seen running.** The simulator was signed out, and signing in to inventaire.io was not attempted. The
-  header, the pinned tabs, the Listes tab, a friend's list read-only and the pressing of a book on an étagère
-  inside a `ScrollView` (it lived in a `List` until now) all wait for a pass on a device or a signed-in
-  simulator — in light and dark, with VoiceOver and the largest text sizes.
+- **The folding header has never been seen running**: it was built and installed on a phone, not looked at. Two
+  guesses wait for that look: that `ScrollGeometry.contentInsets.top` counts the content margin (the fold starts at
+  the wrong offset otherwise), and the 46 pt by which the header reaches into the bar, which differs by a few points
+  between iOS 18 and iOS 26. The first version (plain header, pinned segmented control) was seen on a phone, briefly.
+  The Listes tab, a friend's list read-only and the pressing of a book on an étagère inside a `ScrollView` still
+  want a pass — in light and dark, with VoiceOver and the largest text sizes.
+- **The Figma mock-ups F1 to F5 show the first version**, to be redrawn once the header is approved.
 - **The e2e scenario** does not play this screen: it signs in to one account, and a friend's lists need two.
 - **Android**: not ported; the Android app was being worked on in another session.
 - The mock-up's avatar is a 48 px asset blown up to 96 pt.

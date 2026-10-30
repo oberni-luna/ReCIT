@@ -9,8 +9,6 @@ import SwiftUI
 
 enum ThumbnailSize {
     case xsmall, small, medium, large
-    /// A reader's picture at the head of their profile, where it stands in for the title.
-    case xlarge
     /// A glass button's diameter in a navigation bar on iOS 26 — what my avatar matches at the
     /// top of the three main tabs, beside buttons that are drawn that size by the system.
     case toolbar
@@ -22,7 +20,6 @@ enum ThumbnailSize {
         case .small: return 36
         case .medium: return 48
         case .large: return 64
-        case .xlarge: return 96
         case .toolbar: return 44
         }
     }

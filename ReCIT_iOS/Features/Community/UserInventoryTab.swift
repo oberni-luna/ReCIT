@@ -15,6 +15,9 @@ struct UserInventoryTab: View {
     @Environment(InventoryModel.self) private var inventoryModel
 
     let user: User
+    /// One on a phone; two on a screen as wide as the unfolded iPhone Duo in landscape, as my
+    /// own « Tous les livres » (`ShelvesContent.allBooksColumnCount`).
+    let columns: Int
     @Binding var path: NavigationPath
     /// Asks the screen for the borrowing form, which it presents as a sheet.
     let onBorrow: (InventoryItem) -> Void
@@ -36,21 +39,47 @@ struct UserInventoryTab: View {
                 Text("inventory.empty")
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundSecondary)
+            } else if columns > 1 {
+                // Keyed on the row's first book by its persistent id, as in `ShelvesContent`.
+                ForEach(bookRows, id: \.first?.id) { row in
+                    HStack(alignment: .top, spacing: .medium) {
+                        ForEach(row) { item in
+                            bookButton(item)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        // A short last row keeps its book in the first column, at its width.
+                        if row.count < columns {
+                            Color.clear.frame(maxWidth: .infinity, maxHeight: 0)
+                        }
+                    }
+                }
             } else {
                 ForEach(user.items) { item in
-                    Button {
-                        path.append(NavigationDestination.book(anchor: .item(item)))
-                    } label: {
-                        InventoryCell(item: item, filterParameter: .userInventory)
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        borrowActions(for: item)
-                    }
+                    bookButton(item)
                 }
             }
         }
         .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
+    }
+
+    /// Their books in rows of `columns`, in the list's order, read left to right.
+    private var bookRows: [[InventoryItem]] {
+        let items: [InventoryItem] = user.items
+        return stride(from: 0, to: items.count, by: columns).map { start in
+            Array(items[start..<min(start + columns, items.count)])
+        }
+    }
+
+    private func bookButton(_ item: InventoryItem) -> some View {
+        Button {
+            path.append(NavigationDestination.book(anchor: .item(item)))
+        } label: {
+            InventoryCell(item: item, filterParameter: .userInventory)
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            borrowActions(for: item)
+        }
     }
 
     @ViewBuilder

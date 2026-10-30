@@ -25,6 +25,9 @@ struct UserProfilePage<Content: View>: View {
     let showsShelves: Bool
     /// Their bio at the top, centred, on the single page of someone who has no Présentation tab.
     let showsBio: Bool
+    /// Rows held to the readable width on a wide screen — every page but an Inventaire laid out
+    /// on two columns, which needs the whole width for them.
+    let holdsReadableWidth: Bool
     /// The header's height unfolded — what the page is pushed down by.
     let expandedHeaderHeight: CGFloat
     /// Where the header starts on screen at rest.
@@ -98,6 +101,7 @@ struct UserProfilePage<Content: View>: View {
             content
         }
         .listStyle(.insetGrouped)
+        .readableContentMargins(isEnabled: holdsReadableWidth)
         .environment(\.defaultMinListRowHeight, 0)
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y + geometry.contentInsets.top

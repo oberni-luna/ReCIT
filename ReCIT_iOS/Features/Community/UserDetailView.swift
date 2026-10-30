@@ -37,6 +37,8 @@ struct UserDetailView: View {
     /// Where the header starts on screen at rest, read only while the page on screen is settled
     /// (see `UserProfilePage.firstRowTop`).
     @State private var headerTop: CGFloat?
+    /// The pages' width, which says whether their books go on one column or two.
+    @State private var pagesWidth: CGFloat = 0
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -61,8 +63,17 @@ struct UserDetailView: View {
         metrics.collapse
     }
 
+    /// Their books side by side past the width where mine are (`ShelvesContent`): the unfolded
+    /// iPhone Duo in landscape.
+    private var bookColumns: Int {
+        ShelvesContent.allBooksColumnCount(containerWidth: pagesWidth)
+    }
+
     var body: some View {
         pages
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                pagesWidth = width
+            }
             .overlay(alignment: .top) {
                 header
             }
@@ -165,6 +176,7 @@ struct UserDetailView: View {
             page: page,
             showsShelves: showsShelves,
             showsBio: showsBio,
+            holdsReadableWidth: showsInventory == false || page != .inventory || bookColumns == 1,
             expandedHeaderHeight: expandedHeaderHeight,
             headerTop: headerTop,
             collapse: collapse,
@@ -178,7 +190,7 @@ struct UserDetailView: View {
     private func tabContent(_ page: UserProfileTab) -> some View {
         switch page {
         case .inventory:
-            UserInventoryTab(user: user, path: $path) { item in
+            UserInventoryTab(user: user, columns: bookColumns, path: $path) { item in
                 borrowFromItem = item
             }
         case .lists:

@@ -5,7 +5,7 @@
 //  The head of a reader's profile, held just under the navigation bar and folding as the page
 //  scrolls — the Contacts card of Messages. At rest: their picture at 96 pt, their name large
 //  under it, how many books they hold, and the Inventaire | Listes tabs. Folded: the picture at
-//  40 pt, risen into the bar's row between the back button and « … », the name small under it,
+//  48 pt, risen into the bar's row between the back button and « … », the name small under it,
 //  the count gone, the tabs still there. From there on the page scrolls under it, behind a blur
 //  that reaches up under the bar, which is made transparent for it.
 //
@@ -23,11 +23,11 @@ struct UserProfileStickyHeader: View {
     /// What every height of the header is made of, so the screen can know how far the fold
     /// goes before it has happened.
     struct Metrics {
-        static let avatar: (rest: CGFloat, folded: CGFloat) = (96, 40)
-        /// How far the folded header rises into the navigation bar: enough for the 40 pt picture
-        /// to sit centred on the bar's 44 pt row, the header's own 8 pt of padding above it
-        /// (Figma, F3).
-        static let barRise: CGFloat = 50
+        static let avatar: (rest: CGFloat, folded: CGFloat) = (96, ThumbnailSize.medium.sizeInPt)
+        /// How far the folded header rises into the navigation bar: the 48 pt picture a little
+        /// above the middle of the bar's row, the header's own 8 pt of padding above it (Figma
+        /// F3, then 8 pt higher on the phone).
+        static let barRise: CGFloat = 58
 
         /// The name's line at rest, in `title200`.
         let nameHeight: CGFloat

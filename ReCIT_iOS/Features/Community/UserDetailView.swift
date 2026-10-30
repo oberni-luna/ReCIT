@@ -14,8 +14,8 @@ import SwiftData
 /// scroll away under it; the tab's content follows. See PRD 0031 and the « Détail d'un amis »
 /// section of the Figma file (`865:17783`).
 ///
-/// A `ScrollView`, not a `List`, so the page can be offset under a header of its own and its
-/// scroll read. The rows are drawn on cards of their own (`CardRows`).
+/// An inset grouped `List`, so the books and the lists sit in the system's own sections, corners
+/// and separators. Its first row is as tall as the unfolded header, which lies over it.
 struct UserDetailView: View {
     /// Where the page's scroll stands, as `onScrollGeometryChange` reports it.
     private struct ScrollPlace: Equatable {
@@ -37,6 +37,10 @@ struct UserDetailView: View {
     @State private var scroll: ScrollPlace = .init(offset: 0, topInset: 0)
     /// The header's height unfolded — what the page is pushed down by.
     @State private var expandedHeaderHeight: CGFloat = 0
+    /// Where the header and the list's first row start on screen, at rest: the list puts some
+    /// room of its own above its first section, which the first row gives back.
+    @State private var headerTop: CGFloat = 0
+    @State private var firstRowTop: CGFloat = 0
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -61,40 +65,60 @@ struct UserDetailView: View {
         metrics.collapse
     }
 
-    var body: some View {
-        ScrollView {
-            // The room the unfolded header takes, as the page's first row rather than a content
-            // margin: the scroll's insets are then the bars' alone, and the offset counts from
-            // the page at rest whatever the header measures.
-            Color.clear
-                .frame(height: expandedHeaderHeight)
+    /// Exactly at rest — not folding, and not pulled down past the top either.
+    private var isAtRest: Bool {
+        abs(scroll.offset) < 0.5
+    }
 
-            LazyVStack(spacing: DesignSystem.Spacing.large.rawValue) {
+    var body: some View {
+        List {
+            Section {
+                // The room the unfolded header takes, as the page's first row rather than a
+                // content margin: the scroll's insets are then the bars' alone, and the offset
+                // counts from the page at rest whatever the header measures.
+                Color.clear
+                    .frame(height: max(expandedHeaderHeight - (firstRowTop - headerTop), 0))
+                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
+                        guard isAtRest else { return }
+                        firstRowTop = top
+                    }
+
                 if let bio = user.bio, bio.isEmpty == false {
                     Text(bio)
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundSecondary)
                         .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
                         .padding(.horizontal, .medium)
+                        .padding(.top, .small)
                 }
+            }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
 
-                if showsInventory {
-                    // Their étagères sit between who they are and what they own, which is the
-                    // order the two are read in: a shelf says how the library is arranged, the
-                    // tabs say what is in it.
+            if showsInventory {
+                // Their étagères sit between who they are and what they own, which is the
+                // order the two are read in: a shelf says how the library is arranged, the
+                // tabs say what is in it.
+                Section {
                     UserShelvesSection(user: user, path: $path)
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
 
-                    switch tab {
-                    case .inventory:
-                        UserInventoryTab(user: user, path: $path) { item in
-                            borrowFromItem = item
-                        }
-                    case .lists:
-                        UserListsTab(user: user, load: listsLoad, path: $path)
+                switch tab {
+                case .inventory:
+                    UserInventoryTab(user: user, path: $path) { item in
+                        borrowFromItem = item
                     }
-                } else {
+                case .lists:
+                    UserListsTab(user: user, load: listsLoad, path: $path)
+                }
+            } else {
+                Section {
                     RelationActionsView(user: user)
-                        .padding(.horizontal, .medium)
 
                     EmptyStateView(
                         glyph: "person",
@@ -103,10 +127,12 @@ struct UserDetailView: View {
                     )
                     .padding(.vertical, .large)
                 }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
-            .padding(.top, .small)
-            .padding(.bottom, .large)
         }
+        .listStyle(.insetGrouped)
+        .environment(\.defaultMinListRowHeight, 0)
         .onScrollGeometryChange(for: ScrollPlace.self) { geometry in
             .init(
                 offset: geometry.contentOffset.y + geometry.contentInsets.top,
@@ -181,9 +207,10 @@ struct UserDetailView: View {
             progress: collapse.progress(at: scroll.offset),
             isContentUnder: collapse.isContentUnder(at: scroll.offset)
         )
-        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-            guard collapse.progress(at: scroll.offset) == 0 else { return }
-            expandedHeaderHeight = height
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            guard isAtRest else { return }
+            expandedHeaderHeight = frame.height
+            headerTop = frame.minY
         }
     }
 

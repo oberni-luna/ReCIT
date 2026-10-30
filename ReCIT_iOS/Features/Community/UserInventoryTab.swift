@@ -3,7 +3,7 @@
 //  ReCIT_iOS
 //
 //  A reader's books, under the Inventaire tab of their profile — the list the profile has
-//  always shown, on a card of its own: the first-sync bar while their books arrive, the books
+//  always shown, as a section of the page's inset grouped list: the first-sync bar while their books arrive, the books
 //  as they come, and « Emprunter à … » on a long press. The header that named it went: the tab
 //  above says what it is.
 //
@@ -21,7 +21,7 @@ struct UserInventoryTab: View {
 
     var body: some View {
         let syncState: InventoryFirstSyncState = inventoryModel.firstSyncState(for: user)
-        VStack(spacing: .medium) {
+        Section {
             // The same bar as their cell in the Profil, and the books already received under
             // it: a friend's inventory is read as it arrives, not after.
             if syncState != .synced {
@@ -29,24 +29,19 @@ struct UserInventoryTab: View {
                     title: "sync.inventory.friend.title \(user.username)",
                     state: syncState
                 )
-                .padding(.all, .medium)
-                .background(DesignSystem.Color.backgroundFormCell.color)
-                .clipShape(.rect(cornerRadius: DesignSystem.CornerRadius.medium.rawValue))
-                .padding(.horizontal, .medium)
+                .padding(.vertical, .xSmall)
             }
 
             if syncState == .synced && user.items.isEmpty {
                 Text("inventory.empty")
                     .textStyle(.content300)
                     .foregroundStyle(.foregroundSecondary)
-                    .padding(.top, .large)
             } else {
-                CardRows(data: user.items) { item in
+                ForEach(user.items) { item in
                     Button {
                         path.append(NavigationDestination.book(anchor: .item(item)))
                     } label: {
                         InventoryCell(item: item, filterParameter: .userInventory)
-                            .contentShape(.rect)
                     }
                     .buttonStyle(.plain)
                     .contextMenu {
@@ -55,6 +50,7 @@ struct UserInventoryTab: View {
                 }
             }
         }
+        .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
     }
 
     @ViewBuilder

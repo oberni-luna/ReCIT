@@ -14,7 +14,7 @@ of Messages**:
   grey disc when they have none), their name large (`title200`), how many books they hold, and **two tabs,
   Inventaire | Listes**: two words, the selected one in a glass capsule (a material one before iOS 26) that slides
   to the other. The bar keeps the way back and « … » (remove from the network, report) and shows no title;
-- **as the page scrolls, the header folds**: the picture shrinks to 40 pt and rises into the bar's row, centred between the back button and « … », the name to
+- **as the page scrolls, the header folds**: the picture shrinks to 48 pt and rises into the bar's row, centred between the back button and « … », the name to
   the size of an inline navigation bar's title (`title50`), 8 pt under the picture and 16 pt over the tab labels,
   the count fades out; the tabs stay. It **never rests half folded** — a scroll that ends
   inside the fold is carried to the nearer end. Once folded, the page passes under it, behind a progressive blur
@@ -60,10 +60,12 @@ attribute: SwiftData migrates it lightly, with no plan. A list stored before has
 `FriendListsTests` holds the five rules: the creator is stored, a friend's sync keeps mine (stamped or not) and
 prunes theirs, my sync claims and prunes the unstamped, `isCreated(byMe:)`, and unfriending.
 
-**The screen** (issue 0153). `UserDetailView` is a `ScrollView` over a `LazyVStack`, whose first row is an empty
-frame as tall as the unfolded header, `UserProfileStickyHeader`, an overlay laid out in the safe area — just under the
+**The screen** (issue 0153). `UserDetailView` is an inset grouped `List` — the system's own sections, corners and
+separators — whose first row is an empty frame as tall as the unfolded header, `UserProfileStickyHeader`, an overlay laid out in the safe area — just under the
 navigation bar. A bar's principal item cannot hold a 96 pt picture, hence the overlay. The empty row rather than a
-content margin keeps the scroll's insets the bars' alone, so the offset counts from the page at rest. The bar is made
+content margin keeps the scroll's insets the bars' alone, so the offset counts from the page at rest. The list
+puts room of its own above its first section; the first row gives it back, measured at rest as the gap between the
+header's top and the row's. The bar is made
 transparent (`toolbarBackgroundVisibility(.hidden)`, and from iOS 26 the top scroll-edge blur turned off), so that
 once folded the header's backdrop, which reaches up under the bar, is the only one.
 
@@ -71,9 +73,9 @@ The first build drew the header *into* the bar's row of buttons, the picture bet
 reading the bars' height from a `GeometryReader` that ignored the top safe area. That reader reported no inset at
 all: on the phone the picture sat against the top of the screen and the page started a bar's height too low. The
 picture now sits under the bar at rest, as asked after seeing it. Folded, the whole header rises by `barRise`
-(50 pt, read off the Figma F3 as adjusted by hand), so the 40 pt picture is centred on the bar's 44 pt row; the rise
-is part of the fold's length, so the page stays glued to the header's foot until it is folded. On iOS 26, whose bar
-is a few points taller, the picture may sit slightly high. The back button and « … » stay the system's, which keeps the swipe back; hiding
+(58 pt: the Figma F3 as adjusted by hand, then 8 pt higher once the folded picture went from 40 to 48 pt on the
+phone), so the picture sits a little above the middle of the bar's row; the rise is part of the fold's length, so the
+page stays glued to the header's foot until it is folded. The back button and « … » stay the system's, which keeps the swipe back; hiding
 the bar to draw our own would have lost it. Only the tabs take touches; the rest of the header lets them through.
 
 The fold is read with `onScrollGeometryChange` (offset counted from rest) and computed by `ProfileHeaderCollapse`,
@@ -86,9 +88,8 @@ a guess was shorter than the line, so `minimumScaleFactor` shrank the name a sec
 opened. The backdrop reuses `VariableBlurView`, with its private-API caveat.
 
 The tabs are `UserProfileTabPicker`, Buttons over a `matchedGeometryEffect` capsule; the glass is
-`View.glassCapsule()` and the edge effect `View.topScrollEdgeEffectHidden()`, both in `View+glass.swift`. Rows sit on cards of their own,
-`CardRows` (`Features/Components/`), with a hairline between two — the book screen's and the forms'
-`backgroundFormCell` on `backgroundForm`, corner radius `medium` as in the mock-up. The pieces:
+`View.glassCapsule()` and the edge effect `View.topScrollEdgeEffectHidden()`, both in `View+glass.swift`. The rows are the forms' and the book screen's,
+`backgroundFormCell` on `backgroundForm`. The pieces:
 `UserProfileStickyHeader`, `UserItemCountText` (lifted out of `UserHeaderView`, which my Profil keeps),
 `UserShelvesSection` (now a plain view, no longer a `List` section), `UserProfileTabPicker` over `UserProfileTab`,
 `UserInventoryTab`, `UserListsTab`.
@@ -114,15 +115,16 @@ Five strings: `user.segment`, `user.lists.empty.title %@`, `user.lists.empty.mes
 - An unstamped list is mine, rather than a migration that would have to guess.
 - No name in the bar once the header has scrolled away: the request removed the title. The mock-up's spec leaves
   it as an open question.
-- Cards on `backgroundForm`, not the system cell grey: a `ScrollView` has no cells, and the book screen already
-  draws these.
+- A `List`, not a `ScrollView` with drawn cards: a `ScrollView` was tried first, for its pinned section headers,
+  and its cards' corners were not the system's. With the header an overlay, nothing needs a pinned header any more.
+- Rows on `backgroundFormCell` over `backgroundForm`, as on the book screen, not the system cell grey.
 - A non-friend's profile keeps its relation actions and « Inventaire privé », under the new header, with no tabs.
 
 ## Not done, not verified
 
 - **The folding header has been seen at rest only**, in its first, wrong placement; the fold, the snap and the
   backdrop are unchecked. The first version (plain header, pinned segmented control) was seen on a phone, briefly.
-  The Listes tab, a friend's list read-only and the pressing of a book on an étagère inside a `ScrollView` still
+  The Listes tab, a friend's list read-only and the pressing of a book on an étagère inside the list still
   want a pass — in light and dark, with VoiceOver and the largest text sizes.
 - **The Figma mock-ups F1 to F5 show the first version**, to be redrawn once the header is approved.
 - **The e2e scenario** does not play this screen: it signs in to one account, and a friend's lists need two.

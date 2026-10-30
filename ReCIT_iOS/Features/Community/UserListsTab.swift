@@ -41,27 +41,22 @@ struct UserListsTab: View {
 
     var body: some View {
         if lists.isEmpty {
-            emptyState
-                .padding(.top, .large)
-        } else {
-            CardRows(data: lists) { list in
-                Button {
-                    path.append(NavigationDestination.entityList(id: list._id))
-                } label: {
-                    HStack(spacing: .small) {
-                        ListRowView(list: list)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        Image(systemName: "chevron.right")
-                            .textStyle(.footnote200Bold)
-                            .foregroundStyle(.foregroundSecondary)
-                            .accessibilityHidden(true)
-                    }
-                    .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("e2e.user.listRow")
+            Section {
+                emptyState
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, .large)
             }
+            .listRowBackground(Color.clear)
+        } else {
+            Section {
+                ForEach(lists) { list in
+                    NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
+                        ListRowView(list: list)
+                    }
+                    .accessibilityIdentifier("e2e.user.listRow")
+                }
+            }
+            .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
         }
     }
 

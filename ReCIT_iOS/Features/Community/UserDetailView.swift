@@ -33,10 +33,22 @@ struct UserDetailView: View {
     @State private var scrollTopInset: CGFloat = 0
     /// The header's height unfolded — what the page is pushed down by.
     @State private var expandedHeaderHeight: CGFloat = 0
-    /// Where the header and the list's first row start on screen, at rest: the list puts some
-    /// room of its own above its first section, which the first row gives back.
-    @State private var headerTop: CGFloat = 0
-    @State private var firstRowTop: CGFloat = 0
+    /// Where the header and the list's first row start on screen as the page first appears: the
+    /// list puts some room of its own above its first section, which the first row gives back.
+    ///
+    /// **Taken once, and never again.** Measured whenever the page was at rest, the two raced
+    /// the scroll: a row's new position could be read before the offset saying the page had
+    /// moved, so the first row grew or shrank by the scroll of that frame — the page stood still
+    /// while the header folded, or sat 40 pt low after a bounce until the next reading put it
+    /// back with a jump. The list's own room does not change while the screen is up.
+    @State private var headerTop: CGFloat?
+    @State private var firstRowTop: CGFloat?
+
+    /// The list's own room above its first section, once both tops are known.
+    private var listTopRoom: CGFloat {
+        guard let headerTop, let firstRowTop else { return 0 }
+        return firstRowTop - headerTop
+    }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -68,9 +80,9 @@ struct UserDetailView: View {
                 // content margin: the scroll's insets are then the bars' alone, and the offset
                 // counts from the page at rest whatever the header measures.
                 Color.clear
-                    .frame(height: max(expandedHeaderHeight - (firstRowTop - headerTop), 0))
+                    .frame(height: max(expandedHeaderHeight - listTopRoom, 0))
                     .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
-                        guard scrollOffset.isAtRest else { return }
+                        guard firstRowTop == nil else { return }
                         firstRowTop = top
                     }
 
@@ -201,9 +213,13 @@ struct UserDetailView: View {
             scrollOffset: scrollOffset
         )
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            if headerTop == nil {
+                headerTop = frame.minY
+            }
+            // Its height moves only with the fold, which the offset drives, so the offset is
+            // never stale here: unfolded, the header is at its full height.
             guard scrollOffset.isAtRest else { return }
             expandedHeaderHeight = frame.height
-            headerTop = frame.minY
         }
     }
 

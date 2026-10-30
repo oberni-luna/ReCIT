@@ -65,8 +65,11 @@ prunes theirs, my sync claims and prunes the unstamped, `isCreated(byMe:)`, and 
 separators — whose first row is an empty frame as tall as the unfolded header, `UserProfileStickyHeader`, an overlay laid out in the safe area — just under the
 navigation bar. A bar's principal item cannot hold a 96 pt picture, hence the overlay. The empty row rather than a
 content margin keeps the scroll's insets the bars' alone, so the offset counts from the page at rest. The list
-puts room of its own above its first section; the first row gives it back, measured at rest as the gap between the
-header's top and the row's. The bar is made
+puts room of its own above its first section; the first row gives it back, measured **once**, as the page first
+appears, as the gap between the header's top and the row's. Measured again whenever the page was at rest, the two
+raced the scroll — a row's new position could be read before the offset saying the page had moved — so the first row
+grew or shrank by a frame's scroll: the page stood still while the header folded, or sat 40 pt low after a bounce and
+then jumped back. The bar is made
 transparent (`toolbarBackgroundVisibility(.hidden)`, and from iOS 26 the top scroll-edge blur turned off), so that
 once folded the header's backdrop, which reaches up under the bar, is the only one.
 

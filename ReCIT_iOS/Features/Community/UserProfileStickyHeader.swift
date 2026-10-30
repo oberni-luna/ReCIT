@@ -70,19 +70,20 @@ struct UserProfileStickyHeader: View {
     /// Read here and nowhere else on the screen, so a scroll redraws this header only.
     let scrollOffset: ProfileScrollOffset
 
+    /// Blended between the two pages while the pager moves: each page is scrolled its own way.
     private var progress: CGFloat {
-        collapse.progress(at: scrollOffset.value)
+        scrollOffset.progress(in: collapse)
     }
 
     private var isContentUnder: Bool {
-        collapse.isContentUnder(at: scrollOffset.value)
+        scrollOffset.isContentUnder(in: collapse)
     }
 
     /// How far the page is pulled down past its top — by a finger, or by the bounce of a fling
     /// back up. The header goes down with it, as the Contacts card does, instead of staying put
     /// while a gap opens under it.
     private var pull: CGFloat {
-        max(-scrollOffset.value, 0)
+        scrollOffset.pull
     }
 
     private func folding(_ values: (rest: CGFloat, folded: CGFloat)) -> CGFloat {

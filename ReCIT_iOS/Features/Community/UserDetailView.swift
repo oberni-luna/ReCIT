@@ -14,8 +14,9 @@ import SwiftData
 /// scroll away under it; the tab's content follows. See PRD 0031 and the « Détail d'un amis »
 /// section of the Figma file (`865:17783`).
 ///
-/// An inset grouped `List`, so the books and the lists sit in the system's own sections, corners
-/// and separators. Its first row is as tall as the unfolded header, which lies over it.
+/// Each tab is a page of its own (`UserProfilePage`), an inset grouped `List` whose first row is
+/// as tall as the unfolded header, which lies over both. The pages sit in a pager: a tab is
+/// changed by a swipe as well as by its name.
 struct UserDetailView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(ListModel.self) private var listModel
@@ -27,34 +28,36 @@ struct UserDetailView: View {
     @State private var isConfirmingRemoval: Bool = false
     @State private var tab: UserProfileTab = .inventory
     @State private var listsLoad: UserListsTab.Load = .loading
-    /// The page's scroll, counted from rest — never read by this body, so a scroll redraws the
-    /// header alone — and the scroll view's top inset it is counted from, which barely moves.
+    /// The pages' scroll and the pager's position — never read by this body, so a scroll
+    /// redraws the header alone.
     @State private var scrollOffset: ProfileScrollOffset = .init()
-    @State private var scrollTopInset: CGFloat = 0
-    /// The header's height unfolded — what the page is pushed down by.
+    /// The header's height unfolded — what the pages are pushed down by.
     @State private var expandedHeaderHeight: CGFloat = 0
-    /// Where the header and the list's first row start on screen at rest: the list puts some room
-    /// of its own above its first section, which the first row gives back.
-    ///
-    /// **Read only while the page is still.** Read whenever the offset said "at rest", they raced
-    /// the scroll: a row's new position could arrive before the offset saying the page had
-    /// moved, so the first row grew or shrank by that frame's scroll — the page stood still while
-    /// the header folded, or sat 40 pt low after a bounce, then jumped back. Read only once, they
-    /// caught the screen before the navigation bar had set its insets, and the list rose under
-    /// the header. So: whenever the scroll is idle and at rest, which holds through the screen's
-    /// arrival and never during a gesture or a bounce.
+    /// Where the header starts on screen at rest, read only while the page on screen is settled
+    /// (see `UserProfilePage.firstRowTop`).
     @State private var headerTop: CGFloat?
-    @State private var firstRowTop: CGFloat?
-    @State private var isScrollIdle: Bool = true
+    /// The screen's safe area and the whole screen, on screen: the pages are as tall as the
+    /// screen, and the room at the foot of the safe area is the tab bar's, which they run under.
+    /// Inside the pager, a page is told neither — it would be as tall as the safe area, and stop
+    /// at the tab bar's top.
+    @State private var safeFrame: CGRect = .zero
+    @State private var screenFrame: CGRect = .zero
 
-    private var maySettleMeasures: Bool {
-        isScrollIdle && scrollOffset.isAtRest
+    private var bottomSafeArea: CGFloat {
+        max(screenFrame.maxY - safeFrame.maxY, 0)
     }
 
-    /// The list's own room above its first section, once both tops are known.
-    private var listTopRoom: CGFloat {
-        guard let headerTop, let firstRowTop else { return 0 }
-        return firstRowTop - headerTop
+    /// The tab as the pager's scroll position: a swipe that settles on a page selects its tab,
+    /// and a tab chosen by its name scrolls the pager to it.
+    private var pagerSelection: Binding<UserProfileTab?> {
+        .init(
+            get: { tab },
+            set: { page in
+                if let page {
+                    tab = page
+                }
+            }
+        )
     }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -81,52 +84,111 @@ struct UserDetailView: View {
     }
 
     var body: some View {
-        List {
-            Section {
-                // The room the unfolded header takes, as the page's first row rather than a
-                // content margin: the scroll's insets are then the bars' alone, and the offset
-                // counts from the page at rest whatever the header measures.
+        // The safe area, as what the pages are measured against: a horizontal scroll view takes
+        // the height of what it holds, so it cannot be what the pages are sized from.
+        Color.clear
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                safeFrame = frame
+            }
+            .background {
+                // Measured inside `ignoresSafeArea`, where the frame is the screen's.
                 Color.clear
-                    .frame(height: max(expandedHeaderHeight - listTopRoom, 0))
-                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
-                        guard maySettleMeasures else { return }
-                        firstRowTop = top
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                        screenFrame = frame
                     }
-
-                if let bio = user.bio, bio.isEmpty == false {
-                    Text(bio)
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundSecondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, .medium)
-                        .padding(.top, .small)
+                    .ignoresSafeArea()
+            }
+            .overlay {
+                pages
+            }
+            .overlay(alignment: .top) {
+                header
+            }
+            // The header draws its own backdrop under the bar, once the page passes under it.
+            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+            .background {
+                DesignSystem.Color.backgroundForm.color
+                    .ignoresSafeArea()
+            }
+            // The name heads the page; the bar keeps the way back and « … ». The title stays set
+            // for what reads it elsewhere — the back button's long-press menu.
+            .navigationTitle(user.username)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(removing: .title)
+            .toolbar { toolbarContent }
+            .task(id: user._id) {
+                await syncLists()
+            }
+            // The maquette draws no confirmation, and this adds one: unfriending is the only
+            // gesture of the whole flow that loses something — the relation has to be asked for
+            // again, and the books go with it. Every other destructive action in the app asks
+            // first (« Supprimer de mon inventaire », deleting a shelf), so this one does too.
+            .confirmationDialog(
+                "network.remove.confirm \(user.username)",
+                isPresented: $isConfirmingRemoval,
+                titleVisibility: .visible
+            ) {
+                Button("network.remove", role: .destructive) {
+                    userModel.unfriend(user, modelContext: modelContext)
+                }
+                Button("action.cancel", role: .cancel) {}
+            }
+            .sheet(item: $borrowFromItem) { item in
+                if let owner = item.owner, let me = userModel.myUser {
+                    TransactionFormView(
+                        transaction: .init(
+                            _id: "",
+                            _rev: "",
+                            item: item,
+                            owner: owner,
+                            requester: me,
+                            type: item.transaction,
+                            created: .now,
+                            messages: [],
+                            state: .requested,
+                            actions: [],
+                            readStatus: .init(owner: false, requester: true)
+                        ),
+                        transition: TransactionStateMachine.requestTransition
+                    )
                 }
             }
-            .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
+    }
 
-            if showsInventory {
-                // Their étagères sit between who they are and what they own, which is the
-                // order the two are read in: a shelf says how the library is arranged, the
-                // tabs say what is in it.
-                Section {
-                    UserShelvesSection(user: user, path: $path)
-                }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-
-                switch tab {
-                case .inventory:
-                    UserInventoryTab(user: user, path: $path) { item in
-                        borrowFromItem = item
+    /// Inventaire and Listes side by side, a swipe or a tab's name apart. Someone whose books are
+    /// closed to me has no tabs, and a single page.
+    @ViewBuilder
+    private var pages: some View {
+        if showsInventory {
+            ScrollView(.horizontal) {
+                HStack(spacing: .zero) {
+                    ForEach(UserProfileTab.allCases, id: \.self) { page in
+                        profilePage(page, showsShelves: true, bottomMargin: bottomSafeArea) {
+                            tabContent(page)
+                        }
+                        .frame(width: screenFrame.width, height: screenFrame.height)
+                        .id(page)
                     }
-                case .lists:
-                    UserListsTab(user: user, load: listsLoad, path: $path)
                 }
-            } else {
+                .scrollTargetLayout()
+            }
+            .scrollTargetBehavior(.paging)
+            .scrollPosition(id: pagerSelection)
+            .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+            .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                geometry.contentOffset.x / max(geometry.containerSize.width, 1)
+            } action: { _, position in
+                scrollOffset.pagePosition = position
+            }
+            // Edge to edge, so the pages run under the bars as a list does: within the safe
+            // area, the pager would clip them at the tab bar's top. The header's room is the
+            // pages' first row, and the tab bar's a margin each page is given.
+            .ignoresSafeArea()
+            // Frozen while a book is being picked off an étagère, like the pages' own scroll.
+            .scrollDisabled(shelfFocus.isArmed)
+        } else {
+            profilePage(.inventory, showsShelves: false, bottomMargin: 0) {
                 Section {
                     RelationActionsView(user: user)
 
@@ -141,79 +203,41 @@ struct UserDetailView: View {
                 .listRowSeparator(.hidden)
             }
         }
-        .listStyle(.insetGrouped)
-        .environment(\.defaultMinListRowHeight, 0)
-        .onScrollGeometryChange(for: CGFloat.self) { geometry in
-            geometry.contentOffset.y + geometry.contentInsets.top
-        } action: { _, offset in
-            scrollOffset.value = offset
-        }
-        .onScrollGeometryChange(for: CGFloat.self) { geometry in
-            geometry.contentInsets.top
-        } action: { _, inset in
-            scrollTopInset = inset
-        }
-        .onScrollPhaseChange { _, phase in
-            isScrollIdle = phase == .idle
-        }
-        .scrollTargetBehavior(ProfileHeaderSnapBehavior(collapse: collapse, topInset: scrollTopInset))
-        .overlay(alignment: .top) {
-            header
-        }
-        // The header draws its own backdrop under the bar, once the page passes under it.
-        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
-        .topScrollEdgeEffectHidden()
-        .applyListBackground(.backgroundForm)
-        // Frozen while a book is being picked off an étagère, so the slide moves the
-        // selection and not the page — the same rule the inventory's own carousel follows.
-        .scrollDisabled(shelfFocus.isArmed)
-        // The name heads the page; the bar keeps the way back and « … ». The title stays set
-        // for what reads it elsewhere — the back button's long-press menu.
-        .navigationTitle(user.username)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(removing: .title)
-        .toolbar { toolbarContent }
-        .task(id: user._id) {
-            await syncLists()
-        }
-        // The maquette draws no confirmation, and this adds one: unfriending is the only
-        // gesture of the whole flow that loses something — the relation has to be asked for
-        // again, and the books go with it. Every other destructive action in the app asks
-        // first (« Supprimer de mon inventaire », deleting a shelf), so this one does too.
-        .confirmationDialog(
-            "network.remove.confirm \(user.username)",
-            isPresented: $isConfirmingRemoval,
-            titleVisibility: .visible
-        ) {
-            Button("network.remove", role: .destructive) {
-                userModel.unfriend(user, modelContext: modelContext)
+    }
+
+    private func profilePage(
+        _ page: UserProfileTab,
+        showsShelves: Bool,
+        bottomMargin: CGFloat,
+        @ViewBuilder content: () -> some View
+    ) -> some View {
+        UserProfilePage(
+            user: user,
+            page: page,
+            showsShelves: showsShelves,
+            expandedHeaderHeight: expandedHeaderHeight,
+            headerTop: headerTop,
+            bottomMargin: bottomMargin,
+            collapse: collapse,
+            scrollOffset: scrollOffset,
+            path: $path,
+            content: content
+        )
+    }
+
+    @ViewBuilder
+    private func tabContent(_ page: UserProfileTab) -> some View {
+        switch page {
+        case .inventory:
+            UserInventoryTab(user: user, path: $path) { item in
+                borrowFromItem = item
             }
-            Button("action.cancel", role: .cancel) {}
-        }
-        .sheet(item: $borrowFromItem) { item in
-            if let owner = item.owner, let me = userModel.myUser {
-                TransactionFormView(
-                    transaction: .init(
-                        _id: "",
-                        _rev: "",
-                        item: item,
-                        owner: owner,
-                        requester: me,
-                        type: item.transaction,
-                        created: .now,
-                        messages: [],
-                        state: .requested,
-                        actions: [],
-                        readStatus: .init(owner: false, requester: true)
-                    ),
-                    transition: TransactionStateMachine.requestTransition
-                )
-            }
+        case .lists:
+            UserListsTab(user: user, load: listsLoad, path: $path)
         }
     }
 
-    /// Under the navigation bar, in the safe area: the overlay of a scroll view lays out where
-    /// the page does.
+    /// Under the navigation bar: an overlay of the safe area, over the pages that run past it.
     private var header: some View {
         UserProfileStickyHeader(
             user: user,
@@ -223,7 +247,7 @@ struct UserDetailView: View {
             scrollOffset: scrollOffset
         )
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-            guard maySettleMeasures else { return }
+            guard scrollOffset.isSettled(tab) else { return }
             headerTop = frame.minY
             expandedHeaderHeight = frame.height
         }

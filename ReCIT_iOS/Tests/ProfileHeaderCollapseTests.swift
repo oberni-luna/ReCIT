@@ -38,6 +38,16 @@ struct ProfileHeaderCollapseTests {
         #expect(collapse.restingOffset(for: 340) == 340)
     }
 
+    @Test("Between two pages, the fold is blended, not the offsets")
+    func progressBetweenPages() {
+        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: 0) == 1)
+        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: 0.5) == 0.5)
+        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: 1) == 0)
+        #expect(collapse.progress(between: 50, and: 100, pagePosition: 0.5) == 0.75)
+        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: -0.2) == 1)
+        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: 1.3) == 0)
+    }
+
     @Test("Values move from their resting size to their folded one")
     func interpolate() {
         #expect(ProfileHeaderCollapse.interpolate(from: 96, to: 40, progress: 0) == 96)

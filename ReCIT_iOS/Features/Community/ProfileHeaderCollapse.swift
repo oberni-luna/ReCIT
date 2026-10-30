@@ -36,6 +36,18 @@ struct ProfileHeaderCollapse: Equatable {
         return offset < distance / 2 ? 0 : distance
     }
 
+    /// The fold while the pager moves between two pages, each scrolled its own way: the first
+    /// page's at 0, the second's at 1, and in between as much of each as is on screen. The fold
+    /// is what is blended, not the offsets — halfway from a page scrolled 2 000 pt down to one at
+    /// rest is half folded, not still folded.
+    func progress(between first: CGFloat, and second: CGFloat, pagePosition: CGFloat) -> CGFloat {
+        Self.interpolate(
+            from: progress(at: first),
+            to: progress(at: second),
+            progress: min(max(pagePosition, 0), 1)
+        )
+    }
+
     /// `from` at rest, `to` once folded.
     static func interpolate(from: CGFloat, to: CGFloat, progress: CGFloat) -> CGFloat {
         from + (to - from) * progress

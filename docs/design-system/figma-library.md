@@ -13,7 +13,9 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   haut, les écrans au repos remontent de 25) ; les comptes entrent dans les libellés, « Inventaire • 540 » et
   « Listes • 4 » (« Listes • 0 » en F5), par deux propriétés texte de `Profile / Tabs`, `Inventaire` et `Listes`.
   Pour tenir dans l'écran, les capsules passent à `spacing/s-medium` de marge et `spacing/zero` entre elles :
-  382 pt avec 540 livres. Les étagères ne restent que sous l'onglet Inventaire (F2 et F6 sans bande).
+  382 pt avec 540 livres. Les étagères ne restent que sous l'onglet Inventaire (F2 et F6 sans bande). Troisième
+  temps : les libellés passent en `Action/action200` (12 pt) dans les trois variantes — 291 pt avec 540 livres —
+  et les écrans au repos remontent de 7 pt sous l'en-tête raccourci.
   Implémentée le même jour ([feature 0067](../features/0067-a-friends-profile-presentation-tab.md)) ; écarts
   restants : aucun dans la structure — l'app réduit les libellés jusqu'à 70 % aux plus grandes tailles de texte,
   ce que Figma ne montre pas. Aucun token nouveau.

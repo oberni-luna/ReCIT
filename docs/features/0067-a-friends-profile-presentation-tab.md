@@ -26,9 +26,9 @@ and [0066](0066-a-friends-profile-tabs-as-pages.md). Mock-ups: Figma `S7IvC6Gvlc
   runs with nothing stored, it says « Listes » alone rather than a wrong 0, so the screen hands its
   `UserListsTab.Load` down through the header to the picker. VoiceOver reads « Inventaire, 540 éléments »
   and « Listes, 4 » instead of the bullet.
-- **The picker**: capsules at `.sMedium` (12 pt) of horizontal padding and `.zero` between them, as the Figma
-  draws them — three labels with a three-figure count make 382 pt, under a phone's 393. The labels keep to one
-  line and may shrink to 70 % rather than wrap.
+- **The picker**: labels in `action200` (Open Sans SemiBold 12, after a first build in `action300`, 17), capsules
+  at `.sMedium` (12 pt) of horizontal padding and `.zero` between them, as the Figma draws them — three labels
+  with a three-figure count make 291 pt. The labels keep to one line and may shrink to 70 % rather than wrap.
 - **The fold over three pages**: `ProfileHeaderCollapse.progress(of:pagePosition:)` takes one offset per page and
   blends the two the pager stands between, through `ProfileHeaderCollapse.blend(_:at:)`, which
   `ProfileScrollOffset.pull` uses too. The pager itself already went by `UserProfileTab.allCases`. The fold's

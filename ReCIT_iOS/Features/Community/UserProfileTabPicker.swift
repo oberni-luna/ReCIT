@@ -4,8 +4,9 @@
 //
 //  Inventaire • 540 | Listes • 4 | Présentation, at the foot of a reader's profile header: three
 //  labels, the selected one in a glass capsule — the tabs of the Contacts card, quieter than a
-//  segmented control. The capsules sit side by side with 12 pt of padding each, so that three
-//  of them, counts included, fit a phone's width. See PRD 0031 and `UserProfileTabLabel`.
+//  segmented control. The labels are in `action200`, the capsules side by side with 12 pt of
+//  padding each, so that three of them, counts included, sit well inside a phone's width. See
+//  PRD 0031 and `UserProfileTabLabel`.
 //
 //  The capsule follows the pager rather than the selection: it slides under the finger as a page
 //  is swiped, between the two words by as much of each page as is on screen, and glides to a word
@@ -62,7 +63,7 @@ struct UserProfileTabPicker: View {
                     selection = tab
                 } label: {
                     UserProfileTabLabel(tab: tab, user: user, listsLoad: listsLoad)
-                        .textStyle(.action300)
+                        .textStyle(.action200)
                         .foregroundStyle(isHighlighted ? .foregroundDefault : .foregroundSecondary)
                         // At the largest text sizes, shrunk rather than wrapped or cut.
                         .lineLimit(1)

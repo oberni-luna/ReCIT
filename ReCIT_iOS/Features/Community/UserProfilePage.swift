@@ -9,8 +9,8 @@
 //  rows sliding and fading under the header.
 //
 //  Each page scrolls its own way and tells `ProfileScrollOffset` where it is; the header, laid
-//  over the pager, folds by the page on screen. Their top is the same on both pages, which is
-//  why the étagères are drawn twice: what scrolls with a page has to be in it.
+//  over the pager, folds by the page on screen. What scrolls with a page has to be in it, which
+//  is why the étagères are in the Inventaire page, the only one that shows them.
 //
 
 import SwiftUI
@@ -21,7 +21,7 @@ struct UserProfilePage<Content: View>: View {
 
     let user: User
     let page: UserProfileTab
-    /// Their étagères, on the profile of someone whose books are open to me.
+    /// Their étagères, on the Inventaire page of someone whose books are open to me.
     let showsShelves: Bool
     /// Their bio at the top, centred, on the single page of someone who has no Présentation tab.
     let showsBio: Bool

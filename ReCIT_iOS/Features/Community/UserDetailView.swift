@@ -10,8 +10,9 @@ import SwiftData
 
 /// A reader's profile, shaped like the Contacts card of Messages: a header held at the top —
 /// their picture, their name and the Inventaire • 540 | Listes • 4 | Présentation tabs — that
-/// folds into the navigation bar as the page scrolls, and never stays half folded. Their étagères
-/// scroll away under it; the tab's content follows, their bio being Présentation's. See PRD 0031 and the « Détail d'un amis »
+/// folds into the navigation bar as the page scrolls, and never stays half folded. Under
+/// Inventaire, their étagères scroll away under it, the books after them; the other tabs open
+/// on their content, their bio being Présentation's. See PRD 0031 and the « Détail d'un amis »
 /// section of the Figma file (`865:17783`).
 ///
 /// Each tab is a page of its own (`UserProfilePage`), an inset grouped `List` whose first row is
@@ -126,7 +127,9 @@ struct UserDetailView: View {
                 isFrozen: shelfFocus.isArmed,
                 scrollOffset: scrollOffset
             ) { page in
-                profilePage(page, showsShelves: true, showsBio: false) {
+                // The étagères are part of the library, so they go with the books, not with the
+                // lists or the bio.
+                profilePage(page, showsShelves: page == .inventory, showsBio: false) {
                     tabContent(page)
                 }
             }

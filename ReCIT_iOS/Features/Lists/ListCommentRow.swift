@@ -59,6 +59,9 @@ struct ListCommentRow: View {
                 prompt: Text(prompt),
                 axis: .vertical
             )
+            // Four lines held even when empty, so going from one book to the next does not move
+            // what is below; past four, the field grows.
+            .lineLimit(4...)
             .textStyle(.content300)
             .foregroundStyle(.foregroundDefault)
             .focused(isFocused)

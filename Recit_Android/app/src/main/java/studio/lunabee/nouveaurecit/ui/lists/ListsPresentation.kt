@@ -31,6 +31,10 @@ data class ListElementRowModel(
     val image: String?,
     val comment: String,
     val authors: String? = null,
+    /** The element's own id — `optimistic:…` until the server has created it. */
+    val elementId: String = "",
+    /** When it was added, in epoch milliseconds. */
+    val created: Double = 0.0,
 )
 
 /**

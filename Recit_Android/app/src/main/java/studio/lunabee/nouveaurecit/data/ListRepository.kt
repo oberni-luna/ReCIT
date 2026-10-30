@@ -127,6 +127,23 @@ class ListRepository(
         dao.deleteElementsByUri(listId, uris)
     }
 
+    /**
+     * `ListModel.updateComment`: the reader's comment on an element, written to the store at once and to
+     * `/api/lists/update-element` behind it; a failure puts the previous text back and is reported
+     * (ADR 0001). Nothing is sent when the text has not changed, nor for an element still on its
+     * optimistic id: the server does not know that id yet.
+     */
+    suspend fun updateComment(elementId: String, comment: String) {
+        val element: EntityListItemEntity = dao.element(elementId) ?: return
+        if (comment == element.comment || OptimisticRunner.isOptimistic(elementId)) return
+        runner.run(
+            apply = { dao.upsertElements(listOf(element.copy(comment = comment))) },
+            revert = { dao.element(elementId)?.let { dao.upsertElements(listOf(it.copy(comment = element.comment))) } },
+            request = { updateElement(elementId, comment) },
+            stillThere = { dao.element(elementId) != null },
+        )
+    }
+
     suspend fun updateElement(elementId: String, comment: String) {
         api.send<UpdateListElementDto, OkStatusDto>("/api/lists/update-element", method = "PUT", body = UpdateListElementDto(elementId, comment))
     }

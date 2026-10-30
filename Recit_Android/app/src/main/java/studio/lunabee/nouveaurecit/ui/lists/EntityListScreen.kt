@@ -1,39 +1,47 @@
 package studio.lunabee.nouveaurecit.ui.lists
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.data.model.EntityListType
+import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
-import studio.lunabee.nouveaurecit.ui.common.BookRow
+import studio.lunabee.nouveaurecit.ui.common.Formatting
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
@@ -42,19 +50,21 @@ import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
 /**
- * `EntityListDetail`: a list's works (portraits, pushing the work) or authors (rounds, pushing the
- * author), each with its comment, swiped to take it out. « Modifier » opens the form; the screen
- * leaves by itself when the list stops existing.
+ * `EntityListDetail` + `ListCoverFlowScreen` (iOS feature 0060): a list of works or of authors as one
+ * screen in two halves — the cover flow on top, the element facing the reader below: its title and
+ * authors, « Mon commentaire », « Retirer de la liste » and the day it was added. Moving to another book
+ * cross-fades that block while the covers follow the finger.
+ *
+ * « Modifier » opens the form; the screen leaves by itself when the list stops existing. A list of
+ * publishers says it is empty, as on iOS.
  */
 @Composable
 fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) {
     val viewModel: EntityListViewModel = recitViewModel(key = destination.id) {
         EntityListViewModel(destination.id, it.lists, it.entities)
     }
-    val state: EntityListViewModel.State by viewModel.state.collectAsState()
+    val state: EntityListViewModel.State by viewModel.state.collectAsStateWithLifecycle()
     var showsForm: Boolean by rememberSaveable { mutableStateOf(false) }
-    val messenger: Messenger = LocalMessenger.current
-    val genericError: String = stringResource(R.string.error_generic)
 
     // Deleting from the form pops, and so does the list vanishing from Room: leave only once.
     var hasLeft: Boolean by remember { mutableStateOf(false) }
@@ -77,7 +87,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
             RecitTopBar(
                 title = state.list?.name.orEmpty(),
                 onBack = navigator::pop,
-                containerColor = RecitTheme.colors.backgroundDefault,
+                containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
                     if (state.list != null) {
                         IconButton(onClick = { showsForm = true }) {
@@ -87,36 +97,15 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 },
             )
         },
-        containerColor = RecitTheme.colors.backgroundDefault,
+        containerColor = RecitTheme.colors.backgroundGrouped,
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
-            val list = state.list
+            val list: EntityListEntity? = state.list
             when {
                 !state.isLoaded -> Unit
-                list == null -> EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
-                // A publisher list shows no rows on iOS either: it says it is empty.
-                state.rows.isEmpty() -> EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
-                else -> LazyColumn(Modifier.fillMaxSize()) {
-                    item(key = "header") { ListHeader(description = list.explanation, count = state.rows.size, type = list.type) }
-                    items(state.rows, key = { it.uri }) { row ->
-                        SwipeToDeleteRow(
-                            key = row.uri,
-                            onDelete = { viewModel.remove(row.uri) { messenger.showError(genericError, it.localizedMessage) } },
-                            modifier = Modifier.animateItem(),
-                        ) {
-                            ListElementRow(
-                                row = row,
-                                isAuthor = list.type == EntityListType.Author,
-                                onClick = {
-                                    navigator.push(
-                                        if (list.type == EntityListType.Author) Destination.Author(row.uri) else Destination.Work(row.uri),
-                                    )
-                                },
-                            )
-                        }
-                        HorizontalDivider(color = RecitTheme.colors.borderDefault, modifier = Modifier.padding(start = Spacing.medium))
-                    }
-                }
+                list == null || list.type == EntityListType.Publisher || state.rows.isEmpty() ->
+                    EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
+                else -> ListCoverFlowContent(list, state, viewModel, navigator)
             }
         }
     }
@@ -131,37 +120,106 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
     }
 }
 
-/** What the list is for — its description — and how much it holds, above its elements. */
 @Composable
-private fun ListHeader(description: String?, count: Int, type: EntityListType) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.small),
-        verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
+private fun ListCoverFlowContent(
+    list: EntityListEntity,
+    state: EntityListViewModel.State,
+    viewModel: EntityListViewModel,
+    navigator: Navigator,
+) {
+    val isAuthor: Boolean = list.type == EntityListType.Author
+    val messenger: Messenger = LocalMessenger.current
+    val genericError: String = stringResource(R.string.error_generic)
+    val scope: CoroutineScope = rememberCoroutineScope()
+    val open: (String) -> Unit = { uri -> navigator.push(if (isAuthor) Destination.Author(uri) else Destination.Work(uri)) }
+    var isCommentFocused: Boolean by remember { mutableStateOf(false) }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().imePadding(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.medium),
     ) {
-        description?.takeIf { it.isNotBlank() }?.let {
-            Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
+        item(key = "cover-flow") {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                ListCoverFlow(
+                    rows = state.rows,
+                    isAuthor = isAuthor,
+                    selectedUri = state.selectedUri,
+                    onSelect = viewModel::select,
+                    onOpen = open,
+                )
+                Crossfade(targetState = state.selectedRow, label = "list.title") { row ->
+                    if (row != null) ListSelectedTitle(row)
+                }
+            }
         }
-        Text(
-            pluralStringResource(ListsPresentation.countPlural(type), count, count),
-            style = RecitTheme.typography.footnote200,
-            color = RecitTheme.colors.foregroundSecondary,
-        )
+        item(key = "comment") {
+            Crossfade(targetState = state.selectedRow?.uri, label = "list.comment") { uri ->
+                val row: ListElementRowModel = state.rows.firstOrNull { it.uri == uri } ?: return@Crossfade
+                ListCard {
+                    ListCommentField(
+                        row = row,
+                        isAuthor = isAuthor,
+                        onFocusChange = { isCommentFocused = it },
+                        onSave = { viewModel.updateComment(row, it) },
+                    )
+                }
+            }
+        }
+        item(key = "remove") {
+            val row: ListElementRowModel? = state.selectedRow
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                ListCard(
+                    onClick = {
+                        if (row != null) {
+                            scope.launch { viewModel.remove(row.uri) { messenger.showError(genericError, it.localizedMessage) } }
+                        }
+                    },
+                ) {
+                    Text(stringResource(R.string.list_detail_remove), style = RecitTheme.typography.action300, color = RecitTheme.colors.foregroundError)
+                }
+                Crossfade(targetState = row, label = "list.added") { shown ->
+                    if (shown != null && shown.created > 0) {
+                        Text(
+                            stringResource(R.string.list_detail_added, Formatting.longDate(shown.created)),
+                            style = RecitTheme.typography.footnote200,
+                            color = RecitTheme.colors.foregroundSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.large),
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
-/** `ListItemCellView`: a [BookRow], with the element's comment as its footer. */
+/** `ListSelectedTitle`: the element's title, and who wrote it — or what inventaire.io says an author is. */
 @Composable
-private fun ListElementRow(row: ListElementRowModel, isAuthor: Boolean, onClick: () -> Unit) {
-    BookRow(
-        title = row.title,
-        imageUrl = row.image,
-        onClick = onClick,
-        modifier = Modifier.background(RecitTheme.colors.backgroundDefault),
-        authors = row.authors,
-        subtitle = row.subtitle,
-        isPerson = isAuthor,
-        footer = row.comment.takeIf { it.isNotEmpty() }?.let { comment ->
-            { Text(comment, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault) }
-        },
-    )
+private fun ListSelectedTitle(row: ListElementRowModel) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall),
+    ) {
+        Text(row.title, style = RecitTheme.typography.content400Bold, color = RecitTheme.colors.foregroundDefault, textAlign = TextAlign.Center)
+        (row.authors ?: row.subtitle)?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+/** A cell of the grouped list below the covers, on the screen's margins. */
+@Composable
+internal fun ListCard(onClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.medium)
+            .clip(RoundedCornerShape(CornerRadius.rounded))
+            .background(RecitTheme.colors.backgroundGroupedCell)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
+    ) {
+        content()
+    }
 }

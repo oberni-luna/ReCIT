@@ -308,6 +308,9 @@ interface ListDao {
     @Query("SELECT * FROM list_elements WHERE listId = :listId")
     suspend fun elements(listId: String): List<EntityListItemEntity>
 
+    @Query("SELECT * FROM list_elements WHERE id = :id")
+    suspend fun element(id: String): EntityListItemEntity?
+
     @Upsert
     suspend fun upsert(lists: List<EntityListEntity>)
 

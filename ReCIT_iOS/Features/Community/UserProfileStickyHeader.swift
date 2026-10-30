@@ -2,16 +2,14 @@
 //  UserProfileStickyHeader.swift
 //  ReCIT_iOS
 //
-//  The head of a reader's profile, held at the top of the screen and folding as the page
-//  scrolls — the Contacts card of Messages. At rest: their picture at 96 pt between the back
-//  button and « … », their name large under it, how many books they hold, and the Inventaire |
-//  Listes tabs. Folded: the picture at 40 pt in the navigation bar's row, the name small, the
-//  count gone, the tabs still there. From there on the page scrolls under it, behind a blur.
+//  The head of a reader's profile, held just under the navigation bar and folding as the page
+//  scrolls — the Contacts card of Messages. At rest: their picture at 96 pt, their name large
+//  under it, how many books they hold, and the Inventaire | Listes tabs. Folded: the picture at
+//  40 pt, the name small, the count gone, the tabs still there. From there on the page scrolls
+//  under it, behind a blur that reaches up under the bar, which is made transparent for it.
 //
-//  **Drawn under the navigation bar, not in it.** A navigation bar is 44 pt tall and its
-//  principal item cannot hold a 96 pt picture, so the header is an overlay that starts in the
-//  bar's row, and the bar is made transparent above it. The back button and « … » stay the
-//  system's, which is what keeps the swipe back working.
+//  An overlay rather than anything of the bar's: a navigation bar's principal item cannot hold
+//  a 96 pt picture. The back button and « … » stay the system's, which keeps the swipe back.
 //
 //  Only the tabs take touches: the rest lets them through to the page underneath.
 //
@@ -26,9 +24,6 @@ struct UserProfileStickyHeader: View {
     struct Metrics {
         static let avatar: (rest: CGFloat, folded: CGFloat) = (96, 40)
         static let nameScale: (rest: CGFloat, folded: CGFloat) = (1, 0.6)
-        /// How far above the bottom of the navigation bar the header starts: the top of its row
-        /// of buttons, give or take the few points between an iOS 18 bar and an iOS 26 one.
-        static let barOverlap: CGFloat = 46
 
         let nameHeight: CGFloat
         let countHeight: CGFloat
@@ -36,7 +31,6 @@ struct UserProfileStickyHeader: View {
         var collapse: ProfileHeaderCollapse {
             .init(
                 distance: (Self.avatar.rest - Self.avatar.folded)
-                    - 2
                     + nameHeight * (Self.nameScale.rest - Self.nameScale.folded)
                     + countHeight
                     + DesignSystem.Spacing.xxSmall.rawValue
@@ -50,8 +44,6 @@ struct UserProfileStickyHeader: View {
     let metrics: Metrics
     let progress: CGFloat
     let isContentUnder: Bool
-    /// The status bar and the navigation bar together, which the header reaches up into.
-    let topInset: CGFloat
 
     private func folding(_ values: (rest: CGFloat, folded: CGFloat)) -> CGFloat {
         ProfileHeaderCollapse.interpolate(from: values.rest, to: values.folded, progress: progress)
@@ -67,7 +59,7 @@ struct UserProfileStickyHeader: View {
                     .padding(.top, .small)
             }
         }
-        .padding(.top, max(topInset - Metrics.barOverlap, 0))
+        .padding(.top, .small)
         .padding(.bottom, .small)
         .frame(maxWidth: .infinity)
         .background(alignment: .top) {
@@ -78,9 +70,6 @@ struct UserProfileStickyHeader: View {
     private var identity: some View {
         VStack(spacing: .zero) {
             avatar
-                // Folded, the picture sits centred on the bar's buttons rather than level with
-                // their top.
-                .padding(.top, folding((0, 2)))
 
             Text(user.username)
                 .textStyle(.title200)

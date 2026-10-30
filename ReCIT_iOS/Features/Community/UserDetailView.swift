@@ -35,10 +35,8 @@ struct UserDetailView: View {
     @State private var listsLoad: UserListsTab.Load = .loading
     /// The page's scroll, counted from rest, and the scroll view's top inset it is counted from.
     @State private var scroll: ScrollPlace = .init(offset: 0, topInset: 0)
-    /// The header's full height from the top of the screen, unfolded — what the page is pushed
-    /// down by — and the bars' height above the page.
+    /// The header's height unfolded — what the page is pushed down by.
     @State private var expandedHeaderHeight: CGFloat = 0
-    @State private var barsHeight: CGFloat = 0
 
     @ScaledMetric(relativeTo: .largeTitle) private var nameHeight: CGFloat = 40
     @ScaledMetric(relativeTo: .body) private var countHeight: CGFloat = 24
@@ -66,6 +64,12 @@ struct UserDetailView: View {
 
     var body: some View {
         ScrollView {
+            // The room the unfolded header takes, as the page's first row rather than a content
+            // margin: the scroll's insets are then the bars' alone, and the offset counts from
+            // the page at rest whatever the header measures.
+            Color.clear
+                .frame(height: expandedHeaderHeight)
+
             LazyVStack(spacing: DesignSystem.Spacing.large.rawValue) {
                 if let bio = user.bio, bio.isEmpty == false {
                     Text(bio)
@@ -104,8 +108,6 @@ struct UserDetailView: View {
             .padding(.top, .small)
             .padding(.bottom, .large)
         }
-        // The page starts under the unfolded header; the bars' own height is already inset.
-        .contentMargins(.top, max(expandedHeaderHeight - barsHeight, 0), for: .scrollContent)
         .onScrollGeometryChange(for: ScrollPlace.self) { geometry in
             .init(
                 offset: geometry.contentOffset.y + geometry.contentInsets.top,
@@ -170,26 +172,20 @@ struct UserDetailView: View {
         }
     }
 
-    /// The header reaches up into the bars, so it reads their height from a reader that ignores
-    /// them — the one place a `GeometryReader` is the tool: `onGeometryChange` reports the frame,
-    /// not the insets a view has given up.
+    /// Under the navigation bar, in the safe area: the overlay of a scroll view lays out where
+    /// the page does.
     private var header: some View {
-        GeometryReader { proxy in
-            UserProfileStickyHeader(
-                user: user,
-                tab: showsInventory ? $tab : nil,
-                metrics: metrics,
-                progress: collapse.progress(at: scroll.offset),
-                isContentUnder: collapse.isContentUnder(at: scroll.offset),
-                topInset: proxy.safeAreaInsets.top
-            )
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-                guard collapse.progress(at: scroll.offset) == 0 else { return }
-                expandedHeaderHeight = height
-                barsHeight = proxy.safeAreaInsets.top
-            }
+        UserProfileStickyHeader(
+            user: user,
+            tab: showsInventory ? $tab : nil,
+            metrics: metrics,
+            progress: collapse.progress(at: scroll.offset),
+            isContentUnder: collapse.isContentUnder(at: scroll.offset)
+        )
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+            guard collapse.progress(at: scroll.offset) == 0 else { return }
+            expandedHeaderHeight = height
         }
-        .ignoresSafeArea(edges: .top)
     }
 
     /// A friend's lists are fetched each time their profile opens — not at launch, where every

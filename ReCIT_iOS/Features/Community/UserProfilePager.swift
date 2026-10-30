@@ -70,12 +70,23 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
 
     /// A page with the environment of the screen that holds the pager: a hosting controller
     /// starts from an empty one, which has none of the app's models.
+    ///
+    /// The appearance and the text size are the hosting controller's own, read from UIKit's
+    /// traits, which follow a change made while the screen is open. The copied environment does
+    /// not: switched to dark, the pages stayed light under a header gone white.
     struct HostedPage: View {
+        @Environment(\.colorScheme) private var colorScheme
+        @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
         let content: Page
         let environment: EnvironmentValues
 
         var body: some View {
+            // The nearer the content, the stronger: the two traits go inside the copy, which
+            // would otherwise put its own back.
             content
+                .environment(\.colorScheme, colorScheme)
+                .environment(\.dynamicTypeSize, dynamicTypeSize)
                 .environment(\.self, environment)
         }
     }

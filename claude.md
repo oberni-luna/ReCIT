@@ -112,6 +112,13 @@ what it is for. Read
 touching it — in particular the `e2e.*` accessibility identifiers it depends on, and the two
 seams it needs in the app (`AppModels/UITest/UITestHooks.swift`).
 
+Android has the same scenario: `scripts/e2e-android.sh` (account `OlivierB_test4` by default, an emulator,
+report in `build/e2e-android/<timestamp>/`, rendered by the same `scripts/e2e_report.py`). It is the
+self-instrumenting UI Automator module `Recit_Android/e2e/`; its seams are in
+`Recit_Android/app/…/e2e/` and its `e2e.*` test tags in the screens. To iterate on it without
+signing in each time, run it with `-e e2eKeepSession true` — read
+[docs/features/0065-android-end-to-end-scenario.md](docs/features/0065-android-end-to-end-scenario.md) first.
+
 **Heads-up on the test target:** `Tests/ReCIT_iOSTests.swift` is an *integration* suite that logs into the real `inventaire.io` production server with hard-coded credentials (`OlivierB_test`) and mutates that account's data. It is now gated behind `.enabled(if: IntegrationConfig.isEnabled)`, so a normal run skips it — but the credentials are still in the repo. Do not add it to automated pipelines without first stubbing the network or moving them out. Everything else is a pure or `MockURLProtocol`-backed suite and is safe to run anywhere.
 
 ## Architecture (the parts that span files)
@@ -296,5 +303,6 @@ This project does **not** use CloudKit, so the standard SwiftData rules apply: `
 - [0062 Android catches up with iOS 1.7.0](docs/features/0062-android-catches-up-with-1-7-0.md) — on `Recit_Android/`: red removal swipes, an ISBN in Recherche opening its edition, « Éditions » by language and filled batch by batch, the section spinner, a list as a cover flow with its comment, « Ajouter un livre » by search and by scan, « Déplacer dans une autre liste »; seen only in a throwaway harness, never signed in, nothing written to inventaire.io
 - [0063 Names, titles and descriptions in the phone's language](docs/features/0063-content-in-the-phones-language.md) — every `lang=fr` becomes `ContentLanguage.preferred`, read from `Locale.preferredLanguages`; `EntityLabel` and the new `EntityDescription` put it first; the store is not migrated, an entity turns on its next fetch; Android still in French; not seen on a simulator, e2e not run
 - [0064 A friend's profile: their picture at the head, their étagères, Inventaire | Listes](docs/features/0064-a-friends-profile-with-tabs.md) — the Contacts card of Messages: a header held under the navigation bar, picture, name and glass tabs, folding as the page scrolls, never half folded; a friend's lists synced as the profile opens, `EntityList.creatorId` keeping them out of mine, opened read-only; never seen running, e2e not run
+- [0065 The end-to-end scenario, on Android](docs/features/0065-android-end-to-end-scenario.md) — `scripts/e2e-android.sh`: the iOS journey played by UI Automator from a self-instrumenting `:e2e` module, the same `report.json` and HTML; the scanner reads its barcodes through `E2EHooks`, the drag is injected; `e2eKeepSession` to iterate without signing in
 - [0066 A friend's profile: Inventaire and Listes as pages, changed by a swipe](docs/features/0066-a-friends-profile-tabs-as-pages.md) — each tab its own inset grouped `List` (`UserProfilePage`), side by side in a `UIPageViewController` (`UserProfilePager`) bound to the tab, as the Contacts card of Messages; each page keeps its scroll, the header folds by the page on screen and the capsule follows the finger; seen in a harness and installed on a phone, e2e not run
 - [0067 A friend's profile: a Présentation tab, counts in the tabs, étagères under Inventaire](docs/features/0067-a-friends-profile-presentation-tab.md) — a third tab holds the bio; « Inventaire • 540 » and « Listes • 4 » replace the count under the name; capsules at 12 pt, no gap; the étagères under Inventaire only; the fold blended over any number of pages; installed on a phone, e2e not run

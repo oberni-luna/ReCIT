@@ -18,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -138,7 +139,7 @@ private fun WorkContent(work: WorkEntity, state: WorkUiState, navigator: Navigat
             item(key = "editions-loading") { LoadingCell() }
         }
         items(state.editions, key = { it.uri }) { edition ->
-            EntityResultRow(title = edition.title, subtitle = edition.subtitle, imageUrl = edition.image) {
+            EntityResultRow(title = edition.title, subtitle = edition.subtitle, imageUrl = edition.image, modifier = Modifier.testTag("e2e.workEdition")) {
                 navigator.push(Destination.Book(BookAnchor.Edition(edition.uri)))
             }
         }

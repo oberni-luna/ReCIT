@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -178,6 +179,7 @@ private fun InventoryContent(
                     showsOwner = false,
                     onClick = { navigator.push(Destination.Book(BookAnchor.Item(row.item.id))) },
                     onPush = navigator::push,
+                    modifier = Modifier.testTag("e2e.inventory.item"),
                 )
                 HorizontalDivider(Modifier.padding(start = Spacing.medium), color = RecitTheme.colors.borderDefault)
             }

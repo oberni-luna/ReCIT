@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -106,7 +107,7 @@ private fun AuthorContent(author: AuthorEntity, state: AuthorUiState, navigator:
             }
         }
         items(state.works, key = { it.uri }) { work ->
-            EntityResultRow(title = work.title, subtitle = work.subtitle, imageUrl = work.image) {
+            EntityResultRow(title = work.title, subtitle = work.subtitle, imageUrl = work.image, modifier = Modifier.testTag("e2e.authorWork")) {
                 navigator.push(Destination.Work(work.uri))
             }
         }

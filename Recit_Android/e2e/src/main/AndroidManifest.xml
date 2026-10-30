@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The app is a separate package: to start it, the runner has to be able to see it. -->
+    <queries>
+        <package android:name="studio.lunabee.exlibris.android.dev" />
+    </queries>
+</manifest>

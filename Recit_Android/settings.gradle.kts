@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Recit_Android"
 include(":app")
+include(":e2e")

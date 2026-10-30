@@ -33,6 +33,8 @@ import studio.lunabee.nouveaurecit.data.scan.BatchScanState
 import studio.lunabee.nouveaurecit.data.scan.ScannedBook
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
+import studio.lunabee.nouveaurecit.e2e.E2EBarcodeFeed
+import studio.lunabee.nouveaurecit.e2e.E2EHooks
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
@@ -90,7 +92,17 @@ fun ScanCameraScreen(onOpenBook: (ScannedBook) -> Unit, onFinished: (addedBookCo
     }
 
     Box(Modifier.fillMaxSize().background(ScanOverlayPalette.Ground)) {
-        when (cameraAccess.access) {
+        // The end-to-end scenario: no camera, the barcodes it was handed (feature 0065).
+        if (E2EHooks.isScanningScripted) {
+            E2EBarcodeFeed(onCode = viewModel::codeSeen, modifier = Modifier.fillMaxSize())
+            ResultSlot(
+                state = state,
+                onOpen = onOpenBook,
+                onAdd = viewModel::addPendingBook,
+                onCreate = viewModel::openCreation,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        } else when (cameraAccess.access) {
             CameraAccess.Granted -> {
                 BarcodeCameraPreview(onCode = viewModel::codeSeen, modifier = Modifier.fillMaxSize())
                 ResultSlot(

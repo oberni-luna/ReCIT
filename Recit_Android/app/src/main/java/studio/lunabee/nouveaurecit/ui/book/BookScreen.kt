@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -72,6 +73,7 @@ internal fun BookDetail(anchor: BookAnchor, navigator: Navigator) {
     val headerTop: Dp = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + TopBarHeight
 
     Scaffold(
+        modifier = Modifier.testTag("e2e.book"),
         contentWindowInsets = WindowInsets(0),
         containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding: PaddingValues ->

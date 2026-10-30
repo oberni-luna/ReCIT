@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -188,6 +189,7 @@ private fun SortBookCard(
                 .width(width)
                 .height(SortGridMetrics.CARD_HEIGHT.dp)
                 .clickable(enabled = enabled, onClickLabel = menuLabel) { showsMenu = true }
+                .testTag("e2e.sortBook")
                 .padding(vertical = Spacing.xxSmall)
                 .semantics {
                     customActions = filingOptions.mapIndexed { index, option ->

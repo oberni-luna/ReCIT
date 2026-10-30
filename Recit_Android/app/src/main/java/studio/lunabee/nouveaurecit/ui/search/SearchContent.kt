@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -190,7 +191,9 @@ private fun LazyListScope.suggestions(query: String, onSuggestion: (SearchSugges
             label = emphasised(suggestion.query, sentence),
             spokenLabel = spoken,
             onClick = { onSuggestion(suggestion) },
-            modifier = Modifier.groupedCell(index, suggestions.size, RecitTheme.colors.backgroundGroupedCell),
+            modifier = Modifier
+                .groupedCell(index, suggestions.size, RecitTheme.colors.backgroundGroupedCell)
+                .testTag("e2e.searchSuggestion.${suggestion.kind.name.lowercase()}"),
         )
     }
 }
@@ -250,7 +253,7 @@ private fun LazyListScope.resultGroup(
         SearchResultRow(
             result = result,
             onClick = { onPush(destinationFor(result)) },
-            modifier = Modifier.groupedCell(index, results.size, RecitTheme.colors.backgroundGroupedCell),
+            modifier = Modifier.groupedCell(index, results.size, RecitTheme.colors.backgroundGroupedCell).testTag("e2e.searchResult.$key"),
         )
     }
 }

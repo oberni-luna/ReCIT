@@ -24,10 +24,10 @@ struct UserProfileStickyHeader: View {
     /// goes before it has happened.
     struct Metrics {
         static let avatar: (rest: CGFloat, folded: CGFloat) = (96, ThumbnailSize.medium.sizeInPt)
-        /// How far the folded header rises into the navigation bar: the 48 pt picture a little
-        /// above the middle of the bar's row, the header's own 8 pt of padding above it (Figma
-        /// F3, then 8 pt higher on the phone).
-        static let barRise: CGFloat = 58
+        /// How far the folded header rises into the navigation bar: the top of the 48 pt picture
+        /// level with the top of the bar's 44 pt buttons, the header's own 8 pt of padding above
+        /// it (measured on the phone: 58 left the picture 4 pt lower than the buttons).
+        static let barRise: CGFloat = 62
 
         /// The name's line at rest, in `title200`.
         let nameHeight: CGFloat

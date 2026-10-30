@@ -78,8 +78,8 @@ The first build drew the header *into* the bar's row of buttons, the picture bet
 reading the bars' height from a `GeometryReader` that ignored the top safe area. That reader reported no inset at
 all: on the phone the picture sat against the top of the screen and the page started a bar's height too low. The
 picture now sits under the bar at rest, as asked after seeing it. Folded, the whole header rises by `barRise`
-(58 pt: the Figma F3 as adjusted by hand, then 8 pt higher once the folded picture went from 40 to 48 pt on the
-phone), so the picture sits a little above the middle of the bar's row; the rise is part of the fold's length, so the
+(62 pt: the Figma F3 as adjusted by hand, 8 pt higher once the folded picture went from 40 to 48 pt on the
+phone, then 4 pt more), so the top of the picture is level with the top of the bar's buttons; the rise is part of the fold's length, so the
 page stays glued to the header's foot until it is folded. The back button and « … » stay the system's, which keeps the swipe back; hiding
 the bar to draw our own would have lost it. Only the tabs take touches; the rest of the header lets them through.
 

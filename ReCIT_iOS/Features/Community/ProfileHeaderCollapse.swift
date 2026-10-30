@@ -36,16 +36,22 @@ struct ProfileHeaderCollapse: Equatable {
         return offset < distance / 2 ? 0 : distance
     }
 
-    /// The fold while the pager moves between two pages, each scrolled its own way: the first
-    /// page's at 0, the second's at 1, and in between as much of each as is on screen. The fold
-    /// is what is blended, not the offsets — halfway from a page scrolled 2 000 pt down to one at
-    /// rest is half folded, not still folded.
-    func progress(between first: CGFloat, and second: CGFloat, pagePosition: CGFloat) -> CGFloat {
-        Self.interpolate(
-            from: progress(at: first),
-            to: progress(at: second),
-            progress: min(max(pagePosition, 0), 1)
-        )
+    /// The fold while the pager moves between pages, each scrolled its own way: the first page's
+    /// at 0, the second's at 1, the third's at 2, and in between as much of the two pages the
+    /// pager stands between as is on screen. The fold is what is blended, not the offsets —
+    /// halfway from a page scrolled 2 000 pt down to one at rest is half folded, not still folded.
+    func progress(of offsets: [CGFloat], pagePosition: CGFloat) -> CGFloat {
+        Self.blend(offsets.map { progress(at: $0) }, at: pagePosition)
+    }
+
+    /// One value per page, blended between the two pages the pager stands between: `values[0]`
+    /// at 0, `values[1]` at 1, and so on. A position past either end holds the end's value.
+    static func blend(_ values: [CGFloat], at pagePosition: CGFloat) -> CGFloat {
+        guard let last = values.indices.last else { return 0 }
+        let position: CGFloat = min(max(pagePosition, 0), CGFloat(last))
+        let lower: Int = Int(position.rounded(.down))
+        let upper: Int = min(lower + 1, last)
+        return interpolate(from: values[lower], to: values[upper], progress: position - CGFloat(lower))
     }
 
     /// `from` at rest, `to` once folded.

@@ -3374,6 +3374,108 @@
         }
       }
     },
+    "user.presentation.empty %@" : {
+      "comment" : "Présentation tab of a reader's profile, when they wrote no bio. %@ is their username.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hasn’t written a bio yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n’a pas encore écrit de présentation"
+          }
+        }
+      }
+    },
+    "user.tab.inventory %lld" : {
+      "comment" : "Inventory tab of a reader's profile, with how many books they hold.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventory • %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventaire • %lld"
+          }
+        }
+      }
+    },
+    "user.tab.inventory.accessibility %lld" : {
+      "comment" : "VoiceOver label of user.tab.inventory, read without its bullet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventory, %lld items"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventaire, %lld éléments"
+          }
+        }
+      }
+    },
+    "user.tab.lists %lld" : {
+      "comment" : "Lists tab of a reader's profile, with how many lists I can see.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lists • %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listes • %lld"
+          }
+        }
+      }
+    },
+    "user.tab.lists.accessibility %lld" : {
+      "comment" : "VoiceOver label of user.tab.lists, read without its bullet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lists, %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listes, %lld"
+          }
+        }
+      }
+    },
+    "user.tab.presentation" : {
+      "comment" : "Third tab of a reader's profile, holding their bio.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Présentation"
+          }
+        }
+      }
+    },
     "work_form.anthology" : {
       "extractionState" : "manual",
       "localizations" : {

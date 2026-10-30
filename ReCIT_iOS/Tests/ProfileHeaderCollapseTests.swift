@@ -40,12 +40,30 @@ struct ProfileHeaderCollapseTests {
 
     @Test("Between two pages, the fold is blended, not the offsets")
     func progressBetweenPages() {
-        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: 0) == 1)
-        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: 0.5) == 0.5)
-        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: 1) == 0)
-        #expect(collapse.progress(between: 50, and: 100, pagePosition: 0.5) == 0.75)
-        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: -0.2) == 1)
-        #expect(collapse.progress(between: 2_000, and: 0, pagePosition: 1.3) == 0)
+        #expect(collapse.progress(of: [2_000, 0], pagePosition: 0) == 1)
+        #expect(collapse.progress(of: [2_000, 0], pagePosition: 0.5) == 0.5)
+        #expect(collapse.progress(of: [2_000, 0], pagePosition: 1) == 0)
+        #expect(collapse.progress(of: [50, 100], pagePosition: 0.5) == 0.75)
+        #expect(collapse.progress(of: [2_000, 0], pagePosition: -0.2) == 1)
+        #expect(collapse.progress(of: [2_000, 0], pagePosition: 1.3) == 0)
+    }
+
+    @Test("Across three pages, only the two the pager stands between count")
+    func progressAcrossThreePages() {
+        let offsets: [CGFloat] = [0, 2_000, 50]
+        #expect(collapse.progress(of: offsets, pagePosition: 0) == 0)
+        #expect(collapse.progress(of: offsets, pagePosition: 1) == 1)
+        #expect(collapse.progress(of: offsets, pagePosition: 1.5) == 0.75)
+        #expect(collapse.progress(of: offsets, pagePosition: 2) == 0.5)
+        #expect(collapse.progress(of: offsets, pagePosition: 2.4) == 0.5)
+        #expect(collapse.progress(of: [], pagePosition: 1) == 0)
+    }
+
+    @Test("Any value per page blends the same way")
+    func blend() {
+        #expect(ProfileHeaderCollapse.blend([0, 40, 10], at: 0.5) == 20)
+        #expect(ProfileHeaderCollapse.blend([0, 40, 10], at: 1.5) == 25)
+        #expect(ProfileHeaderCollapse.blend([7], at: 3) == 7)
     }
 
     @Test("Values move from their resting size to their folded one")

@@ -9,9 +9,9 @@ import SwiftUI
 import SwiftData
 
 /// A reader's profile, shaped like the Contacts card of Messages: a header held at the top —
-/// their picture, their name, their book count and the Inventaire | Listes tabs — that folds into
-/// the navigation bar as the page scrolls, and never stays half folded. Their bio and étagères
-/// scroll away under it; the tab's content follows. See PRD 0031 and the « Détail d'un amis »
+/// their picture, their name and the Inventaire • 540 | Listes • 4 | Présentation tabs — that
+/// folds into the navigation bar as the page scrolls, and never stays half folded. Their étagères
+/// scroll away under it; the tab's content follows, their bio being Présentation's. See PRD 0031 and the « Détail d'un amis »
 /// section of the Figma file (`865:17783`).
 ///
 /// Each tab is a page of its own (`UserProfilePage`), an inset grouped `List` whose first row is
@@ -116,8 +116,8 @@ struct UserDetailView: View {
             }
     }
 
-    /// Inventaire and Listes side by side, a swipe or a tab's name apart. Someone whose books are
-    /// closed to me has no tabs, and a single page.
+    /// Inventaire, Listes and Présentation side by side, a swipe or a tab's name apart. Someone
+    /// whose books are closed to me has no tabs, and a single page, their bio at its top.
     @ViewBuilder
     private var pages: some View {
         if showsInventory {
@@ -126,7 +126,7 @@ struct UserDetailView: View {
                 isFrozen: shelfFocus.isArmed,
                 scrollOffset: scrollOffset
             ) { page in
-                profilePage(page, showsShelves: true) {
+                profilePage(page, showsShelves: true, showsBio: false) {
                     tabContent(page)
                 }
             }
@@ -134,7 +134,7 @@ struct UserDetailView: View {
             // page the safe area, which its list keeps its rows clear of.
             .ignoresSafeArea()
         } else {
-            profilePage(.inventory, showsShelves: false) {
+            profilePage(.inventory, showsShelves: false, showsBio: true) {
                 Section {
                     RelationActionsView(user: user)
 
@@ -154,12 +154,14 @@ struct UserDetailView: View {
     private func profilePage(
         _ page: UserProfileTab,
         showsShelves: Bool,
+        showsBio: Bool,
         @ViewBuilder content: () -> some View
     ) -> some View {
         UserProfilePage(
             user: user,
             page: page,
             showsShelves: showsShelves,
+            showsBio: showsBio,
             expandedHeaderHeight: expandedHeaderHeight,
             headerTop: headerTop,
             collapse: collapse,
@@ -178,6 +180,8 @@ struct UserDetailView: View {
             }
         case .lists:
             UserListsTab(user: user, load: listsLoad, path: $path)
+        case .presentation:
+            UserPresentationTab(user: user)
         }
     }
 
@@ -187,6 +191,7 @@ struct UserDetailView: View {
         UserProfileStickyHeader(
             user: user,
             tab: showsInventory ? $tab : nil,
+            listsLoad: listsLoad,
             metrics: metrics,
             collapse: collapse,
             scrollOffset: scrollOffset

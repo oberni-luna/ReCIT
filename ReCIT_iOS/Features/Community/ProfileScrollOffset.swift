@@ -19,7 +19,8 @@ final class ProfileScrollOffset {
     private var offsets: [UserProfileTab: CGFloat] = [:]
     /// The pages whose scroll is idle — no finger on them, no deceleration, no bounce.
     private var busyPages: Set<UserProfileTab> = []
-    /// Where the pager stands: 0 on the first page, 1 on the second, in between during a swipe.
+    /// Where the pager stands: 0 on the first page, 1 on the second, 2 on the third, in between
+    /// during a swipe.
     var pagePosition: CGFloat = 0
 
     func offset(of page: UserProfileTab) -> CGFloat {
@@ -52,27 +53,24 @@ final class ProfileScrollOffset {
         isAtRest(page) && abs(pagePosition - Self.position(of: page)) < 0.001
     }
 
-    /// How far the header has folded, blended between the two pages while the pager moves.
+    /// How far the header has folded, blended between the two pages the pager stands between.
     func progress(in collapse: ProfileHeaderCollapse) -> CGFloat {
-        collapse.progress(
-            between: offset(of: .inventory),
-            and: offset(of: .lists),
-            pagePosition: pagePosition
-        )
+        collapse.progress(of: UserProfileTab.allCases.map(offset(of:)), pagePosition: pagePosition)
     }
 
     /// How far the page on screen is pulled down past its top, blended the same way.
     var pull: CGFloat {
-        ProfileHeaderCollapse.interpolate(
-            from: max(-offset(of: .inventory), 0),
-            to: max(-offset(of: .lists), 0),
-            progress: min(max(pagePosition, 0), 1)
+        ProfileHeaderCollapse.blend(
+            UserProfileTab.allCases.map { max(-offset(of: $0), 0) },
+            at: pagePosition
         )
     }
 
     /// Whether the page that holds most of the screen has passed under the folded header.
     func isContentUnder(in collapse: ProfileHeaderCollapse) -> Bool {
-        collapse.isContentUnder(at: offset(of: pagePosition < 0.5 ? .inventory : .lists))
+        let tabs: [UserProfileTab] = UserProfileTab.allCases
+        let index: Int = min(max(Int(pagePosition.rounded()), 0), tabs.count - 1)
+        return collapse.isContentUnder(at: offset(of: tabs[index]))
     }
 
     static func position(of page: UserProfileTab) -> CGFloat {

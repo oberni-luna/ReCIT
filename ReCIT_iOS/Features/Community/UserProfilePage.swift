@@ -2,8 +2,8 @@
 //  UserProfilePage.swift
 //  ReCIT_iOS
 //
-//  One page of a reader's profile — Inventaire or Listes — as an inset grouped `List` of its
-//  own: room for the header, their bio, their étagères, then the tab's content. The two pages
+//  One page of a reader's profile — Inventaire, Listes or Présentation — as an inset grouped
+//  `List` of its own: room for the header, their étagères, then the tab's content. The pages
 //  sit side by side in a pager, so a tab is changed by a swipe as well as by its name, and the
 //  change slides a whole page in instead of having one list swap its sections, which drew the
 //  rows sliding and fading under the header.
@@ -23,6 +23,8 @@ struct UserProfilePage<Content: View>: View {
     let page: UserProfileTab
     /// Their étagères, on the profile of someone whose books are open to me.
     let showsShelves: Bool
+    /// Their bio at the top, centred, on the single page of someone who has no Présentation tab.
+    let showsBio: Bool
     /// The header's height unfolded — what the page is pushed down by.
     let expandedHeaderHeight: CGFloat
     /// Where the header starts on screen at rest.
@@ -67,7 +69,7 @@ struct UserProfilePage<Content: View>: View {
                         firstRowTop = top
                     }
 
-                if let bio = user.bio, bio.isEmpty == false {
+                if showsBio, let bio = user.bio, bio.isEmpty == false {
                     Text(bio)
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundSecondary)

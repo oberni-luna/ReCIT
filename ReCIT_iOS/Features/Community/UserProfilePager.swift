@@ -2,7 +2,7 @@
 //  UserProfilePager.swift
 //  ReCIT_iOS
 //
-//  Inventaire and Listes side by side under a reader's profile header, turned by a swipe or by a
+//  Inventaire, Listes and Présentation side by side under a reader's profile header, turned by a swipe or by a
 //  tab's name — UIKit's own pager, `UIPageViewController`, as the Contacts card of Messages does.
 //
 //  Two SwiftUI pagers were tried first. A paging `ScrollView` let a finger's slant scroll the
@@ -12,8 +12,9 @@
 //
 //  Each page is a `UIHostingController`, given the screen's environment — the app's models, the
 //  store, the navigation — and the safe area by UIKit itself, so its list runs under the bars as
-//  any list does. Where the pager stands, 0 on the first page and 1 on the second, is written to
-//  `ProfileScrollOffset.pagePosition` as the finger moves, for the header to fold by.
+//  any list does. Where the pager stands, 0 on the first page, 1 on the second and 2 on the
+//  third, is written to `ProfileScrollOffset.pagePosition` as the finger moves, for the header to
+//  fold by.
 //
 
 import SwiftUI

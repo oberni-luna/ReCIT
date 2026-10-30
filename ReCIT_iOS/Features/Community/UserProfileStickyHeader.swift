@@ -4,9 +4,10 @@
 //
 //  The head of a reader's profile, held just under the navigation bar and folding as the page
 //  scrolls — the Contacts card of Messages. At rest: their picture at 96 pt, their name large
-//  under it, how many books they hold, and the Inventaire | Listes tabs. Folded: the picture at
-//  48 pt, risen into the bar's row between the back button and « … », the name small under it,
-//  the count gone, the tabs still there. From there on the page scrolls under it, behind the
+//  under it, and the Inventaire • 540 | Listes • 4 | Présentation tabs — how many books they hold
+//  is in the first tab, no longer a line under the name. Folded: the picture at 48 pt, risen into
+//  the bar's row between the back button and « … », the name small under it, the tabs still
+//  there. From there on the page scrolls under it, behind the
 //  bars' material, which reaches up under the bar, made transparent for it.
 //
 //  An overlay rather than anything of the bar's: a navigation bar's principal item cannot hold
@@ -34,7 +35,6 @@ struct UserProfileStickyHeader: View {
         /// What the name is scaled by once folded: down to `title50`, the size of an inline
         /// navigation bar's title, which is what the folded header stands in for.
         let foldedNameScale: CGFloat
-        let countHeight: CGFloat
 
         /// Read off the fonts at the text size the screen runs at, so the header's frames hold
         /// its text exactly — no smaller, which would have the text shrink to fit on top of its
@@ -44,7 +44,6 @@ struct UserProfileStickyHeader: View {
             let title: UIFont = DesignSystem.TextStyle.title50.uiFont(for: dynamicTypeSize)
             nameHeight = name.lineHeight
             foldedNameScale = title.pointSize / name.pointSize
-            countHeight = DesignSystem.TextStyle.content300.uiFont(for: dynamicTypeSize).lineHeight
         }
 
         var nameScale: (rest: CGFloat, folded: CGFloat) {
@@ -56,8 +55,6 @@ struct UserProfileStickyHeader: View {
                 distance: (Self.avatar.rest - Self.avatar.folded)
                     + Self.barRise
                     + nameHeight * (1 - foldedNameScale)
-                    + countHeight
-                    + DesignSystem.Spacing.xxSmall.rawValue
             )
         }
     }
@@ -65,6 +62,8 @@ struct UserProfileStickyHeader: View {
     let user: User
     /// `nil` on the profile of someone whose books are closed to me: no tabs to show.
     var tab: Binding<UserProfileTab>?
+    /// Where the fetch of their lists stands, for the Listes tab's count.
+    let listsLoad: UserListsTab.Load
     let metrics: Metrics
     let collapse: ProfileHeaderCollapse
     /// Read here and nowhere else on the screen, so a scroll redraws this header only.
@@ -96,7 +95,12 @@ struct UserProfileStickyHeader: View {
                 .allowsHitTesting(false)
 
             if let tab {
-                UserProfileTabPicker(selection: tab, pagePosition: scrollOffset.pagePosition)
+                UserProfileTabPicker(
+                    selection: tab,
+                    pagePosition: scrollOffset.pagePosition,
+                    user: user,
+                    listsLoad: listsLoad
+                )
                     .padding(.top, .small)
             }
         }
@@ -128,14 +132,6 @@ struct UserProfileStickyHeader: View {
                 .frame(height: metrics.nameHeight * folding(metrics.nameScale))
                 .padding(.top, .small)
                 .accessibilityAddTraits(.isHeader)
-
-            UserItemCountText(user: user)
-                .textStyle(.content300)
-                .foregroundStyle(.foregroundSecondary)
-                .frame(height: metrics.countHeight * (1 - progress))
-                .opacity(max(1 - progress * 2, 0))
-                .clipped()
-                .padding(.top, folding((DesignSystem.Spacing.xxSmall.rawValue, 0)))
         }
     }
 

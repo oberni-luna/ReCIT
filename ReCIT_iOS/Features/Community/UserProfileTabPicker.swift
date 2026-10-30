@@ -2,9 +2,10 @@
 //  UserProfileTabPicker.swift
 //  ReCIT_iOS
 //
-//  Inventaire | Listes, at the foot of a reader's profile header: two words, the selected one
-//  in a glass capsule — the tabs of the Contacts card, quieter than a segmented control. See
-//  PRD 0031.
+//  Inventaire • 540 | Listes • 4 | Présentation, at the foot of a reader's profile header: three
+//  labels, the selected one in a glass capsule — the tabs of the Contacts card, quieter than a
+//  segmented control. The capsules sit side by side with 12 pt of padding each, so that three
+//  of them, counts included, fit a phone's width. See PRD 0031 and `UserProfileTabLabel`.
 //
 //  The capsule follows the pager rather than the selection: it slides under the finger as a page
 //  is swiped, between the two words by as much of each page as is on screen, and glides to a word
@@ -15,8 +16,12 @@ import SwiftUI
 
 struct UserProfileTabPicker: View {
     @Binding var selection: UserProfileTab
-    /// Where the pager stands: 0 on the first tab, 1 on the second, in between during a swipe.
+    /// Where the pager stands: 0 on the first tab, 1 on the second, 2 on the third, in between
+    /// during a swipe.
     let pagePosition: CGFloat
+    /// Whose counts the labels give.
+    let user: User
+    let listsLoad: UserListsTab.Load
 
     /// Each word's frame in the picker, which the capsule is drawn between.
     @State private var labelFrames: [UserProfileTab: CGRect] = [:]
@@ -49,17 +54,20 @@ struct UserProfileTabPicker: View {
     }
 
     var body: some View {
-        HStack(spacing: .xSmall) {
+        HStack(spacing: .zero) {
             ForEach(UserProfileTab.allCases, id: \.self) { tab in
                 let isHighlighted: Bool = tab == highlighted
                 Button {
                     // The pager turns to it, and the capsule with the pager.
                     selection = tab
                 } label: {
-                    Text(tab.title)
+                    UserProfileTabLabel(tab: tab, user: user, listsLoad: listsLoad)
                         .textStyle(.action300)
                         .foregroundStyle(isHighlighted ? .foregroundDefault : .foregroundSecondary)
-                        .padding(.horizontal, .medium)
+                        // At the largest text sizes, shrunk rather than wrapped or cut.
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .padding(.horizontal, .sMedium)
                         .padding(.vertical, .small)
                         .contentShape(.capsule)
                 }

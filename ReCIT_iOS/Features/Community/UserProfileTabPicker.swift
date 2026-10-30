@@ -3,8 +3,8 @@
 //  ReCIT_iOS
 //
 //  Inventaire | Listes, pinned under the navigation bar once the header and the étagères have
-//  scrolled away. It carries the screen's own ground, so the rows pass under it rather than
-//  through it, and a hairline under it once it is pinned.
+//  scrolled away. No band of its own: a grey strip the width of the screen read as a bar
+//  stuck under the bar, so the control floats over the rows that pass beneath it.
 //
 
 import SwiftUI
@@ -23,7 +23,6 @@ struct UserProfileTabPicker: View {
         .labelsHidden()
         .padding(.horizontal, .medium)
         .padding(.vertical, .small)
-        .background(DesignSystem.Color.backgroundForm.color)
         .accessibilityIdentifier("e2e.user.tabs")
     }
 }

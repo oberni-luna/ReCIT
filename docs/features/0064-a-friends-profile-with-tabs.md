@@ -14,8 +14,9 @@ The profile no longer opens under a navigation title that repeats the name. It o
   network, report) and shows no title;
 - **their étagères**, the carousel of 0019 unchanged, absent when they share none (F4);
 - **two tabs, Inventaire | Listes**, opening on Inventaire. Once the header and the étagères have scrolled away,
-  the tabs **stay pinned under the navigation bar**, on the screen's ground, and the tab's content scrolls under
-  them (F3).
+  the tabs **stay pinned under the navigation bar**, with no band of their own — the control floats over the
+  tab's content, which scrolls under it. The mock-up (F3) drew a grey band; seen on a phone, it read as a second
+  bar, and went.
 
 **Inventaire** is the list the profile always showed: the first-sync bar while the books arrive, the books as they
 come, « Emprunter à … » on a long press. Its header « Inventaire de X » went: the tab says it.

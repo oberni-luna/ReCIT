@@ -136,6 +136,10 @@ Five strings: `user.segment`, `user.lists.empty.title %@`, `user.lists.empty.mes
   The Listes tab, a friend's list read-only and the pressing of a book on an étagère inside the list still
   want a pass — in light and dark, with VoiceOver and the largest text sizes.
 - **The Figma mock-ups F1 to F5 show the first version**, to be redrawn once the header is approved.
+- **Figma proposes a third tab, Présentation (Bio)**, since 2026-10-30: the bio leaves the top of the page for it
+  (F6). The counts move into the tab labels, « Inventaire • 540 » and « Listes • 4 », and the line under the
+  name goes; the étagères show under Inventaire only. Implemented in
+  [0067](0067-a-friends-profile-presentation-tab.md).
 - **The e2e scenario** does not play this screen: it signs in to one account, and a friend's lists need two.
 - **Android**: not ported; the Android app was being worked on in another session.
 - The mock-up's avatar is a 48 px asset blown up to 96 pt.

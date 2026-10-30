@@ -2,6 +2,21 @@
 
 Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ; Figma en est le reflet.
 
+- **Proposition du 2026-10-30 — `Détail d'un amis` · Présentation** (`865:17783`, page `Réseau`, clair seul) : la
+  bio quitte le haut du profil d'un ami pour un troisième onglet, « Présentation » (« Bio » en anglais).
+  `Profile / Tabs` (`875:5287`) gagne l'onglet dans ses trois variantes et une valeur `Selected=Présentation`
+  (`880:5312`) ; les instances de `Profile / Header` suivent. La bio est retirée de F1 à F5 (les étagères
+  viennent juste sous l'en-tête, hauteurs des frames recalées) ; `F6 · Profil ami · Présentation` (`880:5337`) :
+  la bio dans une carte, alignée à gauche, en `foreground/secondary`, sous les étagères. Panneau `Spec · Détail
+  d’un ami` : items Étagères et Onglets réécrits, item `Présentation` (`880:5568`, avec l'état sans bio, non
+  maquetté). Second temps, le même jour : la ligne « 540 livres » quitte l'en-tête (State=Rest passe à 213 de
+  haut, les écrans au repos remontent de 25) ; les comptes entrent dans les libellés, « Inventaire • 540 » et
+  « Listes • 4 » (« Listes • 0 » en F5), par deux propriétés texte de `Profile / Tabs`, `Inventaire` et `Listes`.
+  Pour tenir dans l'écran, les capsules passent à `spacing/s-medium` de marge et `spacing/zero` entre elles :
+  382 pt avec 540 livres. Les étagères ne restent que sous l'onglet Inventaire (F2 et F6 sans bande).
+  Implémentée le même jour ([feature 0067](../features/0067-a-friends-profile-presentation-tab.md)) ; écarts
+  restants : aucun dans la structure — l'app réduit les libellés jusqu'à 70 % aux plus grandes tailles de texte,
+  ce que Figma ne montre pas. Aucun token nouveau.
 - **Proposition du 2026-10-29 — `Liste détails`** (`843:12721`, page `Liste`, à droite des trois sections de
   la page, clair seul) : le détail d'une liste en deux parties. En haut, un cover flow sans reflet ni compteur sur
   `background/form` — la couverture de face (172 × 258, `radius/book`, `Shadow/Thumbnail`) est la sélection, les

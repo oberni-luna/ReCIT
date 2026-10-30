@@ -53,14 +53,19 @@ struct EntityEdit: Equatable, Sendable {
         uri: String,
         labels: [String: String],
         properties: EditionProperties,
-        originalLanguage: String? = nil
+        originalLanguage: String? = nil,
+        preferredLanguage: String = ContentLanguage.preferred
     ) {
         self.uri = uri
         originalLabels = labels
         original = properties
         self.properties = properties
 
-        let shown: String? = EntityLabel.language(of: labels, originalLang: originalLanguage)
+        let shown: String? = EntityLabel.language(
+            of: labels,
+            originalLang: originalLanguage,
+            preferredLanguage: preferredLanguage
+        )
         let ordered: [String] = labels.keys.sorted { lhs, rhs in
             if lhs == shown { return true }
             if rhs == shown { return false }

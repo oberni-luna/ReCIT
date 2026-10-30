@@ -31,15 +31,6 @@ import Foundation
 
 @MainActor
 struct WorkEditionResolver {
-    /// The language the app reads in. Hard-coded, like the twelve other `"fr"` in this codebase;
-    /// a real preferred-language setting is a feature of its own (PRD 0014, Out of Scope).
-    ///
-    /// `nonisolated` because it is the default value of a parameter, and a default is evaluated
-    /// at the call site — which is not necessarily on the main actor, and which Swift 6 rejects
-    /// outright. A constant `String` has no state to protect, so there is nothing for the actor
-    /// to be guarding here.
-    nonisolated static let preferredLang: String = "fr"
-
     /// How many uris `by-uris` takes at once — the same batch size `EntityModel.fetchEntities`
     /// uses, so the two never disagree about what the server accepts.
     private static let batchSize: Int = 50
@@ -59,7 +50,7 @@ struct WorkEditionResolver {
         forWorkUri workUri: String,
         originalLang: String?,
         heldEditionUris: Set<String> = [],
-        preferredLang: String = Self.preferredLang
+        preferredLang: String = ContentLanguage.preferred
     ) async throws -> String? {
         let uris: [String] = try await editionUris(ofWork: workUri)
         guard uris.isEmpty == false else { return nil }
@@ -101,7 +92,7 @@ struct WorkEditionResolver {
         for batch in uris.splitInSubArrays(of: Self.batchSize) {
             let endpoint: String = "/api/entities/by-uris"
                 + "?uris=\(batch.joined(separator: "|"))"
-                + "&attributes=info|labels|claims|image&lang=\(Self.preferredLang)"
+                + "&attributes=info|labels|claims|image&lang=\(ContentLanguage.preferred)"
             let response: EditionCandidatesDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
             entities.merge(response?.entities ?? [:]) { current, _ in current }
         }

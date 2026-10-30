@@ -86,7 +86,7 @@ public class Work: Identifiable, Entity {
             publicationDate: publicationDateString?.parseToDate() ??
             publicationDateString?.parseToDate(dateFormat: "YYYY-MM"),
             authors: authors,
-            subtitle: entityDTO.descriptions?["fr"] ?? entityDTO.descriptions?["en"]
+            subtitle: EntityDescription.resolve(entityDTO.descriptions)
         )
     }
 
@@ -110,7 +110,7 @@ public class Work: Identifiable, Entity {
         if let publicationDate = publicationDateString?.parseToDate() ?? publicationDateString?.parseToDate(dateFormat: "YYYY-MM") {
             self.publicationDate = publicationDate
         }
-        if let subtitle = entityDTO.descriptions?["fr"] ?? entityDTO.descriptions?["en"] {
+        if let subtitle = EntityDescription.resolve(entityDTO.descriptions) {
             self.subtitle = subtitle
         }
     }

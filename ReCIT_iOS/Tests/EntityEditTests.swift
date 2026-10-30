@@ -26,7 +26,8 @@ struct EntityEditTests {
         .init(
             uri: workUri,
             labels: labels,
-            properties: .init(claims: claims, labels: names, catalogue: .work)
+            properties: .init(claims: claims, labels: names, catalogue: .work),
+            preferredLanguage: "fr"
         )
     }
 

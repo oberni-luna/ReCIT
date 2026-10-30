@@ -1,0 +1,1 @@
+Une liste s’ouvre sur ses couvertures, en défilé : commentez chaque livre, ajoutez-en un en le cherchant ou en le scannant, déplacez-le dans une autre liste. « Éditions » se filtre par langue. Un ISBN tapé dans Recherche ouvre directement son édition.

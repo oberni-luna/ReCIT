@@ -227,7 +227,8 @@ private fun LazyListScope.remote(
             )
         }
         null -> {
-            val works: List<SearchResult> = state.results.filter { it.type == SearchResult.Type.Works }
+            // The books — works, and the edition an ISBN names, which is a book too.
+            val works: List<SearchResult> = state.results.filter { it.type != SearchResult.Type.Humans }
             val humans: List<SearchResult> = state.results.filter { it.type == SearchResult.Type.Humans }
             resultGroup("works", R.string.inventory_search_results_works, works, onPush)
             resultGroup("humans", R.string.inventory_search_results_humans, humans, onPush)
@@ -256,6 +257,8 @@ private fun LazyListScope.resultGroup(
 
 private fun destinationFor(result: SearchResult): Destination = when (result.type) {
     SearchResult.Type.Works -> Destination.Book(BookAnchor.BestEditionOfWork(result.uri, result.label, result.image))
+    // The edition an ISBN named: the very book, nothing left to pick.
+    SearchResult.Type.Editions -> Destination.Book(BookAnchor.Edition(result.uri))
     SearchResult.Type.Humans -> Destination.Author(result.uri)
 }
 

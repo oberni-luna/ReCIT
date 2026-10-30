@@ -25,9 +25,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.SearchResult
+import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.UserRelation
+import studio.lunabee.nouveaurecit.data.search.IsbnQuery
 
 /**
  * `SearchTabView` + `SearchContent`'s state (features 0014, 0037): the field, its phase, the
@@ -141,7 +143,7 @@ class SearchViewModel(private val container: AppContainer) : ViewModel() {
         _remoteState.value = RemoteSearchState.Loading
         delay(DEBOUNCE_MILLIS)
         try {
-            val results: List<SearchResult> = container.search.search(next.submission.query, next.submission.types)
+            val results: List<SearchResult> = remoteResults(next.submission)
             _remoteState.value = RemoteSearchState.Loaded(results)
             answered = next
         } catch (cancellation: CancellationException) {
@@ -151,6 +153,31 @@ class SearchViewModel(private val container: AppContainer) : ViewModel() {
             answered = next
             container.errorReporter.report(error)
         }
+    }
+
+    /**
+     * What inventaire.io answers to [submission].
+     *
+     * **An ISBN is not searched, it is looked up.** `/api/search` reads one as a handful of numbers and
+     * finds every title holding a « 2 »; the website asks for the edition by its `isbn:` uri instead, and
+     * so does this — the scanner's call, `autocreate` included. An ISBN nothing knows comes back as no
+     * result. Only the people-only suggestion still searches the text: nobody is named with an ISBN.
+     */
+    private suspend fun remoteResults(submission: SearchSuggestion): List<SearchResult> {
+        val isbn: String? = IsbnQuery.isbn(submission.query).takeIf { submission.kind != SearchSuggestion.Kind.Humans }
+        if (isbn == null) return container.search.search(submission.query, submission.types)
+        val edition: EditionEntity = container.entities.refreshEdition("isbn:$isbn", autocreate = true) ?: return emptyList()
+        return listOf(
+            SearchResult(
+                id = edition.uri,
+                type = SearchResult.Type.Editions,
+                uri = edition.uri,
+                label = edition.title,
+                description = edition.authorNames.takeIf { it.isNotEmpty() }?.joinToString(", "),
+                image = edition.image,
+                score = 1.0,
+            ),
+        )
     }
 
     private data class SearchAttempt(val submission: SearchSuggestion, val count: Int)

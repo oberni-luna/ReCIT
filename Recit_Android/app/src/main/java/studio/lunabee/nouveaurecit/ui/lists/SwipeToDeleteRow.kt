@@ -26,7 +26,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 
 /**
  * `.swipeActions { Button("action.delete", systemImage: "trash") }`: swiping from the end reveals
- * « Supprimer » and runs [onDelete]. The writes behind it are server-first, so the row stays swiped
+ * « Supprimer », in red, and runs [onDelete]. The writes behind it are server-first, so the row stays swiped
  * while it runs and comes back when [onDelete] answers `false`; on success Room drops the row.
  */
 @Composable
@@ -52,13 +52,13 @@ internal fun SwipeToDeleteRow(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(RecitTheme.colors.backgroundError)
+                    .background(RecitTheme.colors.foregroundError)
                     .padding(horizontal = Spacing.medium),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xSmall, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(Icons.Default.Delete, contentDescription = null, tint = RecitTheme.colors.foregroundError, modifier = Modifier.size(20.dp))
-                Text(stringResource(R.string.action_delete), style = RecitTheme.typography.action300, color = RecitTheme.colors.foregroundError)
+                Icon(Icons.Default.Delete, contentDescription = null, tint = RecitTheme.colors.foregroundInverse, modifier = Modifier.size(20.dp))
+                Text(stringResource(R.string.action_delete), style = RecitTheme.typography.action300, color = RecitTheme.colors.foregroundInverse)
             }
         },
     ) {

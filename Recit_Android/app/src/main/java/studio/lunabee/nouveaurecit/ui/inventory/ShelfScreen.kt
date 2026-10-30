@@ -155,7 +155,10 @@ private fun visibilityLabel(visibility: ShelfVisibility): Int = when (visibility
     ShelfVisibility.Public -> R.string.shelf_detail_visibility_public
 }
 
-/** `.swipeActions(edge: .trailing, allowsFullSwipe: true)` — « Retirer de %@ ». */
+/**
+ * `.swipeActions(edge: .trailing, allowsFullSwipe: true)` — « Retirer de %@ », in red: the book leaves the
+ * étagère, and the accent's green read as a harmless action.
+ */
 @Composable
 private fun RemovableRow(row: ItemRow, shelfName: String, onOpen: () -> Unit, onPush: (Destination) -> Unit, onRemove: () -> Unit) {
     val dismissState: SwipeToDismissBoxState = rememberSwipeToDismissBoxState()
@@ -167,16 +170,16 @@ private fun RemovableRow(row: ItemRow, shelfName: String, onOpen: () -> Unit, on
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(RecitTheme.colors.backgroundTintedInverse)
+                    .background(RecitTheme.colors.foregroundError)
                     .padding(horizontal = Spacing.medium),
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                    Icon(Icons.Outlined.Outbox, contentDescription = null, tint = RecitTheme.colors.foregroundTintedInverse)
+                    Icon(Icons.Outlined.Outbox, contentDescription = null, tint = RecitTheme.colors.foregroundInverse)
                     Text(
                         text = stringResource(R.string.shelf_remove_from_named, shelfName),
                         style = RecitTheme.typography.action200,
-                        color = RecitTheme.colors.foregroundTintedInverse,
+                        color = RecitTheme.colors.foregroundInverse,
                     )
                 }
             }

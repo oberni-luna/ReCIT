@@ -41,7 +41,8 @@ aside.
   and **`ListSelectedTitle`**; then **`ListCommentRow`** and « Voir la fiche … », « Retirer de la liste » with « Ajouté
   le … » as its footer. `ListCommentRow`'s field holds four lines even when empty (`lineLimit(4...)`, since
   2026-10-30), so moving between books with comments of up to four lines no longer moves the rows below it; a longer
-  one still grows the field. Every row about the selected book sits in a **`ListCrossFade`** keyed on its uri. The add bar
+  one still grows the field. `ListSelectedTitle` likewise holds the height of a two-line title over a one-line byline,
+  its text on the bottom of it and cut beyond, so a work with no author moves nothing either. Every row about the selected book sits in a **`ListCrossFade`** keyed on its uri. The add bar
   goes through `formActionBar(isPresented:)`, with the forms' `.primary()` buttons; `.toolbar(.hidden, for: .tabBar)`. The selection is a **uri**, kept across
   changes of the list: the uri an add asked for, else the same one, else the one that took the removed element's place.
 - **`ListCoverFlowView`** — a horizontal `ScrollView` in a `GeometryReader`, with

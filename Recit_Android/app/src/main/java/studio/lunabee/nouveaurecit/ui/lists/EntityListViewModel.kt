@@ -89,6 +89,13 @@ class EntityListViewModel(
         selection.value = CoverFlowSelection.next(shownUris, shownUris, selection.value.selected, uri)
     }
 
+    /** What the scanner or the search chose: added optimistically, the list landing on the first of it at once. */
+    fun add(uris: List<String>) {
+        val first: String = uris.firstOrNull() ?: return
+        requestSelection(first)
+        viewModelScope.launch { lists.addEntities(listId, uris) }
+    }
+
     /** Optimistic; written when the field is left. */
     fun updateComment(row: ListElementRowModel, comment: String) {
         viewModelScope.launch { lists.updateComment(row.elementId, comment) }

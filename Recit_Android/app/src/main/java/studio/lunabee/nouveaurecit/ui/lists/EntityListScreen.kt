@@ -65,6 +65,11 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
     }
     val state: EntityListViewModel.State by viewModel.state.collectAsStateWithLifecycle()
     var showsForm: Boolean by rememberSaveable { mutableStateOf(false) }
+    var showsSearch: Boolean by rememberSaveable { mutableStateOf(false) }
+    var isCommentFocused: Boolean by remember { mutableStateOf(false) }
+    val list: EntityListEntity? = state.list
+    val isAuthor: Boolean = list?.type == EntityListType.Author
+    val canAdd: Boolean = list != null && list.type != EntityListType.Publisher
 
     // Deleting from the form pops, and so does the list vanishing from Room: leave only once.
     var hasLeft: Boolean by remember { mutableStateOf(false) }
@@ -97,17 +102,34 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 },
             )
         },
+        // The add bar steps aside while the comment is written: the keyboard is not topped with two
+        // buttons that have nothing to do with typing.
+        bottomBar = {
+            if (canAdd && !isCommentFocused) {
+                ListAddBar(isAuthor = isAuthor, onScan = {}, onSearch = { showsSearch = true })
+            }
+        },
         containerColor = RecitTheme.colors.backgroundGrouped,
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
-            val list: EntityListEntity? = state.list
             when {
                 !state.isLoaded -> Unit
                 list == null || list.type == EntityListType.Publisher || state.rows.isEmpty() ->
                     EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
-                else -> ListCoverFlowContent(list, state, viewModel, navigator)
+                else -> ListCoverFlowContent(list, state, viewModel, navigator, onCommentFocusChange = { isCommentFocused = it })
             }
         }
+    }
+
+    if (showsSearch && list != null) {
+        ListAddSearchSheet(
+            listName = list.name,
+            isAuthor = isAuthor,
+            existingUris = state.rows.map { it.uri }.toSet(),
+            onAdd = viewModel::add,
+            onShow = viewModel::requestSelection,
+            onDismiss = { showsSearch = false },
+        )
     }
 
     if (showsForm) {
@@ -126,14 +148,13 @@ private fun ListCoverFlowContent(
     state: EntityListViewModel.State,
     viewModel: EntityListViewModel,
     navigator: Navigator,
+    onCommentFocusChange: (Boolean) -> Unit,
 ) {
     val isAuthor: Boolean = list.type == EntityListType.Author
     val messenger: Messenger = LocalMessenger.current
     val genericError: String = stringResource(R.string.error_generic)
     val scope: CoroutineScope = rememberCoroutineScope()
     val open: (String) -> Unit = { uri -> navigator.push(if (isAuthor) Destination.Author(uri) else Destination.Work(uri)) }
-    var isCommentFocused: Boolean by remember { mutableStateOf(false) }
-
     LazyColumn(
         modifier = Modifier.fillMaxSize().imePadding(),
         verticalArrangement = Arrangement.spacedBy(Spacing.medium),
@@ -159,7 +180,7 @@ private fun ListCoverFlowContent(
                     ListCommentField(
                         row = row,
                         isAuthor = isAuthor,
-                        onFocusChange = { isCommentFocused = it },
+                        onFocusChange = onCommentFocusChange,
                         onSave = { viewModel.updateComment(row, it) },
                     )
                 }

@@ -76,4 +76,9 @@ final class ProfileScrollOffset {
     static func position(of page: UserProfileTab) -> CGFloat {
         CGFloat(UserProfileTab.allCases.firstIndex(of: page) ?? 0)
     }
+
+    /// Held between the first page and the last, which a bounce at either end would pass.
+    static func clampedPosition(_ position: CGFloat) -> CGFloat {
+        min(max(position, 0), CGFloat(UserProfileTab.allCases.count - 1))
+    }
 }

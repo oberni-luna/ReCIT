@@ -110,8 +110,8 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
             return UserProfileTab.allCases[index]
         }
 
-        /// Reads the finger off the pager's scroll view, which rests with the page on screen in
-        /// its middle, one page width in: how far it is from there is how far the swipe has gone.
+        /// Reads the finger off the pager's scroll view: where the pages are laid in it says how
+        /// far the swipe has gone.
         func attach(to controller: UIPageViewController) {
             self.controller = controller
             scrollView = controller.view.subviews.lazy.compactMap { $0 as? UIScrollView }.first
@@ -122,16 +122,23 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
             }
         }
 
+        /// Measured on the page laid nearest the scroll's offset, not on
+        /// `viewControllers.first`: the pager hands that the destination as soon as the finger
+        /// lets go, while the offset still counts from the page left — the capsule then jumped
+        /// a whole tab until the page had settled.
         private func scrolled(_ scrollView: UIScrollView) {
             let width: CGFloat = scrollView.bounds.width
-            guard isTurningByName == false,
-                  width > 0,
-                  let shown = tab(of: controller?.viewControllers?.first)
-            else { return }
+            guard isTurningByName == false, width > 0 else { return }
 
-            let swipe: CGFloat = (scrollView.contentOffset.x - width) / width
-            let last: CGFloat = ProfileScrollOffset.position(of: UserProfileTab.allCases.last ?? shown)
-            scrollOffset.pagePosition = min(max(ProfileScrollOffset.position(of: shown) + swipe, 0), last)
+            let laidOut: [(index: Int, minX: CGFloat)] = pages.enumerated().compactMap { index, page in
+                guard page.isViewLoaded, page.view.isDescendant(of: scrollView) else { return nil }
+                return (index, page.view.convert(page.view.bounds, to: scrollView).minX)
+            }
+            let offset: CGFloat = scrollView.contentOffset.x
+            guard let nearest = laidOut.min(by: { abs($0.minX - offset) < abs($1.minX - offset) }) else { return }
+
+            let position: CGFloat = CGFloat(nearest.index) + (offset - nearest.minX) / width
+            scrollOffset.pagePosition = ProfileScrollOffset.clampedPosition(position)
         }
 
         func setFrozen(_ isFrozen: Bool) {

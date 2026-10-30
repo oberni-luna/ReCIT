@@ -17,8 +17,9 @@ of Messages**:
 - **as the page scrolls, the header folds**: the picture shrinks to 48 pt and rises into the bar's row, centred between the back button and « … », the name to
   the size of an inline navigation bar's title (`title50`), 8 pt under the picture and 16 pt over the tab labels,
   the count fades out; the tabs stay. It **never rests half folded** — a scroll that ends
-  inside the fold is carried to the nearer end. Once folded, the page passes under it, behind a progressive blur
-  that fades out a little below the tabs, with a hairline at its foot;
+  inside the fold is carried to the nearer end. Once folded, the page passes under it, behind the bars' material
+  (`.bar`), which stops dead on a hairline at the header's foot. A pull past the top — or the bounce of a fling back
+  up — takes the header down with the page, so no gap opens under it;
 - **their bio and their étagères** (the carousel of 0019, absent when they share none, F4) scroll away under it,
   as the Contacts card's call buttons do; the tab's content follows.
 
@@ -78,14 +79,18 @@ phone), so the picture sits a little above the middle of the bar's row; the rise
 page stays glued to the header's foot until it is folded. The back button and « … » stay the system's, which keeps the swipe back; hiding
 the bar to draw our own would have lost it. Only the tabs take touches; the rest of the header lets them through.
 
-The fold is read with `onScrollGeometryChange` (offset counted from rest) and computed by `ProfileHeaderCollapse`,
+The fold is read with `onScrollGeometryChange` (offset counted from rest) into `ProfileScrollOffset`, an
+`@Observable` object read by the header alone: as `@State` of the screen, every frame of a scroll re-evaluated the
+whole page, books included, and the header stuttered as it unfolded. It is computed by `ProfileHeaderCollapse`,
 pure and tested: the progress, when the page is under the header, and where a scroll left inside the fold comes to
 rest, which `ProfileHeaderSnapBehavior` (a `ScrollTargetBehavior`) applies. The fold's length is known before it
 happens, from the header's own metrics: the picture's 56 pt, the bar rise, and the line heights of the name and
 the count read off the fonts at the screen's text size (`Metrics(dynamicTypeSize:)`). The name is scaled as a
 whole from `title200` down to `title50` in a frame exactly as tall as its scaled line — an earlier frame sized from
 a guess was shorter than the line, so `minimumScaleFactor` shrank the name a second time and the gaps around it
-opened. The backdrop reuses `VariableBlurView`, with its private-API caveat.
+opened. The backdrop was first `VariableBlurView`, fading out
+24 pt below the header; on the phone a backdrop that stops on its hairline read better, and it is now the system
+`.bar` material.
 
 The tabs are `UserProfileTabPicker`, Buttons over a `matchedGeometryEffect` capsule; the glass is
 `View.glassCapsule()` and the edge effect `View.topScrollEdgeEffectHidden()`, both in `View+glass.swift`. The rows are the forms' and the book screen's,

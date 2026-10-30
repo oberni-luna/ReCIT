@@ -17,12 +17,6 @@ import SwiftData
 /// An inset grouped `List`, so the books and the lists sit in the system's own sections, corners
 /// and separators. Its first row is as tall as the unfolded header, which lies over it.
 struct UserDetailView: View {
-    /// Where the page's scroll stands, as `onScrollGeometryChange` reports it.
-    private struct ScrollPlace: Equatable {
-        let offset: CGFloat
-        let topInset: CGFloat
-    }
-
     @Environment(UserModel.self) private var userModel
     @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
@@ -33,8 +27,10 @@ struct UserDetailView: View {
     @State private var isConfirmingRemoval: Bool = false
     @State private var tab: UserProfileTab = .inventory
     @State private var listsLoad: UserListsTab.Load = .loading
-    /// The page's scroll, counted from rest, and the scroll view's top inset it is counted from.
-    @State private var scroll: ScrollPlace = .init(offset: 0, topInset: 0)
+    /// The page's scroll, counted from rest — never read by this body, so a scroll redraws the
+    /// header alone — and the scroll view's top inset it is counted from, which barely moves.
+    @State private var scrollOffset: ProfileScrollOffset = .init()
+    @State private var scrollTopInset: CGFloat = 0
     /// The header's height unfolded — what the page is pushed down by.
     @State private var expandedHeaderHeight: CGFloat = 0
     /// Where the header and the list's first row start on screen, at rest: the list puts some
@@ -65,11 +61,6 @@ struct UserDetailView: View {
         metrics.collapse
     }
 
-    /// Exactly at rest — not folding, and not pulled down past the top either.
-    private var isAtRest: Bool {
-        abs(scroll.offset) < 0.5
-    }
-
     var body: some View {
         List {
             Section {
@@ -79,7 +70,7 @@ struct UserDetailView: View {
                 Color.clear
                     .frame(height: max(expandedHeaderHeight - (firstRowTop - headerTop), 0))
                     .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
-                        guard isAtRest else { return }
+                        guard scrollOffset.isAtRest else { return }
                         firstRowTop = top
                     }
 
@@ -133,15 +124,17 @@ struct UserDetailView: View {
         }
         .listStyle(.insetGrouped)
         .environment(\.defaultMinListRowHeight, 0)
-        .onScrollGeometryChange(for: ScrollPlace.self) { geometry in
-            .init(
-                offset: geometry.contentOffset.y + geometry.contentInsets.top,
-                topInset: geometry.contentInsets.top
-            )
-        } action: { _, place in
-            scroll = place
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top
+        } action: { _, offset in
+            scrollOffset.value = offset
         }
-        .scrollTargetBehavior(ProfileHeaderSnapBehavior(collapse: collapse, topInset: scroll.topInset))
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentInsets.top
+        } action: { _, inset in
+            scrollTopInset = inset
+        }
+        .scrollTargetBehavior(ProfileHeaderSnapBehavior(collapse: collapse, topInset: scrollTopInset))
         .overlay(alignment: .top) {
             header
         }
@@ -204,11 +197,11 @@ struct UserDetailView: View {
             user: user,
             tab: showsInventory ? $tab : nil,
             metrics: metrics,
-            progress: collapse.progress(at: scroll.offset),
-            isContentUnder: collapse.isContentUnder(at: scroll.offset)
+            collapse: collapse,
+            scrollOffset: scrollOffset
         )
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-            guard isAtRest else { return }
+            guard scrollOffset.isAtRest else { return }
             expandedHeaderHeight = frame.height
             headerTop = frame.minY
         }

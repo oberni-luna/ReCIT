@@ -6,8 +6,8 @@
 //  scrolls — the Contacts card of Messages. At rest: their picture at 96 pt, their name large
 //  under it, how many books they hold, and the Inventaire | Listes tabs. Folded: the picture at
 //  48 pt, risen into the bar's row between the back button and « … », the name small under it,
-//  the count gone, the tabs still there. From there on the page scrolls under it, behind a blur
-//  that reaches up under the bar, which is made transparent for it.
+//  the count gone, the tabs still there. From there on the page scrolls under it, behind the
+//  bars' material, which reaches up under the bar, made transparent for it.
 //
 //  An overlay rather than anything of the bar's: a navigation bar's principal item cannot hold
 //  a 96 pt picture. The back button and « … » stay the system's, which keeps the swipe back.
@@ -66,8 +66,24 @@ struct UserProfileStickyHeader: View {
     /// `nil` on the profile of someone whose books are closed to me: no tabs to show.
     var tab: Binding<UserProfileTab>?
     let metrics: Metrics
-    let progress: CGFloat
-    let isContentUnder: Bool
+    let collapse: ProfileHeaderCollapse
+    /// Read here and nowhere else on the screen, so a scroll redraws this header only.
+    let scrollOffset: ProfileScrollOffset
+
+    private var progress: CGFloat {
+        collapse.progress(at: scrollOffset.value)
+    }
+
+    private var isContentUnder: Bool {
+        collapse.isContentUnder(at: scrollOffset.value)
+    }
+
+    /// How far the page is pulled down past its top — by a finger, or by the bounce of a fling
+    /// back up. The header goes down with it, as the Contacts card does, instead of staying put
+    /// while a gap opens under it.
+    private var pull: CGFloat {
+        max(-scrollOffset.value, 0)
+    }
 
     private func folding(_ values: (rest: CGFloat, folded: CGFloat)) -> CGFloat {
         ProfileHeaderCollapse.interpolate(from: values.rest, to: values.folded, progress: progress)
@@ -90,7 +106,7 @@ struct UserProfileStickyHeader: View {
             backdrop
         }
         // Rising as it folds, so the page under it stays glued to its foot until it is folded.
-        .offset(y: -Metrics.barRise * progress)
+        .offset(y: pull - Metrics.barRise * progress)
     }
 
     private var identity: some View {
@@ -151,26 +167,18 @@ struct UserProfileStickyHeader: View {
         .accessibilityHidden(true)
     }
 
-    /// Nothing at rest — nothing is behind the header yet. Once the page passes under it, a blur
-    /// from the top of the screen, fading out a little below the tabs, and a hairline at its
-    /// foot.
+    /// Nothing at rest — nothing is behind the header yet. Once the page passes under it, the
+    /// bars' own material from the top of the screen down to the header's foot, where it stops
+    /// on a hairline, as a navigation bar does.
     private var backdrop: some View {
-        ZStack(alignment: .bottom) {
-            VariableBlurView(maxRadius: 20, strongEdge: .top, fadeSpan: 0.25)
-                .overlay {
-                    LinearGradient(
-                        colors: [DesignSystem.Color.backgroundForm.color.opacity(0.8), .clear],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                }
-                .padding(.bottom, -DesignSystem.Spacing.large.rawValue)
-
-            Divider()
-        }
-        .opacity(isContentUnder ? 1 : 0)
-        .animation(.easeOut(duration: 0.2), value: isContentUnder)
-        .ignoresSafeArea(edges: .top)
-        .allowsHitTesting(false)
+        Rectangle()
+            .fill(.bar)
+            .overlay(alignment: .bottom) {
+                Divider()
+            }
+            .opacity(isContentUnder ? 1 : 0)
+            .animation(.easeOut(duration: 0.15), value: isContentUnder)
+            .ignoresSafeArea(edges: .top)
+            .allowsHitTesting(false)
     }
 }

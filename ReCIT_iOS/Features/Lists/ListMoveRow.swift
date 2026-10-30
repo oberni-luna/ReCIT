@@ -25,8 +25,14 @@ struct ListMoveRow: View {
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
+    @Environment(UserModel.self) private var userModel
 
-    @Query(sort: \EntityList.name) private var lists: [EntityList]
+    @Query(sort: \EntityList.name) private var storedLists: [EntityList]
+
+    /// Mine only: a friend's lists, stored for their profile, are not mine to file into.
+    private var lists: [EntityList] {
+        storedLists.filter { $0.isCreated(byMe: userModel.myUser?._id) }
+    }
 
     @State private var isMoving: Bool = false
 

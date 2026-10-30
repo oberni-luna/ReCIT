@@ -12,7 +12,13 @@ struct EntityListView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(ListModel.self) var listModel
     @Environment(SyncStatusStore.self) private var syncStatus
-    @Query(sort: \EntityList.name) var allLists: [EntityList]
+    @Environment(UserModel.self) private var userModel
+    @Query(sort: \EntityList.name) private var storedLists: [EntityList]
+
+    /// Mine only: a friend's lists, stored for their profile, belong on their profile.
+    private var allLists: [EntityList] {
+        storedLists.filter { $0.isCreated(byMe: userModel.myUser?._id) }
+    }
 
     @State private var searchText: String = ""
     @State private var path: NavigationPath = .init()

@@ -46,7 +46,8 @@ struct DeleteAccountView: View {
         return .init(
             books: items.count(where: { $0.ownerId == myId }),
             shelves: shelves.count(where: { $0.ownerId == myId }),
-            lists: lists.count,
+            // A friend's lists, stored for their profile, are not lost with my account.
+            lists: lists.filter { $0.isCreated(byMe: userModel.myUser?._id) }.count,
             activeTransactions: transactions.count(where: \.isCurrent)
         )
     }

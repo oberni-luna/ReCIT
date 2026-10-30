@@ -25,20 +25,41 @@ final class ListModel: OptimisticMutating {
         self.errorReporter = errorReporter
     }
 
+    /// Syncs **my** lists. The lists stored before `EntityList.creatorId` existed are mine too,
+    /// so this sync is the one allowed to prune them.
     func syncLists(forUser: User, modelContext: ModelContext) async throws {
-        let listsDTO: ListsDTO? = try await apiService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(forUser._id)&with-elements=true", debug: true)
+        try await syncLists(createdBy: forUser._id, claimsUnstamped: true, modelContext: modelContext)
+    }
+
+    /// Syncs the lists a friend lets me see, for their profile. The server applies the
+    /// visibility; nothing is filtered here.
+    func syncFriendLists(of user: User, modelContext: ModelContext) async throws {
+        try await syncLists(createdBy: user._id, claimsUnstamped: false, modelContext: modelContext)
+    }
+
+    /// The answer holds one reader's lists and nobody else's, so the deletion pass is scoped to
+    /// that reader: without it, opening a friend's profile would delete every list of mine.
+    private func syncLists(createdBy creatorId: String, claimsUnstamped: Bool, modelContext: ModelContext) async throws {
+        let listsDTO: ListsDTO? = try await apiService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(creatorId)&with-elements=true", debug: true)
         guard let listsDTO else { return }
 
         let baseUrl: String = apiService.baseUrl()
         // Upsert in place (never delete+reinsert) so any open list view stays reactive.
-        try modelContext.upsert(
+        let synced: [EntityList] = try modelContext.upsert(
             listsDTO.lists,
             dtoID: { $0._id },
             modelID: { (list: EntityList) in list._id },
             make: { EntityList(listDTO: $0, baseUrl: baseUrl) },
             update: { list, dto in list.update(listDTO: dto, baseUrl: baseUrl, modelContext: modelContext) },
-            deleteMissing: true
+            deleteMissing: true,
+            scope: { list in
+                list.creatorId == creatorId || (claimsUnstamped && list.creatorId == nil)
+            }
         )
+        // Stamped from the request when the answer does not say: these are the creator's lists.
+        for list in synced where list.creatorId == nil {
+            list.creatorId = creatorId
+        }
         try modelContext.save()
     }
 

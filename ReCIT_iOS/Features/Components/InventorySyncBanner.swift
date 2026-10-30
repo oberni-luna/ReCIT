@@ -6,8 +6,7 @@
 //  received, the bar, and what has arrived out of what. The books themselves fill in below it
 //  as they come, which is what the last sentence promises. See docs/features/0027.
 //
-//  Card-free: the inventory wraps it in a card of its own, a friend's profile gives it a
-//  `List` row.
+//  Card-free: the inventory and a friend's profile each wrap it in a card of their own.
 //
 
 import SwiftUI

@@ -17457,6 +17457,91 @@
         }
       }
     },
+    "list.detail.comment.other" : {
+      "comment" : "Above the comment on an element of a list that is not mine, which can only be read.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commentaire"
+          }
+        }
+      }
+    },
+    "user.lists.empty.title %@" : {
+      "comment" : "Lists tab of a reader's profile, when they have no list I can see. %@ is their username.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ has no list yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n’a pas encore de liste"
+          }
+        }
+      }
+    },
+    "user.lists.empty.message" : {
+      "comment" : "Under user.lists.empty.title.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Their lists will show here as soon as there is one. You can browse them, not edit them."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses listes apparaîtront ici dès qu’il y en aura une. Vous pourrez les parcourir, pas les modifier."
+          }
+        }
+      }
+    },
+    "user.lists.failed %@" : {
+      "comment" : "Lists tab of a reader's profile, when their lists could not be fetched and none is stored. %@ is their username.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@’s lists could not be loaded"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les listes de %@ n’ont pas pu être chargées"
+          }
+        }
+      }
+    },
+    "user.segment" : {
+      "comment" : "Accessibility label of the Inventory | Lists control on a reader's profile.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile sections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sections du profil"
+          }
+        }
+      }
+    },
     "welcome.app_name" : {
       "extractionState" : "manual",
       "localizations" : {

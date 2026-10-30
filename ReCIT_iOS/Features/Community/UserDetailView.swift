@@ -8,46 +8,66 @@
 import SwiftUI
 import SwiftData
 
+/// A reader's profile: their picture and name at the head instead of a navigation title, their
+/// étagères, then Inventaire | Listes — tabs that stay pinned under the navigation bar once the
+/// header and the étagères have scrolled away. See PRD 0031 and the « Détail d'un amis » section
+/// of the Figma file (`865:17783`).
+///
+/// A `ScrollView`, not a `List`: an inset grouped list does not pin its section headers, and the
+/// tabs have to stay. The rows are drawn on cards of their own (`CardRows`).
 struct UserDetailView: View {
     @Environment(UserModel.self) private var userModel
+    @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
-    /// Only so the list can hold still while a book is being picked off an étagère.
+    /// Only so the page can hold still while a book is being picked off an étagère.
     @Environment(ShelfFocusModel.self) private var shelfFocus
-    @Environment(InventoryModel.self) private var inventoryModel
 
-    @State private var nextNavigationDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
     @State private var isConfirmingRemoval: Bool = false
+    @State private var tab: UserProfileTab = .inventory
+    @State private var listsLoad: UserListsTab.Load = .loading
 
     let user: User
     @Binding var path: NavigationPath
 
+    private var isMe: Bool {
+        user._id == userModel.myUser?._id
+    }
+
     /// Mine, or a friend's: the two cases where there are books to show. Everyone else's
     /// inventory is closed until the relation is, which is what the empty state says.
     private var showsInventory: Bool {
-        user._id == userModel.myUser?._id || user.relation == .friend
+        isMe || user.relation == .friend
     }
 
     var body: some View {
-        List {
-            Section {
-                UserHeaderView(user: user)
-            }
+        ScrollView {
+            LazyVStack(spacing: DesignSystem.Spacing.large.rawValue, pinnedViews: [.sectionHeaders]) {
+                UserProfileHeader(user: user)
+                    .padding(.top, .small)
 
-            if showsInventory {
-                // Their étagères sit between who they are and what they own, which is the
-                // order the two are read in: a shelf says how the library is arranged, the
-                // list below says what is in it.
-                UserShelvesSection(user: user, path: $path)
-                inventorySection
-            } else {
-                Section {
+                if showsInventory {
+                    // Their étagères sit between who they are and what they own, which is the
+                    // order the two are read in: a shelf says how the library is arranged, the
+                    // tabs below say what is in it.
+                    UserShelvesSection(user: user, path: $path)
+
+                    Section {
+                        switch tab {
+                        case .inventory:
+                            UserInventoryTab(user: user, path: $path) { item in
+                                borrowFromItem = item
+                            }
+                        case .lists:
+                            UserListsTab(user: user, load: listsLoad, path: $path)
+                        }
+                    } header: {
+                        UserProfileTabPicker(selection: $tab)
+                    }
+                } else {
                     RelationActionsView(user: user)
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
+                        .padding(.horizontal, .medium)
 
-                Section {
                     EmptyStateView(
                         glyph: "person",
                         title: "network.private_inventory.title",
@@ -55,16 +75,22 @@ struct UserDetailView: View {
                     )
                     .padding(.vertical, .large)
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
             }
+            .padding(.bottom, .large)
         }
-        .applyListBackground()
+        .applyListBackground(.backgroundForm)
         // Frozen while a book is being picked off an étagère, so the slide moves the
         // selection and not the page — the same rule the inventory's own carousel follows.
         .scrollDisabled(shelfFocus.isArmed)
-        .navigationTitle("nav.user")
+        // The name heads the page; the bar keeps the way back and « … ». The title stays set
+        // for what reads it elsewhere — the back button's long-press menu.
+        .navigationTitle(user.username)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(removing: .title)
         .toolbar { toolbarContent }
+        .task(id: user._id) {
+            await syncLists()
+        }
         // The maquette draws no confirmation, and this adds one: unfriending is the only
         // gesture of the whole flow that loses something — the relation has to be asked for
         // again, and the books go with it. Every other destructive action in the app asks
@@ -101,47 +127,20 @@ struct UserDetailView: View {
         }
     }
 
-    @ViewBuilder
-    private var inventorySection: some View {
-        let syncState: InventoryFirstSyncState = inventoryModel.firstSyncState(for: user)
-        Section {
-            // The same bar as their cell in the Profil, and the books already received under
-            // it: a friend's inventory is read as it arrives, not after.
-            if syncState != .synced {
-                InventorySyncBanner(
-                    title: "sync.inventory.friend.title \(user.username)",
-                    state: syncState
-                )
-                .padding(.vertical, .xSmall)
-            }
-            if syncState == .synced && user.items.isEmpty {
-                Text("inventory.empty")
-            } else {
-                ForEach(user.items) { item in
-                    Button {
-                        path.append(NavigationDestination.book(anchor: .item(item)))
-                    } label: {
-                        InventoryCell(item: item, filterParameter: .userInventory)
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        if item.ownerId != userModel.myUser?._id {
-                            if item.transaction == .inventorying {
-                                Button("community.owner_not_lending \(user.username)", systemImage: "hand.raised.slash") { }
-                                    .disabled(true)
-                            } else {
-                                Button("action.borrow_from_user \(user.username)", systemImage: "hand.wave") {
-                                    borrowFromItem = item
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } header: {
-            Text("user.inventory.header \(user.username)")
-                .textStyle(.action200)
-                .foregroundStyle(.foregroundSecondary)
+    /// A friend's lists are fetched each time their profile opens — not at launch, where every
+    /// friend's would be, for a tab most profiles are never switched to. What the store already
+    /// holds shows in the meantime. Mine are synced at launch, with the rest of my data.
+    private func syncLists() async {
+        guard showsInventory, isMe == false else {
+            listsLoad = .loaded
+            return
+        }
+
+        do {
+            try await listModel.syncFriendLists(of: user, modelContext: modelContext)
+            listsLoad = .loaded
+        } catch {
+            listsLoad = .failed
         }
     }
 

@@ -24,6 +24,11 @@
 //  the cover flow goes under the navigation bar, and the add bar steps aside so that the keyboard
 //  is not topped with two buttons that have nothing to do with typing.
 //
+//  **A friend's list is read, not written.** Opened from their profile, the same screen keeps the
+//  covers, the title and their comment, and drops everything that writes: the add bar (the tab
+//  bar stays), « Mon commentaire », « Déplacer » and « Retirer de la liste ». Derived from the
+//  list's creator, never passed in. See PRD 0031.
+//
 //  See PRD 0029 and the `Liste détails` section of the Figma file (`843:12721`).
 //
 
@@ -39,6 +44,7 @@ struct ListCoverFlowScreen: View {
     @Environment(EntityModel.self) private var entityModel
     @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
+    @Environment(UserModel.self) private var userModel
 
     @Query private var items: [EntityListItem]
 
@@ -81,6 +87,11 @@ struct ListCoverFlowScreen: View {
         liveItems.first { $0.uri == selectedURI }
     }
 
+    /// Whether anything on this screen may write to the list.
+    private var isMine: Bool {
+        list.isCreated(byMe: userModel.myUser?._id)
+    }
+
     /// The room left under the list while the comment is written, when the keyboard's own height
     /// is not known yet.
     private static let minimumKeyboardRoom: CGFloat = 320
@@ -104,7 +115,7 @@ struct ListCoverFlowScreen: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .formActionBar(isPresented: isCommentFocused == false) {
+        .formActionBar(isPresented: isMine && isCommentFocused == false) {
             ListAddBar(
                 listType: list.type,
                 onScan: { isPresentingScanner = true },
@@ -127,7 +138,8 @@ struct ListCoverFlowScreen: View {
                 onShow: show
             )
         }
-        .toolbar(.hidden, for: .tabBar)
+        // The add bar takes the tab bar's place; a list with nothing to add keeps the tab bar.
+        .toolbar(isMine ? .hidden : .automatic, for: .tabBar)
         .toolbar {
             // The comment spans lines, so the return key starts a new one: this is the way to
             // say the comment is done, and leaving the field is what writes it.
@@ -200,43 +212,51 @@ struct ListCoverFlowScreen: View {
                 // margin; before it the section keeps the list's margins.
                 .listSectionHorizontalMargins(0)
 
-                Section {
-                    if let selectedItem {
-                        ListCrossFade(id: selectedItem.uri) {
-                            ListCommentRow(
+                if isMine {
+                    Section {
+                        if let selectedItem {
+                            ListCrossFade(id: selectedItem.uri) {
+                                ListCommentRow(
+                                    item: selectedItem,
+                                    listType: list.type,
+                                    isFocused: $isCommentFocused,
+                                    onEdit: { commentEdits += 1 }
+                                )
+                            }
+                            .background {
+                                ListKeyboardReveal(trigger: commentEdits, keyboardTop: keyboardTop)
+                            }
+
+                            // No way to the element's page here: the cover in front opens it.
+                            ListMoveRow(
                                 item: selectedItem,
-                                listType: list.type,
-                                isFocused: $isCommentFocused,
-                                onEdit: { commentEdits += 1 }
+                                list: list,
+                                isCommentFocused: isCommentFocused
                             )
                         }
-                        .background {
-                            ListKeyboardReveal(trigger: commentEdits, keyboardTop: keyboardTop)
-                        }
-
-                        // No way to the element's page here: the cover in front opens it.
-                        ListMoveRow(
-                            item: selectedItem,
-                            list: list,
-                            isCommentFocused: isCommentFocused
-                        )
                     }
-                }
 
-                if let selectedItem {
+                    if let selectedItem {
+                        Section {
+                            Button("list.detail.remove", role: .destructive) {
+                                remove(selectedItem)
+                            }
+                            .textStyle(.action300)
+                            .foregroundStyle(.foregroundError)
+                        } footer: {
+                            addedFooter(selectedItem)
+                        }
+                    }
+                } else if let selectedItem {
+                    // Their comment when they wrote one, and the day the element was added.
                     Section {
-                        Button("list.detail.remove", role: .destructive) {
-                            remove(selectedItem)
+                        if selectedItem.comment.isEmpty == false {
+                            ListCrossFade(id: selectedItem.uri) {
+                                ListReadOnlyCommentRow(comment: selectedItem.comment)
+                            }
                         }
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundError)
                     } footer: {
-                        ListCrossFade(id: selectedItem.uri) {
-                            Text("list.detail.added \(selectedItem.created.formatted(.dateTime.day().month(.wide).year()))")
-                                .textStyle(.footnote200)
-                                .foregroundStyle(.foregroundSecondary)
-                                .frame(maxWidth: .infinity)
-                        }
+                        addedFooter(selectedItem)
                     }
                 }
             }
@@ -256,6 +276,15 @@ struct ListCoverFlowScreen: View {
                         .listRowInsets(.init())
                 }
             }
+        }
+    }
+
+    private func addedFooter(_ item: EntityListItem) -> some View {
+        ListCrossFade(id: item.uri) {
+            Text("list.detail.added \(item.created.formatted(.dateTime.day().month(.wide).year()))")
+                .textStyle(.footnote200)
+                .foregroundStyle(.foregroundSecondary)
+                .frame(maxWidth: .infinity)
         }
     }
 

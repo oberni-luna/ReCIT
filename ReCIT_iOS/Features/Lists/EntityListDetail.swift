@@ -12,6 +12,8 @@ struct EntityListDetail: View {
     let listId: String
     @Binding var path: NavigationPath
 
+    @Environment(UserModel.self) private var userModel
+
     @Query private var matchingLists: [EntityList]
     @State private var presentEditForm: Bool = false
 
@@ -22,6 +24,13 @@ struct EntityListDetail: View {
     }
 
     private var list: EntityList? { matchingLists.first }
+
+    /// Whether this screen may write to the list. Derived from the list's creator, like an
+    /// étagère's owner in `ShelfDetailView`: a friend's list, opened from their profile, cannot
+    /// lie about whose it is.
+    private var isMine: Bool {
+        list?.isCreated(byMe: userModel.myUser?._id) ?? false
+    }
 
     /// Leaves when the list this screen is about stops existing.
     ///
@@ -63,7 +72,7 @@ struct EntityListDetail: View {
         .navigationTitle(list?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if list != nil {
+            if isMine {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("action.edit", systemImage: "pencil") {
                         presentEditForm = true

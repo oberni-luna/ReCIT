@@ -66,6 +66,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
     val state: EntityListViewModel.State by viewModel.state.collectAsStateWithLifecycle()
     var showsForm: Boolean by rememberSaveable { mutableStateOf(false) }
     var showsSearch: Boolean by rememberSaveable { mutableStateOf(false) }
+    var showsScanner: Boolean by rememberSaveable { mutableStateOf(false) }
     var isCommentFocused: Boolean by remember { mutableStateOf(false) }
     val list: EntityListEntity? = state.list
     val isAuthor: Boolean = list?.type == EntityListType.Author
@@ -106,7 +107,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
         // buttons that have nothing to do with typing.
         bottomBar = {
             if (canAdd && !isCommentFocused) {
-                ListAddBar(isAuthor = isAuthor, onScan = {}, onSearch = { showsSearch = true })
+                ListAddBar(isAuthor = isAuthor, onScan = { showsScanner = true }, onSearch = { showsSearch = true })
             }
         },
         containerColor = RecitTheme.colors.backgroundGrouped,
@@ -119,6 +120,16 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 else -> ListCoverFlowContent(list, state, viewModel, navigator, onCommentFocusChange = { isCommentFocused = it })
             }
         }
+    }
+
+    if (showsScanner && list != null) {
+        ListScanScreen(
+            listName = list.name,
+            existingUris = state.rows.map { it.uri }.toSet(),
+            onAdd = viewModel::add,
+            onShow = viewModel::requestSelection,
+            onDismiss = { showsScanner = false },
+        )
     }
 
     if (showsSearch && list != null) {

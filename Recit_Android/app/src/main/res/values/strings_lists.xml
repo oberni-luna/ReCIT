@@ -66,6 +66,10 @@
     <string name="list_add_choose_title">Ce livre réunit plusieurs œuvres</string>
     <string name="list_add_choose_message">Laquelle ajouter à « %1$s » ?</string>
     <string name="list_add_choose_all">Toutes les œuvres</string>
+    <string name="list_add_duplicate_title">Ce livre est déjà dans « %1$s »</string>
+    <string name="list_add_duplicate_message">inventaire.io ne garde qu’une fois chaque œuvre dans une liste.</string>
+    <string name="list_add_duplicate_show">Le voir</string>
+    <string name="list_add_duplicate_continue">Continuer</string>
 
     <!-- Form -->
     <string name="list_form_create_title">Créer une liste</string>

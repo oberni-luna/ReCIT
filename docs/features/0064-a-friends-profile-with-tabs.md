@@ -14,7 +14,7 @@ of Messages**:
   grey disc when they have none), their name large (`title200`), how many books they hold, and **two tabs,
   Inventaire | Listes**: two words, the selected one in a glass capsule (a material one before iOS 26) that slides
   to the other. The bar keeps the way back and « … » (remove from the network, report) and shows no title;
-- **as the page scrolls, the header folds**: the picture shrinks to 40 pt, the name to
+- **as the page scrolls, the header folds**: the picture shrinks to 40 pt and rises into the bar's row, centred between the back button and « … », the name to
   six tenths of its size, the count fades out; the tabs stay. It **never rests half folded** — a scroll that ends
   inside the fold is carried to the nearer end. Once folded, the page passes under it, behind a progressive blur
   that fades out a little below the tabs, with a hairline at its foot;
@@ -69,7 +69,10 @@ once folded the header's backdrop, which reaches up under the bar, is the only o
 The first build drew the header *into* the bar's row of buttons, the picture between the back button and « … »,
 reading the bars' height from a `GeometryReader` that ignored the top safe area. That reader reported no inset at
 all: on the phone the picture sat against the top of the screen and the page started a bar's height too low. The
-picture now sits under the bar, as asked after seeing it. The back button and « … » stay the system's, which keeps the swipe back; hiding
+picture now sits under the bar at rest, as asked after seeing it. Folded, the whole header rises by `barRise`
+(50 pt, read off the Figma F3 as adjusted by hand), so the 40 pt picture is centred on the bar's 44 pt row; the rise
+is part of the fold's length, so the page stays glued to the header's foot until it is folded. On iOS 26, whose bar
+is a few points taller, the picture may sit slightly high. The back button and « … » stay the system's, which keeps the swipe back; hiding
 the bar to draw our own would have lost it. Only the tabs take touches; the rest of the header lets them through.
 
 The fold is read with `onScrollGeometryChange` (offset counted from rest) and computed by `ProfileHeaderCollapse`,

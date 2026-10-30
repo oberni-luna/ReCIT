@@ -5,8 +5,9 @@
 //  The head of a reader's profile, held just under the navigation bar and folding as the page
 //  scrolls — the Contacts card of Messages. At rest: their picture at 96 pt, their name large
 //  under it, how many books they hold, and the Inventaire | Listes tabs. Folded: the picture at
-//  40 pt, the name small, the count gone, the tabs still there. From there on the page scrolls
-//  under it, behind a blur that reaches up under the bar, which is made transparent for it.
+//  40 pt, risen into the bar's row between the back button and « … », the name small under it,
+//  the count gone, the tabs still there. From there on the page scrolls under it, behind a blur
+//  that reaches up under the bar, which is made transparent for it.
 //
 //  An overlay rather than anything of the bar's: a navigation bar's principal item cannot hold
 //  a 96 pt picture. The back button and « … » stay the system's, which keeps the swipe back.
@@ -24,6 +25,10 @@ struct UserProfileStickyHeader: View {
     struct Metrics {
         static let avatar: (rest: CGFloat, folded: CGFloat) = (96, 40)
         static let nameScale: (rest: CGFloat, folded: CGFloat) = (1, 0.6)
+        /// How far the folded header rises into the navigation bar: enough for the 40 pt picture
+        /// to sit centred on the bar's 44 pt row, the header's own 8 pt of padding above it
+        /// (Figma, F3).
+        static let barRise: CGFloat = 50
 
         let nameHeight: CGFloat
         let countHeight: CGFloat
@@ -31,6 +36,7 @@ struct UserProfileStickyHeader: View {
         var collapse: ProfileHeaderCollapse {
             .init(
                 distance: (Self.avatar.rest - Self.avatar.folded)
+                    + Self.barRise
                     + nameHeight * (Self.nameScale.rest - Self.nameScale.folded)
                     + countHeight
                     + DesignSystem.Spacing.xxSmall.rawValue
@@ -65,6 +71,8 @@ struct UserProfileStickyHeader: View {
         .background(alignment: .top) {
             backdrop
         }
+        // Rising as it folds, so the page under it stays glued to its foot until it is folded.
+        .offset(y: -Metrics.barRise * progress)
     }
 
     private var identity: some View {

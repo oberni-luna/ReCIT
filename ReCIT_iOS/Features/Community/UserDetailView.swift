@@ -36,29 +36,6 @@ struct UserDetailView: View {
     /// Where the header starts on screen at rest, read only while the page on screen is settled
     /// (see `UserProfilePage.firstRowTop`).
     @State private var headerTop: CGFloat?
-    /// The screen's safe area and the whole screen, on screen: the pages are as tall as the
-    /// screen, and the room at the foot of the safe area is the tab bar's, which they run under.
-    /// Inside the pager, a page is told neither — it would be as tall as the safe area, and stop
-    /// at the tab bar's top.
-    @State private var safeFrame: CGRect = .zero
-    @State private var screenFrame: CGRect = .zero
-
-    private var bottomSafeArea: CGFloat {
-        max(screenFrame.maxY - safeFrame.maxY, 0)
-    }
-
-    /// The tab as the pager's scroll position: a swipe that settles on a page selects its tab,
-    /// and a tab chosen by its name scrolls the pager to it.
-    private var pagerSelection: Binding<UserProfileTab?> {
-        .init(
-            get: { tab },
-            set: { page in
-                if let page {
-                    tab = page
-                }
-            }
-        )
-    }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -84,23 +61,7 @@ struct UserDetailView: View {
     }
 
     var body: some View {
-        // The safe area, as what the pages are measured against: a horizontal scroll view takes
-        // the height of what it holds, so it cannot be what the pages are sized from.
-        Color.clear
-            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                safeFrame = frame
-            }
-            .background {
-                // Measured inside `ignoresSafeArea`, where the frame is the screen's.
-                Color.clear
-                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                        screenFrame = frame
-                    }
-                    .ignoresSafeArea()
-            }
-            .overlay {
-                pages
-            }
+        pages
             .overlay(alignment: .top) {
                 header
             }
@@ -160,35 +121,20 @@ struct UserDetailView: View {
     @ViewBuilder
     private var pages: some View {
         if showsInventory {
-            ScrollView(.horizontal) {
-                HStack(spacing: .zero) {
-                    ForEach(UserProfileTab.allCases, id: \.self) { page in
-                        profilePage(page, showsShelves: true, bottomMargin: bottomSafeArea) {
-                            tabContent(page)
-                        }
-                        .frame(width: screenFrame.width, height: screenFrame.height)
-                        .id(page)
-                    }
+            UserProfilePager(
+                selection: $tab,
+                isFrozen: shelfFocus.isArmed,
+                scrollOffset: scrollOffset
+            ) { page in
+                profilePage(page, showsShelves: true) {
+                    tabContent(page)
                 }
-                .scrollTargetLayout()
             }
-            .scrollTargetBehavior(.paging)
-            .scrollPosition(id: pagerSelection)
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
-            .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                geometry.contentOffset.x / max(geometry.containerSize.width, 1)
-            } action: { _, position in
-                scrollOffset.pagePosition = position
-            }
-            // Edge to edge, so the pages run under the bars as a list does: within the safe
-            // area, the pager would clip them at the tab bar's top. The header's room is the
-            // pages' first row, and the tab bar's a margin each page is given.
+            // Edge to edge, so the pages run under the bars as a list does; UIKit hands each
+            // page the safe area, which its list keeps its rows clear of.
             .ignoresSafeArea()
-            // Frozen while a book is being picked off an étagère, like the pages' own scroll.
-            .scrollDisabled(shelfFocus.isArmed)
         } else {
-            profilePage(.inventory, showsShelves: false, bottomMargin: 0) {
+            profilePage(.inventory, showsShelves: false) {
                 Section {
                     RelationActionsView(user: user)
 
@@ -208,7 +154,6 @@ struct UserDetailView: View {
     private func profilePage(
         _ page: UserProfileTab,
         showsShelves: Bool,
-        bottomMargin: CGFloat,
         @ViewBuilder content: () -> some View
     ) -> some View {
         UserProfilePage(
@@ -217,7 +162,6 @@ struct UserDetailView: View {
             showsShelves: showsShelves,
             expandedHeaderHeight: expandedHeaderHeight,
             headerTop: headerTop,
-            bottomMargin: bottomMargin,
             collapse: collapse,
             scrollOffset: scrollOffset,
             path: $path,
@@ -237,7 +181,8 @@ struct UserDetailView: View {
         }
     }
 
-    /// Under the navigation bar: an overlay of the safe area, over the pages that run past it.
+    /// Under the navigation bar, in the safe area: an overlay of the pages, laid out where they
+    /// would be had they not run past it.
     private var header: some View {
         UserProfileStickyHeader(
             user: user,

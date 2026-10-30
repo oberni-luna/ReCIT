@@ -1,8 +1,9 @@
 # A friend's profile: Inventaire and Listes as pages, changed by a swipe
 
-Shipped on 2026-10-30, on the branch `android-1.7.0`, in an autopilot run: one slice, no PRD, no issue. It reworks
-how the tabs of [0064](0064-a-friends-profile-with-tabs.md) change; the header, the étagères, the lists and what
-they show are as 0064 left them.
+Shipped on 2026-10-30, on the branch `android-1.7.0`: one slice in an autopilot run, no PRD, no issue, then the
+pager redone in UIKit the same day after a pass on a phone. It reworks how the tabs of
+[0064](0064-a-friends-profile-with-tabs.md) change; the header, the étagères, the lists and what they show are as
+0064 left them. The model is the Contacts card of Messages: a header above a pager, each page scrolling on its own.
 
 ## What it does
 
@@ -11,7 +12,7 @@ books' rows slid and faded under the header while the lists' rows took their pla
 
 The two tabs are now **two pages side by side**:
 
-- **a tab's name scrolls to its page**, the glass capsule sliding to it as before;
+- **a tab's name turns to its page**, the glass capsule sliding to it as before;
 - **a horizontal swipe anywhere on the page** turns to the other one, and selects its tab once it settles;
 - **each page keeps its own scroll.** Deep in the books, a swipe to Listes finds the lists where they were left —
   at their top the first time — and the header **unfolds or folds along with the swipe**, by how much of each page
@@ -26,9 +27,14 @@ The page still freezes while a book is being picked off an étagère, the swipe 
   header's room as its first row, the bio, the étagères, then the tab's content — with the snap of the fold, the
   scroll reporting and the freeze. The profile of someone whose books are closed to me is one such page, with no
   pager.
-- **The pager** is a horizontal `ScrollView` of the two pages, `.scrollTargetBehavior(.paging)`, its
-  `scrollPosition(id:)` bound to the tab, its offset written to `ProfileScrollOffset.pagePosition` (0 on
-  Inventaire, 1 on Listes).
+- **`UserProfilePager`** (new) is UIKit's pager, a `UIPageViewController` (`.scroll`, horizontal) in a
+  `UIViewControllerRepresentable`, bound to the tab. Each page is a `UIHostingController` whose root view is
+  given the screen's whole environment (`.environment(\.self, context.environment)`) — the app's models, the
+  store, the `NavigationStack` that a list's `NavigationLink` pushes onto — and is replaced at every update of the
+  screen, so the pages keep their state. The coordinator reads the pager's scroll view by KVO on `contentOffset` and
+  writes `ProfileScrollOffset.pagePosition` (0 on Inventaire, 1 on Listes) as the finger moves; a tab chosen by
+  its name is turned to with `setViewControllers(_:direction:animated:)` and the header animated to it; a swipe
+  that turns the page selects its tab in `didFinishAnimating`. Frozen through the scroll view's `isScrollEnabled`.
 - **`ProfileScrollOffset`** keeps one offset per page, which pages are scrolling, and the pager's position. The
   header reads the fold, the pull and whether content is under it from there: the fold is blended between the two
   pages — **the fold, not the offsets**, so halfway from a page 2 000 pt down to one at rest is half folded —
@@ -38,17 +44,19 @@ The page still freezes while a book is being picked off an étagère, the swipe 
   swipe ends — read only with the pager settled, the Listes page sat 40 pt low. The header is read only once the
   pager has settled on the page on screen (`isSettled`).
 - **Edge to edge.** The pager ignores the safe area, so the pages pass under the navigation and tab bars as the
-  `List` did. Inside it a page is told no safe area: it would be as tall as the safe area and stop at the tab bar's
-  top. So the screen is laid out on a `Color.clear` that fills the safe area, the pager and the header are its
-  overlays, and two frames are measured on it — its own and, through a background that ignores the safe area, the
-  screen's. The pages are as tall as the screen, and the difference at the foot, the tab bar's room, is each page's
-  bottom `contentMargins`.
+  `List` did. UIKit hands each hosted page the safe area itself, so each list keeps its last rows clear of the tab
+  bar with nothing measured.
 
 ## Decisions
 
-- **A paging `ScrollView`, not `TabView(.page)`.** The `TabView` was tried first: inside the safe area it cut the
-  pages at the tab bar's top; made to ignore the safe area, its pages slid down by up to 40 pt as the list scrolled,
-  pushing the end of the list off the screen. A `ScrollView` exposes its offset, its position and `scrollDisabled`.
+- **`UIPageViewController`, after two SwiftUI pagers.** A paging horizontal `ScrollView` shipped first: on a
+  phone, a finger's slant scrolled the page up or down while it turned — no direction lock against the lists
+  inside — and the pager fell back to the first page in one frame. `TabView(.page)`, tried on the phone after it,
+  turned well by a swipe but not when a tab's name was chosen, and on the simulator its pages slid down by up to
+  40 pt once made to ignore the safe area. UIKit's pager locks the swipe to one direction, turns when asked, and
+  gives its pages the safe area.
+- **Not Fitness Park's `SessionDetailView`**, looked at as a model: it is one vertical `ScrollView` whose pinned
+  section header holds the tabs and whose content is swapped without animation — no pager, no swipe.
 - **Each page keeps its own scroll; the incoming page is not aligned on the header.** Aligning it — scrolling the
   other page to the fold, as some apps do — would move a page the reader is not looking at, and lose where it was.
 - **The étagères are drawn twice**, once per page. A carousel shared above both pages would not scroll with
@@ -56,10 +64,14 @@ The page still freezes while a book is being picked off an étagère, the swipe 
 
 ## Not done, not verified
 
-- **Seen only in a throwaway harness**, on the iPhone 17 simulator in dark: a made-up friend with six or thirty
-  books and three lists, no étagère, no tab bar, no back stack. Never seen signed in against inventaire.io.
-- **Not checked:** the swipe back from the screen's left edge while on Inventaire, a swipe started on the étagères'
-  carousel (the carousel should win), the profile inside the Profil sheet, light mode, the largest text sizes,
-  VoiceOver, iOS 18, iPhone Duo.
-- The capsule moves when the tab changes, at the end of a swipe — it does not follow the finger.
+- **The UIKit pager is seen only in a throwaway harness**, on the iPhone 17 simulator in dark: a made-up friend with
+  thirty books and three lists, no étagère, no tab bar. Checked there: a tab's name turns the page, a swipe turns
+  it and selects the tab, the header folds and unfolds with the page on screen, a list opens through its
+  `NavigationLink`, the swipe back from the left edge pops the screen, the end of the books clears the home
+  indicator. Installed on a phone for a pass with a real finger, not yet reported on.
+- A finger put on a list still decelerating stops it, as anywhere in UIKit, and that touch does not turn the page.
+- **Not checked:** a swipe started on the étagères' carousel (the carousel should win), pressing a book on an
+  étagère inside a hosted page (the focus overlay reads global frames), the profile inside the Profil sheet, light
+  mode, the largest text sizes, VoiceOver, iOS 18, iPhone Duo.
+- The capsule moves when the tab changes, at the end of a swipe — it does not follow the finger as Messages' does.
 - e2e not run (it does not play this screen anyway). Android: not ported.

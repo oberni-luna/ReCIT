@@ -27,9 +27,6 @@ struct UserProfilePage<Content: View>: View {
     let expandedHeaderHeight: CGFloat
     /// Where the header starts on screen at rest.
     let headerTop: CGFloat?
-    /// The bars' room at the foot of the screen, given back to the list as a margin: in the pager
-    /// the page runs under the tab bar, and no longer sees that safe area on its own.
-    let bottomMargin: CGFloat
     let collapse: ProfileHeaderCollapse
     /// Written here, read by the header alone — never by this body, so a scroll redraws the
     /// header only.
@@ -100,8 +97,6 @@ struct UserProfilePage<Content: View>: View {
         }
         .listStyle(.insetGrouped)
         .environment(\.defaultMinListRowHeight, 0)
-        .contentMargins(.bottom, bottomMargin, for: .scrollContent)
-        .contentMargins(.bottom, bottomMargin, for: .scrollIndicators)
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y + geometry.contentInsets.top
         } action: { _, offset in

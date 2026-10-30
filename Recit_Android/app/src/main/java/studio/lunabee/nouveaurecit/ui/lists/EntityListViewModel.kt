@@ -2,6 +2,7 @@ package studio.lunabee.nouveaurecit.ui.lists
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.data.db.EntityListItemEntity
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
 import studio.lunabee.nouveaurecit.data.lists.CoverFlowSelection
+import studio.lunabee.nouveaurecit.data.lists.ListMoveDestination
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 
 /**
@@ -45,6 +47,9 @@ class EntityListViewModel(
         val list: EntityListEntity? = null,
         val rows: List<ListElementRowModel> = emptyList(),
         val selectedUri: String? = null,
+        /** Where « Déplacer dans une autre liste » can take the selected element; empty, the row is hidden. */
+        val destinations: List<ListMoveDestination> = emptyList(),
+        val isMoving: Boolean = false,
     ) {
         val selectedRow: ListElementRowModel? get() = rows.firstOrNull { it.uri == selectedUri }
     }
@@ -66,8 +71,28 @@ class EntityListViewModel(
     /** The uris of the rows the selection was last worked out against. */
     private var shownUris: List<String> = emptyList()
 
-    val state: StateFlow<State> = combine(content, selection) { current, selected ->
-        State(isLoaded = current.isLoaded, list = current.list, rows = current.rows, selectedUri = selected.selected)
+    private val isMoving: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    val state: StateFlow<State> = combine(content, selection, lists.observeLists(), isMoving) { current, selected, all, moving ->
+        val list: EntityListEntity? = current.list
+        val uri: String? = selected.selected
+        State(
+            isLoaded = current.isLoaded,
+            list = list,
+            rows = current.rows,
+            selectedUri = uri,
+            destinations = if (list == null || uri == null) {
+                emptyList()
+            } else {
+                ListMoveDestination.destinations(
+                    uri = uri,
+                    currentListId = list.id,
+                    type = list.type,
+                    candidates = all.map { entry -> ListMoveDestination.Candidate(entry.list.id, entry.list.name, entry.list.type, entry.elements.map { it.uri }.toSet()) },
+                )
+            },
+            isMoving = moving,
+        )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, State())
 
     init {
@@ -94,6 +119,26 @@ class EntityListViewModel(
         val first: String = uris.firstOrNull() ?: return
         requestSelection(first)
         viewModelScope.launch { lists.addEntities(listId, uris) }
+    }
+
+    /**
+     * « Déplacer dans une autre liste »: server-first. Returns whether it went through; [onError] says why
+     * not. The element leaves the cover flow once the server has answered.
+     */
+    suspend fun move(row: ListElementRowModel, destination: ListMoveDestination, onError: (Throwable) -> Unit): Boolean {
+        if (isMoving.value) return false
+        isMoving.value = true
+        return try {
+            lists.moveElement(uri = row.uri, comment = row.comment, sourceId = listId, destinationId = destination.id)
+            true
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            onError(error)
+            false
+        } finally {
+            isMoving.value = false
+        }
     }
 
     /** Optimistic; written when the field is left. */

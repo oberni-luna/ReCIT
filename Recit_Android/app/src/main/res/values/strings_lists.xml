@@ -41,6 +41,9 @@
     <string name="list_detail_comment_placeholder_author">Pourquoi cet·te auteur·ice est dans la liste…</string>
     <string name="list_detail_remove">Retirer de la liste</string>
     <string name="list_detail_added">Ajouté le %1$s</string>
+    <string name="list_detail_move">Déplacer dans une autre liste</string>
+    <string name="list_detail_move_already">Déjà dans cette liste</string>
+    <string name="list_detail_moved_to_named">Déplacé dans « %1$s »</string>
     <string name="list_detail_add_work">Ajouter un livre</string>
     <string name="list_detail_add_author">Ajouter un·e auteur·ice</string>
     <string name="list_detail_add_scan">Scanner</string>

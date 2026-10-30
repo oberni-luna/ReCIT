@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.OptimisticRunner
 import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.designsystem.CornerRadius
@@ -117,7 +118,14 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 !state.isLoaded -> Unit
                 list == null || list.type == EntityListType.Publisher || state.rows.isEmpty() ->
                     EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
-                else -> ListCoverFlowContent(list, state, viewModel, navigator, onCommentFocusChange = { isCommentFocused = it })
+                else -> ListCoverFlowContent(
+                    list = list,
+                    state = state,
+                    viewModel = viewModel,
+                    navigator = navigator,
+                    isCommentFocused = isCommentFocused,
+                    onCommentFocusChange = { isCommentFocused = it },
+                )
             }
         }
     }
@@ -159,11 +167,13 @@ private fun ListCoverFlowContent(
     state: EntityListViewModel.State,
     viewModel: EntityListViewModel,
     navigator: Navigator,
+    isCommentFocused: Boolean,
     onCommentFocusChange: (Boolean) -> Unit,
 ) {
     val isAuthor: Boolean = list.type == EntityListType.Author
     val messenger: Messenger = LocalMessenger.current
     val genericError: String = stringResource(R.string.error_generic)
+    val movedTo: String = stringResource(R.string.list_detail_moved_to_named)
     val scope: CoroutineScope = rememberCoroutineScope()
     val open: (String) -> Unit = { uri -> navigator.push(if (isAuthor) Destination.Author(uri) else Destination.Work(uri)) }
     LazyColumn(
@@ -195,6 +205,24 @@ private fun ListCoverFlowContent(
                         onSave = { viewModel.updateComment(row, it) },
                     )
                 }
+            }
+        }
+        val selected: ListElementRowModel? = state.selectedRow
+        if (selected != null && state.destinations.isNotEmpty()) {
+            item(key = "move") {
+                // No way to the element's page here: the cover in front opens it.
+                ListMoveRow(
+                    destinations = state.destinations,
+                    isMoving = state.isMoving,
+                    enabled = !isCommentFocused && !OptimisticRunner.isOptimistic(selected.elementId),
+                    onMove = { destination ->
+                        scope.launch {
+                            if (viewModel.move(selected, destination) { messenger.showError(genericError, it.localizedMessage) }) {
+                                messenger.show(movedTo.format(destination.name))
+                            }
+                        }
+                    },
+                )
             }
         }
         item(key = "remove") {

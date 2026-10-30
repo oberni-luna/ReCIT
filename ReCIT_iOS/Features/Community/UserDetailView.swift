@@ -38,8 +38,7 @@ struct UserDetailView: View {
     /// The header's height unfolded — what the page is pushed down by.
     @State private var expandedHeaderHeight: CGFloat = 0
 
-    @ScaledMetric(relativeTo: .largeTitle) private var nameHeight: CGFloat = 40
-    @ScaledMetric(relativeTo: .body) private var countHeight: CGFloat = 24
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let user: User
     @Binding var path: NavigationPath
@@ -55,7 +54,7 @@ struct UserDetailView: View {
     }
 
     private var metrics: UserProfileStickyHeader.Metrics {
-        .init(nameHeight: nameHeight, countHeight: countHeight)
+        .init(dynamicTypeSize: dynamicTypeSize)
     }
 
     private var collapse: ProfileHeaderCollapse {

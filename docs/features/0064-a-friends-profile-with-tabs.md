@@ -15,7 +15,8 @@ of Messages**:
   Inventaire | Listes**: two words, the selected one in a glass capsule (a material one before iOS 26) that slides
   to the other. The bar keeps the way back and « … » (remove from the network, report) and shows no title;
 - **as the page scrolls, the header folds**: the picture shrinks to 40 pt and rises into the bar's row, centred between the back button and « … », the name to
-  six tenths of its size, the count fades out; the tabs stay. It **never rests half folded** — a scroll that ends
+  the size of an inline navigation bar's title (`title50`), 8 pt under the picture and 16 pt over the tab labels,
+  the count fades out; the tabs stay. It **never rests half folded** — a scroll that ends
   inside the fold is carried to the nearer end. Once folded, the page passes under it, behind a progressive blur
   that fades out a little below the tabs, with a hairline at its foot;
 - **their bio and their étagères** (the carousel of 0019, absent when they share none, F4) scroll away under it,
@@ -78,8 +79,11 @@ the bar to draw our own would have lost it. Only the tabs take touches; the rest
 The fold is read with `onScrollGeometryChange` (offset counted from rest) and computed by `ProfileHeaderCollapse`,
 pure and tested: the progress, when the page is under the header, and where a scroll left inside the fold comes to
 rest, which `ProfileHeaderSnapBehavior` (a `ScrollTargetBehavior`) applies. The fold's length is known before it
-happens, from the header's own metrics: the picture's 56 pt, the name's lost height (`@ScaledMetric`) and the
-count's. The backdrop reuses `VariableBlurView`, with its private-API caveat.
+happens, from the header's own metrics: the picture's 56 pt, the bar rise, and the line heights of the name and
+the count read off the fonts at the screen's text size (`Metrics(dynamicTypeSize:)`). The name is scaled as a
+whole from `title200` down to `title50` in a frame exactly as tall as its scaled line — an earlier frame sized from
+a guess was shorter than the line, so `minimumScaleFactor` shrank the name a second time and the gaps around it
+opened. The backdrop reuses `VariableBlurView`, with its private-API caveat.
 
 The tabs are `UserProfileTabPicker`, Buttons over a `matchedGeometryEffect` capsule; the glass is
 `View.glassCapsule()` and the edge effect `View.topScrollEdgeEffectHidden()`, both in `View+glass.swift`. Rows sit on cards of their own,

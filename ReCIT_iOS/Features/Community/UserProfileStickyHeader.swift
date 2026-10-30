@@ -24,20 +24,38 @@ struct UserProfileStickyHeader: View {
     /// goes before it has happened.
     struct Metrics {
         static let avatar: (rest: CGFloat, folded: CGFloat) = (96, 40)
-        static let nameScale: (rest: CGFloat, folded: CGFloat) = (1, 0.6)
         /// How far the folded header rises into the navigation bar: enough for the 40 pt picture
         /// to sit centred on the bar's 44 pt row, the header's own 8 pt of padding above it
         /// (Figma, F3).
         static let barRise: CGFloat = 50
 
+        /// The name's line at rest, in `title200`.
         let nameHeight: CGFloat
+        /// What the name is scaled by once folded: down to `title50`, the size of an inline
+        /// navigation bar's title, which is what the folded header stands in for.
+        let foldedNameScale: CGFloat
         let countHeight: CGFloat
+
+        /// Read off the fonts at the text size the screen runs at, so the header's frames hold
+        /// its text exactly — no smaller, which would have the text shrink to fit on top of its
+        /// scale, and no taller, which would open gaps around it.
+        init(dynamicTypeSize: DynamicTypeSize) {
+            let name: UIFont = DesignSystem.TextStyle.title200.uiFont(for: dynamicTypeSize)
+            let title: UIFont = DesignSystem.TextStyle.title50.uiFont(for: dynamicTypeSize)
+            nameHeight = name.lineHeight
+            foldedNameScale = title.pointSize / name.pointSize
+            countHeight = DesignSystem.TextStyle.content300.uiFont(for: dynamicTypeSize).lineHeight
+        }
+
+        var nameScale: (rest: CGFloat, folded: CGFloat) {
+            (1, foldedNameScale)
+        }
 
         var collapse: ProfileHeaderCollapse {
             .init(
                 distance: (Self.avatar.rest - Self.avatar.folded)
                     + Self.barRise
-                    + nameHeight * (Self.nameScale.rest - Self.nameScale.folded)
+                    + nameHeight * (1 - foldedNameScale)
                     + countHeight
                     + DesignSystem.Spacing.xxSmall.rawValue
             )
@@ -79,14 +97,18 @@ struct UserProfileStickyHeader: View {
         VStack(spacing: .zero) {
             avatar
 
+            // 8 pt under the picture and over the tabs' 8 pt, at rest and folded alike: the line
+            // keeps its own height and is scaled as a whole, in a frame as tall as the scaled
+            // line. A long name may still shrink to fit the width, never to fit the height.
             Text(user.username)
                 .textStyle(.title200)
                 .foregroundStyle(.foregroundDefault)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, .xxLarge)
-                .scaleEffect(folding(Metrics.nameScale))
-                .frame(height: metrics.nameHeight * folding(Metrics.nameScale))
+                .scaleEffect(folding(metrics.nameScale))
+                .frame(height: metrics.nameHeight * folding(metrics.nameScale))
                 .padding(.top, .small)
                 .accessibilityAddTraits(.isHeader)
 

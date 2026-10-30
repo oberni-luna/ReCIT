@@ -33,16 +33,23 @@ struct UserDetailView: View {
     @State private var scrollTopInset: CGFloat = 0
     /// The header's height unfolded — what the page is pushed down by.
     @State private var expandedHeaderHeight: CGFloat = 0
-    /// Where the header and the list's first row start on screen as the page first appears: the
-    /// list puts some room of its own above its first section, which the first row gives back.
+    /// Where the header and the list's first row start on screen at rest: the list puts some room
+    /// of its own above its first section, which the first row gives back.
     ///
-    /// **Taken once, and never again.** Measured whenever the page was at rest, the two raced
-    /// the scroll: a row's new position could be read before the offset saying the page had
-    /// moved, so the first row grew or shrank by the scroll of that frame — the page stood still
-    /// while the header folded, or sat 40 pt low after a bounce until the next reading put it
-    /// back with a jump. The list's own room does not change while the screen is up.
+    /// **Read only while the page is still.** Read whenever the offset said "at rest", they raced
+    /// the scroll: a row's new position could arrive before the offset saying the page had
+    /// moved, so the first row grew or shrank by that frame's scroll — the page stood still while
+    /// the header folded, or sat 40 pt low after a bounce, then jumped back. Read only once, they
+    /// caught the screen before the navigation bar had set its insets, and the list rose under
+    /// the header. So: whenever the scroll is idle and at rest, which holds through the screen's
+    /// arrival and never during a gesture or a bounce.
     @State private var headerTop: CGFloat?
     @State private var firstRowTop: CGFloat?
+    @State private var isScrollIdle: Bool = true
+
+    private var maySettleMeasures: Bool {
+        isScrollIdle && scrollOffset.isAtRest
+    }
 
     /// The list's own room above its first section, once both tops are known.
     private var listTopRoom: CGFloat {
@@ -82,7 +89,7 @@ struct UserDetailView: View {
                 Color.clear
                     .frame(height: max(expandedHeaderHeight - listTopRoom, 0))
                     .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
-                        guard firstRowTop == nil else { return }
+                        guard maySettleMeasures else { return }
                         firstRowTop = top
                     }
 
@@ -145,6 +152,9 @@ struct UserDetailView: View {
             geometry.contentInsets.top
         } action: { _, inset in
             scrollTopInset = inset
+        }
+        .onScrollPhaseChange { _, phase in
+            isScrollIdle = phase == .idle
         }
         .scrollTargetBehavior(ProfileHeaderSnapBehavior(collapse: collapse, topInset: scrollTopInset))
         .overlay(alignment: .top) {
@@ -213,12 +223,8 @@ struct UserDetailView: View {
             scrollOffset: scrollOffset
         )
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-            if headerTop == nil {
-                headerTop = frame.minY
-            }
-            // Its height moves only with the fold, which the offset drives, so the offset is
-            // never stale here: unfolded, the header is at its full height.
-            guard scrollOffset.isAtRest else { return }
+            guard maySettleMeasures else { return }
+            headerTop = frame.minY
             expandedHeaderHeight = frame.height
         }
     }

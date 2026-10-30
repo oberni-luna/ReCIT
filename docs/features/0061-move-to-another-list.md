@@ -55,5 +55,5 @@ liste »**.
   works lists and not the authors list. **No move was made**: the simulator's account is real data.
 - Not seen: a move for real, the SnackBar, the spinner, a greyed list, the error path, an authors list, dark mode,
   iOS 18.
-- Android not done. Figma's `Liste détails` frames still draw « Voir la fiche ».
+- Android: ported in [0062](0062-android-catches-up-with-1-7-0.md). Figma's `Liste détails` frames still draw « Voir la fiche ».
 - The end-to-end scenario was not run.

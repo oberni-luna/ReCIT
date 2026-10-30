@@ -95,7 +95,7 @@ Quatre chaînes en/fr : `editions.language.all`, `editions.language.count %lld` 
 
 - **Déduire la langue manquante** (du préfixe de l'ISBN, de la langue des libellés) : non, comme la spec le propose.
   5 613 éditions de *L'Appel de la forêt* restent sous « Langue non renseignée ».
-- **Android** : rien de porté.
+- **Android** : porté par la [feature 0062](0062-android-catches-up-with-1-7-0.md), sans les doublons ni la relecture quotidienne.
 - **Vu sur le simulateur** (iPhone 17, iOS 26, sombre, français) : le libellé, le menu, le passage du français à
   l'anglais, la revue des 6 paires anglaises, le choix gardé au retour. **Pas vu** : le clair, un téléphone en
   anglais, une œuvre sans édition dans la langue du téléphone, un appareil réel.

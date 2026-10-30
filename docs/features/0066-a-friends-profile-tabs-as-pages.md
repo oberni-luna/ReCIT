@@ -12,7 +12,9 @@ books' rows slid and faded under the header while the lists' rows took their pla
 
 The two tabs are now **two pages side by side**:
 
-- **a tab's name turns to its page**, the glass capsule sliding to it as before;
+- **a tab's name turns to its page**, the glass capsule gliding to it as the page turns;
+- **the capsule follows the finger** during a swipe, between the two words by as much of each page as is on screen,
+  as Messages' does; the word it is mostly under is drawn as the selected one;
 - **a horizontal swipe anywhere on the page** turns to the other one, and selects its tab once it settles;
 - **each page keeps its own scroll.** Deep in the books, a swipe to Listes finds the lists where they were left —
   at their top the first time — and the header **unfolds or folds along with the swipe**, by how much of each page
@@ -34,7 +36,12 @@ The page still freezes while a book is being picked off an étagère, the swipe 
   screen, so the pages keep their state. The coordinator reads the pager's scroll view by KVO on `contentOffset` and
   writes `ProfileScrollOffset.pagePosition` (0 on Inventaire, 1 on Listes) as the finger moves; a tab chosen by
   its name is turned to with `setViewControllers(_:direction:animated:)` and the header animated to it; a swipe
-  that turns the page selects its tab in `didFinishAnimating`. Frozen through the scroll view's `isScrollEnabled`.
+  that turns the page selects its tab in `didFinishAnimating`. A tab chosen by its name while a swipe is still
+  settling is kept and turned to once it has, instead of being lost under the page the swipe lands on. Frozen
+  through the scroll view's `isScrollEnabled`.
+- **`UserProfileTabPicker`** draws its capsule from `pagePosition` rather than from the selection: each word's frame
+  is measured in the picker, and the capsule is laid between the two the pager stands between. Turned to by name,
+  `pagePosition` is animated (`.snappy`), and the capsule glides with it; the `matchedGeometryEffect` goes.
 - **`ProfileScrollOffset`** keeps one offset per page, which pages are scrolling, and the pager's position. The
   header reads the fold, the pull and whether content is under it from there: the fold is blended between the two
   pages — **the fold, not the offsets**, so halfway from a page 2 000 pt down to one at rest is half folded —
@@ -68,10 +75,9 @@ The page still freezes while a book is being picked off an étagère, the swipe 
   thirty books and three lists, no étagère, no tab bar. Checked there: a tab's name turns the page, a swipe turns
   it and selects the tab, the header folds and unfolds with the page on screen, a list opens through its
   `NavigationLink`, the swipe back from the left edge pops the screen, the end of the books clears the home
-  indicator. Installed on a phone for a pass with a real finger, not yet reported on.
+  indicator, the capsule straddles the two words halfway through a held swipe and glides after a tap. Installed on a phone for a pass with a real finger, not yet reported on.
 - A finger put on a list still decelerating stops it, as anywhere in UIKit, and that touch does not turn the page.
 - **Not checked:** a swipe started on the étagères' carousel (the carousel should win), pressing a book on an
   étagère inside a hosted page (the focus overlay reads global frames), the profile inside the Profil sheet, light
   mode, the largest text sizes, VoiceOver, iOS 18, iPhone Duo.
-- The capsule moves when the tab changes, at the end of a swipe — it does not follow the finger as Messages' does.
 - e2e not run (it does not play this screen anyway). Android: not ported.

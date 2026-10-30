@@ -91,6 +91,9 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
         /// While a tab chosen by its name is being turned to: the pager's own scroll is not a
         /// finger then, and the header is animated to the page instead.
         private var isTurningByName: Bool = false
+        /// A tab chosen by its name while a swipe was still settling: turned to once it has, rather
+        /// than lost under the page the swipe lands on.
+        private var pendingTab: UserProfileTab?
 
         init(selection: Binding<UserProfileTab>, scrollOffset: ProfileScrollOffset) {
             self.selection = selection
@@ -141,6 +144,11 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
                   shown != target
             else { return }
 
+            if let scrollView, scrollView.isDragging || scrollView.isDecelerating {
+                pendingTab = target
+                return
+            }
+
             let isForward: Bool = ProfileScrollOffset.position(of: target) > ProfileScrollOffset.position(of: shown)
             isTurningByName = true
             withAnimation(.snappy) {
@@ -177,7 +185,8 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
 
         // MARK: - UIPageViewControllerDelegate
 
-        /// A swipe that turned the page selects its tab.
+        /// A swipe that turned the page selects its tab — unless a tab was chosen by its name
+        /// meanwhile, which is turned to now.
         func pageViewController(
             _ pageViewController: UIPageViewController,
             didFinishAnimating finished: Bool,
@@ -187,6 +196,13 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
             guard let shown = tab(of: pageViewController.viewControllers?.first) else { return }
 
             scrollOffset.pagePosition = ProfileScrollOffset.position(of: shown)
+            if let pendingTab {
+                self.pendingTab = nil
+                if pendingTab != shown {
+                    turn(pageViewController, to: pendingTab)
+                    return
+                }
+            }
             if completed, selection.wrappedValue != shown {
                 selection.wrappedValue = shown
             }

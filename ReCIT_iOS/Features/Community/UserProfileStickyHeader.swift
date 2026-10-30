@@ -96,7 +96,7 @@ struct UserProfileStickyHeader: View {
                 .allowsHitTesting(false)
 
             if let tab {
-                UserProfileTabPicker(selection: tab)
+                UserProfileTabPicker(selection: tab, pagePosition: scrollOffset.pagePosition)
                     .padding(.top, .small)
             }
         }

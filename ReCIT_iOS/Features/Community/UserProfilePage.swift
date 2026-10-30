@@ -96,6 +96,9 @@ struct UserProfilePage<Content: View>: View {
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+                // Edge to edge, as the inventory's carousel: the inset grouped margins would
+                // clip the peeking étagère and the books leaning out of the first one.
+                .listSectionHorizontalMargins(0)
             }
 
             content

@@ -62,10 +62,11 @@ struct NetworkView: View {
     }
 
     /// The « + » follows the segment: a friend to find on one side, a group on the other.
+    /// Placed as a confirmation action, as on the Lists tab, which draws it prominent.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ProfileToolbarItem()
-        ToolbarItem(placement: .primaryAction) {
+        ToolbarItem(placement: .confirmationAction) {
             switch segment {
             case .friends:
                 Button("network.add_friends", systemImage: "plus") {

@@ -10,6 +10,11 @@ import SwiftUI
 struct InventoryCell: View {
     let item: InventoryItem
     let filterParameter: InventoryItem.FilterParameter
+    /// Set where the row is not a `List` cell — « Tous les livres », under the étagères. A cell
+    /// lends its long-press preview its own margins, ground and rounded corners; a bare row
+    /// lifted only its text, flush against the cover, on a ground the page shares. Standing
+    /// alone, the row pads itself and carries that card before the menu is attached.
+    var standsAlone: Bool = false
 
     var body: some View {
         // `isStillInTheStore` first, and it is not decoration: this cell is the one the crash of
@@ -52,6 +57,7 @@ struct InventoryCell: View {
                     }
                 }
             }
+            .modifier(StandAloneCard(isOn: standsAlone))
             // The book screen's "…" menu, on a long press — every list of books carries it
             // through this cell. The edition is read here, under the store guard above.
             .bookActions(

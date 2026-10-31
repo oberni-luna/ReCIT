@@ -240,11 +240,12 @@ struct ShelvesContent: View {
 
     private func bookLink(_ item: InventoryItem) -> some View {
         NavigationLink(value: NavigationDestination.book(anchor: .item(item))) {
-            InventoryCell(item: item, filterParameter: .userInventory)
-                .padding(.horizontal, .medium)
-                .padding(.vertical, .small)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
+            InventoryCell(
+                item: item,
+                filterParameter: .userInventory,
+                standsAlone: true
+            )
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("e2e.inventoryBook")

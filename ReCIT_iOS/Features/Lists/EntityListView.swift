@@ -20,6 +20,9 @@ struct EntityListView: View {
     @State private var path: NavigationPath = .init()
 
     @State private var showNewListModal: Bool = false
+    /// The list a swipe asked to delete, waiting for the confirmation: a full swipe deleted it
+    /// outright, with its works and comments, on the server too.
+    @State private var listToDelete: EntityList?
 
     /// Everything there is to show, search aside: what decides the empty screen and the headers.
     private var allSections: ListsTabSections {
@@ -55,9 +58,7 @@ struct EntityListView: View {
                         isSearching: !searchText.isEmpty,
                         onCreate: { showNewListModal = true },
                         onDelete: { list in
-                            Task {
-                                try? await listModel.deleteList(modelContext: modelContext, list: list)
-                            }
+                            listToDelete = list
                         }
                     )
                 }
@@ -76,6 +77,24 @@ struct EntityListView: View {
                 }
             }
             .searchable(text: $searchText)
+            .confirmationDialog(
+                "lists.delete_confirm.title \(listToDelete?.name ?? "")",
+                isPresented: .init(
+                    get: { listToDelete != nil },
+                    set: { if !$0 { listToDelete = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: listToDelete
+            ) { list in
+                Button("list.form.delete", role: .destructive) {
+                    Task {
+                        try? await listModel.deleteList(modelContext: modelContext, list: list)
+                    }
+                }
+                Button("action.cancel", role: .cancel) { }
+            } message: { _ in
+                Text("lists.delete_confirm.message")
+            }
             .sheet(isPresented: $showNewListModal) {
                 ListFormView()
             }

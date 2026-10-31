@@ -11313,6 +11313,38 @@
         }
       }
     },
+    "lists.delete_confirm.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its works and your comments go with it, on inventaire.io too. Your books stay in your inventory."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses œuvres et vos commentaires disparaissent avec elle, sur inventaire.io aussi. Vos livres restent dans votre inventaire."
+          }
+        }
+      }
+    },
+    "lists.delete_confirm.title %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete « %@ »?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer « %@ » ?"
+          }
+        }
+      }
+    },
     "lists.empty.action.create.detail" : {
       "extractionState" : "manual",
       "localizations" : {

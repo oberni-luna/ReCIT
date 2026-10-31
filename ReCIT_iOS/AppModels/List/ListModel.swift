@@ -37,28 +37,57 @@ final class ListModel: OptimisticMutating {
         try await syncLists(createdBy: user._id, claimsUnstamped: false, modelContext: modelContext)
     }
 
-    /// The answer holds one reader's lists and nobody else's, so the deletion pass is scoped to
-    /// that reader: without it, opening a friend's profile would delete every list of mine.
+    /// Syncs every friend's lists at once, for « Dans mon réseau » in the Lists tab: one request
+    /// per batch of friends rather than one per profile. Each batch prunes only the lists of the
+    /// friends it asked about, so mine, and a stranger's opened on their profile, stay.
+    func syncNetworkLists(of friends: [User], modelContext: ModelContext) async throws {
+        let ids: [String] = friends.map(\._id)
+        for start in stride(from: 0, to: ids.count, by: Self.creatorsPerRequest) {
+            let batch: Set<String> = .init(ids[start..<min(start + Self.creatorsPerRequest, ids.count)])
+            try await syncLists(createdBy: batch, claimsUnstamped: false, modelContext: modelContext)
+        }
+    }
+
+    /// Ids are 32 characters: fifty of them keep the address well under any server's limit.
+    private static let creatorsPerRequest: Int = 50
+
     private func syncLists(createdBy creatorId: String, claimsUnstamped: Bool, modelContext: ModelContext) async throws {
-        let listsDTO: ListsDTO? = try await apiService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(creatorId)&with-elements=true", debug: true)
+        try await syncLists(createdBy: [creatorId], claimsUnstamped: claimsUnstamped, modelContext: modelContext)
+    }
+
+    /// The answer holds these readers' lists and nobody else's, so the deletion pass is scoped to
+    /// them: without it, opening a friend's profile would delete every list of mine.
+    private func syncLists(createdBy creatorIds: Set<String>, claimsUnstamped: Bool, modelContext: ModelContext) async throws {
+        let users: String = creatorIds.sorted().joined(separator: "|")
+        let listsDTO: ListsDTO? = try await apiService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(users)&with-elements=true", debug: true)
         guard let listsDTO else { return }
+        // Asked about several readers, a list that does not say whose it is cannot be stamped,
+        // and stored unstamped it would pass for mine (`isCreated(byMe:)`): it is left out.
+        let dtos: [ListDTO] = if creatorIds.count == 1 {
+            listsDTO.lists
+        } else {
+            listsDTO.lists.filter { $0.creator.map(creatorIds.contains) ?? false }
+        }
 
         let baseUrl: String = apiService.baseUrl()
         // Upsert in place (never delete+reinsert) so any open list view stays reactive.
         let synced: [EntityList] = try modelContext.upsert(
-            listsDTO.lists,
+            dtos,
             dtoID: { $0._id },
             modelID: { (list: EntityList) in list._id },
             make: { EntityList(listDTO: $0, baseUrl: baseUrl) },
             update: { list, dto in list.update(listDTO: dto, baseUrl: baseUrl, modelContext: modelContext) },
             deleteMissing: true,
             scope: { list in
-                list.creatorId == creatorId || (claimsUnstamped && list.creatorId == nil)
+                list.creatorId.map(creatorIds.contains) ?? claimsUnstamped
             }
         )
-        // Stamped from the request when the answer does not say: these are the creator's lists.
-        for list in synced where list.creatorId == nil {
-            list.creatorId = creatorId
+        // Stamped from the request when the answer does not say and only one reader was asked
+        // about: these are that reader's lists.
+        if creatorIds.count == 1, let creatorId = creatorIds.first {
+            for list in synced where list.creatorId == nil {
+                list.creatorId = creatorId
+            }
         }
         try modelContext.save()
     }

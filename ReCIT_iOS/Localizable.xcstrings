@@ -11432,6 +11432,38 @@
         }
       }
     },
+    "lists.section.mine" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My lists"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes listes"
+          }
+        }
+      }
+    },
+    "lists.section.network" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In my network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans mon réseau"
+          }
+        }
+      }
+    },
     "login.button.create_account" : {
       "localizations" : {
         "en" : {

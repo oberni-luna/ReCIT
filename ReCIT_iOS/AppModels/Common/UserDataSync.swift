@@ -15,7 +15,8 @@
 //     rather than after a library that can take minutes;
 //  4. my inventory;
 //  5. my lists, my transactions;
-//  6. my friends' étagères and books, one friend at a time — the longest, and none of it is
+//  6. my friends' lists, in one request — « Dans mon réseau » in the Lists tab;
+//  7. my friends' étagères and books, one friend at a time — the longest, and none of it is
 //     what the screen in front of the user waits for.
 //
 
@@ -114,6 +115,14 @@ struct UserDataSync {
 
         await sync(.transactions) {
             try await transactionModel.syncTransactions(modelContext: modelContext)
+        }
+
+        // Before the friends' books: one request for every friend, where the books take minutes.
+        // Outside the domain tracking, as the Lists tab's placeholder waits on my lists alone.
+        do {
+            try await listModel.syncNetworkLists(of: userModel.friends(modelContext: modelContext), modelContext: modelContext)
+        } catch {
+            print("⚠️⚠️⚠️⚠️⚠️ Error during network lists sync: \(error)")
         }
 
         await syncFriendsInventories(modelContext: modelContext)

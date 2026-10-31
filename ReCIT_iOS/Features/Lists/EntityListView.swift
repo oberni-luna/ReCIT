@@ -13,24 +13,30 @@ struct EntityListView: View {
     @Environment(ListModel.self) var listModel
     @Environment(SyncStatusStore.self) private var syncStatus
     @Environment(UserModel.self) private var userModel
-    @Query(sort: \EntityList.name) private var storedLists: [EntityList]
-
-    /// Mine only: a friend's lists, stored for their profile, belong on their profile.
-    private var allLists: [EntityList] {
-        storedLists.filter { $0.isCreated(byMe: userModel.myUser?._id) }
-    }
+    @Query private var storedLists: [EntityList]
+    @Query private var users: [User]
 
     @State private var searchText: String = ""
     @State private var path: NavigationPath = .init()
 
     @State private var showNewListModal: Bool = false
 
-    var filteredLists: [EntityList] {
-        if searchText.isEmpty {
-            return allLists
-        } else {
-            return allLists.filter { $0.name.localizedStandardContains(searchText) }
-        }
+    /// Everything there is to show, search aside: what decides the empty screen and the headers.
+    private var allSections: ListsTabSections {
+        sections(matching: "")
+    }
+
+    private var filteredSections: ListsTabSections {
+        sections(matching: searchText)
+    }
+
+    private func sections(matching text: String) -> ListsTabSections {
+        .init(
+            lists: storedLists,
+            myUserId: userModel.myUser?._id,
+            friends: users.filter { $0.relation == .friend },
+            searchText: text
+        )
     }
 
     var body: some View {
@@ -38,27 +44,22 @@ struct EntityListView: View {
             Group {
                 if syncStatus.shouldShowPlaceholder(.lists) {
                     SyncingPlaceholderView()
-                } else if allLists.isEmpty && searchText.isEmpty {
+                } else if allSections.isEmpty && searchText.isEmpty {
                     ListsEmptyStateView {
                         showNewListModal = true
                     }
                 } else {
-                    List {
-                        ForEach(filteredLists) { list in
-                            NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
-                                ListRowView(list: list)
-                                    .swipeActions {
-                                        Button("action.delete", systemImage: "trash") {
-                                            Task {
-                                                try? await listModel.deleteList(modelContext: modelContext, list: list)
-                                            }
-                                        }
-                                        .tint(.red)
-                                    }
+                    ListsTabList(
+                        sections: filteredSections,
+                        showsHeaders: !allSections.network.isEmpty,
+                        isSearching: !searchText.isEmpty,
+                        onCreate: { showNewListModal = true },
+                        onDelete: { list in
+                            Task {
+                                try? await listModel.deleteList(modelContext: modelContext, list: list)
                             }
-                            .accessibilityIdentifier("e2e.listRow")
                         }
-                    }
+                    )
                 }
             }
             .navigationDestination(for: NavigationDestination.self) { destination in

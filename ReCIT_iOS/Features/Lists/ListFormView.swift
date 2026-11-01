@@ -14,6 +14,9 @@
 //  the answer, and a choice betrayed afterwards is worse than an absent one. The sequencing of
 //  the two server calls is `ListModel`'s, not this form's — see `createListAndAddWork`.
 //
+//  « Visible par » is asked in all three modes, with the five answers of the Présentation tab
+//  (`ListVisibility`). The update already sent the list's keys; it now sends the chosen ones.
+//
 
 import SwiftUI
 import LBSnackBar
@@ -61,6 +64,15 @@ struct ListFormView: View {
         list.name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// The list's keys seen as one of the five answers the Présentation tab names, and written
+    /// back as that answer's keys. See `ListVisibility`.
+    private var visibility: Binding<ListVisibility> {
+        .init(
+            get: { ListVisibility(attributes: list.visibility) },
+            set: { list.visibility = $0.attributes }
+        )
+    }
+
     private var submitTitleKey: LocalizedStringKey {
         isFilingIntoNewList ? "list.form.create_and_add" : "action.submit"
     }
@@ -99,6 +111,18 @@ struct ListFormView: View {
                 }
                 .listRowSeparator(.visible)
                 .listSectionSeparator(.hidden)
+
+                // Asked in every mode: a list made from a book has a visibility too, and
+                // the default stays « Moi seul·e », what every new list got before.
+                Section {
+                    Picker("list.info.visibility", selection: visibility) {
+                        ForEach(ListVisibility.allCases) { option in
+                            Text(option.label).tag(option)
+                        }
+                    }
+                    .foregroundStyle(.foregroundDefault)
+                    .accessibilityIdentifier("e2e.listForm.visibility")
+                }
             }
             .formActionBar {
                 VStack {

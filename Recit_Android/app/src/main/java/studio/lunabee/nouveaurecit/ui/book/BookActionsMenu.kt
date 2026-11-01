@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.WavingHand
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.inventory.ShelfFormSheet
 import studio.lunabee.nouveaurecit.ui.lists.ListFormSheet
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
+import studio.lunabee.nouveaurecit.ui.transactions.TransactionRequestSheet
 
 /**
  * `BookActionsModifier`: words [state]'s [BookMenuLine]s into [MenuLine]s for [content] to place —
@@ -63,6 +65,7 @@ internal fun BookActionsHost(
     var removesItem: String? by rememberSaveable { mutableStateOf(null) }
     var createsShelfFor: String? by rememberSaveable { mutableStateOf(null) }
     var createsListFor: String? by rememberSaveable { mutableStateOf(null) }
+    var requestsItem: String? by rememberSaveable { mutableStateOf(null) }
 
     val lines: List<MenuLine> = state?.lines.orEmpty().map { line ->
         when (line) {
@@ -114,6 +117,11 @@ internal fun BookActionsHost(
                     }
                 },
             )
+            is BookMenuLine.Request -> MenuLine.Action(
+                label = resources.getString(line.target.wording.menu, line.target.ownerName),
+                icon = Icons.Filled.WavingHand,
+                onClick = { requestsItem = line.target.itemId },
+            )
         }
     }
 
@@ -141,12 +149,14 @@ internal fun BookActionsHost(
     }
     createsShelfFor?.let { itemId -> ShelfFormSheet(shelfId = null, fileItemId = itemId, onDismiss = { createsShelfFor = null }) }
     createsListFor?.let { workUri -> ListFormSheet(listId = null, fileWorkUri = workUri, onDismiss = { createsListFor = null }) }
+    requestsItem?.let { itemId -> TransactionRequestSheet(itemId = itemId, onDismiss = { requestsItem = null }) }
 }
 
 /**
  * `bookActions(edition:placement: .contextMenu)`: an [InventoryItemRow] that opens the book
  * screen's « … » menu for its edition on a long press, anchored on the row. A tap still opens the
- * book ([onClick]); [onPush] serves the snackbars' « Voir ».
+ * book ([onClick]); [onPush] serves the snackbars' « Voir ». A friend's copy on offer heads the
+ * menu with the request for it — « Emprunter à Anne ».
  *
  * The row's [BookActions] reads Room only while its menu is open.
  */
@@ -163,9 +173,10 @@ fun InventoryItemRowWithActions(
     val editionUri: String = row.item.editionUri
     val actions: BookActions = remember(container, editionUri) { BookActions(container, flowOf(editionUri)) }
     var expanded: Boolean by remember { mutableStateOf(false) }
-    // Kept once the menu closes, so its fade-out still shows its lines.
-    val state: BookActionsState? by produceState<BookActionsState?>(initialValue = null, actions, expanded) {
-        if (expanded) actions.state.collect { value = it }
+    // Kept once the menu closes, so its fade-out still shows its lines. The row offers to ask for
+    // its own copy only, not for every friend's copy of the edition, as the book screen does.
+    val state: BookActionsState? by produceState<BookActionsState?>(initialValue = null, actions, expanded, row) {
+        if (expanded) actions.state.collect { value = it?.forCopy(row) }
     }
 
     BookActionsHost(actions = actions, state = state, onPush = onPush) { lines ->

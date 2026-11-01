@@ -29,7 +29,12 @@
 //  bar stays), « Mon commentaire », « Déplacer » and « Retirer de la liste ». Derived from the
 //  list's creator, never passed in. See PRD 0031.
 //
-//  See PRD 0029 and the `Liste détails` section of the Figma file (`843:12721`).
+//  **Two tabs, changed by a touch.** « Livres • 8 » is all of the above; « Présentation » is the
+//  list's description and what the list is (`ListPresentationPage`), and drops the add bar. The
+//  tabs are the list's first row, so they scroll with it and leave the keyboard's handling alone.
+//
+//  See PRD 0029 and the `Liste détails` section of the Figma file (`843:12721`); the tabs, its
+//  `Liste détails · Description de la liste` section (`909:1465`).
 //
 
 import SwiftData
@@ -48,6 +53,7 @@ struct ListCoverFlowScreen: View {
 
     @Query private var items: [EntityListItem]
 
+    @State private var tab: ListDetailTab = .elements
     @State private var selectedURI: String?
     /// The uri an add has just asked for, selected as soon as the list holds it.
     @State private var selectAfterAdd: String?
@@ -115,7 +121,7 @@ struct ListCoverFlowScreen: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .formActionBar(isPresented: isMine && isCommentFocused == false) {
+        .formActionBar(isPresented: isMine && tab == .elements && isCommentFocused == false) {
             ListAddBar(
                 listType: list.type,
                 onScan: { isPresentingScanner = true },
@@ -178,87 +184,23 @@ struct ListCoverFlowScreen: View {
 
     private var rows: some View {
         DesignSystem.FormList {
-            if liveItems.isEmpty {
-                Section {
-                    Text("list.empty")
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundSecondary)
-                }
-            } else {
-                // The cover flow and the title, edge to edge on the screen's own ground: a row
-                // dressed as a header. A real section header lays its horizontal scroll view out
-                // before it has a width, and the strip came up empty.
-                Section {
-                    VStack(spacing: .zero) {
-                        ListCoverFlowView(
-                            uris: uris,
-                            listType: list.type,
-                            selectedURI: $selectedURI,
-                            onOpen: open
-                        )
+            Section {
+                ListDetailTabPicker(
+                    selection: $tab,
+                    listType: list.type,
+                    count: liveItems.count
+                )
+                .frame(maxWidth: .infinity)
+                .listRowInsets(.init())
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
 
-                        if let selectedURI {
-                            ListCrossFade(id: selectedURI) {
-                                ListSelectedTitle(uri: selectedURI, listType: list.type)
-                            }
-                            .padding(.horizontal, .medium)
-                        }
-                    }
-                    .listRowInsets(.init())
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                }
-                // Edge to edge from iOS 26, so the turned covers are not cut at the section's
-                // margin; before it the section keeps the list's margins.
-                .listSectionHorizontalMargins(0)
-
-                if isMine {
-                    Section {
-                        if let selectedItem {
-                            ListCrossFade(id: selectedItem.uri) {
-                                ListCommentRow(
-                                    item: selectedItem,
-                                    listType: list.type,
-                                    isFocused: $isCommentFocused,
-                                    onEdit: { commentEdits += 1 }
-                                )
-                            }
-                            .background {
-                                ListKeyboardReveal(trigger: commentEdits, keyboardTop: keyboardTop)
-                            }
-
-                            // No way to the element's page here: the cover in front opens it.
-                            ListMoveRow(
-                                item: selectedItem,
-                                list: list,
-                                isCommentFocused: isCommentFocused
-                            )
-                        }
-                    }
-
-                    if let selectedItem {
-                        Section {
-                            Button("list.detail.remove", role: .destructive) {
-                                remove(selectedItem)
-                            }
-                            .textStyle(.action300)
-                            .foregroundStyle(.foregroundError)
-                        } footer: {
-                            addedFooter(selectedItem)
-                        }
-                    }
-                } else if let selectedItem {
-                    // Their comment when they wrote one, and the day the element was added.
-                    Section {
-                        if selectedItem.comment.isEmpty == false {
-                            ListCrossFade(id: selectedItem.uri) {
-                                ListReadOnlyCommentRow(comment: selectedItem.comment)
-                            }
-                        }
-                    } footer: {
-                        addedFooter(selectedItem)
-                    }
-                }
+            switch tab {
+            case .elements:
+                elementSections
+            case .presentation:
+                ListPresentationPage(list: list)
             }
 
             // Room for the comment to rise into. Below the comment the list holds only « Retirer de
@@ -274,6 +216,93 @@ struct ListCoverFlowScreen: View {
                         .frame(height: max(keyboardHeight, Self.minimumKeyboardRoom))
                         .listRowBackground(Color.clear)
                         .listRowInsets(.init())
+                }
+            }
+        }
+    }
+
+    /// The cover flow, the selected element and what may be done with it: the « Livres » tab.
+    @ViewBuilder
+    private var elementSections: some View {
+        if liveItems.isEmpty {
+            Section {
+                Text("list.empty")
+                    .textStyle(.content300)
+                    .foregroundStyle(.foregroundSecondary)
+            }
+        } else {
+            // The cover flow and the title, edge to edge on the screen's own ground: a row
+            // dressed as a header. A real section header lays its horizontal scroll view out
+            // before it has a width, and the strip came up empty.
+            Section {
+                VStack(spacing: .zero) {
+                    ListCoverFlowView(
+                        uris: uris,
+                        listType: list.type,
+                        selectedURI: $selectedURI,
+                        onOpen: open
+                    )
+
+                    if let selectedURI {
+                        ListCrossFade(id: selectedURI) {
+                            ListSelectedTitle(uri: selectedURI, listType: list.type)
+                        }
+                        .padding(.horizontal, .medium)
+                    }
+                }
+                .listRowInsets(.init())
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+            // Edge to edge from iOS 26, so the turned covers are not cut at the section's
+            // margin; before it the section keeps the list's margins.
+            .listSectionHorizontalMargins(0)
+
+            if isMine {
+                Section {
+                    if let selectedItem {
+                        ListCrossFade(id: selectedItem.uri) {
+                            ListCommentRow(
+                                item: selectedItem,
+                                listType: list.type,
+                                isFocused: $isCommentFocused,
+                                onEdit: { commentEdits += 1 }
+                            )
+                        }
+                        .background {
+                            ListKeyboardReveal(trigger: commentEdits, keyboardTop: keyboardTop)
+                        }
+
+                        // No way to the element's page here: the cover in front opens it.
+                        ListMoveRow(
+                            item: selectedItem,
+                            list: list,
+                            isCommentFocused: isCommentFocused
+                        )
+                    }
+                }
+
+                if let selectedItem {
+                    Section {
+                        Button("list.detail.remove", role: .destructive) {
+                            remove(selectedItem)
+                        }
+                        .textStyle(.action300)
+                        .foregroundStyle(.foregroundError)
+                    } footer: {
+                        addedFooter(selectedItem)
+                    }
+                }
+            } else if let selectedItem {
+                // Their comment when they wrote one, and the day the element was added.
+                Section {
+                    if selectedItem.comment.isEmpty == false {
+                        ListCrossFade(id: selectedItem.uri) {
+                            ListReadOnlyCommentRow(comment: selectedItem.comment)
+                        }
+                    }
+                } footer: {
+                    addedFooter(selectedItem)
                 }
             }
         }

@@ -232,6 +232,278 @@
         }
       }
     },
+    "list.tab.works %lld" : {
+      "comment" : "Tab of a list of works, before the number of books it holds.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books • %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres • %lld"
+          }
+        }
+      }
+    },
+    "list.tab.works.accessibility %lld" : {
+      "comment" : "VoiceOver label of list.tab.works, read without its bullet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books, %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres, %lld"
+          }
+        }
+      }
+    },
+    "list.tab.authors %lld" : {
+      "comment" : "Tab of a list of authors, before the number of authors it holds.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authors • %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur·ices • %lld"
+          }
+        }
+      }
+    },
+    "list.tab.authors.accessibility %lld" : {
+      "comment" : "VoiceOver label of list.tab.authors, read without its bullet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authors, %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteur·ices, %lld"
+          }
+        }
+      }
+    },
+    "list.tab.presentation" : {
+      "comment" : "Tab of a list that shows its description and what it is.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Présentation"
+          }
+        }
+      }
+    },
+    "list.tabs" : {
+      "comment" : "Accessibility label of the Books | About control on a list's screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List sections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sections de la liste"
+          }
+        }
+      }
+    },
+    "list.presentation.empty" : {
+      "comment" : "Under a list's Présentation tab, when it has no description.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This list has no description"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette liste n'a pas de description"
+          }
+        }
+      }
+    },
+    "list.info.type" : {
+      "comment" : "Label of a list's type, under its Présentation tab.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        }
+      }
+    },
+    "list.info.visibility" : {
+      "comment" : "Label of who may see a list, under its Présentation tab.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visible to"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visible par"
+          }
+        }
+      }
+    },
+    "list.info.created" : {
+      "comment" : "Label of the day a list was created, under its Présentation tab.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Created on"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créée le"
+          }
+        }
+      }
+    },
+    "list.info.updated" : {
+      "comment" : "Label of the day a list was last changed, under its Présentation tab.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updated on"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifiée le"
+          }
+        }
+      }
+    },
+    "list.visibility.private" : {
+      "comment" : "A list nobody else may see.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only me"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moi seul·e"
+          }
+        }
+      }
+    },
+    "list.visibility.friends" : {
+      "comment" : "A list visible to my friends.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes amis"
+          }
+        }
+      }
+    },
+    "list.visibility.groups" : {
+      "comment" : "A list visible to the members of my groups.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My groups"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes groupes"
+          }
+        }
+      }
+    },
+    "list.visibility.friends_and_groups" : {
+      "comment" : "A list visible to my friends and to the members of my groups.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My friends and my groups"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes amis et mes groupes"
+          }
+        }
+      }
+    },
+    "list.visibility.public" : {
+      "comment" : "A list anyone may see.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everyone"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout le monde"
+          }
+        }
+      }
+    },
     "user.tab.inventory %lld" : {
       "comment" : "Inventory tab of a reader's profile, with how many books they hold.",
       "localizations" : {

@@ -36,7 +36,6 @@ import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
 import studio.lunabee.nouveaurecit.data.model.EntityListType
-import studio.lunabee.nouveaurecit.data.model.Visibility
 import studio.lunabee.nouveaurecit.designsystem.DestructiveTextButton
 import studio.lunabee.nouveaurecit.designsystem.FormTextField
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
@@ -49,8 +48,9 @@ import studio.lunabee.nouveaurecit.ui.common.Messenger
 
 /**
  * `ListFormView`, as a sheet: create (`listId == null`), edit (`listId` set), or create a work list
- * and file one work in it (`fileWorkUri` set — no type picker then). [onDeleted] runs after the list
- * was deleted from the edit form.
+ * and file one work in it (`fileWorkUri` set — no type picker then). « Visible par » is asked in all
+ * three, with the five answers of [ListVisibility]. [onDeleted] runs after the list was deleted from
+ * the edit form.
  *
  * Every write is server-first and runs in the application scope, so closing the sheet mid-request
  * stops the waiting, not the write. A failure keeps the sheet open with what was typed.
@@ -74,7 +74,7 @@ fun ListFormSheet(
     var name: String by rememberSaveable { mutableStateOf("") }
     var description: String by rememberSaveable { mutableStateOf("") }
     var type: EntityListType by rememberSaveable { mutableStateOf(EntityListType.Work) }
-    var visibility: List<Visibility> by remember { mutableStateOf(emptyList()) }
+    var visibility: ListVisibility by rememberSaveable { mutableStateOf(ListVisibility.Private) }
     var isSeeded: Boolean by rememberSaveable { mutableStateOf(false) }
     var isSubmitting: Boolean by remember { mutableStateOf(false) }
     var isDeleting: Boolean by remember { mutableStateOf(false) }
@@ -82,11 +82,11 @@ fun ListFormSheet(
     LaunchedEffect(listId) {
         if (listId == null) return@LaunchedEffect
         val existing: ListWithElements = container.lists.observeList(listId).first() ?: return@LaunchedEffect
-        visibility = existing.list.visibility
         if (!isSeeded) {
             name = existing.list.name
             description = existing.list.explanation
             type = existing.list.type
+            visibility = ListVisibility.from(existing.list.visibility)
             isSeeded = true
         }
     }
@@ -103,11 +103,11 @@ fun ListFormSheet(
                 container.applicationScope.async {
                     when {
                         fileWorkUri != null -> {
-                            container.lists.createListAndAddWork(name, description, fileWorkUri)
+                            container.lists.createListAndAddWork(name, description, visibility.raw, fileWorkUri)
                             messenger.show(context.getString(R.string.list_added_to_named, name.trim()))
                         }
-                        listId == null -> container.lists.createList(name, description, type, emptyList())
-                        else -> container.lists.updateList(listId, name, description, visibility)
+                        listId == null -> container.lists.createList(name, description, type, visibility.raw)
+                        else -> container.lists.updateList(listId, name, description, visibility.raw)
                     }
                     Unit
                 }.await()
@@ -169,6 +169,8 @@ fun ListFormSheet(
             if (isCreating && !isFiling) {
                 ListTypePicker(selected = type, onSelect = { type = it })
             }
+            // Asked in every mode, as on iOS: a new list still starts as « Moi seul·e ».
+            ListVisibilityPicker(selected = visibility, onSelect = { visibility = it })
 
             PrimaryButton(
                 text = stringResource(
@@ -214,6 +216,34 @@ private fun ListTypePicker(selected: EntityListType, onSelect: (EntityListType) 
                     text = { Text(stringResource(type.label), style = RecitTheme.typography.content300) },
                     onClick = {
                         onSelect(type)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
+/** `Picker("list.info.visibility")` over the five answers of [ListVisibility], as a menu. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ListVisibilityPicker(selected: ListVisibility, onSelect: (ListVisibility) -> Unit) {
+    var expanded: Boolean by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        FormTextField(
+            value = stringResource(selected.label),
+            onValueChange = {},
+            label = stringResource(R.string.list_form_visibility),
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            ListVisibility.entries.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(option.label), style = RecitTheme.typography.content300) },
+                    onClick = {
+                        onSelect(option)
                         expanded = false
                     },
                 )

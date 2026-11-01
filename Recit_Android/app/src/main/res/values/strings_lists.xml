@@ -83,5 +83,11 @@
     <string name="list_form_create">Créer</string>
     <string name="list_form_create_and_add">Créer et ajouter</string>
     <string name="list_form_delete">Supprimer la liste</string>
+    <string name="list_form_visibility">Visible par</string>
+    <string name="list_visibility_private">Moi seul·e</string>
+    <string name="list_visibility_friends">Mes amis</string>
+    <string name="list_visibility_groups">Mes groupes</string>
+    <string name="list_visibility_friends_and_groups">Mes amis et mes groupes</string>
+    <string name="list_visibility_public">Tout le monde</string>
     <string name="list_added_to_named">Ajouté à %1$s</string>
 </resources>

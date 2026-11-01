@@ -67,8 +67,8 @@ class ListRepository(
         return response.list.id
     }
 
-    suspend fun createListAndAddWork(name: String, description: String, workUri: String): String {
-        val id: String = createList(name, description, EntityListType.Work, emptyList())
+    suspend fun createListAndAddWork(name: String, description: String, visibility: List<Visibility>, workUri: String): String {
+        val id: String = createList(name, description, EntityListType.Work, visibility)
         addEntities(id, listOf(workUri))
         return id
     }

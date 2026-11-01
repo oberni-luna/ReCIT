@@ -38,6 +38,10 @@ struct UserDTO: Codable {
     /// Days between two activity summaries; the server reads an absent value as 20.
     let summaryPeriodicity: Int?
     let settings: UserSettingsDTO?
+    /// The providers the account has handed OAuth tokens to — `["wikidata"]` once it is linked
+    /// to a Wikidata account. Owner only, on `GET /api/user`; the tokens themselves never leave
+    /// the server.
+    let enabledOAuth: [String]?
 }
 
 //"snapshot": {

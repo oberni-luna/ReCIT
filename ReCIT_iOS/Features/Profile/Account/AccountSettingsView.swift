@@ -3,7 +3,8 @@
 //  ReCIT_iOS
 //
 //  « Compte et connexion » (`A6` in the Figma file): the address and the password, each behind a
-//  screen of its own, then the language of the account and two switches about who sees what.
+//  screen of its own, then the language of the account, two switches about who sees what, and
+//  the Wikidata account edits are published under (`AccountWikidataSection`).
 //  No « Enregistrer »: the menu and the switches write themselves, optimistic, and go back with a
 //  SnackBar if the server refuses (`UserModel+Account`).
 //
@@ -74,6 +75,8 @@ struct AccountSettingsView: View {
                     CreateBookSectionHeader("account.visibility.header")
                 }
                 .tint(.backgroundTintedInverse)
+
+                AccountWikidataSection(isLinked: account.linksWikidata)
             } else {
                 Section {
                     SyncingInlineRow()

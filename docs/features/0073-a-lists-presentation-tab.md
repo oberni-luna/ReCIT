@@ -8,8 +8,9 @@ drawn, and B was chosen. No PRD and no issues: one slice.
 
 A list of works or of authors opens, under its navigation bar, on two tabs in the labels of a reader's profile:
 « Livres • 8 » (« Auteur·ices • 3 » for a list of authors) and « Présentation », the selected one in a glass
-capsule. A touch changes the tab, and the capsule glides to it; there is no swipe between them, since the
-horizontal swipe belongs to the cover flow.
+capsule. They stay pinned under the bar, as on a reader's profile, the list scrolling under them. A touch changes
+the tab, and the capsule glides to it; there is no swipe between them, since the horizontal swipe belongs to the
+cover flow.
 
 - **Livres** is the screen as it was (feature 0060): the cover flow, the selected element, its comment, « Déplacer
   dans une autre liste », « Retirer de la liste », and « Ajouter un livre » in place of the tab bar.
@@ -30,8 +31,10 @@ A friend's list, read-only, has the same two tabs.
   values under their captions through `withLabel(label:)`, as in the list's form.
 - **`ListVisibilityLabel.label(for:)`** — inventaire.io's visibility keys in words: `public` wins over the rest,
   `friends` and `groups` are named apart or together, none is « Moi seul·e ».
-- **`ListCoverFlowScreen`** — the tabs are the list's first row, so they scroll with it and leave the comment's
-  keyboard handling as it was; what used to be the whole list is `elementSections`; the add bar shows only on
+- **`listDetailTabsBar(_:)`** (in `ListDetailTabPicker.swift`) — pins the tabs under the navigation bar, 2 pt
+  under it and 8 pt above the list: a `safeAreaBar(edge: .top)` with the soft scroll edge from iOS 26, a
+  `safeAreaInset` on the bars' material before it — `formActionBar`'s pattern, at the top.
+- **`ListCoverFlowScreen`** — what used to be the whole list is `elementSections`; the add bar shows only on
   Livres. The tab bar stays hidden on my lists under both tabs, so it does not come and go with the tab.
 - Strings: `list.tab.{works,authors} %lld` and their `.accessibility`, `list.tab.presentation`, `list.tabs`,
   `list.presentation.empty`, `list.info.{type,visibility,created,updated}`,
@@ -49,7 +52,7 @@ A friend's list, read-only, has the same two tabs.
 
 ## Not done
 
-- Not seen on a simulator or a phone, in light or dark: checked by a simulator build and the unit tests above. The
-  gap between the tabs' row and the cover flow is the inset grouped list's own section spacing, not measured
-  against the mock-up.
+- Seen on a phone in dark, on Livres, before the tabs were pinned: they were then the list's first row, scrolling
+  away, with the list's top margin and section spacing between them and the title. Pinned, they were installed
+  on the phone but not looked at; light, Présentation and iOS 18 unseen.
 - Android not done. The proposal's dark mode was never drawn. e2e not run.

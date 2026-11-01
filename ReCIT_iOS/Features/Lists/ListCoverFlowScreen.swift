@@ -31,7 +31,8 @@
 //
 //  **Two tabs, changed by a touch.** « Livres • 8 » is all of the above; « Présentation » is the
 //  list's description and what the list is (`ListPresentationPage`), and drops the add bar. The
-//  tabs are the list's first row, so they scroll with it and leave the keyboard's handling alone.
+//  tabs stay pinned under the navigation bar, as on a reader's profile, the list scrolling under
+//  them (`listDetailTabsBar`).
 //
 //  See PRD 0029 and the `Liste détails` section of the Figma file (`843:12721`); the tabs, its
 //  `Liste détails · Description de la liste` section (`909:1465`).
@@ -104,6 +105,13 @@ struct ListCoverFlowScreen: View {
 
     var body: some View {
         rows
+        .listDetailTabsBar {
+            ListDetailTabPicker(
+                selection: $tab,
+                listType: list.type,
+                count: liveItems.count
+            )
+        }
         .task {
             for await notification in NotificationCenter.default.notifications(
                 named: UIResponder.keyboardWillShowNotification
@@ -184,18 +192,6 @@ struct ListCoverFlowScreen: View {
 
     private var rows: some View {
         DesignSystem.FormList {
-            Section {
-                ListDetailTabPicker(
-                    selection: $tab,
-                    listType: list.type,
-                    count: liveItems.count
-                )
-                .frame(maxWidth: .infinity)
-                .listRowInsets(.init())
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
-
             switch tab {
             case .elements:
                 elementSections

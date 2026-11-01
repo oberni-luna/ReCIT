@@ -69,3 +69,31 @@ struct ListDetailTabPicker: View {
         }
     }
 }
+
+extension View {
+    /// Pins the tabs just under the navigation bar, as if they were part of it: from iOS 26 a
+    /// `safeAreaBar` the list fades out under with the bar's own soft scroll edge; before it an
+    /// inset on the bars' material, reaching up under the navigation bar.
+    @ViewBuilder
+    func listDetailTabsBar<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        let tabs: some View = content()
+            .frame(maxWidth: .infinity)
+            .padding(.top, .xxSmall)
+            .padding(.bottom, .small)
+        if #available(iOS 26.0, *) {
+            safeAreaBar(edge: .top) {
+                tabs
+            }
+            .scrollEdgeEffectStyle(.soft, for: .top)
+        } else {
+            safeAreaInset(edge: .top, spacing: .zero) {
+                tabs
+                    .background {
+                        Rectangle()
+                            .fill(.bar)
+                            .ignoresSafeArea(edges: .top)
+                    }
+            }
+        }
+    }
+}

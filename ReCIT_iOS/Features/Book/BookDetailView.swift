@@ -215,7 +215,7 @@ struct BookDetailView: View {
                                 Button("community.owner_not_lending \(owner.username)", systemImage: "hand.raised.slash") { }
                                     .disabled(true)
                             } else {
-                                Button("action.borrow_from_user \(owner.username)", systemImage: "hand.wave") {
+                                Button(String(localized: item.transaction.requestMenuLabel(owner: owner.username)), systemImage: "hand.wave") {
                                     borrowFromItem = item
                                 }
                             }

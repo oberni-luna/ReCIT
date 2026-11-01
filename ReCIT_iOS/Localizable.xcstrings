@@ -941,6 +941,22 @@
         }
       }
     },
+    "action.ask_from" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demander à"
+          }
+        }
+      }
+    },
     "action.back" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -986,6 +1002,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Emprunter à %@"
+          }
+        }
+      }
+    },
+    "action.buy_from_user %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy from %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acheter à %@"
+          }
+        }
+      }
+    },
+    "action.buy_from" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy from"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acheter à"
           }
         }
       }
@@ -1298,6 +1346,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Envoyer"
+          }
+        }
+      }
+    },
+    "action.take_from_user %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take from %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupérer de %@"
+          }
+        }
+      }
+    },
+    "action.take_from" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take from"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupérer de"
           }
         }
       }
@@ -16944,6 +17024,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Messages"
+          }
+        }
+      }
+    },
+    "transaction.request.title.selling %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy %1$@ from %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acheter %1$@ à %2$@"
+          }
+        }
+      }
+    },
+    "transaction.request.title.lending %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrow %1$@ from %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emprunter %1$@ à %2$@"
+          }
+        }
+      }
+    },
+    "transaction.request.title.giving %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take %1$@ from %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupérer %1$@ de %2$@"
+          }
+        }
+      }
+    },
+    "transaction.request.message.selling" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your message (required): what price, and how could I get it?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre message (obligatoire) : à quel prix, et comment pourrais-je l'avoir ?"
+          }
+        }
+      }
+    },
+    "transaction.request.message.lending" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your message (required): when and where could I borrow it?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre message (obligatoire) : quand et où pourrais-je l'emprunter ?"
+          }
+        }
+      }
+    },
+    "transaction.request.message.giving" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your message (required): when and where could I pick it up?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre message (obligatoire) : quand et où pourrais-je le récupérer ?"
+          }
+        }
+      }
+    },
+    "transaction.request.button.selling" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask to buy it"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demander à l'acheter"
+          }
+        }
+      }
+    },
+    "transaction.request.button.lending" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask to borrow it"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demander à l'emprunter"
+          }
+        }
+      }
+    },
+    "transaction.request.button.giving" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask to take it"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demander à le récupérer"
           }
         }
       }

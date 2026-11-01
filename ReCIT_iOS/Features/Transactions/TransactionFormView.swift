@@ -16,10 +16,16 @@ struct TransactionFormView: View {
     @Environment(UserModel.self) var userModel
     @Environment(TransactionModel.self) var transactionModel
 
-    @Bindable var transaction: UserTransaction
+    let transaction: UserTransaction
     @State var message: String = ""
     /// The transition to apply on submit, or `nil` to just send a message.
     let transition: TransactionTransition?
+
+    /// A transaction not yet on the server: the form is asking for the copy, and its words follow
+    /// the copy's status — the type is the item's, inventaire.io offers no choice.
+    private var isRequest: Bool {
+        transaction._id.isEmpty
+    }
 
     private var isMessageRequired: Bool {
         transition?.requiresMessage ?? false
@@ -29,8 +35,23 @@ struct TransactionFormView: View {
         isMessageRequired && message.isEmpty
     }
 
+    private var title: String {
+        let book: String = transaction.item.edition?.title ?? ""
+        return isRequest
+            ? String(localized: transaction.type.requestTitle(book: book, owner: transaction.owner.username))
+            : String(localized: .transactionFormHeader(book, transaction.owner.username))
+    }
+
+    private var messageLabel: String {
+        if isRequest { return String(localized: transaction.type.requestMessageLabel) }
+        return isMessageRequired
+            ? String(localized: "transaction.form.your_message_required")
+            : String(localized: "transaction.form.your_message")
+    }
+
     private var submitLabel: String {
-        transition?.event.label ?? String(localized: "action.send_message")
+        if isRequest { return String(localized: transaction.type.requestButtonLabel) }
+        return transition?.event.label ?? String(localized: "action.send_message")
     }
 
     /// Applies the picked transition through the state machine, or sends a plain
@@ -63,17 +84,14 @@ struct TransactionFormView: View {
         NavigationStack {
             DesignSystem.Form {
                 Section { } header: {
-                    Text(.transactionFormHeader(transaction.item.edition?.title ?? "", transaction.owner.username))
-                        .textStyle(.title50)
-                        .foregroundStyle(.foregroundDefault)
-                }
-                
-                if transaction._id.isEmpty {
-                    Section {
-                        Picker("transaction.form.type", selection: $transaction.type) {
-                            ForEach(TransactionType.allCases.filter { $0 != .inventorying }, id: \.self) { type in
-                                Text(type.rawValue).tag(type)
-                            }
+                    VStack(alignment: .leading, spacing: .small) {
+                        Text(title)
+                            .textStyle(.title50)
+                            .foregroundStyle(.foregroundDefault)
+                        if isRequest {
+                            Text(.init(String(localized: transaction.type.requestSentence(owner: transaction.owner.username))))
+                                .textStyle(.content300)
+                                .foregroundStyle(.foregroundSecondary)
                         }
                     }
                 }
@@ -82,7 +100,7 @@ struct TransactionFormView: View {
                     VStack(alignment: .leading, spacing: .xSmall) {
                         TextEditor(text: $message)
                             .frame(minHeight: 48)
-                            .withLabel(label: isMessageRequired ? "transaction.form.your_message_required" : "transaction.form.your_message")
+                            .withLabel(label: messageLabel)
                     }
                 }
                 .listRowSeparator(.visible)

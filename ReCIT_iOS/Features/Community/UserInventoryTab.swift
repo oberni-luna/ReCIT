@@ -89,7 +89,7 @@ struct UserInventoryTab: View {
                 Button("community.owner_not_lending \(user.username)", systemImage: "hand.raised.slash") { }
                     .disabled(true)
             } else {
-                Button("action.borrow_from_user \(user.username)", systemImage: "hand.wave") {
+                Button(String(localized: item.transaction.requestMenuLabel(owner: user.username)), systemImage: "hand.wave") {
                     onBorrow(item)
                 }
             }

@@ -151,6 +151,70 @@
         }
       }
     },
+    "edit_entity.wikidata.bot" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This one lives on Wikidata: Save publishes your changes there through inventaire.io’s bot, which names your account. Link your Wikidata account in Account and sign-in to publish them under your own name."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette fiche vit sur Wikidata : « Enregistrer » y publie vos modifications par le robot d’inventaire.io, qui cite votre compte. Reliez votre compte Wikidata dans Compte et connexion pour les publier sous votre nom."
+          }
+        }
+      }
+    },
+    "edit_entity.wikidata.linked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This one lives on Wikidata: Save publishes your changes there, under your Wikidata name."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette fiche vit sur Wikidata : « Enregistrer » y publie vos modifications, sous votre nom Wikidata."
+          }
+        }
+      }
+    },
+    "entity_picker.wikidata_only" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wikidata can only name its own entries, so only those are shown."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wikidata ne peut nommer que ses propres fiches : seules celles-ci sont proposées."
+          }
+        }
+      }
+    },
+    "entity_picker.wikidata_only.none" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Wikidata entry found. Wikidata can only name its own entries: create the missing one on wikidata.org."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune fiche Wikidata trouvée. Wikidata ne peut nommer que ses propres fiches : créez celle qui manque sur wikidata.org."
+          }
+        }
+      }
+    },
     "user.presentation.empty %@" : {
       "comment" : "Présentation tab of a reader's profile, when they wrote no bio. %@ is their username.",
       "localizations" : {

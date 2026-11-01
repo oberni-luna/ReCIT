@@ -164,6 +164,7 @@ struct EditEditionFlowView: View {
                     EditionPropertyDestination(
                         step: step,
                         properties: entityProperties(uri),
+                        wikidataOnly: EntityEdit.linksWikidataOnly(uri: uri),
                         push: { path.append(.entityProperty(uri: uri, step: $0)) },
                         pop: { path.removeLast(min($0, path.count)) },
                         openEntity: { path.append(.entity(uri: $0)) }
@@ -184,11 +185,11 @@ struct EditEditionFlowView: View {
     }
 
     /// Pushes the screen of a work of « Édition de »: the whole of « Modifier l'œuvre » for one
-    /// inventaire.io has, the title and authors of `EditWorkView` for one being created or one
-    /// of Wikidata's.
+    /// that exists, inventaire.io's or Wikidata's, the title and authors of `EditWorkView` for one
+    /// being created.
     private func openWork(_ id: UUID) {
         guard let work = edit?.works.first(where: { $0.id == id }),
-              work.isNew == false, work.isEditable, let uri = work.uri else {
+              work.isNew == false, let uri = work.uri, EntityEdit.canEdit(uri: uri) else {
             path.append(.workDetail(id: id))
             return
         }

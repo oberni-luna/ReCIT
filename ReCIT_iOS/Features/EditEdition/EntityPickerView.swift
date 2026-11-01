@@ -10,7 +10,8 @@
 //
 //  A language is only chosen, never created: Wikidata has them all. A collection is created
 //  under the edition's publisher, as inventaire.io requires; without one, the row says to choose
-//  the publisher first.
+//  the publisher first. A Wikidata work or person names Wikidata entities only: inventaire.io
+//  refuses the link to one of its own, so its picker shows Wikidata's results and creates none.
 //
 
 import SwiftUI
@@ -22,6 +23,8 @@ struct EntityPickerView: View {
     let property: EditionProperty
     /// Whether the edition names a publisher a new collection can be created under.
     var hasPublisher: Bool = true
+    /// Whether only Wikidata entities may be chosen — for a work or a person of Wikidata's.
+    var wikidataOnly: Bool = false
     /// Handed the entity picked or created. The screen pops itself afterwards.
     let onChoose: (EditionEntityValue) -> Void
 
@@ -35,15 +38,28 @@ struct EntityPickerView: View {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private var allowsCreation: Bool {
+        property.allowsCreation && wikidataOnly == false
+    }
+
     private var canCreate: Bool {
-        property.allowsCreation && (property != .collection || hasPublisher)
+        allowsCreation && (property != .collection || hasPublisher)
+    }
+
+    private var candidates: [SearchResult] {
+        Self.candidates(results, wikidataOnly: wikidataOnly)
+    }
+
+    /// The results that can be chosen: every one, or Wikidata's alone.
+    static func candidates(_ results: [SearchResult], wikidataOnly: Bool) -> [SearchResult] {
+        wikidataOnly ? results.filter { EntityEdit.linksWikidataOnly(uri: $0.uri) } : results
     }
 
     var body: some View {
         DesignSystem.FormList {
-            if results.isEmpty == false {
+            if candidates.isEmpty == false {
                 Section {
-                    ForEach(results) { result in
+                    ForEach(candidates) { result in
                         Button {
                             onChoose(.init(uri: result.uri, label: result.title, detail: result.description))
                             dismiss()
@@ -55,13 +71,20 @@ struct EntityPickerView: View {
                 } header: {
                     Text("entity_picker.existing")
                 } footer: {
-                    if property.allowsCreation {
+                    if wikidataOnly {
+                        Text("entity_picker.wikidata_only")
+                    } else if property.allowsCreation {
                         Text("entity_picker.why_existing")
                     }
                 }
+            } else if wikidataOnly, hasSearched {
+                Section {
+                } footer: {
+                    Text("entity_picker.wikidata_only.none")
+                }
             }
 
-            if trimmedQuery.isEmpty == false, property.allowsCreation {
+            if trimmedQuery.isEmpty == false, allowsCreation {
                 Section {
                     Button {
                         onChoose(.init(label: trimmedQuery))

@@ -181,8 +181,8 @@ struct EntityEditTests {
         #expect(edit.isSaveable == false)
     }
 
-    @Test("A Wikidata entity is never saved")
-    func wikidataIsNotSaved() {
+    @Test("A Wikidata entity is saved like inventaire.io's: the server sends it on to Wikidata")
+    func wikidataIsSaved() {
         var edit: EntityEdit = .init(
             uri: "wd:Q42",
             labels: ["fr": "Douglas Adams"],
@@ -190,6 +190,18 @@ struct EntityEditTests {
         )
         edit.properties.addLiteral("Bop Ad", to: .pseudonym)
         #expect(edit.hasChanges)
+        #expect(edit.isSaveable)
+        #expect(edit.claimUpdates.isEmpty == false)
+    }
+
+    @Test("An entity neither inventaire.io's nor Wikidata's is never saved")
+    func otherUriIsNotSaved() {
+        var edit: EntityEdit = .init(
+            uri: "isbn:9782070368228",
+            labels: ["fr": "Douglas Adams"],
+            properties: .init(catalogue: .human)
+        )
+        edit.properties.addLiteral("Bop Ad", to: .pseudonym)
         #expect(edit.isSaveable == false)
     }
 

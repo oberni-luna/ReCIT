@@ -123,6 +123,7 @@ ADR 0001 and ADR 0008 hold as written:
   - painted spines and the press-and-hold focus;
   - the onboarding after sign-in (the wall of covers came with feature 0044);
   - groups — ported later, in [0046](0046-android-groups.md);
-  - tips, transactions (hidden on iOS too), the full-screen cover, reporting by mail;
+  - tips, transactions (hidden on iOS too; asking for a copy ported in
+    [0072](0072-android-transaction-request.md)), the full-screen cover, reporting by mail;
   - genre enrichment and genre tags.
 - No Figma pass: the screens follow the iOS code, not the Figma library.

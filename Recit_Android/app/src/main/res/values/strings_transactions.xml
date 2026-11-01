@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Asking a friend for a copy (feature 0072). One verb per type: emprunter, acheter, récupérer. -->
+    <string name="transaction_request_menu_lending">Emprunter à %1$s</string>
+    <string name="transaction_request_menu_selling">Acheter à %1$s</string>
+    <string name="transaction_request_menu_giving">Récupérer de %1$s</string>
+
+    <string name="transaction_request_title_lending">Emprunter %1$s à %2$s</string>
+    <string name="transaction_request_title_selling">Acheter %1$s à %2$s</string>
+    <string name="transaction_request_title_giving">Récupérer %1$s de %2$s</string>
+
+    <!-- iOS's transaction.desc.requester.*: the sentence that replaces the « Type » picker. -->
+    <string name="transaction_desc_requester_lending">Vous souhaitez l\'emprunter à %1$s</string>
+    <string name="transaction_desc_requester_selling">Vous souhaitez l\'acheter à %1$s</string>
+    <string name="transaction_desc_requester_giving">Vous souhaitez le récupérer de %1$s</string>
+
+    <string name="transaction_form_your_message_required">Votre message (obligatoire)</string>
+    <string name="transaction_request_hint_lending">Pour combien de temps, et comment vous le lui rendrez.</string>
+    <string name="transaction_request_hint_selling">À quel prix, et comment vous pourriez vous retrouver.</string>
+    <string name="transaction_request_hint_giving">Pourquoi il vous tente, et comment vous pourriez vous retrouver.</string>
+
+    <string name="transaction_request_submit_lending">Demander à l\'emprunter</string>
+    <string name="transaction_request_submit_selling">Demander à l\'acheter</string>
+    <string name="transaction_request_submit_giving">Demander à le récupérer</string>
+
+    <string name="transaction_request_sent">Demande envoyée à %1$s</string>
+    <string name="transaction_request_error_already_requested">Vous avez déjà fait une demande pour ce livre</string>
+    <string name="transaction_request_error_busy">Ce livre fait déjà l\'objet d\'une demande</string>
+    <string name="transaction_request_error_not_requestable">Ce livre n\'est plus proposé</string>
+</resources>

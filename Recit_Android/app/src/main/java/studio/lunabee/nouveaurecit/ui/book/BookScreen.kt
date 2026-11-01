@@ -51,8 +51,8 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
 /**
  * `Features/Book/BookDetailView.swift` (ADR 0002): the unified book screen, for an edition, a copy,
- * or the best edition of a searched work. Borrowing (« Emprunter à ») and the full-screen cover are
- * not ported.
+ * or the best edition of a searched work. Asking for a friend's copy (« Emprunter à », « Acheter à »,
+ * « Récupérer de ») is a line of the « … » menu, since feature 0072.
  */
 @Composable
 fun BookScreen(destination: Destination.Book, navigator: Navigator) {

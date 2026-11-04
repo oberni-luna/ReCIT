@@ -68,7 +68,9 @@ on 2026-08-29. The `toml-skills:*` and `olive-skills:to-issues` skills write Mar
 
 ## Build, run, test
 
-All `xcodebuild` invocations expect you to run from the repo root (or pass `-project ReCIT_iOS/ReCIT_iOS.xcodeproj`). There is no Fastlane, no SwiftLint config, and no Makefile — Xcode/SPM is the whole toolchain.
+All `xcodebuild` invocations expect you to run from the repo root (or pass `-project ReCIT_iOS/ReCIT_iOS.xcodeproj`). There is no Fastlane and no Makefile — Xcode/SPM is the whole toolchain.
+
+**SwiftLint runs on every build** (the `SwiftLintBuildToolPlugin` from `SwiftLintPlugins`, on all three targets) and every violation is an error. Config in `ReCIT_iOS/.swiftlint.yml` (plus `Tests/` and `UITests/` overrides); the code that predates it is frozen in `ReCIT_iOS/.swiftlint.baseline`, which only ever shrinks (issue #17). Never add `swiftlint:disable`. Command-line builds need `-skipPackagePluginValidation`; in Xcode, click **Trust & Enable** once.
 
 ```sh
 # List schemes / targets / configs
@@ -78,12 +80,14 @@ xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj -list
 xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
   -scheme ReCIT_iOS \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -skipPackagePluginValidation \
   build
 
 # Run the full test target (ReCIT_iOSTests — Swift Testing)
 xcodebuild -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
   -scheme ReCIT_iOSTests \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -skipPackagePluginValidation \
   test
 
 # Run a single test (Swift Testing identifier = TypeName/methodName)
@@ -91,6 +95,7 @@ xcodebuild test \
   -project ReCIT_iOS/ReCIT_iOS.xcodeproj \
   -scheme ReCIT_iOSTests \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -skipPackagePluginValidation \
   -only-testing:ReCIT_iOSTests/InventoryIntegrationTests/inventoryScenario
 ```
 

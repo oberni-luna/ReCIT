@@ -12,7 +12,7 @@ Written by `/wa-setup`, yours to edit.
 
 ```yaml
 languages: [fr, en]      # source first — mirrors ui_strings_language in config
-person: vous             # tu | vous | impersonal (per-language when needed: {fr: tu, de: du})
+person: tu               # tu | vous | impersonal (per-language when needed: {fr: tu, de: du})
 base: sober              # neutral | sober | complice | premium | energetic | custom
 audience: general        # general | tech | young | pro
 situations:              # override tones only; guardrails are fixed (wording/situations.md)
@@ -28,7 +28,9 @@ situations:              # override tones only; guardrails are fixed (wording/si
 
 **Voice** — two or three sentences on how the app talks. Allowed / forbidden: emoji, exclamation marks, humor.
 
-Ex-libris parle comme un libraire attentif : phrases courtes, vouvoiement, le vocabulaire du livre (étagère, œuvre, édition) plutôt que celui de la base de données. Il nomme inventaire.io quand c'est lui qui refuse ou qui attend (« inventaire.io a refusé cette modification »), écrit inclusif — jamais de masculin générique : une tournure épicène quand elle vient naturellement (« tout le monde »), sinon le point médian, un seul au pluriel (auteur·ice, ami·es, lecteur·ices), et dit ce qui va se passer plutôt que ce qui s'est mal passé. Pas d'emoji, pas de point d'exclamation, l'humour seulement dans un état vide.
+Ex-libris parle comme un libraire attentif : phrases courtes, tutoiement, le vocabulaire du livre (étagère, œuvre, édition) plutôt que celui de la base de données. Il nomme inventaire.io quand c'est lui qui refuse ou qui attend (« inventaire.io a refusé cette modification »), écrit inclusif — jamais de masculin générique : une tournure épicène quand elle vient naturellement (« tout le monde »), sinon le point médian, un seul au pluriel (auteur·ice, ami·es, lecteur·ices), et dit ce qui va se passer plutôt que ce qui s'est mal passé. Pas d'emoji, pas de point d'exclamation, l'humour seulement dans un état vide.
+
+Le tutoiement est la voix cible (2026-11-04), déjà celle de la fiche App Store. Les chaînes de l'app et la fiche Play encore au « vous » passeront au « tu » d'un bloc, plus tard ; d'ici là, une chaîne nouvelle sur un écran encore au « vous » suit cet écran, pour ne pas mélanger les deux sur un même écran.
 
 <!-- to review -->
 

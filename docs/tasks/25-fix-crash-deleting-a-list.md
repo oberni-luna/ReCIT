@@ -1,6 +1,6 @@
 ---
 issue: 25
-status: todo
+status: to-test
 wiki: [[lists]], [[architecture]]
 note: found by the iOS 1.9.0 gate (#19), which it blocks
 created: 2026-11-04
@@ -32,8 +32,24 @@ created: 2026-11-04
 
 ## Implementation
 
+Round 1 — 2026-11-04.
+
+- `ListsTabSections`: drops lists that are no longer in the store before reading `name` / `creatorId`.
+- `ListsTabList`, `UserListsTab`: each row guarded with `isStillInTheStore`; `UserListsTab.lists` filtered first. e2e identifiers moved to private `AccessibilityID` constants (same strings).
+- `NetworkListEntry.id` → `list.id` (`PersistentIdentifier`), so `ForEach` diffing never reads a persisted property.
+- `ListRowView` (crash 16:25), `ListCoverFlowScreen` (crash 12:41), `ListElementsPage`, `ListPresentationPage`: body only when `list.isStillInTheStore`. The two pages are hosted by `TabPager` in their own `UIHostingController` and re-render on their own.
+- `EntityListDetail`: `list` = first match still in the store; the not-found view only when the query is empty; `popIfTheListIsGone` unchanged.
+- Tests: new `ListsTabSectionsTests` (deleted and saved · deleted before save · friend's list deleted while searching); `NetworkListsTests` now inserts its lists into a context.
+- `.swiftlint.baseline`: 3 stale `accessibility_id_constant` entries removed (4194 → 4191), nothing added.
+- Proof: `ReCIT_iOSTests` `** TEST SUCCEEDED **` (1251), SwiftLint 0 violations. `RequestPacerTests/runsInOrder()` failed once under parallel load, passed on rerun — unrelated timing flake.
+- Not touched: `ListFormView` still reads `list._id` / `name` until `dismiss()` (no crash seen), `ListMoveRow`, other `@Model` types.
+
 ## Review
 
+review → /wa-validate (on_validation).
+
 ## Verification
+
+manual validation — not run by agent (verify.mode: autopilot). Criteria 1 and 2 are yours.
 
 ## Feedback

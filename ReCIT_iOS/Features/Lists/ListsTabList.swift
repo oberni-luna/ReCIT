@@ -30,16 +30,18 @@ struct ListsTabList: View {
                             .accessibilityIdentifier("e2e.lists.create")
                     } else {
                         ForEach(sections.mine) { list in
-                            NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
-                                ListRowView(list: list)
-                                    .swipeActions {
-                                        Button("action.delete", systemImage: "trash") {
-                                            onDelete(list)
+                            if list.isStillInTheStore {
+                                NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
+                                    ListRowView(list: list)
+                                        .swipeActions {
+                                            Button("action.delete", systemImage: "trash") {
+                                                onDelete(list)
+                                            }
+                                            .tint(.red)
                                         }
-                                        .tint(.red)
-                                    }
+                                }
+                                .accessibilityIdentifier(AccessibilityID.myListRow)
                             }
-                            .accessibilityIdentifier("e2e.listRow")
                         }
                     }
                 } header: {
@@ -52,13 +54,22 @@ struct ListsTabList: View {
             if !sections.network.isEmpty {
                 Section("lists.section.network") {
                     ForEach(sections.network) { entry in
-                        NavigationLink(value: NavigationDestination.entityList(id: entry.list._id)) {
-                            ListRowView(list: entry.list, owner: entry.owner)
+                        if entry.list.isStillInTheStore {
+                            NavigationLink(value: NavigationDestination.entityList(id: entry.list._id)) {
+                                ListRowView(list: entry.list, owner: entry.owner)
+                            }
+                            .accessibilityIdentifier(AccessibilityID.networkListRow)
                         }
-                        .accessibilityIdentifier("e2e.lists.networkRow")
                     }
                 }
             }
         }
+    }
+}
+
+private extension ListsTabList {
+    enum AccessibilityID {
+        static let myListRow: String = "e2e.listRow"
+        static let networkListRow: String = "e2e.lists.networkRow"
     }
 }

@@ -108,7 +108,8 @@ struct NetworkListsTests {
     }
 
     @Test("Mine by name, my friends' the most recently changed first, a stranger's left out")
-    func sections() {
+    func sections() throws {
+        let context: ModelContext = try TestStore.makeContext()
         let lea: User = friend("lea")
         let ines: User = friend("ines")
         let lists: [EntityList] = [
@@ -119,26 +120,29 @@ struct NetworkListsTests {
             list(id: "lea-new", creator: "lea", updated: 200),
             list(id: "stranger", creator: "stranger", updated: 400)
         ]
+        lists.forEach(context.insert)
 
         let sections: ListsTabSections = .init(lists: lists, myUserId: "me", friends: [lea, ines])
 
         #expect(sections.mine.map(\._id) == ["a", "b"])
-        #expect(sections.network.map(\.id) == ["ines-new", "lea-new", "lea-old"])
+        #expect(sections.network.map(\.list._id) == ["ines-new", "lea-new", "lea-old"])
         #expect(sections.network.map(\.owner._id) == ["ines", "lea", "lea"])
     }
 
     @Test("The search keeps the matching lists in both sections")
-    func searchFiltersBothSections() {
+    func searchFiltersBothSections() throws {
+        let context: ModelContext = try TestStore.makeContext()
         let lists: [EntityList] = [
             list(id: "mine-polar", name: "Polars à lire", creator: "me"),
             list(id: "mine-other", name: "Livres lus", creator: "me"),
             list(id: "lea-polar", name: "Polars nordiques", creator: "lea"),
             list(id: "lea-other", name: "Pour les enfants", creator: "lea")
         ]
+        lists.forEach(context.insert)
 
         let sections: ListsTabSections = .init(lists: lists, myUserId: "me", friends: [friend("lea")], searchText: "polar")
 
         #expect(sections.mine.map(\._id) == ["mine-polar"])
-        #expect(sections.network.map(\.id) == ["lea-polar"])
+        #expect(sections.network.map(\.list._id) == ["lea-polar"])
     }
 }

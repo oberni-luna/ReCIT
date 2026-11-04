@@ -16,10 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
@@ -27,7 +29,10 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 
-/** `ListRowView`: the cover fan, then the name, what the list is for, and how much it holds. */
+/**
+ * `ListRowView`: the cover fan, then a line saying how much the list holds — headed, for a friend's list, by
+ * their picture and name —, its name, and what it is for on up to three lines.
+ */
 @Composable
 internal fun ListRow(row: ListRowModel, onClick: () -> Unit) {
     Row(
@@ -40,7 +45,8 @@ internal fun ListRow(row: ListRowModel, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ListCoverFan(covers = row.covers, type = row.type)
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
+        Column {
+            ListRowMetaLine(row)
             Text(
                 text = row.name,
                 style = RecitTheme.typography.content400Bold,
@@ -51,23 +57,49 @@ internal fun ListRow(row: ListRowModel, onClick: () -> Unit) {
             if (row.explanation.isNotEmpty()) {
                 Text(
                     text = row.explanation,
-                    style = RecitTheme.typography.content300,
+                    style = RecitTheme.typography.content200,
                     color = RecitTheme.colors.foregroundSecondary,
-                    maxLines = 1,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+    }
+}
+
+/** `ListRowMetaLine`: « 14 œuvres », or « Léa • 14 œuvres » after Léa's picture — whose the list is before what it is called. */
+@Composable
+private fun ListRowMetaLine(row: ListRowModel) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xSmall), verticalAlignment = Alignment.CenterVertically) {
+        val owner: UserEntity? = row.owner
+        if (owner != null) {
+            CellThumbnail(url = owner.avatarUrl, size = ThumbnailSize.XXSmall, shape = ThumbnailShape.Circle)
             Text(
-                // Plural rules follow the device's language; « 0 œuvres » showed on an English phone.
-                text = if (row.count == 0) {
-                    stringResource(R.string.list_count_empty)
-                } else {
-                    pluralStringResource(ListsPresentation.countPlural(row.type), row.count, row.count)
-                },
-                style = RecitTheme.typography.footnote200,
+                text = owner.username,
+                style = RecitTheme.typography.caption200,
                 color = RecitTheme.colors.foregroundSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            Text(
+                text = "•",
+                style = RecitTheme.typography.caption200,
+                color = RecitTheme.colors.foregroundSecondary,
+                modifier = Modifier.clearAndSetSemantics {},
             )
         }
+        Text(
+            // Plural rules follow the device's language; « 0 œuvres » showed on an English phone.
+            text = if (row.count == 0) {
+                stringResource(R.string.list_count_empty)
+            } else {
+                pluralStringResource(ListsPresentation.countPlural(row.type), row.count, row.count)
+            },
+            style = RecitTheme.typography.caption200,
+            color = RecitTheme.colors.foregroundSecondary,
+            maxLines = 1,
+        )
     }
 }
 

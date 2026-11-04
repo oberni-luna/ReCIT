@@ -21,21 +21,22 @@ import studio.lunabee.nouveaurecit.data.db.ListWithElements
 class ListRowFeed(private val entities: EntityRepository, private val scope: CoroutineScope) {
     private val requested: MutableSet<String> = mutableSetOf()
 
-    fun rows(lists: Flow<List<ListWithElements>>, query: Flow<String>): Flow<List<ListRowModel>> {
-        val fetching: Flow<List<ListWithElements>> = lists.onEach(::fetchMissingCovers)
-        val images: Flow<Map<String, String?>> = fetching
-            .map(ListsPresentation::coverUris)
-            .distinctUntilChanged()
-            .flatMapLatest { (workUris, authorUris) ->
-                combine(
-                    entities.entities.observeWorksWithAuthors(workUris),
-                    entities.entities.observeAuthors(authorUris),
-                ) { works, authors ->
-                    works.associate { it.work.uri to it.work.image } + authors.associate { it.uri to it.image }
-                }
+    fun rows(lists: Flow<List<ListWithElements>>, query: Flow<String>): Flow<List<ListRowModel>> =
+        combine(lists, query, images(lists), ListsPresentation::rows)
+
+    /** The covers of [lists]' first elements, by entity uri, as Room holds them. */
+    fun images(lists: Flow<List<ListWithElements>>): Flow<Map<String, String?>> = lists
+        .onEach(::fetchMissingCovers)
+        .map(ListsPresentation::coverUris)
+        .distinctUntilChanged()
+        .flatMapLatest { (workUris, authorUris) ->
+            combine(
+                entities.entities.observeWorksWithAuthors(workUris),
+                entities.entities.observeAuthors(authorUris),
+            ) { works, authors ->
+                works.associate { it.work.uri to it.work.image } + authors.associate { it.uri to it.image }
             }
-        return combine(fetching, query, images, ListsPresentation::rows)
-    }
+        }
 
     private fun fetchMissingCovers(lists: List<ListWithElements>) {
         val (workUris, authorUris) = ListsPresentation.coverUris(lists)

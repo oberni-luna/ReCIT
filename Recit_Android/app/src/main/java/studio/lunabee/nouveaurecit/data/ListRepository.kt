@@ -9,6 +9,7 @@ import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.data.db.EntityListItemEntity
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.data.lists.ListCreatorBatches
 import studio.lunabee.nouveaurecit.data.lists.ListSyncPlan
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.data.model.Merges
@@ -47,6 +48,9 @@ class ListRepository(
     fun observeListsOf(userId: String): Flow<List<ListWithElements>> =
         myUserId.flatMapLatest { myId -> if (userId == myId) dao.observeMine(myId) else dao.observeCreatedBy(userId) }
 
+    /** Mine and everyone else's, for the Lists tab to tell apart ([studio.lunabee.nouveaurecit.ui.lists.ListsTabSections]). */
+    fun observeAllLists(): Flow<List<ListWithElements>> = dao.observeAll()
+
     fun observeList(id: String): Flow<ListWithElements?> = dao.observeList(id)
 
     /** Syncs **my** lists — the one sync allowed to prune the lists stored before `creatorId` was read. */
@@ -57,6 +61,15 @@ class ListRepository(
      * the visibility; nothing is filtered here.
      */
     suspend fun syncFriendLists(userId: String) = syncLists(creatorIds = setOf(userId), claimsUnstamped = false)
+
+    /**
+     * `ListModel.syncNetworkLists`: every friend's lists at once, for « Dans mon réseau » in the Lists tab,
+     * [ListCreatorBatches.PER_REQUEST] friends per request. Each batch prunes only the lists of the friends
+     * it asked about, so mine, and a stranger's opened on their profile, stay.
+     */
+    suspend fun syncNetworkLists(friendIds: List<String>) {
+        ListCreatorBatches.of(friendIds).forEach { syncLists(creatorIds = it, claimsUnstamped = false) }
+    }
 
     /** Upsert in place, the missing lists of [creatorIds] deleted ([ListSyncPlan]); each list's elements likewise. */
     private suspend fun syncLists(creatorIds: Set<String>, claimsUnstamped: Boolean) {

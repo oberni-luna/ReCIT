@@ -223,6 +223,7 @@ fun SectionLoadingIndicator(modifier: Modifier = Modifier) {
 }
 
 enum class ThumbnailSize(val width: Dp) {
+    XXSmall(16.dp),
     XSmall(24.dp),
     Small(36.dp),
     Medium(48.dp),

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
@@ -14,19 +15,32 @@ import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.ListRepository
 import studio.lunabee.nouveaurecit.data.SessionCoordinator
 import studio.lunabee.nouveaurecit.data.SyncStatus
-import studio.lunabee.nouveaurecit.data.db.ListWithElements
+import studio.lunabee.nouveaurecit.data.UserRepository
+import studio.lunabee.nouveaurecit.data.model.UserRelation
 
 /**
- * `EntityListView`'s state: my lists from Room, filtered by the search text, each with the covers
- * of its first elements ([ListRowFeed]).
+ * `EntityListView`'s state: every list Room holds, split into mine and my friends' ([ListsTabSections]),
+ * filtered by the search text, each with the covers of its first elements ([ListRowFeed]).
  */
 class ListsViewModel(
     private val lists: ListRepository,
-    private val entities: EntityRepository,
+    users: UserRepository,
+    entities: EntityRepository,
     private val session: SessionCoordinator,
     syncStatus: SyncStatus,
 ) : ViewModel() {
-    private val all: StateFlow<List<ListWithElements>?> = lists.observeMyLists()
+    /** The rows of « Mes listes » and of « Dans mon réseau », as the search leaves them. */
+    data class Rows(
+        val mine: List<ListRowModel> = emptyList(),
+        val network: List<ListRowModel> = emptyList(),
+    )
+
+    /** Everything there is to show, search aside: what decides the empty screen and the headers. */
+    private val all: StateFlow<ListsTabSections?> = combine(
+        lists.observeAllLists(),
+        users.observeByRelation(UserRelation.Friend),
+        users.myUserId,
+    ) { stored, friends, myId -> ListsTabSections.of(stored, myId, friends) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _query: MutableStateFlow<String> = MutableStateFlow("")
@@ -38,12 +52,25 @@ class ListsViewModel(
         .runningFold(false) { settled, now -> settled || now }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val hasNoList: StateFlow<Boolean> = all.map { it.isNullOrEmpty() }
+    /** Neither a list of mine nor one of my friends': the empty screen. */
+    val hasNoList: StateFlow<Boolean> = all.map { it?.isEmpty ?: true }
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    val rows: StateFlow<List<ListRowModel>> = ListRowFeed(entities, viewModelScope)
-        .rows(all.map { it.orEmpty() }, _query)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    /** The headers show only when there is a network to set mine apart from. */
+    val showsHeaders: StateFlow<Boolean> = all.map { it?.network?.isNotEmpty() == true }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val rows: StateFlow<Rows> = combine(
+        all,
+        _query,
+        ListRowFeed(entities, viewModelScope).images(all.map { it?.lists.orEmpty() }),
+    ) { sections, query, images ->
+        val shown: ListsTabSections = sections?.matching(query) ?: return@combine Rows()
+        Rows(
+            mine = shown.mine.map { ListsPresentation.row(it, images) },
+            network = shown.network.map { ListsPresentation.row(it.list, images, it.owner) },
+        )
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, Rows())
 
     private val _isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()

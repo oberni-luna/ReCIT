@@ -9,6 +9,7 @@ import androidx.compose.ui.text.withStyle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.EntityListItemEntity
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
+import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.data.model.Merges
 
@@ -21,6 +22,8 @@ data class ListRowModel(
     val count: Int,
     /** The fanned covers, first in front; a single `null` slot for an empty list. */
     val covers: List<String?>,
+    /** Who made the list, when it is a friend's: « Dans mon réseau » heads the row with them. */
+    val owner: UserEntity? = null,
 )
 
 /** One element of a list's detail screen, as `ListItemCellView` reads it off a work or an author. */
@@ -57,11 +60,13 @@ object ListsPresentation {
      * Lists sorted by name, kept when their name contains [query] — case- and accent-insensitive,
      * the `localizedStandardContains` of iOS. A blank query keeps them all.
      */
-    fun filter(lists: List<ListWithElements>, query: String): List<ListWithElements> {
+    fun filter(lists: List<ListWithElements>, query: String): List<ListWithElements> =
+        lists.sortedBy { Merges.fold(it.list.name) }.filter { nameMatches(it.list.name, query) }
+
+    /** Whether a list named [name] is kept by the search [query]: case- and accent-insensitive, a blank query keeps all. */
+    fun nameMatches(name: String, query: String): Boolean {
         val folded: String = Merges.fold(query)
-        return lists
-            .sortedBy { Merges.fold(it.list.name) }
-            .filter { folded.isEmpty() || Merges.fold(it.list.name).contains(folded) }
+        return folded.isEmpty() || Merges.fold(name).contains(folded)
     }
 
     /**
@@ -69,17 +74,21 @@ object ListsPresentation {
      * publisher lists, authors for author lists — and a uri it lacks shows the grey slot.
      */
     fun rows(lists: List<ListWithElements>, query: String, images: Map<String, String?>): List<ListRowModel> =
-        filter(lists, query).map { entry ->
-            val uris: List<String> = previewUris(entry.elements)
-            ListRowModel(
-                id = entry.list.id,
-                name = entry.list.name,
-                explanation = entry.list.explanation,
-                type = entry.list.type,
-                count = entry.elements.size,
-                covers = if (uris.isEmpty()) listOf(null) else uris.map { images[it] },
-            )
-        }
+        filter(lists, query).map { row(it, images) }
+
+    /** One list as its row reads it, headed by [owner] when it is a friend's. */
+    fun row(entry: ListWithElements, images: Map<String, String?>, owner: UserEntity? = null): ListRowModel {
+        val uris: List<String> = previewUris(entry.elements)
+        return ListRowModel(
+            id = entry.list.id,
+            name = entry.list.name,
+            explanation = entry.list.explanation,
+            type = entry.list.type,
+            count = entry.elements.size,
+            covers = if (uris.isEmpty()) listOf(null) else uris.map { images[it] },
+            owner = owner,
+        )
+    }
 
     /** The uris whose covers the tab needs, split by what they are: (works, authors). Publishers have none. */
     fun coverUris(lists: List<ListWithElements>): Pair<List<String>, List<String>> {

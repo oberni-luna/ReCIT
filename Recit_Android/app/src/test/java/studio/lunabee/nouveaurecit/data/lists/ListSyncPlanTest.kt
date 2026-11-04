@@ -68,6 +68,27 @@ class ListSyncPlanTest {
     }
 
     @Test
+    fun a_network_batch_prunes_only_the_friends_it_asked_about() {
+        val existing: List<EntityListEntity> = listOf(
+            stored("mine", "me"),
+            stored("old", null),
+            stored("stranger", "someone"),
+            stored("lea-kept", "lea"),
+            stored("lea-gone", "lea"),
+            stored("ines-gone", "ines"),
+            stored("later", "zoe"),
+        )
+        val plan: ListSyncPlan = ListSyncPlan.plan(
+            existing,
+            listOf(answered("lea-kept", "lea"), answered("ines-new", "ines")),
+            setOf("lea", "ines"),
+            claimsUnstamped = false,
+        )
+        assertEquals(listOf("lea-gone", "ines-gone"), plan.deletions)
+        assertEquals(listOf("lea", "ines"), plan.upserts.map { it.creatorId })
+    }
+
+    @Test
     fun a_sync_keeps_the_creator_stored_when_the_answer_omits_it() {
         val plan: ListSyncPlan = ListSyncPlan.plan(listOf(stored("a", "me")), listOf(answered("a", null)), setOf("me"), claimsUnstamped = true)
         assertEquals("me", plan.upserts.single().creatorId)

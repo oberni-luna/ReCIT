@@ -15,8 +15,8 @@ import studio.lunabee.nouveaurecit.data.sorting.SortSession
  * `RootView+RefreshUserData` and `RootView+ForgetSignedOutUser`: the sync order of a signed-in
  * launch, and what a signed-out one forgets.
  *
- * Order: my user → my shelves → my inventory → relations → groups → lists → each friend's shelves
- * then inventory, never-synced friends first. A `401` on the first call is the only thing that signs
+ * Order: my user → my shelves → my inventory → relations → groups → lists → my friends' lists → each
+ * friend's shelves then inventory, never-synced friends first. A `401` on the first call is the only thing that signs
  * the user out (ADR 0008); every later failure is logged and the next domain carries on.
  */
 class SessionCoordinator(
@@ -51,6 +51,8 @@ class SessionCoordinator(
         sync(SyncStatus.Domain.Community) { users.syncRelations() }
         sync(SyncStatus.Domain.Groups) { groups.syncMyGroups(me.id) }
         sync(SyncStatus.Domain.Lists) { lists.syncLists(me) }
+        // Outside the tracking: the Lists tab's placeholder waits on my lists alone.
+        runCatching { lists.syncNetworkLists(users.friends().map { it.id }) }.onFailure { Log.w(TAG, "network lists", it) }
         syncFriendsInventories()
     }
 

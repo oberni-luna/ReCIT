@@ -296,6 +296,11 @@ interface ListDao {
     @Query("SELECT * FROM lists WHERE creatorId IS NULL OR creatorId = :myId ORDER BY created DESC")
     fun observeMine(myId: String?): Flow<List<ListWithElements>>
 
+    /** Every list the store holds — the Lists tab splits them into mine and my friends'. */
+    @Transaction
+    @Query("SELECT * FROM lists")
+    fun observeAll(): Flow<List<ListWithElements>>
+
     /** Another reader's lists, by name, as their profile shows them. */
     @Transaction
     @Query("SELECT * FROM lists WHERE creatorId = :creatorId ORDER BY name COLLATE NOCASE")

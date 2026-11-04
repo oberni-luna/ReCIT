@@ -47,6 +47,8 @@ class EntityListViewModel(
         val isLoaded: Boolean = false,
         val list: EntityListEntity? = null,
         val rows: List<ListElementRowModel> = emptyList(),
+        /** How many elements the list holds, those whose work or author has not landed yet included: the first tab's count. */
+        val elementCount: Int = 0,
         val selectedUri: String? = null,
         /** Where « Déplacer dans une autre liste » can take the selected element; empty, the row is hidden. */
         val destinations: List<ListMoveDestination> = emptyList(),
@@ -64,12 +66,13 @@ class EntityListViewModel(
         val isLoaded: Boolean = false,
         val list: EntityListEntity? = null,
         val rows: List<ListElementRowModel> = emptyList(),
+        val elementCount: Int = 0,
     )
 
     private val requested: MutableSet<String> = mutableSetOf()
 
     private val content: StateFlow<Content> = lists.observeList(listId)
-        .flatMapLatest { entry -> rowsOf(entry).map { rows -> Content(isLoaded = true, list = entry?.list, rows = rows) } }
+        .flatMapLatest { entry -> rowsOf(entry).map { rows -> Content(isLoaded = true, list = entry?.list, rows = rows, elementCount = entry?.elements?.size ?: 0) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, Content())
 
     private val selection: MutableStateFlow<CoverFlowSelection.Result> = MutableStateFlow(CoverFlowSelection.Result(null, null))
@@ -87,6 +90,7 @@ class EntityListViewModel(
             isLoaded = current.isLoaded,
             list = list,
             rows = current.rows,
+            elementCount = current.elementCount,
             selectedUri = uri,
             destinations = if (list == null || uri == null || isReadOnly) {
                 emptyList()

@@ -1,6 +1,6 @@
 ---
 issue: 22
-status: todo
+status: to-test
 wiki: [[features/0068-lists-in-my-network]], [[features/0073-a-lists-presentation-tab]], [[features/0074-a-lists-visibility-in-its-form]], [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0062-android-catches-up-with-1-7-0]]
 note: split from #20; sprint Android 1.3.0; builds on #21 (same branch)
 created: 2026-11-04
@@ -38,3 +38,20 @@ created: 2026-11-04
 - [ ] Présentation: description with links, Type, Visible par in words, Créée le, Modifiée le; empty → « Cette liste n'a pas de description »; no add bar
 - [ ] Editing a comment on Livres: page swipe disabled until done
 - [ ] Unit tests: by-creators batching (50 per request), scoped pruning, section ordering, visibility label
+
+## Implementation
+
+- **Network sync:** `ListRepository.syncNetworkLists(friendIds)` — `by-creators` in batches of 50 (`data/lists/ListCreatorBatches.kt`), one after another, a failure stops the rest; prunes only the friends asked (`ListSyncPlan`). Run by `SessionCoordinator` right after my lists, outside the sync-status tracking (as iOS). Only `UserRelation.Friend`.
+- **Friend filter:** in `ListsViewModel`, combining `observeAllLists()` with `observeByRelation(Friend)`, split by the pure `ListsTabSections` (as iOS), not a store query.
+- **Listes tab:** « Mes listes » by name, « Dans mon réseau » newest change first; headers only when friends have lists; search filters both; tinted « Créer une liste » on top when I have none but friends do.
+- **Row:** `ListRow` count line above the name; a friend's starts with a 16 dp avatar + name; description 3 lines in new `content200`; friends' rows read-only, no swipe.
+- **List screen:** `ListDetailTab` « Livres • N » / « Auteur·ices • N » | « Présentation » with #21's `CapsuleTabs` + pager; add bar inside Livres; pager frozen while a comment is edited; empty work/author list → tabs + « Cette liste est vide ».
+- **Présentation:** `ListPresentationPage` — selectable description with links (`ui/common/WebLinks.kt`), Type, Visible par (`ListVisibility` in words, groups included), Créée le, Modifiée le when changed; empty « Cette liste n'a pas de description ».
+- **Design system:** `content200` (Alegreya Medium 15 sp) and `ThumbnailSize.XXSmall` (16 dp) added.
+- **Not ported:** lens; tab group screen-reader label; avatar initials at 16 dp (grey disc); links on bare domains without `www.`; fade of the list under the tabs.
+- **Unverified:** at the first/last cover, an extra swipe may turn the outer page.
+- **Proof:** `./gradlew assembleDebug :app:testDebugUnitTest` green, 570 tests (13 new: `ListCreatorBatchesTest`, `ListsTabSectionsTest`, `WebLinksTest`, cases in `ListSyncPlanTest`, `ListVisibilityTest`). Never run on an emulator.
+
+## Verification
+
+manual validation — not run by agent

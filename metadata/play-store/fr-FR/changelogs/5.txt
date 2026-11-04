@@ -1,0 +1,1 @@
+Le profil d’un·e ami·e s’ouvre sur trois pages, Inventaire, Listes et Présentation, que l’on tourne d’un geste. L’onglet Listes montre aussi les listes de votre réseau, et chaque liste a sa page Présentation. Une œuvre ou un·e auteur·ice se modifie en entier, avec son propre « Enregistrer ». En mode sombre, les formulaires se détachent mieux du fond.

@@ -1,0 +1,1 @@
+A friend’s profile opens on three pages, Inventaire, Listes and Présentation, turned with a swipe. The Lists tab also shows your network’s lists, and every list has its Présentation page. A work or an author can be edited in full, each with its own “Enregistrer”. In dark mode, forms stand out better from the background.

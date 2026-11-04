@@ -8,6 +8,10 @@ Lists of works or authors, mine and my network's. A list opens as a cover flow w
 - `AppModels/List/` — `ListModel`, `ListDTO`
 - `Model/UserData/EntityList.swift`
 
+## Deleting a list
+
+`ListModel.deleteList` is server-first, then `modelContext.delete` + `save()`. Every view that can render once more with the deleted `EntityList` or its cascaded `EntityListItem`s — the Lists tab's sections and rows, a friend's Listes tab, the list's screen, its two pages, the comment and « Déplacer » rows, the form — asks `isStillInTheStore` before any persisted read: SwiftData traps on a deleted model, it never returns nil. A view added to that path does the same (#25).
+
 ## Features
 
 - [0016 Creating a list or an étagère from a book](features/0016-create-a-list-or-shelf-from-a-book.md) — the "…" menu stops going silent when you own nothing yet

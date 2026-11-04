@@ -18,7 +18,7 @@
     <string name="inventory_item_delete_confirm">Supprimer cet item de votre inventaire ?</string>
     <string name="inventory_item_deleted">Supprimé !</string>
     <string name="edition_added_to_inventory">Ajouté à votre inventaire</string>
-    <string name="edition_error_no_user">Pas d\'utilisateur connecté !</string>
+    <string name="edition_error_no_user">Vous n\'êtes pas connecté·e.</string>
 
     <!-- States -->
     <string name="book_resolve_error_title">Impossible d’ouvrir ce livre</string>
@@ -33,7 +33,7 @@
 
     <!-- Sections -->
     <string name="entity_summary_label">Résumé</string>
-    <string name="author_unknown">Auteur inconnu</string>
+    <string name="author_unknown">Auteur·ice inconnu·e</string>
     <string name="book_other_editions_subtitle">Autres éditions</string>
     <string name="nav_community">Dans la communauté</string>
     <string name="inventory_item_since_date">Depuis le %1$s</string>
@@ -58,8 +58,8 @@
     <string name="section_refreshing">Mise à jour en cours</string>
 
     <!-- Author -->
-    <string name="nav_author">Auteur</string>
-    <string name="author_loading">Chargement de l\'auteur...</string>
+    <string name="nav_author">Auteur·ice</string>
+    <string name="author_loading">Chargement de l\'auteur·ice…</string>
     <string name="author_loading_works">Chargement des œuvres de %1$s</string>
     <string name="author_birth_date">Né·e le %1$s</string>
     <string name="author_life_dates">%1$s – %2$s</string>

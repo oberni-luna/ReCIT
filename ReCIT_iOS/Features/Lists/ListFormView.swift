@@ -34,9 +34,18 @@ struct ListFormView: View {
     /// create-then-file mode from plain creation. `nil` in the two modes that existed before.
     private let workUriToFile: String?
 
+    /// Whether this form is making a list or editing one. A list only has a server id once the
+    /// server has answered, so an empty id is what "does not exist yet" means here.
+    ///
+    /// Read by everything that differs between the two modes — the title, the type picker and
+    /// the delete control — because those three disagreeing is exactly how the form came to
+    /// offer deleting a list that had never existed.
+    private let isCreating: Bool
+
     init(list: EntityList = .init(_id: "", _rev: "", name: "", explanation: "", created: Date(), visibility: [], type: .work)) {
         _list = Bindable(wrappedValue: list)
         workUriToFile = nil
+        isCreating = list._id.isEmpty
     }
 
     /// The create-then-file form, opened from a book or a work. The list is made to hold that
@@ -44,16 +53,7 @@ struct ListFormView: View {
     init(fileWorkIntoNewList workUri: String) {
         _list = Bindable(wrappedValue: .init(_id: "", _rev: "", name: "", explanation: "", created: Date(), visibility: [], type: .work))
         workUriToFile = workUri
-    }
-
-    /// Whether this form is making a list or editing one. A list only has a server id once the
-    /// server has answered, so an empty id is what "does not exist yet" means here.
-    ///
-    /// Read by everything that differs between the two modes — the title, the type picker and
-    /// the delete control — because those three disagreeing is exactly how the form came to
-    /// offer deleting a list that had never existed.
-    private var isCreating: Bool {
-        list._id.isEmpty
+        isCreating = true
     }
 
     private var isFilingIntoNewList: Bool {
@@ -78,100 +78,106 @@ struct ListFormView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            DesignSystem.Form {
-                // Not asked when the book has already answered: a list opened from a book
-                // holds that book's work, and the value is forced in the initializer.
-                if isCreating, isFilingIntoNewList == false {
+        if isCreating || list.isStillInTheStore {
+            NavigationStack {
+                DesignSystem.Form {
+                    // Not asked when the book has already answered: a list opened from a book
+                    // holds that book's work, and the value is forced in the initializer.
+                    if isCreating, isFilingIntoNewList == false {
+                        Section {
+                            Picker("list.form.type", selection: $list.type) {
+                                ForEach(EntityListType.allCases, id: \.self) { type in
+                                    Text(type.label).tag(type)
+                                }
+                            }
+                            .foregroundStyle(.foregroundDefault)
+                        }
+                    }
+
                     Section {
-                        Picker("list.form.type", selection: $list.type) {
-                            ForEach(EntityListType.allCases, id: \.self) { type in
-                                Text(type.label).tag(type)
+                        TextField("list.form.name", text: $list.name)
+                            // Before `withLabel`, which wraps the field with a `Text` of its own:
+                            // applied after it, the identifier lands on the pair and resolves to
+                            // the label rather than to the box the scenario has to type into.
+                            .accessibilityIdentifier(AccessibilityID.name)
+                            .textStyle(.content300)
+                            .foregroundStyle(.foregroundDefault)
+                            .withLabel(label: "list.form.name")
+
+                        TextEditor(text: $list.explanation)
+                            .frame(minHeight: 48)
+                            .textStyle(.content300)
+                            .foregroundStyle(.foregroundDefault)
+                            .withLabel(label: "list.form.description")
+                    }
+                    .listRowSeparator(.visible)
+                    .listSectionSeparator(.hidden)
+
+                    // Asked in every mode: a list made from a book has a visibility too, and
+                    // the default stays « Moi seul·e », what every new list got before.
+                    Section {
+                        Picker("list.info.visibility", selection: visibility) {
+                            ForEach(ListVisibility.allCases) { option in
+                                Text(option.label).tag(option)
                             }
                         }
                         .foregroundStyle(.foregroundDefault)
+                        .accessibilityIdentifier(AccessibilityID.visibility)
                     }
                 }
+                .formActionBar {
+                    VStack {
+                        AsyncButton(
+                            action: {
+                                await submit()
+                            },
+                            actionOptions: [.showProgressView],
+                            label: {
+                                Text(submitTitleKey)
+                                    .frame(maxWidth: .infinity)
+                            }
+                        )
+                        .buttonStyle(.primary())
+                        // Only the new mode refuses an empty name: the other two are left
+                        // exactly as they were.
+                        .disabled(isFilingIntoNewList && trimmedName.isEmpty)
+                        .accessibilityIdentifier(AccessibilityID.submit)
 
-                Section {
-                    TextField("list.form.name", text: $list.name)
-                        // Before `withLabel`, which wraps the field with a `Text` of its own:
-                        // applied after it, the identifier lands on the pair and resolves to
-                        // the label rather than to the box the scenario has to type into.
-                        .accessibilityIdentifier("e2e.listForm.name")
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundDefault)
-                        .withLabel(label: "list.form.name")
-
-                    TextEditor(text: $list.explanation)
-                        .frame(minHeight: 48)
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundDefault)
-                        .withLabel(label: "list.form.description")
-                }
-                .listRowSeparator(.visible)
-                .listSectionSeparator(.hidden)
-
-                // Asked in every mode: a list made from a book has a visibility too, and
-                // the default stays « Moi seul·e », what every new list got before.
-                Section {
-                    Picker("list.info.visibility", selection: visibility) {
-                        ForEach(ListVisibility.allCases) { option in
-                            Text(option.label).tag(option)
-                        }
-                    }
-                    .foregroundStyle(.foregroundDefault)
-                    .accessibilityIdentifier("e2e.listForm.visibility")
-                }
-            }
-            .formActionBar {
-                VStack {
-                    AsyncButton(action: {
-                        await submit()
-                    },
+                        // Only an existing list can be deleted. The same test decides the
+                        // title and the type picker above: a list with no server id has
+                        // never existed, so offering to delete it asked the endpoint to
+                        // remove an empty id.
+                        if !isCreating {
+                            AsyncButton(
+                                action: {
+                                    do {
+                                        try await listModel.deleteList(
+                                            modelContext: modelContext,
+                                            list: list
+                                        )
+                                        dismiss()
+                                    } catch {
+                                        snackBar.show { SnackBarView.error(error) }
+                                    }
+                                },
                                 actionOptions: [.showProgressView],
                                 label: {
-                        Text(submitTitleKey)
-                            .frame(maxWidth: .infinity)
-                    })
-                    .buttonStyle(.primary())
-                    // Only the new mode refuses an empty name: the other two are left
-                    // exactly as they were.
-                    .disabled(isFilingIntoNewList && trimmedName.isEmpty)
-                    .accessibilityIdentifier("e2e.listForm.submit")
-
-                    // Only an existing list can be deleted. The same test decides the
-                    // title and the type picker above: a list with no server id has
-                    // never existed, so offering to delete it asked the endpoint to
-                    // remove an empty id.
-                    if !isCreating {
-                        AsyncButton(action: {
-                            do {
-                                try await listModel.deleteList(
-                                    modelContext: modelContext,
-                                    list: list
-                                )
-                                dismiss()
-                            } catch {
-                                snackBar.show { SnackBarView.error(error) }
-                            }
-                        },
-                                    actionOptions: [.showProgressView],
-                                    label: {
-                            Text("list.form.delete")
-                                .frame(maxWidth: .infinity)
-                        })
-                        .buttonStyle(.destructive())
-                        .accessibilityIdentifier("e2e.listForm.delete")
+                                    Text("list.form.delete")
+                                        .frame(maxWidth: .infinity)
+                                }
+                            )
+                            .buttonStyle(.destructive())
+                            .accessibilityIdentifier(AccessibilityID.delete)
+                        }
                     }
                 }
-            }
-            .navigationTitle(isCreating ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("action.close", systemImage: "xmark") {
-                        dismiss()
+                .navigationTitle(isCreating ? String(localized: "list.form.create_title") : String(localized: "list.form.edit_title"))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("action.close", systemImage: "xmark") {
+                            dismiss()
+                        }
                     }
                 }
             }
@@ -219,6 +225,15 @@ struct ListFormView: View {
         } catch {
             snackBar.show { SnackBarView.error(error) }
         }
+    }
+}
+
+private extension ListFormView {
+    enum AccessibilityID {
+        static let name: String = "e2e.listForm.name"
+        static let visibility: String = "e2e.listForm.visibility"
+        static let submit: String = "e2e.listForm.submit"
+        static let delete: String = "e2e.listForm.delete"
     }
 }
 

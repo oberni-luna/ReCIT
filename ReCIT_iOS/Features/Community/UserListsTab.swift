@@ -32,10 +32,11 @@ struct UserListsTab: View {
     @Query(sort: \EntityList.name) private var storedLists: [EntityList]
 
     private var lists: [EntityList] {
-        if user._id == userModel.myUser?._id {
-            storedLists.filter { $0.isCreated(byMe: user._id) }
+        let stored: [EntityList] = storedLists.filter(\.isStillInTheStore)
+        return if user._id == userModel.myUser?._id {
+            stored.filter { $0.isCreated(byMe: user._id) }
         } else {
-            storedLists.filter { $0.creatorId == user._id }
+            stored.filter { $0.creatorId == user._id }
         }
     }
 
@@ -50,10 +51,12 @@ struct UserListsTab: View {
         } else {
             Section {
                 ForEach(lists) { list in
-                    NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
-                        ListRowView(list: list)
+                    if list.isStillInTheStore {
+                        NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
+                            ListRowView(list: list)
+                        }
+                        .accessibilityIdentifier(AccessibilityID.listRow)
                     }
-                    .accessibilityIdentifier("e2e.user.listRow")
                 }
             }
             .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
@@ -77,5 +80,11 @@ struct UserListsTab: View {
                 title: "user.lists.failed \(user.username)"
             )
         }
+    }
+}
+
+private extension UserListsTab {
+    enum AccessibilityID {
+        static let listRow: String = "e2e.user.listRow"
     }
 }

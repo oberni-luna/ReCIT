@@ -55,9 +55,10 @@ enum TestStore {
 enum Fixture {
     static func user(
         id: String = "user-1",
-        username: String = "tester"
+        username: String = "tester",
+        relation: UserRelation = .none
     ) -> User {
-        .init(
+        let user: User = .init(
             _id: id,
             _rev: "rev-1",
             username: username,
@@ -66,6 +67,8 @@ enum Fixture {
             avatarURLValue: nil,
             itemCount: 0
         )
+        user.relation = relation
+        return user
     }
 
     static func edition(

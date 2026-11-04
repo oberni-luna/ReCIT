@@ -31,19 +31,6 @@ struct FriendListsTests {
         return #"{ "total": \#(lists.count), "lists": [\#(docs.joined(separator: ","))] }"#
     }
 
-    private func list(id: String, creator: String?) -> EntityList {
-        .init(
-            _id: id,
-            _rev: "1",
-            name: id,
-            explanation: "",
-            created: .init(timeIntervalSince1970: 0),
-            visibility: [.public],
-            type: .work,
-            creatorId: creator
-        )
-    }
-
     private func storedIDs(_ context: ModelContext) throws -> Set<String> {
         .init(try context.fetch(FetchDescriptor<EntityList>()).map(\._id))
     }
@@ -67,9 +54,9 @@ struct FriendListsTests {
     @Test("A friend's sync leaves my lists alone, stamped or not")
     func friendSyncKeepsMine() async throws {
         let context: ModelContext = try TestStore.makeContext()
-        context.insert(list(id: "mine-1", creator: "user-1"))
-        context.insert(list(id: "mine-legacy", creator: nil))
-        context.insert(list(id: "theirs-gone", creator: "user-2"))
+        context.insert(EntityList.mock(id: "mine-1", creatorId: "user-1"))
+        context.insert(EntityList.mock(id: "mine-legacy", creatorId: nil))
+        context.insert(EntityList.mock(id: "theirs-gone", creatorId: "user-2"))
         try context.save()
 
         let mock: MockAPIService = .init()
@@ -86,9 +73,9 @@ struct FriendListsTests {
     @Test("My sync prunes my unstamped lists and leaves a friend's alone")
     func mySyncClaimsUnstampedLists() async throws {
         let context: ModelContext = try TestStore.makeContext()
-        context.insert(list(id: "mine-kept", creator: nil))
-        context.insert(list(id: "mine-gone", creator: nil))
-        context.insert(list(id: "theirs-1", creator: "user-2"))
+        context.insert(EntityList.mock(id: "mine-kept", creatorId: nil))
+        context.insert(EntityList.mock(id: "mine-gone", creatorId: nil))
+        context.insert(EntityList.mock(id: "theirs-1", creatorId: "user-2"))
         try context.save()
 
         let mock: MockAPIService = .init()
@@ -105,12 +92,12 @@ struct FriendListsTests {
 
     @Test("Mine are the unstamped lists and the ones I made, never a friend's")
     func isCreatedByMe() {
-        #expect(list(id: "a", creator: nil).isCreated(byMe: "user-1"))
-        #expect(list(id: "b", creator: "user-1").isCreated(byMe: "user-1"))
-        #expect(list(id: "c", creator: "user-2").isCreated(byMe: "user-1") == false)
+        #expect(EntityList.mock(id: "a", creatorId: nil).isCreated(byMe: "user-1"))
+        #expect(EntityList.mock(id: "b", creatorId: "user-1").isCreated(byMe: "user-1"))
+        #expect(EntityList.mock(id: "c", creatorId: "user-2").isCreated(byMe: "user-1") == false)
         // Without knowing who I am, only the unstamped lists can be mine.
-        #expect(list(id: "d", creator: "user-1").isCreated(byMe: nil) == false)
-        #expect(list(id: "e", creator: nil).isCreated(byMe: nil))
+        #expect(EntityList.mock(id: "d", creatorId: "user-1").isCreated(byMe: nil) == false)
+        #expect(EntityList.mock(id: "e", creatorId: nil).isCreated(byMe: nil))
     }
 
     @Test("Unfriending takes their lists, not mine")
@@ -123,9 +110,9 @@ struct FriendListsTests {
         let friend: User = Fixture.user(id: "user-2", username: "friend")
         friend.relation = .friend
         context.insert(friend)
-        context.insert(list(id: "mine-1", creator: "user-1"))
-        context.insert(list(id: "mine-legacy", creator: nil))
-        context.insert(list(id: "theirs-1", creator: "user-2"))
+        context.insert(EntityList.mock(id: "mine-1", creatorId: "user-1"))
+        context.insert(EntityList.mock(id: "mine-legacy", creatorId: nil))
+        context.insert(EntityList.mock(id: "theirs-1", creatorId: "user-2"))
         try context.save()
 
         model.unfriend(friend, modelContext: context)

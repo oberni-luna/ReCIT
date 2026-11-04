@@ -27,10 +27,11 @@ struct ListsTabSections {
         friends: [User],
         searchText: String = ""
     ) {
+        let stored: [EntityList] = lists.filter(\.isStillInTheStore)
         let matching: [EntityList] = if searchText.isEmpty {
-            lists
+            stored
         } else {
-            lists.filter { $0.name.localizedStandardContains(searchText) }
+            stored.filter { $0.name.localizedStandardContains(searchText) }
         }
         let friendsById: [String: User] = .init(friends.map { ($0._id, $0) }) { first, _ in first }
 

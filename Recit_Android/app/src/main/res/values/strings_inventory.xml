@@ -27,7 +27,7 @@
     <string name="shelf_empty_sort_heading">Étape suivante : ranger vos livres</string>
     <string name="shelf_empty_sort_body">Vos livres sont là. Il reste à leur faire une place sur des étagères.</string>
     <string name="shelf_empty_action_search_title">Rechercher</string>
-    <string name="shelf_empty_action_search_detail">par titre ou auteur</string>
+    <string name="shelf_empty_action_search_detail">par titre ou auteur·ice</string>
     <string name="shelf_empty_action_add_title">Ajouter des livres</string>
     <string name="shelf_empty_action_add_detail">depuis votre inventaire</string>
     <string name="shelf_add_books_title">Ajouter à %1$s</string>
@@ -42,7 +42,7 @@
     <string name="inventory_search_recents_clear">Effacer</string>
     <string name="inventory_search_recents_empty_title">Aucune recherche récente</string>
     <string name="inventory_search_recents_empty_message">Vos recherches récentes apparaîtront ici.</string>
-    <string name="inventory_search_local_section">Dans mes livres et chez mes amis</string>
+    <string name="inventory_search_local_section">Dans mes livres et chez mes ami·es</string>
     <string name="inventory_search_see_all">Tout voir</string>
     <string name="inventory_search_remote_section">Chercher sur inventaire.io</string>
     <string name="inventory_search_suggestion_works">Livres contenant %1$s</string>
@@ -56,17 +56,17 @@
     <string name="inventory_search_error_retry">Réessayer</string>
     <string name="inventory_search_results_works">Livres · %1$d</string>
     <string name="inventory_search_results_humans">Auteur·ices · %1$d</string>
-    <string name="inventory_search_friends_section">Chez mes amis</string>
+    <string name="inventory_search_friends_section">Chez mes ami·es</string>
     <string name="inventory_search_friends_section_cover">%1$s, chez %2$s</string>
-    <string name="inventory_search_friends_section_invite_title">Trouver des lecteurs</string>
-    <string name="inventory_search_friends_section_invite_detail">Les livres de vos amis s\'afficheront ici.</string>
+    <string name="inventory_search_friends_section_invite_title">Trouver des lecteur·ices</string>
+    <string name="inventory_search_friends_section_invite_detail">Les livres de vos ami·es s\'afficheront ici.</string>
 
     <!-- Shelf screen -->
     <string name="shelf_detail_edit">Modifier</string>
     <string name="shelf_detail_empty">Cette étagère est vide</string>
     <string name="shelf_detail_empty_message">Choisissez dans votre inventaire les livres qui y vont.</string>
     <string name="shelf_detail_visibility_private">Privée</string>
-    <string name="shelf_detail_visibility_friends">Visible par vos amis</string>
+    <string name="shelf_detail_visibility_friends">Visible par vos ami·es</string>
     <string name="shelf_detail_visibility_public">Publique</string>
     <plurals name="shelf_detail_count">
         <item quantity="one">%1$d livre</item>
@@ -82,7 +82,7 @@
     <string name="shelf_form_description">Description (optionnel)</string>
     <string name="shelf_form_visibility">Visibilité</string>
     <string name="shelf_form_visibility_private">Privé</string>
-    <string name="shelf_form_visibility_friends">Amis</string>
+    <string name="shelf_form_visibility_friends">Ami·es</string>
     <string name="shelf_form_visibility_public">Public</string>
     <string name="shelf_form_create">Créer</string>
     <string name="shelf_form_save">Enregistrer</string>

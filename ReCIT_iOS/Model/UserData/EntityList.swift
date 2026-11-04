@@ -132,6 +132,34 @@ public final class EntityList {
     }
 }
 
+extension EntityList {
+    static func mock(
+        id: String = "list-1",
+        rev: String = "1",
+        name: String = "Livres lus",
+        explanation: String = "",
+        created: Date = .init(timeIntervalSince1970: 0),
+        updated: Date? = nil,
+        visibility: [VisibilityAttributes] = [.public],
+        elements: [EntityListItem] = [],
+        type: EntityListType = .work,
+        creatorId: String? = nil
+    ) -> EntityList {
+        .init(
+            _id: id,
+            _rev: rev,
+            name: name,
+            explanation: explanation,
+            created: created,
+            updated: updated,
+            visibility: visibility,
+            elements: elements,
+            type: type,
+            creatorId: creatorId
+        )
+    }
+}
+
 @Model
 public final class EntityListItem {
     @Attribute(.unique) var _id: String

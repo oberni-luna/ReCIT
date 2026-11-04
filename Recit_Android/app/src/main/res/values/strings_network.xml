@@ -7,10 +7,10 @@
 <resources>
     <string name="network_nav_network">Réseau</string>
 
-    <string name="network_add_friends">Ajouter des amis lecteurs</string>
-    <string name="network_friends">Amis</string>
+    <string name="network_add_friends">Ajouter des ami·es lecteur·ices</string>
+    <string name="network_friends">Ami·es</string>
     <string name="network_profile_invitations">Invitations</string>
-    <string name="network_profile_network_empty">Aucun ami pour le moment</string>
+    <string name="network_profile_network_empty">Aucun·e ami·e pour le moment</string>
 
     <!-- Invitations -->
     <string name="network_invitation_accept">Accepter</string>
@@ -28,11 +28,11 @@
     <string name="network_invitations_sent">Envoyées</string>
 
     <!-- Reader search -->
-    <string name="network_search_prompt">Nom d’utilisateur</string>
-    <string name="network_search_header">Lecteurs</string>
-    <string name="network_search_title">Trouvez vos amis lecteurs</string>
-    <string name="network_search_explanation">Cherchez un lecteur par son nom d’utilisateur sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès qu’il l’aura acceptée.</string>
-    <string name="network_search_no_results">Aucun lecteur de ce nom</string>
+    <string name="network_search_prompt">Nom d’utilisateur·ice</string>
+    <string name="network_search_header">Lecteur·ices</string>
+    <string name="network_search_title">Trouvez vos ami·es lecteur·ices</string>
+    <string name="network_search_explanation">Cherchez un·e lecteur·ice par son nom d’utilisateur·ice sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès que la demande sera acceptée.</string>
+    <string name="network_search_no_results">Aucun·e lecteur·ice de ce nom</string>
     <string name="network_search_no_results_message">Personne sur inventaire.io ne répond à « %1$s ».</string>
     <string name="network_search_clear">Effacer</string>
     <string name="network_requests_pending">Demandes en cours</string>
@@ -40,13 +40,13 @@
     <!-- Relations -->
     <string name="network_add_to_network">Ajouter au réseau</string>
     <string name="network_add_reader">Ajouter %1$s</string>
-    <string name="network_reciprocal">Une fois la demande acceptée, vous verrez ses livres et il verra les vôtres. inventaire.io ne connaît pas de sens unique : le réseau est réciproque.</string>
+    <string name="network_reciprocal">Une fois la demande acceptée, chacun·e verra les livres de l’autre. inventaire.io ne connaît pas de sens unique : le réseau est réciproque.</string>
     <string name="network_request_sent">Envoyée</string>
     <string name="network_request_awaiting">Demande envoyée</string>
     <string name="network_request_cancel">Annuler la demande</string>
     <string name="network_request_no_notification">%1$s ne reçoit aucune notification : la demande sera vue à la prochaine ouverture de l’app.</string>
     <string name="network_request_title">Demande d’ajout</string>
-    <string name="network_request_explanation">%1$s trouvera votre demande dans ses invitations. Tant qu’elle n’est pas acceptée, aucun de vous deux ne voit l’inventaire de l’autre.</string>
+    <string name="network_request_explanation">%1$s trouvera votre demande dans ses invitations. Tant qu’elle n’est pas acceptée, aucun·e de vous deux ne voit l’inventaire de l’autre.</string>
     <string name="network_request_send">Envoyer la demande</string>
     <string name="network_remove">Retirer du réseau</string>
     <string name="network_remove_confirm">Retirer %1$s de votre réseau ? Ses livres quittent votre inventaire, et la relation devra être redemandée.</string>

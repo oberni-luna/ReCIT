@@ -1,34 +1,39 @@
 //
-//  UserProfilePager.swift
+//  TabPager.swift
 //  ReCIT_iOS
 //
-//  Inventaire, Listes and Présentation side by side under a reader's profile header, turned by a swipe or by a
-//  tab's name — UIKit's own pager, `UIPageViewController`, as the Contacts card of Messages does.
+//  A screen's pages side by side, turned by a swipe or by a tab's name — UIKit's own pager,
+//  `UIPageViewController`, as the Contacts card of Messages does. A reader's profile holds
+//  Inventaire, Listes and Présentation in it; a list's screen, Livres and Présentation.
 //
 //  Two SwiftUI pagers were tried first. A paging `ScrollView` let a finger's slant scroll the
 //  page up or down while it turned, and fell back to the first page in one frame. `TabView(.page)`
 //  turned by a swipe but not when a tab's name was chosen. UIKit's pager locks the swipe to one
-//  direction against the lists it holds, and turns when asked to.
+//  direction against the lists it holds, and turns when asked to. A horizontal scroll view inside
+//  a page keeps its own swipe — a list's cover flow scrolls its covers, the rest of the page turns.
 //
 //  Each page is a `UIHostingController`, given the screen's environment — the app's models, the
 //  store, the navigation — and the safe area by UIKit itself, so its list runs under the bars as
-//  any list does. Where the pager stands, 0 on the first page, 1 on the second and 2 on the
-//  third, is written to `ProfileScrollOffset.pagePosition` as the finger moves, for the header to
-//  fold by.
+//  any list does. Where the pager stands, 0 on the first page, 1 on the second and so on, is
+//  written to a `TabPagerPositionStore` as the finger moves, for the tabs (and, on a reader's
+//  profile, the header) to follow.
+//
+//  A page lives in a hosting controller of its own, so a `@FocusState` held by the screen does
+//  not reach a field inside it: a page with a text field owns its focus.
 //
 
 import SwiftUI
 import UIKit
 
-struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
-    @Binding var selection: UserProfileTab
-    /// Frozen while a book is being picked off an étagère, like the pages' own scroll.
+struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepresentable {
+    @Binding var selection: Tab
+    /// Holds the pages still — while a book is being picked off an étagère, or a comment written.
     let isFrozen: Bool
-    let scrollOffset: ProfileScrollOffset
-    @ViewBuilder let page: (UserProfileTab) -> Page
+    let position: any TabPagerPositionStore
+    @ViewBuilder let page: (Tab) -> Page
 
     func makeCoordinator() -> Coordinator {
-        .init(selection: $selection, scrollOffset: scrollOffset)
+        .init(selection: $selection, position: position)
     }
 
     func makeUIViewController(context: Context) -> UIPageViewController {
@@ -40,7 +45,7 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
         controller.dataSource = context.coordinator
         controller.delegate = context.coordinator
 
-        context.coordinator.pages = UserProfileTab.allCases.map { tab in
+        context.coordinator.pages = Coordinator.tabs.map { tab in
             let host: UIHostingController<HostedPage> = .init(rootView: hostedPage(tab, context: context))
             host.view.backgroundColor = .clear
             return host
@@ -57,14 +62,14 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: UIPageViewController, context: Context) {
         let coordinator: Coordinator = context.coordinator
         coordinator.selection = $selection
-        for (tab, host) in zip(UserProfileTab.allCases, coordinator.pages) {
+        for (tab, host) in zip(Coordinator.tabs, coordinator.pages) {
             host.rootView = hostedPage(tab, context: context)
         }
         coordinator.setFrozen(isFrozen)
         coordinator.turn(controller, to: selection)
     }
 
-    private func hostedPage(_ tab: UserProfileTab, context: Context) -> HostedPage {
+    private func hostedPage(_ tab: Tab, context: Context) -> HostedPage {
         .init(content: page(tab), environment: context.environment)
     }
 
@@ -93,32 +98,40 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
 
     @MainActor
     final class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
-        var selection: Binding<UserProfileTab>
-        let scrollOffset: ProfileScrollOffset
+        static var tabs: [Tab] {
+            Array(Tab.allCases)
+        }
+
+        var selection: Binding<Tab>
+        let position: any TabPagerPositionStore
         var pages: [UIHostingController<HostedPage>] = []
 
         private weak var controller: UIPageViewController?
         private weak var scrollView: UIScrollView?
         private var offsetObservation: NSKeyValueObservation?
         /// While a tab chosen by its name is being turned to: the pager's own scroll is not a
-        /// finger then, and the header is animated to the page instead.
+        /// finger then, and the position is animated to the page instead.
         private var isTurningByName: Bool = false
         /// A tab chosen by its name while a swipe was still settling: turned to once it has, rather
         /// than lost under the page the swipe lands on.
-        private var pendingTab: UserProfileTab?
+        private var pendingTab: Tab?
 
-        init(selection: Binding<UserProfileTab>, scrollOffset: ProfileScrollOffset) {
+        init(selection: Binding<Tab>, position: any TabPagerPositionStore) {
             self.selection = selection
-            self.scrollOffset = scrollOffset
+            self.position = position
         }
 
-        func page(for tab: UserProfileTab) -> UIHostingController<HostedPage> {
-            pages[UserProfileTab.allCases.firstIndex(of: tab) ?? 0]
+        static func index(of tab: Tab) -> CGFloat {
+            CGFloat(tabs.firstIndex(of: tab) ?? 0)
         }
 
-        private func tab(of viewController: UIViewController?) -> UserProfileTab? {
+        func page(for tab: Tab) -> UIHostingController<HostedPage> {
+            pages[Int(Self.index(of: tab))]
+        }
+
+        private func tab(of viewController: UIViewController?) -> Tab? {
             guard let index = pages.firstIndex(where: { $0 === viewController }) else { return nil }
-            return UserProfileTab.allCases[index]
+            return Self.tabs[index]
         }
 
         /// Reads the finger off the pager's scroll view: where the pages are laid in it says how
@@ -148,8 +161,8 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
             let offset: CGFloat = scrollView.contentOffset.x
             guard let nearest = laidOut.min(by: { abs($0.minX - offset) < abs($1.minX - offset) }) else { return }
 
-            let position: CGFloat = CGFloat(nearest.index) + (offset - nearest.minX) / width
-            scrollOffset.pagePosition = ProfileScrollOffset.clampedPosition(position)
+            let swiped: CGFloat = CGFloat(nearest.index) + (offset - nearest.minX) / width
+            position.pagePosition = min(max(swiped, 0), CGFloat(pages.count - 1))
         }
 
         func setFrozen(_ isFrozen: Bool) {
@@ -157,7 +170,7 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
         }
 
         /// Turns to the tab chosen by its name, if it is not the page on screen already.
-        func turn(_ controller: UIPageViewController, to target: UserProfileTab) {
+        func turn(_ controller: UIPageViewController, to target: Tab) {
             guard isTurningByName == false,
                   let shown = tab(of: controller.viewControllers?.first),
                   shown != target
@@ -168,10 +181,10 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
                 return
             }
 
-            let isForward: Bool = ProfileScrollOffset.position(of: target) > ProfileScrollOffset.position(of: shown)
+            let isForward: Bool = Self.index(of: target) > Self.index(of: shown)
             isTurningByName = true
             withAnimation(.snappy) {
-                scrollOffset.pagePosition = ProfileScrollOffset.position(of: target)
+                position.pagePosition = Self.index(of: target)
             }
             controller.setViewControllers(
                 [page(for: target)],
@@ -214,7 +227,7 @@ struct UserProfilePager<Page: View>: UIViewControllerRepresentable {
         ) {
             guard let shown = tab(of: pageViewController.viewControllers?.first) else { return }
 
-            scrollOffset.pagePosition = ProfileScrollOffset.position(of: shown)
+            position.pagePosition = Self.index(of: shown)
             if let pendingTab {
                 self.pendingTab = nil
                 if pendingTab != shown {

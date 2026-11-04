@@ -14,7 +14,7 @@ import CoreGraphics
 
 @MainActor
 @Observable
-final class ProfileScrollOffset {
+final class ProfileScrollOffset: TabPagerPositionStore {
     /// Each page's scroll. A page never scrolled is at rest.
     private var offsets: [UserProfileTab: CGFloat] = [:]
     /// The pages whose scroll is idle — no finger on them, no deceleration, no bounce.

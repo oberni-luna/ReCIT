@@ -133,10 +133,10 @@ struct UserDetailView: View {
     @ViewBuilder
     private var pages: some View {
         if showsInventory {
-            UserProfilePager(
+            TabPager(
                 selection: $tab,
                 isFrozen: shelfFocus.isArmed,
-                scrollOffset: scrollOffset
+                position: scrollOffset
             ) { page in
                 // The étagères are part of the library, so they go with the books, not with the
                 // lists or the bio.

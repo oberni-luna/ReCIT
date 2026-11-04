@@ -1,6 +1,6 @@
 ---
 issue: 28
-status: to-test
+status: to-close
 wiki:
 note: "je veux passer tous les libellés en Français en inclusif — ami → ami·e, auteur → auteur·ice, « Ajouter des amis lecteurs » → « Ajouter des ami·es lecteur·ices »"
 created: 2026-11-04
@@ -70,7 +70,7 @@ The table names the strings found on 2026-11-04; any other masculine generic fou
 
 - iOS: `ReCIT_iOS/Localizable.xcstrings` — 75 `fr` values on 74 keys, exact text edits on the raw file (no JSON re-dump); keys, `en` values and layout unchanged. Beyond the table: `groups.delete.confirm.message` other → « Ses %lld membres en seront retiré·es ».
 - iOS tests: `Tests/ListVisibilityLabelTests.swift` expects « Mes ami·es » / « Mes ami·es et mes groupes »; `UITests/E2EScenarioTests.swift` comments and messages quote « Dans mes livres et chez mes ami·es » (the scenario finds rows by title/owner, not by that section title).
-- Android: 57 strings in 9 `res/values/strings*.xml` files, same wording as iOS where the string exists on both. Android-only: `shelf_detail_visibility_friends` « Visible par vos ami·es », `shelf_form_visibility_friends` « Ami·es », `network_nav_user` « Utilisateur·ice », `network_profile_network_empty` « Aucun·e ami·e pour le moment ».
+- Android: 59 strings in 9 `res/values/strings*.xml` files, same wording as iOS where the string exists on both. Android-only: `shelf_detail_visibility_friends` « Visible par vos ami·es », `shelf_form_visibility_friends` « Ami·es », `network_nav_user` « Utilisateur·ice », `network_profile_network_empty` « Aucun·e ami·e pour le moment ».
 - Android e2e: `E2EScenarioTest.kt` matches on-screen text — login field « Nom d'utilisateur·ice », the two error regexes, `LOCAL_SECTION` « Dans mes livres et chez mes ami·es ».
 - `metadata/app-store/localizations/fr-FR.json`: `lecteur·rices` → `lecteur·ices` (2).
 - `docs/conventions/glossary.md`: `Ami` → `Ami·e`, Never `Follower, Ami`, Also `contact, lecteur·ice`.
@@ -78,6 +78,16 @@ The table names the strings found on 2026-11-04; any other masculine generic fou
 - Proof: iOS `build` ✅ (SwiftLint on), `ListVisibilityLabelTests` ✅; Android `:app:assembleDebug :app:testDebugUnitTest` ✅, `:e2e:compileDebugKotlin` ✅. `:app:lintDebug` ❌ 9 × `LocalContextResourcesRead` in Kotlin files this task does not touch (ForgotPasswordSheet, InvitationsScreen, ListFormSheet, NetworkScreen) — pre-existing, out of scope.
 
 ## Review
+
+### Round validation — 2026-11-04
+LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓
+- 🟠 strings_lists.xml `list_add_search_explanation_work` « chez vos amis » left → fixed (« ami·es »)
+- 🟠 strings_edit_edition.xml `create_book_notice_body` « par tous » left → fixed (« par tout le monde »)
+- 🟡 E2EScenarioTests.swift:267 step title « livre d'un ami » → fixed (« d'un·e ami·e »)
+- 🟡 « Êtes-vous sûr·e ? » literal-translation trap → accepted: out of scope, in the agreed table
+- 🟡 `edition.error.no_user` gives no next step → accepted: out of scope, in the agreed table
+Autofix: 3 strings, no code. Re-verify: clean. Android `:app:assembleDebug` ✅, iOS `build-for-testing ReCIT_iOSE2E` ✅.
+Wiki: features/0076-inclusive-french-labels.md, CLAUDE.md shipped line, wording.md Voice rule.
 
 ## Verification
 

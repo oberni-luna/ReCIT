@@ -264,7 +264,7 @@ final class E2EScenarioTests: XCTestCase {
         // MARK: 9. A friend's book, among the local results
 
         driver.step(
-            "Recherche 1 — livre d'un ami : « \(Self.friendsBook.query) »",
+            "Recherche 1 — livre d'un·e ami·e : « \(Self.friendsBook.query) »",
             critical: false
         ) {
             try Self.findFriendsBook(

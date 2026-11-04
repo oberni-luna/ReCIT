@@ -163,7 +163,7 @@
     <string name="create_book_search_no_result">Aucune œuvre de ce nom sur inventaire.io. Vérifiez l’orthographe, ou cherchez l’auteur·ice, avant d’en créer une.</string>
 
     <string name="create_book_notice_title">Données bibliographiques</string>
-    <string name="create_book_notice_body">Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tous.</string>
+    <string name="create_book_notice_body">Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tout le monde.</string>
     <string name="create_book_notice_learn_more">En savoir plus</string>
 
     <string name="create_book_help_what">Ce que c’est</string>

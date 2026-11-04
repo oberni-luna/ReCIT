@@ -38,7 +38,7 @@ struct InventoryCell: View {
 
                         let authorNames: [String] = edition.displayedAuthorNames
                         if authorNames.isEmpty == false {
-                            Text(authorNames.joined(separator: ", "))
+                            Text(AuthorNamesSummary(authorNames).text)
                                 .textStyle(.footnote200)
                         }
 

@@ -1,6 +1,6 @@
 ---
 issue: 32
-status: todo
+status: to-test
 wiki: [[architecture]], [[testing]]
 note: il faut limiter la longueur des auteurs dans une cell d'inventaire, à 2 lignes
 created: 2026-11-04
@@ -30,8 +30,18 @@ created: 2026-11-04
 
 ## Implementation
 
+Round 1 — 2026-11-04.
+
+- `Model/Books/AuthorNamesSummary.swift` (new): `struct AuthorNamesSummary` — `shownNames` (first ≤ 3), `hiddenCount`, `text` (« , »-join, then a space and the plural suffix past three).
+- `Localizable.xcstrings`: `inventory.authors.others %lld`, plural one/other — fr « et %lld autre » / « et %lld autres », en « and %lld other » / « and %lld others ».
+- `Features/Inventory/InventoryCell.swift`: `Text(AuthorNamesSummary(authorNames).text)`; `isEmpty` guard kept, no `lineLimit`.
+- `Tests/AuthorNamesSummaryTests.swift` (new): 0, 1, 3, 4, 101 names. The translated suffix is not asserted (depends on the simulator's language): prefix, count, order and absence of the fourth name are.
+- Proof: `-only-testing:ReCIT_iOSTests/AuthorNamesSummaryTests` → `** TEST SUCCEEDED **` 5/5; `-scheme ReCIT_iOS build` → `** BUILD SUCCEEDED **`, SwiftLint clean.
+
 ## Review
 
 ## Verification
+
+Round 1 — manual validation, not run by agent.
 
 ## Feedback

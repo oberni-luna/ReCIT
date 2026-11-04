@@ -125,7 +125,7 @@ private fun HeaderCover(imageUrl: String) {
     }
 }
 
-/** A list cell: the iOS `List` row background, with the row's own padding. */
+/** A list cell: the iOS `List` row background — the form cells' (iOS feature 0054) —, with the row's own padding. */
 @Composable
 internal fun CellSurface(
     modifier: Modifier = Modifier,
@@ -135,7 +135,7 @@ internal fun CellSurface(
     Box(
         modifier
             .fillMaxWidth()
-            .background(RecitTheme.colors.backgroundDefault)
+            .background(RecitTheme.colors.backgroundFormCell)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
     ) {

@@ -5,19 +5,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -34,9 +40,11 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -48,7 +56,10 @@ import studio.lunabee.nouveaurecit.data.creation.ClaimLiteral
 import studio.lunabee.nouveaurecit.data.creation.EditionEntityValue
 import studio.lunabee.nouveaurecit.data.creation.EditionProperties
 import studio.lunabee.nouveaurecit.data.creation.EditionProperty
+import studio.lunabee.nouveaurecit.data.creation.EditionPropertyCatalogue
+import studio.lunabee.nouveaurecit.data.creation.EntityEdit
 import studio.lunabee.nouveaurecit.data.creation.EntitySearchHit
+import studio.lunabee.nouveaurecit.data.creation.EntitySearchType
 import studio.lunabee.nouveaurecit.data.creation.PublicationDate
 import studio.lunabee.nouveaurecit.designsystem.DestructiveTextButton
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
@@ -64,15 +75,17 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 /*
- * The pages a property of the catalogue pushes over the edition's form (`EditionPropertyDestination`):
- * its values, the search for one more, the date, the catalogue of identifiers and the field of one. The
- * same in « Modifier l'édition » and in the scanner's « Nouvelle édition »: they write into the
- * properties they are handed, and push or close pages through the caller, whose stack it is.
+ * The pages a property of the catalogue pushes over a form (`EditionPropertyDestination`): its values,
+ * the search for one more, the date, the list of choices, the catalogue of identifiers and the field of
+ * one. The same in « Modifier l'édition », the scanner's « Nouvelle édition », « Modifier l'œuvre » and
+ * « Modifier l'auteur·ice »: they write into the properties they are handed — whose catalogue names the
+ * step's property —, and push or close pages through the caller, whose stack it is.
  */
 
 /**
  * The page an [EditionPropertyStep] shows. [entitySearch] is the picker's search, which the caller owns
- * so it survives a rotation; [onEntityQuery] types into it.
+ * so it survives a rotation; [onEntityQuery] types into it. [onOpenEntity], where given, opens « Modifier
+ * l'auteur·ice » for a person a list of values names.
  */
 @Composable
 fun EditionPropertyPage(
@@ -84,18 +97,21 @@ fun EditionPropertyPage(
     push: (EditionPropertyStep) -> Unit,
     pop: (count: Int) -> Unit,
     actions: @Composable RowScope.() -> Unit = {},
+    onOpenEntity: ((String) -> Unit)? = null,
 ) {
+    val catalogue: EditionPropertyCatalogue = properties.catalogue
     when (step) {
-        is EditionPropertyStep.Values -> EditionProperty.named(step.propertyUri)?.let { property ->
+        is EditionPropertyStep.Values -> catalogue.property(step.propertyUri)?.let { property ->
             EntityValuesPage(
                 property = property,
                 properties = properties,
                 onChange = onChange,
                 onAdd = { push(EditionPropertyStep.Picker(property.uri)) },
                 onBack = { pop(1) },
+                onOpenEntity = onOpenEntity,
             )
         }
-        is EditionPropertyStep.Picker -> EditionProperty.named(step.propertyUri)?.let { property ->
+        is EditionPropertyStep.Picker -> catalogue.property(step.propertyUri)?.let { property ->
             EntityPickerPage(
                 property = property,
                 hasPublisher = properties.entities(EditionProperty.Publisher).isNotEmpty(),
@@ -109,13 +125,19 @@ fun EditionPropertyPage(
                 actions = actions,
             )
         }
-        EditionPropertyStep.PublicationDate -> PublicationDatePage(properties = properties, onChange = onChange, onBack = { pop(1) })
+        is EditionPropertyStep.Date -> catalogue.property(step.propertyUri)?.let { property ->
+            DatePage(property = property, properties = properties, onChange = onChange, onBack = { pop(1) })
+        }
+        is EditionPropertyStep.Choice -> catalogue.property(step.propertyUri)?.let { property ->
+            ChoiceListPage(property = property, properties = properties, onChange = onChange, onBack = { pop(1) })
+        }
         is EditionPropertyStep.IdentifierCatalog -> IdentifierCatalogPage(
             group = step.group,
+            catalogue = catalogue,
             onChoose = { push(EditionPropertyStep.IdentifierInput(it.uri)) },
             onBack = { pop(1) },
         )
-        is EditionPropertyStep.IdentifierInput -> EditionProperty.named(step.propertyUri)?.let { property ->
+        is EditionPropertyStep.IdentifierInput -> catalogue.property(step.propertyUri)?.let { property ->
             IdentifierInputPage(
                 property = property,
                 onAdd = { literal ->
@@ -153,7 +175,7 @@ fun FormPageScaffold(
             )
         },
         bottomBar = bottomBar,
-        containerColor = RecitTheme.colors.backgroundGrouped,
+        containerColor = RecitTheme.colors.backgroundForm,
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize().imePadding(),
@@ -166,7 +188,8 @@ fun FormPageScaffold(
 
 /**
  * `EditionEntityValuesView`: the entities one property names — its publishers, its translators —
- * listed, taken away with a swipe, and added to through the search.
+ * listed, taken away with a swipe, and added to through the search. A person inventaire.io has opens
+ * « Modifier l'auteur·ice » through [onOpenEntity], where the caller can push it.
  */
 @Composable
 fun EntityValuesPage(
@@ -175,6 +198,7 @@ fun EntityValuesPage(
     onChange: (EditionProperties) -> Unit,
     onAdd: () -> Unit,
     onBack: () -> Unit,
+    onOpenEntity: ((String) -> Unit)? = null,
 ) {
     val remove: String = stringResource(R.string.edit_edition_remove)
     FormPageScaffold(title = stringResource(EditionPropertyLabels.label(property)), onBack = onBack) {
@@ -182,8 +206,14 @@ fun EntityValuesPage(
             FormSection(header = null, footer = stringResource(R.string.edit_edition_values_footer), modifier = Modifier.padding(top = Spacing.medium)) {
                 properties.entities(property).forEachIndexed { index, entity ->
                     key(entity.id) {
+                        val opensUri: String? = entity.uri?.takeIf { property.searchType == EntitySearchType.Humans && EntityEdit.canEdit(it) }
                         SwipeToRemoveRow(label = remove, onRemove = { onChange(properties.remove(setOf(index), property)) }) {
-                            EntityValueRow(label = entity.trimmedLabel, detail = entity.detail, isNew = entity.uri == null)
+                            EntityValueRow(
+                                label = entity.trimmedLabel,
+                                detail = entity.detail,
+                                isNew = entity.uri == null,
+                                onClick = if (opensUri != null && onOpenEntity != null) ({ onOpenEntity(opensUri) }) else null,
+                            )
                         }
                         FormDivider()
                     }
@@ -288,7 +318,7 @@ internal fun PickerSearchField(query: String, onQueryChange: (String) -> Unit, p
         placeholder = placeholder,
         clearLabel = stringResource(R.string.action_close),
         autoCorrect = false,
-        containerColor = RecitTheme.colors.backgroundGroupedCell,
+        containerColor = RecitTheme.colors.backgroundFormCell,
         modifier = Modifier
             .padding(horizontal = Spacing.medium, vertical = Spacing.small)
             .focusRequester(focus),
@@ -319,23 +349,24 @@ private fun SearchHitRow(hit: EntitySearchHit, onClick: () -> Unit) {
 }
 
 /**
- * `PublicationDateView`: the edition's date, as precise as the book — a year, a month, or a day. What is
- * set is written into the form as it changes; opening the page and leaving it adds nothing.
+ * `PublicationDateView`: the date [property] holds — an edition's publication, a work's first one, a
+ * person's birth —, as precise as is known: a year, a month, or a day. What is set is written into the
+ * form as it changes; opening the page and leaving it adds nothing.
  */
 @Composable
-fun PublicationDatePage(properties: EditionProperties, onChange: (EditionProperties) -> Unit, onBack: () -> Unit) {
+fun DatePage(property: EditionProperty, properties: EditionProperties, onChange: (EditionProperties) -> Unit, onBack: () -> Unit) {
     val thisYear: Int = remember { LocalDate.now().year }
     var date: PublicationDate by rememberSaveable(stateSaver = PublicationDateSaver) {
-        mutableStateOf(EditionFormRules.initialDate(properties, thisYear))
+        mutableStateOf(EditionFormRules.initialDate(property, properties, thisYear))
     }
     val update: (PublicationDate) -> Unit = { changed ->
         if (changed != date) {
             date = changed
-            onChange(properties.setLiteral(ClaimLiteral.Text(changed.claim), EditionProperty.PublicationDateProperty))
+            onChange(properties.setLiteral(ClaimLiteral.Text(changed.claim), property))
         }
     }
-    val hasDate: Boolean = properties.literal(EditionProperty.PublicationDateProperty) != null
-    FormPageScaffold(title = stringResource(EditionPropertyLabels.label(EditionProperty.PublicationDateProperty)), onBack = onBack) {
+    val hasDate: Boolean = properties.literal(property) != null
+    FormPageScaffold(title = stringResource(EditionPropertyLabels.label(property)), onBack = onBack) {
         item(key = "precision") {
             FormSection(header = stringResource(R.string.edit_edition_date_precision), footer = stringResource(R.string.edit_edition_date_footer)) {
                 PrecisionPicker(precision = date.precision, onPrecision = { update(date.copy(precision = it)) })
@@ -359,7 +390,7 @@ fun PublicationDatePage(properties: EditionProperties, onChange: (EditionPropert
                 DestructiveTextButton(
                     text = stringResource(R.string.edit_edition_date_remove),
                     onClick = {
-                        onChange(properties.setLiteral(null, EditionProperty.PublicationDateProperty))
+                        onChange(properties.setLiteral(null, property))
                         onBack()
                     },
                     modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.medium),
@@ -382,7 +413,8 @@ private fun PrecisionPicker(precision: PublicationDate.Precision, onPrecision: (
                     activeContainerColor = RecitTheme.colors.backgroundTinted,
                     activeContentColor = RecitTheme.colors.foregroundTinted,
                     activeBorderColor = RecitTheme.colors.borderDefault,
-                    inactiveContainerColor = RecitTheme.colors.backgroundGroupedCell,
+                    // On the card, which already draws the cell's colour.
+                    inactiveContainerColor = Color.Transparent,
                     inactiveContentColor = RecitTheme.colors.foregroundDefault,
                     inactiveBorderColor = RecitTheme.colors.borderDefault,
                 ),
@@ -455,7 +487,7 @@ private fun DayPicker(date: PublicationDate, thisYear: Int, update: (Publication
         headline = null,
         showModeToggle = false,
         colors = DatePickerDefaults.colors(
-            containerColor = RecitTheme.colors.backgroundGroupedCell,
+            containerColor = Color.Transparent,
             selectedDayContainerColor = RecitTheme.colors.backgroundTintedInverse,
             selectedDayContentColor = RecitTheme.colors.foregroundTintedInverse,
             selectedYearContainerColor = RecitTheme.colors.backgroundTintedInverse,
@@ -467,11 +499,16 @@ private fun DayPicker(date: PublicationDate, thisYear: Int, update: (Publication
 }
 
 /**
- * `IdentifierCatalogView`: the catalogues an edition can be identified in — or the kinds of links it can
- * have — each with the server's example, to pick the one an identifier is added to.
+ * `IdentifierCatalogView`: the catalogues an edition, a work or a person can be identified in — or the
+ * kinds of links it can have — each with the server's example, to pick the one an identifier is added to.
  */
 @Composable
-fun IdentifierCatalogPage(group: EditionProperty.Group, onChoose: (EditionProperty) -> Unit, onBack: () -> Unit) {
+fun IdentifierCatalogPage(
+    group: EditionProperty.Group,
+    catalogue: EditionPropertyCatalogue,
+    onChoose: (EditionProperty) -> Unit,
+    onBack: () -> Unit,
+) {
     val isDatabases: Boolean = group == EditionProperty.Group.Databases
     FormPageScaffold(
         title = stringResource(if (isDatabases) R.string.edit_edition_databases_add else R.string.edit_edition_links_add),
@@ -483,7 +520,7 @@ fun IdentifierCatalogPage(group: EditionProperty.Group, onChoose: (EditionProper
                 footer = stringResource(R.string.edit_edition_identifiers_catalog_footer),
                 modifier = Modifier.padding(top = Spacing.medium),
             ) {
-                EditionProperty.inGroup(group).forEachIndexed { index, property ->
+                catalogue.inGroup(group).forEachIndexed { index, property ->
                     if (index > 0) FormDivider()
                     EditionPropertyRow(
                         label = stringResource(EditionPropertyLabels.label(property)),
@@ -548,6 +585,48 @@ fun IdentifierInputPage(property: EditionProperty, onAdd: (ClaimLiteral) -> Unit
                 modifier = Modifier.padding(Spacing.medium),
             )
         }
+    }
+}
+
+/**
+ * `EditionChoiceListView`: the values a property allows, when they are too many for a menu — a work's
+ * form —, the one it holds checked, « Non précisé » last. A choice closes the page.
+ */
+@Composable
+fun ChoiceListPage(property: EditionProperty, properties: EditionProperties, onChange: (EditionProperties) -> Unit, onBack: () -> Unit) {
+    val selected: String? = properties.literal(property)?.string
+    val choose: (String?) -> Unit = { uri ->
+        onChange(properties.setLiteral(uri?.let { ClaimLiteral.Text(it) }, property))
+        onBack()
+    }
+    FormPageScaffold(title = stringResource(EditionPropertyLabels.label(property)), onBack = onBack) {
+        item(key = "choices") {
+            FormSection(header = null, footer = null, modifier = Modifier.padding(top = Spacing.medium)) {
+                property.choices.forEachIndexed { index, choice ->
+                    if (index > 0) FormDivider()
+                    ChoiceRow(stringResource(EditionPropertyLabels.label(choice)), isSelected = selected == choice.uri) { choose(choice.uri) }
+                }
+                FormDivider()
+                ChoiceRow(stringResource(R.string.edition_choice_none), isSelected = selected == null) { choose(null) }
+            }
+        }
+    }
+}
+
+/** One value of a [ChoiceListPage]: its name, and a check when it is the one held. */
+@Composable
+private fun ChoiceRow(title: String, isSelected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = MinRowHeight)
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
+            .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+    ) {
+        Text(title, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault, modifier = Modifier.weight(1f))
+        if (isSelected) Icon(Icons.Default.Check, contentDescription = null, tint = RecitTheme.colors.foregroundTinted)
     }
 }
 

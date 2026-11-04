@@ -51,7 +51,6 @@ import studio.lunabee.nouveaurecit.data.creation.ClaimLiteral
 import studio.lunabee.nouveaurecit.data.creation.EditionFormat
 import studio.lunabee.nouveaurecit.data.creation.EditionProperties
 import studio.lunabee.nouveaurecit.data.creation.EditionProperty
-import studio.lunabee.nouveaurecit.data.creation.PublicationDate
 import studio.lunabee.nouveaurecit.data.creation.WorkEdit
 import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
@@ -68,8 +67,9 @@ import java.util.UUID
 
 /**
  * `EditionWorksSection`: the works the edition is an edition of, then « Ajouter une œuvre ». Touching a
- * work opens « Modifier l'œuvre », the only place its title and authors change; swiping it to the left
- * detaches it from the edition. The work itself stays on inventaire.io.
+ * work opens « Modifier l'œuvre », the only place its title and authors change — saved there, for one
+ * that exists — unless it is a Wikidata one, which leads nowhere; swiping it to the left detaches it from
+ * the edition. The work itself stays on inventaire.io.
  */
 @Composable
 fun EditionWorksSection(
@@ -88,8 +88,9 @@ fun EditionWorksSection(
         val detach: String = stringResource(R.string.edit_edition_works_detach)
         works.forEach { work ->
             key(work.id) {
+                val opens: Boolean = EditionFormRules.opensWork(work)
                 SwipeToRemoveRow(label = detach, onRemove = { onDetach(work.id) }) {
-                    WorkRow(work = work.candidate, onClick = { onOpen(work.id) })
+                    WorkRow(work = work.candidate, showsDisclosure = opens, onClick = if (opens) ({ onOpen(work.id) }) else null)
                 }
                 FormDivider()
             }
@@ -251,13 +252,7 @@ fun EditionPublicationSection(properties: EditionProperties, onOpen: (EditionPro
         FormDivider()
         EditionEntityPropertyRow(EditionProperty.Collection, properties, stringResource(R.string.edition_property_collection_placeholder), onOpen)
         FormDivider()
-        val date: PublicationDate? = properties.literal(EditionProperty.PublicationDateProperty)?.string?.let(PublicationDate::parse)
-        EditionPropertyRow(
-            label = stringResource(EditionPropertyLabels.label(EditionProperty.PublicationDateProperty)),
-            value = date?.displayed(),
-            placeholder = stringResource(R.string.edition_property_publication_date_placeholder),
-            onClick = { onOpen(EditionProperty.PublicationDateProperty) },
-        )
+        EditionDateRow(EditionProperty.PublicationDateProperty, properties, onOpen)
         FormDivider()
         EditionEntityPropertyRow(EditionProperty.Language, properties, stringResource(R.string.edition_property_language_placeholder), onOpen)
     }
@@ -300,25 +295,11 @@ private fun EditionFormatMenu(properties: EditionProperties, onChange: (EditionP
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, containerColor = RecitTheme.colors.backgroundRaised) {
             EditionFormat.entries.forEach { option ->
-                FormatLine(stringResource(EditionPropertyLabels.name(option)), isSelected = option == format) { choose(option) }
+                MenuChoice(stringResource(EditionPropertyLabels.name(option)), isSelected = option == format) { choose(option) }
             }
-            FormatLine(stringResource(R.string.edition_format_none), isSelected = format == null) { choose(null) }
+            MenuChoice(stringResource(R.string.edition_format_none), isSelected = format == null) { choose(null) }
         }
     }
-}
-
-@Composable
-private fun FormatLine(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = {
-            Text(
-                text,
-                style = if (isSelected) RecitTheme.typography.content400Bold else RecitTheme.typography.content400,
-                color = if (isSelected) RecitTheme.colors.foregroundTinted else RecitTheme.colors.foregroundDefault,
-            )
-        },
-        onClick = onClick,
-    )
 }
 
 /** A positive count, typed. Anything but digits is dropped as it is typed. */
@@ -353,10 +334,10 @@ fun EditionContributorsSection(properties: EditionProperties, onOpen: (EditionPr
 }
 
 /**
- * `EditionIdentifiersSection`: the identifiers of the edition in library catalogues
- * ([EditionProperty.Group.Databases]), or its links ([EditionProperty.Group.Links]). Each value is a
- * row, taken away with a swipe; the last row adds one, through the catalogue and a field checked against
- * the server's pattern.
+ * `EditionIdentifiersSection`: the identifiers of the edition — or of a work, a person — in library
+ * catalogues ([EditionProperty.Group.Databases]), or its links ([EditionProperty.Group.Links]). Each value
+ * is a row, taken away with a swipe; the last row adds one, through the catalogue and a field checked
+ * against the server's pattern. [footer] says which catalogues there are: the edition's by default.
  */
 @Composable
 fun EditionIdentifiersSection(
@@ -365,11 +346,14 @@ fun EditionIdentifiersSection(
     onChange: (EditionProperties) -> Unit,
     onAdd: () -> Unit,
     modifier: Modifier = Modifier,
+    footer: String = stringResource(
+        if (group == EditionProperty.Group.Databases) R.string.edit_edition_databases_footer else R.string.edit_edition_links_footer,
+    ),
 ) {
     val isDatabases: Boolean = group == EditionProperty.Group.Databases
     FormSection(
         header = stringResource(if (isDatabases) R.string.edit_edition_databases_header else R.string.edit_edition_links_header),
-        footer = stringResource(if (isDatabases) R.string.edit_edition_databases_footer else R.string.edit_edition_links_footer),
+        footer = footer,
         modifier = modifier,
     ) {
         val remove: String = stringResource(R.string.edit_edition_remove)
@@ -406,6 +390,17 @@ fun EditionEntityPropertyRow(
         label = stringResource(EditionPropertyLabels.label(property)),
         value = names.takeIf { it.isNotEmpty() }?.let { EditionFormRules.joinedNames(it, stringResource(R.string.edition_property_names_and)) },
         placeholder = placeholder,
+        onClick = { onOpen(property) },
+    )
+}
+
+/** `EditionDateButton`: a date — an edition's publication, a person's birth —, as precise as it is known, or an invitation. */
+@Composable
+fun EditionDateRow(property: EditionProperty, properties: EditionProperties, onOpen: (EditionProperty) -> Unit) {
+    EditionPropertyRow(
+        label = stringResource(EditionPropertyLabels.label(property)),
+        value = EditionFormRules.date(property, properties)?.displayed(),
+        placeholder = stringResource(R.string.edition_property_publication_date_placeholder),
         onClick = { onOpen(property) },
     )
 }

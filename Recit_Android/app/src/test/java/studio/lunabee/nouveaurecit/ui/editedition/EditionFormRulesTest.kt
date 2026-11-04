@@ -8,10 +8,13 @@ import org.junit.Test
 import studio.lunabee.nouveaurecit.data.creation.ClaimLiteral
 import studio.lunabee.nouveaurecit.data.creation.EditionProperties
 import studio.lunabee.nouveaurecit.data.creation.EditionProperty
+import studio.lunabee.nouveaurecit.data.creation.EditionPropertyCatalogue
 import studio.lunabee.nouveaurecit.data.creation.EditionWork
 import studio.lunabee.nouveaurecit.data.creation.NewBookAuthor
 import studio.lunabee.nouveaurecit.data.creation.PublicationDate
 import studio.lunabee.nouveaurecit.data.creation.WorkEdit
+import studio.lunabee.nouveaurecit.data.creation.WorkProperties
+import java.util.Locale
 
 /** The decisions the edition form's pages make on their own. */
 class EditionFormRulesTest {
@@ -27,10 +30,26 @@ class EditionFormRulesTest {
     }
 
     @Test
-    fun aWorkSaysWhereItIsChanged() {
-        assertEquals(EditionFormRules.WorkFooter.Wikidata, EditionFormRules.workFooter(WorkEdit.existing(EditionWork(uri = "wd:Q1", title = "Dune"))))
-        assertEquals(EditionFormRules.WorkFooter.New, EditionFormRules.workFooter(WorkEdit.newTitled("Dune")))
-        assertEquals(EditionFormRules.WorkFooter.Default, EditionFormRules.workFooter(WorkEdit.existing(EditionWork(uri = "inv:1", title = "Dune"))))
+    fun aWorkOpensItsPageUnlessItLivesOnWikidata() {
+        assertFalse(EditionFormRules.opensWork(WorkEdit.existing(EditionWork(uri = "wd:Q1", title = "Dune"))))
+        assertTrue(EditionFormRules.opensWork(WorkEdit.newTitled("Dune")))
+        assertTrue(EditionFormRules.opensWork(WorkEdit.existing(EditionWork(uri = "inv:1", title = "Dune"))))
+    }
+
+    @Test
+    fun aLanguageIsNamedInTheReadersLanguageOrByItsCode() {
+        assertEquals("Français", EditionFormRules.languageName("fr", Locale.FRENCH))
+        assertEquals("Anglais", EditionFormRules.languageName("en", Locale.FRENCH))
+        assertEquals("zz", EditionFormRules.languageName("zz", Locale.FRENCH))
+    }
+
+    @Test
+    fun aChoiceIsNamedOnlyWhenTheListHoldsIt() {
+        val comic: EditionProperties = EditionProperties(catalogue = EditionPropertyCatalogue.Work)
+            .setLiteral(ClaimLiteral.Text("wd:Q1004"), WorkProperties.Type)
+        assertEquals("work_type_comic", EditionFormRules.choice(WorkProperties.Type, comic)?.labelKey)
+        val unknown: EditionProperties = comic.setLiteral(ClaimLiteral.Text("wd:Q42"), WorkProperties.Type)
+        assertNull(EditionFormRules.choice(WorkProperties.Type, unknown))
     }
 
     @Test
@@ -89,8 +108,8 @@ class EditionFormRulesTest {
     @Test
     fun theDatePageOpensOnTheEditionsDateOrThisYear() {
         val dated: EditionProperties = EditionProperties().setLiteral(ClaimLiteral.Text("2023-03"), EditionProperty.PublicationDateProperty)
-        assertEquals(PublicationDate(2023, 3, 1, PublicationDate.Precision.Month), EditionFormRules.initialDate(dated, thisYear = 2026))
-        assertEquals(PublicationDate(2026, precision = PublicationDate.Precision.Year), EditionFormRules.initialDate(EditionProperties(), thisYear = 2026))
+        assertEquals(PublicationDate(2023, 3, 1, PublicationDate.Precision.Month), EditionFormRules.initialDate(EditionProperty.PublicationDateProperty, dated, thisYear = 2026))
+        assertEquals(PublicationDate(2026, precision = PublicationDate.Precision.Year), EditionFormRules.initialDate(EditionProperty.PublicationDateProperty, EditionProperties(), thisYear = 2026))
     }
 
     @Test

@@ -21,7 +21,7 @@ data class EditionClaimUpdate(
     @SerialName("new-value") val newValue: ClaimLiteral? = null,
 ) {
     companion object {
-        /** One of the claims whose values are strings — a title, a cover, a work, an author. */
+        /** One of the edition's claims whose values are strings — a title, a cover, a work. */
         fun of(uri: String, property: EditableClaimProperty, oldValue: String?, newValue: String?): EditionClaimUpdate =
             EditionClaimUpdate(
                 uri = uri,
@@ -33,9 +33,9 @@ data class EditionClaimUpdate(
 }
 
 /**
- * `EntityLabelUpdate` (iOS feature 0049): a work renamed from « Modifier l'œuvre », as
- * `PUT /api/entities/update-label` takes it. A work's title is a label, not a claim — unlike an edition's,
- * which is `wdt:P1476`.
+ * `EntityLabelUpdate` (iOS features 0049, 0057): a work or a person renamed from « Modifier l'œuvre » or
+ * « Modifier l'auteur·ice », as `PUT /api/entities/update-label` takes it. A work's title is a label, not a
+ * claim — unlike an edition's, which is `wdt:P1476`.
  */
 @Serializable
 data class EntityLabelUpdate(

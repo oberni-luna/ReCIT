@@ -3,10 +3,13 @@ package studio.lunabee.nouveaurecit.ui.editedition
 import studio.lunabee.nouveaurecit.data.creation.ClaimLiteral
 import studio.lunabee.nouveaurecit.data.creation.EditionProperties
 import studio.lunabee.nouveaurecit.data.creation.EditionProperty
+import studio.lunabee.nouveaurecit.data.creation.EditionPropertyChoice
+import studio.lunabee.nouveaurecit.data.creation.EntityEdit
 import studio.lunabee.nouveaurecit.data.creation.PublicationDate
 import studio.lunabee.nouveaurecit.data.creation.WorkEdit
 import studio.lunabee.nouveaurecit.network.ApiService
 import java.net.URI
+import java.util.Locale
 
 /**
  * The few decisions the edition form's pages make on their own — which sentence a section ends on,
@@ -23,14 +26,11 @@ object EditionFormRules {
         else -> WorksFooter.Default
     }
 
-    /** What « Modifier l'œuvre » says under the work (`EditWorkView.footer`). */
-    enum class WorkFooter { Wikidata, New, Default }
-
-    fun workFooter(work: WorkEdit): WorkFooter = when {
-        !work.isEditable -> WorkFooter.Wikidata
-        work.isNew -> WorkFooter.New
-        else -> WorkFooter.Default
-    }
+    /**
+     * Whether touching a work of « Édition de » opens a page: the title and authors of one being created,
+     * or the whole of « Modifier l'œuvre » for one of inventaire.io's own. A Wikidata work offers none.
+     */
+    fun opensWork(work: WorkEdit): Boolean = work.isNew || EntityEdit.canEdit(work.uri)
 
     /** Whether the picker offers to create what was typed: a language is chosen, never created. */
     fun offersCreation(property: EditionProperty, query: String): Boolean = property.allowsCreation && query.isNotBlank()
@@ -55,9 +55,9 @@ object EditionFormRules {
     /** One identifier or link of a group, as a row: the property it is of, and its value. */
     data class IdentifierEntry(val property: EditionProperty, val value: ClaimLiteral)
 
-    /** The identifiers — or links — the edition has in [group], in the catalogue's order. */
+    /** The identifiers — or links — the entity has in [group], in its catalogue's order. */
     fun identifierEntries(group: EditionProperty.Group, properties: EditionProperties): List<IdentifierEntry> =
-        EditionProperty.inGroup(group).flatMap { property ->
+        properties.catalogue.inGroup(group).flatMap { property ->
             properties.values(property).mapNotNull { it.claim }.map { IdentifierEntry(property, it) }
         }
 
@@ -81,10 +81,25 @@ object EditionFormRules {
         else -> property.example?.let { IdentifierStatus.Example(it) } ?: IdentifierStatus.Empty
     }
 
-    /** The date the date's page opens on: the edition's, or this year alone. */
-    fun initialDate(properties: EditionProperties, thisYear: Int): PublicationDate =
-        properties.literal(EditionProperty.PublicationDateProperty)?.string?.let(PublicationDate::parse)
-            ?: PublicationDate(year = thisYear, precision = PublicationDate.Precision.Year)
+    /** The date the date's page opens on: the one [property] holds, or this year alone. */
+    fun initialDate(property: EditionProperty, properties: EditionProperties, thisYear: Int): PublicationDate =
+        date(property, properties) ?: PublicationDate(year = thisYear, precision = PublicationDate.Precision.Year)
+
+    /** The date [property] holds — an edition's publication, a person's birth —, or `null`. */
+    fun date(property: EditionProperty, properties: EditionProperties): PublicationDate? =
+        properties.literal(property)?.string?.let(PublicationDate::parse)
+
+    /** The choice [property] holds; `null` when it holds none, or one the list does not hold — set on the website before the list changed. */
+    fun choice(property: EditionProperty, properties: EditionProperties): EditionPropertyChoice? {
+        val uri: String = properties.literal(property)?.string ?: return null
+        return property.choices.firstOrNull { it.uri == uri }
+    }
+
+    /** A language's name in the reader's language, « Français »; its code when the system has none. */
+    fun languageName(code: String, locale: Locale): String =
+        Locale.forLanguageTag(code).getDisplayLanguage(locale).takeIf { it.isNotEmpty() && it != code }
+            ?.replaceFirstChar { it.titlecase(locale) }
+            ?: code
 
     /** A year as typed: digits only, four at most; `null` keeps the year it had. */
     fun typedYear(text: String): Int? = text.filter(Char::isDigit).take(4).toIntOrNull()?.takeIf { it > 0 }

@@ -263,28 +263,6 @@ class EntityCreationRepositoryEditionTest {
     }
 
     @Test
-    fun aWorkRenamedIsSentAsALabelAfterTheClaims() = runTest {
-        ok()
-        ok()
-        val opened: EditionEdit = EditionEdit(
-            original,
-            listOf(EditionWork("inv:work", "Lucioles", listOf(NewBookAuthor(name = "Lucie Durand", uri = "inv:lucie")), titleLanguage = "fr")),
-        )
-        val edit: EditionEdit = opened.updatingWork(opened.works[0].id) { it.copy(title = "Lucioles, quinze fictions").removeAuthors(setOf(0)) }
-
-        val saved: EditionEdit = saved(edit)
-
-        val requests: List<RecordedRequest> = requests()
-        assertEquals(listOf("/api/entities/update-claim", "/api/entities/update-label"), requests.map { it.url.encodedPath })
-        assertEquals(EditionClaimUpdate.of("inv:work", EditableClaimProperty.Author, "inv:lucie", null), update(requests[0]))
-        assertEquals(
-            EntityLabelUpdate(uri = "inv:work", lang = "fr", value = "Lucioles, quinze fictions"),
-            ApiService.DefaultJson.decodeFromString(EntityLabelUpdate.serializer(), body(requests[1])),
-        )
-        assertTrue(!saved.hasChanges)
-    }
-
-    @Test
     fun aNewPublisherIsCreatedThenACollectionUnderItThenTheClaimsACountAsANumber() = runTest {
         answer("""{"entity":{"uri":"inv:publisher"}}""")
         answer("""{"entity":{"uri":"inv:collection"}}""")

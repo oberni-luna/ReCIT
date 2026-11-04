@@ -22,8 +22,8 @@ import java.util.UUID
 /**
  * `EntityCreationModel` (features 0020, iOS 0047, 0049 and 0050): writing into inventaire.io's open
  * database — the one thing the app does that is not about the user's own shelves. It publishes a book
- * inventaire.io lacks, and changes an edition that exists: everything inventaire.io accepts on it, the
- * works it is an edition of, their titles and authors.
+ * inventaire.io lacks, and changes an edition that exists — everything inventaire.io accepts on it, the
+ * works it is an edition of — and a work or a person, each saved alone from its own screen (iOS 0057).
  *
  * **Nothing here is optimistic.** An optimistic publication that failed would leave the user believing
  * they had contributed, and one that half-succeeded would leave a work without its edition on a public
@@ -108,12 +108,16 @@ class EntityCreationRepository(
      * `/api/search` restricted to one [type] — a publisher, a collection, a person, a language, a work —
      * best match first. Throws: a picker says nothing about a failed search, its « Créer » row stays.
      */
-    suspend fun searchEntities(query: String, type: EntitySearchType, limit: Int = 15): List<EntitySearchHit> {
+    suspend fun searchEntities(query: String, type: EntitySearchType, limit: Int = 15): List<EntitySearchHit> =
+        searchEntities(query, listOf(type), limit)
+
+    /** The same search among several [types] at once — a work's main subject, its relations — best match first. */
+    suspend fun searchEntities(query: String, types: List<EntitySearchType>, limit: Int = 15): List<EntitySearchHit> {
         val trimmed: String = query.trim()
-        if (trimmed.isEmpty()) return emptyList()
+        if (trimmed.isEmpty() || types.isEmpty()) return emptyList()
         val response: SearchResultsDto = api.get(
             "/api/search",
-            "types" to type.raw,
+            "types" to types.joinToString("|") { it.raw },
             "search" to trimmed,
             "lang" to "fr",
             "limit" to "$limit",
@@ -221,7 +225,7 @@ class EntityCreationRepository(
     /**
      * Runs what the form changed, one request at a time in the order [EditionEdit.nextStep] gives — the
      * picture, the authors, works, publishers, collections and people that do not exist yet, then the
-     * claims, then the works' new titles.
+     * claims.
      *
      * Unlike a new book's, a new cover is not an ornament here: it may be the whole change asked for, so an
      * upload that does not land is a failure like any other.
@@ -230,21 +234,101 @@ class EntityCreationRepository(
      * landed has moved into it, and is neither sent nor created again.
      */
     suspend fun saveEdition(edit: EditionEdit): EditionSaveResult {
-        var current: EditionEdit = edit
-        // Every step lands or throws; a step that did neither would loop for ever.
+        val (landed: EditionEdit, error: Exception?) = runSteps(edit, { it.nextStep }, ::run)
+        return if (error == null) EditionSaveResult.Saved(landed) else EditionSaveFailure(landed, error)
+    }
+
+    // Changing a work or a person
+
+    /**
+     * What inventaire.io holds about a work or a person, read fresh to open « Modifier l'œuvre » or
+     * « Modifier l'auteur·ice »: its labels and every property of its catalogue, the entities they name
+     * labelled by a second call. `relatives` is not asked: it does not know every property a work or a
+     * person can name. A name that does not come keeps the uri.
+     *
+     * Public, so cookieless. Throws when the answer holds no `inv:` work or person: the form could send
+     * nothing about it.
+     */
+    suspend fun editableEntity(uri: String): EntityEdit {
+        val response: EditableEditionsDto = publicApi.get(
+            "/api/entities/by-uris",
+            "uris" to uri,
+            "attributes" to "info|claims|labels",
+            "lang" to "fr",
+        )
+        val entity: EntityResultDto = response.entities[response.redirects?.get(uri) ?: uri]
+            ?: response.entities.values.firstOrNull()
+            ?: throw NetworkError.BadResponse()
+        val catalogue: EditionPropertyCatalogue = EditionPropertyCatalogue.of(entity.type)
+            ?.takeIf { it != EditionPropertyCatalogue.Edition && EntityEdit.canEdit(entity.uri) }
+            ?: throw NetworkError.BadResponse()
+
+        val unnamed: EditionProperties = EditionProperties.fromClaims(entity.claims, emptyMap(), catalogue)
+        val uris: List<String> = unnamed.entityUris.distinct().sorted()
+        val labels: Map<String, String> = if (uris.isEmpty()) {
+            emptyMap()
+        } else {
+            quietly {
+                publicApi.get<EditableEditionsDto>(
+                    "/api/entities/by-uris",
+                    "uris" to uris.joinToString("|"),
+                    "attributes" to "labels",
+                    "lang" to "fr",
+                )
+            }?.entities?.values?.mapNotNull { dto -> displayName(dto)?.let { dto.uri to it } }?.toMap().orEmpty()
+        }
+        return EntityEdit.open(
+            uri = entity.uri,
+            labels = entity.labels,
+            properties = EditionProperties.fromClaims(entity.claims, labels, catalogue),
+            originalLanguage = entity.originalLang,
+        )
+    }
+
+    /**
+     * Runs what « Modifier l'œuvre » or « Modifier l'auteur·ice » changed, one request at a time in the
+     * order [EntityEdit.nextStep] gives — the people to create, the claims, the labels.
+     *
+     * Answers [EntitySaveResult.Saved], or [EntitySaveResult.Failed] carrying the edit as far as it got:
+     * what landed has moved into it, and is neither sent nor created again.
+     */
+    suspend fun saveEntity(edit: EntityEdit): EntitySaveResult {
+        val (landed: EntityEdit, error: Exception?) = runSteps(edit, { it.nextStep }, ::run)
+        return if (error == null) EntitySaveResult.Saved(landed) else EntitySaveResult.Failed(landed, error)
+    }
+
+    /**
+     * Runs [nextStep] after [nextStep] until none is left, and answers what landed with the error that
+     * stopped it, if one did. Every step lands or throws; a step that did neither would loop for ever, so
+     * the steps are counted.
+     */
+    private suspend fun <E> runSteps(
+        start: E,
+        nextStep: (E) -> EditionEditStep?,
+        run: suspend (EditionEditStep, E) -> E,
+    ): Pair<E, Exception?> {
+        var current: E = start
         var budget: Int = MAX_SAVE_STEPS
         return try {
             while (true) {
-                val step: EditionEditStep = current.nextStep ?: break
+                val step: EditionEditStep = nextStep(current) ?: break
                 if (--budget < 0) throw NetworkError.BadResponse()
                 current = run(step, current)
             }
-            EditionSaveResult.Saved(current)
+            current to null
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {
-            EditionSaveFailure(current, error)
+            current to error
         }
+    }
+
+    private suspend fun run(step: EditionEditStep, edit: EntityEdit): EntityEdit = when (step) {
+        is EditionEditStep.CreateEntity -> edit.entityCreated(step.id, createEntity(step.label, step.language, step.kind))
+        is EditionEditStep.Claim -> edit.landed(updateClaim(step.update))
+        is EditionEditStep.Label -> edit.landed(updateLabel(step.update))
+        // Not steps of a work or a person: `EntityEdit` never lists them.
+        is EditionEditStep.UploadCover, is EditionEditStep.CreateAuthor, is EditionEditStep.CreateWork -> throw NetworkError.BadResponse()
     }
 
     private suspend fun run(step: EditionEditStep, edit: EditionEdit): EditionEdit = when (step) {
@@ -263,14 +347,21 @@ class EntityCreationRepository(
             edit.workCreated(step.id, createEntity(mapOf(step.language to step.label), claims))
         }
         is EditionEditStep.CreateEntity -> edit.entityCreated(step.id, createEntity(step.label, step.language, step.kind))
-        is EditionEditStep.Claim -> {
-            api.send<EditionClaimUpdate, OkStatusDto>("/api/entities/update-claim", method = "PUT", body = step.update)
-            edit.landed(step.update)
-        }
-        is EditionEditStep.Label -> {
-            api.send<EntityLabelUpdate, OkStatusDto>("/api/entities/update-label", method = "PUT", body = step.update)
-            edit.landed(step.update)
-        }
+        is EditionEditStep.Claim -> edit.landed(updateClaim(step.update))
+        // Not a step of an edition: a work is renamed from its own screen.
+        is EditionEditStep.Label -> throw NetworkError.BadResponse()
+    }
+
+    /** `PUT /api/entities/update-claim`: answers [update] once it landed. */
+    private suspend fun updateClaim(update: EditionClaimUpdate): EditionClaimUpdate {
+        api.send<EditionClaimUpdate, OkStatusDto>("/api/entities/update-claim", method = "PUT", body = update)
+        return update
+    }
+
+    /** `PUT /api/entities/update-label`: answers [update] once it landed. */
+    private suspend fun updateLabel(update: EntityLabelUpdate): EntityLabelUpdate {
+        api.send<EntityLabelUpdate, OkStatusDto>("/api/entities/update-label", method = "PUT", body = update)
+        return update
     }
 
     /**

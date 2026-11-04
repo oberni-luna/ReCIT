@@ -33,6 +33,15 @@ data class RecitColors(
     val backgroundGroupedElevated: Color,
     /** A grouped list's cells, on either of the two above. */
     val backgroundGroupedCell: Color,
+    /**
+     * Behind a form and the book screen's cells (iOS feature 0054). In dark, `gray/800`: the cards sit a
+     * step *below* the ground, [backgroundFormCell] over it.
+     */
+    val backgroundForm: Color,
+    /** A form's cards, and the book screen's cells: white in light; in dark, [backgroundShade]'s veil over [backgroundForm]. */
+    val backgroundFormCell: Color,
+    /** Figma's `background/shade`: a veil that darkens whatever it lies on — by nothing in light, black at 40 % in dark. */
+    val backgroundShade: Color,
     val borderDefault: Color,
     val isDark: Boolean,
 ) {
@@ -41,6 +50,13 @@ data class RecitColors(
      * it is one step lighter than the screen, so elevation reads the right way round.
      */
     val backgroundRaised: Color get() = if (isDark) backgroundSecondary else backgroundDefault
+
+    /**
+     * The book screen's ground. Android only: the forms' in dark (iOS feature 0054), so the book and the
+     * « Modifier l'édition » it opens are one surface; white in light, where the book screen has always
+     * been white on Android, cells and ground alike.
+     */
+    val backgroundBook: Color get() = if (isDark) backgroundForm else backgroundDefault
 
     val borderTinted: Color get() = foregroundTinted
     val borderError: Color get() = foregroundError
@@ -65,6 +81,9 @@ data class RecitColors(
             backgroundGrouped = Primitive.Gray50,
             backgroundGroupedElevated = Primitive.Gray50,
             backgroundGroupedCell = Primitive.Gray0,
+            backgroundForm = Primitive.Gray50,
+            backgroundFormCell = Primitive.Gray0,
+            backgroundShade = Color.Black.copy(alpha = 0f),
             borderDefault = Color.Black.copy(alpha = 0.1f),
             isDark = false,
         )
@@ -88,6 +107,10 @@ data class RecitColors(
             backgroundGrouped = Primitive.Gray1000,
             backgroundGroupedElevated = Primitive.Gray900,
             backgroundGroupedCell = Primitive.Gray800,
+            backgroundForm = Primitive.Gray800,
+            // The shade's veil spelled out, as on iOS.
+            backgroundFormCell = Color.Black.copy(alpha = 0.4f),
+            backgroundShade = Color.Black.copy(alpha = 0.4f),
             borderDefault = Color.White.copy(alpha = 0.1f),
             isDark = true,
         )

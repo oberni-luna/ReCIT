@@ -18,8 +18,8 @@ import studio.lunabee.nouveaurecit.AppContainer
 @OptIn(ExperimentalCoroutinesApi::class)
 class DeleteAccountViewModel(private val container: AppContainer) : ViewModel() {
     /**
-     * Books and étagères are filtered to me because the store also holds friends' — the server
-     * only deletes mine. Lists are all mine: only mine are ever synced. `null` until Room answers.
+     * Books, étagères and lists are filtered to me because the store also holds friends' — the
+     * server only deletes mine. `null` until Room answers.
      */
     val summary: StateFlow<AccountDeletionSummary?> = container.users.myUserId
         .flatMapLatest { myId: String? ->
@@ -29,7 +29,7 @@ class DeleteAccountViewModel(private val container: AppContainer) : ViewModel() 
                 combine(
                     container.inventory.observeCountOf(myId),
                     container.shelves.observeCountOf(myId),
-                    container.lists.observeCount(),
+                    container.lists.observeMyCount(),
                 ) { books: Int, shelves: Int, lists: Int -> AccountDeletionSummary(books, shelves, lists) }
             }
         }

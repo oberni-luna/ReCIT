@@ -33,6 +33,8 @@ data class UserEntity(
     val created: Double? = null,
     val lastInventorySync: Double? = null,
     val relation: UserRelation = UserRelation.None,
+    /** What the reader wrote about themselves — the Présentation tab of their profile. */
+    val bio: String? = null,
 )
 
 @Entity(tableName = "editions")
@@ -137,7 +139,17 @@ data class EntityListEntity(
     val updated: Double? = null,
     val visibility: List<Visibility> = emptyList(),
     val type: EntityListType = EntityListType.Work,
-)
+    /** Who made the list, from the listing's `creator`; `null` for a list stored before it was read. */
+    val creatorId: String? = null,
+) {
+    /**
+     * `EntityList.isCreated(byMe:)`: one of my lists — the only ones the Lists tab, the « … » menus and
+     * « Déplacer » offer, and the only ones anything may write to. An unstamped list is mine: it was
+     * stored when only mine were synced. A missing [myUserId] matches only those, so a friend's list is
+     * never taken for mine.
+     */
+    fun isCreatedByMe(myUserId: String?): Boolean = creatorId == null || creatorId == myUserId
+}
 
 @Entity(
     tableName = "list_elements",

@@ -80,80 +80,82 @@ struct ListCoverFlowScreen: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
-            TabPager(
-                selection: $tab,
-                isFrozen: isWritingComment,
-                position: pagerPosition
-            ) { page in
-                switch page {
-                case .elements:
-                    ListElementsPage(
-                        list: list,
-                        items: liveItems,
-                        isMine: isMine,
-                        selectedURI: $selectedURI,
-                        isWritingComment: $isWritingComment,
-                        tabsHeight: tabsHeight,
-                        onScan: { isPresentingScanner = true },
-                        onSearch: { isPresentingSearch = true },
-                        onOpen: open,
-                        onRemove: remove
-                    )
-                case .presentation:
-                    DesignSystem.FormList {
-                        ListPresentationPage(list: list)
+        if list.isStillInTheStore {
+            ZStack(alignment: .top) {
+                TabPager(
+                    selection: $tab,
+                    isFrozen: isWritingComment,
+                    position: pagerPosition
+                ) { page in
+                    switch page {
+                    case .elements:
+                        ListElementsPage(
+                            list: list,
+                            items: liveItems,
+                            isMine: isMine,
+                            selectedURI: $selectedURI,
+                            isWritingComment: $isWritingComment,
+                            tabsHeight: tabsHeight,
+                            onScan: { isPresentingScanner = true },
+                            onSearch: { isPresentingSearch = true },
+                            onOpen: open,
+                            onRemove: remove
+                        )
+                    case .presentation:
+                        DesignSystem.FormList {
+                            ListPresentationPage(list: list)
+                        }
+                        .listDetailTabsRoom(height: tabsHeight)
                     }
-                    .listDetailTabsRoom(height: tabsHeight)
+                }
+                // Edge to edge, so the pages run under the bars as a list does; UIKit hands each
+                // page the safe area, which its list keeps its rows clear of.
+                .ignoresSafeArea()
+
+                ListDetailTabPicker(
+                    selection: $tab,
+                    position: pagerPosition,
+                    listType: list.type,
+                    count: liveItems.count
+                )
+                .listDetailTabsBar()
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabsHeight = $0 }
+            }
+            .fullScreenCover(isPresented: $isPresentingScanner) {
+                ListScanView(
+                    list: list,
+                    existingURIs: Set(uris),
+                    onAdd: add,
+                    onShow: show
+                )
+            }
+            .sheet(isPresented: $isPresentingSearch) {
+                ListAddSearchView(
+                    list: list,
+                    existingURIs: Set(uris),
+                    onAdd: add,
+                    onShow: show
+                )
+            }
+            // The add bar takes the tab bar's place; a list with nothing to add keeps the tab bar.
+            .toolbar(isMine ? .hidden : .automatic, for: .tabBar)
+            .onAppear {
+                if selectedURI == nil {
+                    selectedURI = uris.first
                 }
             }
-            // Edge to edge, so the pages run under the bars as a list does; UIKit hands each
-            // page the safe area, which its list keeps its rows clear of.
-            .ignoresSafeArea()
-
-            ListDetailTabPicker(
-                selection: $tab,
-                position: pagerPosition,
-                listType: list.type,
-                count: liveItems.count
-            )
-            .listDetailTabsBar()
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabsHeight = $0 }
-        }
-        .fullScreenCover(isPresented: $isPresentingScanner) {
-            ListScanView(
-                list: list,
-                existingURIs: Set(uris),
-                onAdd: add,
-                onShow: show
-            )
-        }
-        .sheet(isPresented: $isPresentingSearch) {
-            ListAddSearchView(
-                list: list,
-                existingURIs: Set(uris),
-                onAdd: add,
-                onShow: show
-            )
-        }
-        // The add bar takes the tab bar's place; a list with nothing to add keeps the tab bar.
-        .toolbar(isMine ? .hidden : .automatic, for: .tabBar)
-        .onAppear {
-            if selectedURI == nil {
-                selectedURI = uris.first
+            .onChange(of: uris) { oldURIs, newURIs in
+                keepSelection(from: oldURIs, to: newURIs)
             }
-        }
-        .onChange(of: uris) { oldURIs, newURIs in
-            keepSelection(from: oldURIs, to: newURIs)
-        }
-        .task(id: uris) {
-            switch list.type {
-            case .work:
-                _ = try? await entityModel.getOrFetchWorks(modelContext: modelContext, uris: uris)
-            case .author:
-                _ = try? await entityModel.getOrFetchAuthors(modelContext: modelContext, uris: uris)
-            case .publisher:
-                break
+            .task(id: uris) {
+                switch list.type {
+                case .work:
+                    _ = try? await entityModel.getOrFetchWorks(modelContext: modelContext, uris: uris)
+                case .author:
+                    _ = try? await entityModel.getOrFetchAuthors(modelContext: modelContext, uris: uris)
+                case .publisher:
+                    break
+                }
             }
         }
     }

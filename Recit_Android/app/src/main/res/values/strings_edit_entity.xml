@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  « Modifier l’œuvre » and « Modifier l’auteur·ice » (iOS feature 0057; issue #23). French values of
+  ReCIT_iOS/Localizable.xcstrings (edit_work.*, edit_author.*, edit_entity.*, entity_property.*, work_type.*,
+  work_form.*, edition_choice.none), keys with '.' turned into '_' and %@ into %1$s. The entity_property_*,
+  work_type_* and work_form_* names are the ones EditionProperty.labelKey and EditionPropertyChoice.labelKey give.
+-->
+<resources>
+    <!-- « Modifier l’œuvre » -->
+    <string name="edit_work_add_title">Ajouter le titre dans une autre langue</string>
+    <string name="edit_work_authors_footer">Touchez un·e auteur·ice pour modifier sa fiche. Glissez-le·la vers la gauche pour l’enlever de l’œuvre.</string>
+    <string name="edit_work_authors_header">Auteur·ices</string>
+    <string name="edit_work_comics_footer">Pour une bande dessinée, un manga, un manhwa ou un roman graphique. Laissez vide sinon.</string>
+    <string name="edit_work_comics_header">Bande dessinée</string>
+    <string name="edit_work_databases_footer">BnF, IdRef, Babelio, Open Library, Goodreads, SensCritique… vingt bases en tout. Glissez un identifiant pour le retirer.</string>
+    <string name="edit_work_form_placeholder">Choisir une forme</string>
+    <string name="edit_work_general_footer">Ce que vous changez ici vaut pour toutes les éditions de cette œuvre. Une année seule suffit pour la date.</string>
+    <string name="edit_work_misc_footer">«\u202FÀ ne pas confondre avec\u202F» dit qu’une œuvre qui lui ressemble n’est pas la même.</string>
+    <string name="edit_work_relations_footer">«\u202FPubliée dans\u202F»\u202F: le recueil ou la revue où l’œuvre a paru d’abord.</string>
+    <string name="edit_work_relations_header">Liens avec d’autres œuvres</string>
+    <string name="edit_work_roles_footer">Chaque rôle peut nommer plusieurs personnes. Touchez-en une pour modifier sa fiche.</string>
+    <string name="edit_work_roles_header">Ont aussi fait cette œuvre</string>
+    <string name="edit_work_series_footer">Le rang est la place de l’œuvre dans la série\u202F: 1, 2, 3…</string>
+    <string name="edit_work_series_header">Série</string>
+    <string name="edit_work_series_placeholder">Choisir une série</string>
+    <string name="edit_work_series_ordinal_placeholder">Ajouter un rang</string>
+    <string name="edit_work_subjects_footer">Une œuvre peut avoir plusieurs genres et plusieurs sujets.</string>
+    <string name="edit_work_subjects_header">Genre et sujet</string>
+    <string name="edit_work_title_field">Titre · %1$s</string>
+    <string name="edit_work_type_placeholder">Choisir un type</string>
+
+    <!-- « Modifier l’auteur·ice » -->
+    <string name="edit_author_add_name">Ajouter le nom dans une autre langue</string>
+    <string name="edit_author_add_pseudonym">Ajouter un pseudonyme</string>
+    <string name="edit_author_databases_footer">ISNI, BnF, IdRef, Babelio, ORCID, Goodreads, NooSFere, BD Gest’… vingt-neuf bases en tout. Glissez un identifiant pour le retirer.</string>
+    <string name="edit_author_general_footer">Une année seule suffit pour les dates. Ce que vous changez ici vaut pour toutes ses œuvres. Glissez un pseudonyme pour le retirer.</string>
+    <string name="edit_author_header">L’auteur·ice</string>
+    <string name="edit_author_influences_footer">Un mouvement littéraire ou artistique\u202F; les auteur·ices dont l’œuvre a compté pour la sienne.</string>
+    <string name="edit_author_influences_header">Courant et influences</string>
+    <string name="edit_author_links_footer">Site officiel, blog, réseaux sociaux, LinkedIn. Glissez un lien pour le retirer.</string>
+    <string name="edit_author_misc_footer">«\u202FÀ ne pas confondre avec\u202F» dit qu’une personne au même nom n’est pas la même.</string>
+    <string name="edit_author_name_field">Nom · %1$s</string>
+    <string name="edit_author_title">Modifier l’auteur·ice</string>
+
+    <!-- Both screens -->
+    <string name="edit_entity_leave_message">Vos changements ne sont pas enregistrés\u202F: en quittant, vous les perdez.</string>
+    <string name="edit_entity_misc_header">Autres données</string>
+    <string name="edit_entity_failure_refused_body">Une valeur n’est peut-être pas acceptée telle quelle — cette fiche peut aussi être modifiée sur inventaire.io même.</string>
+    <string name="edition_choice_none">Non précisé</string>
+
+    <!-- The properties of a work and of a person -->
+    <string name="entity_property_anime_news_network">Anime News Network</string>
+    <string name="entity_property_author">Auteur·ice</string>
+    <string name="entity_property_babelio">Babelio</string>
+    <string name="entity_property_based_on">Basée sur</string>
+    <string name="entity_property_bd_gest">BD Gest’</string>
+    <string name="entity_property_birth_date">Date de naissance</string>
+    <string name="entity_property_bnb">British National Bibliography</string>
+    <string name="entity_property_cairn">Cairn</string>
+    <string name="entity_property_colorist">Couleurs</string>
+    <string name="entity_property_death_date">Date de mort</string>
+    <string name="entity_property_different_from">À ne pas confondre avec</string>
+    <string name="entity_property_first_publication_date">Date de première publication</string>
+    <string name="entity_property_genre">Genre</string>
+    <string name="entity_property_google_scholar">Google Scholar</string>
+    <string name="entity_property_grand_comics_database">Grand Comics Database</string>
+    <string name="entity_property_idref">IdRef</string>
+    <string name="entity_property_influenced_by">Influencé·e par</string>
+    <string name="entity_property_inker">Encrage</string>
+    <string name="entity_property_inspired_by">Inspirée de</string>
+    <string name="entity_property_isni">ISNI</string>
+    <string name="entity_property_letterer">Lettrage</string>
+    <string name="entity_property_library_of_congress">Bibliothèque du Congrès</string>
+    <string name="entity_property_librarything">LibraryThing</string>
+    <string name="entity_property_linkedin">LinkedIn</string>
+    <string name="entity_property_main_subject">Sujet principal</string>
+    <string name="entity_property_movement">Mouvement</string>
+    <string name="entity_property_myanimelist">MyAnimeList</string>
+    <string name="entity_property_ndl">Bibliothèque nationale de la Diète</string>
+    <string name="entity_property_noosfere_story">NooSFere (texte d’un recueil)</string>
+    <string name="entity_property_nta">NTA (Pays-Bas)</string>
+    <string name="entity_property_oclc_work">OCLC (œuvre)</string>
+    <string name="entity_property_orcid">ORCID</string>
+    <string name="entity_property_original_language">Langue originale</string>
+    <string name="entity_property_penciller">Dessin</string>
+    <string name="entity_property_pseudonym">Pseudonymes</string>
+    <string name="entity_property_published_in">Publiée dans</string>
+    <string name="entity_property_reply_to">En réponse à</string>
+    <string name="entity_property_scenarist">Scénario</string>
+    <string name="entity_property_selibr">SELIBR</string>
+    <string name="entity_property_senscritique">SensCritique</string>
+    <string name="entity_property_series">Série</string>
+    <string name="entity_property_series_ordinal">Rang dans la série</string>
+    <string name="entity_property_storygraph">The StoryGraph</string>
+    <string name="entity_property_theses_fr">theses.fr</string>
+    <string name="entity_property_work_form">Forme de l’œuvre</string>
+    <string name="entity_property_work_type">Type</string>
+    <string name="entity_property_writing_languages">Langues d’écriture</string>
+
+    <!-- A work's type -->
+    <string name="work_type_comic">Bande dessinée</string>
+    <string name="work_type_graphic_novel">Roman graphique</string>
+    <string name="work_type_literary_work">Œuvre littéraire</string>
+    <string name="work_type_manga">Manga</string>
+    <string name="work_type_manhwa">Manhwa</string>
+    <string name="work_type_written_work">Œuvre écrite</string>
+
+    <!-- A work's form -->
+    <string name="work_form_anthology">Anthologie</string>
+    <string name="work_form_catalog">Catalogue</string>
+    <string name="work_form_conference_proceedings">Actes de conférence</string>
+    <string name="work_form_diary">Journal intime</string>
+    <string name="work_form_dictionary">Dictionnaire</string>
+    <string name="work_form_encyclopedia">Encyclopédie</string>
+    <string name="work_form_essay">Essai</string>
+    <string name="work_form_exhibition_catalogue">Catalogue d’exposition</string>
+    <string name="work_form_fairy_tale_collection">Recueil de contes</string>
+    <string name="work_form_fix_up">Fix-up</string>
+    <string name="work_form_gamebook">Livre-jeu</string>
+    <string name="work_form_graphic_novel">Roman graphique</string>
+    <string name="work_form_journal">Journal</string>
+    <string name="work_form_letter_collection">Recueil de lettres</string>
+    <string name="work_form_monograph">Monographie</string>
+    <string name="work_form_novel">Roman</string>
+    <string name="work_form_novel_collection">Recueil de romans</string>
+    <string name="work_form_novelette">Novelette</string>
+    <string name="work_form_novelette_collection">Recueil de novelettes</string>
+    <string name="work_form_novella">Roman court</string>
+    <string name="work_form_novella_collection">Recueil de romans courts</string>
+    <string name="work_form_play">Pièce de théâtre</string>
+    <string name="work_form_poem">Poème</string>
+    <string name="work_form_poetry_anthology">Anthologie poétique</string>
+    <string name="work_form_poetry_collection">Recueil de poèmes</string>
+    <string name="work_form_short_story">Nouvelle</string>
+    <string name="work_form_short_story_anthology">Anthologie de nouvelles</string>
+    <string name="work_form_short_story_collection">Recueil de nouvelles</string>
+    <string name="work_form_textbook">Manuel scolaire</string>
+    <string name="work_form_thesis">Thèse</string>
+    <string name="work_form_treatise">Traité</string>
+</resources>

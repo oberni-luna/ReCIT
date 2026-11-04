@@ -101,7 +101,7 @@ class WorkViewModel(
         chosenLanguage,
     ) { editions, chosen -> EditionLanguageListing.of(editions, chosen, Locale.getDefault().language) }
 
-    private val lists: Flow<List<MembershipEntry>> = container.lists.observeLists().map { all ->
+    private val lists: Flow<List<MembershipEntry>> = container.lists.observeMyLists().map { all ->
         all.filter { it.list.type == EntityListType.Work }
             .sortedBy { it.list.name.lowercase() }
             .map { list -> MembershipEntry(list.list.id, list.list.name, list.elements.any { it.uri == workUri }) }

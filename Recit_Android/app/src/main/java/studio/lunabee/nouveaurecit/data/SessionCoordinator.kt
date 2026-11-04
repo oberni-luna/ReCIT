@@ -3,6 +3,11 @@ package studio.lunabee.nouveaurecit.data
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -15,8 +20,8 @@ import studio.lunabee.nouveaurecit.data.sorting.SortSession
  * `RootView+RefreshUserData` and `RootView+ForgetSignedOutUser`: the sync order of a signed-in
  * launch, and what a signed-out one forgets.
  *
- * Order: my user → my shelves → my inventory → relations → groups → lists → each friend's shelves
- * then inventory, never-synced friends first. A `401` on the first call is the only thing that signs
+ * Order: my user → my shelves → my inventory → relations → groups → lists → my friends' lists → each
+ * friend's shelves then inventory, never-synced friends first. A `401` on the first call is the only thing that signs
  * the user out (ADR 0008); every later failure is logged and the next domain carries on.
  */
 class SessionCoordinator(
@@ -31,6 +36,11 @@ class SessionCoordinator(
     private val syncStatus: SyncStatus,
 ) {
     private val mutex: Mutex = Mutex()
+
+    private val _friendsSyncing: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+
+    /** The readers whose invitation I am accepting, while their books and lists come in. */
+    val friendsSyncing: StateFlow<Set<String>> = _friendsSyncing.asStateFlow()
 
     fun refreshUserData(): Job = scope.launch { refresh() }
 
@@ -51,6 +61,8 @@ class SessionCoordinator(
         sync(SyncStatus.Domain.Community) { users.syncRelations() }
         sync(SyncStatus.Domain.Groups) { groups.syncMyGroups(me.id) }
         sync(SyncStatus.Domain.Lists) { lists.syncLists(me) }
+        // Outside the tracking: the Lists tab's placeholder waits on my lists alone.
+        runCatching { lists.syncNetworkLists(users.friends().map { it.id }) }.onFailure { Log.w(TAG, "network lists", it) }
         syncFriendsInventories()
     }
 
@@ -63,11 +75,27 @@ class SessionCoordinator(
         }
     }
 
-    /** A friend just accepted: their books arrive now rather than at the next launch. */
-    fun syncFriend(userId: String): Job = scope.launch {
+    /**
+     * Accepts [userId]'s invitation, once: an accept already under way for them is not sent again. Until
+     * the answer and the new friend's data are in, they are among [friendsSyncing], so their profile waits
+     * on their lists rather than saying they have none.
+     */
+    suspend fun acceptFriend(userId: String) {
+        val previous: Set<String> = _friendsSyncing.getAndUpdate { it + userId }
+        if (userId in previous) return
+        try {
+            users.acceptRelation(userId) { syncFriend(userId).join() }.join()
+        } finally {
+            _friendsSyncing.update { it - userId }
+        }
+    }
+
+    /** A friend just accepted: their books and lists arrive now rather than at the next launch. */
+    private fun syncFriend(userId: String): Job = scope.launch {
         val friend: UserEntity = users.getOrFetchUsers(listOf(userId)).firstOrNull() ?: return@launch
         runCatching { shelves.syncShelves(friend) }
         runCatching { inventory.syncInventory(friend) }
+        runCatching { lists.syncFriendLists(userId) }
     }
 
     suspend fun signOut() {

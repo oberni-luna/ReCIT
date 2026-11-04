@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -42,6 +45,8 @@ import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
+import studio.lunabee.nouveaurecit.ui.common.CapsuleTab
+import studio.lunabee.nouveaurecit.ui.common.CapsuleTabs
 import studio.lunabee.nouveaurecit.ui.common.Formatting
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
@@ -56,13 +61,19 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
  * authors, « Mon commentaire », « Retirer de la liste » and the day it was added. Moving to another book
  * cross-fades that block while the covers follow the finger.
  *
- * « Modifier » opens the form; the screen leaves by itself when the list stops existing. A list of
- * publishers says it is empty, as on iOS.
+ * A friend's list (iOS feature 0064) opens read-only: no « Modifier », no add bar, no « Déplacer », no
+ * « Retirer de la liste »; their comment, when they wrote one, reads as text.
+ *
+ * The screen is two pages, « Livres • 8 » | « Présentation » (iOS features 0073 and 0075, without the
+ * lens): see [ListDetailPages].
+ *
+ * « Modifier » opens the form; the screen leaves by itself when the list stops existing. The « Livres »
+ * page of a list of publishers says it is empty, as on iOS; its « Présentation » reads as any other's.
  */
 @Composable
 fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) {
     val viewModel: EntityListViewModel = recitViewModel(key = destination.id) {
-        EntityListViewModel(destination.id, it.lists, it.entities)
+        EntityListViewModel(destination.id, it.lists, it.entities, it.users.myUserId)
     }
     val state: EntityListViewModel.State by viewModel.state.collectAsStateWithLifecycle()
     var showsForm: Boolean by rememberSaveable { mutableStateOf(false) }
@@ -71,7 +82,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
     var isCommentFocused: Boolean by remember { mutableStateOf(false) }
     val list: EntityListEntity? = state.list
     val isAuthor: Boolean = list?.type == EntityListType.Author
-    val canAdd: Boolean = list != null && list.type != EntityListType.Publisher
+    val canAdd: Boolean = list != null && list.type != EntityListType.Publisher && !state.isReadOnly
 
     // Deleting from the form pops, and so does the list vanishing from Room: leave only once.
     var hasLeft: Boolean by remember { mutableStateOf(false) }
@@ -96,7 +107,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 onBack = navigator::pop,
                 containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
-                    if (state.list != null) {
+                    if (state.list != null && !state.isReadOnly) {
                         IconButton(onClick = { showsForm = true }) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
                         }
@@ -104,27 +115,23 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 },
             )
         },
-        // The add bar steps aside while the comment is written: the keyboard is not topped with two
-        // buttons that have nothing to do with typing.
-        bottomBar = {
-            if (canAdd && !isCommentFocused) {
-                ListAddBar(isAuthor = isAuthor, onScan = { showsScanner = true }, onSearch = { showsSearch = true })
-            }
-        },
         containerColor = RecitTheme.colors.backgroundGrouped,
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when {
                 !state.isLoaded -> Unit
-                list == null || list.type == EntityListType.Publisher || state.rows.isEmpty() ->
+                list == null ->
                     EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
-                else -> ListCoverFlowContent(
+                else -> ListDetailPages(
                     list = list,
                     state = state,
                     viewModel = viewModel,
                     navigator = navigator,
+                    canAdd = canAdd,
                     isCommentFocused = isCommentFocused,
                     onCommentFocusChange = { isCommentFocused = it },
+                    onScan = { showsScanner = true },
+                    onSearch = { showsSearch = true },
                 )
             }
         }
@@ -158,6 +165,79 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
             onDismiss = { showsForm = false },
             onDeleted = leave,
         )
+    }
+}
+
+/**
+ * `ListCoverFlowScreen`'s `TabPager`: the tabs pinned under the bar, over two pages side by side, each keeping
+ * its own scroll. A swipe on the covers moves the covers; anywhere else on « Livres » it turns the page. The
+ * add bar belongs to « Livres » and slides with it; it steps aside while the comment is written, so the
+ * keyboard is not topped with two buttons that have nothing to do with typing — and the pager holds still,
+ * so the field does not leave with the keyboard up.
+ */
+@Composable
+private fun ListDetailPages(
+    list: EntityListEntity,
+    state: EntityListViewModel.State,
+    viewModel: EntityListViewModel,
+    navigator: Navigator,
+    canAdd: Boolean,
+    isCommentFocused: Boolean,
+    onCommentFocusChange: (Boolean) -> Unit,
+    onScan: () -> Unit,
+    onSearch: () -> Unit,
+) {
+    val pagerState: PagerState = rememberPagerState { ListDetailTab.entries.size }
+    Column(Modifier.fillMaxSize()) {
+        CapsuleTabs(
+            tabs = listDetailTabs(list.type, if (list.type == EntityListType.Publisher) 0 else state.elementCount),
+            pagerState = pagerState,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = Spacing.xxSmall, bottom = Spacing.small),
+        )
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f),
+            userScrollEnabled = !isCommentFocused,
+            verticalAlignment = Alignment.Top,
+        ) { page ->
+            when (ListDetailTab.entries[page]) {
+                ListDetailTab.Elements -> Column(Modifier.fillMaxSize()) {
+                    Box(Modifier.weight(1f).fillMaxWidth()) {
+                        if (state.rows.isEmpty() || list.type == EntityListType.Publisher) {
+                            EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
+                        } else {
+                            ListCoverFlowContent(
+                                list = list,
+                                state = state,
+                                viewModel = viewModel,
+                                navigator = navigator,
+                                isCommentFocused = isCommentFocused,
+                                onCommentFocusChange = onCommentFocusChange,
+                            )
+                        }
+                    }
+                    if (canAdd && !isCommentFocused) {
+                        ListAddBar(isAuthor = list.type == EntityListType.Author, onScan = onScan, onSearch = onSearch)
+                    }
+                }
+                ListDetailTab.Presentation -> ListPresentationPage(list)
+            }
+        }
+    }
+}
+
+/** `ListDetailTabPicker`'s words: « Livres • 8 » or « Auteur·ices • 3 », then « Présentation ». */
+@Composable
+private fun listDetailTabs(type: EntityListType, count: Int): List<CapsuleTab> = ListDetailTab.entries.map { tab ->
+    when (tab) {
+        ListDetailTab.Elements -> if (type == EntityListType.Author) {
+            CapsuleTab(stringResource(R.string.list_tab_authors, count), stringResource(R.string.list_tab_authors_description, count))
+        } else {
+            CapsuleTab(stringResource(R.string.list_tab_works, count), stringResource(R.string.list_tab_works_description, count))
+        }
+        ListDetailTab.Presentation -> CapsuleTab(stringResource(R.string.list_tab_presentation))
     }
 }
 
@@ -197,13 +277,16 @@ private fun ListCoverFlowContent(
         item(key = "comment") {
             Crossfade(targetState = state.selectedRow?.uri, label = "list.comment") { uri ->
                 val row: ListElementRowModel = state.rows.firstOrNull { it.uri == uri } ?: return@Crossfade
-                ListCard {
-                    ListCommentField(
-                        row = row,
-                        isAuthor = isAuthor,
-                        onFocusChange = onCommentFocusChange,
-                        onSave = { viewModel.updateComment(row, it) },
-                    )
+                when {
+                    !state.isReadOnly -> ListCard {
+                        ListCommentField(
+                            row = row,
+                            isAuthor = isAuthor,
+                            onFocusChange = onCommentFocusChange,
+                            onSave = { viewModel.updateComment(row, it) },
+                        )
+                    }
+                    row.comment.isNotBlank() -> ListCard { ListReadOnlyComment(row.comment) }
                 }
             }
         }
@@ -228,14 +311,16 @@ private fun ListCoverFlowContent(
         item(key = "remove") {
             val row: ListElementRowModel? = state.selectedRow
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                ListCard(
-                    onClick = {
-                        if (row != null) {
-                            scope.launch { viewModel.remove(row.uri) { messenger.showError(genericError, it.localizedMessage) } }
-                        }
-                    },
-                ) {
-                    Text(stringResource(R.string.list_detail_remove), style = RecitTheme.typography.action300, color = RecitTheme.colors.foregroundError)
+                if (!state.isReadOnly) {
+                    ListCard(
+                        onClick = {
+                            if (row != null) {
+                                scope.launch { viewModel.remove(row.uri) { messenger.showError(genericError, it.localizedMessage) } }
+                            }
+                        },
+                    ) {
+                        Text(stringResource(R.string.list_detail_remove), style = RecitTheme.typography.action300, color = RecitTheme.colors.foregroundError)
+                    }
                 }
                 Crossfade(targetState = row, label = "list.added") { shown ->
                     if (shown != null && shown.created > 0) {

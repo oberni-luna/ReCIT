@@ -33,11 +33,11 @@
     <string name="about_headline">La bibliothèque derrière Ex-libris</string>
     <string name="about_tagline">inventaire.io est une bibliothèque commune, libre et sans publicité. Ex-libris y range vos livres.</string>
     <string name="about_value_commons_title">Une bibliothèque commune</string>
-    <string name="about_value_commons_body">Chacun y inventorie ses livres et choisit qui les voit : ses amis, ses groupes, ou tout le monde.</string>
+    <string name="about_value_commons_body">Chacun·e y inventorie ses livres et choisit qui les voit : ses ami·es, ses groupes, ou tout le monde.</string>
     <string name="about_value_account_title">Votre compte est un compte inventaire.io</string>
     <string name="about_value_account_body">Mêmes identifiants, mêmes livres : tout ce que vous rangez ici se retrouve sur inventaire.io, et inversement.</string>
     <string name="about_value_data_title">Des données ouvertes</string>
-    <string name="about_value_data_body">Titres, auteur·ices et éditions rejoignent une base libre, reliée à Wikidata, que chacun peut réutiliser.</string>
+    <string name="about_value_data_body">Titres, auteur·ices et éditions rejoignent une base libre, reliée à Wikidata, que chacun·e peut réutiliser.</string>
     <string name="about_value_software_title">Un logiciel libre, sans publicité</string>
     <string name="about_value_software_body">Son code est public, il ne revend rien de vous, et il vit des dons de celles et ceux qui l’utilisent.</string>
     <string name="about_links">Aller plus loin</string>
@@ -67,7 +67,7 @@
         <item quantity="other">%d listes seront supprimées</item>
     </plurals>
     <string name="delete_account_hosting">Votre compte est hébergé par inventaire.io. Le supprimer ici le supprime aussi sur le site.</string>
-    <string name="delete_account_username_kept">Votre nom d\'utilisateur restera réservé et ne pourra pas servir à un nouveau compte.</string>
+    <string name="delete_account_username_kept">Votre nom d\'utilisateur·ice restera réservé et ne pourra pas servir à un nouveau compte.</string>
     <string name="delete_account_button">Supprimer mon compte</string>
     <string name="delete_account_confirm_title">Supprimer définitivement ?</string>
     <string name="delete_account_confirm_message">Vos livres, étagères, listes et échanges seront supprimés. Cette action ne peut pas être annulée.</string>

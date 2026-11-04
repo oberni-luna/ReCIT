@@ -23,7 +23,7 @@ struct EntityListDetail: View {
         _matchingLists = Query(filter: #Predicate<EntityList> { $0._id == listId })
     }
 
-    private var list: EntityList? { matchingLists.first }
+    private var list: EntityList? { matchingLists.first(where: \.isStillInTheStore) }
 
     /// Whether this screen may write to the list. Derived from the list's creator, like an
     /// étagère's owner in `ShelfDetailView`: a friend's list, opened from their profile, cannot
@@ -61,7 +61,7 @@ struct EntityListDetail: View {
                     }
                     .applyListBackground(.backgroundGrouped)
                 }
-            } else {
+            } else if matchingLists.isEmpty {
                 ContentUnavailableView(
                     "list.empty",
                     systemImage: "list.bullet.rectangle"

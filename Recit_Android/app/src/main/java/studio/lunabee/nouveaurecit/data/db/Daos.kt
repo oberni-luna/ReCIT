@@ -291,9 +291,20 @@ interface ShelfDao {
 
 @Dao
 interface ListDao {
+    /** `EntityList.isCreated(byMe:)` as a query: the unstamped lists, and those [myId] made. */
     @Transaction
-    @Query("SELECT * FROM lists ORDER BY created DESC")
-    fun observeLists(): Flow<List<ListWithElements>>
+    @Query("SELECT * FROM lists WHERE creatorId IS NULL OR creatorId = :myId ORDER BY created DESC")
+    fun observeMine(myId: String?): Flow<List<ListWithElements>>
+
+    /** Every list the store holds — the Lists tab splits them into mine and my friends'. */
+    @Transaction
+    @Query("SELECT * FROM lists")
+    fun observeAll(): Flow<List<ListWithElements>>
+
+    /** Another reader's lists, by name, as their profile shows them. */
+    @Transaction
+    @Query("SELECT * FROM lists WHERE creatorId = :creatorId ORDER BY name COLLATE NOCASE")
+    fun observeCreatedBy(creatorId: String): Flow<List<ListWithElements>>
 
     @Transaction
     @Query("SELECT * FROM lists WHERE id = :id")
@@ -326,10 +337,13 @@ interface ListDao {
     @Query("DELETE FROM list_elements WHERE listId = :listId AND uri IN (:uris)")
     suspend fun deleteElementsByUri(listId: String, uris: List<String>)
 
+    @Query("DELETE FROM lists WHERE creatorId = :creatorId")
+    suspend fun deleteCreatedBy(creatorId: String)
+
     @Query("DELETE FROM lists")
     suspend fun deleteAll()
 
-    /** How many lists the store holds — only mine are ever synced. */
-    @Query("SELECT COUNT(*) FROM lists")
-    fun observeCount(): Flow<Int>
+    /** How many of the store's lists are mine — the account-deletion summary, the line under my name. */
+    @Query("SELECT COUNT(*) FROM lists WHERE creatorId IS NULL OR creatorId = :myId")
+    fun observeMyCount(myId: String?): Flow<Int>
 }

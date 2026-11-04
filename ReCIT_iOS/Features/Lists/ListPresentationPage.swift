@@ -15,43 +15,45 @@ struct ListPresentationPage: View {
     let list: EntityList
 
     var body: some View {
-        if list.explanation.isEmpty == false {
+        if list.isStillInTheStore {
+            if list.explanation.isEmpty == false {
+                Section {
+                    Text(UserPresentationTab.linked(list.explanation))
+                        .textStyle(.content300)
+                        .foregroundStyle(.foregroundDefault)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                }
+            } else {
+                Section {
+                    EmptyStateView(
+                        glyph: "text.quote",
+                        title: "list.presentation.empty"
+                    )
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, .large)
+                }
+                .listRowBackground(Color.clear)
+            }
+
             Section {
-                Text(UserPresentationTab.linked(list.explanation))
-                    .textStyle(.content300)
-                    .foregroundStyle(.foregroundDefault)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
+                Text(list.type.label)
+                    .infoRow(label: "list.info.type")
+
+                Text(ListVisibilityLabel.label(for: list.visibility))
+                    .infoRow(label: "list.info.visibility")
+
+                Text(list.created, format: .dateTime.day().month(.wide).year())
+                    .infoRow(label: "list.info.created")
+
+                if let updated = list.updated {
+                    Text(updated, format: .dateTime.day().month(.wide).year())
+                        .infoRow(label: "list.info.updated")
+                }
             }
-        } else {
-            Section {
-                EmptyStateView(
-                    glyph: "text.quote",
-                    title: "list.presentation.empty"
-                )
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, .large)
-            }
-            .listRowBackground(Color.clear)
+            .listRowSeparator(.visible)
+            .listSectionSeparator(.hidden)
         }
-
-        Section {
-            Text(list.type.label)
-                .infoRow(label: "list.info.type")
-
-            Text(ListVisibilityLabel.label(for: list.visibility))
-                .infoRow(label: "list.info.visibility")
-
-            Text(list.created, format: .dateTime.day().month(.wide).year())
-                .infoRow(label: "list.info.created")
-
-            if let updated = list.updated {
-                Text(updated, format: .dateTime.day().month(.wide).year())
-                    .infoRow(label: "list.info.updated")
-            }
-        }
-        .listRowSeparator(.visible)
-        .listSectionSeparator(.hidden)
     }
 }
 

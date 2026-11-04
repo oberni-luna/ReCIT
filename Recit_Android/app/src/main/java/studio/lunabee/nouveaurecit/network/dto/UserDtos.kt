@@ -20,6 +20,7 @@ data class UserDto(
     val language: String? = null,
     val snapshot: Map<String, ItemCountDto>? = null,
     val created: Double? = null,
+    val bio: String? = null,
 )
 
 @Serializable

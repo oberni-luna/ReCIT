@@ -6,11 +6,11 @@
 //  whose picture and name head the row.
 //
 
-import Foundation
+import SwiftData
 
 struct NetworkListEntry: Identifiable {
     let list: EntityList
     let owner: User
 
-    var id: String { list._id }
+    var id: PersistentIdentifier { list.id }
 }

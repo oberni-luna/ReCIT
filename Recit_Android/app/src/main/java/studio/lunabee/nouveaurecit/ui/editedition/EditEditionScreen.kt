@@ -38,10 +38,11 @@ import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
 /**
- * `EditEditionFlowView` + `EditEditionView` (iOS features 0049, 0050): « Modifier l'édition », pushed by
- * the book screen's « Données bibliographiques ». Everything inventaire.io holds about the edition, read
- * fresh, then the form, and what it pushes over itself — as pages of its view model under one
- * [BackHandler], as « Nouveau livre » does.
+ * `EditEditionFlowView` + `EditEditionView` (iOS features 0049, 0050, 0057): « Modifier l'édition », pushed
+ * by the book screen's « Données bibliographiques ». Everything inventaire.io holds about the edition,
+ * read fresh, then the form, and what it pushes over itself — « Modifier l'œuvre » and « Modifier
+ * l'auteur·ice » among them — as pages of its view model under one [BackHandler], as « Nouveau livre »
+ * does.
  *
  * « Enregistrer » is pinned at the foot and waits for the server; while it does, nothing can be left or
  * changed — the save's answer is the draft from then on.
@@ -54,11 +55,11 @@ fun EditEditionScreen(destination: Destination.EditEdition, navigator: Navigator
     val workSearch: SearchState<WorkCandidate> by viewModel.workSearch.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isSaved) { if (state.isSaved) navigator.pop() }
-    BackHandler(enabled = state.isSaving || !state.pages.isEmpty) { viewModel.back() }
+    BackHandler(enabled = state.isBusy || !state.pages.isEmpty) { viewModel.back() }
 
     val edit: EditionEdit? = state.edit
     val page: EditEditionPage? = state.pages.top
-    val help: @Composable RowScope.() -> Unit ={ BibliographicDataHelpButton(viewModel::openHelp) }
+    val help: @Composable RowScope.() -> Unit = { BibliographicDataHelpButton(viewModel::openHelp) }
     when {
         edit == null || page == null -> EditEditionForm(
             state = state,
@@ -109,7 +110,43 @@ fun EditEditionScreen(destination: Destination.EditEdition, navigator: Navigator
             push = viewModel::pushProperty,
             pop = viewModel::pop,
             actions = help,
+            onOpenEntity = viewModel::openEntity,
         )
+        page is EditEditionPage.Entity -> EditEntityPage(
+            edit = state.entities[page.uri],
+            isUnreadable = page.uri in state.unreadableEntities,
+            failure = state.entityFailures[page.uri],
+            isSaving = state.savingEntity == page.uri,
+            isConfirmingLeave = state.leavingEntity == page.uri,
+            actions = EntityFormActions(
+                onLabel = { language, value -> viewModel.setEntityLabel(page.uri, language, value) },
+                onAddLabel = { viewModel.addEntityLabel(page.uri, it) },
+                onChange = { viewModel.setEntityProperties(page.uri, it) },
+                onOpenProperty = { viewModel.openEntityProperty(page.uri, it) },
+                onPick = { viewModel.pickEntityProperty(page.uri, it) },
+                onAddIdentifier = { viewModel.openEntityIdentifierCatalog(page.uri, it) },
+                onOpenEntity = viewModel::openEntity,
+            ),
+            onSave = { viewModel.saveEntity(page.uri) },
+            onRetryLoad = { viewModel.loadEntity(page.uri) },
+            onBack = { viewModel.back() },
+            onLeave = { viewModel.leaveEntity(page.uri) },
+            onStay = viewModel::stayOnEntity,
+            onHelp = viewModel::openHelp,
+        )
+        page is EditEditionPage.EntityProperty -> state.entities[page.uri]?.let { entity ->
+            EditionPropertyPage(
+                step = page.step,
+                properties = entity.properties,
+                onChange = { viewModel.setEntityProperties(page.uri, it) },
+                entitySearch = entitySearch,
+                onEntityQuery = viewModel.entitySearch::setQuery,
+                push = { viewModel.pushEntityProperty(page.uri, it) },
+                pop = viewModel::pop,
+                actions = help,
+                onOpenEntity = viewModel::openEntity,
+            )
+        }
     }
 }
 
@@ -134,7 +171,7 @@ private fun EditEditionForm(state: EditEditionUiState, viewModel: EditEditionVie
                 )
             }
         },
-        containerColor = RecitTheme.colors.backgroundGrouped,
+        containerColor = RecitTheme.colors.backgroundForm,
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
             when (state.phase) {

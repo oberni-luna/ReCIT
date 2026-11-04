@@ -130,13 +130,13 @@ class E2EScenarioTest {
             }
         }
 
-        driver.step("Recherche 1 · « $FRIEND_BOOK_QUERY » chez mes amis", critical = false) {
+        driver.step("Recherche 1 · « $FRIEND_BOOK_QUERY » chez mes ami·es", critical = false) {
             openTab(TAB_SEARCH)
             typeSearch(FRIEND_BOOK_QUERY)
             driver.waitFor(By.text(LOCAL_SECTION), "la section « $LOCAL_SECTION »")
             val copy: UiObject2 = driver.waitFor(
                 By.clickable(true).hasDescendant(By.textStartsWith(OWNED_BY_PREFIX)).hasDescendant(By.textContains(FRIEND_BOOK_QUERY)),
-                "l'exemplaire d'un ami parmi les résultats locaux",
+                "l'exemplaire d'un·e ami·e parmi les résultats locaux",
             )
             val label: String = rowTitle(copy) ?: FRIEND_BOOK_QUERY
             val owner: String = copy.findObject(By.textStartsWith(OWNED_BY_PREFIX))?.text.orEmpty()
@@ -318,17 +318,17 @@ class E2EScenarioTest {
 
     private fun signIn(username: String, password: String) {
         driver.tapUntil(button(SIGN_IN), SIGN_IN) { driver.exists(By.text(LOGIN_SUBTITLE)) }
-        driver.type(driver.textField(0, "Nom d'utilisateur"), username, "Nom d'utilisateur")
+        driver.type(driver.textField(0, "Nom d'utilisateur·ice"), username, "Nom d'utilisateur·ice")
         driver.type(driver.textField(1, "Mot de passe"), password, "Mot de passe")
         driver.tap(button(SIGN_IN), SIGN_IN)
         val landed: Int = driver.waitForAny(
             "Après « Se connecter »",
             E2EDriver.NETWORK_TIMEOUT,
             tabBar(),
-            By.text(Pattern.compile("(Nom d'utilisateur ou mot de passe incorrect|Impossible de joindre|Une erreur est survenue).*")),
+            By.text(Pattern.compile("(Nom d'utilisateur·ice ou mot de passe incorrect|Impossible de joindre|Une erreur est survenue).*")),
         )
         if (landed == 1) {
-            val said: String = driver.find(By.text(Pattern.compile("(Nom d'utilisateur|Impossible|Une erreur).*")))?.text.orEmpty()
+            val said: String = driver.find(By.text(Pattern.compile("(Nom d'utilisateur·ice|Impossible|Une erreur).*")))?.text.orEmpty()
             throw E2EFailure("Connexion refusée : « $said » (inventaire.io limite les connexions : attendez quelques minutes).")
         }
     }
@@ -651,7 +651,7 @@ class E2EScenarioTest {
         const val ADD_TO_INVENTORY: String = "Ajouter à l'inventaire"
         const val ADDED: String = "Ajouté à votre inventaire"
         const val CONTINUE_WITHOUT_SORTING: String = "Continuer sans ranger"
-        const val LOCAL_SECTION: String = "Dans mes livres et chez mes amis"
+        const val LOCAL_SECTION: String = "Dans mes livres et chez mes ami·es"
         const val OWNED_BY_PREFIX: String = "Appartient à"
         const val NO_EDITION: String = "Aucune édition pour ce livre"
         const val RESOLVE_FAILED: String = "La connexion à inventaire.io a échoué"

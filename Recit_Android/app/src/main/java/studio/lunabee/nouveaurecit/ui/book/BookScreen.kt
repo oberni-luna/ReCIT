@@ -29,9 +29,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -75,7 +75,7 @@ internal fun BookDetail(anchor: BookAnchor, navigator: Navigator) {
     Scaffold(
         modifier = Modifier.testTag("e2e.book"),
         contentWindowInsets = WindowInsets(0),
-        containerColor = RecitTheme.colors.backgroundDefault,
+        containerColor = RecitTheme.colors.backgroundBook,
     ) { padding: PaddingValues ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (val phase: BookPhase = state.phase) {
@@ -95,7 +95,7 @@ internal fun BookDetail(anchor: BookAnchor, navigator: Navigator) {
             }
             RecitTopBar(
                 title = if (isScrolled) state.edition?.title.orEmpty() else "",
-                containerColor = if (isScrolled || state.phase !is BookPhase.Loaded) RecitTheme.colors.backgroundDefault else Color.Transparent,
+                containerColor = if (isScrolled || state.phase !is BookPhase.Loaded) RecitTheme.colors.backgroundBook else Color.Transparent,
                 onBack = navigator::pop,
                 actions = {
                     val actionsState: BookActionsState? = state.actions

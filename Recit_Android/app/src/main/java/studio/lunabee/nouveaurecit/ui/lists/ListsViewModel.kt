@@ -2,15 +2,11 @@ package studio.lunabee.nouveaurecit.ui.lists
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
@@ -19,20 +15,32 @@ import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.ListRepository
 import studio.lunabee.nouveaurecit.data.SessionCoordinator
 import studio.lunabee.nouveaurecit.data.SyncStatus
-import studio.lunabee.nouveaurecit.data.db.ListWithElements
+import studio.lunabee.nouveaurecit.data.UserRepository
+import studio.lunabee.nouveaurecit.data.model.UserRelation
 
 /**
- * `EntityListView`'s state: the lists from Room, filtered by the search text, each with the covers
- * of its first elements — read from Room too, and fetched once when the store lacks them.
+ * `EntityListView`'s state: every list Room holds, split into mine and my friends' ([ListsTabSections]),
+ * filtered by the search text, each with the covers of its first elements ([ListRowFeed]).
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ListsViewModel(
     private val lists: ListRepository,
-    private val entities: EntityRepository,
+    users: UserRepository,
+    entities: EntityRepository,
     private val session: SessionCoordinator,
     syncStatus: SyncStatus,
 ) : ViewModel() {
-    private val all: StateFlow<List<ListWithElements>?> = lists.observeLists()
+    /** The rows of « Mes listes » and of « Dans mon réseau », as the search leaves them. */
+    data class Rows(
+        val mine: List<ListRowModel> = emptyList(),
+        val network: List<ListRowModel> = emptyList(),
+    )
+
+    /** Everything there is to show, search aside: what decides the empty screen and the headers. */
+    private val all: StateFlow<ListsTabSections?> = combine(
+        lists.observeAllLists(),
+        users.observeByRelation(UserRelation.Friend),
+        users.myUserId,
+    ) { stored, friends, myId -> ListsTabSections.of(stored, myId, friends) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _query: MutableStateFlow<String> = MutableStateFlow("")
@@ -44,35 +52,28 @@ class ListsViewModel(
         .runningFold(false) { settled, now -> settled || now }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val hasNoList: StateFlow<Boolean> = all.map { it.isNullOrEmpty() }
+    /** Neither a list of mine nor one of my friends': the empty screen. */
+    val hasNoList: StateFlow<Boolean> = all.map { it?.isEmpty ?: true }
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    private val images: Flow<Map<String, String?>> = all
-        .map { ListsPresentation.coverUris(it.orEmpty()) }
-        .distinctUntilChanged()
-        .flatMapLatest { (workUris, authorUris) ->
-            combine(
-                entities.entities.observeWorksWithAuthors(workUris),
-                entities.entities.observeAuthors(authorUris),
-            ) { works, authors ->
-                works.associate { it.work.uri to it.work.image } + authors.associate { it.uri to it.image }
-            }
-        }
+    /** The headers show only when there is a network to set mine apart from. */
+    val showsHeaders: StateFlow<Boolean> = all.map { it?.network?.isNotEmpty() == true }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val rows: StateFlow<List<ListRowModel>> = combine(all, _query, images) { lists, query, images ->
-        ListsPresentation.rows(lists.orEmpty(), query, images)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val rows: StateFlow<Rows> = combine(
+        all,
+        _query,
+        ListRowFeed(entities, viewModelScope).images(all.map { it?.lists.orEmpty() }),
+    ) { sections, query, images ->
+        val shown: ListsTabSections = sections?.matching(query) ?: return@combine Rows()
+        Rows(
+            mine = shown.mine.map { ListsPresentation.row(it, images) },
+            network = shown.network.map { ListsPresentation.row(it.list, images, it.owner) },
+        )
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, Rows())
 
     private val _isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
-
-    private val requested: MutableSet<String> = mutableSetOf()
-
-    init {
-        viewModelScope.launch {
-            all.collect { lists -> fetchMissingCovers(lists.orEmpty()) }
-        }
-    }
 
     fun setQuery(query: String) {
         _query.value = query
@@ -97,14 +98,5 @@ class ListsViewModel(
     } catch (error: Exception) {
         onError(error)
         false
-    }
-
-    /** `ListCoverFan.fetchMissing`, once per uri for the life of the screen. */
-    private fun fetchMissingCovers(lists: List<ListWithElements>) {
-        val (workUris, authorUris) = ListsPresentation.coverUris(lists)
-        val works: List<String> = workUris.filter { requested.add(it) }
-        val authors: List<String> = authorUris.filter { requested.add(it) }
-        if (works.isNotEmpty()) viewModelScope.launch { runCatching { entities.getOrFetchWorks(works) } }
-        if (authors.isNotEmpty()) viewModelScope.launch { runCatching { entities.getOrFetchAuthors(authors) } }
     }
 }

@@ -3,9 +3,9 @@ package studio.lunabee.nouveaurecit.data.creation
 import java.util.UUID
 
 /**
- * `EditionEditStep` (iOS feature 0049): one request of a save, as [EditionEdit.nextStep] lists them —
- * what has to exist before the claims can name it (a picture, an author, a work, a publisher), then the
- * claims one at a time, then the works' new titles.
+ * `EditionEditStep` (iOS features 0049, 0057): one request of a save, as [EditionEdit.nextStep] and
+ * [EntityEdit.nextStep] list them — what has to exist before the claims can name it (a picture, an author,
+ * a work, a publisher), then the claims one at a time, then a work's or a person's labels.
  */
 sealed interface EditionEditStep {
     /** Upload a new cover — the local JPEG at [path] — for the hash `invp:P2` takes. */
@@ -23,6 +23,6 @@ sealed interface EditionEditStep {
     /** Change one claim. */
     data class Claim(val update: EditionClaimUpdate) : EditionEditStep
 
-    /** Rename a work. */
+    /** Rename a work or a person, in one language. */
     data class Label(val update: EntityLabelUpdate) : EditionEditStep
 }

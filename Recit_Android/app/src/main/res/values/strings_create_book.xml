@@ -13,13 +13,13 @@
     <string name="create_book_search_empty_message">inventaire.io ne connaît pas encore l’ISBN %1$s. Cherchez le titre ou l’auteur·ice : si l’œuvre y est déjà, il ne restera presque rien à saisir.</string>
 
     <string name="create_book_edition_title">Nouvelle édition</string>
-    <string name="create_book_edition_of_help">L’œuvre et son auteur viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Touchez-la pour revenir à la recherche, ou glissez-la pour la détacher.</string>
+    <string name="create_book_edition_of_help">L’œuvre et son auteur·ice viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Touchez-la pour revenir à la recherche, ou glissez-la pour la détacher.</string>
     <string name="create_book_edition_new_work_help">Touchez la nouvelle œuvre pour la nommer et lui donner ses auteur·ices : elle est publiée avec cette édition.</string>
     <string name="create_book_edition_no_work_help">Un livre est l’édition d’une œuvre : retrouvez-la, ou créez-la, pour publier.</string>
     <string name="create_book_edition_title_help">Repris de l’œuvre. Corrigez-le s’il diffère de la couverture : une traduction, un sous-titre.</string>
     <string name="create_book_isbn">ISBN, lu sur le code-barres</string>
     <string name="create_book_language">Langue, déduite de l’ISBN : %1$s</string>
-    <string name="create_book_public_notice">Ce livre rejoindra inventaire.io, la base ouverte : ce que vous écrivez ici sera public, et modifiable par les autres lecteurs.</string>
+    <string name="create_book_public_notice">Ce livre rejoindra inventaire.io, la base ouverte : ce que vous écrivez ici sera public, et modifiable par les autres lecteur·ices.</string>
     <string name="create_book_title_field">Titre de cette édition</string>
     <string name="create_book_publish">Publier et ajouter à mes livres</string>
     <string name="create_book_retry">Réessayer</string>
@@ -27,15 +27,15 @@
 
     <string name="create_book_new_work_help">Ses traductions et ses rééditions en seront des éditions.</string>
 
-    <string name="create_book_author_field">Auteur</string>
+    <string name="create_book_author_field">Auteur·ice</string>
     <string name="create_book_author_create">Créer « %1$s »</string>
     <string name="create_book_author_existing">Déjà sur inventaire.io</string>
-    <string name="create_book_author_why_existing">Prenez l’auteur déjà présent si vous le reconnaissez : c’est ce qui évite un doublon dans la base.</string>
-    <string name="create_book_author_no_result">Aucun auteur de ce nom sur inventaire.io pour l’instant.</string>
+    <string name="create_book_author_why_existing">Prenez l’auteur·ice déjà présent·e si c’est la bonne personne : c’est ce qui évite un doublon dans la base.</string>
+    <string name="create_book_author_no_result">Aucun·e auteur·ice de ce nom sur inventaire.io pour l’instant.</string>
 
     <string name="create_book_work_title">Œuvre déjà connue</string>
     <string name="create_book_work_header">Sur inventaire.io</string>
-    <string name="create_book_work_lead">La recherche ne l’a pas proposée, mais inventaire.io la reconnaît à son titre et à son auteur.</string>
+    <string name="create_book_work_lead">La recherche ne l’a pas proposée, mais inventaire.io la reconnaît à son titre et à son auteur·ice.</string>
     <string name="create_book_work_what_you_publish">Ce que vous publiez</string>
     <string name="create_book_work_one_more_edition">Une édition de cette œuvre</string>
     <string name="create_book_work_one_more_edition_help">Rien d’autre n’est créé : ni œuvre, ni auteur·ice.</string>

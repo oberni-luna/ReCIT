@@ -44,6 +44,7 @@ object Merges {
                 lastItemAdded = lastItemAdded,
                 itemCount = itemCount,
                 created = dto.created,
+                bio = dto.bio,
             )
         }
         return existing.copy(
@@ -56,6 +57,7 @@ object Merges {
             created = dto.created ?: existing.created,
             itemCount = itemCount,
             lastItemAdded = lastItemAdded,
+            bio = dto.bio ?: existing.bio,
         )
     }
 
@@ -235,6 +237,7 @@ object Merges {
             updated = dto.updated ?: base.updated,
             visibility = dto.visibility.mapNotNull(Visibility::from),
             type = EntityListType.from(dto.type),
+            creatorId = dto.creator ?: base.creatorId,
         )
     }
 

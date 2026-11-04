@@ -129,7 +129,7 @@ class BookActions(
 
     private val singleWorkUri: Flow<String?> = editionWithWorks.map { it?.works?.singleOrNull()?.uri }.distinctUntilChanged()
 
-    val myLists: Flow<List<MembershipEntry>> = combine(container.lists.observeLists(), singleWorkUri) { all, workUri ->
+    val myLists: Flow<List<MembershipEntry>> = combine(container.lists.observeMyLists(), singleWorkUri) { all, workUri ->
         if (workUri == null) {
             emptyList()
         } else {

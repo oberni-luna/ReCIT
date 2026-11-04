@@ -61,66 +61,68 @@ struct ListElementsPage: View {
     }
 
     var body: some View {
-        DesignSystem.FormList {
-            elementSections
+        if list.isStillInTheStore {
+            DesignSystem.FormList {
+                elementSections
 
-            // Room for the comment to rise into. Below the comment the list holds only « Retirer de
-            // la liste » and its footer: it was already scrolled as far as it goes, so neither the
-            // caret nor `ListKeyboardReveal` could take the growing field any higher, and each new line
-            // went under the keyboard. A transparent row as tall as the keyboard, while the
-            // comment is being written.
-            if isCommentFocused {
-                Section {
-                    Color.clear
-                        // At least a keyboard's worth even before its frame is known: a hardware
-                        // keyboard first reports a sliver, and the room has to be there already.
-                        .frame(height: max(keyboardHeight, Self.minimumKeyboardRoom))
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(.init())
+                // Room for the comment to rise into. Below the comment the list holds only « Retirer de
+                // la liste » and its footer: it was already scrolled as far as it goes, so neither the
+                // caret nor `ListKeyboardReveal` could take the growing field any higher, and each new line
+                // went under the keyboard. A transparent row as tall as the keyboard, while the
+                // comment is being written.
+                if isCommentFocused {
+                    Section {
+                        Color.clear
+                            // At least a keyboard's worth even before its frame is known: a hardware
+                            // keyboard first reports a sliver, and the room has to be there already.
+                            .frame(height: max(keyboardHeight, Self.minimumKeyboardRoom))
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(.init())
+                    }
                 }
             }
-        }
-        .listDetailTabsRoom(height: tabsHeight)
-        .scrollDismissesKeyboard(.interactively)
-        .formActionBar(isPresented: isMine && isCommentFocused == false) {
-            ListAddBar(
-                listType: list.type,
-                onScan: onScan,
-                onSearch: onSearch
-            )
-        }
-        .toolbar {
-            // The comment spans lines, so the return key starts a new one: this is the way to
-            // say the comment is done, and leaving the field is what writes it.
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
+            .listDetailTabsRoom(height: tabsHeight)
+            .scrollDismissesKeyboard(.interactively)
+            .formActionBar(isPresented: isMine && isCommentFocused == false) {
+                ListAddBar(
+                    listType: list.type,
+                    onScan: onScan,
+                    onSearch: onSearch
+                )
+            }
+            .toolbar {
+                // The comment spans lines, so the return key starts a new one: this is the way to
+                // say the comment is done, and leaving the field is what writes it.
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
 
-                Button("action.ok") {
-                    isCommentFocused = false
+                    Button("action.ok") {
+                        isCommentFocused = false
+                    }
                 }
             }
-        }
-        .task {
-            for await notification in NotificationCenter.default.notifications(
-                named: UIResponder.keyboardWillShowNotification
-            ) {
-                let frame: CGRect? = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
-                keyboardTop = frame?.minY ?? .infinity
-                keyboardHeight = frame?.height ?? 0
+            .task {
+                for await notification in NotificationCenter.default.notifications(
+                    named: UIResponder.keyboardWillShowNotification
+                ) {
+                    let frame: CGRect? = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+                    keyboardTop = frame?.minY ?? .infinity
+                    keyboardHeight = frame?.height ?? 0
+                }
             }
-        }
-        .task {
-            for await _ in NotificationCenter.default.notifications(
-                named: UIResponder.keyboardWillHideNotification
-            ) {
-                keyboardTop = .infinity
+            .task {
+                for await _ in NotificationCenter.default.notifications(
+                    named: UIResponder.keyboardWillHideNotification
+                ) {
+                    keyboardTop = .infinity
+                }
             }
-        }
-        .onChange(of: isCommentFocused) { _, focused in
-            if focused {
-                commentEdits += 1
+            .onChange(of: isCommentFocused) { _, focused in
+                if focused {
+                    commentEdits += 1
+                }
+                isWritingComment = focused
             }
-            isWritingComment = focused
         }
     }
 

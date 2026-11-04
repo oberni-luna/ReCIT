@@ -25,7 +25,7 @@ Product objects and notions, their states, roles, plans. Users see these: one co
 | Œuvre | Work | titre, livre | — | `Work` | the text, whatever the edition |
 | Édition | Edition | version | Livre | `Edition` | one published form of a work, often with an ISBN |
 | Auteur·ice | Author | écrivain | Auteur | `Author` | person who wrote a work |
-| Ami | Friend | contact, lecteur | Follower | `UserRelation`, `User` | reader linked both ways → [[features/0018-reader-network]] |
+| Ami·e | Friend | contact, lecteur·ice | Follower, Ami | `UserRelation`, `User` | reader linked both ways → [[features/0018-reader-network]] |
 | Groupe | Group | — | Communauté | `StoredGroup` | readers sharing their books → [[features/0028-network-tab-and-groups]] |
 | Échange | Transaction | demande, prêt | Order | `UserTransaction` | give, lend or sell request on a copy → [[features/0071-a-request-names-what-it-asks-for]] |
 | Données bibliographiques | Bibliographic data | métadonnées | — | `EditionBibliographicClaims` | an edition's claims on inventaire.io → [[features/0050-every-bibliographic-datum]] |

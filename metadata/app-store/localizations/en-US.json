@@ -12,6 +12,6 @@
     "keywords": "books,reading,library,borrow,lend,inventory,share,friends,readers,comics",
     "supportUrl": "https://inventaire.io/",
     "marketingUrl": "https://inventaire.io/",
-    "whatsNew": "What's new in 1.3:\n• A new Network tab brings your friends and groups together, with a badge when something awaits your answer\n• inventaire.io groups come to the app: find a group, ask to join, invite members or start your own\n• A red dot marks the groups you administer that have requests waiting for you\n• Tap a book's cover to see it full screen: pinch to zoom, double-tap to fill the screen\n• \"Sort my books\": the button now says \"Save\", and the app checks with you before leaving unsaved changes\n• The app now opens on your Inventory\n• A work's publication date is now the right one\n• Fixes: a crash related to work genres, and a friend's sync that could fail"
+    "whatsNew": "What's new in 1.9:\n• Find your friends' lists in the Lists tab, under \"Dans mon réseau\" (in my network)\n• Swipe from a list to its \"Présentation\" page: its description and who can see it, which you choose when you create or edit the list\n• Link your Wikidata account to edit Wikidata works and authors\n• On a friend's book, ask to borrow, buy or take it, depending on whether it is for lending, for sale or to give away"
   }
 }

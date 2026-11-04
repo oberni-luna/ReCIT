@@ -90,7 +90,7 @@ class AppContainer(context: Context) {
     )
     val inventory: InventoryRepository = InventoryRepository(api, database, entities, optimisticRunner, syncStatus)
     val shelves: ShelfRepository = ShelfRepository(api, database, optimisticRunner)
-    val lists: ListRepository = ListRepository(api, database, optimisticRunner)
+    val lists: ListRepository = ListRepository(api, database, optimisticRunner, users.myUserId)
     val search: SearchRepository = SearchRepository(api)
 
     /** Asking a friend for a copy (feature 0072). Nothing stored: the rest of the transactions is not ported. */

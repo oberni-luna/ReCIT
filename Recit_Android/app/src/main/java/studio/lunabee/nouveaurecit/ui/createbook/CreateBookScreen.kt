@@ -152,7 +152,7 @@ private fun NewEditionPage(state: CreateBookState, session: CreateBookSession, o
         bottomBar = {
             CreateBookPublishBar(state = state, onPublish = session::publish, onClose = onClose)
         },
-        containerColor = RecitTheme.colors.backgroundGrouped,
+        containerColor = RecitTheme.colors.backgroundForm,
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
             LazyColumn(

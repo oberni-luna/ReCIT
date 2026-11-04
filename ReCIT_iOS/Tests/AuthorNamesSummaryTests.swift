@@ -46,6 +46,8 @@ struct AuthorNamesSummaryTests {
         #expect(summary.hiddenCount == 1)
         #expect(summary.text.hasPrefix("A, B, C "))
         #expect(summary.text.contains("D") == false)
+        #expect(summary.text.hasSuffix("1 other") || summary.text.hasSuffix("1 autre"))
+        #expect(summary.text.contains("inventory.") == false)
     }
 
     @Test
@@ -58,6 +60,7 @@ struct AuthorNamesSummaryTests {
         #expect(summary.shownNames == ["Greta Thunberg", "Peter Brannen", "Beth Shapiro"])
         #expect(summary.hiddenCount == 98)
         #expect(summary.text.hasPrefix("Greta Thunberg, Peter Brannen, Beth Shapiro "))
-        #expect(summary.text.contains("98"))
+        #expect(summary.text.hasSuffix("98 others") || summary.text.hasSuffix("98 autres"))
+        #expect(summary.text.contains("inventory.") == false)
     }
 }

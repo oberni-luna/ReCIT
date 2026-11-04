@@ -1,6 +1,6 @@
 ---
 issue: 32
-status: to-test
+status: to-close
 wiki: [[architecture]], [[testing]]
 note: il faut limiter la longueur des auteurs dans une cell d'inventaire, à 2 lignes
 created: 2026-11-04
@@ -40,8 +40,15 @@ Round 1 — 2026-11-04.
 
 ## Review
 
+Round `validation` — 2026-11-04, at `/wa-close 32`. Scope `origin/main...HEAD`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `Tests/AuthorNamesSummaryTests.swift:47` — [correctness] the 4- and 101-name tests never asserted the suffix; a missing catalog key (raw-key fallback) would pass. — fixed by autofix: `hasSuffix("1 other" | "1 autre")`, `hasSuffix("98 others" | "98 autres")`, no `inventory.` in the text. Re-verified clean, 5/5 green.
+
 ## Verification
 
 Round 1 — manual validation, not run by agent.
+
+- Installed on Olivier's iPhone (Debug, branch `wa/32-shorten-book-row-authors`); tested by Olivier before `/wa-close`.
+- PR screenshots skipped: the iPhone 17 simulator is signed out.
 
 ## Feedback

@@ -1,6 +1,6 @@
 ---
 issue: 25
-status: to-test
+status: to-close
 wiki: [[lists]], [[architecture]]
 note: found by the iOS 1.9.0 gate (#19), which it blocks
 created: 2026-11-04
@@ -46,7 +46,17 @@ Round 1 — 2026-11-04.
 
 ## Review
 
-review → /wa-validate (on_validation).
+Round `validation` — 2026-11-04, `/wa-close 25`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟠 `ListMoveRow.swift:42` [correctness] unguarded `list` / `item` reads in a FormList cell → fixed: `destinations` guards both, `lists` filtered on `isStillInTheStore`
+- 🟠 `ListCommentRow.swift:68` [correctness] body reads `item` after the cascade → fixed: body behind `if item.isStillInTheStore`
+- 🟡 `ListFormView.swift:64` [correctness] form reads the deleted list until `dismiss()` → fixed: body behind `isCreating || list.isStillInTheStore`; `isCreating` now a `let` set in each init (the computed one read `_id`)
+- 🟡 `ListsTabSectionsTests.swift:16` [style] third copy of list/friend builders → fixed: `EntityList.mock(...)` in the model's file, `Fixture.user(relation:)`, used by three suites
+- 🟡 `NetworkListsTests.swift:111` [structure] section tests in the sync suite → fixed: moved to `ListsTabSectionsTests`, backtick names
+- 🟡 `NetworkListsTests.swift:43` [style] friends block ×3 (round 2) → fixed: `private let friends`
+- Autofix side effects: 4 `ListFormView` identifiers to a private `AccessibilityID`, two `AsyncButton` calls one argument per line; `.swiftlint.baseline` 4191 → 4181 (10 stale removed, 0 added).
+- Final: ✅ review clean. Tests 1251 green, SwiftLint 0.
+- ⚠️ Code changed after the simulator pass: « Déplacer », comment row, list form — same guards, not re-run on the simulator.
 
 ## Verification
 

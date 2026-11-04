@@ -13,33 +13,55 @@ import Testing
 @MainActor
 @Suite
 struct ListsTabSectionsTests {
-    private static func list(
-        id: String,
-        creator: String
-    ) -> EntityList {
-        .init(
-            _id: id,
-            _rev: "1",
-            name: id,
-            explanation: "",
-            created: .init(timeIntervalSince1970: 0),
-            visibility: [.public],
-            type: .work,
-            creatorId: creator
-        )
+    @Test
+    func `shows mine by name, my friends' the most recently changed first, and leaves a stranger's out`() throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let lea: User = Fixture.user(id: "lea", username: "lea", relation: .friend)
+        let ines: User = Fixture.user(id: "ines", username: "ines", relation: .friend)
+        let lists: [EntityList] = [
+            .mock(id: "b", name: "Livres lus", creatorId: "me"),
+            .mock(id: "a", name: "Livres à lire", creatorId: nil),
+            .mock(id: "lea-old", updated: .init(timeIntervalSince1970: 100), creatorId: "lea"),
+            .mock(id: "ines-new", updated: .init(timeIntervalSince1970: 300), creatorId: "ines"),
+            .mock(id: "lea-new", updated: .init(timeIntervalSince1970: 200), creatorId: "lea"),
+            .mock(id: "stranger", updated: .init(timeIntervalSince1970: 400), creatorId: "stranger")
+        ]
+        lists.forEach(context.insert)
+
+        let sections: ListsTabSections = .init(lists: lists, myUserId: "me", friends: [lea, ines])
+
+        #expect(sections.mine.map(\._id) == ["a", "b"])
+        #expect(sections.network.map(\.list._id) == ["ines-new", "lea-new", "lea-old"])
+        #expect(sections.network.map(\.owner._id) == ["ines", "lea", "lea"])
     }
 
-    private static func friend(_ id: String) -> User {
-        let user: User = Fixture.user(id: id, username: id)
-        user.relation = .friend
-        return user
+    @Test
+    func `keeps the lists matching the search in both sections`() throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let lists: [EntityList] = [
+            .mock(id: "mine-polar", name: "Polars à lire", creatorId: "me"),
+            .mock(id: "mine-other", name: "Livres lus", creatorId: "me"),
+            .mock(id: "lea-polar", name: "Polars nordiques", creatorId: "lea"),
+            .mock(id: "lea-other", name: "Pour les enfants", creatorId: "lea")
+        ]
+        lists.forEach(context.insert)
+
+        let sections: ListsTabSections = .init(
+            lists: lists,
+            myUserId: "me",
+            friends: [Fixture.user(id: "lea", username: "lea", relation: .friend)],
+            searchText: "polar"
+        )
+
+        #expect(sections.mine.map(\._id) == ["mine-polar"])
+        #expect(sections.network.map(\.list._id) == ["lea-polar"])
     }
 
     @Test
     func `drops my list once it is deleted and saved`() throws {
         let context: ModelContext = try TestStore.makeContext()
-        let kept: EntityList = Self.list(id: "kept", creator: "me")
-        let deleted: EntityList = Self.list(id: "deleted", creator: "me")
+        let kept: EntityList = .mock(id: "kept", creatorId: "me")
+        let deleted: EntityList = .mock(id: "deleted", creatorId: "me")
         context.insert(kept)
         context.insert(deleted)
         try context.save()
@@ -56,8 +78,8 @@ struct ListsTabSectionsTests {
     @Test
     func `drops my list between its deletion and the save`() throws {
         let context: ModelContext = try TestStore.makeContext()
-        let kept: EntityList = Self.list(id: "kept", creator: "me")
-        let deleted: EntityList = Self.list(id: "deleted", creator: "me")
+        let kept: EntityList = .mock(id: "kept", creatorId: "me")
+        let deleted: EntityList = .mock(id: "deleted", creatorId: "me")
         context.insert(kept)
         context.insert(deleted)
         try context.save()
@@ -73,8 +95,8 @@ struct ListsTabSectionsTests {
     @Test
     func `drops a friend's deleted list while searching`() throws {
         let context: ModelContext = try TestStore.makeContext()
-        let kept: EntityList = Self.list(id: "lea-kept", creator: "lea")
-        let deleted: EntityList = Self.list(id: "lea-deleted", creator: "lea")
+        let kept: EntityList = .mock(id: "lea-kept", name: "Polars nordiques", creatorId: "lea")
+        let deleted: EntityList = .mock(id: "lea-deleted", name: "Polars anglais", creatorId: "lea")
         context.insert(kept)
         context.insert(deleted)
         try context.save()
@@ -85,8 +107,8 @@ struct ListsTabSectionsTests {
         let sections: ListsTabSections = .init(
             lists: [deleted, kept],
             myUserId: "me",
-            friends: [Self.friend("lea")],
-            searchText: "lea"
+            friends: [Fixture.user(id: "lea", username: "lea", relation: .friend)],
+            searchText: "polar"
         )
 
         #expect(sections.mine.isEmpty)

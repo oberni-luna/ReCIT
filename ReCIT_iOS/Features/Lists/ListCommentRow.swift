@@ -48,43 +48,45 @@ struct ListCommentRow: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: .xSmall) {
-            Text("list.detail.comment.label")
-                .textStyle(.footnote200)
-                .foregroundStyle(.foregroundSecondary)
+        if item.isStillInTheStore {
+            VStack(alignment: .leading, spacing: .xSmall) {
+                Text("list.detail.comment.label")
+                    .textStyle(.footnote200)
+                    .foregroundStyle(.foregroundSecondary)
 
-            TextField(
-                "list.detail.comment.label",
-                text: $draft,
-                prompt: Text(prompt),
-                axis: .vertical
-            )
-            // Four lines held even when empty, so going from one book to the next does not move
-            // what is below; past four, the field grows.
-            .lineLimit(4...)
-            .textStyle(.content300)
-            .foregroundStyle(.foregroundDefault)
-            .focused(isFocused)
-            .disabled(OptimisticID.isOptimistic(item._id))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .onChange(of: isFocused.wrappedValue) { _, focused in
-            guard focused == false else { return }
+                TextField(
+                    "list.detail.comment.label",
+                    text: $draft,
+                    prompt: Text(prompt),
+                    axis: .vertical
+                )
+                // Four lines held even when empty, so going from one book to the next does not move
+                // what is below; past four, the field grows.
+                .lineLimit(4...)
+                .textStyle(.content300)
+                .foregroundStyle(.foregroundDefault)
+                .focused(isFocused)
+                .disabled(OptimisticID.isOptimistic(item._id))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .onChange(of: isFocused.wrappedValue) { _, focused in
+                guard focused == false else { return }
 
-            save()
-        }
-        .onChange(of: draft) {
-            guard isFocused.wrappedValue else { return }
+                save()
+            }
+            .onChange(of: draft) {
+                guard isFocused.wrappedValue else { return }
 
-            onEdit()
-        }
-        .onChange(of: item.comment) { _, comment in
-            // A sync or a reverted write moves the stored text; a draft being typed keeps its own.
-            guard isFocused.wrappedValue == false else { return }
+                onEdit()
+            }
+            .onChange(of: item.comment) { _, comment in
+                // A sync or a reverted write moves the stored text; a draft being typed keeps its own.
+                guard isFocused.wrappedValue == false else { return }
 
-            draft = comment
+                draft = comment
+            }
+            .onDisappear(perform: save)
         }
-        .onDisappear(perform: save)
     }
 
     private func save() {

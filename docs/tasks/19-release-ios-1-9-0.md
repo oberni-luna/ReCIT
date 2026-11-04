@@ -46,6 +46,16 @@ Round 2 — 2026-11-04, after #25 (PR #26) merged.
 
 ## Review
 
+Round `validation` — 2026-11-04, at `/wa-close 19`. Scope `main..HEAD`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. No autofix: every finding is store copy or a proof only Olivier can give.
+
+- 🟠 `en-US.json` `whatsNew` names French labels, but the app is localized: an English iPhone shows « In my network » and « About », never « Dans mon réseau » / « Présentation ». Reverts f1b7a9c → Olivier decides. — open
+- 🟡 `fr-FR.json` in « tu » while `wording.md` says `vous` and the Play changelogs use « vous ». The App Store description and promotional text are in « tu ». — open (recommend accept, record the store exception in `wording.md`)
+- 🟡 Header « Nouveautés de la 1.9 : » / "What's new in 1.9:" repeats the store's own heading. 1.3's notes had one too. — open (recommend accept)
+- 🟡 « Glisse d'une liste à sa page Présentation »: the swipe is inside a list, Livres → Présentation; « Présentation » lacks guillemets. Same in English. — open
+- 🟡 Last bullet presents asking a friend for a book as new; 0071 only made the request name what it asks for. — open
+- 🟡 Criteria « shown in TestFlight » and « Profil's foot reads Version 1.9.0 (20) » have no proof recorded. — open (Olivier to confirm)
+- `project.pbxproj`: only ReCIT_iOS Debug + Release moved. `.remote-snapshot.json`: adds `placements` links only, benign; committed with this round at Olivier's request.
+
 ## Verification
 
 Round 1 — gate.

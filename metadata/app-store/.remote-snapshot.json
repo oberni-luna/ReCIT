@@ -227,6 +227,12 @@
             "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/relationships/appScreenshotSets"
           }
         },
+        "placements": {
+          "links": {
+            "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/placements",
+            "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/relationships/placements"
+          }
+        },
         "searchKeywords": {
           "links": {
             "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/c9b8ee53-6a8e-483b-ac0f-d98eddc4f74f/searchKeywords",
@@ -261,6 +267,12 @@
           "links": {
             "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/appScreenshotSets",
             "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/relationships/appScreenshotSets"
+          }
+        },
+        "placements": {
+          "links": {
+            "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/placements",
+            "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/7a75a2e4-e652-425e-b71d-01b81784feef/relationships/placements"
           }
         },
         "searchKeywords": {

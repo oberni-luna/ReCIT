@@ -1,6 +1,6 @@
 ---
 issue: 21
-status: to-test
+status: to-close
 wiki: [[features/0064-a-friends-profile-with-tabs]], [[features/0066-a-friends-profile-tabs-as-pages]], [[features/0067-a-friends-profile-presentation-tab]], [[features/0031-android-app]], [[features/0041-android-catches-up-with-ios]]
 note: split from #20; sprint Android 1.3.0 — Android catches up with iOS 1.9.0
 created: 2026-11-04
@@ -55,6 +55,33 @@ created: 2026-11-04
 - **Tabs:** `ui/common/CapsuleTabs.kt` drawn from the pager position (reused by #22); `NetworkSegment` untouched.
 - **Not ported:** tappable links in the bio, labels shrinking before wrapping, pager frozen while picking a book off an étagère.
 - **Proof:** `./gradlew assembleDebug :app:testDebugUnitTest` green (557 tests, 16 new: `ListSyncPlanTest`, `EntityListOwnershipTest`, `ProfileHeaderCollapseTest`). Never run on an emulator.
+
+## Review
+
+### Round validation — 2026-11-04
+
+One `wa-verifier` over the cumulative diff of #21, #22, #23 (`3d0ac63..df130d0`), four lenses ✓, then three autofix rounds, each re-verified; clean at the end.
+
+- Round 1, 10 findings, all fixed:
+  - 🟠 [correctness] friend profile page's foot room kept stale after a long page loaded → recomputed, 0 when the page can't be measured whole
+  - 🟡 [correctness] accepting an invitation didn't fetch the friend's lists → `syncFriend` syncs lists
+  - 🟡 [correctness] a friendship ended outside the app kept that reader's lists → `syncRelations` deletes them (`UserRepository.endedFriendships`)
+  - 🟡 [correctness] « Édition de » showed a refused save → built from what landed (`savedName`)
+  - 🟡 [correctness] publisher list had no Présentation → goes through the pager, Livres empty
+  - 🟡 [correctness] « Modifiée le » shown on never-edited lists → only when `updated > created`
+  - 🟡 [elegance] `ListRowFeed` collected the lists twice, unused `query` → `shareIn` once, parameter dropped
+  - 🟡 [elegance] dead `EditionProperty.inGroup` → deleted
+  - 🟡 [style] `EntityFormActions` in a composables file → own file
+  - 🟡 [style] typed spaces in « » / before « : » → `\u202F`
+- Round 2, 4 findings, all fixed:
+  - 🟡 [correctness] Listes page said « pas encore de liste » during an accept, lists fetched twice → `SessionCoordinator.acceptFriend` + `friendsSyncing`, one fetch
+  - 🟡 [correctness] publisher list tab « Livres • n » over an empty page → « Livres • 0 »
+  - 🟡 [correctness] regression: a page a bit taller than the screen rested half folded → snap grows the foot room (`ProfileHeaderCollapse.roomToFinish`)
+  - 🟡 [style] `endedFriendships` test in `MergesTest` → `UserRepositoryRelationsTest`
+- Round 3, 2 findings, fixed, delta read by me:
+  - 🟠 [correctness] a drag during the snap ended the page's snapping for good → `collectLatest`, interruption caught, wait capped at 500 ms
+  - 🟡 [correctness] two overlapping accepts cleared the in-progress mark early → second accept ignored (`getAndUpdate`)
+- Proof: `./gradlew assembleDebug :app:testDebugUnitTest` green, 600 tests. Not run on an emulator.
 
 ## Verification
 

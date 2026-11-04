@@ -1,6 +1,7 @@
 package studio.lunabee.nouveaurecit.data
 
 import androidx.room.withTransaction
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -101,9 +102,12 @@ class UserRepository(
         val ids: List<String> = (network.network + states.keys).distinct().filter { it != myId }
         getOrFetchUsers(ids)
         db.withTransaction {
-            for (user in dao.all()) {
-                dao.setRelation(user.id, if (user.id == myId) UserRelation.None else states[user.id] ?: UserRelation.None)
+            val users: List<UserEntity> = dao.all()
+            val relations: Map<String, UserRelation> = users.associate { user ->
+                user.id to if (user.id == myId) UserRelation.None else states[user.id] ?: UserRelation.None
             }
+            relations.forEach { (id, relation) -> dao.setRelation(id, relation) }
+            endedFriendships(users.associate { it.id to it.relation }, relations).forEach { db.listDao().deleteCreatedBy(it) }
         }
     }
 
@@ -144,9 +148,9 @@ class UserRepository(
         to: UserRelation,
         action: String,
         reconcile: suspend () -> Unit = {},
-    ) {
+    ): Job {
         val previous: UserRelation = dao.get(userId)?.relation ?: UserRelation.None
-        runner.run(
+        return runner.run(
             apply = { dao.setRelation(userId, to) },
             revert = { dao.setRelation(userId, previous) },
             request = { api.send<RelationActionPayload, OkStatusDto>("/api/relations/$action", body = RelationActionPayload(userId)) },
@@ -195,6 +199,10 @@ class UserRepository(
 
     companion object {
         private const val MY_USER_ID_KEY: String = "session.myUserId"
+
+        /** The readers who were friends in [before] and no longer are in [after]: their lists are not mine to keep. */
+        fun endedFriendships(before: Map<String, UserRelation>, after: Map<String, UserRelation>): Set<String> =
+            before.filter { (id, relation) -> relation == UserRelation.Friend && after[id] != UserRelation.Friend }.keys
 
         /** `UserRelation.byUserID`: requests first, and a friendship wins over both. */
         fun relationsById(dto: UserNetworkDto): Map<String, UserRelation> = buildMap {

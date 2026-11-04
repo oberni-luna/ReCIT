@@ -41,6 +41,10 @@ data class EntityEdit(
     /** The name the screen and the rows beneath it show: the first label that says something. */
     val displayName: String get() = labels.map { it.trimmedValue }.firstOrNull { it.isNotEmpty() }.orEmpty()
 
+    /** The name as inventaire.io holds it: the first label that landed, in the screen's order. */
+    val savedName: String
+        get() = labels.firstNotNullOfOrNull { label -> originalLabels[label.language]?.trim()?.takeIf { it.isNotEmpty() } }.orEmpty()
+
     // Labels
 
     /** The languages a label can be added in, less those the entity has one in. */
@@ -100,12 +104,12 @@ data class EntityEdit(
 
     // Showing
 
-    /** A work as « Édition de » lists it: its title, and the authors it names. */
+    /** A work as « Édition de » lists it, as far as inventaire.io holds it: its title, and the authors it names. */
     val editionWork: EditionWork
         get() = EditionWork(
             uri = uri,
-            title = displayName,
-            authors = properties.entities(WorkProperties.Author).mapNotNull { author ->
+            title = savedName,
+            authors = original.entities(WorkProperties.Author).mapNotNull { author ->
                 author.uri?.let { NewBookAuthor(name = author.trimmedLabel, uri = it) }
             },
             titleLanguage = labels.firstOrNull()?.language,

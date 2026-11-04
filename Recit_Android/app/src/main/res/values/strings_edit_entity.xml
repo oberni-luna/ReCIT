@@ -15,12 +15,12 @@
     <string name="edit_work_databases_footer">BnF, IdRef, Babelio, Open Library, Goodreads, SensCritique… vingt bases en tout. Glissez un identifiant pour le retirer.</string>
     <string name="edit_work_form_placeholder">Choisir une forme</string>
     <string name="edit_work_general_footer">Ce que vous changez ici vaut pour toutes les éditions de cette œuvre. Une année seule suffit pour la date.</string>
-    <string name="edit_work_misc_footer">« À ne pas confondre avec » dit qu’une œuvre qui lui ressemble n’est pas la même.</string>
-    <string name="edit_work_relations_footer">« Publiée dans » : le recueil ou la revue où l’œuvre a paru d’abord.</string>
+    <string name="edit_work_misc_footer">«\u202FÀ ne pas confondre avec\u202F» dit qu’une œuvre qui lui ressemble n’est pas la même.</string>
+    <string name="edit_work_relations_footer">«\u202FPubliée dans\u202F»\u202F: le recueil ou la revue où l’œuvre a paru d’abord.</string>
     <string name="edit_work_relations_header">Liens avec d’autres œuvres</string>
     <string name="edit_work_roles_footer">Chaque rôle peut nommer plusieurs personnes. Touchez-en une pour modifier sa fiche.</string>
     <string name="edit_work_roles_header">Ont aussi fait cette œuvre</string>
-    <string name="edit_work_series_footer">Le rang est la place de l’œuvre dans la série : 1, 2, 3…</string>
+    <string name="edit_work_series_footer">Le rang est la place de l’œuvre dans la série\u202F: 1, 2, 3…</string>
     <string name="edit_work_series_header">Série</string>
     <string name="edit_work_series_placeholder">Choisir une série</string>
     <string name="edit_work_series_ordinal_placeholder">Ajouter un rang</string>
@@ -35,15 +35,15 @@
     <string name="edit_author_databases_footer">ISNI, BnF, IdRef, Babelio, ORCID, Goodreads, NooSFere, BD Gest’… vingt-neuf bases en tout. Glissez un identifiant pour le retirer.</string>
     <string name="edit_author_general_footer">Une année seule suffit pour les dates. Ce que vous changez ici vaut pour toutes ses œuvres. Glissez un pseudonyme pour le retirer.</string>
     <string name="edit_author_header">L’auteur·ice</string>
-    <string name="edit_author_influences_footer">Un mouvement littéraire ou artistique ; les auteur·ices dont l’œuvre a compté pour la sienne.</string>
+    <string name="edit_author_influences_footer">Un mouvement littéraire ou artistique\u202F; les auteur·ices dont l’œuvre a compté pour la sienne.</string>
     <string name="edit_author_influences_header">Courant et influences</string>
     <string name="edit_author_links_footer">Site officiel, blog, réseaux sociaux, LinkedIn. Glissez un lien pour le retirer.</string>
-    <string name="edit_author_misc_footer">« À ne pas confondre avec » dit qu’une personne au même nom n’est pas la même.</string>
+    <string name="edit_author_misc_footer">«\u202FÀ ne pas confondre avec\u202F» dit qu’une personne au même nom n’est pas la même.</string>
     <string name="edit_author_name_field">Nom · %1$s</string>
     <string name="edit_author_title">Modifier l’auteur·ice</string>
 
     <!-- Both screens -->
-    <string name="edit_entity_leave_message">Vos changements ne sont pas enregistrés : en quittant, vous les perdez.</string>
+    <string name="edit_entity_leave_message">Vos changements ne sont pas enregistrés\u202F: en quittant, vous les perdez.</string>
     <string name="edit_entity_misc_header">Autres données</string>
     <string name="edit_entity_failure_refused_body">Une valeur n’est peut-être pas acceptée telle quelle — cette fiche peut aussi être modifiée sur inventaire.io même.</string>
     <string name="edition_choice_none">Non précisé</string>

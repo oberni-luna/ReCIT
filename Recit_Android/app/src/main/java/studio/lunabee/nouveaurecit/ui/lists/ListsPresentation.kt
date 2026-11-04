@@ -70,11 +70,11 @@ object ListsPresentation {
     }
 
     /**
-     * The rows the tab shows. [images] maps an entity uri to its cover — works for work and
+     * [lists] as rows, by name. [images] maps an entity uri to its cover — works for work and
      * publisher lists, authors for author lists — and a uri it lacks shows the grey slot.
      */
-    fun rows(lists: List<ListWithElements>, query: String, images: Map<String, String?>): List<ListRowModel> =
-        filter(lists, query).map { row(it, images) }
+    fun rows(lists: List<ListWithElements>, images: Map<String, String?>): List<ListRowModel> =
+        filter(lists, query = "").map { row(it, images) }
 
     /** One list as its row reads it, headed by [owner] when it is a friend's. */
     fun row(entry: ListWithElements, images: Map<String, String?>, owner: UserEntity? = null): ListRowModel {

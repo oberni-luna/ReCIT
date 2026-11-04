@@ -7,9 +7,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
@@ -40,11 +39,15 @@ class UserViewModel(private val container: AppContainer, val userId: String) : V
 
     /** The Listes page: mine on my own profile, theirs on anyone else's, by name. */
     val lists: StateFlow<List<ListRowModel>> = ListRowFeed(container.entities, viewModelScope)
-        .rows(container.lists.observeListsOf(userId), flowOf(""))
+        .rows(container.lists.observeListsOf(userId))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _listsLoad: MutableStateFlow<UserListsLoad> = MutableStateFlow(UserListsLoad.Loading)
-    val listsLoad: StateFlow<UserListsLoad> = _listsLoad.asStateFlow()
+
+    /** Loading too while an invitation from them is being accepted: the accept brings their lists. */
+    val listsLoad: StateFlow<UserListsLoad> = combine(_listsLoad, container.session.friendsSyncing) { load, syncing ->
+        if (userId in syncing) UserListsLoad.Loading else load
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, UserListsLoad.Loading)
 
     val actions: RelationActions = RelationActions(container, viewModelScope)
 

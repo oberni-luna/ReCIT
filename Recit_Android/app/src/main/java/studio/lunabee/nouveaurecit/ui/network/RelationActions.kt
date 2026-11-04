@@ -22,7 +22,7 @@ class RelationActions(
     }
 
     fun accept(userId: String) {
-        scope.launch { container.users.acceptRelation(userId) { container.session.syncFriend(userId).join() } }
+        scope.launch { container.session.acceptFriend(userId) }
     }
 
     fun refuse(userId: String) {

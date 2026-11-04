@@ -181,6 +181,22 @@ class EntityEditTest {
     }
 
     @Test
+    fun aSaveStoppedHalfwayShowsOnlyWhatLanded() {
+        var edit: EntityEdit = work()
+            .changing { it.add(EditionEntityValue(uri = "inv:lucie", label = "Lucie"), WorkProperties.Author) }
+            .withLabel("fr", "Lucioles II")
+
+        assertEquals("Lucioles II", edit.displayName)
+        assertEquals("Lucioles", edit.editionWork.title)
+        assertEquals(emptyList<String>(), edit.editionWork.authors.map { it.uri })
+
+        edit = edit.landed(edit.claimUpdates[0])
+
+        assertEquals("Lucioles", edit.editionWork.title)
+        assertEquals(listOf("inv:lucie"), edit.editionWork.authors.map { it.uri })
+    }
+
+    @Test
     fun aPersonRenamedIsShownUnderTheNewNameWithoutAChange() {
         val opened: EntityEdit = work(
             EditionProperties(catalogue = EditionPropertyCatalogue.Work).add(EditionEntityValue(uri = "inv:lucie", label = "Lucie"), WorkProperties.Author),

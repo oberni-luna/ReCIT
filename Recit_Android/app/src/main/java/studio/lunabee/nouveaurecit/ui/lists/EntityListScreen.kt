@@ -67,8 +67,8 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
  * The screen is two pages, « Livres • 8 » | « Présentation » (iOS features 0073 and 0075, without the
  * lens): see [ListDetailPages].
  *
- * « Modifier » opens the form; the screen leaves by itself when the list stops existing. A list of
- * publishers says it is empty, as on iOS.
+ * « Modifier » opens the form; the screen leaves by itself when the list stops existing. The « Livres »
+ * page of a list of publishers says it is empty, as on iOS; its « Présentation » reads as any other's.
  */
 @Composable
 fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) {
@@ -120,7 +120,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
         Box(Modifier.fillMaxSize().padding(padding)) {
             when {
                 !state.isLoaded -> Unit
-                list == null || list.type == EntityListType.Publisher ->
+                list == null ->
                     EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
                 else -> ListDetailPages(
                     list = list,
@@ -190,7 +190,7 @@ private fun ListDetailPages(
     val pagerState: PagerState = rememberPagerState { ListDetailTab.entries.size }
     Column(Modifier.fillMaxSize()) {
         CapsuleTabs(
-            tabs = listDetailTabs(list.type, state.elementCount),
+            tabs = listDetailTabs(list.type, if (list.type == EntityListType.Publisher) 0 else state.elementCount),
             pagerState = pagerState,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -205,7 +205,7 @@ private fun ListDetailPages(
             when (ListDetailTab.entries[page]) {
                 ListDetailTab.Elements -> Column(Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f).fillMaxWidth()) {
-                        if (state.rows.isEmpty()) {
+                        if (state.rows.isEmpty() || list.type == EntityListType.Publisher) {
                             EmptyState(title = stringResource(R.string.list_empty), modifier = Modifier.align(Alignment.Center))
                         } else {
                             ListCoverFlowContent(

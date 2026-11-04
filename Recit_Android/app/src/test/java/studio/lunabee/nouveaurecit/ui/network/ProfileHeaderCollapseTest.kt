@@ -2,6 +2,7 @@ package studio.lunabee.nouveaurecit.ui.network
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -48,5 +49,18 @@ class ProfileHeaderCollapseTest {
     fun a_short_page_gets_the_room_to_fold_whole() {
         assertEquals(300f, collapse.trailingRoom(contentHeight = 600f, viewportHeight = 800f), 0f)
         assertEquals(0f, collapse.trailingRoom(contentHeight = 2_000f, viewportHeight = 800f), 0f)
+    }
+
+    @Test
+    fun a_page_too_tall_to_measure_whole_gets_no_room() {
+        assertEquals(0f, collapse.trailingRoom(contentHeight = null, viewportHeight = 800f), 0f)
+    }
+
+    @Test
+    fun a_fold_stopped_short_gets_the_room_it_lacks() {
+        assertEquals(70f, collapse.roomToFinish(room = 0f, reached = 30f, resting = 100f))
+        assertEquals(90f, collapse.roomToFinish(room = 20f, reached = 30f, resting = 100f))
+        assertNull(collapse.roomToFinish(room = 0f, reached = 99.5f, resting = 100f))
+        assertNull(collapse.roomToFinish(room = 0f, reached = 40f, resting = 0f))
     }
 }

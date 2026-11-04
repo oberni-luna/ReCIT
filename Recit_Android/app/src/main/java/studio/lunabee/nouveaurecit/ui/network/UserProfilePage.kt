@@ -20,8 +20,15 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 
 /**
@@ -41,14 +48,25 @@ internal fun UserProfilePage(
     var trailingRoom: Float by remember { mutableFloatStateOf(0f) }
 
     LaunchedEffect(state, collapse) {
-        snapshotFlow { state.isScrollInProgress }.filter { !it }.collect {
-            val offset: Float = state.headerOffset()
-            val resting: Float = collapse.restingOffset(offset)
-            if (resting != offset) state.animateScrollBy(resting - offset)
+        snapshotFlow { state.isScrollInProgress }.filter { !it }.collectLatest {
+            try {
+                val offset: Float = state.headerOffset()
+                val resting: Float = collapse.restingOffset(offset)
+                if (resting == offset) return@collectLatest
+                val room: Float = trailingRoom
+                state.animateScrollBy(resting - offset)
+                val reached: Float = state.headerOffset()
+                val needed: Float = collapse.roomToFinish(room, reached, resting) ?: return@collectLatest
+                trailingRoom = maxOf(trailingRoom, needed)
+                withTimeoutOrNull(ROOM_WAIT) { snapshotFlow { state.canScrollForward }.first { it } } ?: return@collectLatest
+                state.animateScrollBy(resting - reached)
+            } catch (interrupted: CancellationException) {
+                currentCoroutineContext().ensureActive()
+            }
         }
     }
     LaunchedEffect(state, collapse) {
-        snapshotFlow { state.layoutInfo.measuredContent() }.filterNotNull().collect { (contentHeight, viewportHeight) ->
+        snapshotFlow { state.layoutInfo.measuredContent() }.collect { (contentHeight, viewportHeight) ->
             trailingRoom = collapse.trailingRoom(contentHeight, viewportHeight)
         }
     }
@@ -69,15 +87,18 @@ internal fun LazyListState.headerOffset(): Float =
     if (firstVisibleItemIndex == 0) firstVisibleItemScrollOffset.toFloat() else Float.POSITIVE_INFINITY
 
 /**
- * The height of everything but the trailing room, and of the viewport above the bottom padding — known
- * only while the whole page is on screen, which is the only time a page can be too short.
+ * The height of everything but the trailing room, and of the viewport above the bottom padding. The first
+ * is known only while the whole page is on screen, which is the only time a page can be too short: `null`
+ * otherwise.
  */
-private fun LazyListLayoutInfo.measuredContent(): Pair<Float, Float>? {
-    val first: LazyListItemInfo = visibleItemsInfo.firstOrNull()?.takeIf { it.index == 0 } ?: return null
-    val last: LazyListItemInfo = visibleItemsInfo.firstOrNull { it.index == totalItemsCount - 2 } ?: return null
-    val contentHeight: Float = (last.offset + last.size - first.offset).toFloat()
-    return contentHeight to (viewportSize.height - afterContentPadding).toFloat()
+private fun LazyListLayoutInfo.measuredContent(): Pair<Float?, Float> {
+    val viewportHeight: Float = (viewportSize.height - afterContentPadding).toFloat()
+    val first: LazyListItemInfo = visibleItemsInfo.firstOrNull()?.takeIf { it.index == 0 } ?: return null to viewportHeight
+    val last: LazyListItemInfo = visibleItemsInfo.firstOrNull { it.index == totalItemsCount - 2 } ?: return null to viewportHeight
+    return (last.offset + last.size - first.offset).toFloat() to viewportHeight
 }
 
 private const val HEADER_ROOM: String = "header-room"
 private const val TRAILING_ROOM: String = "trailing-room"
+
+private val ROOM_WAIT: Duration = 500.milliseconds

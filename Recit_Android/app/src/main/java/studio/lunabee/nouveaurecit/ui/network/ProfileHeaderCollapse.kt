@@ -30,11 +30,22 @@ data class ProfileHeaderCollapse(val distance: Float) {
 
     /**
      * The empty room a page needs at its end so that it can always scroll the whole fold: a page shorter
-     * than that would stop halfway, and rest half folded.
+     * than that would stop halfway, and rest half folded. A [contentHeight] of `null` is a page too tall to
+     * be measured on screen whole, which needs none.
      */
-    fun trailingRoom(contentHeight: Float, viewportHeight: Float): Float = (viewportHeight + distance - contentHeight).coerceAtLeast(0f)
+    fun trailingRoom(contentHeight: Float?, viewportHeight: Float): Float =
+        contentHeight?.let { (viewportHeight + distance - it).coerceAtLeast(0f) } ?: 0f
+
+    /**
+     * The trailing room a page needs to finish folding when its scroll toward [resting] stopped at
+     * [reached], [room] at its foot: `null` once it got there, to the pixel.
+     */
+    fun roomToFinish(room: Float, reached: Float, resting: Float): Float? =
+        (resting - reached).takeIf { it >= PIXEL }?.let { room + it }
 
     companion object {
+        private const val PIXEL: Float = 1f
+
         /**
          * One value per page, blended between the two pages the pager stands between: `values[0]` at 0,
          * `values[1]` at 1, and so on. A position past either end holds the end's value.

@@ -257,8 +257,8 @@ class EditEditionViewModel(
             when (after.catalogue) {
                 EditionPropertyCatalogue.Work -> state.copy(edit = state.edit?.workSaved(after.editionWork))
                 EditionPropertyCatalogue.Human -> state.copy(
-                    edit = state.edit?.rename(after.uri, after.displayName),
-                    entities = state.entities.mapValues { (uri, entity) -> if (uri == after.uri) entity else entity.rename(after.uri, after.displayName) },
+                    edit = state.edit?.rename(after.uri, after.savedName),
+                    entities = state.entities.mapValues { (uri, entity) -> if (uri == after.uri) entity else entity.rename(after.uri, after.savedName) },
                 )
                 EditionPropertyCatalogue.Edition -> state
             }

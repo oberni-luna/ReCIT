@@ -3,11 +3,14 @@ package studio.lunabee.nouveaurecit.ui.lists
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
@@ -21,8 +24,11 @@ import studio.lunabee.nouveaurecit.data.db.ListWithElements
 class ListRowFeed(private val entities: EntityRepository, private val scope: CoroutineScope) {
     private val requested: MutableSet<String> = mutableSetOf()
 
-    fun rows(lists: Flow<List<ListWithElements>>, query: Flow<String>): Flow<List<ListRowModel>> =
-        combine(lists, query, images(lists), ListsPresentation::rows)
+    /** [lists] as rows, by name, collected once whatever the covers need. */
+    fun rows(lists: Flow<List<ListWithElements>>): Flow<List<ListRowModel>> {
+        val shared: SharedFlow<List<ListWithElements>> = lists.shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
+        return combine(shared, images(shared), ListsPresentation::rows)
+    }
 
     /** The covers of [lists]' first elements, by entity uri, as Room holds them. */
     fun images(lists: Flow<List<ListWithElements>>): Flow<Map<String, String?>> = lists

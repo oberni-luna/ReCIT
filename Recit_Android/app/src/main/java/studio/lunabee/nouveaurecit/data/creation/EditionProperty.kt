@@ -272,8 +272,6 @@ data class EditionProperty(
 
         fun named(uri: String): EditionProperty? = all.firstOrNull { it.uri == uri }
 
-        fun inGroup(group: Group): List<EditionProperty> = all.filter { it.group == group }
-
         /** Wikidata's limit on a string, which the server aligns on. */
         private const val MAX_TEXT_LENGTH: Int = 400
 

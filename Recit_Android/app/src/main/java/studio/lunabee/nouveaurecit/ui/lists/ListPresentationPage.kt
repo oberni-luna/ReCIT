@@ -48,7 +48,7 @@ internal fun ListPresentationPage(list: EntityListEntity, modifier: Modifier = M
         stringResource(R.string.list_info_type) to stringResource(list.type.label),
         stringResource(R.string.list_info_visibility) to stringResource(ListVisibility.from(list.visibility).label),
         list.created.takeIf { it > 0 }?.let { stringResource(R.string.list_info_created) to Formatting.longDate(it) },
-        list.updated?.let { stringResource(R.string.list_info_updated) to Formatting.longDate(it) },
+        list.updated?.takeIf { it > list.created }?.let { stringResource(R.string.list_info_updated) to Formatting.longDate(it) },
     )
     LazyColumn(
         modifier = modifier.fillMaxSize(),

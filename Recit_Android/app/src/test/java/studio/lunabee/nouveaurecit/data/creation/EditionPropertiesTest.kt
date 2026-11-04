@@ -33,8 +33,8 @@ class EditionPropertiesTest {
         assertEquals(6, EditionProperty.contributors.size)
         assertNull(EditionProperty.named("wdt:P212"))
         assertNull(EditionProperty.named("wdt:P1889"))
-        assertEquals(4, EditionProperty.inGroup(EditionProperty.Group.Publication).size)
-        assertEquals(3, EditionProperty.inGroup(EditionProperty.Group.Format).size)
+        assertEquals(4, EditionPropertyCatalogue.Edition.inGroup(EditionProperty.Group.Publication).size)
+        assertEquals(3, EditionPropertyCatalogue.Edition.inGroup(EditionProperty.Group.Format).size)
     }
 
     @Test

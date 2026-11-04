@@ -16,7 +16,7 @@
 //  What is written, and which tags, is a `ShelfEmptyStateErrand`: an empty inventory asks to
 //  be filled, by scanning or by searching; books on no étagère ask to be arranged. This view
 //  paints the errand and reports which tag was pressed; where each press goes is decided in
-//  one place, by `ShelvesContent`. See docs/features/0021.
+//  one place, by `ShelvesContent`. See docs/wiki/features/0021.
 //
 //  The card itself is no longer a button. It was one while it carried a single note; with two
 //  tags side by side, a press anywhere on the card would have to guess which one was meant.

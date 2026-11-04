@@ -4,7 +4,7 @@
 //
 //  The app's first reusable empty state: a glyph, a title, a sentence and an action, of which
 //  only the title is compulsory. It is `Empty State` (`204:263`, `Layout=Centered`) from the
-//  « États vides » pass of 2026-08-28 — see `docs/design-system/figma-library.md`.
+//  « États vides » pass of 2026-08-28 — see `docs/wiki/design-system/figma-library.md`.
 //
 //  It exists because there was nothing to reuse. Four screens draw their own centred `Text`
 //  today — `ShelvesContent`, `InventoryListContent`, `EntityListView` and `EntityListDetail` —

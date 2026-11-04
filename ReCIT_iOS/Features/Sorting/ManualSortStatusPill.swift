@@ -16,7 +16,7 @@
 //
 //  The pill is the design system's `Tag` (`TagLabelStyle`, `23:23` in Figma), tinted
 //  for « Nouvelle » and secondary for « Modifiée », per the token table in
-//  docs/design-system/figma-library.md. Glyphless, hence the empty icon — the same
+//  docs/wiki/design-system/figma-library.md. Glyphless, hence the empty icon — the same
 //  `Show glyph=false` reading `EntityMetaTagsView` makes.
 //
 

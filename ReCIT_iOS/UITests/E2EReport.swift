@@ -15,7 +15,7 @@
 //  folder out with `xcrun simctl get_app_container` and renders it as HTML. The same steps are
 //  also attached to the `.xcresult`, so a run started from Xcode reads the same way.
 //
-//  See `docs/features/0012-end-to-end-scenario.md`.
+//  See `docs/wiki/features/0012-end-to-end-scenario.md`.
 //
 
 import Foundation

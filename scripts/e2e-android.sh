@@ -21,7 +21,7 @@
 #
 # The scenario signs into a real inventaire.io account and writes to it — books, étagères, a list —
 # and deletes all of it again in its last steps. A run that fails halfway can leave things behind;
-# the report says which. See docs/features/0065-android-end-to-end-scenario.md.
+# the report says which. See docs/wiki/features/0065-android-end-to-end-scenario.md.
 #
 set -euo pipefail
 

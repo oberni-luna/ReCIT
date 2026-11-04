@@ -6,7 +6,7 @@
 //
 //  The point being pinned is the one the card exists for: an empty inventory is offered the
 //  two ways of filling it and nothing else — no sorting, since there is nothing to sort — and
-//  an inventory with books is offered the one way of arranging them. See docs/features/0021.
+//  an inventory with books is offered the one way of arranging them. See docs/wiki/features/0021.
 //
 
 import Testing

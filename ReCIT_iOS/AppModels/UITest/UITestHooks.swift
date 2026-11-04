@@ -21,7 +21,7 @@
 //  compiled out of Release.** A build a user can install has `isActive == false` and no way to
 //  set it: the scanner reads its constant, and nothing is ever reset.
 //
-//  See `docs/features/0012-end-to-end-scenario.md`.
+//  See `docs/wiki/features/0012-end-to-end-scenario.md`.
 //
 
 import Foundation

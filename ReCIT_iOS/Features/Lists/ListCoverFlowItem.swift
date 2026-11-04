@@ -105,8 +105,7 @@ struct ListCoverFlowItem: View {
             if let image = entity?.image, let url = URL(string: image) {
                 CachedAsyncImage(url: url) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .resizable().scaledToFill()
                 } placeholder: {
                     // Sized, unlike `EmptyView`: the loader reads the frame it fills to know which
                     // size of image to fetch, and a placeholder of no size asks for nothing.

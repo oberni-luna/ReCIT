@@ -49,7 +49,6 @@ struct DeleteListElementsDTO: Codable {
     let uris: [String]
 }
 
-
 // MARK: Add to list
 struct AddToListDTO: Codable {
     let id: String

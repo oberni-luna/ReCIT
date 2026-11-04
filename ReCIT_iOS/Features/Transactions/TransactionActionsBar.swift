@@ -32,7 +32,7 @@ struct TransactionActionsBar: View {
     @State private var showOverflow: Bool = false
     /// The event currently running, if any — drives the in-button progress views
     /// and disables the bar to prevent a double submit.
-    @State private var runningEvent: TransactionEvent? = nil
+    @State private var runningEvent: TransactionEvent?
 
     private var defaultTransition: TransactionTransition? {
         transaction.defaultTransition(for: user)

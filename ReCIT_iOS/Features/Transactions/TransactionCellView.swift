@@ -10,7 +10,7 @@ import SwiftUI
 struct TransactionCellView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(UserModel.self) private var userModel
-    
+
     let transaction: UserTransaction
     var amIRequester: Bool {
         transaction.requester._id == userModel.myUser?._id

@@ -133,7 +133,7 @@ struct ProfileView: View {
                             .foregroundStyle(.foregroundTinted)
                     }
                 }
-            } header : {
+            } header: {
                 Text("profile.current_transactions")
                     .textStyle(.action200)
                     .foregroundStyle(.foregroundSecondary)

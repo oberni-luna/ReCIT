@@ -22,8 +22,6 @@ struct UserItemCellView: View {
         }
     }
 
-    
-
     @ViewBuilder
     func othersItemCellView(owner: User) -> some View {
         VStack(alignment: .leading, spacing: .small) {
@@ -52,4 +50,3 @@ struct UserItemCellView: View {
         }
     }
 }
-

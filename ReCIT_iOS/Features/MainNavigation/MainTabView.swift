@@ -16,7 +16,7 @@ struct MainTabView: View {
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.snackBar) private var snackBar
     let authModel: AuthModel
-    
+
     /// In the tab bar's order: `CaseIterable` is what lays the tabs out.
     enum TabConfig: String, Hashable, CaseIterable {
         case inventory

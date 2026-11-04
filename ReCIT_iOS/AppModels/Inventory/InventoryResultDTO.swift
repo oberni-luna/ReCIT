@@ -18,4 +18,3 @@ struct InventoryWorkTreeDTO: Codable {
     let genre: [String: [String]]
     let owner: [String: [String: [String]]] // owner -> work -> [itemId]
 }
-

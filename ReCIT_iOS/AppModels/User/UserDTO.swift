@@ -20,7 +20,7 @@ struct UserDTO: Codable {
     let position: [Double]?
     let picture: String?
     let language: String?
-    let snapshot: [String:ItemCountDTO]?
+    let snapshot: [String: ItemCountDTO]?
     /// When the account was opened, in milliseconds — inventaire's own epoch for user documents.
     ///
     /// Served on `/api/users/by-ids` for anyone, without a session, alongside the fields the
@@ -44,7 +44,7 @@ struct UserDTO: Codable {
     let enabledOAuth: [String]?
 }
 
-//"snapshot": {
+// "snapshot": {
 //                "network": {
 
 struct UsersDTO: Codable {

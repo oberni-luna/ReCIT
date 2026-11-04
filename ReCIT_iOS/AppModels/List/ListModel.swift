@@ -107,7 +107,7 @@ final class ListModel: OptimisticMutating {
         if list._id.isEmpty {
             try await self.createList(modelContext: modelContext, name: list.name, description: list.explanation, type: list.type.rawValue, visibility: list.visibility.map(\.rawValue))
         } else {
-            let _ : NewListResponseDTO? = try await apiService.send(
+            let _: NewListResponseDTO? = try await apiService.send(
                 toEndpoint: "/api/lists",
                 method: "PUT",
                 payload: NewListDTO(id: list._id, name: list.name, description: list.explanation, visibility: list.visibility.map(\.rawValue), type: nil),

@@ -12,7 +12,7 @@ import SwiftUI
 struct ListRowView: View {
     let list: EntityList
     /// Who made the list, when it is not mine: « Dans mon réseau » in the Lists tab.
-    var owner: User? = nil
+    var owner: User?
 
     var body: some View {
         HStack(spacing: .sMedium) {

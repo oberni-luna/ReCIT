@@ -5,7 +5,6 @@
 //  Created by Olivier Berni on 14/01/2026.
 //
 
-
 import SwiftUI
 import AVFoundation
 import Nuke
@@ -48,7 +47,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
                     )
             }
 
-            if let loadedImage: Image = loadedImage {
+            if let loadedImage : Image {
                 content(loadedImage)
                     .transition(.opacity.animation(.easeIn(duration: imageAppearanceDuration)))
             }
@@ -58,7 +57,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
                 Color.clear
                     .task(id: url) {
                         loadFailed = false
-                        guard let url = url else { return }
+                        guard let url else { return }
                         let targetSize: CGSize = proxy.size
                         do {
                             let uiImage: UIImage = try await ImageLoader.shared.load(
@@ -193,7 +192,7 @@ actor ImageLoader {
     }
 
     private func processImage(_ image: UIImage, targetSize: CGSize?) async throws -> UIImage {
-        guard let targetSize = targetSize else { return image }
+        guard let targetSize else { return image }
 
         let screenScale: CGFloat = await UIScreen.main.scale
         guard shouldResize(image, targetSize: targetSize, screenScale: screenScale) else {

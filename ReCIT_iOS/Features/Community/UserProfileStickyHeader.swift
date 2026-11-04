@@ -144,8 +144,7 @@ struct UserProfileStickyHeader: View {
             if let image = user.avatarURLValue, let url = URL(string: image) {
                 CachedAsyncImage(url: url) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .resizable().scaledToFill()
                 } placeholder: {
                     DesignSystem.Color.backgroundDisable.color
                 }

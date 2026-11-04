@@ -81,6 +81,3 @@ public class Author: Identifiable, Entity {
         static let imageBaseUrl: String = "https://commons.wikimedia.org/wiki/Special:FilePath/"
     }
 }
-
-
-

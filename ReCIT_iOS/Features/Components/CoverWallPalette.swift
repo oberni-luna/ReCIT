@@ -27,7 +27,7 @@ enum CoverWallPalette {
         .init("color/yellow/400"),
         ShelfPalette.parchment,
         .init("color/green/800"),
-        .init("color/green/100"),
+        .init("color/green/100")
     ]
 
     /// The band across the lower third of a painted jacket, and the two lines standing in for

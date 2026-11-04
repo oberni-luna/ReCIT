@@ -88,8 +88,7 @@ struct FullScreenCoverView: View {
     private var cover: some View {
         FullScreenCoverImage(url: url) { image in
             image
-                .resizable()
-                .aspectRatio(contentMode: .fit)
+                .resizable().scaledToFit()
                 // Measured before `scaleEffect`, which leaves layout alone: this is the fitted
                 // size whatever the current zoom.
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { fittedSize = $0 }
@@ -125,4 +124,3 @@ struct FullScreenCoverView: View {
             }
     }
 }
-

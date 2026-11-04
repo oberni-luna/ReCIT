@@ -8,7 +8,7 @@
 import Foundation
 
 struct EntityResultsDTO: Codable {
-    let entities: [String : EntityResultDTO]
+    let entities: [String: EntityResultDTO]
 }
 
 struct EntityResultDTO: Codable {
@@ -93,4 +93,3 @@ enum ClaimValue: Codable {
         }
     }
 }
-

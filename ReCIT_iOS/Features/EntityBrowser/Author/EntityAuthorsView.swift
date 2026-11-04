@@ -25,7 +25,7 @@ struct EntityAuthorsView: View {
                 entityDestination = NavigationDestination.author(uri: author.uri)
             } label: {
                 NavigationLink(value: UUID()) {
-                    HStack(alignment: .center, spacing: .small){
+                    HStack(alignment: .center, spacing: .small) {
                         Group {
                             CellThumbnail(imageUrl: author.image, cornerRadius: .full)
 
@@ -42,7 +42,7 @@ struct EntityAuthorsView: View {
                 HStack(spacing: .sMedium) {
                     ForEach(authors) { author in
                         NavigationLink(value: NavigationDestination.author(uri: author.uri)) {
-                            HStack(alignment: .center, spacing: .small){
+                            HStack(alignment: .center, spacing: .small) {
                                 Group {
                                     CellThumbnail(imageUrl: author.image, cornerRadius: .full, size: .small)
 
@@ -61,4 +61,3 @@ struct EntityAuthorsView: View {
         }
     }
 }
-

@@ -13,7 +13,7 @@ struct LensTabTrackTests {
     private let track: LensTabTrack = .init(frames: [
         .init(x: 0, y: 0, width: 100, height: 30),
         .init(x: 100, y: 0, width: 60, height: 30),
-        .init(x: 160, y: 0, width: 100, height: 30),
+        .init(x: 160, y: 0, width: 100, height: 30)
     ])
 
     @Test("The capsule goes from one word's frame to the next, and stays on the ends past them")

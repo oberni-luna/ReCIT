@@ -15,7 +15,7 @@ import Testing
     private let candidates: [(id: String, name: String)] = [
         (id: "s1", name: "Classiques français"),
         (id: "s2", name: "Romans policiers"),
-        (id: "s3", name: "Science-fiction"),
+        (id: "s3", name: "Science-fiction")
     ]
 
     @Test func flagsTheContainersTheEntityIsIn() {

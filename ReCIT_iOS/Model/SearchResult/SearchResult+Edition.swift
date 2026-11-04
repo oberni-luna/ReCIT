@@ -14,7 +14,7 @@ extension SearchResult {
     init(edition: Edition) {
         let byline: [String] = [
             edition.authorNames.isEmpty ? nil : edition.authorNames.formatted(.list(type: .and)),
-            edition.publisherName,
+            edition.publisherName
         ]
         .compactMap { $0 }
 

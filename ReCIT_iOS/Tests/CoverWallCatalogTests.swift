@@ -95,7 +95,7 @@ struct CoverWallCatalogTests {
         "/img/entities/176x264/abc123",
         "https://commons.wikimedia.org/wiki/Special:FilePath/Some%20Cover.jpg",
         "abc123",
-        "",
+        ""
     ]) func itLeavesEveryOtherShapeAlone(path: String) {
         #expect(CoverWallCatalog.sizedPath(path, coverSize: cover, scale: 2) == path)
     }

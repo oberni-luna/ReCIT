@@ -16,7 +16,7 @@ struct ListMoveDestinationTests {
             .init(id: "zola", name: "zola", type: .work, uris: []),
             .init(id: "authors", name: "Autrices", type: .author, uris: []),
             .init(id: "read", name: "Lus", type: .work, uris: ["wd:Q1"]),
-            .init(id: "gifts", name: "Cadeaux", type: .work, uris: ["wd:Q2"]),
+            .init(id: "gifts", name: "Cadeaux", type: .work, uris: ["wd:Q2"])
         ]
 
         let destinations: [ListMoveDestination] = ListMoveDestination.destinations(
@@ -34,7 +34,7 @@ struct ListMoveDestinationTests {
     func noDestination() {
         let candidates: [ListMoveDestination.Candidate] = [
             .init(id: "current", name: "À lire", type: .work, uris: ["wd:Q1"]),
-            .init(id: "authors", name: "Autrices", type: .author, uris: []),
+            .init(id: "authors", name: "Autrices", type: .author, uris: [])
         ]
 
         #expect(ListMoveDestination.destinations(for: "wd:Q1", from: "current", type: .work, among: candidates).isEmpty)

@@ -117,7 +117,7 @@ struct NetworkListsTests {
             list(id: "lea-old", creator: "lea", updated: 100),
             list(id: "ines-new", creator: "ines", updated: 300),
             list(id: "lea-new", creator: "lea", updated: 200),
-            list(id: "stranger", creator: "stranger", updated: 400),
+            list(id: "stranger", creator: "stranger", updated: 400)
         ]
 
         let sections: ListsTabSections = .init(lists: lists, myUserId: "me", friends: [lea, ines])
@@ -133,7 +133,7 @@ struct NetworkListsTests {
             list(id: "mine-polar", name: "Polars à lire", creator: "me"),
             list(id: "mine-other", name: "Livres lus", creator: "me"),
             list(id: "lea-polar", name: "Polars nordiques", creator: "lea"),
-            list(id: "lea-other", name: "Pour les enfants", creator: "lea"),
+            list(id: "lea-other", name: "Pour les enfants", creator: "lea")
         ]
 
         let sections: ListsTabSections = .init(lists: lists, myUserId: "me", friends: [friend("lea")], searchText: "polar")

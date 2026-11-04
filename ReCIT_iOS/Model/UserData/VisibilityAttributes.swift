@@ -5,7 +5,6 @@
 //  Created by Olivier Berni on 28/11/2025.
 //
 
-
 enum VisibilityAttributes: String, Codable {
     case `public` = "public"
     case friends = "friends"

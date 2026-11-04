@@ -28,7 +28,6 @@ struct WithLabel: ViewModifier {
         }
     }
 
-
 }
 
 #Preview {

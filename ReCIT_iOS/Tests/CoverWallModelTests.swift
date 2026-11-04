@@ -35,7 +35,7 @@ struct CoverWallModelTests {
         #expect(model.coverPaths == [
             "/img/entities/aad39462d658e8ad98c0af6db893a7270f2b8dbf",
             "/img/entities/a849b14309d1a3c2f70613d234c94e700c8e42e2",
-            "/img/entities/b85b1785cd72f085d5ebe1b035689f95c13406ce",
+            "/img/entities/b85b1785cd72f085d5ebe1b035689f95c13406ce"
         ])
     }
 

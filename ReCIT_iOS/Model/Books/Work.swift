@@ -81,7 +81,7 @@ public class Work: Identifiable, Entity {
             uri: entityDTO.uri,
             lastrevid: entityDTO.lastrevid ?? 0,
             title: EntityLabel.resolve(entityDTO.labels, originalLang: entityDTO.originalLang) ?? "Unknown",
-            originalLang: entityDTO.originalLang, 
+            originalLang: entityDTO.originalLang,
             image: imageUrl,
             publicationDate: publicationDateString?.parseToDate() ??
             publicationDateString?.parseToDate(dateFormat: "YYYY-MM"),

@@ -231,7 +231,7 @@ struct ListModelTests {
         #expect(mock.recordedRequests.map(\.endpoint) == [
             "/api/lists/add-elements",
             "/api/lists/update-element",
-            "/api/lists/remove-elements",
+            "/api/lists/remove-elements"
         ])
         #expect(source.elements.filter(\.isStillInTheStore).isEmpty)
         #expect(destination.elements.map(\._id) == ["e2"])
@@ -254,7 +254,7 @@ struct ListModelTests {
 
         #expect(mock.recordedRequests.map(\.endpoint) == [
             "/api/lists/add-elements",
-            "/api/lists/remove-elements",
+            "/api/lists/remove-elements"
         ])
         #expect(destination.elements.count == 1)
     }

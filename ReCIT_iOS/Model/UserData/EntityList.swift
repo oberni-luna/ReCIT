@@ -7,7 +7,6 @@
 
 import Foundation
 
-import Foundation
 import SwiftData
 
 enum EntityListType: String, Codable, CaseIterable {

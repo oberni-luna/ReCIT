@@ -20,16 +20,15 @@ struct EntityImageView<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: .xSmall) {
             tappableImageView
-                .frame(maxWidth:.infinity)
+                .frame(maxWidth: .infinity)
                 .frame(height: 256)
-                .shadow(color:.black.opacity(0.1), radius: 10)
+                .shadow(color: .black.opacity(0.1), radius: 10)
                 .padding(.bottom, .sMedium)
 
             content()
         }
         .background(alignment: .bottom) {
-            imageView
-                .aspectRatio(contentMode: .fill)
+            imageView.scaledToFill()
                 .ignoresSafeArea(.all)
                 .blur(radius: 80)
                 .opacity(colorScheme == .dark ? 0.2 : 0.2)
@@ -65,8 +64,7 @@ struct EntityImageView<Content: View>: View {
         if let url = URL(string: imageUrl ?? "") {
             CachedAsyncImage(url: url) { image in
                 image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .resizable().scaledToFit()
                     .frame(height: 256)
                     .cornerRadius(.minimal)
             } placeholder: {
@@ -78,4 +76,3 @@ struct EntityImageView<Content: View>: View {
         }
     }
 }
-

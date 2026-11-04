@@ -28,13 +28,13 @@ import SwiftUI
 
 struct EmptyStateView: View {
     /// SF Symbol above the title, or `nil` for a block that is only words.
-    var glyph: String? = nil
+    var glyph: String?
     /// The one thing every empty state has to say — what is not there.
     let title: LocalizedStringKey
     /// A sentence under the title, usually what would fill the emptiness. Silent when `nil`.
-    var message: LocalizedStringKey? = nil
+    var message: LocalizedStringKey?
     /// The way out, when there is one to offer. Silent when `nil`.
-    var action: Action? = nil
+    var action: Action?
 
     var body: some View {
         VStack(spacing: .medium) {

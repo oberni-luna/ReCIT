@@ -44,7 +44,7 @@ struct InventoryCell: View {
 
                     }
                     .foregroundStyle(.foregroundDefault)
-                    
+
                     HStack(alignment: .firstTextBaseline, spacing: .small) {
                         item.transaction.label
                             .labelStyle(.tag)

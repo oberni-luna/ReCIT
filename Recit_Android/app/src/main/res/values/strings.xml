@@ -54,11 +54,11 @@
     <string name="login_button_signin">Se connecter</string>
     <string name="login_button_create_account">Créer un compte</string>
     <string name="login_subtitle">Connectez-vous à votre compte inventaire.io.</string>
-    <string name="login_username">Nom d\'utilisateur</string>
+    <string name="login_username">Nom d\'utilisateur·ice</string>
     <string name="login_password">Mot de passe</string>
     <string name="login_button_forgot_password">Mot de passe oublié ?</string>
 
-    <string name="auth_error_invalid_credentials">Nom d\'utilisateur ou mot de passe incorrect.</string>
+    <string name="auth_error_invalid_credentials">Nom d\'utilisateur·ice ou mot de passe incorrect.</string>
     <string name="auth_error_network">Impossible de joindre le serveur. Vérifiez votre connexion internet.</string>
     <string name="auth_error_generic">Une erreur est survenue. Réessayez plus tard.</string>
 
@@ -67,8 +67,8 @@
     <string name="signup_email">Adresse e-mail</string>
     <string name="signup_button_create">Créer mon compte</string>
     <string name="signup_footnote">En continuant, vous acceptez les conditions d\'inventaire.io.</string>
-    <string name="signup_error_username_taken">Ce nom d\'utilisateur est déjà pris.</string>
-    <string name="signup_error_username_invalid">Ce nom d\'utilisateur ne peut pas être utilisé. Essayez-en un autre.</string>
+    <string name="signup_error_username_taken">Ce nom d\'utilisateur·ice est déjà pris.</string>
+    <string name="signup_error_username_invalid">Ce nom d\'utilisateur·ice ne peut pas être utilisé. Essayez-en un autre.</string>
     <string name="signup_error_email_taken">Un compte utilise déjà cette adresse e-mail.</string>
     <string name="signup_error_email_invalid">Cette adresse e-mail n\'est pas valide.</string>
     <string name="signup_error_password_rejected">Ce mot de passe n\'a pas été accepté. Essayez-en un plus long.</string>

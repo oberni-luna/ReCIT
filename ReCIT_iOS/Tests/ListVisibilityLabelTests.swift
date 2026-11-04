@@ -25,10 +25,10 @@ struct ListVisibilityLabelTests {
 
     @Test
     func friendsAndGroupsAreNamedApartAndTogether() {
-        #expect(french([.friends]) == "Mes amis")
+        #expect(french([.friends]) == "Mes ami·es")
         #expect(french([.groups]) == "Mes groupes")
-        #expect(french([.friends, .groups]) == "Mes amis et mes groupes")
-        #expect(french([.groups, .friends]) == "Mes amis et mes groupes")
+        #expect(french([.friends, .groups]) == "Mes ami·es et mes groupes")
+        #expect(french([.groups, .friends]) == "Mes ami·es et mes groupes")
     }
 
     @Test

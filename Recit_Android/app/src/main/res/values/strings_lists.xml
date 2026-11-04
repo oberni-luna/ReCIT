@@ -55,9 +55,9 @@
     <string name="list_add_search_prompt_author">Nom de l’auteur·ice</string>
     <string name="list_add_search_title_work">Trouver un livre</string>
     <string name="list_add_search_title_author">Trouver un·e auteur·ice</string>
-    <string name="list_add_search_explanation_work">Cherchez un titre ou un·e auteur·ice : dans vos livres et chez vos amis d’abord, puis sur inventaire.io.</string>
+    <string name="list_add_search_explanation_work">Cherchez un titre ou un·e auteur·ice : dans vos livres et chez vos ami·es d’abord, puis sur inventaire.io.</string>
     <string name="list_add_search_explanation_author">Cherchez un·e auteur·ice sur inventaire.io.</string>
-    <string name="list_add_search_local">Dans mes livres et chez mes amis</string>
+    <string name="list_add_search_local">Dans mes livres et chez mes ami·es</string>
     <string name="list_add_search_works">Œuvres sur inventaire.io</string>
     <string name="list_add_search_humans">Auteur·ices sur inventaire.io</string>
     <string name="list_add_search_empty">Aucun résultat</string>
@@ -85,9 +85,9 @@
     <string name="list_form_delete">Supprimer la liste</string>
     <string name="list_form_visibility">Visible par</string>
     <string name="list_visibility_private">Moi seul·e</string>
-    <string name="list_visibility_friends">Mes amis</string>
+    <string name="list_visibility_friends">Mes ami·es</string>
     <string name="list_visibility_groups">Mes groupes</string>
-    <string name="list_visibility_friends_and_groups">Mes amis et mes groupes</string>
+    <string name="list_visibility_friends_and_groups">Mes ami·es et mes groupes</string>
     <string name="list_visibility_public">Tout le monde</string>
     <string name="list_added_to_named">Ajouté à %1$s</string>
 </resources>

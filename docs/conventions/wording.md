@@ -28,7 +28,7 @@ situations:              # override tones only; guardrails are fixed (wording/si
 
 **Voice** — two or three sentences on how the app talks. Allowed / forbidden: emoji, exclamation marks, humor.
 
-Ex-libris parle comme un libraire attentif : phrases courtes, vouvoiement, le vocabulaire du livre (étagère, œuvre, édition) plutôt que celui de la base de données. Il nomme inventaire.io quand c'est lui qui refuse ou qui attend (« inventaire.io a refusé cette modification »), écrit inclusif à point médian (auteur·ice), et dit ce qui va se passer plutôt que ce qui s'est mal passé. Pas d'emoji, pas de point d'exclamation, l'humour seulement dans un état vide.
+Ex-libris parle comme un libraire attentif : phrases courtes, vouvoiement, le vocabulaire du livre (étagère, œuvre, édition) plutôt que celui de la base de données. Il nomme inventaire.io quand c'est lui qui refuse ou qui attend (« inventaire.io a refusé cette modification »), écrit inclusif — jamais de masculin générique : une tournure épicène quand elle vient naturellement (« tout le monde »), sinon le point médian, un seul au pluriel (auteur·ice, ami·es, lecteur·ices), et dit ce qui va se passer plutôt que ce qui s'est mal passé. Pas d'emoji, pas de point d'exclamation, l'humour seulement dans un état vide.
 
 <!-- to review -->
 

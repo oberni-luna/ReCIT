@@ -163,7 +163,7 @@
     <string name="create_book_search_no_result">Aucune œuvre de ce nom sur inventaire.io. Vérifiez l’orthographe, ou cherchez l’auteur·ice, avant d’en créer une.</string>
 
     <string name="create_book_notice_title">Données bibliographiques</string>
-    <string name="create_book_notice_body">Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tous.</string>
+    <string name="create_book_notice_body">Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tout le monde.</string>
     <string name="create_book_notice_learn_more">En savoir plus</string>
 
     <string name="create_book_help_what">Ce que c’est</string>
@@ -171,7 +171,7 @@
     <string name="create_book_help_from">D’où elles viennent</string>
     <string name="create_book_help_from_body">Surtout de Wikidata, la base ouverte qui sert Wikipédia. Ce qui y manque, inventaire.io le crée dans sa propre base, sous licence CC0.</string>
     <string name="create_book_help_publish">Ce que vous publiez</string>
-    <string name="create_book_help_publish_body">Ce que vous saisissez est public dès l’envoi, et modifiable par tous. L’améliorer, c’est améliorer Wikidata et les projets qui s’en servent.</string>
+    <string name="create_book_help_publish_body">Ce que vous saisissez est public dès l’envoi, et modifiable par tout le monde. L’améliorer, c’est améliorer Wikidata et les projets qui s’en servent.</string>
     <string name="create_book_help_further">Aller plus loin</string>
     <string name="create_book_help_wiki">Les données sur le wiki d’inventaire.io</string>
     <string name="create_book_help_chat">Poser une question sur le chat du projet</string>

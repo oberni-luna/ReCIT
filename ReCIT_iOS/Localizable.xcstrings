@@ -448,7 +448,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mes amis"
+            "value" : "Mes ami·es"
           }
         }
       }
@@ -482,7 +482,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mes amis et mes groupes"
+            "value" : "Mes ami·es et mes groupes"
           }
         }
       }
@@ -787,7 +787,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chacun y inventorie ses livres et choisit qui les voit : ses amis, ses groupes, ou tout le monde."
+            "value" : "Chacun·e y inventorie ses livres et choisit qui les voit : ses ami·es, ses groupes, ou tout le monde."
           }
         }
       }
@@ -819,7 +819,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titres, auteur·ices et éditions rejoignent une base libre, reliée à Wikidata, que chacun peut réutiliser."
+            "value" : "Titres, auteur·ices et éditions rejoignent une base libre, reliée à Wikidata, que chacun·e peut réutiliser."
           }
         }
       }
@@ -1683,7 +1683,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nom d'utilisateur ou mot de passe incorrect."
+            "value" : "Nom d'utilisateur·ice ou mot de passe incorrect."
           }
         }
       }
@@ -1732,7 +1732,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chargement de l'auteur..."
+            "value" : "Chargement de l'auteur·ice…"
           }
         }
       }
@@ -1764,7 +1764,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auteur inconnu"
+            "value" : "Auteur·ice inconnu·e"
           }
         }
       }
@@ -2250,7 +2250,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auteur"
+            "value" : "Auteur·ice"
           }
         }
       }
@@ -2266,7 +2266,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisir l’auteur"
+            "value" : "Choisir l’auteur·ice"
           }
         }
       }
@@ -2314,7 +2314,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun auteur de ce nom sur inventaire.io pour l’instant."
+            "value" : "Aucun·e auteur·ice de ce nom sur inventaire.io pour l’instant."
           }
         }
       }
@@ -2330,7 +2330,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prenez l’auteur déjà présent si vous le reconnaissez : c’est ce qui évite un doublon dans la base."
+            "value" : "Prenez l’auteur·ice déjà présent·e si c’est la bonne personne : c’est ce qui évite un doublon dans la base."
           }
         }
       }
@@ -2747,7 +2747,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L’œuvre et son auteur viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Touchez-la pour revenir à la recherche, ou glissez-la pour la détacher."
+            "value" : "L’œuvre et son auteur·ice viennent d’inventaire.io : rien à ressaisir. Ce n’est pas elle ? Touchez-la pour revenir à la recherche, ou glissez-la pour la détacher."
           }
         }
       }
@@ -2987,7 +2987,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce que vous saisissez est public dès l’envoi, et modifiable par tous. L’améliorer, c’est améliorer Wikidata et les projets qui s’en servent."
+            "value" : "Ce que vous saisissez est public dès l’envoi, et modifiable par tout le monde. L’améliorer, c’est améliorer Wikidata et les projets qui s’en servent."
           }
         }
       }
@@ -3180,7 +3180,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tous."
+            "value" : "Œuvres, éditions et auteur·ices viennent de Wikidata et de la base d’inventaire.io. Ce que vous saisissez devient public, sous licence CC0, et modifiable par tout le monde."
           }
         }
       }
@@ -3228,7 +3228,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce livre rejoindra inventaire.io, la base ouverte : ce que vous écrivez ici sera public, et modifiable par les autres lecteurs."
+            "value" : "Ce livre rejoindra inventaire.io, la base ouverte : ce que vous écrivez ici sera public, et modifiable par les autres lecteur·ices."
           }
         }
       }
@@ -3484,7 +3484,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La recherche ne l’a pas proposée, mais inventaire.io la reconnaît à son titre et à son auteur."
+            "value" : "La recherche ne l’a pas proposée, mais inventaire.io la reconnaît à son titre et à son auteur·ice."
           }
         }
       }
@@ -3882,7 +3882,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre nom d'utilisateur restera réservé et ne pourra pas servir à un nouveau compte."
+            "value" : "Votre nom d'utilisateur·ice restera réservé et ne pourra pas servir à un nouveau compte."
           }
         }
       }
@@ -5900,7 +5900,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "inventaire.io a refusé le nom d’utilisateur. Ce qui le précédait est enregistré ; enregistrez à nouveau pour envoyer le reste."
+            "value" : "inventaire.io a refusé le nom d’utilisateur·ice. Ce qui le précédait est enregistré ; enregistrez à nouveau pour envoyer le reste."
           }
         }
       }
@@ -5916,7 +5916,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce nom d’utilisateur vient d’être pris. Choisissez-en un autre, puis enregistrez à nouveau."
+            "value" : "Ce nom d’utilisateur·ice vient d’être pris. Choisissez-en un autre, puis enregistrez à nouveau."
           }
         }
       }
@@ -6060,7 +6060,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elle fait apparaître vos livres aux lecteurs et aux groupes proches. Elle est publique : placez-la à l’échelle du quartier, pas de votre porte."
+            "value" : "Elle fait apparaître vos livres aux lecteur·ices et aux groupes proches. Elle est publique : placez-la à l’échelle du quartier, pas de votre porte."
           }
         }
       }
@@ -6092,7 +6092,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sans position, vos livres n’apparaissent pas aux lecteurs proches. Vos amis les voient toujours."
+            "value" : "Sans position, vos livres n’apparaissent pas aux lecteur·ices proches. Vos ami·es les voient toujours."
           }
         }
       }
@@ -6108,7 +6108,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nom d’utilisateur : de 2 à 20 lettres, chiffres ou « _ ». Le nom, la photo et la bio sont publics, sur inventaire.io comme dans l’app de vos amis."
+            "value" : "Nom d’utilisateur·ice : de 2 à 20 lettres, chiffres ou « _ ». Le nom, la photo et la bio sont publics, sur inventaire.io comme dans l’app de vos ami·es."
           }
         }
       }
@@ -6140,7 +6140,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nom d’utilisateur"
+            "value" : "Nom d’utilisateur·ice"
           }
         }
       }
@@ -7665,7 +7665,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pas d'utilisateur connecté !"
+            "value" : "Vous n'êtes pas connecté·e."
           }
         }
       }
@@ -8971,7 +8971,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvert à tous"
+            "value" : "Ouvert à tout le monde"
           }
         }
       }
@@ -9056,13 +9056,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Son membre en sera retiré, puis le groupe disparaîtra d’inventaire.io. Impossible de revenir en arrière."
+                  "value" : "Son membre en sera retiré·e, puis le groupe disparaîtra d’inventaire.io. Impossible de revenir en arrière."
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Ses %lld membres en seront retirés, puis le groupe disparaîtra d’inventaire.io. Impossible de revenir en arrière."
+                  "value" : "Ses %lld membres en seront retiré·es, puis le groupe disparaîtra d’inventaire.io. Impossible de revenir en arrière."
                 }
               },
               "zero" : {
@@ -9087,7 +9087,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un autre admin est dans le groupe : seul l’unique admin peut le supprimer."
+            "value" : "Le groupe compte un·e autre admin : il faut en être l’unique admin pour le supprimer."
           }
         }
       }
@@ -9151,7 +9151,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un groupe réunit des lecteurs qui mettent leurs livres en commun : un club, une famille, un immeuble. Rejoignez-en un, ou créez le vôtre."
+            "value" : "Un groupe réunit des lecteur·ices qui mettent leurs livres en commun : un club, une famille, un immeuble. Rejoignez-en un, ou créez le vôtre."
           }
         }
       }
@@ -9263,7 +9263,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous en serez l’admin. Vous pourrez inviter vos amis dès sa création."
+            "value" : "Vous en serez l’admin. Vous pourrez inviter vos ami·es dès sa création."
           }
         }
       }
@@ -9343,7 +9343,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvert à tous"
+            "value" : "Ouvert à tout le monde"
           }
         }
       }
@@ -9359,7 +9359,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Désactivé : chaque demande attend l’accord d’un admin."
+            "value" : "Désactivé : chaque demande attend l’accord d’un·e admin."
           }
         }
       }
@@ -9407,7 +9407,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tout lecteur d’inventaire.io peut trouver le groupe."
+            "value" : "Tout le monde sur inventaire.io peut trouver le groupe."
           }
         }
       }
@@ -9471,7 +9471,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inviter des amis"
+            "value" : "Inviter des ami·es"
           }
         }
       }
@@ -9535,7 +9535,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tout membre peut inviter. L’invitation apparaît dans Réseau › Groupes de l’ami invité."
+            "value" : "Chaque membre peut inviter. L’invitation apparaît dans Réseau › Groupes de l’ami·e invité·e."
           }
         }
       }
@@ -9551,7 +9551,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos amis"
+            "value" : "Vos ami·es"
           }
         }
       }
@@ -9567,7 +9567,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun ami à inviter"
+            "value" : "Aucun·e ami·e à inviter"
           }
         }
       }
@@ -9583,7 +9583,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les invitations vont à vos amis. Ajoutez-en depuis Réseau › Amis."
+            "value" : "Les invitations vont à vos ami·es. Ajoutez-en depuis Réseau › Ami·es."
           }
         }
       }
@@ -9599,7 +9599,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chercher parmi vos amis"
+            "value" : "Chercher parmi vos ami·es"
           }
         }
       }
@@ -9647,7 +9647,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce groupe est ouvert à tous : vous en serez membre tout de suite."
+            "value" : "Ce groupe est ouvert à tout le monde : vous en serez membre tout de suite."
           }
         }
       }
@@ -9695,7 +9695,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous êtes le seul admin : nommez un autre admin avant de quitter le groupe."
+            "value" : "Vous êtes seul·e admin : nommez un·e autre admin avant de quitter le groupe."
           }
         }
       }
@@ -9807,7 +9807,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un admin valide les demandes, change les réglages et retire des membres. Cela ne peut pas être défait depuis l’app."
+            "value" : "Un·e admin valide les demandes, change les réglages et retire des membres. Cela ne peut pas être défait depuis l’app."
           }
         }
       }
@@ -9942,7 +9942,7 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Voir le membre"
+                  "value" : "Voir son membre"
                 }
               },
               "other" : {
@@ -10031,7 +10031,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un admin du groupe valide chaque demande. Tant qu’il ne l’a pas acceptée, les livres du groupe vous restent fermés."
+            "value" : "Un·e admin du groupe valide chaque demande. Tant qu’elle n’est pas acceptée, les livres du groupe vous restent fermés."
           }
         }
       }
@@ -10578,7 +10578,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chez mes amis"
+            "value" : "Chez mes ami·es"
           }
         }
       }
@@ -10612,7 +10612,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les livres de vos amis s'afficheront ici."
+            "value" : "Les livres de vos ami·es s'afficheront ici."
           }
         }
       }
@@ -10629,7 +10629,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trouver des lecteurs"
+            "value" : "Trouver des lecteur·ices"
           }
         }
       }
@@ -10663,7 +10663,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans mes livres et chez mes amis"
+            "value" : "Dans mes livres et chez mes ami·es"
           }
         }
       }
@@ -11139,7 +11139,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cherchez un titre ou un·e auteur·ice : dans vos livres et chez vos amis d’abord, puis sur inventaire.io."
+            "value" : "Cherchez un titre ou un·e auteur·ice : dans vos livres et chez vos ami·es d’abord, puis sur inventaire.io."
           }
         }
       }
@@ -11173,7 +11173,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans mes livres et chez mes amis"
+            "value" : "Dans mes livres et chez mes ami·es"
           }
         }
       }
@@ -12165,7 +12165,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nom d'utilisateur"
+            "value" : "Nom d'utilisateur·ice"
           }
         }
       }
@@ -13463,7 +13463,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auteur"
+            "value" : "Auteur·ice"
           }
         }
       }
@@ -13675,7 +13675,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Utilisateur"
+            "value" : "Utilisateur·ice"
           }
         }
       }
@@ -13691,7 +13691,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajouter des amis lecteurs"
+            "value" : "Ajouter des ami·es lecteur·ices"
           }
         }
       }
@@ -13723,7 +13723,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Amis"
+            "value" : "Ami·es"
           }
         }
       }
@@ -13981,7 +13981,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une fois la demande acceptée, vous verrez ses livres et il verra les vôtres. inventaire.io ne connaît pas de sens unique : le réseau est réciproque."
+            "value" : "Une fois la demande acceptée, chacun·e verra les livres de l’autre. inventaire.io ne connaît pas de sens unique : le réseau est réciproque."
           }
         }
       }
@@ -14062,7 +14062,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ trouvera votre demande dans ses invitations. Tant qu’elle n’est pas acceptée, aucun de vous deux ne voit l’inventaire de l’autre."
+            "value" : "%@ trouvera votre demande dans ses invitations. Tant qu’elle n’est pas acceptée, aucun·e de vous deux ne voit l’inventaire de l’autre."
           }
         }
       }
@@ -14160,7 +14160,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cherchez un lecteur par son nom d’utilisateur sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès qu’il l’aura acceptée."
+            "value" : "Cherchez un·e lecteur·ice par son nom d’utilisateur·ice sur inventaire.io, puis envoyez-lui une demande. Son inventaire rejoindra le vôtre dès que la demande sera acceptée."
           }
         }
       }
@@ -14176,7 +14176,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lecteurs"
+            "value" : "Lecteur·ices"
           }
         }
       }
@@ -14192,7 +14192,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun lecteur de ce nom"
+            "value" : "Aucun·e lecteur·ice de ce nom"
           }
         }
       }
@@ -14224,7 +14224,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nom d’utilisateur"
+            "value" : "Nom d’utilisateur·ice"
           }
         }
       }
@@ -14240,7 +14240,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trouvez vos amis lecteurs"
+            "value" : "Trouvez vos ami·es lecteur·ices"
           }
         }
       }
@@ -14272,7 +14272,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Amis"
+            "value" : "Ami·es"
           }
         }
       }
@@ -14320,7 +14320,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Amis"
+            "value" : "Ami·es"
           }
         }
       }
@@ -14336,7 +14336,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "On me demande en ami"
+            "value" : "On me demande en ami·e"
           }
         }
       }
@@ -14464,7 +14464,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les livres que vos amis et vos groupes ont ajoutés."
+            "value" : "Les livres que vos ami·es et vos groupes ont ajoutés."
           }
         }
       }
@@ -14857,7 +14857,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sans position, vos livres n’apparaissent plus aux lecteurs proches. Vos amis les voient toujours."
+            "value" : "Sans position, vos livres n’apparaissent plus aux lecteur·ices proches. Vos ami·es les voient toujours."
           }
         }
       }
@@ -14953,7 +14953,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous n'êtes pas connecté."
+            "value" : "Vous n'êtes pas connecté·e."
           }
         }
       }
@@ -15102,7 +15102,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun ami pour le moment"
+            "value" : "Aucun·e ami·e pour le moment"
           }
         }
       }
@@ -15235,7 +15235,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Membre signalé : %1$@ (%2$@)"
+            "value" : "Membre signalé·e : %1$@ (%2$@)"
           }
         }
       }
@@ -15562,7 +15562,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "par titre ou auteur"
+            "value" : "par titre ou auteur·ice"
           }
         }
       }
@@ -15825,7 +15825,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Amis"
+            "value" : "Ami·es"
           }
         }
       }
@@ -16025,7 +16025,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce nom d'utilisateur ne peut pas être utilisé. Essayez-en un autre."
+            "value" : "Ce nom d'utilisateur·ice ne peut pas être utilisé. Essayez-en un autre."
           }
         }
       }
@@ -16042,7 +16042,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce nom d'utilisateur est déjà pris."
+            "value" : "Ce nom d'utilisateur·ice est déjà pris."
           }
         }
       }
@@ -17068,7 +17068,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Êtes-vous sûr ?"
+            "value" : "Êtes-vous sûr·e ?"
           }
         }
       }

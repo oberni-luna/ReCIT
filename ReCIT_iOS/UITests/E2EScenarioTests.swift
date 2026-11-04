@@ -46,7 +46,7 @@ final class E2EScenarioTests: XCTestCase {
     ]
 
     /// A book a friend of the test account owns, and that friend: the Recherche tab must show the
-    /// copy among « Dans mes livres et chez mes amis » as it is typed, before anything is sent.
+    /// copy among « Dans mes livres et chez mes ami·es » as it is typed, before anything is sent.
     private static let friendsBook: (query: String, owner: String) = (
         query: "Dans la forêt",
         owner: "OlivierB"
@@ -882,7 +882,7 @@ final class E2EScenarioTests: XCTestCase {
     /// A friend's copy, found by typing its title and nothing more. Returns the step's detail.
     ///
     /// **Nothing is sent to inventaire.io.** My friends' books are in the local store, and the
-    /// Recherche tab ranks them under « Dans mes livres et chez mes amis » as the query is typed,
+    /// Recherche tab ranks them under « Dans mes livres et chez mes ami·es » as the query is typed,
     /// above the suggestions. The row is found by its label rather than an identifier — the
     /// title, and the owner the cell names (`inventory.owned_by`) — because what is checked is
     /// precisely that *this* friend's copy is the one listed.
@@ -910,7 +910,7 @@ final class E2EScenarioTests: XCTestCase {
         guard copy.waitForExistence(timeout: E2EDriver.syncTimeout) else {
             throw E2EFailure(
                 "« \(query) » chez \(owner) n'est pas apparu dans « Dans mes livres et chez mes "
-                + "amis » au bout de \(Int(E2EDriver.syncTimeout)) s."
+                + "ami·es » au bout de \(Int(E2EDriver.syncTimeout)) s."
             )
         }
         let sentAnything: Bool = driver.all("e2e.searchResult").count > 0
@@ -921,7 +921,7 @@ final class E2EScenarioTests: XCTestCase {
         try leaveSearch(driver: driver, app: app)
 
         let shown: String = "« \(title.isEmpty ? query : title) », chez \(owner), listé parmi "
-            + "« Dans mes livres et chez mes amis »"
+            + "« Dans mes livres et chez mes ami·es »"
         return sentAnything
             ? shown + " (des résultats inventaire.io étaient aussi à l'écran), fiche ouverte"
             : shown + " sans rien demander à inventaire.io, fiche ouverte"

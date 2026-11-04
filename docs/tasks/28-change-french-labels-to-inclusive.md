@@ -1,6 +1,6 @@
 ---
 issue: 28
-status: todo
+status: to-test
 wiki:
 note: "je veux passer tous les libellés en Français en inclusif — ami → ami·e, auteur → auteur·ice, « Ajouter des amis lecteurs » → « Ajouter des ami·es lecteur·ices »"
 created: 2026-11-04
@@ -68,8 +68,19 @@ The table names the strings found on 2026-11-04; any other masculine generic fou
 
 ## Implementation
 
+- iOS: `ReCIT_iOS/Localizable.xcstrings` — 75 `fr` values on 74 keys, exact text edits on the raw file (no JSON re-dump); keys, `en` values and layout unchanged. Beyond the table: `groups.delete.confirm.message` other → « Ses %lld membres en seront retiré·es ».
+- iOS tests: `Tests/ListVisibilityLabelTests.swift` expects « Mes ami·es » / « Mes ami·es et mes groupes »; `UITests/E2EScenarioTests.swift` comments and messages quote « Dans mes livres et chez mes ami·es » (the scenario finds rows by title/owner, not by that section title).
+- Android: 57 strings in 9 `res/values/strings*.xml` files, same wording as iOS where the string exists on both. Android-only: `shelf_detail_visibility_friends` « Visible par vos ami·es », `shelf_form_visibility_friends` « Ami·es », `network_nav_user` « Utilisateur·ice », `network_profile_network_empty` « Aucun·e ami·e pour le moment ».
+- Android e2e: `E2EScenarioTest.kt` matches on-screen text — login field « Nom d'utilisateur·ice », the two error regexes, `LOCAL_SECTION` « Dans mes livres et chez mes ami·es ».
+- `metadata/app-store/localizations/fr-FR.json`: `lecteur·rices` → `lecteur·ices` (2).
+- `docs/conventions/glossary.md`: `Ami` → `Ami·e`, Never `Follower, Ami`, Also `contact, lecteur·ice`.
+- Left alone on purpose: words about books or publishers (« Retiré de », « Doublon signalé », « éditeur »), impersonal `il`, « ceux » for books, « Membre depuis », « cette personne ».
+- Proof: iOS `build` ✅ (SwiftLint on), `ListVisibilityLabelTests` ✅; Android `:app:assembleDebug :app:testDebugUnitTest` ✅, `:e2e:compileDebugKotlin` ✅. `:app:lintDebug` ❌ 9 × `LocalContextResourcesRead` in Kotlin files this task does not touch (ForgotPasswordSheet, InvitationsScreen, ListFormSheet, NetworkScreen) — pre-existing, out of scope.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent. e2e scenarios not run.
 
 ## Feedback

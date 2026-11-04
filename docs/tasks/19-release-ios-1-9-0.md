@@ -1,6 +1,6 @@
 ---
 issue: 19
-status: to-test
+status: to-close
 wiki: [[architecture]], [[lists]], [[network]], [[testing]]
 note: grilled with #20 (Android 1.3.0) from one request on 2026-11-04
 created: 2026-11-04
@@ -48,12 +48,12 @@ Round 2 — 2026-11-04, after #25 (PR #26) merged.
 
 Round `validation` — 2026-11-04, at `/wa-close 19`. Scope `main..HEAD`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. No autofix: every finding is store copy or a proof only Olivier can give.
 
-- 🟠 `en-US.json` `whatsNew` names French labels, but the app is localized: an English iPhone shows « In my network » and « About », never « Dans mon réseau » / « Présentation ». Reverts f1b7a9c → Olivier decides. — open
-- 🟡 `fr-FR.json` in « tu » while `wording.md` says `vous` and the Play changelogs use « vous ». The App Store description and promotional text are in « tu ». — open (recommend accept, record the store exception in `wording.md`)
-- 🟡 Header « Nouveautés de la 1.9 : » / "What's new in 1.9:" repeats the store's own heading. 1.3's notes had one too. — open (recommend accept)
-- 🟡 « Glisse d'une liste à sa page Présentation »: the swipe is inside a list, Livres → Présentation; « Présentation » lacks guillemets. Same in English. — open
-- 🟡 Last bullet presents asking a friend for a book as new; 0071 only made the request name what it asks for. — open
-- 🟡 Criteria « shown in TestFlight » and « Profil's foot reads Version 1.9.0 (20) » have no proof recorded. — open (Olivier to confirm)
+- 🟠 `en-US.json` `whatsNew` names French labels, but the app is localized: an English iPhone shows « In my network » and « About », never « Dans mon réseau » / « Présentation ». Reverts f1b7a9c → Olivier decides. — accepted: French labels kept (Olivier)
+- 🟡 `fr-FR.json` in « tu » while `wording.md` says `vous` and the Play changelogs use « vous ». The App Store description and promotional text are in « tu ». — accepted: « tu » is the target voice; `wording.md` switched to `person: tu`, app strings migrate later (Olivier)
+- 🟡 Header « Nouveautés de la 1.9 : » / "What's new in 1.9:" repeats the store's own heading. 1.3's notes had one too. — accepted (Olivier)
+- 🟡 « Glisse d'une liste à sa page Présentation »: the swipe is inside a list, Livres → Présentation; « Présentation » lacks guillemets. Same in English. — accepted (Olivier)
+- 🟡 Last bullet presents asking a friend for a book as new; 0071 only made the request name what it asks for. — accepted (Olivier)
+- 🟡 Criteria « shown in TestFlight » and « Profil's foot reads Version 1.9.0 (20) » have no proof recorded. — accepted: TestFlight confirmed by Olivier; the Profil's foot reads the build settings checked above
 - `project.pbxproj`: only ReCIT_iOS Debug + Release moved. `.remote-snapshot.json`: adds `placements` links only, benign; committed with this round at Olivier's request.
 
 ## Verification
@@ -68,5 +68,6 @@ Round 2 — gate re-run after #25.
 
 - ✅ A list of mine holding a book (« Gate AGate A », 1 œuvre) → pencil → « Supprimer la liste »: back on Listes, no crash, no new crash log (`build/release-1.9.0/regate/`).
 - Upload: build 20 accepted (« Uploaded package is processing »). TestFlight not looked at by the agent — Olivier to confirm in App Store Connect › Ex-libris › TestFlight. Nothing submitted for review.
+- ✅ TestFlight shows build 20 (Olivier, 2026-11-04).
 
 ## Feedback

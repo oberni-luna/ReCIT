@@ -5,6 +5,10 @@
     <string name="lists_search_prompt">Rechercher</string>
     <string name="lists_search_clear">Effacer</string>
 
+    <!-- Mine and my network's (iOS feature 0068) -->
+    <string name="lists_section_mine">Mes listes</string>
+    <string name="lists_section_network">Dans mon réseau</string>
+
     <!-- Empty tab (feature 0022) -->
     <string name="lists_empty_heading">Pas encore de liste</string>
     <string name="lists_empty_body">Vos envies de lecture ont leur place ici.</string>
@@ -37,6 +41,7 @@
 
     <!-- A list as a cover flow (iOS feature 0060) -->
     <string name="list_detail_comment_label">Mon commentaire</string>
+    <string name="list_detail_comment_other">Commentaire</string>
     <string name="list_detail_comment_placeholder_work">Pourquoi ce livre est dans la liste…</string>
     <string name="list_detail_comment_placeholder_author">Pourquoi cet·te auteur·ice est dans la liste…</string>
     <string name="list_detail_remove">Retirer de la liste</string>
@@ -90,4 +95,16 @@
     <string name="list_visibility_friends_and_groups">Mes ami·es et mes groupes</string>
     <string name="list_visibility_public">Tout le monde</string>
     <string name="list_added_to_named">Ajouté à %1$s</string>
+
+    <!-- Livres | Présentation (iOS features 0073, 0075) -->
+    <string name="list_tab_works">Livres • %1$d</string>
+    <string name="list_tab_works_description">Livres, %1$d</string>
+    <string name="list_tab_authors">Auteur·ices • %1$d</string>
+    <string name="list_tab_authors_description">Auteur·ices, %1$d</string>
+    <string name="list_tab_presentation">Présentation</string>
+    <string name="list_presentation_empty">Cette liste n’a pas de description</string>
+    <string name="list_info_type">Type</string>
+    <string name="list_info_visibility">Visible par</string>
+    <string name="list_info_created">Créée le</string>
+    <string name="list_info_updated">Modifiée le</string>
 </resources>

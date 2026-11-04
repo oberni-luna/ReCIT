@@ -58,9 +58,7 @@
     <string name="edit_work_title">Modifier l’œuvre</string>
     <string name="edit_work_header">L’œuvre</string>
     <string name="edit_work_add_other_author">Ajouter un·e autre auteur·ice</string>
-    <string name="edit_work_help">Ce que vous changez ici vaut pour toutes les éditions de cette œuvre, et part avec « Enregistrer », au retour. Glissez un·e auteur·ice vers la gauche pour l’enlever de l’œuvre.</string>
     <string name="edit_work_new_help">Nommez qui l’a écrite : l’œuvre se crée avec ses auteur·ices, à l’enregistrement de l’édition.</string>
-    <string name="edit_work_wikidata_help">Cette œuvre vit sur Wikidata : son titre et ses auteur·ices s’y modifient.</string>
 
     <string name="entity_picker_prompt">Rechercher</string>
     <string name="entity_picker_existing">Déjà sur inventaire.io</string>

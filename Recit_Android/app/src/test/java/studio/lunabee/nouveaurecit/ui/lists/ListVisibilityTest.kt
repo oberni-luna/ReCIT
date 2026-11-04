@@ -3,6 +3,7 @@ package studio.lunabee.nouveaurecit.ui.lists
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.model.Visibility
 
 class ListVisibilityTest {
@@ -18,6 +19,14 @@ class ListVisibilityTest {
     @Test
     fun each_answer_is_written_as_the_keys_it_is_read_from() {
         ListVisibility.entries.forEach { assertEquals(it, ListVisibility.from(it.raw)) }
+    }
+
+    @Test
+    fun each_answer_is_named_in_words_groups_included() {
+        assertEquals(R.string.list_visibility_private, ListVisibility.from(emptyList()).label)
+        assertEquals(R.string.list_visibility_groups, ListVisibility.from(listOf(Visibility.Groups)).label)
+        assertEquals(R.string.list_visibility_friends_and_groups, ListVisibility.from(listOf(Visibility.Friends, Visibility.Groups)).label)
+        assertEquals(R.string.list_visibility_public, ListVisibility.from(listOf(Visibility.Groups, Visibility.Public)).label)
     }
 
     @Test

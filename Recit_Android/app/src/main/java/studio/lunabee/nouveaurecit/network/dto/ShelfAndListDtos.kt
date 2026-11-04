@@ -59,6 +59,7 @@ data class ListDto(
     val visibility: List<String> = emptyList(),
     val type: String = "work",
     val elements: List<ListElementDto>? = null,
+    val creator: String? = null,
 )
 
 @Serializable

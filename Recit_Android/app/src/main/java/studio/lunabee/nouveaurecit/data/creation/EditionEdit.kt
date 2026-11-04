@@ -8,11 +8,12 @@ import java.util.UUID
  * steps it lists ([nextStep]) and tells it which ones landed.
  *
  * Besides the edition's own title, subtitle and cover, the form changes the works the edition is an
- * edition of — added from the search or created, detached with a swipe —, each work's title and authors
- * ([WorkEdit]), and every other property of the catalogue ([EditionProperties]). Whatever has to exist
- * before a claim can name it goes first: the picture, the authors inventaire.io does not have, the works
- * being created, the publishers, collections and people the edition names. Then the claims, one at a
- * time, then the works' new titles.
+ * edition of — added from the search or created with their title and authors ([WorkEdit]), detached with
+ * a swipe —, and every other property of the catalogue ([EditionProperties]). A work that exists is
+ * changed in its own « Modifier l'œuvre » and saved alone ([EntityEdit], iOS feature 0057): never here.
+ * Whatever has to exist before a claim can name it goes first: the picture, the authors inventaire.io
+ * does not have, the works being created, the publishers, collections and people the edition names. Then
+ * the claims, one at a time.
  *
  * **A change half sent is finished, not redone.** Each step is its own request, so a title can land and a
  * cover fail. Each one landed moves into [original], a work's `original` or an author's `uri`, and the
@@ -98,9 +99,26 @@ data class EditionEdit(
     /** What a swipe on « Détacher » takes away: the edition stops being an edition of it; the work stays. */
     fun detachWork(id: UUID): EditionEdit = copy(works = works.filterNot { it.id == id })
 
-    /** Changes one work — its title, its authors — from « Modifier l'œuvre ». */
+    /** Changes one work being created — its title, its authors. */
     fun updatingWork(id: UUID, transform: (WorkEdit) -> WorkEdit): EditionEdit =
         copy(works = works.map { if (it.id == id) transform(it) else it })
+
+    /**
+     * Shows a work as « Modifier l'œuvre » just saved it, in place of the row that opened it. The work's
+     * picture is the edition's: the row keeps the one it had.
+     */
+    fun workSaved(work: EditionWork): EditionEdit = copy(
+        works = works.map { row ->
+            if (row.uri == work.uri) WorkEdit.existing(work.copy(imageUrl = row.imageUrl), id = row.id) else row
+        },
+    )
+
+    /** Shows a person under the name « Modifier l'auteur·ice » just saved: among the works' authors and the people the edition names. */
+    fun rename(uri: String, label: String): EditionEdit = copy(
+        works = works.map { it.renameAuthor(uri, label) },
+        properties = properties.rename(uri, label),
+        original = original.copy(properties = original.properties.rename(uri, label)),
+    )
 
     /** The uris of the works listed that exist. */
     val workUris: List<String> get() = works.mapNotNull { it.uri }
@@ -120,7 +138,7 @@ data class EditionEdit(
             trimmedSubtitle != originalSubtitle ||
             cover != Cover.Unchanged ||
             workUris.toSet() != original.workUris.toSet() ||
-            works.any { it.hasChanges } ||
+            works.any { it.isNew } ||
             properties.differs(original.properties)
 
     /**
@@ -142,7 +160,7 @@ data class EditionEdit(
     val nextStep: EditionEditStep?
         get() {
             coverToUpload?.let { return EditionEditStep.UploadCover(it) }
-            for (work in works.filter { it.isEditable }) {
+            for (work in works.filter { it.isNew }) {
                 val author: NewBookAuthor = work.authors.firstOrNull { it.uri == null } ?: continue
                 return EditionEditStep.CreateAuthor(author.id, author.trimmedName, labelLanguage)
             }
@@ -153,14 +171,12 @@ data class EditionEdit(
                 val kind: EntityCreationKind = EntityCreationKind.of(pending.property, properties.publisherUri) ?: continue
                 return EditionEditStep.CreateEntity(pending.entity.id, pending.entity.trimmedLabel, labelLanguage, kind)
             }
-            claimUpdates.firstOrNull()?.let { return EditionEditStep.Claim(it) }
-            return labelUpdates.firstOrNull()?.let { EditionEditStep.Label(it) }
+            return claimUpdates.firstOrNull()?.let { EditionEditStep.Claim(it) }
         }
 
     /**
-     * The claims to send, in order: the edition's title, subtitle, cover and works, its other properties,
-     * then the authors added to and taken from its works. A replacing cover is listed once its hash is
-     * known, an author or a work once it exists.
+     * The claims to send, in order: the edition's title, subtitle, cover and works, then its other
+     * properties. A replacing cover is listed once its hash is known, a work once it exists.
      */
     val claimUpdates: List<EditionClaimUpdate>
         get() = buildList {
@@ -176,20 +192,6 @@ data class EditionEdit(
             current.filter { it !in original.workUris }.forEach { add(update(EditableClaimProperty.Work, from = null, to = it)) }
 
             addAll(properties.updates(original.properties, original.uri))
-
-            for (work in works.filter { it.isEditable }) {
-                val uri: String = work.uri ?: continue
-                work.addedAuthors.mapNotNull { it.uri }.forEach { add(update(EditableClaimProperty.Author, of = uri, from = null, to = it)) }
-                work.removedAuthors.mapNotNull { it.uri }.forEach { add(update(EditableClaimProperty.Author, of = uri, from = it, to = null)) }
-            }
-        }
-
-    /** The works renamed, as `update-label` takes them: in the language of the title they had. */
-    val labelUpdates: List<EntityLabelUpdate>
-        get() = works.mapNotNull { work ->
-            val uri: String = work.uri ?: return@mapNotNull null
-            val title: String = work.renamedTitle ?: return@mapNotNull null
-            EntityLabelUpdate(uri = uri, lang = work.original?.titleLanguage ?: labelLanguage, value = title)
         }
 
     // What landed
@@ -217,19 +219,14 @@ data class EditionEdit(
             EditableClaimProperty.Work -> copy(
                 original = original.copy(workUris = original.workUris.filterNot { it == oldValue } + listOfNotNull(newValue)),
             )
-            EditableClaimProperty.Author -> copy(works = works.map { if (it.uri == update.uri) it.authorLanded(newValue, oldValue) else it })
             null -> copy(original = original.copy(properties = original.properties.apply(update, properties)))
         }
     }
 
-    /** Records that a work's new title landed. */
-    fun landed(update: EntityLabelUpdate): EditionEdit =
-        copy(works = works.map { if (it.uri == update.uri) it.titleLanded(update.value) else it })
-
-    /** An update naming the value it replaces, on the edition unless said otherwise. An empty value is no value. */
-    private fun update(property: EditableClaimProperty, of: String? = null, from: String?, to: String?): EditionClaimUpdate =
+    /** An update naming the value it replaces, on the edition. An empty value is no value. */
+    private fun update(property: EditableClaimProperty, from: String?, to: String?): EditionClaimUpdate =
         EditionClaimUpdate.of(
-            uri = of ?: original.uri,
+            uri = original.uri,
             property = property,
             oldValue = from?.takeIf { it.isNotEmpty() },
             newValue = to?.takeIf { it.isNotEmpty() },

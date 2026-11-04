@@ -64,7 +64,6 @@ class CreateBookPageTest {
         val draft: NewBookDraft = blank.startNewWork("solaris").addAuthor(NewBookAuthor(name = "Stanisław Lem"))
         val work: WorkEdit = CreateBookRules.newWork(draft)
         assertTrue(work.isNew)
-        assertTrue(work.isEditable)
         assertEquals("Solaris", work.title)
         assertEquals(draft.authors, work.authors)
         // The same identity every time: the page is redrawn from the draft at each change.

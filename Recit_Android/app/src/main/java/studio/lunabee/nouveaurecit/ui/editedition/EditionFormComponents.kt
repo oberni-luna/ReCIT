@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -74,8 +75,9 @@ import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
  */
 
 /**
- * A `Section` of an iOS `Form`: its header, its rows on one rounded card of the cells' colour, and the
- * sentence under it. Rows are separated by [FormDivider], placed by the caller.
+ * A `Section` of an iOS `Form`: its header, its rows on one rounded card of the form cells' colour — in
+ * dark a veil a step below the ground (iOS feature 0054) —, and the sentence under it. Rows are separated
+ * by [FormDivider], placed by the caller.
  */
 @Composable
 fun FormSection(
@@ -91,7 +93,7 @@ fun FormSection(
                 .padding(horizontal = Spacing.medium)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(CornerRadius.rounded))
-                .background(RecitTheme.colors.backgroundGroupedCell),
+                .background(RecitTheme.colors.backgroundFormCell),
             content = content,
         )
         if (footer != null) FormFootnote(text = footer, modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small))
@@ -124,6 +126,7 @@ fun FormTextRow(
     enabled: Boolean = true,
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
     val color: Color = if (enabled) RecitTheme.colors.foregroundDefault else RecitTheme.colors.foregroundSecondary
     WithLabel(label = label, modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.sMedium)) {
@@ -135,6 +138,7 @@ fun FormTextRow(
             textStyle = RecitTheme.typography.content300.copy(color = color),
             cursorBrush = SolidColor(RecitTheme.colors.foregroundTinted),
             keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
             modifier = Modifier.fillMaxWidth(),
             decorationBox = { field ->
                 Box {
@@ -253,34 +257,43 @@ fun SwipeToRemoveRow(
             }
         },
     ) {
-        Box(Modifier.background(RecitTheme.colors.backgroundGroupedCell)) { content() }
+        // The card's colour made opaque — its veil laid on the ground — so the swipe's red stays under the row.
+        Box(Modifier.background(RecitTheme.colors.backgroundForm).background(RecitTheme.colors.backgroundFormCell)) { content() }
     }
 }
 
 /**
  * An entity a property names, or an author of a work (`EditWorkAuthorRow`): the name, and under it what
- * tells it apart — the search's description, or that it will be created on saving.
+ * tells it apart — the search's description, or that it will be created on saving. With [onClick], a
+ * chevron: a person whose « Modifier l'auteur·ice » it opens (`EditEntityPersonRow`).
  */
 @Composable
-fun EntityValueRow(label: String, detail: String?, isNew: Boolean, modifier: Modifier = Modifier) {
-    Column(
+fun EntityValueRow(label: String, detail: String?, isNew: Boolean, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = MinRowHeight)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
             .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium)
             .semantics(mergeDescendants = true) {},
-        verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        Text(text = label, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
-        val under: String? = if (isNew) stringResource(R.string.edit_edition_work_new_author) else detail?.takeIf(String::isNotBlank)
-        if (under != null) {
-            Text(
-                text = under,
-                style = RecitTheme.typography.footnote200,
-                color = RecitTheme.colors.foregroundSecondary,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
+            Text(text = label, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
+            val under: String? = if (isNew) stringResource(R.string.edit_edition_work_new_author) else detail?.takeIf(String::isNotBlank)
+            if (under != null) {
+                Text(
+                    text = under,
+                    style = RecitTheme.typography.footnote200,
+                    color = RecitTheme.colors.foregroundSecondary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        if (onClick != null) {
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = RecitTheme.colors.foregroundSecondary)
         }
     }
 }
@@ -416,7 +429,7 @@ fun FormActionBar(
     Column(
         modifier
             .fillMaxWidth()
-            .background(RecitTheme.colors.backgroundGrouped)
+            .background(RecitTheme.colors.backgroundForm)
             .navigationBarsPadding()
             .padding(horizontal = Spacing.medium, vertical = Spacing.small),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -431,7 +444,7 @@ fun FormActionBar(
 private const val NOTICE_DISMISSED_KEY: String = "createBook.bibliographicNotice.dismissed"
 
 /** A row's touch target, as Material asks. */
-private val MinRowHeight: Dp = 48.dp
+internal val MinRowHeight: Dp = 48.dp
 
 /** A cover at 36 × 54: a book's 2:3, which recognising the one in hand takes. */
 private val WorkCoverWidth: Dp = 36.dp

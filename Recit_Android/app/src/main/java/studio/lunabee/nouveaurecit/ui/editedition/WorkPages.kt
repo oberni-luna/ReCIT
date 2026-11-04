@@ -42,7 +42,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 
 /*
- * The pages about works: the search for the work an edition is of, « Modifier l'œuvre » and its author
+ * The pages about works: the search for the work an edition is of, the work being created and its author
  * search — and the help the « ? » of every one of them opens.
  */
 
@@ -113,9 +113,9 @@ fun WorkSearchPage(
 }
 
 /**
- * `EditWorkView`: one work of the edition — its title and its authors, the only place they change: an
- * author belongs to the work, for every edition of it. Nothing is sent from here; what changes goes with
- * « Enregistrer ». A Wikidata work is shown and not changed.
+ * `EditWorkView`: a work being created with the edition — its title and its authors. Nothing is sent from
+ * here; the work is created, with its authors, by the edition's « Enregistrer ». A work that exists opens
+ * the whole of « Modifier l'œuvre » instead ([EditEntityPage]), saved alone.
  *
  * The scanner's « Nouvelle œuvre » is this page over the work its draft describes, with its own [footer]:
  * there, the work is published with the edition.
@@ -128,14 +128,10 @@ fun EditWorkPage(
     onAddAuthor: () -> Unit,
     onHelp: () -> Unit,
     onBack: () -> Unit,
-    @StringRes footer: Int = when (EditionFormRules.workFooter(work)) {
-        EditionFormRules.WorkFooter.Wikidata -> R.string.edit_work_wikidata_help
-        EditionFormRules.WorkFooter.New -> R.string.edit_work_new_help
-        EditionFormRules.WorkFooter.Default -> R.string.edit_work_help
-    },
+    @StringRes footer: Int = R.string.edit_work_new_help,
 ) {
     FormPageScaffold(
-        title = stringResource(if (work.isNew) R.string.create_book_new_work_title else R.string.edit_work_title),
+        title = stringResource(R.string.create_book_new_work_title),
         onBack = onBack,
         actions = { BibliographicDataHelpButton(onHelp) },
     ) {
@@ -145,27 +141,20 @@ fun EditWorkPage(
                     label = stringResource(R.string.create_book_new_work_title_field),
                     value = work.title,
                     onValueChange = onTitle,
-                    enabled = work.isEditable,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 )
                 val remove: String = stringResource(R.string.edit_edition_remove)
                 work.authors.forEachIndexed { index, author ->
                     key(author.id) {
                         FormDivider()
-                        if (work.isEditable) {
-                            SwipeToRemoveRow(label = remove, onRemove = { onRemoveAuthor(index) }) { AuthorRow(author) }
-                        } else {
-                            AuthorRow(author)
-                        }
+                        SwipeToRemoveRow(label = remove, onRemove = { onRemoveAuthor(index) }) { AuthorRow(author) }
                     }
                 }
-                if (work.isEditable) {
-                    FormDivider()
-                    FormActionRow(
-                        title = stringResource(if (work.authors.isEmpty()) R.string.edit_edition_work_add_author else R.string.edit_work_add_other_author),
-                        onClick = onAddAuthor,
-                    )
-                }
+                FormDivider()
+                FormActionRow(
+                    title = stringResource(if (work.authors.isEmpty()) R.string.edit_edition_work_add_author else R.string.edit_work_add_other_author),
+                    onClick = onAddAuthor,
+                )
             }
         }
     }

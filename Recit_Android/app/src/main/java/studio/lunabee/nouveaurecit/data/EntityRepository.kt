@@ -2,7 +2,10 @@ package studio.lunabee.nouveaurecit.data
 
 import kotlinx.coroutines.flow.Flow
 import studio.lunabee.nouveaurecit.data.creation.EditionEdit
+import studio.lunabee.nouveaurecit.data.creation.EditionPropertyCatalogue
 import studio.lunabee.nouveaurecit.data.creation.EditionStoreUpdate
+import studio.lunabee.nouveaurecit.data.creation.EntityEdit
+import studio.lunabee.nouveaurecit.data.creation.WorkProperties
 import studio.lunabee.nouveaurecit.data.db.AuthorEntity
 import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.EditionWorkCrossRef
@@ -180,30 +183,41 @@ class EntityRepository(
      * [editionUri] is the uri the store keeps the edition under — `isbn:…` for one opened from its ISBN,
      * where the edit holds the canonical `inv:…`.
      *
-     * The edition's own claims are written directly ([EditionStoreUpdate]). Its works are read again: the
-     * works an edition points at, and the authors they name, live in other entities than the one the form
-     * changed. Links the save took away are taken away here too — a refresh only ever adds them.
+     * The edition's own claims are written directly ([EditionStoreUpdate]). Its works are read again when
+     * they moved: the works an edition points at live in other entities than the one the form changed.
+     * Links the save took away are taken away here too — a refresh only ever adds them.
      */
     suspend fun applyEditionEdit(editionUri: String, after: EditionEdit, before: EditionEdit) {
         val existing: EditionEntity? = dao.edition(editionUri)
         existing?.let { EditionStoreUpdate.edition(it, after.original, before.original) }?.let { dao.upsertEditions(listOf(it)) }
 
         val worksMoved: Boolean = after.original.workUris.toSet() != before.original.workUris.toSet()
-        if (!worksMoved && before.works.none { it.hasChanges }) return
+        if (!worksMoved) return
 
         val works: List<WorkEntity> = after.original.workUris.mapNotNull { uri -> runCatching { refreshWork(uri) }.getOrNull() }
-        for (work in after.works) {
-            val uri: String = work.uri ?: continue
-            val kept: Set<String> = work.original?.authors.orEmpty().mapNotNull { it.uri }.toSet()
-            val dropped: List<String> = before.works.firstOrNull { it.uri == uri }?.original?.authors.orEmpty()
-                .mapNotNull { it.uri }
-                .filter { it !in kept }
-            if (dropped.isNotEmpty()) dao.unlinkWorkAuthors(uri, dropped)
-        }
-        if (!worksMoved || existing == null) return
+        if (existing == null) return
         val detached: List<String> = before.original.workUris.filter { it !in after.original.workUris }
         if (detached.isNotEmpty()) dao.unlinkEditionWorks(editionUri, detached)
         linkEdition(editionUri, works.map { it.uri })
+    }
+
+    /**
+     * `EditEditionFlowView.show(_:)` (iOS feature 0057): reads again a work or a person « Modifier
+     * l'œuvre » or « Modifier l'auteur·ice » saved, so the book screen shows what inventaire.io now holds —
+     * a work's title and authors, a person's name. Authors the save took away from a work are unlinked: a
+     * refresh only ever adds them.
+     */
+    suspend fun applyEntityEdit(after: EntityEdit, before: EntityEdit) {
+        when (after.catalogue) {
+            EditionPropertyCatalogue.Work -> {
+                refreshWork(after.uri)
+                val kept: Set<String> = after.original.entities(WorkProperties.Author).mapNotNull { it.uri }.toSet()
+                val dropped: List<String> = before.original.entities(WorkProperties.Author).mapNotNull { it.uri }.filter { it !in kept }
+                if (dropped.isNotEmpty()) dao.unlinkWorkAuthors(after.uri, dropped)
+            }
+            EditionPropertyCatalogue.Human -> refreshAuthor(after.uri)
+            EditionPropertyCatalogue.Edition -> Unit
+        }
     }
 
     private suspend fun upsertWorkWithAuthors(dto: EntityResultDto): WorkEntity {

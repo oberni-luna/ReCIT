@@ -14,11 +14,16 @@ import java.util.UUID
  * sends one update naming the value it replaces; a multivalued one, one update per value added or taken
  * away.
  *
+ * The same values serve a work and a person, in « Modifier l'œuvre » and « Modifier l'auteur·ice » (iOS
+ * feature 0057): they then hold that [catalogue]'s properties.
+ *
  * Immutable: every change answers a new value.
  */
 data class EditionProperties(
     /** The values, keyed by property uri, in the order read or added. A property with no value has no key. */
     val values: Map<String, List<EditionClaimValue>> = emptyMap(),
+    /** The properties these values can hold: an edition's, a work's or a person's. */
+    val catalogue: EditionPropertyCatalogue = EditionPropertyCatalogue.Edition,
 ) {
     // Reading
 
@@ -31,7 +36,7 @@ data class EditionProperties(
 
     /** Every entity uri the values name, for the call that fetches their labels. */
     val entityUris: List<String>
-        get() = EditionProperty.all.flatMap { property -> entities(property).mapNotNull { it.uri } }
+        get() = catalogue.properties.flatMap { property -> entities(property).mapNotNull { it.uri } }
 
     /**
      * The entities still to be created, in the order the save creates them: people and publishers first,
@@ -39,7 +44,7 @@ data class EditionProperties(
      */
     val pendingEntities: List<PendingEntity>
         get() {
-            val pending: List<PendingEntity> = EditionProperty.all.flatMap { property ->
+            val pending: List<PendingEntity> = catalogue.properties.flatMap { property ->
                 entities(property).filter { it.uri == null }.map { PendingEntity(property, it) }
             }
             return pending.filter { it.property != EditionProperty.Collection } + pending.filter { it.property == EditionProperty.Collection }
@@ -55,7 +60,7 @@ data class EditionProperties(
     /** The claims as they go on the wire, keyed by property uri. An entity still to be created is left out. */
     val claims: Map<String, List<ClaimLiteral>>
         get() = buildMap {
-            for (property in EditionProperty.all) {
+            for (property in catalogue.properties) {
                 val literals: List<ClaimLiteral> = values(property).mapNotNull { it.claim }
                 if (literals.isNotEmpty()) put(property.uri, literals)
             }
@@ -89,20 +94,20 @@ data class EditionProperties(
         with(property, values(property).filterIndexed { index, _ -> index !in indices })
 
     /** Records the uri an entity was created under: the claim that names it can go now. */
-    fun entityCreated(id: UUID, uri: String): EditionProperties = EditionProperties(
-        values.mapValues { (_, current) ->
-            current.map { value ->
-                val entity: EditionEntityValue? = value.entityValue
-                if (entity?.id == id) EditionClaimValue.Entity(entity.copy(uri = uri)) else value
-            }
-        },
-    )
+    fun entityCreated(id: UUID, uri: String): EditionProperties = mapEntities { if (it.id == id) it.copy(uri = uri) else it }
+
+    /**
+     * Gives the entity named by [uri] a new name, wherever it is a value: a person renamed in « Modifier
+     * l'auteur·ice » is shown under that name by the forms beneath it. Names are not sent, so this changes
+     * nothing the save compares.
+     */
+    fun rename(uri: String, label: String): EditionProperties = mapEntities { if (it.uri == uri) it.copy(label = label) else it }
 
     // What there is to send
 
     /** The claim updates that turn [original] into these values, on the entity [uri]. Entities still to create wait. */
     fun updates(original: EditionProperties, uri: String): List<EditionClaimUpdate> = buildList {
-        for (property in EditionProperty.all) {
+        for (property in catalogue.properties) {
             val before: List<ClaimLiteral> = original.values(property).mapNotNull { it.claim }
             val after: List<ClaimLiteral> = values(property).mapNotNull { it.claim }
             if (property.isMultivalued) {
@@ -116,7 +121,7 @@ data class EditionProperties(
 
     /** Records that [update] landed, so it drops out of [updates]. The value added is named from [current]. */
     fun apply(update: EditionClaimUpdate, current: EditionProperties): EditionProperties {
-        val property: EditionProperty = EditionProperty.named(update.property) ?: return this
+        val property: EditionProperty = catalogue.property(update.property) ?: return this
         var landed: List<EditionClaimValue> = values(property)
         update.oldValue?.let { old -> landed = landed.filterNot { it.claim == old } }
         update.newValue?.let { new ->
@@ -130,28 +135,41 @@ data class EditionProperties(
     fun differs(original: EditionProperties): Boolean = pendingEntities.isNotEmpty() || updates(original, "").isNotEmpty()
 
     private fun with(property: EditionProperty, newValues: List<EditionClaimValue>): EditionProperties =
-        EditionProperties(if (newValues.isEmpty()) values - property.uri else values + (property.uri to newValues))
+        copy(values = if (newValues.isEmpty()) values - property.uri else values + (property.uri to newValues))
+
+    private fun mapEntities(transform: (EditionEntityValue) -> EditionEntityValue): EditionProperties = copy(
+        values = values.mapValues { (_, current) ->
+            current.map { value -> value.entityValue?.let { EditionClaimValue.Entity(transform(it)) } ?: value }
+        },
+    )
 
     /** An entity of [property] waiting to be created. */
     data class PendingEntity(val property: EditionProperty, val entity: EditionEntityValue)
 
     companion object {
-        /** Reads the catalogue's properties out of an entity's claims; entity values are named with [labels], or by their uri. */
-        fun fromClaims(claims: Map<String, List<JsonElement>>, labels: Map<String, String>): EditionProperties {
+        /**
+         * Reads [catalogue]'s properties out of an entity's claims; entity values are named with [labels], or
+         * by their uri.
+         */
+        fun fromClaims(
+            claims: Map<String, List<JsonElement>>,
+            labels: Map<String, String>,
+            catalogue: EditionPropertyCatalogue = EditionPropertyCatalogue.Edition,
+        ): EditionProperties {
             val values: MutableMap<String, List<EditionClaimValue>> = linkedMapOf()
-            for (property in EditionProperty.all) {
+            for (property in catalogue.properties) {
                 val literals: List<ClaimLiteral> = claims[property.uri].orEmpty().mapNotNull(ClaimLiteral::from)
                 if (literals.isEmpty()) continue
                 values[property.uri] = literals.map { literal ->
                     val uri: String? = literal.string
-                    if (property.searchType != null && uri != null) {
+                    if (property.isEntity && uri != null) {
                         EditionClaimValue.Entity(EditionEntityValue(uri = uri, label = labels[uri] ?: uri))
                     } else {
                         EditionClaimValue.Literal(literal)
                     }
                 }
             }
-            return EditionProperties(values)
+            return EditionProperties(values, catalogue)
         }
     }
 }

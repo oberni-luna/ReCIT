@@ -7,6 +7,9 @@ import org.junit.Test
 import studio.lunabee.nouveaurecit.data.creation.EditionEntityValue
 import studio.lunabee.nouveaurecit.data.creation.EditionProperties
 import studio.lunabee.nouveaurecit.data.creation.EditionProperty
+import studio.lunabee.nouveaurecit.data.creation.EditionPropertyCatalogue
+import studio.lunabee.nouveaurecit.data.creation.HumanProperties
+import studio.lunabee.nouveaurecit.data.creation.WorkProperties
 import java.util.UUID
 
 /** Which page a property pushes, and how the stack of pages over the form moves. */
@@ -14,9 +17,34 @@ class EditEditionPageTest {
     @Test
     fun theDateOpensItsOwnPage() {
         assertEquals(
-            EditionPropertyStep.PublicationDate,
+            EditionPropertyStep.Date(EditionProperty.PublicationDateProperty.uri),
             EditionPropertyStep.opening(EditionProperty.PublicationDateProperty, EditionProperties()),
         )
+        assertEquals(
+            EditionPropertyStep.Date(HumanProperties.BirthDate.uri),
+            EditionPropertyStep.opening(HumanProperties.BirthDate, EditionProperties(catalogue = EditionPropertyCatalogue.Human)),
+        )
+    }
+
+    @Test
+    fun aChoiceTooLongForAMenuOpensItsList() {
+        assertEquals(
+            EditionPropertyStep.Choice(WorkProperties.Form.uri),
+            EditionPropertyStep.opening(WorkProperties.Form, EditionProperties(catalogue = EditionPropertyCatalogue.Work)),
+        )
+    }
+
+    @Test
+    fun anEntityPageClosesWithEverythingItPushed() {
+        val entity: EditEditionPage = EditEditionPage.Entity("inv:work")
+        val stack: PageStack<EditEditionPage> = PageStack<EditEditionPage>()
+            .push(entity)
+            .push(EditEditionPage.Entity("inv:person"))
+            .push(EditEditionPage.EntityProperty("inv:person", EditionPropertyStep.IdentifierCatalog(EditionProperty.Group.Databases)))
+
+        assertTrue(stack.popTo(entity).isEmpty)
+        assertEquals(listOf(entity), stack.popTo(EditEditionPage.Entity("inv:person")).pages)
+        assertEquals(stack, stack.popTo(EditEditionPage.Entity("inv:other")))
     }
 
     @Test

@@ -3,20 +3,17 @@ package studio.lunabee.nouveaurecit.data.creation
 import java.util.UUID
 
 /**
- * `WorkEdit` (iOS feature 0049): one work of the edition, as « Édition de » lists it and « Modifier
- * l'œuvre » changes it — its title and authors, against what inventaire.io holds. A work that exists is
- * renamed by `update-label` and given or relieved of authors by `wdt:P50` claims on it; one still to be
- * created is described here, and created with its authors before the edition names it.
- *
- * A Wikidata work is shown and not changed: its title and authors are edited on Wikidata, through an
- * account this app does not hold.
+ * `WorkEdit` (iOS features 0049, 0057): one work of the edition, as « Édition de » lists it. A work that
+ * exists is shown here and changed in its own « Modifier l'œuvre » ([EntityEdit]), saved alone; one still
+ * to be created is described here — its title and authors — and created with them before the edition
+ * names it, by the edition's save.
  *
  * Build one with [existing] or [newTitled]; change it with [copy] (`title`) and the functions below.
  */
 data class WorkEdit(
     /** The row's own identity: a work being created has no uri yet. */
     val id: UUID,
-    /** The work as inventaire.io holds it, after every change that landed. `null` while still to be created. */
+    /** The work as inventaire.io holds it. `null` while still to be created. */
     val original: EditionWork?,
     val title: String,
     /** Who wrote it, as the form has them. One created gets its uri, so a retry does not create them twice. */
@@ -28,40 +25,13 @@ data class WorkEdit(
 
     val isNew: Boolean get() = original == null
 
-    /** One of inventaire.io's own, or one to create. A Wikidata work is changed on Wikidata. */
-    val isEditable: Boolean get() = original?.isEditable ?: true
-
     val trimmedTitle: String get() = title.trim()
 
-    /** The new title of a work that exists, when it was changed. */
-    val renamedTitle: String?
-        get() {
-            val original: EditionWork = original ?: return null
-            if (!isEditable || trimmedTitle.isEmpty() || trimmedTitle == original.title.trim()) return null
-            return trimmedTitle
-        }
-
-    val addedAuthors: List<NewBookAuthor>
-        get() {
-            val original: EditionWork = original ?: return authors
-            return authors.filter { author -> original.authors.none { isSamePerson(it, author) } }
-        }
-
-    val removedAuthors: List<NewBookAuthor>
-        get() {
-            val original: EditionWork = original ?: return emptyList()
-            return original.authors.filter { author -> authors.none { isSamePerson(it, author) } }
-        }
-
-    val hasChanges: Boolean
-        get() = isNew || renamedTitle != null || addedAuthors.isNotEmpty() || removedAuthors.isNotEmpty()
-
     /**
-     * Whether it can be saved: a title, and — for a work being created — an author. One created with
-     * neither is the kind of orphan that has to be repaired by hand on the website.
+     * Whether it can be saved: a work being created needs a title and an author. One created with neither
+     * is the kind of orphan that has to be repaired by hand on the website.
      */
-    val isComplete: Boolean
-        get() = if (trimmedTitle.isEmpty()) !isEditable else !isNew || authors.isNotEmpty()
+    val isComplete: Boolean get() = !isNew || (trimmedTitle.isNotEmpty() && authors.isNotEmpty())
 
     /** The work as a row draws it: its title, and its authors on the line under it. */
     val candidate: WorkCandidate
@@ -72,17 +42,17 @@ data class WorkEdit(
             imageUrl = imageUrl,
         )
 
-    // Changing
+    // Changing a work being created
 
     /** Adds an author, unless they are on the work already. */
     fun addAuthor(author: NewBookAuthor): WorkEdit {
-        if (!isEditable || author.trimmedName.isEmpty() || authors.any { isSamePerson(it, author) }) return this
+        if (!isNew || author.trimmedName.isEmpty() || authors.any { isSamePerson(it, author) }) return this
         return copy(authors = authors + author)
     }
 
     /** What a swipe on the list of authors takes away. */
     fun removeAuthors(indices: Set<Int>): WorkEdit {
-        if (!isEditable) return this
+        if (!isNew) return this
         return copy(authors = authors.filterIndexed { index, _ -> index !in indices })
     }
 
@@ -96,22 +66,16 @@ data class WorkEdit(
     fun created(uri: String, titleLanguage: String): WorkEdit =
         copy(original = EditionWork(uri = uri, title = trimmedTitle, authors = authors, imageUrl = imageUrl, titleLanguage = titleLanguage))
 
-    /** Records that an author claim landed on the work: [added] is on it, [removed] is not. */
-    fun authorLanded(added: String?, removed: String?): WorkEdit {
-        var landed: EditionWork = original ?: return this
-        if (removed != null) landed = landed.copy(authors = landed.authors.filterNot { it.uri == removed })
-        val author: NewBookAuthor? = added?.let { uri -> authors.firstOrNull { it.uri == uri } }
-        if (author != null) landed = landed.copy(authors = landed.authors + author)
-        return copy(original = landed)
-    }
-
-    /** Records that the new title landed. */
-    fun titleLanded(value: String): WorkEdit = copy(original = original?.copy(title = value))
+    /** Shows an author under a new name: one just renamed in « Modifier l'auteur·ice ». */
+    fun renameAuthor(uri: String, name: String): WorkEdit = copy(
+        authors = authors.map { if (it.uri == uri) it.copy(name = name) else it },
+        original = original?.copy(authors = original.authors.map { if (it.uri == uri) it.copy(name = name) else it }),
+    )
 
     companion object {
-        /** A work inventaire.io or Wikidata has. */
-        fun existing(original: EditionWork): WorkEdit = WorkEdit(
-            id = UUID.randomUUID(),
+        /** A work inventaire.io or Wikidata has. [id] keeps a row's identity when the work it shows is read again. */
+        fun existing(original: EditionWork, id: UUID = UUID.randomUUID()): WorkEdit = WorkEdit(
+            id = id,
             original = original,
             title = original.title,
             authors = original.authors,

@@ -41,7 +41,6 @@ class ListsPresentationTest {
     fun an_empty_list_fans_one_grey_slot_and_a_known_cover_shows() {
         val rows: List<ListRowModel> = ListsPresentation.rows(
             lists = listOf(list("1", "Vide"), list("2", "Pleine", elements = listOf(element("wd:A", "0"), element("wd:B", "1")))),
-            query = "",
             images = mapOf("wd:A" to "https://a"),
         )
         assertEquals(listOf<String?>(null), rows.first { it.id == "1" }.covers)

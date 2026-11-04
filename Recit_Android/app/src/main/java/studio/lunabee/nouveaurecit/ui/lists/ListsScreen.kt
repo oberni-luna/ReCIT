@@ -3,15 +3,12 @@ package studio.lunabee.nouveaurecit.ui.lists
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -35,22 +32,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import studio.lunabee.nouveaurecit.R
-import studio.lunabee.nouveaurecit.data.model.EntityListType
-import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
 import studio.lunabee.nouveaurecit.designsystem.RecitSearchField
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
+import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.ShelfPalette
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingPlaceholder
-import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
-import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.designsystem.shelfPaper
 import studio.lunabee.nouveaurecit.ui.common.LargeTitleRefreshBox
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
@@ -63,16 +54,18 @@ import studio.lunabee.nouveaurecit.ui.profile.ProfileAvatarButton
 
 /**
  * `EntityListView` — the Listes tab: the placeholder until the first lists sync, the empty state of
- * feature 0022 (`ListsEmptyStateView`), or the lists by name with their covers (feature 0024),
- * filtered by the search field, swiped to delete, pulled to refresh.
+ * feature 0022 (`ListsEmptyStateView`), or the lists with their covers (feature 0024) in two sections
+ * (`ListsTabList`, feature 0068): « Mes listes » by name, swiped to delete, then « Dans mon réseau », my
+ * friends' lists, read-only. The search filters both; pulled to refresh.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListsScreen(navigator: Navigator) {
-    val viewModel: ListsViewModel = recitViewModel { ListsViewModel(it.lists, it.entities, it.session, it.syncStatus) }
+    val viewModel: ListsViewModel = recitViewModel { ListsViewModel(it.lists, it.users, it.entities, it.session, it.syncStatus) }
     val hasSynced: Boolean by viewModel.hasSynced.collectAsState()
     val hasNoList: Boolean by viewModel.hasNoList.collectAsState()
-    val rows: List<ListRowModel> by viewModel.rows.collectAsState()
+    val showsHeaders: Boolean by viewModel.showsHeaders.collectAsState()
+    val rows: ListsViewModel.Rows by viewModel.rows.collectAsState()
     val query: String by viewModel.query.collectAsState()
     val isRefreshing: Boolean by viewModel.isRefreshing.collectAsState()
     var showsForm: Boolean by rememberSaveable { mutableStateOf(false) }
@@ -109,7 +102,17 @@ fun ListsScreen(navigator: Navigator) {
                     item(key = "search") {
                         ListsSearchField(query = query, onQueryChange = viewModel::setQuery)
                     }
-                    items(rows, key = { it.id }) { row ->
+                    // Without a list of mine while my friends have some, « Mes listes » keeps one row that
+                    // creates the first: the section says where mine will go.
+                    if (rows.mine.isNotEmpty() || (showsHeaders && query.isEmpty())) {
+                        if (showsHeaders) {
+                            item(key = "header-mine") { SectionHeader(stringResource(R.string.lists_section_mine)) }
+                        }
+                        if (rows.mine.isEmpty()) {
+                            item(key = "create") { ListsCreateRow(onClick = { showsForm = true }) }
+                        }
+                    }
+                    items(rows.mine, key = { it.id }) { row ->
                         SwipeToDeleteRow(
                             key = row.id,
                             onDelete = { viewModel.deleteList(row.id) { messenger.showError(genericError, it.localizedMessage) } },
@@ -117,7 +120,16 @@ fun ListsScreen(navigator: Navigator) {
                         ) {
                             ListRow(row = row, onClick = { navigator.push(Destination.EntityList(row.id)) })
                         }
-                        HorizontalDivider(color = RecitTheme.colors.borderDefault, modifier = Modifier.padding(start = Spacing.medium))
+                        ListRowDivider()
+                    }
+                    if (rows.network.isNotEmpty()) {
+                        item(key = "header-network") { SectionHeader(stringResource(R.string.lists_section_network)) }
+                    }
+                    items(rows.network, key = { it.id }) { row ->
+                        Column(Modifier.animateItem()) {
+                            ListRow(row = row, onClick = { navigator.push(Destination.EntityList(row.id)) })
+                            ListRowDivider()
+                        }
                     }
                 }
             }
@@ -126,6 +138,32 @@ fun ListsScreen(navigator: Navigator) {
 
     if (showsForm) {
         ListFormSheet(listId = null, fileWorkUri = null, onDismiss = { showsForm = false })
+    }
+}
+
+@Composable
+private fun ListRowDivider() {
+    HorizontalDivider(color = RecitTheme.colors.borderDefault, modifier = Modifier.padding(start = Spacing.medium))
+}
+
+/** « Créer une liste » in the accent, heading « Mes listes » while I have none: the same form as the « + ». */
+@Composable
+private fun ListsCreateRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(RecitTheme.colors.backgroundDefault)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Default.Add, contentDescription = null, tint = RecitTheme.colors.foregroundTinted, modifier = Modifier.size(20.dp))
+        Text(
+            text = stringResource(R.string.lists_empty_action_create_title),
+            style = RecitTheme.typography.content300,
+            color = RecitTheme.colors.foregroundTinted,
+        )
     }
 }
 
@@ -139,69 +177,6 @@ private fun ListsSearchField(query: String, onQueryChange: (String) -> Unit) {
         clearLabel = stringResource(R.string.lists_search_clear),
         modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small),
     )
-}
-
-/** `ListRowView`: the cover fan, then the name, what the list is for, and how much it holds. */
-@Composable
-private fun ListRow(row: ListRowModel, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(RecitTheme.colors.backgroundDefault)
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        ListCoverFan(covers = row.covers, type = row.type)
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
-            Text(
-                text = row.name,
-                style = RecitTheme.typography.content400Bold,
-                color = RecitTheme.colors.foregroundDefault,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            if (row.explanation.isNotEmpty()) {
-                Text(
-                    text = row.explanation,
-                    style = RecitTheme.typography.content300,
-                    color = RecitTheme.colors.foregroundSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Text(
-                // Plural rules follow the device's language; « 0 œuvres » showed on an English phone.
-                text = if (row.count == 0) {
-                    stringResource(R.string.list_count_empty)
-                } else {
-                    pluralStringResource(ListsPresentation.countPlural(row.type), row.count, row.count)
-                },
-                style = RecitTheme.typography.footnote200,
-                color = RecitTheme.colors.foregroundSecondary,
-            )
-        }
-    }
-}
-
-/** `ListCoverFan`: up to three 48 dp covers, 18dp apart, the first in front; always as wide as a full fan. */
-@Composable
-private fun ListCoverFan(covers: List<String?>, type: EntityListType) {
-    val size: ThumbnailSize = ThumbnailSize.Medium
-    val step: Dp = 18.dp
-    val shape: ThumbnailShape = if (type == EntityListType.Author) ThumbnailShape.Circle else ThumbnailShape.Portrait
-    Box(modifier = Modifier.width(size.width + step * (ListsPresentation.COVER_LIMIT - 1))) {
-        // Drawn back to front, so the first cover lands on top.
-        covers.indices.reversed().forEach { index ->
-            CellThumbnail(
-                url = covers[index],
-                size = size,
-                shape = shape,
-                modifier = Modifier.offset(x = step * index),
-            )
-        }
-    }
 }
 
 /** `ListsEmptyStateView`: the step in words, the tag that says what a list is, the tag that makes one. */

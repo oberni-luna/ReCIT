@@ -4,14 +4,26 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import studio.lunabee.nouveaurecit.data.creation.EditionFormat
-import studio.lunabee.nouveaurecit.data.creation.EditionProperty
+import studio.lunabee.nouveaurecit.data.creation.EditionPropertyCatalogue
 
-/** Every property of the catalogue and every format has a name to print. */
+/** Every property of every catalogue, every choice and every format has a name to print. */
 class EditionPropertyLabelsTest {
     @Test
-    fun everyPropertyHasItsLabel() {
-        val missing: List<String> = EditionProperty.all.filterNot(EditionPropertyLabels::hasLabel).map { it.labelKey }
+    fun everyPropertyOfEveryCatalogueHasItsLabel() {
+        val missing: List<String> = EditionPropertyCatalogue.entries
+            .flatMap { it.properties }
+            .filterNot(EditionPropertyLabels::hasLabel)
+            .map { it.labelKey }
         assertTrue("No label for $missing", missing.isEmpty())
+    }
+
+    @Test
+    fun everyChoiceHasItsName() {
+        val missing: List<String> = EditionPropertyCatalogue.entries
+            .flatMap { catalogue -> catalogue.properties.flatMap { it.choices } }
+            .filterNot(EditionPropertyLabels::hasLabel)
+            .map { it.labelKey }
+        assertTrue("No name for $missing", missing.isEmpty())
     }
 
     @Test

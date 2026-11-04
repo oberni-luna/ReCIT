@@ -15,6 +15,10 @@ import java.net.URI
  *
  * An identifier's pattern is the server's own (`properties_values_constraints.ts`), so a value refused
  * here would have been refused there, with a less useful message.
+ *
+ * A work's and a person's properties are catalogues of their own (iOS feature 0057, [WorkProperties],
+ * [HumanProperties]), shown through the same rows and pages. The same uri can be a different property
+ * there, so a uri is always read in the catalogue of the form it belongs to ([EditionPropertyCatalogue]).
  */
 data class EditionProperty(
     val uri: String,
@@ -40,6 +44,21 @@ data class EditionProperty(
         /** An entity found by `/api/search` with this type, or created. */
         data class Entity(val type: EntitySearchType) : Kind
 
+        /**
+         * An entity found by `/api/search` among several types — a work's main subject can be a genre, a
+         * movement, a person or a work. Never created from the form.
+         */
+        data class AnyEntity(val types: List<EntitySearchType>) : Kind
+
+        /** One value among a fixed few, each an entity uri the server allows: a work's type, its form. */
+        data class Choice(val choices: List<EditionPropertyChoice>) : Kind
+
+        /** Free text: a pseudonym. */
+        data object Text : Kind
+
+        /** A positive whole number the server keeps as a string: a rank in a series. */
+        data object Ordinal : Kind
+
         /** An identifier in a catalogue, checked against the server's pattern. */
         data class Identifier(val pattern: String, val example: String) : Kind
 
@@ -48,16 +67,67 @@ data class EditionProperty(
     }
 
     /** The section of the form a property is shown in. */
-    enum class Group { Publication, Format, Contributors, Databases, Links }
+    enum class Group {
+        Publication,
+        Format,
+        Contributors,
+        Databases,
+        Links,
 
-    /** The type to search for, for a property whose values are entities. */
+        /** A work's or a person's first section: what it is, its language, its dates. */
+        General,
+
+        /** A work's authors. */
+        Authors,
+
+        /** The other people who made a work. */
+        Roles,
+
+        /** The roles of a comic: penciller, inker, colorist, letterer. */
+        Comics,
+        Series,
+
+        /** A work's genres and main subjects. */
+        Subjects,
+
+        /** A work's relations with other works. */
+        Relations,
+
+        /** A person's movement and influences. */
+        Influences,
+
+        /** « À ne pas confondre avec ». */
+        Misc,
+    }
+
+    /** The type to search for, for a property whose values are entities of one type: the type one created is given. */
     val searchType: EntitySearchType? get() = (kind as? Kind.Entity)?.type
 
-    /** Whether an entity nobody has entered can be created from the form: a person, a publisher, a collection. */
+    /** Every type the search looks among, for a property whose values are entities. */
+    val searchTypes: List<EntitySearchType>
+        get() = when (kind) {
+            is Kind.Entity -> listOf(kind.type)
+            is Kind.AnyEntity -> kind.types
+            else -> emptyList()
+        }
+
+    /** Whether the values are entities, named by uri. */
+    val isEntity: Boolean get() = searchTypes.isNotEmpty()
+
+    /** The values a [Kind.Choice] property allows. */
+    val choices: List<EditionPropertyChoice> get() = (kind as? Kind.Choice)?.choices.orEmpty()
+
+    /**
+     * Whether an entity nobody has entered can be created from the form: a person, a publisher, a
+     * collection. A language is chosen among those Wikidata has, and nobody is created only to be told
+     * apart from (« À ne pas confondre avec »).
+     */
     val allowsCreation: Boolean
-        get() = searchType == EntitySearchType.Humans ||
-            searchType == EntitySearchType.Publishers ||
-            searchType == EntitySearchType.Collections
+        get() = group != Group.Misc && (
+            searchType == EntitySearchType.Humans ||
+                searchType == EntitySearchType.Publishers ||
+                searchType == EntitySearchType.Collections
+            )
 
     /** What the user typed, made into the value that goes on the wire — or `null` when the server would refuse it. */
     fun literal(text: String): ClaimLiteral? {
@@ -65,10 +135,17 @@ data class EditionProperty(
         if (trimmed.isEmpty()) return null
         return when (kind) {
             Kind.Integer -> trimmed.toIntOrNull()?.takeIf { it > 0 }?.let { ClaimLiteral.Integer(it) }
+            Kind.Ordinal -> trimmed.takeIf { text -> text.all { it in '0'..'9' } }
+                ?.toIntOrNull()
+                ?.takeIf { it > 0 }
+                ?.let { ClaimLiteral.Text(it.toString()) }
+            // Wikidata's limit, which the server aligns on.
+            Kind.Text -> trimmed.takeIf { it.length <= MAX_TEXT_LENGTH }?.let { ClaimLiteral.Text(it) }
+            is Kind.Choice -> trimmed.takeIf { uri -> kind.choices.any { it.uri == uri } }?.let { ClaimLiteral.Text(it) }
             Kind.Date -> PublicationDate.parse(trimmed)?.let { ClaimLiteral.Text(it.claim) }
             is Kind.Identifier -> normalize(trimmed).takeIf { Regex(kind.pattern).containsMatchIn(it) }?.let { ClaimLiteral.Text(it) }
             Kind.Url -> trimmed.takeIf(::isWebAddress)?.let { ClaimLiteral.Text(it) }
-            Kind.Format, is Kind.Entity -> ClaimLiteral.Text(trimmed)
+            Kind.Format, is Kind.Entity, is Kind.AnyEntity -> ClaimLiteral.Text(trimmed)
         }
     }
 
@@ -80,9 +157,13 @@ data class EditionProperty(
             else -> null
         }
 
-    /** The small rewrites the server makes before it validates: the BnF's `cb` prefix, a Mastodon handle's `@`. */
+    /**
+     * The small rewrites the server makes before it validates: the BnF's `cb` prefix, a Mastodon handle's
+     * `@`, the spaces an ISNI is printed with.
+     */
     private fun normalize(value: String): String = when (uri) {
         "wdt:P268" -> value.removePrefix("cb")
+        "wdt:P213" -> value.filterNot(Char::isWhitespace)
         "wdt:P4033" -> value.removePrefix("@")
         else -> value
     }
@@ -191,15 +272,16 @@ data class EditionProperty(
 
         fun named(uri: String): EditionProperty? = all.firstOrNull { it.uri == uri }
 
-        fun inGroup(group: Group): List<EditionProperty> = all.filter { it.group == group }
+        /** Wikidata's limit on a string, which the server aligns on. */
+        private const val MAX_TEXT_LENGTH: Int = 400
 
-        private fun person(uri: String, labelKey: String): EditionProperty =
-            EditionProperty(uri, Kind.Entity(EntitySearchType.Humans), Group.Contributors, true, labelKey)
+        internal fun person(uri: String, labelKey: String, group: Group = Group.Contributors): EditionProperty =
+            EditionProperty(uri, Kind.Entity(EntitySearchType.Humans), group, true, labelKey)
 
-        private fun database(uri: String, labelKey: String, pattern: String, example: String): EditionProperty =
+        internal fun database(uri: String, labelKey: String, pattern: String, example: String): EditionProperty =
             EditionProperty(uri, Kind.Identifier(pattern, example), Group.Databases, true, labelKey)
 
-        private fun link(uri: String, labelKey: String, pattern: String, example: String): EditionProperty =
+        internal fun link(uri: String, labelKey: String, pattern: String, example: String): EditionProperty =
             EditionProperty(uri, Kind.Identifier(pattern, example), Group.Links, true, labelKey)
     }
 }

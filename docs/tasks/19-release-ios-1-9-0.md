@@ -1,6 +1,6 @@
 ---
 issue: 19
-status: todo
+status: to-test
 wiki: [[architecture]], [[lists]], [[network]], [[testing]]
 note: grilled with #20 (Android 1.3.0) from one request on 2026-11-04
 created: 2026-11-04
@@ -37,6 +37,13 @@ Round 1 — 2026-11-04, on hold (blocked by the list-deletion crash, see Verific
 - `metadata/app-store/localizations/{fr-FR,en-US}.json` → `version.whatsNew`: header + 4 bullets (« Dans mon réseau », a list's Présentation and who sees it, Wikidata, asking a friend for a book). French in « tu », the store's voice; U+202F before « : » and inside « ». 0069 left out.
 - Not done yet: archive, upload, tags. Waiting on the crash fix.
 
+Round 2 — 2026-11-04, after #25 (PR #26) merged.
+
+- Branch rebased on `main` (`45d43fa`, the list-deletion fix).
+- Archive: `build/release-1.9.0/ReCIT_iOS-1.9.0-20.xcarchive` — Release, generic iOS, 1.9.0 (20), `studio.lunabee.nouveau-recit`, team VH79XGK7M2, `libswiftCompatibilitySpan.dylib` embedded.
+- Upload: `xcodebuild -exportArchive` with `build/release-1.9.0/ExportOptions.plist` (`app-store-connect`, `upload`). First tries failed (Xcode tokens missing; the ASC API key may not use cloud-managed distribution certificates); after Olivier signed olivier@lunabee.com back into Xcode: `Upload succeeded`, `** EXPORT SUCCEEDED **` (`build/release-1.9.0/export-retry.log`).
+- Tag `Version-1.8.0-#19` on `e1cfb4c`, pushed. `Version-1.9.0-#20` waits for the merge: the bump commit's SHA changes when the branch is re-signed, so it is tagged on `main` at `/wa-close 19`.
+
 ## Review
 
 ## Verification
@@ -45,6 +52,11 @@ Round 1 — gate.
 
 - `scripts/e2e.sh` (`OlivierB_test4`, `E2E_RESET_ACCOUNT=1`, iPhone 17), `build/e2e/20261104-155953/`: 25 OK / 3 KO. The three KOs (22–24) are « add a work to a list »: the driver does not find `e2e.book.addToList.<list>` though the submenu is open with the entry on screen (screenshot 22) — driver issue, draft #24. Accepted by Olivier.
 - Simulator pass (iPhone 17, `build/release-1.9.0/`, light + dark): Lists tab with « Dans mon réseau » ✅ · a friend's list read-only, Livres → Présentation by swipe ✅ · a friend's profile, Inventaire • 138 / Listes • 2 / Présentation ✅ · add a work to my list from a book's « … » → « Ajouté à Release 1.9.0 test », list shows « 1 œuvre » ✅ (by hand, what the e2e could not do).
-- ❌ Deleting that list from the Lists tab (swipe → « Supprimer la liste ») crashes: `EntityList.type.getter` read on a deleted model from `ListRowView.swift:21` (crash 16:25). Same signature at 12:41 from `ListCoverFlowScreen.swift:117`. Upload stopped; fix first (Olivier, 2026-11-04).
+- ❌ (round 1) Deleting that list from the Lists tab (swipe → « Supprimer la liste ») crashes: `EntityList.type.getter` read on a deleted model from `ListRowView.swift:21` (crash 16:25). Same signature at 12:41 from `ListCoverFlowScreen.swift:117`. Upload stopped; fix first (Olivier, 2026-11-04).
+
+Round 2 — gate re-run after #25.
+
+- ✅ A list of mine holding a book (« Gate AGate A », 1 œuvre) → pencil → « Supprimer la liste »: back on Listes, no crash, no new crash log (`build/release-1.9.0/regate/`).
+- Upload: build 20 accepted (« Uploaded package is processing »). TestFlight not looked at by the agent — Olivier to confirm in App Store Connect › Ex-libris › TestFlight. Nothing submitted for review.
 
 ## Feedback

@@ -50,6 +50,12 @@ review → /wa-validate (on_validation).
 
 ## Verification
 
-manual validation — not run by agent (verify.mode: autopilot). Criteria 1 and 2 are yours.
+Round 1 — simulator pass on request (Olivier, 2026-11-04), iPhone 17 iOS 26, account `OlivierB_test4`, screenshots in `build/task-25/`.
+
+- ✅ Listes → swipe « Test » → Supprimer → « Supprimer la liste »: row gone, app running (01)
+- ✅ « For » → pencil → « Supprimer la liste »: back on Listes, no crash (02)
+- ✅ OlivierB → Listes • 2: rows shown, « Livres lus » opens read-only (03, 04)
+- ✅ Relaunch: both deleted lists stay gone (05). No new file in `~/Library/Logs/DiagnosticReports/` since the 16:25 crash.
+- Note: « Supprimer la liste » in the form deletes without a confirmation, unlike the swipe. Unchanged by this task; Olivier to say if it should ask.
 
 ## Feedback

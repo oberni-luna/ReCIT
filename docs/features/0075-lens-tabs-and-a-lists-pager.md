@@ -14,6 +14,9 @@ private API (App Review guideline 2.5.1), so the lens is rebuilt from public Swi
 - **Past the first or last word** the capsule follows less and less, like a scroll view's rubber band, up to 36 pt.
   It also stretches towards the finger: the far edge follows the finger fully, the near one by half, and the
   capsule flattens a little. Let go, it springs back.
+- **A tick each time the held capsule reaches another word**, as a segmented control's thumb does: the
+  selection haptic, on a tap on another word, at each word crossed, and when a flick carries it one word
+  further. Touching the selected word and swiping the pages give none.
 - **A tap on a word** still picks it. VoiceOver still sees one button per tab, with its count.
 - **A list's two pages, Livres and Présentation, are now side by side in a pager**, as a reader's profile is: a
   swipe turns from one to the other. On Livres, a swipe on the covers still scrolls the covers, and a swipe

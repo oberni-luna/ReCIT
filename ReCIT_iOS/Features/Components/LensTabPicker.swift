@@ -22,6 +22,9 @@
 //  edge, which UIKit's private `_UILiquidLensView` draws, is not there. The geometry is
 //  `LensTabTrack`'s.
 //
+//  **A tick each time the held capsule reaches another word**, as a segmented control's thumb
+//  does: the selection haptic, under the finger and when a flick carries it one word further.
+//
 
 import SwiftUI
 
@@ -43,6 +46,10 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
     @State private var isLifted: Bool = false
     /// How far past the first or last word the finger has pulled the capsule, already damped.
     @State private var overshoot: CGFloat = 0
+    /// The word nearest the capsule while a finger holds it, `nil` otherwise.
+    @State private var heldIndex: Int?
+    /// Bumped each time the held capsule reaches another word, for the selection haptic.
+    @State private var feedbackTick: Int = 0
     @GestureState private var isTouching: Bool = false
 
     private static var coordinateSpace: String { "LensTabPicker" }
@@ -64,6 +71,17 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
 
     private var position: CGFloat {
         dragPosition ?? track.clamped(pagePosition)
+    }
+
+    private func nearestIndex(_ position: CGFloat) -> Int {
+        Int(position.rounded())
+    }
+
+    /// Moves the held capsule's word to `index`, with a tick if it is another one.
+    private func hold(_ index: Int) {
+        guard index != heldIndex else { return }
+        heldIndex = index
+        feedbackTick += 1
     }
 
     var body: some View {
@@ -123,6 +141,7 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
         .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
         .contentShape(.rect)
         .gesture(drag)
+        .sensoryFeedback(.selection, trigger: feedbackTick)
         .onChange(of: pagePosition) { _, newValue in
             // The pager has reached where the capsule settled: it leads again.
             if grabOffset == nil, let dragPosition, abs(newValue - dragPosition) < 0.001 {
@@ -133,6 +152,7 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
             // A touch taken away by the system rather than lifted: back where it was.
             if isTouching == false, grabOffset != nil {
                 grabOffset = nil
+                heldIndex = nil
                 withAnimation(Self.settleAnimation) {
                     isLifted = false
                     overshoot = 0
@@ -158,6 +178,7 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
                         dragPosition = moved
                         overshoot = track.overshoot(forCenter: center)
                     }
+                    hold(nearestIndex(moved))
                     return
                 }
 
@@ -171,10 +192,14 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
                     offset = 0
                 }
                 grabOffset = offset
+                let lifted: CGFloat = track.position(forCenter: start + offset) ?? position
+                // The word the capsule stood on, so only a touch on another word ticks.
+                heldIndex = nearestIndex(position)
                 withAnimation(Self.liftAnimation) {
                     isLifted = true
-                    dragPosition = track.position(forCenter: start + offset) ?? position
+                    dragPosition = lifted
                 }
+                hold(nearestIndex(lifted))
             }
             .onEnded { value in
                 guard let grabOffset else { return }
@@ -185,7 +210,13 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
                     center: value.location.x + grabOffset,
                     velocity: value.velocity.width
                 )
-                guard tabs.indices.contains(index) else { return }
+                guard tabs.indices.contains(index) else {
+                    heldIndex = nil
+                    return
+                }
+                // Flung one word further than the finger had taken it.
+                hold(index)
+                heldIndex = nil
                 let target: CGFloat = CGFloat(index)
                 // The spring carries the finger's speed past the word before it comes back.
                 withAnimation(Self.settleAnimation) {

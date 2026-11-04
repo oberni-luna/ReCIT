@@ -1,6 +1,6 @@
 ---
 issue: 21
-status: todo
+status: to-test
 wiki: [[features/0064-a-friends-profile-with-tabs]], [[features/0066-a-friends-profile-tabs-as-pages]], [[features/0067-a-friends-profile-presentation-tab]], [[features/0031-android-app]], [[features/0041-android-catches-up-with-ios]]
 note: split from #20; sprint Android 1.3.0 — Android catches up with iOS 1.9.0
 created: 2026-11-04
@@ -41,4 +41,21 @@ created: 2026-11-04
 - [ ] Profile of a non-friend: one page, bio centred on top, no tabs
 - [ ] Update from 1.2.0 over an existing install: app launches, my books and lists still there (AutoMigration 1→2)
 - [ ] Remove a friend: their lists vanish from the store
-- [ ] Unit tests: `syncLists` scoped deletion, `isCreatedByMe`, migration 1→2 (`MigrationTestHelper`)
+- [ ] Unit tests: `syncLists` scoped deletion, `isCreatedByMe`; migration 1→2 proven by Room's generated `AutoMigration_1_2` + `2.json` (no `room-testing`: no new dependency)
+
+## Implementation
+
+- **Data:** `AppDatabase` v2, `AutoMigration(1→2)` adds `users.bio` and `lists.creatorId` (nullable); `schemas/…/2.json` exported.
+- **Ownership:** `isCreatedByMe(myUserId)`; `ListRepository.observeMyLists()` / `observeMyCount()` mine-only; `observeListsOf(userId)`, `syncFriendLists(userId)` on profile open.
+- **Scoped pruning:** pure `data/lists/ListSyncPlan.kt` deletes only among the creators asked; multi-creator ready for #22.
+- **Unfriend:** the friend's lists deleted at reconcile, with their books and étagères.
+- **Mine only:** Lists tab, the book's « … », the work screen's lists, « Déplacer », the account-deletion count, the Profil's list count.
+- **Read-only list:** `EntityListScreen` hides « Modifier », the add bar, « Déplacer », « Retirer de la liste »; their comment as selectable text.
+- **Profil d'un ami:** `ui/network/UserProfile*.kt` — header overlay folding over the pager (`ProfileHeaderCollapse`), snaps to the nearer end, backdrop + hairline once folded, fold blended across pages; one `LazyListState` per page.
+- **Tabs:** `ui/common/CapsuleTabs.kt` drawn from the pager position (reused by #22); `NetworkSegment` untouched.
+- **Not ported:** tappable links in the bio, labels shrinking before wrapping, pager frozen while picking a book off an étagère.
+- **Proof:** `./gradlew assembleDebug :app:testDebugUnitTest` green (557 tests, 16 new: `ListSyncPlanTest`, `EntityListOwnershipTest`, `ProfileHeaderCollapseTest`). Never run on an emulator.
+
+## Verification
+
+manual validation — not run by agent

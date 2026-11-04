@@ -6,7 +6,6 @@
 -->
 <resources>
     <string name="network_nav_network">Réseau</string>
-    <string name="network_nav_user">Utilisateur</string>
 
     <string name="network_add_friends">Ajouter des amis lecteurs</string>
     <string name="network_friends">Amis</string>
@@ -54,15 +53,23 @@
     <string name="network_private_inventory_title">Inventaire privé</string>
     <string name="network_private_inventory_message">Les livres de %1$s apparaîtront ici une fois la demande acceptée.</string>
 
-    <!-- A user's profile -->
-    <plurals name="network_user_item_count">
-        <item quantity="one">%1$d livre</item>
-        <item quantity="many">%1$d livres</item>
-        <item quantity="other">%1$d livres</item>
-    </plurals>
+    <!-- A user's profile (iOS features 0064, 0066, 0067) -->
     <string name="network_user_shelves_header">Étagères de %1$s</string>
-    <string name="network_user_inventory_header">Inventaire de %1$s</string>
     <string name="network_inventory_empty">Oh, c’est vide ici</string>
+    <string name="network_user_tab_inventory">Inventaire • %1$d</string>
+    <plurals name="network_user_tab_inventory_description">
+        <item quantity="one">Inventaire, %1$d élément</item>
+        <item quantity="many">Inventaire, %1$d éléments</item>
+        <item quantity="other">Inventaire, %1$d éléments</item>
+    </plurals>
+    <string name="network_user_tab_lists">Listes • %1$d</string>
+    <string name="network_user_tab_lists_description">Listes, %1$d</string>
+    <string name="network_user_tab_lists_loading">Listes</string>
+    <string name="network_user_tab_presentation">Présentation</string>
+    <string name="network_user_lists_empty_title">%1$s n’a pas encore de liste</string>
+    <string name="network_user_lists_empty_message">Ses listes apparaîtront ici dès qu’il y en aura une. Vous pourrez les parcourir, pas les modifier.</string>
+    <string name="network_user_lists_failed">Les listes de %1$s n’ont pas pu être chargées</string>
+    <string name="network_user_presentation_empty">%1$s n’a pas encore écrit de présentation</string>
 
     <!-- First sync of a friend's inventory (feature 0027) -->
     <string name="network_sync_inventory_friend_title">L’inventaire de %1$s arrive</string>

@@ -129,10 +129,12 @@ class UserRepository(
 
     suspend fun discardRelation(userId: String) = changeRelation(userId, UserRelation.None, "discard")
 
+    /** Their books, étagères and lists go with them: nothing syncs them again once the relation is gone. */
     suspend fun unfriend(userId: String) = changeRelation(userId, UserRelation.None, "unfriend") {
         db.withTransaction {
             db.inventoryDao().deleteOwnedBy(userId)
             db.shelfDao().deleteOwnedBy(userId)
+            db.listDao().deleteCreatedBy(userId)
             dao.setLastInventorySync(userId, null)
         }
     }

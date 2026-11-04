@@ -2,11 +2,14 @@ package studio.lunabee.nouveaurecit.data
 
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.data.db.EntityListItemEntity
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.data.lists.ListSyncPlan
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.data.model.Merges
 import studio.lunabee.nouveaurecit.data.model.Visibility
@@ -25,26 +28,48 @@ import studio.lunabee.nouveaurecit.network.dto.RemoveElementsResponseDto
 import studio.lunabee.nouveaurecit.network.dto.SingleIdsPayload
 import studio.lunabee.nouveaurecit.network.dto.UpdateListElementDto
 
-/** `ListModel`: book lists against the `/api/lists` endpoints. */
+/**
+ * `ListModel`: book lists against the `/api/lists` endpoints. The store holds mine and the ones my
+ * friends let me see, told apart by `EntityListEntity.creatorId` against [myUserId].
+ */
 class ListRepository(
     private val api: ApiService,
     private val db: AppDatabase,
     private val runner: OptimisticRunner,
+    private val myUserId: StateFlow<String?>,
 ) {
     private val dao = db.listDao()
 
-    fun observeLists(): Flow<List<ListWithElements>> = dao.observeLists()
+    /** Mine only: the Lists tab, the « … » menus, « Déplacer ». */
+    fun observeMyLists(): Flow<List<ListWithElements>> = myUserId.flatMapLatest(dao::observeMine)
+
+    /** The lists a reader's profile shows: mine on my own, theirs on anyone else's. */
+    fun observeListsOf(userId: String): Flow<List<ListWithElements>> =
+        myUserId.flatMapLatest { myId -> if (userId == myId) dao.observeMine(myId) else dao.observeCreatedBy(userId) }
 
     fun observeList(id: String): Flow<ListWithElements?> = dao.observeList(id)
 
-    /** Upsert in place, missing lists deleted; each list's elements likewise. */
-    suspend fun syncLists(user: UserEntity) {
-        val response: ListsDto = api.get("/api/lists/by-creators", "users" to user.id, "with-elements" to "true")
+    /** Syncs **my** lists — the one sync allowed to prune the lists stored before `creatorId` was read. */
+    suspend fun syncLists(user: UserEntity) = syncLists(creatorIds = setOf(user.id), claimsUnstamped = true)
+
+    /**
+     * The lists a friend lets me see, for their profile, fetched each time it opens. The server applies
+     * the visibility; nothing is filtered here.
+     */
+    suspend fun syncFriendLists(userId: String) = syncLists(creatorIds = setOf(userId), claimsUnstamped = false)
+
+    /** Upsert in place, the missing lists of [creatorIds] deleted ([ListSyncPlan]); each list's elements likewise. */
+    private suspend fun syncLists(creatorIds: Set<String>, claimsUnstamped: Boolean) {
+        val response: ListsDto = api.get(
+            "/api/lists/by-creators",
+            "users" to creatorIds.sorted().joinToString("|"),
+            "with-elements" to "true",
+        )
         db.withTransaction {
-            val existing: Map<String, EntityListEntity> = dao.all().associateBy { it.id }
-            dao.upsert(response.lists.map { Merges.list(existing[it.id], it) })
-            dao.delete(existing.keys.filter { id -> response.lists.none { it.id == id } })
-            response.lists.forEach { mergeElements(it) }
+            val plan: ListSyncPlan = ListSyncPlan.plan(dao.all(), response.lists, creatorIds, claimsUnstamped)
+            dao.upsert(plan.upserts)
+            dao.delete(plan.deletions)
+            plan.synced.forEach { mergeElements(it) }
         }
     }
 
@@ -181,5 +206,5 @@ class ListRepository(
         api.send<UpdateListElementDto, OkStatusDto>("/api/lists/update-element", method = "PUT", body = UpdateListElementDto(elementId, comment))
     }
 
-    fun observeCount(): Flow<Int> = dao.observeCount()
+    fun observeMyCount(): Flow<Int> = myUserId.flatMapLatest(dao::observeMyCount)
 }

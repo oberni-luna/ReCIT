@@ -56,13 +56,16 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
  * authors, « Mon commentaire », « Retirer de la liste » and the day it was added. Moving to another book
  * cross-fades that block while the covers follow the finger.
  *
+ * A friend's list (iOS feature 0064) opens read-only: no « Modifier », no add bar, no « Déplacer », no
+ * « Retirer de la liste »; their comment, when they wrote one, reads as text.
+ *
  * « Modifier » opens the form; the screen leaves by itself when the list stops existing. A list of
  * publishers says it is empty, as on iOS.
  */
 @Composable
 fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) {
     val viewModel: EntityListViewModel = recitViewModel(key = destination.id) {
-        EntityListViewModel(destination.id, it.lists, it.entities)
+        EntityListViewModel(destination.id, it.lists, it.entities, it.users.myUserId)
     }
     val state: EntityListViewModel.State by viewModel.state.collectAsStateWithLifecycle()
     var showsForm: Boolean by rememberSaveable { mutableStateOf(false) }
@@ -71,7 +74,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
     var isCommentFocused: Boolean by remember { mutableStateOf(false) }
     val list: EntityListEntity? = state.list
     val isAuthor: Boolean = list?.type == EntityListType.Author
-    val canAdd: Boolean = list != null && list.type != EntityListType.Publisher
+    val canAdd: Boolean = list != null && list.type != EntityListType.Publisher && !state.isReadOnly
 
     // Deleting from the form pops, and so does the list vanishing from Room: leave only once.
     var hasLeft: Boolean by remember { mutableStateOf(false) }
@@ -96,7 +99,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 onBack = navigator::pop,
                 containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
-                    if (state.list != null) {
+                    if (state.list != null && !state.isReadOnly) {
                         IconButton(onClick = { showsForm = true }) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
                         }
@@ -197,13 +200,16 @@ private fun ListCoverFlowContent(
         item(key = "comment") {
             Crossfade(targetState = state.selectedRow?.uri, label = "list.comment") { uri ->
                 val row: ListElementRowModel = state.rows.firstOrNull { it.uri == uri } ?: return@Crossfade
-                ListCard {
-                    ListCommentField(
-                        row = row,
-                        isAuthor = isAuthor,
-                        onFocusChange = onCommentFocusChange,
-                        onSave = { viewModel.updateComment(row, it) },
-                    )
+                when {
+                    !state.isReadOnly -> ListCard {
+                        ListCommentField(
+                            row = row,
+                            isAuthor = isAuthor,
+                            onFocusChange = onCommentFocusChange,
+                            onSave = { viewModel.updateComment(row, it) },
+                        )
+                    }
+                    row.comment.isNotBlank() -> ListCard { ListReadOnlyComment(row.comment) }
                 }
             }
         }
@@ -228,14 +234,16 @@ private fun ListCoverFlowContent(
         item(key = "remove") {
             val row: ListElementRowModel? = state.selectedRow
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                ListCard(
-                    onClick = {
-                        if (row != null) {
-                            scope.launch { viewModel.remove(row.uri) { messenger.showError(genericError, it.localizedMessage) } }
-                        }
-                    },
-                ) {
-                    Text(stringResource(R.string.list_detail_remove), style = RecitTheme.typography.action300, color = RecitTheme.colors.foregroundError)
+                if (!state.isReadOnly) {
+                    ListCard(
+                        onClick = {
+                            if (row != null) {
+                                scope.launch { viewModel.remove(row.uri) { messenger.showError(genericError, it.localizedMessage) } }
+                            }
+                        },
+                    ) {
+                        Text(stringResource(R.string.list_detail_remove), style = RecitTheme.typography.action300, color = RecitTheme.colors.foregroundError)
+                    }
                 }
                 Crossfade(targetState = row, label = "list.added") { shown ->
                     if (shown != null && shown.created > 0) {

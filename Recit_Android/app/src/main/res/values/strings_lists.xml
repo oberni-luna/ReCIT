@@ -37,6 +37,7 @@
 
     <!-- A list as a cover flow (iOS feature 0060) -->
     <string name="list_detail_comment_label">Mon commentaire</string>
+    <string name="list_detail_comment_other">Commentaire</string>
     <string name="list_detail_comment_placeholder_work">Pourquoi ce livre est dans la liste…</string>
     <string name="list_detail_comment_placeholder_author">Pourquoi cet·te auteur·ice est dans la liste…</string>
     <string name="list_detail_remove">Retirer de la liste</string>

@@ -1,0 +1,10 @@
+# whackagent — test target overrides, merged over the root .swiftlint.yml.
+# A test never crashes: force unwrap / try / cast stay errors. Use `try #require`,
+# `#expect(throws:)`, exit tests. Only size limits and public docs are relaxed.
+
+disabled_rules:
+  - empty_count                 # XCUIElementQuery has `count`, no `isEmpty`: its autofix breaks UI tests
+  - missing_docs
+  - function_body_length
+  - type_body_length
+  - file_length

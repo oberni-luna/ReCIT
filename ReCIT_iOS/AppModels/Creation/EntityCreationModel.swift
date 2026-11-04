@@ -76,7 +76,7 @@ final class EntityCreationModel {
 
         let uris: String = results.map(\.uri).joined(separator: "|")
         let response: WorkSummariesDTO? = try? await publicAPIService.fetchData(
-            fromEndpoint: "/api/entities/by-uris?uris=\(uris)&attributes=labels|claims&lang=fr&relatives=wdt:P50",
+            fromEndpoint: "/api/entities/by-uris?uris=\(uris)&attributes=labels|claims&lang=\(ContentLanguage.preferred)&relatives=wdt:P50",
             debug: false
         )
 
@@ -190,7 +190,7 @@ final class EntityCreationModel {
     /// or nothing at all: there is then nothing the form could send.
     func editableEdition(uri: String) async throws -> EditionClaims {
         let response: EditableEditionsDTO? = try await publicAPIService.fetchData(
-            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=info|claims|labels&lang=fr&relatives=\(Self.namedRelatives)",
+            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=info|claims|labels&lang=\(ContentLanguage.preferred)&relatives=\(Self.namedRelatives)",
             debug: false
         )
 
@@ -205,7 +205,7 @@ final class EntityCreationModel {
         let missing: [String] = unnamed.properties.entityUris.filter { labels[$0] == nil }
         if missing.isEmpty == false {
             let named: EditableEditionsDTO? = try? await publicAPIService.fetchData(
-                fromEndpoint: "/api/entities/by-uris?uris=\(missing.joined(separator: "|"))&attributes=labels&lang=fr",
+                fromEndpoint: "/api/entities/by-uris?uris=\(missing.joined(separator: "|"))&attributes=labels&lang=\(ContentLanguage.preferred)",
                 debug: false
             )
             labels.merge(named?.entities.compactMapValues(\.displayName) ?? [:]) { known, _ in known }
@@ -233,7 +233,7 @@ final class EntityCreationModel {
         guard uris.isEmpty == false else { return [] }
 
         let response: WorkSummariesDTO? = try await publicAPIService.fetchData(
-            fromEndpoint: "/api/entities/by-uris?uris=\(uris.joined(separator: "|"))&attributes=labels|claims&lang=fr&relatives=wdt:P50",
+            fromEndpoint: "/api/entities/by-uris?uris=\(uris.joined(separator: "|"))&attributes=labels|claims&lang=\(ContentLanguage.preferred)&relatives=wdt:P50",
             debug: false
         )
 
@@ -347,7 +347,7 @@ final class EntityCreationModel {
     /// Public, so cookieless. Throws when the answer holds neither a work nor a person.
     func editableEntity(uri: String) async throws -> EntityEdit {
         let response: EditableEditionsDTO? = try await publicAPIService.fetchData(
-            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=info|claims|labels&lang=fr",
+            fromEndpoint: "/api/entities/by-uris?uris=\(uri)&attributes=info|claims|labels&lang=\(ContentLanguage.preferred)",
             debug: false
         )
 
@@ -363,7 +363,7 @@ final class EntityCreationModel {
         var labels: [String: String] = [:]
         if unnamed.entityUris.isEmpty == false {
             let named: EditableEditionsDTO? = try? await publicAPIService.fetchData(
-                fromEndpoint: "/api/entities/by-uris?uris=\(Array(Set(unnamed.entityUris)).sorted().joined(separator: "|"))&attributes=labels&lang=fr",
+                fromEndpoint: "/api/entities/by-uris?uris=\(Array(Set(unnamed.entityUris)).sorted().joined(separator: "|"))&attributes=labels&lang=\(ContentLanguage.preferred)",
                 debug: false
             )
             labels = named?.entities.compactMapValues(\.displayName) ?? [:]

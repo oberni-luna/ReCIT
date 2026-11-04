@@ -42,7 +42,7 @@ struct EditionCell: View {
                     .textStyle(.content400Bold)
                     .foregroundStyle(.foregroundDefault)
 
-                if let details = details {
+                if let details {
                     Text(details)
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundSecondary)

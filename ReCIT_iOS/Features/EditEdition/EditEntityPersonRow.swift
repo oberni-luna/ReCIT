@@ -2,9 +2,9 @@
 //  EditEntityPersonRow.swift
 //  ReCIT_iOS
 //
-//  One author of a work in « Modifier l'œuvre »: their name, and — when inventaire.io has them —
-//  a chevron to « Modifier l'auteur·ice ». A Wikidata person is changed on Wikidata, and one
-//  still to be created is created with the work's save.
+//  One author of a work in « Modifier l'œuvre »: their name, and — when they exist, on
+//  inventaire.io or on Wikidata — a chevron to « Modifier l'auteur·ice ». One still to be created
+//  is created with the work's save.
 //
 
 import SwiftUI
@@ -14,7 +14,7 @@ struct EditEntityPersonRow: View {
     let onOpen: (String) -> Void
 
     var body: some View {
-        if let uri = person.uri, uri.hasPrefix("inv:") {
+        if let uri = person.uri, EntityEdit.canEdit(uri: uri) {
             Button {
                 onOpen(uri)
             } label: {

@@ -14,7 +14,7 @@
 //
 //  Each tag is a `ShelfEmptyStateAction`, which holds its own wording; the destinations live
 //  in `ShelvesContent`, which switches over the action exactly once. See PRD 0007 for the
-//  errand, and docs/features/0021 for the sentence and the tags.
+//  errand, and docs/wiki/features/0021 for the sentence and the tags.
 //
 
 import Foundation

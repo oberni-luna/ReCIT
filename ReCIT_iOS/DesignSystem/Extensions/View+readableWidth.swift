@@ -24,21 +24,24 @@ extension View {
     }
 
     /// A scroll view's content held to `DesignSystem.ReadableWidth.maximum`, its margins
-    /// widened to centre it — and left to the list's own on a screen narrower than that.
-    func readableContentMargins() -> some View {
-        modifier(ReadableContentMargins())
+    /// widened to centre it — and left to the list's own on a screen narrower than that, or
+    /// when `isEnabled` is false (a page that lays its rows out in columns on a wide screen).
+    func readableContentMargins(isEnabled: Bool = true) -> some View {
+        modifier(ReadableContentMargins(isEnabled: isEnabled))
     }
 }
 
 /// Measures the scroll view and widens its horizontal content margins to suit.
 private struct ReadableContentMargins: ViewModifier {
+    let isEnabled: Bool
+
     @State private var containerWidth: CGFloat = 0
 
     func body(content: Content) -> some View {
         content
             .contentMargins(
                 .horizontal,
-                DesignSystem.ReadableWidth.scrollContentMargin(containerWidth: containerWidth),
+                isEnabled ? DesignSystem.ReadableWidth.scrollContentMargin(containerWidth: containerWidth) : nil,
                 for: .scrollContent
             )
             .onGeometryChange(for: CGFloat.self) { proxy in

@@ -28,13 +28,13 @@ enum TransactionStateMachine {
 
     static let transitions: [TransactionTransition] = [
         requestTransition,
-        .init(event: .accept,  from: .requested, to: .accepted,  actor: .owner,     requiresMessage: false),
-        .init(event: .reject,  from: .requested, to: .declined,  actor: .owner,     requiresMessage: false),
-        .init(event: .cancel,  from: .requested, to: .cancelled, actor: .requester, requiresMessage: false),
-        .init(event: .confirm, from: .accepted,  to: .confirmed, actor: .requester, requiresMessage: false),
-        .init(event: .cancel,  from: .accepted,  to: .cancelled, actor: .requester, requiresMessage: false),
-        .init(event: .cancel,  from: .accepted,  to: .cancelled, actor: .owner,     requiresMessage: false),
-        .init(event: .close,   from: .confirmed, to: .returned,  actor: .owner,     requiresMessage: false)
+        .init(event: .accept, from: .requested, to: .accepted, actor: .owner, requiresMessage: false),
+        .init(event: .reject, from: .requested, to: .declined, actor: .owner, requiresMessage: false),
+        .init(event: .cancel, from: .requested, to: .cancelled, actor: .requester, requiresMessage: false),
+        .init(event: .confirm, from: .accepted, to: .confirmed, actor: .requester, requiresMessage: false),
+        .init(event: .cancel, from: .accepted, to: .cancelled, actor: .requester, requiresMessage: false),
+        .init(event: .cancel, from: .accepted, to: .cancelled, actor: .owner, requiresMessage: false),
+        .init(event: .close, from: .confirmed, to: .returned, actor: .owner, requiresMessage: false)
     ]
 
     /// The transitions a given role can trigger from a given state, in table order.

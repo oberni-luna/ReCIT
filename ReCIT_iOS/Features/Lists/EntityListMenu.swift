@@ -20,6 +20,7 @@ struct EntityListMenu: View {
     @Environment(AppErrorReporter.self) private var errorReporter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.snackBar) private var snackBar
+    @Environment(UserModel.self) private var userModel
 
     /// The entity the menu files — a work uri.
     let entityUri: String
@@ -31,7 +32,12 @@ struct EntityListMenu: View {
     /// offers no creation line and hides itself when empty, exactly as before.
     var creationRequest: Binding<ContainerCreationRequest?>?
 
-    @Query(sort: \EntityList.name) private var lists: [EntityList]
+    @Query(sort: \EntityList.name) private var storedLists: [EntityList]
+
+    /// Mine only: a friend's lists, stored for their profile, are not mine to file into.
+    private var lists: [EntityList] {
+        storedLists.filter { $0.isCreated(byMe: userModel.myUser?._id) }
+    }
 
     /// Elements are filtered on `isStillInTheStore` first: a liste can hold the element that
     /// was just removed under the open menu. See `PersistentModel+StillInTheStore`.

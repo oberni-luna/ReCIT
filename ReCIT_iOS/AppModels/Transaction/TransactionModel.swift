@@ -144,7 +144,7 @@ final class TransactionModel: OptimisticMutating {
         if transactionUserId == user._id {
             return user
         } else {
-            return try await userModel?.getOrFetchUsers(modelContext:modelContext, userIds: [transactionUserId]).first
+            return try await userModel?.getOrFetchUsers(modelContext: modelContext, userIds: [transactionUserId]).first
         }
     }
 
@@ -178,12 +178,11 @@ final class TransactionModel: OptimisticMutating {
         guard let _: OkStatusDTO = try await apiService.send(toEndpoint: "/api/transactions/update-state", method: "PUT", payload: payload) else {
             throw NetworkError.badResponse
         }
-        
+
         if let message, !message.isEmpty {
             try await postMessage(transactionId: transaction._id, message: message)
         }
     }
-
 
     func postMessage(transactionId: String, message: String) async throws {
         guard !message.isEmpty else { throw TransactionError.emptyMessage }

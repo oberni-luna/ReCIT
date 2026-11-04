@@ -13,6 +13,9 @@ import SwiftUI
 struct EditionPropertyDestination: View {
     let step: EditionPropertyStep
     @Binding var properties: EditionProperties
+    /// Whether the entity written into is one of Wikidata's, whose properties name Wikidata
+    /// entities only.
+    var wikidataOnly: Bool = false
     let push: (EditionPropertyStep) -> Void
     /// Pops `count` screens: back past the catalogue, to the form.
     let pop: (Int) -> Void
@@ -40,7 +43,8 @@ struct EditionPropertyDestination: View {
                 // Pops itself once an entity is picked or created.
                 EntityPickerView(
                     property: property,
-                    hasPublisher: properties.entities(of: .publisher).isEmpty == false
+                    hasPublisher: properties.entities(of: .publisher).isEmpty == false,
+                    wikidataOnly: wikidataOnly
                 ) { entity in
                     properties.add(entity, to: property)
                 }

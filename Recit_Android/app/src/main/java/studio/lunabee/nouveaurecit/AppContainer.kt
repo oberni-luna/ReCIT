@@ -23,6 +23,7 @@ import studio.lunabee.nouveaurecit.data.SearchRepository
 import studio.lunabee.nouveaurecit.data.SessionCoordinator
 import studio.lunabee.nouveaurecit.data.ShelfRepository
 import studio.lunabee.nouveaurecit.data.SyncStatus
+import studio.lunabee.nouveaurecit.data.TransactionRepository
 import studio.lunabee.nouveaurecit.data.UserPreferences
 import studio.lunabee.nouveaurecit.data.UserRepository
 import studio.lunabee.nouveaurecit.data.creation.EntityCreationRepository
@@ -91,6 +92,9 @@ class AppContainer(context: Context) {
     val shelves: ShelfRepository = ShelfRepository(api, database, optimisticRunner)
     val lists: ListRepository = ListRepository(api, database, optimisticRunner)
     val search: SearchRepository = SearchRepository(api)
+
+    /** Asking a friend for a copy (feature 0072). Nothing stored: the rest of the transactions is not ported. */
+    val transactions: TransactionRepository = TransactionRepository(api)
     val coverWall: CoverWallRepository = CoverWallRepository(publicApi, preferences)
 
     /** Publishing into inventaire.io's open database (feature 0020). Never optimistic. */

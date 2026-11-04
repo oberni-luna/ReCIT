@@ -247,8 +247,19 @@ final class UserModel: OptimisticMutating {
                 for shelf in Self.localShelves(ownedBy: user._id, modelContext: modelContext) {
                     modelContext.delete(shelf)
                 }
+                // Same reason as the shelves: nothing syncs their lists again once they are gone.
+                for list in Self.localLists(createdBy: user._id, modelContext: modelContext) {
+                    modelContext.delete(list)
+                }
             }
         )
+    }
+
+    /// Every list the store holds for one creator.
+    private static func localLists(createdBy creatorId: String, modelContext: ModelContext) -> [EntityList] {
+        let id: String? = creatorId
+        let descriptor: FetchDescriptor<EntityList> = .init(predicate: #Predicate { $0.creatorId == id })
+        return (try? modelContext.fetch(descriptor)) ?? []
     }
 
     /// Every étagère the store holds for one owner. A fetch rather than a relationship:

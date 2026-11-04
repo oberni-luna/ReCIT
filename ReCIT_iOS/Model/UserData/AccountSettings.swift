@@ -3,7 +3,8 @@
 //  ReCIT_iOS
 //
 //  What only the owner of an account sees of it: the address and whether it is confirmed, the
-//  language inventaire.io writes in, the two visibility switches and the e-mails it sends.
+//  language inventaire.io writes in, the two visibility switches, the e-mails it sends, and
+//  whether a Wikidata account is linked.
 //
 //  A value held by `UserModel.account`, not a SwiftData model: none of it is ever shown for anyone
 //  else, it is read again from `GET /api/user` at every launch, and a dozen switches were not worth
@@ -24,6 +25,9 @@ struct AccountSettings: Equatable, Sendable {
     var isFediversable: Bool
     var anonymizesContributions: Bool
     var summaryPeriodicity: Int
+    /// Whether the account holds Wikidata tokens: what changes on a Wikidata work or person is
+    /// then published under the reader's own Wikidata account rather than by inventaire.io's bot.
+    var linksWikidata: Bool
     private var notifications: [NotificationSetting: Bool]
 
     init(
@@ -33,7 +37,8 @@ struct AccountSettings: Equatable, Sendable {
         isFediversable: Bool,
         anonymizesContributions: Bool,
         summaryPeriodicity: Int,
-        notifications: [NotificationSetting: Bool]
+        notifications: [NotificationSetting: Bool],
+        linksWikidata: Bool = false
     ) {
         self.email = email
         self.isEmailValidated = isEmailValidated
@@ -42,6 +47,7 @@ struct AccountSettings: Equatable, Sendable {
         self.anonymizesContributions = anonymizesContributions
         self.summaryPeriodicity = summaryPeriodicity
         self.notifications = notifications
+        self.linksWikidata = linksWikidata
     }
 
     /// An absent switch is read the way the server reads it: on. A confirmation nobody mentions is
@@ -61,7 +67,8 @@ struct AccountSettings: Equatable, Sendable {
             isFediversable: userDTO.fediversable ?? false,
             anonymizesContributions: userDTO.settings?.contributions?["anonymize"] ?? true,
             summaryPeriodicity: userDTO.summaryPeriodicity ?? Self.defaultSummaryPeriodicity,
-            notifications: notifications
+            notifications: notifications,
+            linksWikidata: userDTO.enabledOAuth?.contains(WikidataOAuthFlow.provider) ?? false
         )
     }
 

@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-public final class InventoryItem{
+public final class InventoryItem {
 
     @Attribute(.unique) var _id: String
     var _rev: String

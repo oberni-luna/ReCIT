@@ -2,14 +2,17 @@
 //  ListRowView.swift
 //  ReCIT_iOS
 //
-//  One list in the Lists tab: its first covers fanned out, then its name, what it is for,
-//  and how many works or authors it holds. The name alone said nothing of what was inside.
+//  One list in the Lists tab: its first covers fanned out, then a line saying how many works or
+//  authors it holds — headed, for a friend's list, by its maker's picture and name —, its name,
+//  and what it is for. The name alone said nothing of what was inside.
 //
 
 import SwiftUI
 
 struct ListRowView: View {
     let list: EntityList
+    /// Who made the list, when it is not mine: « Dans mon réseau » in the Lists tab.
+    var owner: User?
 
     var body: some View {
         HStack(spacing: .sMedium) {
@@ -18,7 +21,12 @@ struct ListRowView: View {
                 type: list.type
             )
 
-            VStack(alignment: .leading, spacing: .xxSmall) {
+            VStack(alignment: .leading, spacing: .zero) {
+                ListRowMetaLine(
+                    owner: owner,
+                    count: list.type.countLabel(list.elements.count)
+                )
+
                 Text(list.name)
                     .textStyle(.content400Bold)
                     .foregroundStyle(.foregroundDefault)
@@ -26,14 +34,10 @@ struct ListRowView: View {
 
                 if !list.explanation.isEmpty {
                     Text(list.explanation)
-                        .textStyle(.content300)
+                        .textStyle(.content200)
                         .foregroundStyle(.foregroundSecondary)
-                        .lineLimit(1)
+                        .lineLimit(3)
                 }
-
-                Text(list.type.countLabel(list.elements.count))
-                    .textStyle(.footnote200)
-                    .foregroundStyle(.foregroundSecondary)
             }
         }
         .accessibilityElement(children: .combine)

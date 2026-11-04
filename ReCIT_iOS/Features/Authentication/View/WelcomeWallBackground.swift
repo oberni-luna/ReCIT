@@ -42,7 +42,7 @@ struct WelcomeWallBackground: View {
             .init(color: veilColor.opacity(0.6), location: 0.1),
             .init(color: veilColor.opacity(0.74), location: 0.38),
             .init(color: veilColor.opacity(0.96), location: 0.58),
-            .init(color: veilColor, location: 1),
+            .init(color: veilColor, location: 1)
         ],
         startPoint: .top,
         endPoint: .bottom

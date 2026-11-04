@@ -35,7 +35,7 @@
 //    read as the screen ignoring an instruction: the étagère is listed among the pending
 //    changes and « Appliquer » is live, so not creating it is the screen contradicting
 //    itself. Creating an étagère is what the user asked for by naming one; filling it is a
-//    separate intention. Reversed deliberately — see `docs/features/0009`.
+//    separate intention. Reversed deliberately — see `docs/wiki/features/0009`.
 //  - **An étagère emptied by dragging is modified, never deleted.** A removal is a
 //    removal; a drag does not delete a shelf behind the user's back (PRD 0008).
 //

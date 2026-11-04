@@ -36,11 +36,6 @@ enum ShelfMappingValidator {
     struct RawAssignment: Equatable, Sendable {
         let genre: String
         let shelfName: String
-
-        init(genre: String, shelfName: String) {
-            self.genre = genre
-            self.shelfName = shelfName
-        }
     }
 
     /// Why one assignment was thrown away. Recorded rather than merely counted so

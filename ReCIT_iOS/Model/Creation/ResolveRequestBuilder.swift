@@ -35,11 +35,11 @@ enum ResolveRequestBuilder {
         static let editionOf: String = "wdt:P629"
     }
 
-    /// The language the labels are written in when the ISBN has not answered. The language the
-    /// reader is reading the app in is the best guess available then, and a wrong label
+    /// The language the labels are written in when the ISBN has not answered. The phone's
+    /// language (`ContentLanguage`) is the best guess available then, and a wrong label
     /// language is a nuisance rather than a falsehood.
     static var defaultLabelLanguage: String {
-        Locale.current.language.languageCode?.identifier ?? "fr"
+        ContentLanguage.preferred
     }
 
     /// The request that creates the book, or — with `create: false` — the one that merely asks

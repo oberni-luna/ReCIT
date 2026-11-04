@@ -76,4 +76,3 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
         var requester: Bool
     }
 }
-

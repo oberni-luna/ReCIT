@@ -83,7 +83,7 @@ struct UserModelProfileTests {
         )
 
         #expect(mock.recordedRequests.map(\.endpoint) == [
-            "/api/images/upload?container=users", "/api/user", "/api/user", "/api/user", "/api/user",
+            "/api/images/upload?container=users", "/api/user", "/api/user", "/api/user", "/api/user"
         ])
         #expect(try attributes(mock) == ["picture", "username", "bio", "position"])
         #expect(model.myUser?.avatarURLValue == "https://test.local/img/users/0123456789012345678901234567890123456789")

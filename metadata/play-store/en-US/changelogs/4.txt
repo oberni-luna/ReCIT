@@ -1,0 +1,1 @@
+A list opens on its covers, in a scrolling strip: comment on each book, add one by searching or scanning it, move it to another list. “Editions” can be filtered by language. An ISBN typed in Search opens its edition directly.

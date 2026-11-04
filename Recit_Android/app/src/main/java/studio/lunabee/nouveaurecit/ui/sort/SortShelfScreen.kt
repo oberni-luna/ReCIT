@@ -104,7 +104,7 @@ fun SortShelfScreen(sectionId: SortSectionId, onBack: () -> Unit) {
     }
 }
 
-/** `.swipeActions(edge: .trailing, allowsFullSwipe: true)` — « Retirer de %@ », not destructive. */
+/** `.swipeActions(edge: .trailing, allowsFullSwipe: true)` — « Retirer de %@ », in red like every removal. */
 @Composable
 private fun RemovableBookRow(book: SortBook, shelfName: String, enabled: Boolean, onRemove: () -> Unit) {
     val dismissState: SwipeToDismissBoxState = rememberSwipeToDismissBoxState()
@@ -117,16 +117,16 @@ private fun RemovableBookRow(book: SortBook, shelfName: String, enabled: Boolean
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(RecitTheme.colors.backgroundTintedInverse)
+                    .background(RecitTheme.colors.foregroundError)
                     .padding(horizontal = Spacing.medium),
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                    Icon(Icons.Outlined.Outbox, contentDescription = null, tint = RecitTheme.colors.foregroundTintedInverse)
+                    Icon(Icons.Outlined.Outbox, contentDescription = null, tint = RecitTheme.colors.foregroundInverse)
                     Text(
                         text = stringResource(R.string.shelf_remove_from_named, shelfName),
                         style = RecitTheme.typography.action200,
-                        color = RecitTheme.colors.foregroundTintedInverse,
+                        color = RecitTheme.colors.foregroundInverse,
                     )
                 }
             }

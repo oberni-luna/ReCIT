@@ -4,7 +4,7 @@
 //
 //  The app's first reusable empty state: a glyph, a title, a sentence and an action, of which
 //  only the title is compulsory. It is `Empty State` (`204:263`, `Layout=Centered`) from the
-//  « États vides » pass of 2026-08-28 — see `docs/design-system/figma-library.md`.
+//  « États vides » pass of 2026-08-28 — see `docs/wiki/design-system/figma-library.md`.
 //
 //  It exists because there was nothing to reuse. Four screens draw their own centred `Text`
 //  today — `ShelvesContent`, `InventoryListContent`, `EntityListView` and `EntityListDetail` —
@@ -28,13 +28,13 @@ import SwiftUI
 
 struct EmptyStateView: View {
     /// SF Symbol above the title, or `nil` for a block that is only words.
-    var glyph: String? = nil
+    var glyph: String?
     /// The one thing every empty state has to say — what is not there.
     let title: LocalizedStringKey
     /// A sentence under the title, usually what would fill the emptiness. Silent when `nil`.
-    var message: LocalizedStringKey? = nil
+    var message: LocalizedStringKey?
     /// The way out, when there is one to offer. Silent when `nil`.
-    var action: Action? = nil
+    var action: Action?
 
     var body: some View {
         VStack(spacing: .medium) {

@@ -12,6 +12,8 @@ struct EntityListDetail: View {
     let listId: String
     @Binding var path: NavigationPath
 
+    @Environment(UserModel.self) private var userModel
+
     @Query private var matchingLists: [EntityList]
     @State private var presentEditForm: Bool = false
 
@@ -22,6 +24,13 @@ struct EntityListDetail: View {
     }
 
     private var list: EntityList? { matchingLists.first }
+
+    /// Whether this screen may write to the list. Derived from the list's creator, like an
+    /// étagère's owner in `ShelfDetailView`: a friend's list, opened from their profile, cannot
+    /// lie about whose it is.
+    private var isMine: Bool {
+        list?.isCreated(byMe: userModel.myUser?._id) ?? false
+    }
 
     /// Leaves when the list this screen is about stops existing.
     ///
@@ -42,236 +51,40 @@ struct EntityListDetail: View {
     var body: some View {
         Group {
             if let list {
-                List {
-                    Section {
-                        switch list.type {
-                        case .author:
-                            AuthorListItems(listId: listId, path: $path)
-                        case .work:
-                            WorkListItems(listId: listId, path: $path)
-                        case .publisher:
-                            Text("list.empty")
-                                .textStyle(.content300)
-                        }
+                switch list.type {
+                case .work, .author:
+                    ListCoverFlowScreen(list: list, path: $path)
+                case .publisher:
+                    List {
+                        Text("list.empty")
+                            .textStyle(.content300)
                     }
-                }
-                .navigationTitle(list.name)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("action.edit", systemImage: "pencil") {
-                            presentEditForm = true
-                        }
-                    }
-                }
-                .sheet(isPresented: $presentEditForm) {
-                    ListFormView(list: list)
+                    .applyListBackground(.backgroundGrouped)
                 }
             } else {
                 ContentUnavailableView(
                     "list.empty",
                     systemImage: "list.bullet.rectangle"
                 )
+                .applyListBackground(.backgroundGrouped)
             }
         }
-        .applyListBackground(.backgroundGrouped)
+        .navigationTitle(list?.name ?? "")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if isMine {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("action.edit", systemImage: "pencil") {
+                        presentEditForm = true
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $presentEditForm) {
+            if let list {
+                ListFormView(list: list)
+            }
+        }
         .onChange(of: matchingLists.isEmpty, popIfTheListIsGone)
     }
-}
-
-// MARK: - Author items
-
-private struct AuthorListItems: View {
-    @Environment(EntityModel.self) private var entityModel
-    @Environment(\.modelContext) private var modelContext
-
-    let listId: String
-    @Binding var path: NavigationPath
-
-    @Query private var items: [EntityListItem]
-
-    init(listId: String, path: Binding<NavigationPath>) {
-        self.listId = listId
-        self._path = path
-        _items = Query(
-            filter: #Predicate<EntityListItem> { item in
-                item.list?._id == listId
-            },
-            sort: \EntityListItem.ordinal
-        )
-    }
-
-    var body: some View {
-        Group {
-            if items.isEmpty {
-                Text("list.empty")
-                    .textStyle(.content300)
-            } else {
-                ForEach(items, id: \._id) { item in
-                    AuthorListItemRow(listItem: item, listId: listId, path: $path)
-                }
-            }
-        }
-        .task(id: items.map(\.uri)) {
-            _ = try? await entityModel.getOrFetchAuthors(
-                modelContext: modelContext,
-                uris: items.map(\.uri)
-            )
-        }
-    }
-}
-
-private struct AuthorListItemRow: View {
-    @Environment(ListModel.self) private var listModel
-    @Environment(\.modelContext) private var modelContext
-
-    let listItem: EntityListItem
-    let listId: String
-    @Binding var path: NavigationPath
-
-    @Query private var authors: [Author]
-
-    init(listItem: EntityListItem, listId: String, path: Binding<NavigationPath>) {
-        self.listItem = listItem
-        self.listId = listId
-        self._path = path
-        let uri: String = listItem.uri
-        _authors = Query(filter: #Predicate<Author> { $0.uri == uri })
-    }
-
-    var body: some View {
-        if let author = authors.first {
-            Button {
-                path.append(NavigationDestination.author(uri: author.uri))
-            } label: {
-                NavigationLink(value: UUID()) {
-                    ListItemCellView(listItem: listItem, entity: author)
-                }
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("e2e.listItemRow")
-            .swipeActions(edge: .trailing) {
-                // Named after the list, with the étagère's icon: the entry leaves this list, nothing
-                // is deleted.
-                Button(
-                    "action.remove_from_named \(listItem.list?.name ?? "")",
-                    systemImage: "tray.and.arrow.up",
-                    role: .destructive
-                ) {
-                    Task {
-                        try? await listModel.deleteElementsInList(
-                            modelContext: modelContext,
-                            listId: listId,
-                            elementIds: [listItem.uri]
-                        )
-                    }
-                }
-                // The app's tint would otherwise win over the role, and paint it pale green.
-                .tint(.foregroundError)
-            }
-        }
-    }
-}
-
-// MARK: - Work items
-
-private struct WorkListItems: View {
-    @Environment(EntityModel.self) private var entityModel
-    @Environment(\.modelContext) private var modelContext
-
-    let listId: String
-    @Binding var path: NavigationPath
-
-    @Query private var items: [EntityListItem]
-
-    init(listId: String, path: Binding<NavigationPath>) {
-        self.listId = listId
-        self._path = path
-        _items = Query(
-            filter: #Predicate<EntityListItem> { item in
-                item.list?._id == listId
-            },
-            sort: \EntityListItem.ordinal
-        )
-    }
-
-    var body: some View {
-        Group {
-            if items.isEmpty {
-                Text("list.empty")
-                    .textStyle(.content300)
-            } else {
-                ForEach(items, id: \._id) { item in
-                    WorkListItemRow(listItem: item, listId: listId, path: $path)
-                }
-            }
-        }
-        .task(id: items.map(\.uri)) {
-            _ = try? await entityModel.getOrFetchWorks(
-                modelContext: modelContext,
-                uris: items.map(\.uri)
-            )
-        }
-    }
-}
-
-private struct WorkListItemRow: View {
-    @Environment(ListModel.self) private var listModel
-    @Environment(\.modelContext) private var modelContext
-
-    let listItem: EntityListItem
-    let listId: String
-    @Binding var path: NavigationPath
-
-    @Query private var works: [Work]
-
-    init(listItem: EntityListItem, listId: String, path: Binding<NavigationPath>) {
-        self.listItem = listItem
-        self.listId = listId
-        self._path = path
-        let uri: String = listItem.uri
-        _works = Query(filter: #Predicate<Work> { $0.uri == uri })
-    }
-
-    var body: some View {
-        if let work = works.first {
-            Button {
-                path.append(NavigationDestination.work(uri: work.uri))
-            } label: {
-                NavigationLink(value: UUID()) {
-                    ListItemCellView(listItem: listItem, entity: work)
-                }
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("e2e.listItemRow")
-            // The editions picker's "…" menu, on a long press, so a row in one list can be
-            // filed in another without opening it first.
-            .workActions(
-                workUri: work.uri,
-                placement: .contextMenu
-            )
-            .swipeActions(edge: .trailing) {
-                // Named after the list, with the étagère's icon: the entry leaves this list, nothing
-                // is deleted.
-                Button(
-                    "action.remove_from_named \(listItem.list?.name ?? "")",
-                    systemImage: "tray.and.arrow.up",
-                    role: .destructive
-                ) {
-                    Task {
-                        try? await listModel.deleteElementsInList(
-                            modelContext: modelContext,
-                            listId: listId,
-                            elementIds: [listItem.uri]
-                        )
-                    }
-                }
-                // The app's tint would otherwise win over the role, and paint it pale green.
-                .tint(.foregroundError)
-            }
-        }
-    }
-}
-
-#Preview {
-//    EntityListDetail()
 }

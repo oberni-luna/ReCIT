@@ -33,18 +33,6 @@ enum InventorySearchRanking {
         let searchIndex: String
         let isMine: Bool
         let created: Date
-
-        init(
-            id: String,
-            searchIndex: String,
-            isMine: Bool,
-            created: Date
-        ) {
-            self.id = id
-            self.searchIndex = searchIndex
-            self.isMine = isMine
-            self.created = created
-        }
     }
 
     /// What the section shows, and what it would have shown without the cap.

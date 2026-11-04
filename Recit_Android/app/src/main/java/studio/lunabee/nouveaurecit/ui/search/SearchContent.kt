@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -190,7 +191,9 @@ private fun LazyListScope.suggestions(query: String, onSuggestion: (SearchSugges
             label = emphasised(suggestion.query, sentence),
             spokenLabel = spoken,
             onClick = { onSuggestion(suggestion) },
-            modifier = Modifier.groupedCell(index, suggestions.size, RecitTheme.colors.backgroundGroupedCell),
+            modifier = Modifier
+                .groupedCell(index, suggestions.size, RecitTheme.colors.backgroundGroupedCell)
+                .testTag("e2e.searchSuggestion.${suggestion.kind.name.lowercase()}"),
         )
     }
 }
@@ -227,7 +230,8 @@ private fun LazyListScope.remote(
             )
         }
         null -> {
-            val works: List<SearchResult> = state.results.filter { it.type == SearchResult.Type.Works }
+            // The books — works, and the edition an ISBN names, which is a book too.
+            val works: List<SearchResult> = state.results.filter { it.type != SearchResult.Type.Humans }
             val humans: List<SearchResult> = state.results.filter { it.type == SearchResult.Type.Humans }
             resultGroup("works", R.string.inventory_search_results_works, works, onPush)
             resultGroup("humans", R.string.inventory_search_results_humans, humans, onPush)
@@ -249,13 +253,15 @@ private fun LazyListScope.resultGroup(
         SearchResultRow(
             result = result,
             onClick = { onPush(destinationFor(result)) },
-            modifier = Modifier.groupedCell(index, results.size, RecitTheme.colors.backgroundGroupedCell),
+            modifier = Modifier.groupedCell(index, results.size, RecitTheme.colors.backgroundGroupedCell).testTag("e2e.searchResult.$key"),
         )
     }
 }
 
 private fun destinationFor(result: SearchResult): Destination = when (result.type) {
     SearchResult.Type.Works -> Destination.Book(BookAnchor.BestEditionOfWork(result.uri, result.label, result.image))
+    // The edition an ISBN named: the very book, nothing left to pick.
+    SearchResult.Type.Editions -> Destination.Book(BookAnchor.Edition(result.uri))
     SearchResult.Type.Humans -> Destination.Author(result.uri)
 }
 

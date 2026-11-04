@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,7 +52,13 @@ private const val AutosaveDelayMillis: Long = 1_000
 /** `OtherEditionsCell`: the work's cover and title, « Autres éditions » under it. */
 @Composable
 internal fun OtherEditionsRow(work: WorkEntity, onClick: () -> Unit) {
-    EntityResultRow(title = work.title, subtitle = stringResource(R.string.book_other_editions_subtitle), imageUrl = work.image, onClick = onClick)
+    EntityResultRow(
+        title = work.title,
+        subtitle = stringResource(R.string.book_other_editions_subtitle),
+        imageUrl = work.image,
+        modifier = Modifier.testTag("e2e.book.otherEditions"),
+        onClick = onClick,
+    )
 }
 
 /** `UserItemCellView`: the owner, « Depuis le %s », the transaction tag, and the owner's notes. */

@@ -70,13 +70,13 @@ struct TransactionStateMachineTests {
     @Test("Each event maps to the expected resulting state")
     func eventsProduceExpectedStates() {
         let map: [(State, TransactionRole, TransactionEvent, State)] = [
-            (.requested, .owner,     .accept,  .accepted),
-            (.requested, .owner,     .reject,  .declined),
-            (.requested, .requester, .cancel,  .cancelled),
-            (.accepted,  .requester, .confirm, .confirmed),
-            (.accepted,  .requester, .cancel,  .cancelled),
-            (.accepted,  .owner,     .cancel,  .cancelled),
-            (.confirmed, .owner,     .close,   .returned)
+            (.requested, .owner, .accept, .accepted),
+            (.requested, .owner, .reject, .declined),
+            (.requested, .requester, .cancel, .cancelled),
+            (.accepted, .requester, .confirm, .confirmed),
+            (.accepted, .requester, .cancel, .cancelled),
+            (.accepted, .owner, .cancel, .cancelled),
+            (.confirmed, .owner, .close, .returned)
         ]
         for (from, role, event, expected) in map {
             let transition = TransactionStateMachine.available(from: from, role: role).first { $0.event == event }

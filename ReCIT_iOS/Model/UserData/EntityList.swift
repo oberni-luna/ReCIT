@@ -7,7 +7,6 @@
 
 import Foundation
 
-import Foundation
 import SwiftData
 
 enum EntityListType: String, Codable, CaseIterable {
@@ -45,8 +44,13 @@ public final class EntityList {
     var visibility: [VisibilityAttributes]
     @Relationship(deleteRule: .cascade) var elements: [EntityListItem]
     var type: EntityListType
+    /// Who made the list — me, or a friend whose lists I opened on their profile.
+    ///
+    /// `nil` for a list stored before the field existed. Only my own lists were synced then, so
+    /// an unstamped list is mine, and my next sync stamps it. See `isCreated(byMe:)`.
+    var creatorId: String?
 
-    init(_id: String, _rev: String, name: String, explanation: String, created: Date, updated: Date? = nil, visibility: [VisibilityAttributes], elements: [EntityListItem] = [], type: EntityListType) {
+    init(_id: String, _rev: String, name: String, explanation: String, created: Date, updated: Date? = nil, visibility: [VisibilityAttributes], elements: [EntityListItem] = [], type: EntityListType, creatorId: String? = nil) {
         self._id = _id
         self._rev = _rev
         self.name = name
@@ -56,6 +60,17 @@ public final class EntityList {
         self.visibility = visibility
         self.elements = elements
         self.type = type
+        self.creatorId = creatorId
+    }
+
+    /// Whether this is one of my lists — the ones the Lists tab, the « … » menus and « Déplacer »
+    /// offer, and the only ones anything in the app may write to.
+    ///
+    /// An unstamped list counts as mine: it was stored when nobody else's lists were. A missing
+    /// `myUserId` matches only those, so a friend's list is never taken for mine.
+    func isCreated(byMe myUserId: String?) -> Bool {
+        guard let creatorId else { return true }
+        return creatorId == myUserId
     }
 
     convenience init(listDTO: ListDTO, baseUrl: String) {
@@ -76,7 +91,8 @@ public final class EntityList {
             elements: listDTO.elements?.compactMap {
                 .init(listElementDTO: $0, listType: EntityListType(rawValue: listDTO.type) ?? .work, baseUrl: baseUrl)
             } ?? [],
-            type: EntityListType(rawValue: listDTO.type) ?? .work
+            type: EntityListType(rawValue: listDTO.type) ?? .work,
+            creatorId: listDTO.creator
         )
     }
 
@@ -90,6 +106,7 @@ public final class EntityList {
         updated = listDTO.updated.map { Date(timeIntervalSince1970: $0 / 1000) }
         visibility = listDTO.visibility.compactMap { VisibilityAttributes(rawValue: $0) }
         type = EntityListType(rawValue: listDTO.type) ?? .work
+        if let creator = listDTO.creator { creatorId = creator }
 
         let elementDTOs: [ListElementDTO] = listDTO.elements ?? []
         let dtoByID: [String: ListElementDTO] = .init(elementDTOs.map { ($0._id, $0) }) { first, _ in first }

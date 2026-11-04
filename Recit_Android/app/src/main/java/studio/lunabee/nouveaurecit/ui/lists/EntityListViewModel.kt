@@ -2,10 +2,13 @@ package studio.lunabee.nouveaurecit.ui.lists
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -17,12 +20,20 @@ import studio.lunabee.nouveaurecit.data.ListRepository
 import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.data.db.EntityListItemEntity
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
+import studio.lunabee.nouveaurecit.data.lists.CoverFlowSelection
+import studio.lunabee.nouveaurecit.data.lists.ListMoveDestination
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 
 /**
- * `EntityListDetail`'s state: the list from Room, its elements in `ordinal` order joined to the works
- * or authors they name — an element whose entity the store does not hold yet is fetched once, and
- * shows when it lands, as the `@Query` rows of iOS do.
+ * `EntityListDetail` and `ListCoverFlowScreen`'s state: the list from Room, its elements in `ordinal`
+ * order joined to the works or authors they name — an element whose entity the store does not hold yet
+ * is fetched once, and shows when it lands, as the `@Query` rows of iOS do — and the element facing the
+ * reader in the cover flow.
+ *
+ * **The selection survives the list changing under it** ([CoverFlowSelection]): it is a uri, so an
+ * element whose optimistic id is replaced by the server's stays selected; an element removed hands the
+ * selection to the one that took its place; a uri asked for by an add is selected as soon as the list
+ * holds it.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntityListViewModel(
@@ -35,13 +46,105 @@ class EntityListViewModel(
         val isLoaded: Boolean = false,
         val list: EntityListEntity? = null,
         val rows: List<ListElementRowModel> = emptyList(),
+        val selectedUri: String? = null,
+        /** Where « Déplacer dans une autre liste » can take the selected element; empty, the row is hidden. */
+        val destinations: List<ListMoveDestination> = emptyList(),
+        val isMoving: Boolean = false,
+    ) {
+        val selectedRow: ListElementRowModel? get() = rows.firstOrNull { it.uri == selectedUri }
+    }
+
+    private data class Content(
+        val isLoaded: Boolean = false,
+        val list: EntityListEntity? = null,
+        val rows: List<ListElementRowModel> = emptyList(),
     )
 
     private val requested: MutableSet<String> = mutableSetOf()
 
-    val state: StateFlow<State> = lists.observeList(listId)
-        .flatMapLatest { entry -> rowsOf(entry).map { rows -> State(isLoaded = true, list = entry?.list, rows = rows) } }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, State())
+    private val content: StateFlow<Content> = lists.observeList(listId)
+        .flatMapLatest { entry -> rowsOf(entry).map { rows -> Content(isLoaded = true, list = entry?.list, rows = rows) } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, Content())
+
+    private val selection: MutableStateFlow<CoverFlowSelection.Result> = MutableStateFlow(CoverFlowSelection.Result(null, null))
+
+    /** The uris of the rows the selection was last worked out against. */
+    private var shownUris: List<String> = emptyList()
+
+    private val isMoving: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    val state: StateFlow<State> = combine(content, selection, lists.observeLists(), isMoving) { current, selected, all, moving ->
+        val list: EntityListEntity? = current.list
+        val uri: String? = selected.selected
+        State(
+            isLoaded = current.isLoaded,
+            list = list,
+            rows = current.rows,
+            selectedUri = uri,
+            destinations = if (list == null || uri == null) {
+                emptyList()
+            } else {
+                ListMoveDestination.destinations(
+                    uri = uri,
+                    currentListId = list.id,
+                    type = list.type,
+                    candidates = all.map { entry -> ListMoveDestination.Candidate(entry.list.id, entry.list.name, entry.list.type, entry.elements.map { it.uri }.toSet()) },
+                )
+            },
+            isMoving = moving,
+        )
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, State())
+
+    init {
+        viewModelScope.launch {
+            content.map { current -> current.rows.map { it.uri } }.distinctUntilChanged().collect { uris ->
+                selection.value = CoverFlowSelection.next(shownUris, uris, selection.value.selected, selection.value.requested)
+                shownUris = uris
+            }
+        }
+    }
+
+    /** The cover facing the reader, as the strip settles on it. */
+    fun select(uri: String) {
+        if (uri in shownUris) selection.value = selection.value.copy(selected = uri)
+    }
+
+    /** Selects [uri] as soon as the list holds it — at once when it already does. */
+    fun requestSelection(uri: String) {
+        selection.value = CoverFlowSelection.next(shownUris, shownUris, selection.value.selected, uri)
+    }
+
+    /** What the scanner or the search chose: added optimistically, the list landing on the first of it at once. */
+    fun add(uris: List<String>) {
+        val first: String = uris.firstOrNull() ?: return
+        requestSelection(first)
+        viewModelScope.launch { lists.addEntities(listId, uris) }
+    }
+
+    /**
+     * « Déplacer dans une autre liste »: server-first. Returns whether it went through; [onError] says why
+     * not. The element leaves the cover flow once the server has answered.
+     */
+    suspend fun move(row: ListElementRowModel, destination: ListMoveDestination, onError: (Throwable) -> Unit): Boolean {
+        if (isMoving.value) return false
+        isMoving.value = true
+        return try {
+            lists.moveElement(uri = row.uri, comment = row.comment, sourceId = listId, destinationId = destination.id)
+            true
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            onError(error)
+            false
+        } finally {
+            isMoving.value = false
+        }
+    }
+
+    /** Optimistic; written when the field is left. */
+    fun updateComment(row: ListElementRowModel, comment: String) {
+        viewModelScope.launch { lists.updateComment(row.elementId, comment) }
+    }
 
     /** Server-first. Returns whether it went through; [onError] says why not. */
     suspend fun remove(uri: String, onError: (Throwable) -> Unit): Boolean = try {
@@ -66,18 +169,21 @@ class EntityListViewModel(
                         subtitle = entry.work.subtitle,
                         image = entry.work.image,
                         comment = "",
-                        authors = entry.authors.joinToString(", ") { it.name },
+                        authors = entry.authors.map { it.name }.filter { it.isNotEmpty() }.joinToString(", ").ifEmpty { null },
                     )
                 }
-                elements.mapNotNull { element -> byUri[element.uri]?.copy(comment = element.comment) }
+                elements.mapNotNull { element -> byUri[element.uri]?.with(element) }
             }
             EntityListType.Author -> entities.entities.observeAuthors(uris).map { authors ->
                 val byUri: Map<String, ListElementRowModel> = authors.associate { it.uri to ListElementRowModel(it.uri, it.name, it.subtitle, it.image, "") }
-                elements.mapNotNull { element -> byUri[element.uri]?.copy(comment = element.comment) }
+                elements.mapNotNull { element -> byUri[element.uri]?.with(element) }
             }
             EntityListType.Publisher -> flowOf(emptyList())
         }.distinctUntilChanged()
     }
+
+    private fun ListElementRowModel.with(element: EntityListItemEntity): ListElementRowModel =
+        copy(comment = element.comment, elementId = element.id, created = element.created)
 
     private fun fetchMissing(type: EntityListType, uris: List<String>) {
         val missing: List<String> = uris.filter { requested.add(it) }

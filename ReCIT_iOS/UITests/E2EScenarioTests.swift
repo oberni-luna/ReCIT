@@ -28,7 +28,7 @@
 //  Étagère and list names carry a per-run stamp, so a run that failed halfway and left one
 //  behind cannot make the next run's creation collide with it.
 //
-//  See `docs/features/0012-end-to-end-scenario.md`.
+//  See `docs/wiki/features/0012-end-to-end-scenario.md`.
 //
 
 import XCTest

@@ -114,6 +114,23 @@ struct EntityModelTests {
         #expect(author.dateOfBirth != nil)
     }
 
+    @Test("An author is asked for, and described, in the phone's language")
+    func refreshAuthorReadsThePhonesLanguage() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let mock: MockAPIService = .init()
+        let language: String = ContentLanguage.preferred
+        mock.stub("/api/entities/by-uris", json: entityEnvelope("""
+        {"uri":"wd:Q535","lastrevid":10,"type":"human","labels":{"mul":"Victor Hugo"},"descriptions":{"\(language)":"in the phone's language","zz":"in another"},"claims":{}}
+        """))
+        let model: EntityModel = .init(apiService: mock)
+
+        let author: Author = try #require(try await model.refreshAuthor(modelContext: context, uri: "wd:Q535"))
+
+        let endpoint: String = try #require(mock.recordedRequests.first?.endpoint)
+        #expect(endpoint.contains("&lang=\(language)"))
+        #expect(author.subtitle == "in the phone's language")
+    }
+
     @Test("An author inventaire.io gives no type still decodes")
     func authorWithoutTypeDecodes() async throws {
         let context: ModelContext = try TestStore.makeContext()

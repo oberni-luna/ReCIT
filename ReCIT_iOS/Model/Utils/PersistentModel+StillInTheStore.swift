@@ -29,7 +29,7 @@
 //  A model that was never inserted answers `false` too, which is correct for every caller here —
 //  none of them is handed a draft.
 //
-//  See ADR 0001, and `docs/features/0012-end-to-end-scenario.md`, whose deletion step is what
+//  See ADR 0001, and `docs/wiki/features/0012-end-to-end-scenario.md`, whose deletion step is what
 //  finally reproduced the crash.
 //
 

@@ -53,14 +53,19 @@ struct EntityEdit: Equatable, Sendable {
         uri: String,
         labels: [String: String],
         properties: EditionProperties,
-        originalLanguage: String? = nil
+        originalLanguage: String? = nil,
+        preferredLanguage: String = ContentLanguage.preferred
     ) {
         self.uri = uri
         originalLabels = labels
         original = properties
         self.properties = properties
 
-        let shown: String? = EntityLabel.language(of: labels, originalLang: originalLanguage)
+        let shown: String? = EntityLabel.language(
+            of: labels,
+            originalLang: originalLanguage,
+            preferredLanguage: preferredLanguage
+        )
         let ordered: [String] = labels.keys.sorted { lhs, rhs in
             if lhs == shown { return true }
             if rhs == shown { return false }
@@ -74,9 +79,23 @@ struct EntityEdit: Equatable, Sendable {
         properties.catalogue
     }
 
-    /// One of inventaire.io's own. A Wikidata entity is changed on Wikidata.
+    /// One of inventaire.io's own, or one of Wikidata's — which inventaire.io changes on Wikidata,
+    /// under the reader's Wikidata account when it is linked, with its bot otherwise.
     var isEditable: Bool {
-        uri.hasPrefix("inv:")
+        Self.canEdit(uri: uri)
+    }
+
+    /// Whether the work or person behind this uri opens in « Modifier l'œuvre » or « Modifier
+    /// l'auteur·ice ». `update-claim` and `update-label` take `inv:` and `wd:` uris.
+    static func canEdit(uri: String) -> Bool {
+        uri.hasPrefix("inv:") || uri.hasPrefix("wd:")
+    }
+
+    /// Whether its properties may name only Wikidata entities: inventaire.io refuses to link a
+    /// Wikidata entity to one of its own (« wikidata entities can't link to inventaire
+    /// entities »), which rules out creating one from its form too.
+    static func linksWikidataOnly(uri: String) -> Bool {
+        uri.hasPrefix("wd:")
     }
 
     /// The name the screen and the rows beneath it show: the first label that says something.

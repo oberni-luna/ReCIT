@@ -23,6 +23,9 @@ struct ListDTO: Codable {
     let visibility: [String]
     let type: String
     let elements: [ListElementDTO]?
+    /// The reader who made the list. Sent by every listing route; optional only so that a
+    /// payload that leaves it out still decodes.
+    let creator: String?
 }
 
 struct ListElementDTO: Codable {
@@ -45,7 +48,6 @@ struct DeleteListElementsDTO: Codable {
     let id: String
     let uris: [String]
 }
-
 
 // MARK: Add to list
 struct AddToListDTO: Codable {

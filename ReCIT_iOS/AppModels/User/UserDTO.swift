@@ -20,7 +20,7 @@ struct UserDTO: Codable {
     let position: [Double]?
     let picture: String?
     let language: String?
-    let snapshot: [String:ItemCountDTO]?
+    let snapshot: [String: ItemCountDTO]?
     /// When the account was opened, in milliseconds — inventaire's own epoch for user documents.
     ///
     /// Served on `/api/users/by-ids` for anyone, without a session, alongside the fields the
@@ -38,9 +38,13 @@ struct UserDTO: Codable {
     /// Days between two activity summaries; the server reads an absent value as 20.
     let summaryPeriodicity: Int?
     let settings: UserSettingsDTO?
+    /// The providers the account has handed OAuth tokens to — `["wikidata"]` once it is linked
+    /// to a Wikidata account. Owner only, on `GET /api/user`; the tokens themselves never leave
+    /// the server.
+    let enabledOAuth: [String]?
 }
 
-//"snapshot": {
+// "snapshot": {
 //                "network": {
 
 struct UsersDTO: Codable {

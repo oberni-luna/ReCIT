@@ -110,6 +110,7 @@ xcodebuild test \
   -project "$PROJECT" \
   -scheme "$SCHEME" \
   -destination "platform=iOS Simulator,id=$UDID" \
+  -skipPackagePluginValidation \
   -only-testing:"$TEST_ID" \
   -resultBundlePath "$RESULT_BUNDLE" \
   -test-timeouts-enabled YES \

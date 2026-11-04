@@ -17,8 +17,7 @@ struct ProfileAvatar: View {
                 .foregroundStyle(.foregroundDefault)
             CachedAsyncImage(url: url) { image in
                 image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+                    .resizable().scaledToFill()
             } placeholder: {
                 Color.clear
             }

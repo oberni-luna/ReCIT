@@ -31,7 +31,7 @@ struct ListCoverPreviewTests {
             item("wd:Q4", ordinal: "3"),
             item("wd:Q1", ordinal: "0"),
             item("wd:Q3", ordinal: "2"),
-            item("wd:Q2", ordinal: "1"),
+            item("wd:Q2", ordinal: "1")
         ]
 
         #expect(ListCoverPreview.uris(of: elements) == ["wd:Q1", "wd:Q2", "wd:Q3"])
@@ -50,7 +50,7 @@ struct ListCoverPreviewTests {
         let elements: [EntityListItem] = [
             item("wd:Q1", ordinal: "0"),
             item("wd:Q1", ordinal: "1"),
-            item("wd:Q2", ordinal: "2"),
+            item("wd:Q2", ordinal: "2")
         ]
 
         #expect(ListCoverPreview.uris(of: elements) == ["wd:Q1", "wd:Q2"])
@@ -61,7 +61,7 @@ struct ListCoverPreviewTests {
         (EntityListType.work, 12, "12 œuvres"),
         (EntityListType.author, 1, "1 auteur·ice"),
         (EntityListType.author, 7, "7 auteur·ices"),
-        (EntityListType.publisher, 2, "2 maisons d'édition"),
+        (EntityListType.publisher, 2, "2 maisons d'édition")
     ])
     func countIsSaidInFrench(type: EntityListType, count: Int, expected: String) {
         var resource: LocalizedStringResource = type.countLabel(count)

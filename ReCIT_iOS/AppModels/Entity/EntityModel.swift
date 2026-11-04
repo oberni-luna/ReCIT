@@ -379,7 +379,7 @@ final class EntityModel {
 
         var names: [String: String] = [:]
         for batch in missing.splitInSubArrays(of: 50) {
-            let endpoint: String = "/api/entities/by-uris?uris=\(batch.joined(separator: "|"))&attributes=info|labels|claims&lang=fr"
+            let endpoint: String = "/api/entities/by-uris?uris=\(batch.joined(separator: "|"))&attributes=info|labels|claims&lang=\(ContentLanguage.preferred)"
             guard let response: EditableEditionsDTO = try? await apiService.fetchData(fromEndpoint: endpoint) else { continue }
             for (key, entity) in response.entities {
                 guard let name = entity.displayName else { continue }
@@ -436,22 +436,32 @@ final class EntityModel {
         return try modelContext.fetch(descriptor).first
     }
 
+    /// The summary in the phone's language (`ContentLanguage`), French otherwise, as the app
+    /// always read. For each language, the summary property first, then the Wikipedia article.
+    /// An extract already stored is never fetched again, so it stays in the language it came in.
     func fetchExtract(for uri: String) async throws -> ExtractDTO? {
+        let languages: [String] = [ContentLanguage.preferred, "fr"].reduce(into: []) { languages, language in
+            if languages.contains(language) == false { languages.append(language) }
+        }
         guard let summariesDTO: SummariesDTO = try? await apiService.fetchData(
-            fromEndpoint: "/api/data/summaries?uri=\(uri)&langs=fr&refresh=false"
+            fromEndpoint: "/api/data/summaries?uri=\(uri)&langs=\(languages.joined(separator: "|"))&refresh=false"
         ) else {
             return nil
         }
 
-        if let summary: SummaryDTO = summariesDTO.summaries.first(where: {
-            $0.key == WikidataProperty.summary.rawValue && $0.lang == "fr"
-        }) {
-            return .init(extract: summary.text ?? "", url: summary.link)
-        } else if let summary: SummaryDTO = summariesDTO.summaries.first(where: { $0.key == "frwiki" }) {
-            guard let sitelink: SitelinkDTO = summary.sitelink else { return nil }
-            return try? await apiService.fetchData(
-                fromEndpoint: "/api/data/wp-extract?lang=fr&title=\(sitelink.title)"
-            )
+        for language in languages {
+            if let summary: SummaryDTO = summariesDTO.summaries.first(where: {
+                $0.key == WikidataProperty.summary.rawValue && $0.lang == language
+            }) {
+                return .init(extract: summary.text ?? "", url: summary.link)
+            } else if let summary: SummaryDTO = summariesDTO.summaries.first(where: { $0.key == "\(language)wiki" }) {
+                guard let sitelink: SitelinkDTO = summary.sitelink else { continue }
+                if let extract: ExtractDTO = try? await apiService.fetchData(
+                    fromEndpoint: "/api/data/wp-extract?lang=\(language)&title=\(sitelink.title)"
+                ) {
+                    return extract
+                }
+            }
         }
 
         return nil
@@ -508,7 +518,7 @@ final class EntityModel {
         var results: [EntityResultDTO] = []
 
         for uriBatch in uris.splitInSubArrays(of: 50) {
-            var entityUrl: String = "/api/entities/by-uris?uris=\(uriBatch.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=fr"
+            var entityUrl: String = "/api/entities/by-uris?uris=\(uriBatch.joined(separator: "|"))&attributes=info|labels|descriptions|claims|image&lang=\(ContentLanguage.preferred)"
             if autocreate {
                 entityUrl += "&autocreate=true"
             }

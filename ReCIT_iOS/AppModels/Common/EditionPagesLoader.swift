@@ -19,7 +19,7 @@ actor EditionPagesLoader {
         components?.queryItems = [
             .init(name: "uris", value: uri),
             .init(name: "attributes", value: "claims"),
-            .init(name: "lang", value: "fr")
+            .init(name: "lang", value: ContentLanguage.preferred)
         ]
         // `attributes=claims` returns a lean shape (`uri`, `_rev`, `claims` only), so a
         // dedicated DTO is decoded instead of the full EntityResultDTO. The entity is

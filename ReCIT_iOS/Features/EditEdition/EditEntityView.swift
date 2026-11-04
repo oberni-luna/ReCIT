@@ -14,6 +14,9 @@
 //  The edit lives in the flow that pushed the screen, so the screens this one pushes — a
 //  search, a date, a list — write into it.
 //
+//  A Wikidata work or person opens here too: inventaire.io sends the change on to Wikidata, and
+//  `WikidataEditNotice` says under whose name.
+//
 
 import SwiftUI
 
@@ -63,6 +66,10 @@ struct EditEntityView: View {
                         }
                         .listRowSeparator(.hidden)
                         .listSectionSeparator(.hidden)
+                    }
+
+                    if EntityEdit.linksWikidataOnly(uri: uri) {
+                        WikidataEditNotice()
                     }
 
                     form(binding)

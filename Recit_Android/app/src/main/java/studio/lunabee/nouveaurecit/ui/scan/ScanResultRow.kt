@@ -69,15 +69,17 @@ object ScanOverlayPalette {
  * row keeps its height. Tapping the text opens the book once there is one.
  *
  * An unknown edition says so, and its button — in the place of the « + » — opens « Nouveau livre »
- * (feature 0020). It carries the same glyph; only its label tells the two apart, as on iOS.
+ * (feature 0020). It carries the same glyph; only its label tells the two apart, as on iOS. Without
+ * [onCreate] — the list's scanner — the row says it and nothing more. [addLabel] names what « + » does.
  */
 @Composable
 fun ScanResultRow(
     state: BatchScanState,
     onOpen: (ScannedBook) -> Unit,
     onAdd: () -> Unit,
-    onCreate: () -> Unit,
+    onCreate: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    addLabel: String = stringResource(R.string.action_add_to_inventory),
 ) {
     val book: ScannedBook = state.book ?: ScannedBook.Placeholder
     val isLookingUp: Boolean = state is BatchScanState.LookingUp
@@ -130,11 +132,13 @@ fun ScanResultRow(
             )
         }
         if (state is BatchScanState.NotFound) {
-            ScanRoundButton(onClick = onCreate, enabled = true, contentDescription = stringResource(R.string.create_book_row_action)) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            if (onCreate != null) {
+                ScanRoundButton(onClick = onCreate, enabled = true, contentDescription = stringResource(R.string.create_book_row_action)) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                }
             }
         } else {
-            ScanAddButton(state = state, onClick = onAdd)
+            ScanAddButton(state = state, onClick = onAdd, label = addLabel)
         }
     }
 }
@@ -157,9 +161,9 @@ private fun Modifier.redacted(isRedacted: Boolean): Modifier =
 
 /** `ScanAddButton`: + to file, a spinner while it is written, ✓ once it is. */
 @Composable
-private fun ScanAddButton(state: BatchScanState, onClick: () -> Unit) {
+private fun ScanAddButton(state: BatchScanState, onClick: () -> Unit, label: String) {
     val enabled: Boolean = state is BatchScanState.Resolved || state is BatchScanState.Added
-    ScanRoundButton(onClick = onClick, enabled = enabled, contentDescription = stringResource(R.string.action_add_to_inventory)) {
+    ScanRoundButton(onClick = onClick, enabled = enabled, contentDescription = label) {
         if (state is BatchScanState.Adding) {
             CircularProgressIndicator(color = ScanOverlayPalette.Tint, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
         } else {

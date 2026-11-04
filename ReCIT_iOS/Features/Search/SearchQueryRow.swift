@@ -24,7 +24,7 @@ struct SearchQueryRow: View {
     /// What the row reads, with whatever is emphasised inside it already emphasised.
     let label: AttributedString
     /// What VoiceOver says instead, when the label alone would not name the destination.
-    var spokenLabel: String? = nil
+    var spokenLabel: String?
     let action: () -> Void
 
     /// The label VoiceOver reads: the spoken one when the row carries it, the drawn one

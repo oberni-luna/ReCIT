@@ -18,12 +18,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.book.EditionLanguageFilter
 import studio.lunabee.nouveaurecit.data.db.WorkEntity
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
@@ -104,7 +106,7 @@ private fun EditionPicker(state: WorkUiState, viewModel: WorkViewModel, navigato
                 work == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = RecitTheme.colors.foregroundSecondary)
                 }
-                else -> WorkContent(work, state, navigator)
+                else -> WorkContent(work, state, navigator, onChooseLanguage = viewModel::chooseLanguage)
             }
         }
     }
@@ -115,18 +117,29 @@ private fun EditionPicker(state: WorkUiState, viewModel: WorkViewModel, navigato
 }
 
 @Composable
-private fun WorkContent(work: WorkEntity, state: WorkUiState, navigator: Navigator) {
-    val synced: Boolean = (state.phase as? WorkPhase.Loaded)?.editionsSynced == true
+private fun WorkContent(work: WorkEntity, state: WorkUiState, navigator: Navigator, onChooseLanguage: (EditionLanguageFilter) -> Unit) {
+    val waitsForEditions: Boolean = state.editions.isEmpty() && state.isRefreshing
     LazyColumn(Modifier.fillMaxSize()) {
         item(key = "header") { EntityHeader(title = work.title, subtitle = work.subtitle, imageUrl = work.image) }
         item(key = "summary") { SummaryRow(state.summary) }
         item(key = "authors") { AuthorsRow(state.authors) { navigator.push(Destination.Author(it)) } }
-        item(key = "editions-header") { SectionHeader(title = stringResource(R.string.work_editions_header, work.title)) }
-        if (state.editions.isEmpty() && !synced) {
+        item(key = "editions-header") {
+            // One spinner at a time: while the list is empty, its own spinner stands in for it.
+            SectionHeader(
+                title = stringResource(R.string.work_editions_header, work.title),
+                isRefreshing = state.isRefreshing && !waitsForEditions,
+                trailing = if (state.editionCount > 0) {
+                    { EditionLanguageMenu(state.language, state.languageOptions, onChooseLanguage) }
+                } else {
+                    null
+                },
+            )
+        }
+        if (waitsForEditions) {
             item(key = "editions-loading") { LoadingCell() }
         }
         items(state.editions, key = { it.uri }) { edition ->
-            EntityResultRow(title = edition.title, subtitle = edition.subtitle, imageUrl = edition.image) {
+            EntityResultRow(title = edition.title, subtitle = edition.subtitle, imageUrl = edition.image, modifier = Modifier.testTag("e2e.workEdition")) {
                 navigator.push(Destination.Book(BookAnchor.Edition(edition.uri)))
             }
         }

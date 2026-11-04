@@ -23,7 +23,7 @@ struct InvitationRowView: View {
 
     let user: User
     /// Opening the reader's profile, when the list this sits in offers it.
-    var onOpen: (() -> Void)? = nil
+    var onOpen: (() -> Void)?
 
     private var answer: InvitationAnswer {
         .init(userModel: userModel, modelContext: modelContext, snackBar: snackBar)

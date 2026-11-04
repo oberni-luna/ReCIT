@@ -63,8 +63,7 @@ struct AvatarThumbnail: View {
             if let url {
                 CachedAsyncImage(url: url) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .resizable().scaledToFill()
                 } placeholder: {
                     Color.clear
                 }

@@ -4,7 +4,7 @@
 //
 //  The note at the head of an inventory whose first sync is running: a title, the share
 //  received, the bar, and what has arrived out of what. The books themselves fill in below it
-//  as they come, which is what the last sentence promises. See docs/features/0027.
+//  as they come, which is what the last sentence promises. See docs/wiki/features/0027.
 //
 //  Card-free: the inventory wraps it in a card of its own, a friend's profile gives it a
 //  `List` row.

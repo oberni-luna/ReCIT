@@ -3,7 +3,7 @@
 //  ReCIT_iOS
 //
 //  The étagères a reader shares, on their profile: the same snapping carousel as my own
-//  inventory, between the header card and their books. A friend who has arranged their
+//  inventory, between their header and the Inventaire | Listes tabs. A friend who has arranged their
 //  library is telling you something about it, and until now the app kept it to itself.
 //
 //  `ShelfRowView` is reused untouched, and that is the point: it carries no editing
@@ -12,18 +12,16 @@
 //  lives either in the header's "Ajouter" (which this section does not have) or in
 //  `ShelfDetailView`'s navigation bar (which stands down for a shelf that is not mine).
 //
-//  **Posed on nothing.** The rows are transparent and their insets are dropped, so the
-//  carousel runs edge to edge over the screen's own background rather than sitting on the
-//  darker card the header and the books sit on. It is the one place on this screen where
-//  the content is not in a box, and that is deliberate: a shelf is already an object.
+//  **Posed on nothing.** The carousel runs edge to edge over the screen's own background
+//  rather than sitting on a card like the books below. It is the one place on this screen
+//  where the content is not in a box, and that is deliberate: a shelf is already an object.
 //
-//  The width is measured rather than guessed. `ShelfRowView` takes an explicit width
-//  because a card that measures itself inside a `List` sets off the `UICollectionView`
-//  update loop of ADR 0003, and a `GeometryReader` in a list row has no intrinsic height
-//  to give. So the horizontal `ScrollView` — which fills the row either way — reports its
-//  own width, and the cards are drawn once it has.
+//  The width is measured rather than guessed. `ShelfRowView` takes an explicit width, which
+//  dates from when the profile was a `List` — a card that measures itself there sets off the
+//  `UICollectionView` update loop of ADR 0003. So the horizontal `ScrollView` — which fills
+//  the screen's width either way — reports its own width, and the cards are drawn once it has.
 //
-//  See issue 0092.
+//  See issue 0092 and PRD 0031.
 //
 
 import SwiftUI
@@ -69,15 +67,14 @@ struct UserShelvesSection: View {
         // (scanning books in, arranging them), and neither is anything to ask of someone
         // else's library.
         if shelves.isEmpty == false {
-            Section {
-                carousel
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            } header: {
+            VStack(alignment: .leading, spacing: .xSmall) {
                 Text("user.shelves.header \(user.username)")
                     .textStyle(.action200)
                     .foregroundStyle(.foregroundSecondary)
+                    .padding(.horizontal, .medium)
+                    .accessibilityAddTraits(.isHeader)
+
+                carousel
             }
         }
     }

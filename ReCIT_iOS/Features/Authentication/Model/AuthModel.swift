@@ -89,4 +89,10 @@ public class AuthModel {
         self.isAuthenticated = false
         self.username = ""
     }
+
+    /// The session cookies, for the web view that links a Wikidata account. See
+    /// `AuthService.webSessionCookies()`.
+    func webSessionCookies() -> [HTTPCookie] {
+        authService.webSessionCookies()
+    }
 }

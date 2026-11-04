@@ -24,8 +24,7 @@ struct ScanResultCoverView: View {
             if let imageUrl, let url = URL(string: imageUrl) {
                 CachedAsyncImage(url: url) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .resizable().scaledToFill()
                 } placeholder: {
                     ProgressView()
                         .tint(ScanOverlayPalette.ink)

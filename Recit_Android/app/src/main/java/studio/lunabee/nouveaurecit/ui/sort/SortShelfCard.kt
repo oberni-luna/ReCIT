@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -117,6 +118,7 @@ fun SortShelfCard(
                 color = if (isTargeted) RecitTheme.colors.borderTinted else RecitTheme.colors.borderDefault,
             )
             .clickable(onClickLabel = accessibleTitle, onClick = onOpen)
+            .testTag("e2e.sortShelf.$name")
             .semantics {
                 val book: SortBook? = pile.draggableBook
                 if (book != null && unshelveLabel != null && !isApplying) {
@@ -245,7 +247,8 @@ fun SortNewShelfTile(width: Dp, enabled: Boolean, onClick: () -> Unit) {
                 }
                 drawRect(tint, style = stroke)
             }
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick)
+            .testTag("e2e.sortNewShelf"),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(Modifier.fillMaxWidth().height(SortGridMetrics.ART_HEIGHT.dp), contentAlignment = Alignment.Center) {

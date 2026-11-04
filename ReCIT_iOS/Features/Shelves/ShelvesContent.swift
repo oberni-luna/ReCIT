@@ -131,7 +131,7 @@ struct ShelvesContent: View {
     /// The empty shelf states the next useful thing, and each of its tags does one way of doing
     /// it: with an empty inventory, scanning books in or looking them up; with books already
     /// owned and no étagère to put them on, arranging them. Each is the same promise kept — the
-    /// tag is read, then acted on. See PRD 0007 and docs/features/0021.
+    /// tag is read, then acted on. See PRD 0007 and docs/wiki/features/0021.
     ///
     /// **This card had a second destination once and it was deliberately removed, so putting
     /// one back has to say how it differs.** What PRD 0006 took out was a *silent* substitution
@@ -240,11 +240,12 @@ struct ShelvesContent: View {
 
     private func bookLink(_ item: InventoryItem) -> some View {
         NavigationLink(value: NavigationDestination.book(anchor: .item(item))) {
-            InventoryCell(item: item, filterParameter: .userInventory)
-                .padding(.horizontal, .medium)
-                .padding(.vertical, .small)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
+            InventoryCell(
+                item: item,
+                filterParameter: .userInventory,
+                standsAlone: true
+            )
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("e2e.inventoryBook")

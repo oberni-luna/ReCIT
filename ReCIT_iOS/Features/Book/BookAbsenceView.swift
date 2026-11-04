@@ -38,7 +38,7 @@ struct BookAbsenceView: View {
 
     let absence: Absence
     /// Sends the same resolution again. Only `.failed` offers it — see the type's note.
-    var onRetry: (() -> Void)? = nil
+    var onRetry: (() -> Void)?
 
     var body: some View {
         switch absence {

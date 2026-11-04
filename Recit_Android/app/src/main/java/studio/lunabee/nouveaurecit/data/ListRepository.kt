@@ -67,8 +67,8 @@ class ListRepository(
         return response.list.id
     }
 
-    suspend fun createListAndAddWork(name: String, description: String, workUri: String): String {
-        val id: String = createList(name, description, EntityListType.Work, emptyList())
+    suspend fun createListAndAddWork(name: String, description: String, visibility: List<Visibility>, workUri: String): String {
+        val id: String = createList(name, description, EntityListType.Work, visibility)
         addEntities(id, listOf(workUri))
         return id
     }
@@ -125,6 +125,56 @@ class ListRepository(
         val response: RemoveElementsResponseDto = api.send("/api/lists/remove-elements", method = "PUT", body = DeleteListElementsDto(listId, uris))
         if (response.list == null) throw NetworkError.BadResponse()
         dao.deleteElementsByUri(listId, uris)
+    }
+
+    /**
+     * `ListModel.moveElement` (iOS feature 0061): an element moved into another list, with its comment.
+     *
+     * **Server-first, not optimistic**, in three calls that each wait for the one before: add the uri to
+     * [destinationId], write the comment on the element just created, take the uri out of [sourceId]. A
+     * failure stops the rest, so the element is never taken out of a list before it has landed in the
+     * other — at worst it is in both. What did land on the server is in the store before the error is
+     * thrown. A destination already holding the uri creates nothing: the element then only leaves the
+     * source, and the destination keeps its own comment.
+     */
+    suspend fun moveElement(uri: String, comment: String, sourceId: String, destinationId: String) {
+        val destination: EntityListEntity = dao.get(destinationId) ?: throw NetworkError.BadResponse()
+        val response: AddToListResponseDto = api.send("/api/lists/add-elements", method = "PUT", body = AddToListDto(destinationId, listOf(uri)))
+        if (!response.ok) throw NetworkError.BadResponse()
+        var landed: List<ListElementDto> = response.createdElements
+        try {
+            val element: ListElementDto? = landed.firstOrNull()
+            if (comment.isNotEmpty() && element != null) {
+                updateElement(element.id, comment)
+                landed = listOf(element.copy(comment = comment))
+            }
+        } finally {
+            file(landed, destination)
+        }
+        removeEntities(sourceId, listOf(uri))
+    }
+
+    /** Elements the server has created, into a list of the store — unless the list left it during the round trip. */
+    private suspend fun file(elements: List<ListElementDto>, list: EntityListEntity) {
+        if (elements.isEmpty() || dao.get(list.id) == null) return
+        dao.upsertElements(elements.map { Merges.listElement(it, list.id, list.type) })
+    }
+
+    /**
+     * `ListModel.updateComment`: the reader's comment on an element, written to the store at once and to
+     * `/api/lists/update-element` behind it; a failure puts the previous text back and is reported
+     * (ADR 0001). Nothing is sent when the text has not changed, nor for an element still on its
+     * optimistic id: the server does not know that id yet.
+     */
+    suspend fun updateComment(elementId: String, comment: String) {
+        val element: EntityListItemEntity = dao.element(elementId) ?: return
+        if (comment == element.comment || OptimisticRunner.isOptimistic(elementId)) return
+        runner.run(
+            apply = { dao.upsertElements(listOf(element.copy(comment = comment))) },
+            revert = { dao.element(elementId)?.let { dao.upsertElements(listOf(it.copy(comment = element.comment))) } },
+            request = { updateElement(elementId, comment) },
+            stillThere = { dao.element(elementId) != null },
+        )
     }
 
     suspend fun updateElement(elementId: String, comment: String) {

@@ -28,10 +28,14 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import studio.lunabee.nouveaurecit.R
 import kotlin.math.abs
 
 /** `EmptyStateView`. */
@@ -169,11 +173,15 @@ fun WithLabel(
     }
 }
 
-/** A list section header, as `Section(header:)` renders on iOS: action200, secondary, with an optional trailing action. */
+/**
+ * A list section header, as `Section(header:)` renders on iOS: action200, secondary, with an optional
+ * trailing action. [isRefreshing] puts a [SectionLoadingIndicator] right after the label (iOS feature 0059).
+ */
 @Composable
 fun SectionHeader(
     title: String,
     modifier: Modifier = Modifier,
+    isRefreshing: Boolean = false,
     trailing: @Composable (() -> Unit)? = null,
 ) {
     Row(
@@ -182,14 +190,36 @@ fun SectionHeader(
             .padding(start = Spacing.medium, end = Spacing.xSmall, top = Spacing.large, bottom = Spacing.xSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            style = RecitTheme.typography.action200,
-            color = RecitTheme.colors.foregroundSecondary,
+        Row(
             modifier = Modifier.weight(1f),
-        )
+            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                style = RecitTheme.typography.action200,
+                color = RecitTheme.colors.foregroundSecondary,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            if (isRefreshing) SectionLoadingIndicator()
+        }
         trailing?.invoke()
     }
+}
+
+/**
+ * `SectionLoadingIndicator`: a small grey spinner after a section header's label, for as long as the
+ * screen asks inventaire.io for more of what the section already shows. The header's colour, not the
+ * accent's: a green one read as « wait ».
+ */
+@Composable
+fun SectionLoadingIndicator(modifier: Modifier = Modifier) {
+    val label: String = stringResource(R.string.section_refreshing)
+    CircularProgressIndicator(
+        color = RecitTheme.colors.foregroundSecondary,
+        strokeWidth = 2.dp,
+        modifier = modifier.size(14.dp).semantics { contentDescription = label },
+    )
 }
 
 enum class ThumbnailSize(val width: Dp) {

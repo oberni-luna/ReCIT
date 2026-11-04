@@ -220,8 +220,14 @@ internal fun AuthorsRow(authors: List<AuthorEntity>, onAuthor: (String) -> Unit)
 
 /** `SearchResultCell`'s work cell, drawn as the app's one [BookRow]. */
 @Composable
-internal fun EntityResultRow(title: String, subtitle: String?, imageUrl: String?, onClick: () -> Unit) {
-    BookRow(title = title, imageUrl = imageUrl, onClick = onClick, subtitle = subtitle)
+internal fun EntityResultRow(
+    title: String,
+    subtitle: String?,
+    imageUrl: String?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    BookRow(title = title, imageUrl = imageUrl, onClick = onClick, modifier = modifier, subtitle = subtitle)
 }
 
 /** A section's spinner row, while its content is on its way. */

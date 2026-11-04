@@ -12,7 +12,7 @@ struct AccountLanguage: Identifiable, Equatable {
     /// `translatedLanguagesData` in the server, as its API documentation lists it.
     static let codes: [String] = [
         "ar", "bn", "ca", "cs", "da", "de", "el", "en", "eo", "es", "fi", "fr", "hu", "id", "it",
-        "ja", "nb", "nl", "pa", "pl", "pt", "ro", "ru", "sk", "sv", "th", "tr", "uk", "zh",
+        "ja", "nb", "nl", "pa", "pl", "pt", "ro", "ru", "sk", "sv", "th", "tr", "uk", "zh"
     ]
 
     let code: String

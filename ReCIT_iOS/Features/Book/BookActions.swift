@@ -150,11 +150,20 @@ struct BookActionsModifier: ViewModifier {
         } else {
             let lenders: [InventoryItem] = borrowableItems(edition)
             if !lenders.isEmpty {
-                Menu("action.borrow_from", systemImage: "hand.wave") {
+                // The menu says what is asked for when every copy offers the same; when they
+                // differ, it only says « Demander à », and each owner's line says what theirs is.
+                let types: Set<TransactionType> = Set(lenders.map(\.transaction))
+                let sharedType: TransactionType? = types.count == 1 ? types.first : nil
+                Menu(String(localized: sharedType?.requestMenuTitle ?? "action.ask_from"), systemImage: "hand.wave") {
                     ForEach(lenders) { item in
                         if let owner = item.owner {
-                            Button(owner.username) {
+                            Button {
                                 borrowFromItem = item
+                            } label: {
+                                Text(owner.username)
+                                if sharedType == nil {
+                                    Text(item.transaction.localizedTitle)
+                                }
                             }
                         }
                     }

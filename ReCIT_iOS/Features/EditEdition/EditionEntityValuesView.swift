@@ -56,10 +56,10 @@ struct EditionEntityValuesView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    /// The uri of a person inventaire.io has, whose screen can be pushed. A Wikidata person is
-    /// changed on Wikidata, and one still to be created has nothing to open.
+    /// The uri of a person that exists, on inventaire.io or on Wikidata, whose screen can be
+    /// pushed. One still to be created has nothing to open.
     private func openableUri(of entity: EditionEntityValue) -> String? {
-        guard property.searchType == .humans, let uri = entity.uri, uri.hasPrefix("inv:") else { return nil }
+        guard property.searchType == .humans, let uri = entity.uri, EntityEdit.canEdit(uri: uri) else { return nil }
         return uri
     }
 }

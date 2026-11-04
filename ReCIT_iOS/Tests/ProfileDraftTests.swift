@@ -42,7 +42,7 @@ struct ProfileDraftTests {
             .picture(Data([1, 2, 3])),
             .username("Olive"),
             .bio("Lecteur rapide."),
-            .position(nil),
+            .position(nil)
         ])
     }
 

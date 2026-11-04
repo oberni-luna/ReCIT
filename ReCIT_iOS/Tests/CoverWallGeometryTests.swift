@@ -23,7 +23,7 @@ struct CoverWallGeometryTests {
         .init(width: 320, height: 568),
         .init(width: 375, height: 667),
         .init(width: 393, height: 852),
-        .init(width: 430, height: 932),
+        .init(width: 430, height: 932)
     ]
 
     /// A spread of instants, including a fraction of a second and a long stay on the screen.

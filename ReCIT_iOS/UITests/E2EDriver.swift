@@ -26,7 +26,7 @@
 //  is a workaround for a bug in the app; both are what driving this version of the platform
 //  costs.
 //
-//  See `docs/features/0012-end-to-end-scenario.md`.
+//  See `docs/wiki/features/0012-end-to-end-scenario.md`.
 //
 
 import Foundation

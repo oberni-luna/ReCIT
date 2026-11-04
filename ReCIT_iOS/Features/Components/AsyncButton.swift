@@ -58,4 +58,3 @@ extension AsyncButton {
         case showProgressView
     }
 }
-

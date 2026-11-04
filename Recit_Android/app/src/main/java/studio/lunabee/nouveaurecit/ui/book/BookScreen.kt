@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -50,8 +51,8 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
 /**
  * `Features/Book/BookDetailView.swift` (ADR 0002): the unified book screen, for an edition, a copy,
- * or the best edition of a searched work. Borrowing (« Emprunter à ») and the full-screen cover are
- * not ported.
+ * or the best edition of a searched work. Asking for a friend's copy (« Emprunter à », « Acheter à »,
+ * « Récupérer de ») is a line of the « … » menu, since feature 0072.
  */
 @Composable
 fun BookScreen(destination: Destination.Book, navigator: Navigator) {
@@ -72,6 +73,7 @@ internal fun BookDetail(anchor: BookAnchor, navigator: Navigator) {
     val headerTop: Dp = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + TopBarHeight
 
     Scaffold(
+        modifier = Modifier.testTag("e2e.book"),
         contentWindowInsets = WindowInsets(0),
         containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding: PaddingValues ->

@@ -230,10 +230,10 @@ final class GenreEnrichmentModel {
 
     /// Genre claims come back as bare Wikidata uris (`wd:Q1080374`), which say
     /// nothing to a model asked to name shelves — so each is resolved to its
-    /// French label in batched `attributes=labels` calls.
+    /// label in the phone's language (`ContentLanguage`) in batched `attributes=labels` calls.
     private func resolveGenreLabels(uris: [String]) async throws {
         for batch in uris.splitInSubArrays(of: Self.batchSize) {
-            let endpoint: String = "/api/entities/by-uris?uris=\(batch.joined(separator: "|"))&attributes=labels&lang=fr"
+            let endpoint: String = "/api/entities/by-uris?uris=\(batch.joined(separator: "|"))&attributes=labels&lang=\(ContentLanguage.preferred)"
             let response: EntityLabelsResultsDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
             for (uri, entity) in response?.entities ?? [:] {
                 guard let label = EntityLabel.resolve(entity.labels) else { continue }

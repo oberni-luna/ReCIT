@@ -169,7 +169,7 @@ extension NavigationDestination {
       case .book(let anchor):
           BookDetailView(anchor: anchor, path: path)
       case .user(let user):
-          UserDetailView(user:user, path: path)
+          UserDetailView(user: user, path: path)
       case .transaction(let transaction):
           TransactionDetailView(transaction: transaction, path: path)
       case .allTransactions:

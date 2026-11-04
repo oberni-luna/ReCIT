@@ -24,4 +24,3 @@ struct UpdateItemsResponseDTO: Codable {
 //            "attribute": "transaction",
 //            "value": "lending"
 //        }
-

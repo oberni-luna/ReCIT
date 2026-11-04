@@ -16,6 +16,12 @@ data class SearchResult(
 ) {
     enum class Type(val raw: String) {
         Works("works"),
+
+        /**
+         * Never asked of `/api/search`, which cannot return one: an edition comes back only from an ISBN
+         * typed in Recherche — see `IsbnQuery`.
+         */
+        Editions("editions"),
         Humans("humans"),
         ;
 
@@ -27,7 +33,7 @@ data class SearchResult(
 
 /** `SearchModel`: `/api/search` for works and humans. Search never returns editions. */
 class SearchRepository(private val api: ApiService) {
-    suspend fun search(query: String, types: Set<SearchResult.Type> = SearchResult.Type.entries.toSet(), limit: Int = 15): List<SearchResult> {
+    suspend fun search(query: String, types: Set<SearchResult.Type> = setOf(SearchResult.Type.Works, SearchResult.Type.Humans), limit: Int = 15): List<SearchResult> {
         val trimmed: String = query.trim()
         if (trimmed.isEmpty()) return emptyList()
         val response: SearchResultsDto = api.get(

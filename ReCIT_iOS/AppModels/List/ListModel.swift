@@ -25,20 +25,70 @@ final class ListModel: OptimisticMutating {
         self.errorReporter = errorReporter
     }
 
+    /// Syncs **my** lists. The lists stored before `EntityList.creatorId` existed are mine too,
+    /// so this sync is the one allowed to prune them.
     func syncLists(forUser: User, modelContext: ModelContext) async throws {
-        let listsDTO: ListsDTO? = try await apiService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(forUser._id)&with-elements=true", debug: true)
+        try await syncLists(createdBy: forUser._id, claimsUnstamped: true, modelContext: modelContext)
+    }
+
+    /// Syncs the lists a friend lets me see, for their profile. The server applies the
+    /// visibility; nothing is filtered here.
+    func syncFriendLists(of user: User, modelContext: ModelContext) async throws {
+        try await syncLists(createdBy: user._id, claimsUnstamped: false, modelContext: modelContext)
+    }
+
+    /// Syncs every friend's lists at once, for « Dans mon réseau » in the Lists tab: one request
+    /// per batch of friends rather than one per profile. Each batch prunes only the lists of the
+    /// friends it asked about, so mine, and a stranger's opened on their profile, stay.
+    func syncNetworkLists(of friends: [User], modelContext: ModelContext) async throws {
+        let ids: [String] = friends.map(\._id)
+        for start in stride(from: 0, to: ids.count, by: Self.creatorsPerRequest) {
+            let batch: Set<String> = .init(ids[start..<min(start + Self.creatorsPerRequest, ids.count)])
+            try await syncLists(createdBy: batch, claimsUnstamped: false, modelContext: modelContext)
+        }
+    }
+
+    /// Ids are 32 characters: fifty of them keep the address well under any server's limit.
+    private static let creatorsPerRequest: Int = 50
+
+    private func syncLists(createdBy creatorId: String, claimsUnstamped: Bool, modelContext: ModelContext) async throws {
+        try await syncLists(createdBy: [creatorId], claimsUnstamped: claimsUnstamped, modelContext: modelContext)
+    }
+
+    /// The answer holds these readers' lists and nobody else's, so the deletion pass is scoped to
+    /// them: without it, opening a friend's profile would delete every list of mine.
+    private func syncLists(createdBy creatorIds: Set<String>, claimsUnstamped: Bool, modelContext: ModelContext) async throws {
+        let users: String = creatorIds.sorted().joined(separator: "|")
+        let listsDTO: ListsDTO? = try await apiService.fetchData(fromEndpoint: "/api/lists/by-creators?users=\(users)&with-elements=true", debug: true)
         guard let listsDTO else { return }
+        // Asked about several readers, a list that does not say whose it is cannot be stamped,
+        // and stored unstamped it would pass for mine (`isCreated(byMe:)`): it is left out.
+        let dtos: [ListDTO] = if creatorIds.count == 1 {
+            listsDTO.lists
+        } else {
+            listsDTO.lists.filter { $0.creator.map(creatorIds.contains) ?? false }
+        }
 
         let baseUrl: String = apiService.baseUrl()
         // Upsert in place (never delete+reinsert) so any open list view stays reactive.
-        try modelContext.upsert(
-            listsDTO.lists,
+        let synced: [EntityList] = try modelContext.upsert(
+            dtos,
             dtoID: { $0._id },
             modelID: { (list: EntityList) in list._id },
             make: { EntityList(listDTO: $0, baseUrl: baseUrl) },
             update: { list, dto in list.update(listDTO: dto, baseUrl: baseUrl, modelContext: modelContext) },
-            deleteMissing: true
+            deleteMissing: true,
+            scope: { list in
+                list.creatorId.map(creatorIds.contains) ?? claimsUnstamped
+            }
         )
+        // Stamped from the request when the answer does not say and only one reader was asked
+        // about: these are that reader's lists.
+        if creatorIds.count == 1, let creatorId = creatorIds.first {
+            for list in synced where list.creatorId == nil {
+                list.creatorId = creatorId
+            }
+        }
         try modelContext.save()
     }
 
@@ -57,7 +107,7 @@ final class ListModel: OptimisticMutating {
         if list._id.isEmpty {
             try await self.createList(modelContext: modelContext, name: list.name, description: list.explanation, type: list.type.rawValue, visibility: list.visibility.map(\.rawValue))
         } else {
-            let _ : NewListResponseDTO? = try await apiService.send(
+            let _: NewListResponseDTO? = try await apiService.send(
                 toEndpoint: "/api/lists",
                 method: "PUT",
                 payload: NewListDTO(id: list._id, name: list.name, description: list.explanation, visibility: list.visibility.map(\.rawValue), type: nil),
@@ -182,6 +232,71 @@ final class ListModel: OptimisticMutating {
         )
     }
 
+    /// Moves an element into another list, with its comment — « Déplacer dans une autre liste ».
+    ///
+    /// **Server-first, not optimistic**, in three calls that each wait for the one before: add the
+    /// uri to `destination`, write the comment on the element just created, take the uri out of
+    /// `source`. A failure stops the rest, so the element is never taken out of a list before it
+    /// has landed in the other; at worst it is in both. Whatever did land on the server is in the
+    /// store before the error is thrown, so the screen shows what the server holds.
+    ///
+    /// A destination that already holds the uri creates nothing (`alreadyInList`): the element is
+    /// then only taken out of `source`, and the destination keeps its own comment.
+    func moveElement(
+        modelContext: ModelContext,
+        item: EntityListItem,
+        from source: EntityList,
+        to destination: EntityList
+    ) async throws {
+        let uri: String = item.uri
+        let comment: String = item.comment
+        let sourceId: String = source._id
+
+        guard let response: AddToListResponseDTO = try await apiService.send(
+            toEndpoint: "/api/lists/add-elements",
+            method: "PUT",
+            payload: AddToListDTO(id: destination._id, uris: [uri]),
+            debug: true
+        ) else {
+            throw NetworkError.badResponse
+        }
+
+        var landed: [ListElementDTO] = response.createdElements
+        do {
+            if comment.isEmpty == false, let element = landed.first {
+                guard let commented = try await updateElementInList(elementId: element._id, comment: comment) else {
+                    throw NetworkError.badResponse
+                }
+                landed = [commented]
+            }
+        } catch {
+            try file(landed, into: destination, modelContext: modelContext)
+            throw error
+        }
+        try file(landed, into: destination, modelContext: modelContext)
+
+        try await deleteElementsInList(
+            modelContext: modelContext,
+            listId: sourceId,
+            elementIds: [uri]
+        )
+    }
+
+    /// Inserts elements the server has created into a list of the store, unless the list has left
+    /// it during the round trip or already holds them.
+    private func file(_ elements: [ListElementDTO], into list: EntityList, modelContext: ModelContext) throws {
+        guard list.isStillInTheStore else { return }
+
+        let baseUrl: String = apiService.baseUrl()
+        let heldIDs: Set<String> = .init(list.elements.map(\._id))
+        for element in elements where heldIDs.contains(element._id) == false {
+            let item: EntityListItem = .init(listElementDTO: element, listType: list.type, baseUrl: baseUrl)
+            modelContext.insert(item)
+            list.elements.append(item)
+        }
+        try modelContext.save()
+    }
+
     // TODO: Implement remove item from list
 //    {id: "97e848f4af0a5ffe2886648ee2bc648b", uris: ["inv:fd0bbd368cb02d614a3b29857f960fbe"]}
     func deleteElementsInList(modelContext: ModelContext, listId: String, elementIds: [String]) async throws {
@@ -208,7 +323,36 @@ final class ListModel: OptimisticMutating {
         }
     }
 
-    // TODO: Implement update item in a list to add comment
+    /// Optimistically writes the reader's comment on an element: the store holds the new text at
+    /// once, `/api/lists/update-element` is called in the background, and a failure puts the
+    /// previous text back and is surfaced through the shared channel (ADR 0001).
+    ///
+    /// Nothing is sent when the text has not changed, nor for an element still carrying its
+    /// optimistic id: the server does not know that id yet, and the field that calls this is
+    /// disabled until the add has been reconciled.
+    func updateComment(modelContext: ModelContext, item: EntityListItem, comment: String) {
+        let previous: String = item.comment
+        let elementId: String = item._id
+        guard comment != previous, OptimisticID.isOptimistic(elementId) == false else { return }
+
+        inFlightTask = optimistic(
+            modelContext,
+            subjects: [item],
+            apply: {
+                item.comment = comment
+            },
+            revert: {
+                item.comment = previous
+            },
+            request: { [weak self] in
+                guard let self else { return }
+                guard try await self.updateElementInList(elementId: elementId, comment: comment) != nil else {
+                    throw NetworkError.badResponse
+                }
+            }
+        )
+    }
+
     // TODO: add optionnal comment when adding an element to a list
     func updateElementInList(elementId: String, comment: String) async throws -> ListElementDTO? {
         let updateListElementDTO: UpdateListElementDTO = .init(id: elementId, comment: comment)

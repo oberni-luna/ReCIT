@@ -99,7 +99,7 @@ struct WorkEditionPicker: View {
             entries: editions.map(EditionListing.Entry.init),
             facts: editions.map(EditionFacts.init),
             chosen: chosenLanguage,
-            phoneLanguage: Locale.current.language.languageCode?.identifier
+            phoneLanguage: ContentLanguage.preferred
         )
         guard Task.isCancelled == false else { return }
 

@@ -47,7 +47,7 @@ public class Author: Identifiable, Entity {
             dateOfBirth: dateOfBirthString?.parseToDate(),
             dateOfDeath: dateOfDeathString?.parseToDate(),
             image: imageUrl,
-            subtitle: entityDTO.descriptions?["fr"] ?? entityDTO.descriptions?["en"]
+            subtitle: EntityDescription.resolve(entityDTO.descriptions)
         )
     }
 
@@ -71,7 +71,7 @@ public class Author: Identifiable, Entity {
         if let image = apiService.absoluteImageUrl(entityDTO.image?.url), !image.isEmpty {
             self.image = image
         }
-        if let subtitle = entityDTO.descriptions?["fr"] ?? entityDTO.descriptions?["en"] {
+        if let subtitle = EntityDescription.resolve(entityDTO.descriptions) {
             self.subtitle = subtitle
         }
     }
@@ -81,6 +81,3 @@ public class Author: Identifiable, Entity {
         static let imageBaseUrl: String = "https://commons.wikimedia.org/wiki/Special:FilePath/"
     }
 }
-
-
-

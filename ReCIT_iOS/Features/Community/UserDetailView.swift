@@ -8,46 +8,150 @@
 import SwiftUI
 import SwiftData
 
+/// A reader's profile, shaped like the Contacts card of Messages: a header held at the top —
+/// their picture, their name and the Inventaire • 540 | Listes • 4 | Présentation tabs — that
+/// folds into the navigation bar as the page scrolls, and never stays half folded. Under
+/// Inventaire, their étagères scroll away under it, the books after them; the other tabs open
+/// on their content, their bio being Présentation's. See PRD 0031 and the « Détail d'un amis »
+/// section of the Figma file (`865:17783`).
+///
+/// Each tab is a page of its own (`UserProfilePage`), an inset grouped `List` whose first row is
+/// as tall as the unfolded header, which lies over both. The pages sit in a pager: a tab is
+/// changed by a swipe as well as by its name.
 struct UserDetailView: View {
     @Environment(UserModel.self) private var userModel
+    @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
-    /// Only so the list can hold still while a book is being picked off an étagère.
+    /// Only so the page can hold still while a book is being picked off an étagère.
     @Environment(ShelfFocusModel.self) private var shelfFocus
-    @Environment(InventoryModel.self) private var inventoryModel
 
-    @State private var nextNavigationDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
     @State private var isConfirmingRemoval: Bool = false
+    @State private var tab: UserProfileTab = .inventory
+    @State private var listsLoad: UserListsTab.Load = .loading
+    /// The pages' scroll and the pager's position — never read by this body, so a scroll
+    /// redraws the header alone.
+    @State private var scrollOffset: ProfileScrollOffset = .init()
+    /// The header's height unfolded — what the pages are pushed down by.
+    @State private var expandedHeaderHeight: CGFloat = 0
+    /// Where the header starts on screen at rest, read only while the page on screen is settled
+    /// (see `UserProfilePage.firstRowTop`).
+    @State private var headerTop: CGFloat?
+    /// The pages' width, which says whether their books go on one column or two.
+    @State private var pagesWidth: CGFloat = 0
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let user: User
     @Binding var path: NavigationPath
 
+    private var isMe: Bool {
+        user._id == userModel.myUser?._id
+    }
+
     /// Mine, or a friend's: the two cases where there are books to show. Everyone else's
     /// inventory is closed until the relation is, which is what the empty state says.
     private var showsInventory: Bool {
-        user._id == userModel.myUser?._id || user.relation == .friend
+        isMe || user.relation == .friend
+    }
+
+    private var metrics: UserProfileStickyHeader.Metrics {
+        .init(dynamicTypeSize: dynamicTypeSize)
+    }
+
+    private var collapse: ProfileHeaderCollapse {
+        metrics.collapse
+    }
+
+    /// Their books side by side past the width where mine are (`ShelvesContent`): the unfolded
+    /// iPhone Duo in landscape.
+    private var bookColumns: Int {
+        ShelvesContent.allBooksColumnCount(containerWidth: pagesWidth)
     }
 
     var body: some View {
-        List {
-            Section {
-                UserHeaderView(user: user)
+        pages
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                pagesWidth = width
             }
+            .overlay(alignment: .top) {
+                header
+            }
+            // The header draws its own backdrop under the bar, once the page passes under it.
+            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+            .background {
+                DesignSystem.Color.backgroundForm.color
+                    .ignoresSafeArea()
+            }
+            // The name heads the page; the bar keeps the way back and « … ». The title stays set
+            // for what reads it elsewhere — the back button's long-press menu.
+            .navigationTitle(user.username)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(removing: .title)
+            .toolbar { toolbarContent }
+            .task(id: user._id) {
+                await syncLists()
+            }
+            // The maquette draws no confirmation, and this adds one: unfriending is the only
+            // gesture of the whole flow that loses something — the relation has to be asked for
+            // again, and the books go with it. Every other destructive action in the app asks
+            // first (« Supprimer de mon inventaire », deleting a shelf), so this one does too.
+            .confirmationDialog(
+                "network.remove.confirm \(user.username)",
+                isPresented: $isConfirmingRemoval,
+                titleVisibility: .visible
+            ) {
+                Button("network.remove", role: .destructive) {
+                    userModel.unfriend(user, modelContext: modelContext)
+                }
+                Button("action.cancel", role: .cancel) {}
+            }
+            .sheet(item: $borrowFromItem) { item in
+                if let owner = item.owner, let me = userModel.myUser {
+                    TransactionFormView(
+                        transaction: .init(
+                            _id: "",
+                            _rev: "",
+                            item: item,
+                            owner: owner,
+                            requester: me,
+                            type: item.transaction,
+                            created: .now,
+                            messages: [],
+                            state: .requested,
+                            actions: [],
+                            readStatus: .init(owner: false, requester: true)
+                        ),
+                        transition: TransactionStateMachine.requestTransition
+                    )
+                }
+            }
+    }
 
-            if showsInventory {
-                // Their étagères sit between who they are and what they own, which is the
-                // order the two are read in: a shelf says how the library is arranged, the
-                // list below says what is in it.
-                UserShelvesSection(user: user, path: $path)
-                inventorySection
-            } else {
+    /// Inventaire, Listes and Présentation side by side, a swipe or a tab's name apart. Someone
+    /// whose books are closed to me has no tabs, and a single page, their bio at its top.
+    @ViewBuilder
+    private var pages: some View {
+        if showsInventory {
+            TabPager(
+                selection: $tab,
+                isFrozen: shelfFocus.isArmed,
+                position: scrollOffset
+            ) { page in
+                // The étagères are part of the library, so they go with the books, not with the
+                // lists or the bio.
+                profilePage(page, showsShelves: page == .inventory, showsBio: false) {
+                    tabContent(page)
+                }
+            }
+            // Edge to edge, so the pages run under the bars as a list does; UIKit hands each
+            // page the safe area, which its list keeps its rows clear of.
+            .ignoresSafeArea()
+        } else {
+            profilePage(.inventory, showsShelves: false, showsBio: true) {
                 Section {
                     RelationActionsView(user: user)
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
 
-                Section {
                     EmptyStateView(
                         glyph: "person",
                         title: "network.private_inventory.title",
@@ -59,89 +163,75 @@ struct UserDetailView: View {
                 .listRowSeparator(.hidden)
             }
         }
-        .applyListBackground()
-        // Frozen while a book is being picked off an étagère, so the slide moves the
-        // selection and not the page — the same rule the inventory's own carousel follows.
-        .scrollDisabled(shelfFocus.isArmed)
-        .navigationTitle("nav.user")
-        .toolbar { toolbarContent }
-        // The maquette draws no confirmation, and this adds one: unfriending is the only
-        // gesture of the whole flow that loses something — the relation has to be asked for
-        // again, and the books go with it. Every other destructive action in the app asks
-        // first (« Supprimer de mon inventaire », deleting a shelf), so this one does too.
-        .confirmationDialog(
-            "network.remove.confirm \(user.username)",
-            isPresented: $isConfirmingRemoval,
-            titleVisibility: .visible
-        ) {
-            Button("network.remove", role: .destructive) {
-                userModel.unfriend(user, modelContext: modelContext)
-            }
-            Button("action.cancel", role: .cancel) {}
-        }
-        .sheet(item: $borrowFromItem) { item in
-            if let owner = item.owner, let me = userModel.myUser {
-                TransactionFormView(
-                    transaction: .init(
-                        _id: "",
-                        _rev: "",
-                        item: item,
-                        owner: owner,
-                        requester: me,
-                        type: item.transaction,
-                        created: .now,
-                        messages: [],
-                        state: .requested,
-                        actions: [],
-                        readStatus: .init(owner: false, requester: true)
-                    ),
-                    transition: TransactionStateMachine.requestTransition
-                )
-            }
-        }
+    }
+
+    private func profilePage(
+        _ page: UserProfileTab,
+        showsShelves: Bool,
+        showsBio: Bool,
+        @ViewBuilder content: () -> some View
+    ) -> some View {
+        UserProfilePage(
+            user: user,
+            page: page,
+            showsShelves: showsShelves,
+            showsBio: showsBio,
+            holdsReadableWidth: showsInventory == false || page != .inventory || bookColumns == 1,
+            expandedHeaderHeight: expandedHeaderHeight,
+            headerTop: headerTop,
+            collapse: collapse,
+            scrollOffset: scrollOffset,
+            path: $path,
+            content: content
+        )
     }
 
     @ViewBuilder
-    private var inventorySection: some View {
-        let syncState: InventoryFirstSyncState = inventoryModel.firstSyncState(for: user)
-        Section {
-            // The same bar as their cell in the Profil, and the books already received under
-            // it: a friend's inventory is read as it arrives, not after.
-            if syncState != .synced {
-                InventorySyncBanner(
-                    title: "sync.inventory.friend.title \(user.username)",
-                    state: syncState
-                )
-                .padding(.vertical, .xSmall)
+    private func tabContent(_ page: UserProfileTab) -> some View {
+        switch page {
+        case .inventory:
+            UserInventoryTab(user: user, columns: bookColumns, path: $path) { item in
+                borrowFromItem = item
             }
-            if syncState == .synced && user.items.isEmpty {
-                Text("inventory.empty")
-            } else {
-                ForEach(user.items) { item in
-                    Button {
-                        path.append(NavigationDestination.book(anchor: .item(item)))
-                    } label: {
-                        InventoryCell(item: item, filterParameter: .userInventory)
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        if item.ownerId != userModel.myUser?._id {
-                            if item.transaction == .inventorying {
-                                Button("community.owner_not_lending \(user.username)", systemImage: "hand.raised.slash") { }
-                                    .disabled(true)
-                            } else {
-                                Button("action.borrow_from_user \(user.username)", systemImage: "hand.wave") {
-                                    borrowFromItem = item
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } header: {
-            Text("user.inventory.header \(user.username)")
-                .textStyle(.action200)
-                .foregroundStyle(.foregroundSecondary)
+        case .lists:
+            UserListsTab(user: user, load: listsLoad, path: $path)
+        case .presentation:
+            UserPresentationTab(user: user)
+        }
+    }
+
+    /// Under the navigation bar, in the safe area: an overlay of the pages, laid out where they
+    /// would be had they not run past it.
+    private var header: some View {
+        UserProfileStickyHeader(
+            user: user,
+            tab: showsInventory ? $tab : nil,
+            listsLoad: listsLoad,
+            metrics: metrics,
+            collapse: collapse,
+            scrollOffset: scrollOffset
+        )
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            guard scrollOffset.isSettled(tab) else { return }
+            headerTop = frame.minY
+            expandedHeaderHeight = frame.height
+        }
+    }
+
+    /// A friend's lists are fetched each time their profile opens — not at launch, where every
+    /// friend's would be, for a tab most profiles are never switched to. What the store already
+    /// holds shows in the meantime. Mine are synced at launch, with the rest of my data.
+    private func syncLists() async {
+        guard showsInventory, isMe == false else {
+            listsLoad = .loaded
+            return
+        }
+
+        do {
+            try await listModel.syncFriendLists(of: user, modelContext: modelContext)
+            listsLoad = .loaded
+        } catch {
+            listsLoad = .failed
         }
     }
 

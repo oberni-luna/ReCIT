@@ -39,17 +39,4 @@ struct ValidatedGenreMapping: Equatable, Sendable {
         guard let key = AutoSortName.key(genre) else { return nil }
         return shelfByGenreKey[key]
     }
-
-    /// Internal so only the validator can build one.
-    init(
-        shelfNames: [String],
-        shelfByGenreKey: [String: String],
-        unmappedGenres: [String],
-        rejections: [ShelfMappingValidator.Rejection]
-    ) {
-        self.shelfNames = shelfNames
-        self.shelfByGenreKey = shelfByGenreKey
-        self.unmappedGenres = unmappedGenres
-        self.rejections = rejections
-    }
 }

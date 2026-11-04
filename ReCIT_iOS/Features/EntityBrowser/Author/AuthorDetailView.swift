@@ -11,7 +11,7 @@ import SwiftData
 struct AuthorDetailView: View {
     @Environment(EntityModel.self) private var entityModel
     @Environment(\.modelContext) private var modelContext
-    
+
     enum ViewState {
         case loadingAuthor
         case loadingWorks(author: Author)
@@ -56,7 +56,7 @@ struct AuthorDetailView: View {
                                 .foregroundStyle(.foregroundDefault)
                         }
                         if let dob = author.dateOfBirth {
-                            Text("author.birth_date \(dob.formatted(date:.long, time:.omitted))")
+                            Text("author.birth_date \(dob.formatted(date: .long, time: .omitted))")
                                 .textStyle(.content300)
                                 .foregroundStyle(.foregroundDefault)
                         }
@@ -66,7 +66,7 @@ struct AuthorDetailView: View {
                 Section {
                     ForEach(works) { work in
                         if !work.title.isEmpty {
-                            let result:SearchResult = SearchResult(id: work.uri, uri: work.uri, title: work.title, description: work.subtitle, imageUrl: work.image, score: 0, type: .works)
+                            let result: SearchResult = SearchResult(id: work.uri, uri: work.uri, title: work.title, description: work.subtitle, imageUrl: work.image, score: 0, type: .works)
                             Button {
                                 path.append(NavigationDestination.work(uri: work.uri))
                             } label: {
@@ -128,7 +128,7 @@ struct AuthorDetailView: View {
 
             let works: [Work] = try await entityModel.getAuthorWorks(modelContext: modelContext, author: author) ?? author.works
             state = .loaded(author: author, works: works)
-        } catch(let error) {
+        } catch let error {
             if cached == nil {
                 state = .error(error: error)
             }

@@ -13,7 +13,8 @@
 //  `labels.values.first`, which is whichever language the dictionary hashes first — Russian as
 //  easily as Japanese.
 //
-//  The order: French and English first, as the app always read them; then `mul`, which is the
+//  The order: the phone's language (`ContentLanguage`), which is also the one every request
+//  asks for; then French and English, as the app always read them; then `mul`, which is the
 //  name itself rather than a translation of it; then the entity's original language; and, when
 //  none of those exist, the smallest language code, so the same entity is named the same way
 //  on every sync.
@@ -28,20 +29,22 @@ enum EntityLabel {
     /// The label to display, or `nil` when the entity has none.
     static func resolve(
         _ labels: [String: String]?,
-        originalLang: String? = nil
+        originalLang: String? = nil,
+        preferredLanguage: String = ContentLanguage.preferred
     ) -> String? {
-        language(of: labels, originalLang: originalLang).flatMap { labels?[$0] }
+        language(of: labels, originalLang: originalLang, preferredLanguage: preferredLanguage).flatMap { labels?[$0] }
     }
 
     /// The language of the label `resolve` picks — the one a renamed entity's new label is
     /// written in, so that the name shown is the name replaced.
     static func language(
         of labels: [String: String]?,
-        originalLang: String? = nil
+        originalLang: String? = nil,
+        preferredLanguage: String = ContentLanguage.preferred
     ) -> String? {
         guard let labels else { return nil }
 
-        let preferred: [String?] = ["fr", "en", "mul", originalLang]
+        let preferred: [String?] = [preferredLanguage, "fr", "en", "mul", originalLang]
         for case let language? in preferred {
             if let label = labels[language], label.isEmpty == false {
                 return language

@@ -15,7 +15,7 @@ package studio.lunabee.nouveaurecit.data.sorting
  *
  * Two rules stated rather than left implicit:
  * - **A draft is created whether or not it ends up holding books.** Naming an étagère is the
- *   instruction; filling it is a separate one (iOS `docs/features/0009`).
+ *   instruction; filling it is a separate one (iOS `docs/wiki/features/0009`).
  * - **An étagère emptied by dragging is modified, never deleted.** A drag does not delete a shelf
  *   behind the user's back.
  */

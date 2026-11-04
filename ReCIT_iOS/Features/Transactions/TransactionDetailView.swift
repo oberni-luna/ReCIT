@@ -128,8 +128,7 @@ struct TransactionDetailView: View {
         case .action(let action):
             HStack(alignment: .top, spacing: .sMedium) {
                 Image(systemName: action.systemImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .resizable().scaledToFit()
                     .frame(width: 24, height: 24)
                     .foregroundStyle(.foregroundTinted)
                     .padding(.all, .small)
@@ -169,7 +168,6 @@ struct TransactionDetailView: View {
             }
         }
     }
-
 
 }
 
@@ -272,4 +270,3 @@ extension UserTransaction {
         }
     }
 }
-

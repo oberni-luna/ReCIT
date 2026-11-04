@@ -16,6 +16,7 @@ import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.data.model.TransactionType
 import studio.lunabee.nouveaurecit.data.model.Visibility
+import studio.lunabee.nouveaurecit.data.transactions.TransactionRequestTarget
 
 /** `MembershipMenuEntry`: one étagère or list of the « … » menu, and whether the book is in it. */
 data class MembershipEntry(val id: String, val name: String, val isMember: Boolean)
@@ -30,9 +31,23 @@ data class BookActionsState(
     val myShelves: List<MembershipEntry>,
     val myLists: List<MembershipEntry>,
     val singleWorkUri: String?,
+    val requests: List<TransactionRequestTarget> = emptyList(),
 ) {
     val lines: List<BookMenuLine>
-        get() = BookMenuLine.of(ownsCopy = myItemId != null, shelves = myShelves, lists = myLists, singleWorkUri = singleWorkUri)
+        get() = BookMenuLine.of(
+            ownsCopy = myItemId != null,
+            shelves = myShelves,
+            lists = myLists,
+            singleWorkUri = singleWorkUri,
+            requests = requests,
+        )
+
+    /**
+     * A book row's menu: it asks for the row's own copy only, when someone else's, rather than for
+     * every friend's copy of the edition as the book screen does.
+     */
+    fun forCopy(row: ItemRow): BookActionsState =
+        copy(requests = if (row.item.id == myItemId) emptyList() else TransactionRequestTarget.of(listOf(row)))
 }
 
 /** One line of the book's menu, before it is worded — what `BookActions.menuContent` decides on iOS. */
@@ -46,22 +61,28 @@ sealed interface BookMenuLine {
 
     data object AddToInventory : BookMenuLine
 
+    /** « Emprunter à %s », « Acheter à %s », « Récupérer de %s »: asking for someone else's copy. */
+    data class Request(val target: TransactionRequestTarget) : BookMenuLine
+
     companion object {
         /**
          * Two menus, one per side of the ownership line. Listes hold works: an edition behind
          * several works ([singleWorkUri] `null`) offers no list line at all, creation included.
+         * The copies I can ask for head the other side, as « Emprunter à » does on iOS; holding a
+         * copy of my own, I am not offered anyone else's.
          */
         fun of(
             ownsCopy: Boolean,
             shelves: List<MembershipEntry>,
             lists: List<MembershipEntry>,
             singleWorkUri: String?,
+            requests: List<TransactionRequestTarget> = emptyList(),
         ): List<BookMenuLine> {
             val listLine: BookMenuLine? = singleWorkUri?.let { Lists(lists) }
             return if (ownsCopy) {
                 listOfNotNull(Shelves(shelves), listLine, Remove)
             } else {
-                listOfNotNull(listLine, AddToInventory)
+                requests.map(::Request) + listOfNotNull(listLine, AddToInventory)
             }
         }
     }
@@ -127,6 +148,7 @@ class BookActions(
                 myShelves = shelves,
                 myLists = lists,
                 singleWorkUri = it.works.singleOrNull()?.uri,
+                requests = TransactionRequestTarget.of(owned.others),
             )
         }
     }

@@ -12,19 +12,34 @@ struct EntityListView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(ListModel.self) var listModel
     @Environment(SyncStatusStore.self) private var syncStatus
-    @Query(sort: \EntityList.name) var allLists: [EntityList]
+    @Environment(UserModel.self) private var userModel
+    @Query private var storedLists: [EntityList]
+    @Query private var users: [User]
 
     @State private var searchText: String = ""
     @State private var path: NavigationPath = .init()
 
     @State private var showNewListModal: Bool = false
+    /// The list a swipe asked to delete, waiting for the confirmation: a full swipe deleted it
+    /// outright, with its works and comments, on the server too.
+    @State private var listToDelete: EntityList?
 
-    var filteredLists: [EntityList] {
-        if searchText.isEmpty {
-            return allLists
-        } else {
-            return allLists.filter { $0.name.localizedStandardContains(searchText) }
-        }
+    /// Everything there is to show, search aside: what decides the empty screen and the headers.
+    private var allSections: ListsTabSections {
+        sections(matching: "")
+    }
+
+    private var filteredSections: ListsTabSections {
+        sections(matching: searchText)
+    }
+
+    private func sections(matching text: String) -> ListsTabSections {
+        .init(
+            lists: storedLists,
+            myUserId: userModel.myUser?._id,
+            friends: users.filter { $0.relation == .friend },
+            searchText: text
+        )
     }
 
     var body: some View {
@@ -32,27 +47,20 @@ struct EntityListView: View {
             Group {
                 if syncStatus.shouldShowPlaceholder(.lists) {
                     SyncingPlaceholderView()
-                } else if allLists.isEmpty && searchText.isEmpty {
+                } else if allSections.isEmpty && searchText.isEmpty {
                     ListsEmptyStateView {
                         showNewListModal = true
                     }
                 } else {
-                    List {
-                        ForEach(filteredLists) { list in
-                            NavigationLink(value: NavigationDestination.entityList(id: list._id)) {
-                                ListRowView(list: list)
-                                    .swipeActions {
-                                        Button("action.delete", systemImage: "trash") {
-                                            Task {
-                                                try? await listModel.deleteList(modelContext: modelContext, list: list)
-                                            }
-                                        }
-                                        .tint(.red)
-                                    }
-                            }
-                            .accessibilityIdentifier("e2e.listRow")
+                    ListsTabList(
+                        sections: filteredSections,
+                        showsHeaders: !allSections.network.isEmpty,
+                        isSearching: !searchText.isEmpty,
+                        onCreate: { showNewListModal = true },
+                        onDelete: { list in
+                            listToDelete = list
                         }
-                    }
+                    )
                 }
             }
             .navigationDestination(for: NavigationDestination.self) { destination in
@@ -69,6 +77,24 @@ struct EntityListView: View {
                 }
             }
             .searchable(text: $searchText)
+            .confirmationDialog(
+                "lists.delete_confirm.title \(listToDelete?.name ?? "")",
+                isPresented: .init(
+                    get: { listToDelete != nil },
+                    set: { if !$0 { listToDelete = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: listToDelete
+            ) { list in
+                Button("list.form.delete", role: .destructive) {
+                    Task {
+                        try? await listModel.deleteList(modelContext: modelContext, list: list)
+                    }
+                }
+                Button("action.cancel", role: .cancel) { }
+            } message: { _ in
+                Text("lists.delete_confirm.message")
+            }
             .sheet(isPresented: $showNewListModal) {
                 ListFormView()
             }

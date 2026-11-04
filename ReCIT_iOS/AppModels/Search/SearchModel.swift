@@ -22,7 +22,7 @@ final class SearchModel {
     func searchEntity(
         query: String,
         entityTypes: [SearchResultType] = [.humans, .works],
-        lang: String? = "fr",
+        lang: String? = ContentLanguage.preferred,
         limit: Int = 15,
         offset: Int = 0
     ) async throws -> [SearchResult] {
@@ -40,7 +40,7 @@ final class SearchModel {
         let search: String = trimmedQuery.addingPercentEncoding(
             withAllowedCharacters: .urlQueryAllowed.subtracting(.init(charactersIn: "&+=?#"))
         ) ?? trimmedQuery
-        let language: String = lang ?? "fr"
+        let language: String = lang ?? ContentLanguage.preferred
         let endpoint: String = "/api/search?types=\(types)&search=\(search)&lang=\(language)&limit=\(limit)&offset=\(offset)&exact=false"
 
         let response: SearchResultsDTO? = try await apiService.fetchData(fromEndpoint: endpoint, debug: true)

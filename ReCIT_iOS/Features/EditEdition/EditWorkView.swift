@@ -8,8 +8,9 @@
 //  every edition of it, not to the edition the reader holds.
 //
 //  Nothing is sent from here. What changes goes with the sheet's « Enregistrer », on the way
-//  back: one save for the whole form. A Wikidata work is shown and not changed — its title and
-//  authors are edited on Wikidata.
+//  back: one save for the whole form. A work that exists opens « Modifier l'œuvre » instead
+//  (`EditEntityView`), a Wikidata one included; this screen is left with the works being
+//  created.
 //
 
 import SwiftUI

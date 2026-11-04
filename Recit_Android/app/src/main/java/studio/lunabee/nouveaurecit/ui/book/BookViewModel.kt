@@ -23,6 +23,7 @@ import studio.lunabee.nouveaurecit.data.db.EditionWithWorks
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.WorkEntity
 import studio.lunabee.nouveaurecit.data.model.TransactionType
+import studio.lunabee.nouveaurecit.data.transactions.TransactionRequestTarget
 import studio.lunabee.nouveaurecit.network.NetworkError
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 
@@ -44,7 +45,9 @@ data class BookUiState(
 
     /** What the « … » menu reads; `null` until the edition is on screen. */
     val actions: BookActionsState?
-        get() = edition?.let { BookActionsState(it.uri, myItem?.item?.id, myShelves, myLists, singleWorkUri) }
+        get() = edition?.let {
+            BookActionsState(it.uri, myItem?.item?.id, myShelves, myLists, singleWorkUri, TransactionRequestTarget.of(othersItems))
+        }
 }
 
 /** `BookViewModel.ViewState`. */

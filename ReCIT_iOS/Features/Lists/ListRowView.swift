@@ -15,31 +15,33 @@ struct ListRowView: View {
     var owner: User?
 
     var body: some View {
-        HStack(spacing: .sMedium) {
-            ListCoverFan(
-                uris: ListCoverPreview.uris(of: list.elements),
-                type: list.type
-            )
-
-            VStack(alignment: .leading, spacing: .zero) {
-                ListRowMetaLine(
-                    owner: owner,
-                    count: list.type.countLabel(list.elements.count)
+        if list.isStillInTheStore {
+            HStack(spacing: .sMedium) {
+                ListCoverFan(
+                    uris: ListCoverPreview.uris(of: list.elements),
+                    type: list.type
                 )
 
-                Text(list.name)
-                    .textStyle(.content400Bold)
-                    .foregroundStyle(.foregroundDefault)
-                    .lineLimit(1)
+                VStack(alignment: .leading, spacing: .zero) {
+                    ListRowMetaLine(
+                        owner: owner,
+                        count: list.type.countLabel(list.elements.count)
+                    )
 
-                if !list.explanation.isEmpty {
-                    Text(list.explanation)
-                        .textStyle(.content200)
-                        .foregroundStyle(.foregroundSecondary)
-                        .lineLimit(3)
+                    Text(list.name)
+                        .textStyle(.content400Bold)
+                        .foregroundStyle(.foregroundDefault)
+                        .lineLimit(1)
+
+                    if !list.explanation.isEmpty {
+                        Text(list.explanation)
+                            .textStyle(.content200)
+                            .foregroundStyle(.foregroundSecondary)
+                            .lineLimit(3)
+                    }
                 }
             }
+            .accessibilityElement(children: .combine)
         }
-        .accessibilityElement(children: .combine)
     }
 }

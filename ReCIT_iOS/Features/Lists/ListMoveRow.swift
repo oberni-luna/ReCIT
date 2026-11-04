@@ -31,13 +31,17 @@ struct ListMoveRow: View {
 
     /// Mine only: a friend's lists, stored for their profile, are not mine to file into.
     private var lists: [EntityList] {
-        storedLists.filter { $0.isCreated(byMe: userModel.myUser?._id) }
+        storedLists
+            .filter(\.isStillInTheStore)
+            .filter { $0.isCreated(byMe: userModel.myUser?._id) }
     }
 
     @State private var isMoving: Bool = false
 
     private var destinations: [ListMoveDestination] {
-        ListMoveDestination.destinations(
+        guard item.isStillInTheStore, list.isStillInTheStore else { return [] }
+
+        return ListMoveDestination.destinations(
             for: item.uri,
             from: list._id,
             type: list.type,

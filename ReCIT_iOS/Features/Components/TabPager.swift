@@ -112,6 +112,8 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
         /// While a tab chosen by its name is being turned to: the pager's own scroll is not a
         /// finger then, and the position is animated to the page instead.
         private var isTurningByName: Bool = false
+        /// Held still by the screen.
+        private var isFrozen: Bool = false
         /// A tab chosen by its name while a swipe was still settling: turned to once it has, rather
         /// than lost under the page the swipe lands on.
         private var pendingTab: Tab?
@@ -166,7 +168,15 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
         }
 
         func setFrozen(_ isFrozen: Bool) {
-            scrollView?.isScrollEnabled = isFrozen == false
+            self.isFrozen = isFrozen
+            updateScrollEnabled()
+        }
+
+        /// No finger on the pages while a tab chosen by its name is turned to: a swipe caught the
+        /// turn halfway, UIKit then never reported its end, and the pager waited for it forever —
+        /// a tab chosen afterwards did nothing.
+        private func updateScrollEnabled() {
+            scrollView?.isScrollEnabled = isFrozen == false && isTurningByName == false
         }
 
         /// Turns to the tab chosen by its name, if it is not the page on screen already.
@@ -183,6 +193,7 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
 
             let isForward: Bool = Self.index(of: target) > Self.index(of: shown)
             isTurningByName = true
+            updateScrollEnabled()
             withAnimation(.snappy) {
                 position.pagePosition = Self.index(of: target)
             }
@@ -192,6 +203,7 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
                 animated: true
             ) { [weak self] _ in
                 self?.isTurningByName = false
+                self?.updateScrollEnabled()
             }
         }
 
@@ -218,7 +230,8 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
         // MARK: - UIPageViewControllerDelegate
 
         /// A swipe that turned the page selects its tab — unless a tab was chosen by its name
-        /// meanwhile, which is turned to now.
+        /// meanwhile, which is turned to now. The selection is the page on screen, whether the
+        /// swipe turned it or went back.
         func pageViewController(
             _ pageViewController: UIPageViewController,
             didFinishAnimating finished: Bool,
@@ -235,7 +248,7 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
                     return
                 }
             }
-            if completed, selection.wrappedValue != shown {
+            if selection.wrappedValue != shown {
                 selection.wrappedValue = shown
             }
         }

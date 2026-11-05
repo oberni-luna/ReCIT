@@ -38,11 +38,11 @@ struct ListCoverFlowScreen: View {
     let list: EntityList
     @Binding var path: NavigationPath
 
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
     @Environment(EntityModel.self) private var entityModel
     @Environment(ListModel.self) private var listModel
-    @Environment(\.modelContext) private var modelContext
     @Environment(UserModel.self) private var userModel
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     @Query private var items: [EntityListItem]
 
@@ -106,7 +106,6 @@ struct ListCoverFlowScreen: View {
                             items: liveItems,
                             isMine: isMine,
                             selectedURI: $selectedURI,
-                            highlightedURI: arrival.highlightedURI,
                             isWritingComment: $isWritingComment,
                             tabsHeight: tabsHeight,
                             onScan: { isPresentingScanner = true },
@@ -114,6 +113,7 @@ struct ListCoverFlowScreen: View {
                             onOpen: open,
                             onRemove: remove
                         )
+                        .highlighting(arrival.highlightedURI)
                     case .presentation:
                         DesignSystem.FormList {
                             ListPresentationPage(list: list)
@@ -153,20 +153,23 @@ struct ListCoverFlowScreen: View {
             // The add bar takes the tab bar's place; a list with nothing to add keeps the tab bar.
             .toolbar(isMine ? .hidden : .automatic, for: .tabBar)
             .onAppear {
+                startArrival(in: uris)
                 if selectedURI == nil {
                     selectedURI = uris.first
                 }
-                arrival.start(in: uris, reduceMotion: reduceMotion)
             }
             .onChange(of: uris) { oldURIs, newURIs in
                 keepSelection(from: oldURIs, to: newURIs)
-                arrival.start(in: newURIs, reduceMotion: reduceMotion)
+                startArrival(in: newURIs)
             }
             .onChange(of: selectedURI) { _, newURI in
                 arrival.select(newURI)
             }
             .task(id: arrival) {
                 await follow(arrival.phase)
+            }
+            .sensoryFeedback(.selection, trigger: arrival.landingFeedbackURI) { _, uri in
+                uri != nil
             }
             .task(id: uris) {
                 switch list.type {
@@ -181,11 +184,23 @@ struct ListCoverFlowScreen: View {
         }
     }
 
+    /// Starts the arrival once the list holds the focused element. A jump selects it here, so
+    /// that the first element never shows before it.
+    private func startArrival(in uris: [String]) {
+        let move: ListArrivalFocus.Move? = arrival.start(
+            in: uris,
+            selectedURI: selectedURI,
+            reduceMotion: reduceMotion
+        )
+        if case let .jump(uri) = move {
+            selectedURI = uri
+        }
+    }
+
     /// Plays the arrival's current phase: the move to the focused element, then the halo's fade.
     private func follow(_ phase: ListArrivalFocus.Phase) async {
         switch phase {
-        case let .arriving(.jump(uri)):
-            selectedURI = uri
+        case .arriving(.jump):
             arrival.land(on: selectedURI)
         case let .arriving(.scroll(uri)):
             try? await Task.sleep(for: Self.arrivalLayoutDelay)

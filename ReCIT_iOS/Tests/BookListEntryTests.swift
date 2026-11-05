@@ -1,5 +1,5 @@
 //
-//  BookListEntriesTests.swift
+//  BookListEntryTests.swift
 //  ReCIT_iOSTests
 //
 //  Created by Olivier Berni on 05/11/2026.
@@ -12,7 +12,7 @@ import Testing
 
 @MainActor
 @Suite
-struct BookListEntriesTests {
+struct BookListEntryTests {
     private static func insert(
         list: EntityList,
         holding uris: [String],
@@ -44,11 +44,11 @@ struct BookListEntriesTests {
             Self.insert(list: .mock(id: "stranger", creatorId: "stranger"), holding: ["wd:Q1"], in: context)
         ].flatMap(\.self)
 
-        let entries: BookListEntries = .init(items: items, myUserId: "me", friends: [lea])
+        let entries: [BookListEntry] = BookListEntry.entries(items: items, myUserId: "me", friends: [lea])
 
-        #expect(Set(entries.entries.map(\.list._id)) == ["mine", "lea"])
-        let mine: BookListEntry = try #require(entries.entries.first { $0.list._id == "mine" })
-        let leas: BookListEntry = try #require(entries.entries.first { $0.list._id == "lea" })
+        #expect(Set(entries.map(\.list._id)) == ["mine", "lea"])
+        let mine: BookListEntry = try #require(entries.first { $0.list._id == "mine" })
+        let leas: BookListEntry = try #require(entries.first { $0.list._id == "lea" })
         #expect(mine.owner == nil)
         #expect(leas.owner?._id == "lea")
     }
@@ -62,7 +62,7 @@ struct BookListEntriesTests {
             in: context
         )
 
-        let entries: BookListEntries = .init(items: items, myUserId: "me", friends: [])
+        let entries: [BookListEntry] = BookListEntry.entries(items: items, myUserId: "me", friends: [])
 
         #expect(entries.isEmpty)
     }
@@ -77,10 +77,10 @@ struct BookListEntriesTests {
             in: context
         )
 
-        let entries: BookListEntries = .init(items: items, myUserId: "me", friends: [])
+        let entries: [BookListEntry] = BookListEntry.entries(items: items, myUserId: "me", friends: [])
 
-        #expect(entries.entries.map(\.list._id) == ["recueil"])
-        #expect(entries.entries.first?.focusURI == "wd:Q1")
+        #expect(entries.map(\.list._id) == ["recueil"])
+        #expect(entries.first?.focusURI == "wd:Q1")
     }
 
     @Test
@@ -110,9 +110,9 @@ struct BookListEntriesTests {
             )
         ].flatMap(\.self)
 
-        let entries: BookListEntries = .init(items: items, myUserId: "me", friends: [lea])
+        let entries: [BookListEntry] = BookListEntry.entries(items: items, myUserId: "me", friends: [lea])
 
-        #expect(entries.entries.map(\.list._id) == ["lea-new", "mine-new", "lea-old", "mine-old"])
+        #expect(entries.map(\.list._id) == ["lea-new", "mine-new", "lea-old", "mine-old"])
     }
 
     @Test
@@ -125,8 +125,8 @@ struct BookListEntriesTests {
         removed.forEach(context.delete)
         try context.save()
 
-        let entries: BookListEntries = .init(items: kept + removed, myUserId: "me", friends: [])
+        let entries: [BookListEntry] = BookListEntry.entries(items: kept + removed, myUserId: "me", friends: [])
 
-        #expect(entries.entries.map(\.list._id) == ["kept"])
+        #expect(entries.map(\.list._id) == ["kept"])
     }
 }

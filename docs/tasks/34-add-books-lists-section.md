@@ -1,6 +1,6 @@
 ---
 issue: 34
-status: to-test
+status: to-close
 wiki: [[book-and-editions]], [[lists]], [[design-system/figma-library]]
 note: Figma — section 744:2382 (file S7IvC6GvlcUFe5IgbtvQq6), N1 944:7954, N2 944:8280, spec 945:8188
 created: 2026-11-05
@@ -66,20 +66,37 @@ created: 2026-11-05
 ## Implementation
 
 - **Section** — `Features/Book/BookListsSection.swift`: `@Query` of `EntityListItem` (`workUris.contains($0.uri)`) and of friends; `Section("book.in_lists")` absent when empty; rows `ListRowView` in `NavigationLink(value: .entityList(id:focusURI:))`. Inserted in `BookDetailView` after `myCopySection`.
-- **Selection + order** — pure `BookListEntries` / `BookListEntry`: lists of works only, mine or a friend's (stranger dropped), one entry per list focused on the lowest `ordinal`, `updated ?? created` descending, ties by `_id`.
+- **Selection + order** — pure `Model/Lists/BookListEntry.entries(items:myUserId:friends:)`, with `EntityList.lastChanged` and `User.byId` shared with `ListsTabSections`: lists of works only, mine or a friend's (stranger dropped), one entry per list focused on the lowest `ordinal`, `updated ?? created` descending, ties by `_id`.
 - **Friend rule shared** — `Model/UserData/EntityList+Friend.swift` (`friendCreator(myUserId:friendsById:)`), used by `ListsTabSections` too.
 - **Navigation** — `NavigationDestination.entityList(id:focusURI: = nil)`, `id` carries the focus; `EntityListDetail(listId:focusURI:path:)` → `ListCoverFlowScreen(list:focusURI:path:)`.
-- **Arrival** — pure `ListArrivalFocus` (`waiting → arriving(scroll|jump) → highlighted → done`, once per screen, late `uris` handled); screen waits 300 ms, springs 0.4 s to the book, lands, halo 1.2 s. Reduce Motion → jump. A user selection clears the halo.
+- **Arrival** — pure `Model/Lists/ListArrivalFocus` (`waiting → arriving(scroll|jump) → highlighted → done`, once per screen, late `uris` handled); screen waits 300 ms, springs 0.4 s to the book, lands, halo 1.2 s. Reduce Motion → jump. A user selection clears the halo.
 - **Halo** — `ListCoverHalo`: `foregroundTinted` 2 pt at 5 pt + 8 pt at 14 % at 11 pt, radius follows cover or disc, opacity-only fade. Drawn by `ListCoverFlowItem` via `highlighted(_:)`.
 - **Haptic** — cover flow `.sensoryFeedback(.selection)` now skips the first selection (nil → first) on every list, so the arrival ticks once.
 - **VoiceOver** — title in `ListElementsPage` combined, `@AccessibilityFocusState` set on arrival.
 - **Strings** — `book.in_lists`: « Dans les listes » / « In lists ».
-- **Tests** — `BookListEntriesTests` 5/5, `ListArrivalFocusTests` 6/6, `CoverFlowGeometryTests` 7/7, `ListsTabSectionsTests` 5/5.
+- **Tests** — `BookListEntryTests` 5/5, `ListArrivalFocusTests` 10/10, `CoverFlowGeometryTests` 7/7, `ListsTabSectionsTests` 5/5.
 - **Build** — `xcodebuild … -scheme ReCIT_iOS -destination 'platform=iOS Simulator,name=iPhone 17' -skipPackagePluginValidation build` → succeeded, SwiftLint clean.
-- **Notes** — `@Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool` carries a type: `explicit_type_interface` fails the build otherwise, against CLAUDE.md's "no type on environments". Two statics moved to the top of their types (`minimumKeyboardRoom`, `stripSpace`) for `type_contents_order`. Focused book already first → halo, no haptic. Xcode re-sorts `project.pbxproj` on build: reverted, not part of the change.
+- **Notes** — `@Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool` carries a type: `explicit_type_interface` fails the build otherwise, against CLAUDE.md's "no type on environments". Two statics moved to the top of their types (`minimumKeyboardRoom`, `stripSpace`) for `type_contents_order`. Xcode re-sorts `project.pbxproj` on build: reverted, not part of the change.
 - **Docs carried** — glossary row « Dans les listes » (`BookListsSection`), Figma library entry for the mockups.
 
 ## Review
+
+### Round validation — 2026-11-05
+
+Verifier, four lenses (style ✓ · elegance ✓ · structure ✓ · correctness ✓): 8 findings, all 🟡, all fixed by autofix in one round, re-verified clean.
+
+- [correctness] Reduce Motion showed the first book for a frame → the jump is applied in `onAppear`.
+- [correctness] No haptic when the focused book is the list's first → `ListArrivalFocus.landingFeedbackURI` ticks as the halo lights when the selection did not move; one tick per arrival in every case.
+- [structure] `updated ?? created` and friends-by-id duplicated → `EntityList.lastChanged`, `User.byId`, shared with `ListsTabSections`.
+- [structure] Pure types in `Features/` → `Model/Lists/BookListEntry.swift`, `Model/Lists/ListArrivalFocus.swift`.
+- [elegance] `BookListEntries` wrapper (`entries.entries`) → static `BookListEntry.entries(items:myUserId:friends:)`.
+- [style] `highlightedURI` as init parameter → `highlighting(_:)` modifiers on `ListCoverFlowView` and `ListElementsPage`.
+- [style] System environments first in `ListCoverFlowScreen`.
+- [style] Empty-only preview → « Mine and a friend's » seeded preview added.
+
+Open, not a defect: `reduceMotion: Bool` typed environment — CLAUDE.md vs SwiftLint `explicit_type_interface`.
+
+Code changed after the user's device install: halo haptic on the first book, Reduce Motion first frame, file moves.
 
 ## Verification
 

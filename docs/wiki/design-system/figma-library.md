@@ -21,7 +21,7 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   données (une `@Query` sur `EntityListItem.uri`, rien de nouveau côté serveur, listes d'auteur·ices exclues) et
   quatre points à trancher. **Aucun composant nouveau.** La couverture de `N2` reprend l'image de l'en-tête de la
   fiche (`imageHash` `c40487d1…`), qui n'est pas celle de Monte-Cristo depuis `744:2383`. Les sections suivantes
-  de la page ont été descendues de 2 273. **Rien n'est implémenté.**
+  de la page ont été descendues de 2 273. **Implémentée le même jour** ([feature 0079](../features/0079-the-lists-a-book-is-in.md)), avec un écart : les listes sont mêlées, la plus récemment modifiée d'abord, et non les miennes puis celles du réseau comme dans `N1`.
 - **Proposition du 2026-10-30 — `Détail d'un amis` · Présentation** (`865:17783`, page `Réseau`, clair seul) : la
   bio quitte le haut du profil d'un ami pour un troisième onglet, « Présentation » (« Bio » en anglais).
   `Profile / Tabs` (`875:5287`) gagne l'onglet dans ses trois variantes et une valeur `Selected=Présentation`

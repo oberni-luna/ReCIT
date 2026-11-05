@@ -29,9 +29,8 @@ struct ListCoverFlowView: View {
     let uris: [String]
     let listType: EntityListType
     @Binding var selectedURI: String?
-    /// The cover ringed on arriving from a book screen.
-    let highlightedURI: String?
     let onOpen: (String) -> Void
+    private var highlightedURI: String?
 
     /// A work's cover is the mockup's 172 × 258; an author's portrait a 200 pt disc.
     private var coverSize: CGSize {
@@ -117,5 +116,14 @@ struct ListCoverFlowView: View {
         withAnimation(.snappy) {
             selectedURI = uri
         }
+    }
+}
+
+extension ListCoverFlowView {
+    /// Rings the cover the list has just arrived on from a book screen.
+    func highlighting(_ uri: String?) -> Self {
+        var copy: Self = self
+        copy.highlightedURI = uri
+        return copy
     }
 }

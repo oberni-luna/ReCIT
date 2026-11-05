@@ -25,14 +25,14 @@ struct BookListsSection: View {
     }
 
     var body: some View {
-        let entries: BookListEntries = .init(
+        let entries: [BookListEntry] = BookListEntry.entries(
             items: items,
             myUserId: myUserId,
             friends: users.filter { $0.relation == .friend }
         )
         if !entries.isEmpty {
             Section("book.in_lists") {
-                ForEach(entries.entries) { entry in
+                ForEach(entries) { entry in
                     NavigationLink(
                         value: NavigationDestination.entityList(
                             id: entry.list._id,
@@ -52,9 +52,66 @@ private extension BookListsSection {
     enum AccessibilityID {
         static let listRow: String = "book.inLists.row"
     }
+
+    /// A store holding a work in one of my lists and in a friend's.
+    struct PreviewStore: PreviewModifier {
+        static func makeSharedContext() throws -> ModelContainer {
+            let container: ModelContainer = try .init(
+                for: EntityList.self,
+                EntityListItem.self,
+                User.self,
+                configurations: .init(isStoredInMemoryOnly: true)
+            )
+            let lea: User = .init(
+                _id: "lea",
+                _rev: "1",
+                username: "Léa",
+                email: nil,
+                position: nil,
+                avatarURLValue: nil,
+                itemCount: 0
+            )
+            lea.relation = .friend
+            container.mainContext.insert(lea)
+
+            let lists: [EntityList] = [
+                .mock(id: "mine", name: "Livres lus", updated: .now, creatorId: "me"),
+                .mock(id: "lea", name: "Polars nordiques", creatorId: "lea")
+            ]
+            for list in lists {
+                container.mainContext.insert(list)
+                list.elements.append(
+                    .init(
+                        _id: "\(list._id)-wd:Q1",
+                        uri: "wd:Q1",
+                        ordinal: "0",
+                        created: .now,
+                        itemType: .work
+                    )
+                )
+            }
+            return container
+        }
+
+        func body(
+            content: Content,
+            context: ModelContainer
+        ) -> some View {
+            content.modelContainer(context)
+        }
+    }
 }
 
-#Preview {
+#Preview("Mine and a friend's", traits: .modifier(BookListsSection.PreviewStore())) {
+    List {
+        BookListsSection(
+            workUris: ["wd:Q1"],
+            myUserId: "me"
+        )
+    }
+}
+
+#Preview("In no list") {
     List {
         BookListsSection(
             workUris: ["wd:Q1"],

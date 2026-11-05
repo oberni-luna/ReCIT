@@ -33,7 +33,7 @@ struct ListsTabSections {
         } else {
             stored.filter { $0.name.localizedStandardContains(searchText) }
         }
-        let friendsById: [String: User] = .init(friends.map { ($0._id, $0) }) { first, _ in first }
+        let friendsById: [String: User] = User.byId(friends)
 
         mine = matching
             .filter { $0.isCreated(byMe: myUserId) }
@@ -42,6 +42,6 @@ struct ListsTabSections {
             .compactMap { list in
                 list.friendCreator(myUserId: myUserId, friendsById: friendsById).map { NetworkListEntry(list: list, owner: $0) }
             }
-            .sorted { ($0.list.updated ?? $0.list.created) > ($1.list.updated ?? $1.list.created) }
+            .sorted { $0.list.lastChanged > $1.list.lastChanged }
     }
 }

@@ -33,8 +33,6 @@ struct ListElementsPage: View {
     let items: [EntityListItem]
     let isMine: Bool
     @Binding var selectedURI: String?
-    /// The cover ringed on arriving from a book screen, whose title VoiceOver moves to.
-    let highlightedURI: String?
     /// Told whether the comment is being written, for the screen to hold its pager still.
     @Binding var isWritingComment: Bool
     /// The height of the tabs laid over the page, which it leaves room for.
@@ -43,6 +41,7 @@ struct ListElementsPage: View {
     let onSearch: () -> Void
     let onOpen: (String) -> Void
     let onRemove: (EntityListItem) -> Void
+    private var highlightedURI: String?
 
     @FocusState private var isCommentFocused: Bool
     @AccessibilityFocusState private var isTitleFocused: Bool
@@ -153,9 +152,9 @@ struct ListElementsPage: View {
                         uris: uris,
                         listType: list.type,
                         selectedURI: $selectedURI,
-                        highlightedURI: highlightedURI,
                         onOpen: onOpen
                     )
+                    .highlighting(highlightedURI)
 
                     if let selectedURI {
                         ListCrossFade(id: selectedURI) {
@@ -231,5 +230,15 @@ struct ListElementsPage: View {
                 .foregroundStyle(.foregroundSecondary)
                 .frame(maxWidth: .infinity)
         }
+    }
+}
+
+extension ListElementsPage {
+    /// Rings the cover the list has just arrived on from a book screen, and moves VoiceOver to
+    /// its title.
+    func highlighting(_ uri: String?) -> Self {
+        var copy: Self = self
+        copy.highlightedURI = uri
+        return copy
     }
 }

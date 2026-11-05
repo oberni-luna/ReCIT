@@ -1,31 +1,35 @@
 //
-//  BookListEntries.swift
+//  BookListEntry.swift
 //  ReCIT_iOS
 //
 //  Created by Olivier Berni on 05/11/2026.
 //
 
-import Foundation
+import SwiftData
 
-/// The lists of works holding a book's work, mine and my friends', the most recently changed
-/// first. A list holding two works of a recueil shows once, opened on the first in list order.
-struct BookListEntries {
-    let entries: [BookListEntry]
+/// One row of the book screen's « Dans les listes »: a list holding the book's work, who made
+/// it when it is a friend's, and the work the list opens on.
+struct BookListEntry: Identifiable {
+    let list: EntityList
+    let owner: User?
+    let focusURI: String
 
-    var isEmpty: Bool {
-        entries.isEmpty
-    }
+    var id: PersistentIdentifier { list.id }
 
+    /// The lists of works holding a book's work, mine and my friends', the most recently changed
+    /// first. A list holding two works of a recueil comes once, opened on the first in list order.
+    ///
     /// - Parameters:
     ///   - items: The list elements whose uri is one of the book's works.
     ///   - myUserId: The signed-in reader's id.
     ///   - friends: My friends, whose lists are kept beside mine.
-    init(
+    /// - Returns: One entry per list, a stranger's left out.
+    static func entries(
         items: [EntityListItem],
         myUserId: String?,
         friends: [User]
-    ) {
-        let friendsById: [String: User] = .init(friends.map { ($0._id, $0) }) { first, _ in first }
+    ) -> [BookListEntry] {
+        let friendsById: [String: User] = User.byId(friends)
         let firstItemByList: [String: EntityListItem] = .init(
             items
                 .filter(\.isStillInTheStore)
@@ -35,7 +39,7 @@ struct BookListEntries {
                 }
         ) { first, second in first.ordinal <= second.ordinal ? first : second }
 
-        entries = firstItemByList.values
+        return firstItemByList.values
             .compactMap { item -> BookListEntry? in
                 guard let list = item.list else { return nil }
                 if list.isCreated(byMe: myUserId) {
@@ -46,15 +50,10 @@ struct BookListEntries {
                 }
                 return .init(list: list, owner: owner, focusURI: item.uri)
             }
-            .sorted(by: Self.mostRecentlyChangedFirst)
-    }
-
-    private static func mostRecentlyChangedFirst(
-        _ lhs: BookListEntry,
-        _ rhs: BookListEntry
-    ) -> Bool {
-        let lhsDate: Date = lhs.list.updated ?? lhs.list.created
-        let rhsDate: Date = rhs.list.updated ?? rhs.list.created
-        return lhsDate == rhsDate ? lhs.list._id < rhs.list._id : lhsDate > rhsDate
+            .sorted { lhs, rhs in
+                lhs.list.lastChanged == rhs.list.lastChanged
+                    ? lhs.list._id < rhs.list._id
+                    : lhs.list.lastChanged > rhs.list.lastChanged
+            }
     }
 }

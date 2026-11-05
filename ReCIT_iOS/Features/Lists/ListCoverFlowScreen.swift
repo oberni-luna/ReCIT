@@ -31,6 +31,10 @@ import SwiftData
 import SwiftUI
 
 struct ListCoverFlowScreen: View {
+    /// How long the strip is given to lay its covers out before it moves to the focused one.
+    private static let arrivalLayoutDelay: Duration = .milliseconds(300)
+    private static let arrivalScrollDuration: TimeInterval = 0.4
+
     let list: EntityList
     @Binding var path: NavigationPath
 
@@ -38,11 +42,14 @@ struct ListCoverFlowScreen: View {
     @Environment(ListModel.self) private var listModel
     @Environment(\.modelContext) private var modelContext
     @Environment(UserModel.self) private var userModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     @Query private var items: [EntityListItem]
 
     @State private var tab: ListDetailTab = .elements
     @State private var selectedURI: String?
+    /// The arrival on the book this list was pushed from, if it was.
+    @State private var arrival: ListArrivalFocus
     /// The uri an add has just asked for, selected as soon as the list holds it.
     @State private var selectAfterAdd: String?
     @State private var isPresentingSearch: Bool = false
@@ -54,9 +61,14 @@ struct ListCoverFlowScreen: View {
     /// The tabs' height, which each page leaves room for at its top.
     @State private var tabsHeight: CGFloat = 0
 
-    init(list: EntityList, path: Binding<NavigationPath>) {
+    init(
+        list: EntityList,
+        focusURI: String?,
+        path: Binding<NavigationPath>
+    ) {
         self.list = list
         self._path = path
+        _arrival = State(initialValue: .init(focusURI: focusURI))
         let listId: String = list._id
         _items = Query(
             filter: #Predicate<EntityListItem> { item in
@@ -94,6 +106,7 @@ struct ListCoverFlowScreen: View {
                             items: liveItems,
                             isMine: isMine,
                             selectedURI: $selectedURI,
+                            highlightedURI: arrival.highlightedURI,
                             isWritingComment: $isWritingComment,
                             tabsHeight: tabsHeight,
                             onScan: { isPresentingScanner = true },
@@ -143,9 +156,17 @@ struct ListCoverFlowScreen: View {
                 if selectedURI == nil {
                     selectedURI = uris.first
                 }
+                arrival.start(in: uris, reduceMotion: reduceMotion)
             }
             .onChange(of: uris) { oldURIs, newURIs in
                 keepSelection(from: oldURIs, to: newURIs)
+                arrival.start(in: newURIs, reduceMotion: reduceMotion)
+            }
+            .onChange(of: selectedURI) { _, newURI in
+                arrival.select(newURI)
+            }
+            .task(id: arrival) {
+                await follow(arrival.phase)
             }
             .task(id: uris) {
                 switch list.type {
@@ -157,6 +178,30 @@ struct ListCoverFlowScreen: View {
                     break
                 }
             }
+        }
+    }
+
+    /// Plays the arrival's current phase: the move to the focused element, then the halo's fade.
+    private func follow(_ phase: ListArrivalFocus.Phase) async {
+        switch phase {
+        case let .arriving(.jump(uri)):
+            selectedURI = uri
+            arrival.land(on: selectedURI)
+        case let .arriving(.scroll(uri)):
+            try? await Task.sleep(for: Self.arrivalLayoutDelay)
+            guard !Task.isCancelled else { return }
+            withAnimation(.spring(duration: Self.arrivalScrollDuration)) {
+                selectedURI = uri
+            }
+            try? await Task.sleep(for: .seconds(Self.arrivalScrollDuration))
+            guard !Task.isCancelled else { return }
+            arrival.land(on: selectedURI)
+        case .highlighted:
+            try? await Task.sleep(for: .seconds(ListCoverHalo.fadeDuration))
+            guard !Task.isCancelled else { return }
+            arrival.endHighlight()
+        case .waiting, .done:
+            break
         }
     }
 

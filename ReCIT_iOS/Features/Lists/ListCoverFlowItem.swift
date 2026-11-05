@@ -20,6 +20,9 @@ import SwiftData
 import SwiftUI
 
 struct ListCoverFlowItem: View {
+    /// The strip's own coordinate space, set on its scroll view.
+    static let stripSpace: String = "listCoverFlow.strip"
+
     let uri: String
     let listType: EntityListType
     let geometry: CoverFlowGeometry
@@ -27,9 +30,7 @@ struct ListCoverFlowItem: View {
     /// The visible width of the strip, whose centre is the front.
     let stripWidth: CGFloat
     let action: () -> Void
-
-    /// The strip's own coordinate space, set on its scroll view.
-    static let stripSpace: String = "listCoverFlow.strip"
+    private var isHighlighted: Bool = false
 
     @Query private var works: [Work]
     @Query private var authors: [Author]
@@ -116,5 +117,20 @@ struct ListCoverFlowItem: View {
         .frame(width: size.width, height: size.height)
         .clipShape(.rect(cornerRadius: cornerRadius))
         .shadow(.light)
+        .overlay {
+            if isHighlighted {
+                ListCoverHalo(cornerRadius: cornerRadius)
+                    .transition(.identity)
+            }
+        }
+    }
+}
+
+extension ListCoverFlowItem {
+    /// Rings the cover the list has just arrived on from a book screen.
+    func highlighted(_ isHighlighted: Bool = true) -> Self {
+        var copy: Self = self
+        copy.isHighlighted = isHighlighted
+        return copy
     }
 }

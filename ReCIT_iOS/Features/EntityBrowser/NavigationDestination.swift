@@ -16,7 +16,9 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     case user(user: User)
     case transaction(transaction: UserTransaction)
     case allTransactions
-    case entityList(id: String)
+    /// One list, by id. `focusURI` is the element it opens on, when pushed from a book screen's
+    /// « Dans les listes »; `nil` opens it on its first element.
+    case entityList(id: String, focusURI: String? = nil)
     case shelf(id: String)
     /// Every copy on this device that answers a search — mine and my friends' — uncapped.
     /// Where « Tout voir » leads from the merged search's local section (issue 0075). The
@@ -74,8 +76,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "transaction:\(transaction._id)"
         case .allTransactions:
             return "allTransactions"
-        case .entityList(let id):
-            return "entityList:\(id)"
+        case let .entityList(id, focusURI):
+            return focusURI.map { "entityList:\(id):\($0)" } ?? "entityList:\(id)"
         case .shelf(let id):
             return "shelf:\(id)"
         case .localSearchResults(let query):
@@ -174,8 +176,8 @@ extension NavigationDestination {
           TransactionDetailView(transaction: transaction, path: path)
       case .allTransactions:
           AllTransactionsView()
-      case .entityList(let id):
-          EntityListDetail(listId: id, path: path)
+      case let .entityList(id, focusURI):
+          EntityListDetail(listId: id, focusURI: focusURI, path: path)
       case .shelf(let id):
           ShelfDetailView(shelfId: id, path: path)
       case .localSearchResults(let query):

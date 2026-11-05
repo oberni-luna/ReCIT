@@ -25,10 +25,16 @@ import SwiftUI
 import UIKit
 
 struct ListElementsPage: View {
+    /// The room left under the list while the comment is written, when the keyboard's own height
+    /// is not known yet.
+    private static let minimumKeyboardRoom: CGFloat = 320
+
     let list: EntityList
     let items: [EntityListItem]
     let isMine: Bool
     @Binding var selectedURI: String?
+    /// The cover ringed on arriving from a book screen, whose title VoiceOver moves to.
+    let highlightedURI: String?
     /// Told whether the comment is being written, for the screen to hold its pager still.
     @Binding var isWritingComment: Bool
     /// The height of the tabs laid over the page, which it leaves room for.
@@ -39,6 +45,7 @@ struct ListElementsPage: View {
     let onRemove: (EntityListItem) -> Void
 
     @FocusState private var isCommentFocused: Bool
+    @AccessibilityFocusState private var isTitleFocused: Bool
     /// Bumped by every edit of the comment and by its focus: what makes the list follow the field
     /// as it grows (`ListKeyboardReveal`).
     @State private var commentEdits: Int = 0
@@ -47,10 +54,6 @@ struct ListElementsPage: View {
     @State private var keyboardTop: CGFloat = .infinity
     /// The keyboard's height, for the room left under the list while the comment is written.
     @State private var keyboardHeight: CGFloat = 0
-
-    /// The room left under the list while the comment is written, when the keyboard's own height
-    /// is not known yet.
-    private static let minimumKeyboardRoom: CGFloat = 320
 
     private var uris: [String] {
         items.map(\.uri)
@@ -117,6 +120,11 @@ struct ListElementsPage: View {
                     keyboardTop = .infinity
                 }
             }
+            .onChange(of: highlightedURI) { _, uri in
+                if uri != nil {
+                    isTitleFocused = true
+                }
+            }
             .onChange(of: isCommentFocused) { _, focused in
                 if focused {
                     commentEdits += 1
@@ -145,12 +153,15 @@ struct ListElementsPage: View {
                         uris: uris,
                         listType: list.type,
                         selectedURI: $selectedURI,
+                        highlightedURI: highlightedURI,
                         onOpen: onOpen
                     )
 
                     if let selectedURI {
                         ListCrossFade(id: selectedURI) {
                             ListSelectedTitle(uri: selectedURI, listType: list.type)
+                                .accessibilityElement(children: .combine)
+                                .accessibilityFocused($isTitleFocused)
                         }
                         .padding(.horizontal, .medium)
                     }

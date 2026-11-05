@@ -2,6 +2,26 @@
 
 Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ; Figma en est le reflet.
 
+- **Proposition du 2026-11-05 — `Fiche livre · Dans les listes`** (seconde rangée de la section
+  `Fiche livre · Données bibliographiques`, `744:2382`, page `Inventaire`, clair seul) : la fiche livre gagne une
+  section « Dans les listes », les listes d'œuvres qui contiennent l'œuvre de l'édition — les miennes par nom, puis
+  celles de mon réseau, la plus récemment modifiée d'abord. Absente quand aucune liste ne la contient.
+  `N1 · Fiche livre · Dans les listes · Light` (`944:7954`, toute la longueur, 393 × 1 959) : la section entre
+  « Dans mon inventaire » et « Données bibliographiques », un `Section Header` et un `list group` de trois
+  `Proposition A / List Row` (`466:12852`), clonées de l'onglet Listes (`891:958`, `891:1204`), la troisième avec
+  l'ami·e (« Rémi • 9 œuvres »). `N2 · Liste ouverte sur le livre, éclairé · Light` (`944:8280`), clone de
+  `B1 · Liste · Onglet Livres` (`909:1616`) : la liste ouverte sur l'onglet Livres, le cover flow centré sur le
+  livre d'où l'on vient, entouré d'un halo `foreground/tinted` (deux rectangles sans fond, `944:8359` trait 2 à
+  5 pt, `944:8360` trait 8 à 14 % à 11 pt). **Navigation** : toucher une rangée pousse la liste dans la pile de
+  l'onglet (`NavigationDestination.entityList` gagne l'uri à mettre en avant), le cover flow part du premier livre
+  et défile jusqu'à celui-là (≈ 0,4 s), puis le halo s'estompe en 1,2 s avec le retour haptique de sélection ; une
+  fois, à l'arrivée ; « Réduire les animations » ouvre directement sur le livre ; le retour ramène à la fiche. Une
+  liste d'un·e ami·e s'ouvre en lecture seule. Prototype : la rangée « À lire cet été » de `N1` → `N2`, chevron
+  retour → `N1`. Panneau `Spec · Fiche livre · Dans les listes` (`945:8188`) : anatomie, navigation, éclairage,
+  données (une `@Query` sur `EntityListItem.uri`, rien de nouveau côté serveur, listes d'auteur·ices exclues) et
+  quatre points à trancher. **Aucun composant nouveau.** La couverture de `N2` reprend l'image de l'en-tête de la
+  fiche (`imageHash` `c40487d1…`), qui n'est pas celle de Monte-Cristo depuis `744:2383`. Les sections suivantes
+  de la page ont été descendues de 2 273. **Rien n'est implémenté.**
 - **Proposition du 2026-10-30 — `Détail d'un amis` · Présentation** (`865:17783`, page `Réseau`, clair seul) : la
   bio quitte le haut du profil d'un ami pour un troisième onglet, « Présentation » (« Bio » en anglais).
   `Profile / Tabs` (`875:5287`) gagne l'onglet dans ses trois variantes et une valeur `Selected=Présentation`
@@ -1054,7 +1074,7 @@ retoucher un seul nœud.
 | `Tokens` | `0:1` | 6 sections, 9 planches de tokens |
 | `Components` | `20:2` | Les 3 composants qui **miroitent le package** design system |
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
-| `Inventaire` | `737:22197` | `Étagères` (`734:22155`), `Étagère vide · Première étape` (`734:22157`), `Ranger mes livres` (`97:3755`), `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Inventaire` (`495:13490`), `Œuvre & édition` (`351:9412`), `Fiche livre · Données bibliographiques` (`744:2382`, proposition), `Modifier l'édition · Toutes les données` (`750:2508`, proposition), `Doublons · ISBN et signalement` (`767:4172`), `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, proposition), `Éditions · Filtre par langue` (`831:7654`, proposition) |
+| `Inventaire` | `737:22197` | `Étagères` (`734:22155`), `Étagère vide · Première étape` (`734:22157`), `Ranger mes livres` (`97:3755`), `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Inventaire` (`495:13490`), `Œuvre & édition` (`351:9412`), `Fiche livre · Données bibliographiques` (`744:2382`, proposition, avec `Dans les listes` en seconde rangée), `Modifier l'édition · Toutes les données` (`750:2508`, proposition), `Doublons · ISBN et signalement` (`767:4172`), `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, proposition), `Éditions · Filtre par langue` (`831:7654`, proposition) |
 | `Liste` | `737:22198` | `Listes` (`735:22155`), `Listes · Aucune liste` (`735:22157`), `Liste ouverte, vide` (`735:22159`) |
 | `Réseau` | `737:22199` | `Réseau · Onglet & Groupes` (`499:14069`), `Réseau · Ajouter des amis lecteurs` (`407:10422`), `Synchronisation · Amis` (`735:22163`), `Réseau · Graphe` (`512:15486`) |
 | `Profil` | `737:22200` | `Profil` (`588:17841`), `Transactions` (`735:22166`) |

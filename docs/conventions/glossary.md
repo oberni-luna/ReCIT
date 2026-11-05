@@ -61,6 +61,7 @@ A named piece of UI, reused or talked about on its own. UI projects only.
 | Ligne livre | book row | `InventoryCell` | Inventaire, Profil d'un ami, Recherche | one copy: cover, title, authors |
 | Étiquette papier | paper tag | — | Inventaire, Listes | tilted label naming a shelf or a first step |
 | SnackBar | toast | `SnackBarView` | everywhere | background write failed or done |
+| Dans les listes | in lists | `BookListsSection` | Fiche livre | the lists, mine and friends', holding the book's work → #34 |
 
 
 ## Flows

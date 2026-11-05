@@ -40,10 +40,7 @@ struct ListsTabSections {
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         network = matching
             .compactMap { list in
-                guard let creatorId = list.creatorId, creatorId != myUserId, let owner = friendsById[creatorId] else {
-                    return nil
-                }
-                return NetworkListEntry(list: list, owner: owner)
+                list.friendCreator(myUserId: myUserId, friendsById: friendsById).map { NetworkListEntry(list: list, owner: $0) }
             }
             .sorted { ($0.list.updated ?? $0.list.created) > ($1.list.updated ?? $1.list.created) }
     }

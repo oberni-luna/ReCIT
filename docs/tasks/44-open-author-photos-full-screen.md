@@ -1,0 +1,50 @@
+---
+issue: 44
+status: todo
+wiki: [[network]], [[book-and-editions]]
+note: les images des auteurs aussi doivent pouvoir être ouvertes en full screen. Et on va en profiter pour changer le background des images en full screen pour un Apple material regular.
+created: 2026-11-06
+---
+
+## Context / Decisions
+
+> les images des auteurs aussi doivent pouvoir être ouvertes en full screen
+>
+> Et on va en profiter pour changer le background des images en full screen pour un Apple material regular.
+
+- Builds on #36 (merged): `View.enlargeablePhoto(_:opening:)` in `Features/Components/EnlargeablePhotoModifier.swift`
+  and the Plein écran `FullScreenCoverView`.
+- **Author photo**: only the large round photo at the top of the Auteur·ice screen (`AuthorDetailView`,
+  `CellThumbnail(imageUrl:cornerRadius: .full, size: .large)`). It opens the Plein écran through `enlargeablePhoto`,
+  `opening: .zoom(from: .full)`: the screen is a plain `List`, not over `TabPager`, so the zoom works as on the
+  group's header.
+- The URL opened is the same one the thumbnail loads (Wikimedia and inventaire.io paths resolved the same way).
+- Author rows elsewhere (`EntityAuthorsView` on the Fiche livre) keep their tap: it opens the author.
+- No photo → nothing changes, nothing to press.
+- **Background**: the black behind the picture becomes the system Regular material, for every Plein écran: book
+  covers, a friend's photo, a group's photo, an author's photo. One view, one background.
+- The Plein écran follows the appearance: light material in light mode, dark in dark mode. The forced
+  `.environment(\.colorScheme, .dark)` goes. The « Fermer » button and the picture must stay legible in both.
+- The fade-in of the background stays: the material appears over 0.3 s, as the black did, so the zoom does not open
+  on a card.
+- Out of scope: my own Profil's avatar, Android.
+
+## Acceptance criteria
+
+1. Auteur·ice screen of an author with a photo: a tap on the round photo opens the Plein écran, zooming out of
+   the circle, the photo fitted to the screen.
+2. A swipe down or « Fermer » closes it, back into the circle.
+3. Auteur·ice screen of an author without a photo: no photo, nothing opens.
+4. VoiceOver on the author's photo reads « Agrandir la photo », button.
+5. The Plein écran of a book cover, a friend's photo, a group's photo and an author's photo shows the Regular
+   material, with the screen underneath blurred through it — no plain black.
+6. In light mode the material is light; in dark mode it is dark. « Fermer » and the picture are legible in both.
+7. On the Fiche livre, a tap on an author row still opens the Auteur·ice screen.
+
+## Implementation
+
+## Review
+
+## Verification
+
+## Feedback

@@ -2,6 +2,8 @@
 //  CoverImageReducer.swift
 //  ReCIT_iOS
 //
+//  Created by Olivier Berni on 25/10/2026.
+//
 //  What leaves the device as a cover: JPEG bytes, already reduced, whichever way the picture
 //  came in — the camera, Photos, a file. A nine-megapixel photograph of a paperback is a slow
 //  upload and a cover nobody will ever look at full size.

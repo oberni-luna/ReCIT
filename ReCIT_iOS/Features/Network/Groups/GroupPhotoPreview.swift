@@ -10,15 +10,24 @@ import SwiftUI
 /// The group's photo at the head of « Réglages du groupe », in the shape it has everywhere else:
 /// the bytes just picked, the photo on the server, or the group glyph.
 struct GroupPhotoPreview: View {
-    static let side: CGFloat = 104
+    private static let side: CGFloat = 104
+    private static let kind: AvatarKind = .group
 
-    let picture: GroupPictureEdit
+    private let picture: GroupPictureEdit
     /// The photo on the server, shown while the edit has not touched it.
-    let savedPictureURL: String?
+    private let savedPictureURL: String?
+
+    init(
+        _ picture: GroupPictureEdit,
+        savedPictureURL: String?
+    ) {
+        self.picture = picture
+        self.savedPictureURL = savedPictureURL
+    }
 
     var body: some View {
         AvatarThumbnail(
-            .group,
+            Self.kind,
             imageUrl: picture == .unchanged ? savedPictureURL : nil,
             side: Self.side
         )
@@ -28,7 +37,7 @@ struct GroupPhotoPreview: View {
                     .resizable()
                     .scaledToFill()
                     .frame(width: Self.side, height: Self.side)
-                    .clipShape(RoundedRectangle(cornerRadius: .medium))
+                    .clipShape(RoundedRectangle(cornerRadius: Self.kind.cornerRadius))
                     .accessibilityHidden(true)
             }
         }
@@ -36,9 +45,9 @@ struct GroupPhotoPreview: View {
 }
 
 #Preview("No photo") {
-    GroupPhotoPreview(picture: .unchanged, savedPictureURL: nil)
+    GroupPhotoPreview(.unchanged, savedPictureURL: nil)
 }
 
 #Preview("Removed") {
-    GroupPhotoPreview(picture: .removed, savedPictureURL: "https://inventaire.io/img/groups/abc")
+    GroupPhotoPreview(.removed, savedPictureURL: "https://inventaire.io/img/groups/abc")
 }

@@ -2,6 +2,8 @@
 //  CreateBookSectionFooter.swift
 //  ReCIT_iOS
 //
+//  Created by Olivier Berni on 25/10/2026.
+//
 //  The sentence under a section of the book creation, in the app's footnote rather than the
 //  system's: `Note` (`101:236`), Footnote / Secondary, in the Figma file.
 //
@@ -22,4 +24,8 @@ struct CreateBookSectionFooter: View {
             .textStyle(.footnote200)
             .foregroundStyle(.foregroundSecondary)
     }
+}
+
+#Preview {
+    CreateBookSectionFooter("create_book.cover_url.help")
 }

@@ -277,13 +277,13 @@ final class GroupModel: OptimisticMutating {
         let next: ReaderGroup = setting.applied(to: current, baseUrl: apiService.baseUrl())
         guard next != current else { return }
 
-        let wasStored: Bool = storedGroup(id: groupId, in: modelContext) != nil
+        let previous: GroupSetting = setting.held(by: current)
         let actor: String? = myUserId
         inFlightTask = optimistic(
             modelContext,
             apply: { [weak self] in self?.place(next, in: modelContext) },
             revert: { [weak self] in
-                self?.putBack(current, wasStored: wasStored, actor: actor, in: modelContext)
+                self?.write(previous, on: groupId, actor: actor, in: modelContext)
             },
             request: { [weak self] in
                 try await self?.putSetting(setting, groupId: groupId)

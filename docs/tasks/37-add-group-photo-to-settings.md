@@ -1,6 +1,6 @@
 ---
 issue: 37
-status: to-test
+status: to-close
 wiki: [[network]], [[book-and-editions]], [[features/0028-network-tab-and-groups]], [[features/0047-new-book-work-first]], [[features/0050-every-bibliographic-datum]]
 note: pouvoir modifier l'image d'un groupe depuis les réglages du groupe via le même composant que pour les editions
 created: 2026-11-06
@@ -54,6 +54,21 @@ Round 1 · autopilot · 2026-11-06
 - Build ✅ (ReCIT_iOS, iPhone 17, SwiftLint). Tests ✅ 49/49 — GroupPictureTests (10 new), GroupModelTests, GroupModelAdministrationTests, ReaderGroupTests, GroupPersistenceTests.
 
 ## Review
+
+Round validation · /wa-close · 2026-11-06
+
+- Verifier, cumulative diff from `origin/main`, lenses style ✓ elegance ✓ structure ✓ correctness ✓. Autofix: 2 rounds, then one doc comment inline.
+- Fixed:
+  - [correctness] A refused name/description reverted the whole pre-save group, picture included → only that attribute is put back on the live group (`GroupSetting.held(by:)`, `write`); test added.
+  - [structure] Shared menu depended on CreateBook → `CoverCaptureView`, `CoverImageReducer`, `CoverURLView`, `CoverURLPreview`, `CreateBookSectionHeader/Footer` moved to `Features/Components/`; `CoverURLView` generic over a head, book parts in `CreateBook/BookCoverURLView`. Moved files lost their baseline entries; their violations were fixed, not re-baselined.
+  - [elegance] `GroupPhotoPreview` corner duplicated → `AvatarKind.cornerRadius`.
+  - [style] `GroupPhotoPreview`: private `side`, unlabelled init.
+  - [elegance] `held(by:)` documented as local restore only. [style] `CoverURLView.use()` doc made generic (`inline`).
+- Accepted by the user (2026-11-06):
+  - The slot is a rounded square, like group photos elsewhere, not a circle.
+  - `place`, `putSetting`, `write`, `apiService`, `inFlightTask` setter internal: `GroupModel.swift` is pinned at 486 lines by the baseline. Follow-up task: split `GroupModel`.
+- Build ✅ (SwiftLint, 0 violations). Tests ✅: GroupPictureTests, GroupModelTests, GroupModelAdministrationTests, ReaderGroupTests, GroupPersistenceTests, CoverImageReducerTests, CoverAddressTests.
+- Code changed since the user's test: the address screen's structure (edition forms and group), the revert of a refused name. Not re-run on a device.
 
 ## Verification
 

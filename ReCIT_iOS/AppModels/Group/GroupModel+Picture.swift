@@ -35,8 +35,19 @@ extension GroupModel {
         }
     }
 
-    /// Nothing is written to the group when the account changed during the round trip, nor when
-    /// the group has gone from the store and from memory meanwhile.
+    /// Writes one setting onto the group as it stands now, so that another write which landed
+    /// during the round trip stays. Nothing when the account changed meanwhile, nor when the
+    /// group has gone from the store and from memory. Not saved.
+    func write(
+        _ setting: GroupSetting,
+        on groupId: String,
+        actor: String?,
+        in modelContext: ModelContext
+    ) {
+        guard actor == myUserId, let current = group(id: groupId, in: modelContext) else { return }
+        place(setting.applied(to: current, baseUrl: apiService.baseUrl()), in: modelContext)
+    }
+
     private func writePicture(
         _ imageData: Data?,
         on groupId: String,
@@ -45,9 +56,7 @@ extension GroupModel {
     ) async throws {
         let setting: GroupSetting = .picture(try await uploadedPicturePath(imageData))
         try await putSetting(setting, groupId: groupId)
-
-        guard actor == myUserId, let current = group(id: groupId, in: modelContext) else { return }
-        place(setting.applied(to: current, baseUrl: apiService.baseUrl()), in: modelContext)
+        write(setting, on: groupId, actor: actor, in: modelContext)
         try modelContext.save()
     }
 

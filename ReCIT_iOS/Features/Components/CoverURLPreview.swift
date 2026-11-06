@@ -2,6 +2,8 @@
 //  CoverURLPreview.swift
 //  ReCIT_iOS
 //
+//  Created by Olivier Berni on 25/10/2026.
+//
 //  What an address pasted into « Image depuis une URL » turned out to be: nothing yet, an image
 //  — with its size, and the bytes the form's cover frame will show — or a page that is not one.
 //  The three phases of `Form / Image Preview` (`716:615`) in the Figma file, plus the moment of
@@ -35,9 +37,13 @@ enum CoverURLPreview: Equatable {
 
     /// Fetches the address and decodes what comes back.
     static func load(_ url: URL) async -> CoverURLPreview {
-        guard let (data, _) = try? await URLSession.cookieless.data(from: url),
-              let image = UIImage(data: data),
-              let jpeg = CoverImageReducer.jpegData(for: image) else { return .failed }
+        guard
+            let (data, _) = try? await URLSession.cookieless.data(from: url),
+            let image = UIImage(data: data),
+            let jpeg = CoverImageReducer.jpegData(for: image)
+        else {
+            return .failed
+        }
 
         return .loaded(
             jpeg: jpeg,

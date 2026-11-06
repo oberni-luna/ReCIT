@@ -136,6 +136,38 @@ struct GroupPictureTests {
     }
 
     @Test
+    func `a refused name gives back the name alone, and keeps the picture that landed first`() async throws {
+        let mock: MockAPIService = .init()
+        mock.uploadedImageUrl = Self.newPath
+        mock.stub("/api/groups/update-settings", json: #"{"ok":true}"#)
+        let reporter: AppErrorReporter = .init()
+        let (model, context): (GroupModel, ModelContext) = try await Self.syncedModel(mock, reporter: reporter)
+        var pictureLandedFirst: Bool = false
+        mock.onSend = { [unowned mock] index in
+            let payload: GroupSettingPayload = try JSONDecoder().decode(
+                GroupSettingPayload.self,
+                from: mock.sentPayloads[index]
+            )
+            guard payload.attribute == "name" else { return }
+            pictureLandedFirst = try GroupFixture.stored(context).first?.pictureURL == "https://test.local\(Self.newPath)"
+            throw NetworkError.badStatus(code: 400, message: "name")
+        }
+
+        model.updatePicture(Data([1, 2, 3]), on: "g", modelContext: context)
+        let pictureWrite: Task<Void, Never>? = model.inFlightTask
+        model.update(.name("Polars"), on: "g", modelContext: context)
+        let rename: Task<Void, Never>? = model.inFlightTask
+        await pictureWrite?.value
+        await rename?.value
+
+        let stored: StoredGroup = try #require(try GroupFixture.stored(context).first)
+        #expect(pictureLandedFirst)
+        #expect(stored.name == "Club")
+        #expect(stored.pictureURL == "https://test.local\(Self.newPath)")
+        #expect(reporter.lastFailure != nil)
+    }
+
+    @Test
     func `a removed picture sends null without uploading`() async throws {
         let mock: MockAPIService = .init()
         mock.stub("/api/groups/update-settings", json: #"{"ok":true}"#)

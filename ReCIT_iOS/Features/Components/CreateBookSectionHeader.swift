@@ -2,6 +2,8 @@
 //  CreateBookSectionHeader.swift
 //  ReCIT_iOS
 //
+//  Created by Olivier Berni on 25/10/2026.
+//
 //  The header of a section in the book creation, in the app's section header style rather than
 //  the system's: `Section Header` (`28:164`) in the Figma file, as the Réseau screens set theirs.
 //
@@ -21,4 +23,8 @@ struct CreateBookSectionHeader: View {
         Text(title)
             .textStyle(.action200)
     }
+}
+
+#Preview {
+    CreateBookSectionHeader("create_book.cover_url.address")
 }

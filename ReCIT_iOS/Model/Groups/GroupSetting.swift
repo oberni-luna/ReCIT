@@ -62,6 +62,18 @@ enum GroupSetting: Equatable, Sendable {
         }
     }
 
+    /// The same attribute, with the value `group` holds: what puts it back on the device after a
+    /// refusal. Never sent — `.picture` carries the address the group shows, not a server path.
+    func held(by group: ReaderGroup) -> GroupSetting {
+        switch self {
+        case .name: .name(group.name)
+        case .description: .description(group.description)
+        case .searchable: .searchable(group.searchable)
+        case .open: .open(group.open)
+        case .picture: .picture(group.pictureURL)
+        }
+    }
+
     /// The group once the setting is written.
     ///
     /// - Parameter baseUrl: What a picture's path is served under: the group keeps its picture as

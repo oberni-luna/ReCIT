@@ -41,7 +41,7 @@ struct GroupPhotoPicker: View {
             onPickURL: onPickURL,
             label: {
                 VStack(spacing: .small) {
-                    GroupPhotoPreview(picture: picture, savedPictureURL: savedPictureURL)
+                    GroupPhotoPreview(picture, savedPictureURL: savedPictureURL)
 
                     Text(showsPicture ? "groups.form.picture.change" : "groups.form.picture.add")
                         .textStyle(.action300)

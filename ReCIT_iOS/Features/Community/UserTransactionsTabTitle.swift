@@ -21,7 +21,7 @@ struct UserTransactionsTabTitle: View {
     @Environment(UserModel.self) private var userModel: UserModel
 
     var body: some View {
-        let shared: TransactionsWithUser = .init(transactions, userId: user._id)
+        let shared: TransactionSections = .init(transactions, with: user._id)
         HStack(spacing: .xSmall) {
             Text("user.tab.transactions \(shared.count)")
                 .accessibilityLabel(Text("user.tab.transactions.accessibility \(shared.count)"))

@@ -5,6 +5,10 @@ and 0156, deleted since). It reshapes the header and the pages of [0064](0064-a-
 and [0066](0066-a-friends-profile-tabs-as-pages.md). Mock-ups: Figma `S7IvC6GvlcUFe5IgbtvQq6`, section
 « Détail d'un amis » (`865:17783`), frames F1 to F6, redrawn the same day.
 
+> Since [0086](0086-a-friends-transactions-tab.md), a friend's profile has four tabs, « Échanges • N » between
+> Listes and Présentation; mine keeps these three. The profile's capsules have 8 pt of padding (`.small`), and the
+> row scrolls when they do not fit.
+
 ## What it does
 
 - **Three tabs: « Inventaire • 540 » | « Listes • 4 » | « Présentation »** (« Inventory • 540 », « Lists • 4 »,

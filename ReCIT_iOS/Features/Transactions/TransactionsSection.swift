@@ -1,5 +1,5 @@
 //
-//  UserTransactionsSection.swift
+//  TransactionsSection.swift
 //  ReCIT_iOS
 //
 //  Created by Olivier Berni on 06/11/2026.
@@ -8,9 +8,9 @@
 import SwiftData
 import SwiftUI
 
-/// « En cours » or « Terminés » under the Échanges tab of a friend's profile: the rows of
-/// « Toutes les transactions », each opening its Échange. Nothing at all when it has none.
-struct UserTransactionsSection: View {
+/// A section of Échanges under its header, each row opening its Échange — on « Toutes les
+/// transactions » and on a friend's Échanges tab. Nothing at all when it has none.
+struct TransactionsSection: View {
     private let title: LocalizedStringKey
     private let transactions: [UserTransaction]
 
@@ -33,20 +33,25 @@ struct UserTransactionsSection: View {
                     .textStyle(.action200)
                     .foregroundStyle(.foregroundSecondary)
             }
-            .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
         }
     }
 }
 
-private extension UserTransactionsSection {
+private extension TransactionsSection {
     enum AccessibilityID {
-        static let row: String = "e2e.user.transactionRow"
+        static let row: String = "e2e.transactions.row"
     }
 }
 
 #Preview {
     List {
-        UserTransactionsSection("user.transactions.current", transactions: [])
+        TransactionsSection(
+            "profile.current_transactions",
+            transactions: [
+                .mock(id: "requested"),
+                .mock(id: "accepted", state: .accepted)
+            ]
+        )
     }
     .environment(UserModel(apiService: APIService(env: .production)))
     .modelContainer(for: UserTransaction.self, inMemory: true)

@@ -17,7 +17,7 @@ struct UserTransactionsTab: View {
     @Query private var transactions: [UserTransaction]
 
     var body: some View {
-        let shared: TransactionsWithUser = .init(transactions, userId: user._id)
+        let shared: TransactionSections = .init(transactions, with: user._id)
         if shared.isEmpty {
             Section {
                 EmptyStateView(
@@ -30,13 +30,63 @@ struct UserTransactionsTab: View {
             }
             .listRowBackground(Color.clear)
         } else {
-            UserTransactionsSection("user.transactions.current", transactions: shared.current)
-            UserTransactionsSection("user.transactions.finished", transactions: shared.finished)
+            TransactionsSection("user.transactions.current", transactions: shared.current)
+                .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
+            TransactionsSection("user.transactions.finished", transactions: shared.finished)
+                .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
         }
     }
 }
 
-#Preview {
+private extension UserTransactionsTab {
+    /// A store holding two ongoing Échanges with Camille and one that is over.
+    struct PreviewStore: PreviewModifier {
+        static func makeSharedContext() throws -> ModelContainer {
+            let container: ModelContainer = try .init(
+                for: UserTransaction.self,
+                configurations: .init(isStoredInMemoryOnly: true)
+            )
+            let requested: UserTransaction = .mock(id: "requested")
+            let transactions: [UserTransaction] = [
+                requested,
+                .mock(
+                    id: "accepted",
+                    item: requested.item,
+                    owner: requested.owner,
+                    requester: requested.requester,
+                    state: .accepted
+                ),
+                .mock(
+                    id: "returned",
+                    item: requested.item,
+                    owner: requested.owner,
+                    requester: requested.requester,
+                    state: .returned
+                )
+            ]
+            for transaction in transactions {
+                container.mainContext.insert(transaction)
+            }
+            return container
+        }
+
+        func body(
+            content: Content,
+            context: ModelContainer
+        ) -> some View {
+            content.modelContainer(context)
+        }
+    }
+}
+
+#Preview("En cours et Terminés", traits: .modifier(UserTransactionsTab.PreviewStore())) {
+    List {
+        UserTransactionsTab(user: UserTransaction.mock().owner)
+    }
+    .environment(UserModel(apiService: APIService(env: .production)))
+}
+
+#Preview("Aucun échange") {
     let camille: User = .init(
         _id: "camille",
         _rev: "1",

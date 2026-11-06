@@ -5,6 +5,10 @@ to 0154, deleted since). It reshapes the profile of [0018](0018-reader-network.m
 [0019](0019-a-friends-shared-shelves.md), and opens the lists of [0060](0060-list-cover-flow.md) to friends.
 Mock-ups: Figma `S7IvC6GvlcUFe5IgbtvQq6`, section « Détail d'un amis » (`865:17783`), frames F1 to F5.
 
+> Since [0086](0086-a-friends-transactions-tab.md), a friend's profile has four tabs: Inventaire, Listes,
+> Échanges and Présentation (Présentation came in [0067](0067-a-friends-profile-presentation-tab.md)). My own has
+> no Échanges.
+
 ## What it does
 
 The profile no longer opens under a navigation title that repeats the name. It is shaped like the **Contacts card

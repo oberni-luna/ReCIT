@@ -1,5 +1,5 @@
 //
-//  TransactionsWithUserTests.swift
+//  TransactionSectionsTests.swift
 //  ReCIT_iOSTests
 //
 //  Created by Olivier Berni on 06/11/2026.
@@ -12,7 +12,7 @@ import Testing
 
 @MainActor
 @Suite(.serialized)
-struct TransactionsWithUserTests {
+struct TransactionSectionsTests {
     private let context: ModelContext
     private let myself: User
     private let camille: User
@@ -34,10 +34,21 @@ struct TransactionsWithUserTests {
         let mine: UserTransaction = transaction("mine", owner: myself, requester: camille)
         let other: UserTransaction = transaction("other", owner: sacha, requester: myself)
 
-        let shared: TransactionsWithUser = .init([theirs, mine, other], userId: camille._id)
+        let shared: TransactionSections = .init([theirs, mine, other], with: camille._id)
 
         #expect(shared.count == 2)
         #expect(Set((shared.current + shared.finished).map(\._id)) == ["theirs", "mine"])
+    }
+
+    @Test
+    func `keeps every transaction when no reader is given`() {
+        let theirs: UserTransaction = transaction("theirs", owner: camille, requester: myself)
+        let other: UserTransaction = transaction("other", owner: sacha, requester: myself, state: .returned)
+
+        let sections: TransactionSections = .init([theirs, other])
+
+        #expect(sections.current.map(\._id) == ["theirs"])
+        #expect(sections.finished.map(\._id) == ["other"])
     }
 
     @Test
@@ -53,7 +64,7 @@ struct TransactionsWithUserTests {
             transaction("cancelled", state: .cancelled)
         ]
 
-        let shared: TransactionsWithUser = .init(ongoing + over, userId: camille._id)
+        let shared: TransactionSections = .init(ongoing + over, with: camille._id)
 
         #expect(Set(shared.current.map(\._id)) == ["requested", "accepted", "confirmed"])
         #expect(Set(shared.finished.map(\._id)) == ["returned", "declined", "cancelled"])
@@ -69,7 +80,7 @@ struct TransactionsWithUserTests {
             transaction("lately", state: .cancelled, lastAction: 40)
         ]
 
-        let shared: TransactionsWithUser = .init(transactions, userId: camille._id)
+        let shared: TransactionSections = .init(transactions, with: camille._id)
 
         #expect(shared.current.map(\._id) == ["new", "middle", "old"])
         #expect(shared.finished.map(\._id) == ["lately", "long ago"])
@@ -79,7 +90,7 @@ struct TransactionsWithUserTests {
     func `is empty with a reader I never had a transaction with`() {
         let other: UserTransaction = transaction("other", owner: sacha, requester: myself)
 
-        let shared: TransactionsWithUser = .init([other], userId: camille._id)
+        let shared: TransactionSections = .init([other], with: camille._id)
 
         #expect(shared.isEmpty)
     }
@@ -100,9 +111,9 @@ struct TransactionsWithUserTests {
         )
 
         #expect(unreadByMe.isRead(by: myself._id) == false)
-        #expect(TransactionsWithUser([unreadByMe], userId: camille._id).hasUnread(by: myself._id))
+        #expect(TransactionSections([unreadByMe], with: camille._id).hasUnread(by: myself._id))
         #expect(unreadByThem.isRead(by: myself._id))
-        #expect(TransactionsWithUser([unreadByThem], userId: camille._id).hasUnread(by: myself._id) == false)
+        #expect(TransactionSections([unreadByThem], with: camille._id).hasUnread(by: myself._id) == false)
     }
 
     private func transaction(

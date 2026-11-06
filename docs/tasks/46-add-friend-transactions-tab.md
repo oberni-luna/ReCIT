@@ -1,6 +1,6 @@
 ---
 issue: 46
-status: to-test
+status: to-close
 wiki: [[features/0064-a-friends-profile-with-tabs]], [[features/0066-a-friends-profile-tabs-as-pages]], [[features/0067-a-friends-profile-presentation-tab]], [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0071-a-request-names-what-it-asks-for]]
 note: un tab sur l'écran des ami·es pour afficher les transactions effectuées ou en cours avec cet·te ami·e
 created: 2026-11-06
@@ -58,6 +58,18 @@ created: 2026-11-06
 - Proof: build ✅ · tests ✅ — `TransactionsWithUserTests` 5, `UserProfileTabTests` 2, `LensTabTrackTests` 8, `ProfileHeaderCollapseTests` 8, `TransactionModelTests`.
 
 ## Review
+
+### Round `validation` — 2026-11-06
+
+Scope: `origin/main..wa/46-add-friend-transactions-tab`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `UserTransactionsTabTitle.swift:21` — [style] type annotation on `@Environment(UserModel.self)` (CLAUDE.md) → **accepted**: the project's SwiftLint `explicit_type_interface` rule requires it and fails the build without it; the two rules conflict, to settle outside this task.
+- 🟡 `TransactionsWithUser.swift:23` — [structure] duplicated `AllTransactionsView`'s split, sort and section → **fixed**: `Model/Transaction/TransactionSections.swift` (optional reader filter) + shared `Features/Transactions/TransactionsSection.swift`, used by both screens; `TransactionsWithUser`, `UserTransactionsSection` and their test replaced by `TransactionSectionsTests` (6). Row id now `e2e.transactions.row`.
+- 🟡 `UserTransactionsSection.swift:47` — [style] blank preview → **fixed**: `UserTransaction.mock(...)`, filled preview.
+- 🟡 `UserTransactionsTab.swift:39` — [style] empty-state preview only → **fixed**: « En cours et Terminés » preview added.
+- 🟡 `docs/conventions/glossary.md:52` — [structure] « Profil d'un ami » listed three tabs → **fixed** (approved by Olivier).
+- Round 2: ✅ review clean; « Toutes les transactions » unchanged. Build ✅ · 36 tests ✅.
+- Wiki: `docs/wiki/features/0086-a-friends-transactions-tab.md`, a line in `claude.md` « Shipped features », 0086 in `network.md`, « Since 0086 » quotes in 0064, 0066, 0067.
 
 ## Verification
 

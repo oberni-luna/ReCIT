@@ -47,6 +47,7 @@ One precise screen. Team names, in the discussion language. UI projects only.
 | Recherche | — | `SearchTabView` | unified search: mine, friends, inventaire.io |
 | Profil | Settings | `ProfileView` | sheet behind the avatar → [[features/0038-profile-behind-the-avatar]] |
 | Fiche livre | book screen | `BookDetailView` | one edition: cover, work, copies, actions |
+| Plein écran | full screen cover | `FullScreenCoverView` | one picture alone on black, zoomable → [[features/0029-full-screen-cover]] |
 | Profil d'un ami | reader profile | `UserDetailView` | Inventaire / Listes / Présentation tabs |
 | Scanner | batch scanner | `BatchScanCameraView` | camera that stays open, books pile up |
 | Ranger mes livres | sort, tri | `SortFlowView` | file books into shelves, by hand → [[features/0010-grid-shelf-sorting]] |

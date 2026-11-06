@@ -7,13 +7,16 @@
 
 import SwiftUI
 
-/// A book's cover alone on a dark screen, fitted to the whole of it: double-tap to fill the screen
-/// and again to fit it, pinch to look closer, drag to move around a magnified cover, swipe down or
-/// « Fermer » to go back.
+/// A picture — a book's cover, a reader's or a group's photo — alone on a dark screen, fitted to
+/// the whole of it: double-tap to fill the screen and again to fit it, pinch to look closer, drag
+/// to move around a magnified picture, swipe down or « Fermer » to go back.
 struct FullScreenCoverView: View {
+    private static let swipeDownDistanceToClose: CGFloat = 120
+
     @Environment(\.dismiss) var dismiss
 
     let url: URL
+    private var closesOnSwipeDown: Bool = false
 
     @State private var zoom: CoverZoom = .init()
     @GestureState private var pinch: CGFloat = 1
@@ -24,6 +27,11 @@ struct FullScreenCoverView: View {
     /// once, it was a dark card zooming out of the header around a cover not yet drawn — the
     /// flash this screen opened with.
     @State private var backdropOpacity: Double = 0
+    @State private var swipeDownOffset: CGFloat = 0
+
+    init(url: URL) {
+        self.url = url
+    }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -33,10 +41,7 @@ struct FullScreenCoverView: View {
                 .ignoresSafeArea()
 
             Button("action.close", systemImage: "xmark") {
-                withAnimation(.easeOut(duration: 0.2)) {
-                    backdropOpacity = 0
-                }
-                dismiss()
+                close()
             }
             .labelStyle(.iconOnly)
             .glassButtonStyle()
@@ -69,11 +74,13 @@ struct FullScreenCoverView: View {
         return cover
             .scaleEffect(shown.scale)
             .offset(shown.offset)
+            .offset(y: swipeDownOffset)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { screenSize = $0 }
             .contentShape(.rect)
             .gesture(magnifyGesture)
             .simultaneousGesture(panGesture, isEnabled: zoom.isZoomed)
+            .simultaneousGesture(swipeDownGesture, isEnabled: closesOnSwipeDown && zoom.isZoomed == false)
             .onTapGesture(count: 2) {
                 withAnimation(.snappy) {
                     zoom.toggle()
@@ -122,5 +129,38 @@ struct FullScreenCoverView: View {
             .onEnded { value in
                 zoom.endPan(by: value.translation)
             }
+    }
+
+    private var swipeDownGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                swipeDownOffset = pinch == 1 ? max(0, value.translation.height) : 0
+            }
+            .onEnded { value in
+                if swipeDownOffset > 0, value.predictedEndTranslation.height > Self.swipeDownDistanceToClose {
+                    close()
+                } else {
+                    withAnimation(.snappy) {
+                        swipeDownOffset = 0
+                    }
+                }
+            }
+    }
+
+    private func close() {
+        withAnimation(.easeOut(duration: 0.2)) {
+            backdropOpacity = 0
+        }
+        dismiss()
+    }
+}
+
+extension FullScreenCoverView {
+    /// Closes on a swipe down of the picture, unless it is magnified. A presentation that zooms
+    /// out of its source has that gesture already, and does without this one.
+    func closingOnSwipeDown() -> Self {
+        var copy: Self = self
+        copy.closesOnSwipeDown = true
+        return copy
     }
 }

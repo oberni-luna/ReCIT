@@ -19,7 +19,7 @@ struct GroupHeaderView: View {
             AvatarThumbnail(.group, imageUrl: group.pictureURL, size: .large)
                 .enlargeablePhoto(
                     group.pictureURL.flatMap { URL(string: $0) },
-                    zoomingFrom: .medium
+                    opening: .zoom(from: .medium)
                 )
                 .accessibilityIdentifier(AccessibilityID.photo)
 

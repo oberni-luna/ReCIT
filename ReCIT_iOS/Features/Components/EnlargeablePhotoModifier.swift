@@ -7,36 +7,30 @@
 
 import SwiftUI
 
-/// A reader's or a group's photo that opens in the Plein écran, zooming out of where it sits, as
-/// a book's cover does on the Fiche livre. Without a photo, the view is left as it is: nothing
-/// to open, nothing for VoiceOver to press.
+/// A reader's or a group's photo that opens in the Plein écran on a tap. Without a photo, the
+/// view is left as it is: nothing to open, nothing for VoiceOver to press.
 struct EnlargeablePhotoModifier: ViewModifier {
+    /// How the Plein écran comes on screen.
+    enum Opening {
+        /// Slides up over the screen, and closes on a swipe down of its own. For a photo laid over
+        /// a UIKit view, which vanishes once it is made a transition's source.
+        case slideUp
+        /// Zooms out of the photo, whose corners have this rounding, and back into it.
+        case zoom(from: DesignSystem.CornerRadius)
+    }
+
     let url: URL?
-    /// The rounding of the photo's corners, which the zoom starts from and comes back to. `nil`
-    /// opens the Plein écran without the zoom: a photo laid over a UIKit view — the friend's
-    /// header, over the pages of `TabPager` — vanishes once it is made a transition's source.
-    let zoomCornerRadius: DesignSystem.CornerRadius?
+    let opening: Opening
 
     @State private var isShowingFullScreen: Bool = false
     @Namespace private var transition: Namespace.ID
 
     func body(content: Content) -> some View {
         if let url {
-            if let zoomCornerRadius {
-                button(content)
-                    .matchedTransitionSource(id: url, in: transition) { source in
-                        source.clipShape(RoundedRectangle(cornerRadius: zoomCornerRadius))
-                    }
-                    .fullScreenCover(isPresented: $isShowingFullScreen) {
-                        FullScreenCoverView(url: url)
-                            .navigationTransition(.zoom(sourceID: url, in: transition))
-                    }
-            } else {
-                button(content)
-                    .fullScreenCover(isPresented: $isShowingFullScreen) {
-                        FullScreenCoverView(url: url)
-                    }
-            }
+            source(button(content), for: url)
+                .fullScreenCover(isPresented: $isShowingFullScreen) {
+                    fullScreen(url)
+                }
         } else {
             content
         }
@@ -49,17 +43,49 @@ struct EnlargeablePhotoModifier: ViewModifier {
             content
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("photo.action.enlarge")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction {
+            isShowingFullScreen = true
+        }
+    }
+
+    @ViewBuilder
+    private func source(
+        _ button: some View,
+        for url: URL
+    ) -> some View {
+        switch opening {
+        case .slideUp:
+            button
+        case let .zoom(cornerRadius):
+            button
+                .matchedTransitionSource(id: url, in: transition) { source in
+                    source.clipShape(.rect(cornerRadius: cornerRadius))
+                }
+        }
+    }
+
+    @ViewBuilder
+    private func fullScreen(_ url: URL) -> some View {
+        switch opening {
+        case .slideUp:
+            FullScreenCoverView(url: url)
+                .closingOnSwipeDown()
+        case .zoom:
+            FullScreenCoverView(url: url)
+                .navigationTransition(.zoom(sourceID: url, in: transition))
+        }
     }
 }
 
 extension View {
-    /// Opens `url` in the Plein écran on a tap, zooming out of a view rounded by
-    /// `zoomCornerRadius`, or sliding up over the screen when it is `nil`.
+    /// Opens `url` in the Plein écran on a tap, the way `opening` says.
     func enlargeablePhoto(
         _ url: URL?,
-        zoomingFrom zoomCornerRadius: DesignSystem.CornerRadius? = nil
+        opening: EnlargeablePhotoModifier.Opening = .slideUp
     ) -> some View {
-        modifier(EnlargeablePhotoModifier(url: url, zoomCornerRadius: zoomCornerRadius))
+        modifier(EnlargeablePhotoModifier(url: url, opening: opening))
     }
 }

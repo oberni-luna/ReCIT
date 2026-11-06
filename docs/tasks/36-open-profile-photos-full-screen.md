@@ -53,6 +53,20 @@ Round 1 · autopilot · 2026-11-06
 
 ## Review
 
+Round validation · /wa-close · 2026-11-06
+
+- Verifier, cumulative diff from `origin/main`, lenses style ✓ elegance ✓ structure ✓ correctness ✓. Autofix: 2 rounds.
+- Fixed:
+  - [correctness] Without the zoom the Plein écran lost swipe-down → `FullScreenCoverView.closingOnSwipeDown()`, a drag used only on the slide-up path, ignored during a pinch, clamped downward, closes past 120 pt predicted.
+  - [correctness] The button's label was `accessibilityHidden` → the button is its own element: label « Agrandir la photo », `.isButton`, `accessibilityAction`.
+  - [elegance] Optional radius doubled as the zoom switch → `EnlargeablePhotoModifier.Opening` (`.slideUp`, `.zoom(from:)`), one `fullScreenCover`.
+  - [style] `clipShape(RoundedRectangle(…))` → `.rect(cornerRadius:)`.
+- Open, the user's pick:
+  - 🟠 [correctness] `UserProfileStickyHeader` — the folded 48 pt photo sits in the navigation bar's row; the bar takes the tap, nothing opens (criterion 3). A `ToolbarItem(.principal)` carrying the tap was tried and reverted: the item is in the accessibility tree but taps still opened nothing.
+  - 🟡 [correctness] `GroupHeaderView` — a picture URL that fails to load still makes a button; a tap opens an empty black Plein écran (criterion 6).
+- Runtime, iPhone 17 sim (read only): photo shows at rest, tap → Plein écran, swipe down closes; one « Agrandir la photo » button `e2e.user.photo` in the accessibility tree; folded tap fails.
+- Build ✅ (SwiftLint). No unit test: no logic.
+
 ## Verification
 
 Round 2 · feedback · 2026-11-06

@@ -40,11 +40,19 @@ created: 2026-11-06
 - `AutosavingTextField`: `.toolbar { if isFocused { KeyboardOKButton { isFocused = false } } }` — only the focused field adds the item, so Commentaire + Note privée show one OK; focus loss still calls `save`.
 - Return key untouched. No new string, no pbxproj edit, baseline untouched.
 - Proof: build ✅ (SwiftLint in the build).
+- Runtime fixes (autopilot, PM check on the simulator):
+  - The keyboard toolbar declared inside `AutosavingTextField` (a List cell of the Fiche livre) never reached the keyboard. `BookDetailView` now owns `@FocusState focusedText: InventoryItemTextAttribute?` and puts `.toolbar { KeyboardOKButton { focusedText = nil } }` on the List; `BookMyCopySection(item:focus:)` hands the binding to each `AutosavingTextField(focus:field:)`, whose own `@FocusState` and `.toolbar` are gone. Saving on focus loss unchanged.
+  - Even at screen level the OK did not show: `.sharedBackgroundVisibility(.hidden)` and/or `.padding` inside the keyboard `ToolbarItemGroup` made iOS 26 drop the whole item. Both removed. The glass item already floats off the keyboard's top edge (~8 pt seen), so no `Spacing.small` padding — **deviation from the decision « 8 pt through `Spacing.small` »**, to confirm on device.
+  - `ListElementsPage` unchanged: its toolbar sits on the `FormList`, not in a cell.
 
 ## Review
 
 ## Verification
 
-manual validation — not run by agent. Unseen: the 8 pt gap above the keyboard on iOS 26 and iOS 18; the OK showing from an `AutosavingTextField` inside a `List` row of the Fiche livre.
+PM on the simulator (iPhone 17, iOS 26.4, light):
+- ✅ Fiche livre, Note privée focused → one « OK », tinted prominent glass, ~8 pt above the keyboard; tap → keyboard hidden.
+- ✅ Fiche livre, Commentaire focused → one « OK ».
+
+Still yours: the Liste comment (no list of my own on the test account); text actually saved after OK; iOS 18 look. Earlier notes — the 8 pt gap above the keyboard on iOS 26 and iOS 18; the OK showing from an `AutosavingTextField` inside a `List` row of the Fiche livre.
 
 ## Feedback

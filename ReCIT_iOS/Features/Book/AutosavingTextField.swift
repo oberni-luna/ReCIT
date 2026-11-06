@@ -17,25 +17,33 @@ struct AutosavingTextField: View {
     private let placeholder: LocalizedStringKey
     private let value: String
     private let identifier: String
+    private let focus: FocusState<InventoryItemTextAttribute?>.Binding
+    private let field: InventoryItemTextAttribute
     private let save: (String) -> Void
 
     @State private var draft: String
-
-    @FocusState private var isFocused: Bool
 
     init(
         _ label: LocalizedStringResource,
         placeholder: LocalizedStringKey,
         value: String,
         identifier: String,
+        focus: FocusState<InventoryItemTextAttribute?>.Binding,
+        field: InventoryItemTextAttribute,
         save: @escaping (String) -> Void
     ) {
         self.label = label
         self.placeholder = placeholder
         self.value = value
         self.identifier = identifier
+        self.focus = focus
+        self.field = field
         self.save = save
         _draft = State(initialValue: value)
+    }
+
+    private var isFocused: Bool {
+        focus.wrappedValue == field
     }
 
     var body: some View {
@@ -48,16 +56,7 @@ struct AutosavingTextField: View {
         .foregroundStyle(.foregroundDefault)
         .accessibilityIdentifier(identifier)
         .withLabel(label: String(localized: label))
-        .focused($isFocused)
-        .toolbar {
-            // Keyboard items gather from the whole screen: only the focused field offers its
-            // « OK », so two fields on one screen still show one.
-            if isFocused {
-                KeyboardOKButton {
-                    isFocused = false
-                }
-            }
-        }
+        .focused(focus, equals: field)
         .onChange(of: isFocused) { _, focused in
             if !focused {
                 save(draft)
@@ -85,6 +84,8 @@ struct AutosavingTextField: View {
 }
 
 #Preview {
+    @Previewable @FocusState var focus: InventoryItemTextAttribute?
+
     List {
         Section("edition.my_inventory") {
             AutosavingTextField(
@@ -92,6 +93,8 @@ struct AutosavingTextField: View {
                 placeholder: "inventory.item.write_private_note",
                 value: "",
                 identifier: "preview.privateNote",
+                focus: $focus,
+                field: .notes,
                 save: { _ in }
             )
         }

@@ -32,6 +32,8 @@ struct BookDetailView: View {
     /// in one place. Same shape as `SearchContent`'s.
     @State private var attempt: Int = 0
 
+    @FocusState private var focusedText: InventoryItemTextAttribute?
+
     @Binding var path: NavigationPath
 
     init(
@@ -89,6 +91,11 @@ struct BookDetailView: View {
                 }
                 .applyListBackground(.backgroundForm)
                 .readableContentMargins()
+                .toolbar {
+                    KeyboardOKButton {
+                        focusedText = nil
+                    }
+                }
                 // Keyed on the works rather than on the edition, because a cached edition can
                 // gain a work when the background refresh lands, and that new work needs asking
                 // about too.
@@ -236,7 +243,10 @@ struct BookDetailView: View {
     @ViewBuilder
     func myCopySection(edition: Edition) -> some View {
         if let item = iOwn(edition) {
-            BookMyCopySection(item: item)
+            BookMyCopySection(
+                item: item,
+                focus: $focusedText
+            )
         }
     }
 

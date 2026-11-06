@@ -216,7 +216,7 @@
       }
     },
     "shelf.add_books" : {
-      "comment" : "Button at the foot of an étagère's books, and title of the sheet it opens.",
+      "comment" : "Button pinned at the foot of an étagère's « Livres » page, opening the sheet that adds books to it.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -246,7 +246,25 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tous vos livres sont déjà sur cette étagère"
+            "value" : "Tous tes livres sont déjà sur cette étagère"
+          }
+        }
+      }
+    },
+    "shelf.add_books.no_books" : {
+      "comment" : "In « Ajouter des livres », when I own no book at all.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You have no books yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu n'as pas encore de livre"
           }
         }
       }
@@ -264,7 +282,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun de vos livres ne correspond à « %@ »"
+            "value" : "Aucun de tes livres ne correspond à « %@ »"
           }
         }
       }
@@ -325,6 +343,24 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "shelf.add_books.title %@" : {
+      "comment" : "Title of the « Ajouter des livres » sheet, with the étagère's name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to “%@”"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à « %@ »"
           }
         }
       }

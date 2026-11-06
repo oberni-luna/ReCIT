@@ -82,3 +82,31 @@ public final class Shelf {
         updated = dto.updated.map { Date(timeIntervalSince1970: $0 / 1000) }
     }
 }
+
+extension Shelf {
+    static func mock(
+        id: String = "shelf-1",
+        rev: String = "1-abc",
+        name: String = "Polars",
+        slug: String = "polars",
+        shelfDescription: String = "",
+        ownerId: String = "user-1",
+        visibility: [String] = [],
+        colorHex: String? = nil,
+        created: Date = .init(timeIntervalSince1970: 0),
+        updated: Date? = nil
+    ) -> Shelf {
+        .init(
+            _id: id,
+            _rev: rev,
+            name: name,
+            slug: slug,
+            shelfDescription: shelfDescription,
+            ownerId: ownerId,
+            visibility: visibility,
+            colorHex: colorHex,
+            created: created,
+            updated: updated
+        )
+    }
+}

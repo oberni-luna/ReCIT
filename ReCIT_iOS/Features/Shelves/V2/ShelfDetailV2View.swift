@@ -9,7 +9,7 @@
 //  (`ListCoverFlowScreen`): two pages in a `TabPager`, turned by a swipe or by their tab laid
 //  under the navigation bar — « Livres • 12 », the books in an inset grouped list over a pinned
 //  « Ajouter des livres » (`ShelfBooksPage`), and « Présentation », the description and what the
-//  étagère is (`ShelfPresentationPage`). No tab bar, mine or a friend's.
+//  étagère is (`ShelfPresentationPage`).
 //
 //  Editing stays behind the navigation bar's pencil, and a deletion from the form pops the
 //  screen once the sheet has gone, as on the first screen. A friend's étagère is read-only:
@@ -20,10 +20,7 @@ import SwiftData
 import SwiftUI
 
 struct ShelfDetailV2View: View {
-    @Environment(UserModel.self) private var userModel: UserModel
-
     let shelfId: String
-    @Binding var path: NavigationPath
 
     @Query private var shelves: [Shelf]
 
@@ -37,6 +34,10 @@ struct ShelfDetailV2View: View {
     /// Raised by the form when it deletes this screen's étagère, so the pop happens once the
     /// sheet has gone rather than out from under it.
     @State private var shelfWasDeleted: Bool = false
+
+    @Binding var path: NavigationPath
+
+    @Environment(UserModel.self) private var userModel: UserModel
 
     init(
         shelfId: String,
@@ -80,8 +81,8 @@ struct ShelfDetailV2View: View {
                                 books: books,
                                 isMine: isMine,
                                 tabsHeight: tabsHeight,
-                                path: $path,
-                                onAddBooks: { isAddingBooks = true }
+                                onAddBooks: { isAddingBooks = true },
+                                path: $path
                             )
                         case .presentation:
                             DesignSystem.FormList {
@@ -108,12 +109,12 @@ struct ShelfDetailV2View: View {
         }
         .navigationTitle(shelf?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             if isMine {
                 ToolbarItem(placement: .primaryAction) {
                     Button("action.edit", systemImage: "pencil") { isEditing = true }
                         .labelStyle(.titleAndIcon)
+                        .accessibilityIdentifier(AccessibilityID.edit)
                 }
             }
         }
@@ -128,6 +129,12 @@ struct ShelfDetailV2View: View {
     private func leaveIfShelfWasDeleted() {
         guard shelfWasDeleted, path.isEmpty == false else { return }
         path.removeLast()
+    }
+}
+
+private extension ShelfDetailV2View {
+    enum AccessibilityID {
+        static let edit: String = "e2e.shelfV2.edit"
     }
 }
 

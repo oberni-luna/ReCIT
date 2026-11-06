@@ -26,7 +26,7 @@ struct ShelvesV2Section: View {
                     Button {
                         path.append(NavigationDestination.shelf(id: shelf._id, layout: .tabs))
                     } label: {
-                        row(shelf)
+                        ShelvesV2Row(shelf)
                     }
                     .buttonStyle(.plain)
                     .accessibilityIdentifier(AccessibilityID.row)
@@ -36,29 +36,6 @@ struct ShelvesV2Section: View {
                 }
             }
         }
-    }
-
-    private func row(_ shelf: Shelf) -> some View {
-        HStack(spacing: .small) {
-            VStack(alignment: .leading, spacing: .xxSmall) {
-                Text(shelf.name)
-                    .textStyle(.content400Bold)
-                    .foregroundStyle(.foregroundDefault)
-
-                Text("shelves.v2.count \(shelf.items.count)")
-                    .textStyle(.footnote200)
-                    .foregroundStyle(.foregroundSecondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            Image(systemName: "chevron.right")
-                .textStyle(.footnote200)
-                .foregroundStyle(.foregroundSecondary)
-                .accessibilityHidden(true)
-        }
-        .padding(.horizontal, .medium)
-        .padding(.vertical, .sMedium)
-        .contentShape(Rectangle())
     }
 }
 

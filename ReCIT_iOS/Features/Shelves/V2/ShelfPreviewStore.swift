@@ -24,15 +24,13 @@ struct ShelfPreviewStore: PreviewModifier {
             User.self,
             configurations: .init(isStoredInMemoryOnly: true)
         )
-        let shelf: Shelf = .init(
-            _id: shelfId,
-            _rev: "1",
+        let shelf: Shelf = .mock(
+            id: shelfId,
             name: "Polars nordiques",
             slug: "polars-nordiques",
             shelfDescription: "Tout ce qui se passe dans le froid, de Stockholm à Reykjavik.",
             ownerId: ownerId,
             visibility: ["friends"],
-            colorHex: nil,
             created: .now.addingTimeInterval(-86_400 * 120),
             updated: .now
         )

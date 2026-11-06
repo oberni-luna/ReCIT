@@ -42,21 +42,6 @@ struct ShelfModelTests {
         """
     }
 
-    private func shelf(id: String, name: String, owner: String) -> Shelf {
-        .init(
-            _id: id,
-            _rev: "1-abc",
-            name: name,
-            slug: name.lowercased(),
-            shelfDescription: "",
-            ownerId: owner,
-            visibility: ["friends"],
-            colorHex: nil,
-            created: .init(timeIntervalSince1970: 0),
-            updated: nil
-        )
-    }
-
     private func shelfJSON(id: String, name: String) -> String {
         """
         {
@@ -121,8 +106,8 @@ struct ShelfModelTests {
     @Test("syncShelves leaves another owner's étagères alone")
     func syncDoesNotDeleteAnotherOwnersShelves() async throws {
         let context: ModelContext = try TestStore.makeContext()
-        context.insert(shelf(id: "mine-1", name: "Lus", owner: "user-1"))
-        context.insert(shelf(id: "theirs-old", name: "Anciens", owner: "user-2"))
+        context.insert(Shelf.mock(id: "mine-1", name: "Lus", slug: "lus", ownerId: "user-1", visibility: ["friends"]))
+        context.insert(Shelf.mock(id: "theirs-old", name: "Anciens", slug: "anciens", ownerId: "user-2", visibility: ["friends"]))
         try context.save()
 
         let mock: MockAPIService = .init()

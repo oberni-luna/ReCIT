@@ -58,5 +58,6 @@ struct ShelvesView: View {
                 }
             }
         }
+        .hidesTabBarWhenPushed(on: path)
     }
 }

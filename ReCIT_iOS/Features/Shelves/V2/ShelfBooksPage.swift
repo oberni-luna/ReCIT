@@ -11,9 +11,6 @@
 //  leaves with the page and never stands under « Présentation ». One page of
 //  `ShelfDetailV2View`'s pager.
 //
-//  Books are pushed through the path rather than a `NavigationLink`: the page lives in a hosting
-//  controller of its own, as a reader's Inventaire tab does (`UserInventoryTab`).
-//
 
 import SwiftData
 import SwiftUI
@@ -24,11 +21,9 @@ struct ShelfBooksPage: View {
     let isMine: Bool
     /// The height of the tabs laid over the page, which it leaves room for.
     let tabsHeight: CGFloat
-    @Binding var path: NavigationPath
     let onAddBooks: () -> Void
 
-    @Environment(ShelfModel.self) private var shelfModel: ShelfModel
-    @Environment(\.modelContext) private var modelContext: ModelContext
+    @Binding var path: NavigationPath
 
     var body: some View {
         if shelf.isStillInTheStore {
@@ -40,7 +35,12 @@ struct ShelfBooksPage: View {
                             .foregroundStyle(.foregroundSecondary)
                     } else {
                         ForEach(books) { item in
-                            bookButton(item)
+                            ShelfBookRow(
+                                item,
+                                shelf: shelf,
+                                isMine: isMine,
+                                path: $path
+                            )
                         }
                     }
                 }
@@ -53,30 +53,6 @@ struct ShelfBooksPage: View {
                 }
                 .buttonStyle(.primary())
                 .accessibilityIdentifier(AccessibilityID.addBooks)
-            }
-        }
-    }
-
-    private func bookButton(_ item: InventoryItem) -> some View {
-        Button {
-            path.append(NavigationDestination.book(anchor: .item(item)))
-        } label: {
-            InventoryCell(item: item, filterParameter: .userInventory)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        // As on the first screen: nothing is deleted — the copy stays in the inventory and on
-        // every other étagère — and the label names the étagère. Mine only.
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            if isMine {
-                Button(
-                    "action.remove_from_shelf_named \(shelf.name)",
-                    systemImage: "tray.and.arrow.up",
-                    role: .destructive
-                ) {
-                    shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
-                }
-                .tint(.foregroundError)
             }
         }
     }
@@ -97,8 +73,8 @@ private extension ShelfBooksPage {
             books: shelf.items,
             isMine: true,
             tabsHeight: 0,
-            path: $path,
-            onAddBooks: {}
+            onAddBooks: {},
+            path: $path
         )
     }
 }

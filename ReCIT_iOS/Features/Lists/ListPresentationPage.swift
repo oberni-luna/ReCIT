@@ -56,12 +56,3 @@ struct ListPresentationPage: View {
         }
     }
 }
-
-private extension View {
-    /// A value under its caption, as in the list's form.
-    func infoRow(label: String) -> some View {
-        textStyle(.content300)
-            .foregroundStyle(.foregroundDefault)
-            .withLabel(label: label)
-    }
-}

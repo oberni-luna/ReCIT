@@ -22,15 +22,15 @@ import SwiftUI
 struct ShelfAddBooksSheet: View {
     let shelf: Shelf
 
-    @Environment(\.dismiss) private var dismiss: DismissAction
-    @Environment(\.modelContext) private var modelContext: ModelContext
-    @Environment(ShelfModel.self) private var shelfModel: ShelfModel
-
     @Query private var myItems: [InventoryItem]
 
     /// The books ticked, by server id: an id survives a sync replacing the copy under it.
     @State private var selectedIds: Set<String> = []
     @State private var query: String = ""
+
+    @Environment(\.dismiss) private var dismiss: DismissAction
+    @Environment(\.modelContext) private var modelContext: ModelContext
+    @Environment(ShelfModel.self) private var shelfModel: ShelfModel
 
     init(shelf: Shelf) {
         self.shelf = shelf
@@ -42,10 +42,14 @@ struct ShelfAddBooksSheet: View {
         )
     }
 
+    private var ownedItems: [InventoryItem] {
+        myItems.filter(\.isStillInTheStore)
+    }
+
     /// My books not on the étagère yet.
     private var candidates: [InventoryItem] {
         let onShelf: Set<String> = .init(shelf.items.map(\._id))
-        return myItems.filter { $0.isStillInTheStore && !onShelf.contains($0._id) }
+        return ownedItems.filter { !onShelf.contains($0._id) }
     }
 
     private var trimmedQuery: String {
@@ -71,7 +75,13 @@ struct ShelfAddBooksSheet: View {
         NavigationStack {
             DesignSystem.FormList {
                 Section {
-                    if candidates.isEmpty {
+                    if ownedItems.isEmpty {
+                        EmptyStateView(
+                            glyph: "books.vertical",
+                            title: "shelf.add_books.no_books"
+                        )
+                        .listRowBackground(Color.clear)
+                    } else if candidates.isEmpty {
                         Text("shelf.add_books.empty")
                             .textStyle(.content300)
                             .foregroundStyle(.foregroundSecondary)
@@ -92,7 +102,7 @@ struct ShelfAddBooksSheet: View {
                     }
                 }
             }
-            .navigationTitle("shelf.add_books")
+            .navigationTitle(Text("shelf.add_books.title \(shelf.name)"))
             .searchable(
                 text: $query,
                 placement: .navigationBarDrawer(displayMode: .always),
@@ -103,6 +113,7 @@ struct ShelfAddBooksSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.close", systemImage: "xmark") { dismiss() }
+                        .accessibilityIdentifier(AccessibilityID.close)
                 }
             }
             .formActionBar {
@@ -134,6 +145,7 @@ struct ShelfAddBooksSheet: View {
 private extension ShelfAddBooksSheet {
     enum AccessibilityID {
         static let submit: String = "e2e.shelfV2.addBooks.submit"
+        static let close: String = "e2e.shelfV2.addBooks.close"
     }
 }
 

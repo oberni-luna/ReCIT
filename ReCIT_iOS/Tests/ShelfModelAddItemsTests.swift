@@ -17,21 +17,6 @@ import Testing
 @MainActor
 @Suite("ShelfModel.addItems", .serialized)
 struct ShelfModelAddItemsTests {
-    private func makeShelf() -> Shelf {
-        .init(
-            _id: "shelf-1",
-            _rev: "1-abc",
-            name: "Polars",
-            slug: "polars",
-            shelfDescription: "",
-            ownerId: "user-1",
-            visibility: [],
-            colorHex: nil,
-            created: .init(timeIntervalSince1970: 0),
-            updated: nil
-        )
-    }
-
     private func makeItems(
         _ ids: [String],
         in context: ModelContext
@@ -57,7 +42,7 @@ struct ShelfModelAddItemsTests {
         let mock: MockAPIService = .init()
         mock.stub("add-items", json: membershipJSON(["a", "b", "c"]))
         let model: ShelfModel = .init(apiService: mock)
-        let shelf: Shelf = makeShelf()
+        let shelf: Shelf = .mock()
         context.insert(shelf)
         let items: [InventoryItem] = makeItems(["a", "b", "c"], in: context)
         shelf.items.append(items[0])
@@ -82,8 +67,9 @@ struct ShelfModelAddItemsTests {
         let context: ModelContext = try TestStore.makeContext()
         let mock: MockAPIService = .init()
         mock.stub("add-items", error: NetworkError.badStatus(code: 500, message: nil))
-        let model: ShelfModel = .init(apiService: mock, errorReporter: .init())
-        let shelf: Shelf = makeShelf()
+        let reporter: AppErrorReporter = .init()
+        let model: ShelfModel = .init(apiService: mock, errorReporter: reporter)
+        let shelf: Shelf = .mock()
         context.insert(shelf)
         let items: [InventoryItem] = makeItems(["a", "b", "c"], in: context)
         shelf.items.append(items[0])
@@ -92,5 +78,6 @@ struct ShelfModelAddItemsTests {
         await model.inFlightTask?.value
 
         #expect(shelf.items.map(\._id) == ["a"])
+        #expect(reporter.lastFailure != nil)
     }
 }

@@ -7,9 +7,9 @@
 //  The v2 of an étagère's screen, tried side by side with the first (`ShelfDetailView`) from
 //  the Inventaire's « Étagères (v2) » section. Built as a list's screen is
 //  (`ListCoverFlowScreen`): two pages in a `TabPager`, turned by a swipe or by their tab laid
-//  under the navigation bar — « Livres • 12 », the books in an inset grouped list ending on
+//  under the navigation bar — « Livres • 12 », the books in an inset grouped list over a pinned
 //  « Ajouter des livres » (`ShelfBooksPage`), and « Présentation », the description and what the
-//  étagère is (`ShelfPresentationPage`).
+//  étagère is (`ShelfPresentationPage`). No tab bar, mine or a friend's.
 //
 //  Editing stays behind the navigation bar's pencil, and a deletion from the form pops the
 //  screen once the sheet has gone, as on the first screen. A friend's étagère is read-only:
@@ -108,6 +108,7 @@ struct ShelfDetailV2View: View {
         }
         .navigationTitle(shelf?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             if isMine {
                 ToolbarItem(placement: .primaryAction) {

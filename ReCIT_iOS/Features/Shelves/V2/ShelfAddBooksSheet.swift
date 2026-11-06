@@ -12,6 +12,9 @@
 //  Books already on the étagère are left out rather than shown checked and greyed: the sheet is
 //  a list of what can be added, and the page behind it already shows the rest.
 //
+//  The search field under the bar narrows the list by title or author. It hides books, it does
+//  not untick them: a book ticked then filtered out is still counted, and still added.
+//
 
 import SwiftData
 import SwiftUI
@@ -27,6 +30,7 @@ struct ShelfAddBooksSheet: View {
 
     /// The books ticked, by server id: an id survives a sync replacing the copy under it.
     @State private var selectedIds: Set<String> = []
+    @State private var query: String = ""
 
     init(shelf: Shelf) {
         self.shelf = shelf
@@ -44,6 +48,21 @@ struct ShelfAddBooksSheet: View {
         return myItems.filter { $0.isStillInTheStore && !onShelf.contains($0._id) }
     }
 
+    private var trimmedQuery: String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// The candidates whose title or one of whose authors matches the search, all without one.
+    /// Not `searchIndex`: it holds my own username, which every one of my books would match.
+    private var visibleCandidates: [InventoryItem] {
+        guard trimmedQuery.isEmpty == false else { return candidates }
+        return candidates.filter { item in
+            guard let edition = item.edition else { return false }
+            return ([edition.title] + edition.displayedAuthorNames)
+                .contains { $0.localizedStandardContains(trimmedQuery) }
+        }
+    }
+
     private var selectedItems: [InventoryItem] {
         candidates.filter { selectedIds.contains($0._id) }
     }
@@ -56,8 +75,14 @@ struct ShelfAddBooksSheet: View {
                         Text("shelf.add_books.empty")
                             .textStyle(.content300)
                             .foregroundStyle(.foregroundSecondary)
+                    } else if visibleCandidates.isEmpty {
+                        EmptyStateView(
+                            glyph: "magnifyingglass",
+                            title: "shelf.add_books.search.empty \(trimmedQuery)"
+                        )
+                        .listRowBackground(Color.clear)
                     } else {
-                        ForEach(candidates) { item in
+                        ForEach(visibleCandidates) { item in
                             ShelfAddBookRow(
                                 item: item,
                                 isSelected: selectedIds.contains(item._id),
@@ -68,6 +93,13 @@ struct ShelfAddBooksSheet: View {
                 }
             }
             .navigationTitle("shelf.add_books")
+            .searchable(
+                text: $query,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: Text("shelf.add_books.search.prompt")
+            )
+            .searchPresentationToolbarBehavior(.avoidHidingContent)
+            .autocorrectionDisabled()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.close", systemImage: "xmark") { dismiss() }

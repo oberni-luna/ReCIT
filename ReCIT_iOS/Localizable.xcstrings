@@ -251,6 +251,42 @@
         }
       }
     },
+    "shelf.add_books.search.empty %@" : {
+      "comment" : "In « Ajouter des livres », when no book of mine matches the search. The argument is what was typed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of your books match “%@”"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun de vos livres ne correspond à « %@ »"
+          }
+        }
+      }
+    },
+    "shelf.add_books.search.prompt" : {
+      "comment" : "Prompt of the search field in « Ajouter des livres ».",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title or author"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titre ou auteur·ice"
+          }
+        }
+      }
+    },
     "shelf.add_books.submit %lld" : {
       "comment" : "Button pinned at the foot of « Ajouter des livres », with the number of books ticked.",
       "extractionState" : "manual",

@@ -6,8 +6,10 @@
 //
 //  An étagère's « Livres » page in its v2 screen: its books in an inset grouped list
 //  (`DesignSystem.FormList`), newest first, each opening its book screen; on my own étagère a
-//  swipe takes a book off it, as on the first screen (`ShelfDetailView`), and a last section
-//  opens « Ajouter des livres ». One page of `ShelfDetailV2View`'s pager.
+//  swipe takes a book off it, as on the first screen (`ShelfDetailView`), and « Ajouter des
+//  livres » is pinned at the page's foot as a form's « Enregistrer » is (`formActionBar`), so it
+//  leaves with the page and never stands under « Présentation ». One page of
+//  `ShelfDetailV2View`'s pager.
 //
 //  Books are pushed through the path rather than a `NavigationLink`: the page lives in a hosting
 //  controller of its own, as a reader's Inventaire tab does (`UserInventoryTab`).
@@ -42,16 +44,16 @@ struct ShelfBooksPage: View {
                         }
                     }
                 }
-
-                if isMine {
-                    Section {
-                        Button("shelf.add_books", systemImage: "plus", action: onAddBooks)
-                            .textStyle(.action300)
-                            .accessibilityIdentifier(AccessibilityID.addBooks)
-                    }
-                }
             }
             .listDetailTabsRoom(height: tabsHeight)
+            .formActionBar(isPresented: isMine) {
+                Button(action: onAddBooks) {
+                    Text("shelf.add_books")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.primary())
+                .accessibilityIdentifier(AccessibilityID.addBooks)
+            }
         }
     }
 

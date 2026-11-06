@@ -29,6 +29,8 @@ import SwiftUI
 struct ShelfRowView: View {
     let shelf: Shelf
     let width: CGFloat
+    /// The screen the label opens: the first one, unless `opensShelf(on:)` says otherwise.
+    private var layout: ShelfScreenLayout = .list
     @Binding var path: NavigationPath
 
     @Environment(ShelfFocusModel.self) private var focus
@@ -98,7 +100,7 @@ struct ShelfRowView: View {
             // height at any Dynamic Type size, so planks stay aligned card to card and the
             // carousel's scroll view cannot clip the label's lower half. Self-measuring
             // shelf cards are what caused the collection-view update loop in ADR 0003.
-            NavigationLink(value: NavigationDestination.shelf(id: shelf._id)) {
+            NavigationLink(value: NavigationDestination.shelf(id: shelf._id, layout: layout)) {
                 ShelfLabelView(text: shelf.name, maxWidth: metrics.booksWidth)
             }
             .buttonStyle(.plain)
@@ -360,5 +362,14 @@ struct ShelfRowView: View {
         let seconds: TimeInterval = .init(held.components.seconds)
             + .init(held.components.attoseconds) / 1e18
         return min(max(seconds, minimumExit), ShelfPressRecognizer.holdDuration)
+    }
+}
+
+extension ShelfRowView {
+    /// Opens the étagère on `layout` when its label is pressed.
+    func opensShelf(on layout: ShelfScreenLayout) -> Self {
+        var copy: Self = self
+        copy.layout = layout
+        return copy
     }
 }

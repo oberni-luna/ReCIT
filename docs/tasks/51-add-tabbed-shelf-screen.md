@@ -1,6 +1,6 @@
 ---
 issue: 51
-status: todo
+status: to-test
 wiki: [[features/0001-shelf-carousel-and-creation]], [[features/0019-a-friends-shared-shelves]], [[features/0073-a-lists-presentation-tab]], [[features/0075-lens-tabs-and-a-lists-pager]], [[design-system/figma-library]]
 note: Écran étagère v2, maquetté dans Figma (section « Étagère détails · V2 », 973:8195) ; un premier jet du code est déjà sur cette branche.
 created: 2026-11-06
@@ -47,8 +47,20 @@ created: 2026-11-06
 
 ## Implementation
 
+Round 1 — 2026-11-06. Base `main`; the first cut (routing, « Étagères (v2) », tabs, Présentation, sheet, batch `add-items` + `ShelfModelAddItemsTests`) came from the design session, this round finishes it against the maquette.
+
+- **Screen** (`Shelves/V2/ShelfDetailV2View.swift`): `.toolbar(.hidden, for: .tabBar)`, mine or a friend's.
+- **Pinned button** (`Shelves/V2/ShelfBooksPage.swift`): the list-end Section is gone; `.formActionBar(isPresented: isMine)` on the « Livres » page holds a full-width `.primary()` « Ajouter des livres », so it slides away with the page and never shows under « Présentation ». No icon, as in E1.
+- **Search** (`Shelves/V2/ShelfAddBooksSheet.swift`): `.searchable(.navigationBarDrawer(displayMode: .always))`, prompt « Titre ou auteur·ice »; filters candidates on `edition.title` and `edition.displayedAuthorNames` with `localizedStandardContains` — not `searchIndex`, which also holds my own username. `selectedItems` still reads every candidate, so a ticked book filtered out stays counted and added. No match → `EmptyStateView` « Aucun de vos livres ne correspond à « … » »; no candidate at all → « Tous vos livres sont déjà sur cette étagère », whatever the query.
+- **Friend's étagère** (`Shelves/ShelfRowView.swift`, `Community/UserShelvesSection.swift`): `ShelfRowView.opensShelf(on:)` modifier, default `.list`; the friend's carousel passes `.tabs`. My carousel unchanged.
+- **Strings**: `shelf.add_books.search.prompt`, `shelf.add_books.search.empty %@` (U+00A0 inside « », like the rest of the catalog).
+- **Proof**: `** BUILD SUCCEEDED **` (iPhone 17, SwiftLint on), `** TEST SUCCEEDED **` for `ShelfModelAddItemsTests` + `ShelfModelTests`, `swiftlint lint` 0 violations on the touched files.
+- `project.pbxproj` shows modified in the checkout (Xcode reordering its SwiftLint plugin dependencies); not part of this task, left out of the commit.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent (`verify.mode: autopilot`).
 
 ## Feedback

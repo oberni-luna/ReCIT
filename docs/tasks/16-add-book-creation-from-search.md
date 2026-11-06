@@ -1,6 +1,6 @@
 ---
 issue: 16
-status: to-test
+status: to-close
 wiki: [[search]], [[book-and-editions]], [[features/0047-new-book-work-first]], [[features/0020-creating-a-book-that-inventaire-lacks]]
 note: migrated from docs/issues/0097-the-second-door-from-search.md (frame C6 of PRD 0015, out of v1 scope)
 created: 2026-11-06
@@ -96,6 +96,18 @@ or new work → edition form), opened from Recherche instead of the Scanner.
 - Proof: build ✅ · tests ✅ 67/67 (NewBookDraftTests, NewBookDraftsTests, NewBookOriginTests, ResolveRequestBuilderTests, EntityCreationModelTests, BatchScanViewModelTests; 10 new). Nothing sent to inventaire.io.
 
 ## Review
+
+### Round `validation` — 2026-11-06
+
+Scope: `origin/main..wa/16-add-book-creation-from-search`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `NewEditionView.swift:107` — [structure] publish rule inline in the view, differing from `WorkMatchView` → **fixed**: `NewBookDraft.isPublishable(isISBNEditable:)`, used by both, tested.
+- 🟡 `CreateBookCoverRow.swift:36` — [style] coupled optional init parameters → **fixed**: `.editableISBN(_:isValid:)` modifier.
+- 🟡 `EmptyStateView.swift:69` — [elegance] empty identifier on every other empty-state button → **fixed**: applied only when set.
+- 🟡 `WorkSearchView.swift:37` — [elegance] empty string meaning « no ISBN » → **fixed**: `isbn: String?`.
+- 🟡 `NewBookDraft.swift:13` — [style] header not re-wrapped → **fixed**.
+- Round 2: ✅ review clean. Build ✅ · 68 + 31 tests ✅.
+- Wiki: `docs/wiki/features/0087-book-creation-from-search.md`, a line in `claude.md` « Shipped features », 0087 in `search.md` and `book-and-editions.md`, « Since 0087 » quotes in 0047 and 0020.
 
 ## Verification
 

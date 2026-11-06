@@ -56,13 +56,8 @@ struct NewEditionView: View {
             NewEditionWorkSection(draft: $draft, onFindWork: onFindWork, onOpenNewWork: onOpenNewWork)
 
             Section {
-                CreateBookCoverRow(
-                    isbn: draft.isbn,
-                    editableISBN: isISBNEditable ? $draft.isbn : nil,
-                    isISBNValid: draft.isISBNValid,
-                    imageData: $draft.cover,
-                    onPickURL: onPickCoverURL
-                )
+                CreateBookCoverRow(isbn: draft.isbn, imageData: $draft.cover, onPickURL: onPickCoverURL)
+                    .editableISBN(isISBNEditable ? $draft.isbn : nil, isValid: draft.isISBNValid)
             } header: {
                 CreateBookSectionHeader("edit_edition.cover.header")
             } footer: {
@@ -104,7 +99,7 @@ struct NewEditionView: View {
         .formActionBar {
             CreateBookPublishFooter(
                 failure: failure,
-                isPublishable: draft.isPublishable && (isISBNEditable == false || draft.isISBNValid),
+                isPublishable: draft.isPublishable(isISBNEditable: isISBNEditable),
                 onPublish: onPublish,
                 onClose: onClose
             )

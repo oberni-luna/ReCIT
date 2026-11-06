@@ -33,6 +33,9 @@ struct WorkMatchView: View {
     /// What went wrong last time, in the reader's terms. `nil` until something does.
     let failure: CreateBookFailure?
 
+    /// Whether the ISBN is typed rather than read off a barcode.
+    let isISBNEditable: Bool
+
     /// Publishes with whatever has just been decided.
     let onPublish: () async -> Void
     let onClose: () -> Void
@@ -102,7 +105,7 @@ struct WorkMatchView: View {
             Section {} footer: {
                 CreateBookPublishFooter(
                     failure: failure,
-                    isPublishable: draft.isPublishable,
+                    isPublishable: draft.isPublishable(isISBNEditable: isISBNEditable),
                     onPublish: onPublish,
                     onClose: onClose
                 )

@@ -33,10 +33,6 @@ struct CreateBookCoverRow: View {
     var isbnLabel: String = "create_book.isbn"
     /// The ISBN-10, shown under the ISBN when there is one.
     var isbn10: String?
-    /// The ISBN to type, in place of the one shown, when no barcode was read.
-    var editableISBN: Binding<String>?
-    /// Whether the ISBN typed can be published: none, or one whose check digit is right.
-    var isISBNValid: Bool = true
     /// The picture, as JPEG bytes; `nil` is none. What changing it undoes — an upload already
     /// made for the old one — is the draft's business, behind the binding.
     @Binding var imageData: Data?
@@ -44,6 +40,11 @@ struct CreateBookCoverRow: View {
     /// Pushes « Image depuis une URL », which the row cannot do itself: the screen it pushes
     /// belongs to the sheet's navigation stack.
     let onPickURL: () -> Void
+
+    /// The ISBN to type, in place of the one shown, when no barcode was read.
+    private var editableISBN: Binding<String>?
+    /// Whether the ISBN typed can be published: none, or one whose check digit is right.
+    private var isISBNValid: Bool = true
 
     var body: some View {
         HStack(alignment: .top, spacing: .medium) {
@@ -78,6 +79,19 @@ struct CreateBookCoverRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+}
+
+extension CreateBookCoverRow {
+    /// Makes the ISBN a field to type in, when a binding is given.
+    func editableISBN(
+        _ isbn: Binding<String>?,
+        isValid: Bool
+    ) -> Self {
+        var copy: Self = self
+        copy.editableISBN = isbn
+        copy.isISBNValid = isValid
+        return copy
     }
 }
 

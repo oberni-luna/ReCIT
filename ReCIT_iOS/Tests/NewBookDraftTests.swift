@@ -219,6 +219,18 @@ struct NewBookDraftTests {
         #expect(draft.normalizedISBN == "9782070368228")
     }
 
+    @Test
+    func `a wrong typed ISBN blocks publishing, a scanned one does not`() {
+        var draft: NewBookDraft = .init(isbn: "9782070360025")
+        draft.choose(ministry)
+
+        #expect(draft.isPublishable(isISBNEditable: true) == false)
+        #expect(draft.isPublishable(isISBNEditable: false))
+
+        draft.isbn = ""
+        #expect(draft.isPublishable(isISBNEditable: true))
+    }
+
     @Test("Only the first letter is raised")
     func capitalizingFirstLetterOnly() {
         #expect(NewBookDraft.capitalizingFirstLetter("le Guin et moi") == "Le Guin et moi")

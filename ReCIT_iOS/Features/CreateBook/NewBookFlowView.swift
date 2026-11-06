@@ -77,7 +77,7 @@ struct NewBookFlowView: View {
     var body: some View {
         NavigationStack(path: $path) {
             WorkSearchView(
-                isbn: origin.isbn ?? "",
+                isbn: origin.isbn,
                 query: origin.workQuery,
                 onChoose: choose,
                 onCreate: startNewWork
@@ -121,6 +121,7 @@ struct NewBookFlowView: View {
                         workUri: uri,
                         draft: $draft,
                         failure: failure,
+                        isISBNEditable: origin.isISBNEditable,
                         onPublish: create,
                         onClose: { dismiss() }
                     )

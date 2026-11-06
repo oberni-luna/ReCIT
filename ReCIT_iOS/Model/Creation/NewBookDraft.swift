@@ -9,9 +9,9 @@
 //  Two shapes, decided by the work search the sheet opens on. A work inventaire.io already has:
 //  `workUri` names it, and only the edition is described — its title, its cover. A work of the
 //  reader's own: its title and its authors are described too, and created with the edition.
-//  The ISBN comes from the camera and is never edited there; opened from Recherche it is typed, or
-//  left empty. Everything else inventaire.io accepts on an edition — publisher, date, format, contributors, identifiers — is `properties`, the same
-//  value « Modifier l'édition » holds.
+//  The ISBN comes from the camera and is never edited there; opened from Recherche it is typed,
+//  or left empty. Everything else inventaire.io accepts on an edition — publisher, date, format,
+//  contributors, identifiers — is `properties`, the same value « Modifier l'édition » holds.
 //
 //  See PRD 0015 and PRD 0026.
 //
@@ -203,5 +203,10 @@ struct NewBookDraft: Equatable, Sendable {
     static func capitalizingFirstLetter(_ text: String) -> String {
         guard let first = text.first else { return text }
         return first.uppercased() + text.dropFirst()
+    }
+
+    /// Whether there is enough to publish, and, when the ISBN is typed, whether it can be.
+    func isPublishable(isISBNEditable: Bool) -> Bool {
+        isPublishable && (isISBNEditable == false || isISBNValid)
     }
 }

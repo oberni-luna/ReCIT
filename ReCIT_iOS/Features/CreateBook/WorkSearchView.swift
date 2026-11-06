@@ -33,8 +33,8 @@ struct WorkSearchView: View {
     @Environment(EntityCreationModel.self) private var creationModel
 
     /// The barcode, said back in the opening sentence: it is the one thing the reader knows the
-    /// app has understood. Empty when there is none, and the sentence says only what to search.
-    let isbn: String
+    /// app has understood. `nil` when there is none, and the sentence says only what to search.
+    let isbn: String?
 
     /// A work inventaire.io already has: the edition is attached to it.
     let onChoose: (WorkCandidate) -> Void
@@ -53,7 +53,7 @@ struct WorkSearchView: View {
     @State private var isSearchPresented: Bool = false
 
     init(
-        isbn: String,
+        isbn: String?,
         query: String = "",
         onChoose: @escaping (WorkCandidate) -> Void,
         onCreate: @escaping (String) -> Void,
@@ -141,7 +141,8 @@ struct WorkSearchView: View {
 
     /// A new book's opening sentence: the ISBN inventaire.io does not know, when there is one.
     private var defaultEmptyMessage: LocalizedStringKey {
-        isbn.isEmpty ? "create_book.search.empty.no_isbn" : "create_book.search.empty.message \(isbn)"
+        guard let isbn else { return "create_book.search.empty.no_isbn" }
+        return "create_book.search.empty.message \(isbn)"
     }
 
     /// Runs the search a beat after the last keystroke. Cancellation is the debounce: a new

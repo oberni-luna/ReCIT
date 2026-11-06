@@ -64,9 +64,14 @@ struct EmptyStateView: View {
             .fixedSize(horizontal: false, vertical: true)
 
             if let action {
-                Button(action.title, action: action.handler)
-                    .buttonStyle(.primary())
-                    .accessibilityIdentifier(action.accessibilityIdentifier ?? "")
+                if let identifier = action.accessibilityIdentifier {
+                    Button(action.title, action: action.handler)
+                        .buttonStyle(.primary())
+                        .accessibilityIdentifier(identifier)
+                } else {
+                    Button(action.title, action: action.handler)
+                        .buttonStyle(.primary())
+                }
             }
         }
         .padding(.horizontal, .large)

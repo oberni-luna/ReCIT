@@ -6,8 +6,9 @@
 //
 //  `PUT /api/groups/update-settings` takes one attribute at a time, and the form follows it: a
 //  toggle is written the moment it moves, optimistically, and the two texts go together on
-//  « Enregistrer », one call each for whichever changed. The photo and the place are not
-//  offered yet (PRD 0016).
+//  « Enregistrer », one call each for whichever changed. The photo goes with them, server first:
+//  uploaded, then named, and shown once the server has agreed. The place is not offered yet
+//  (PRD 0016).
 //
 
 import SwiftUI
@@ -24,6 +25,8 @@ struct GroupSettingsView: View {
 
     @State private var name: String
     @State private var groupDescription: String
+    @State private var picture: GroupPictureEdit = .unchanged
+    @State private var isPickingPictureURL: Bool = false
 
     init(group: ReaderGroup) {
         self.group = group
@@ -36,13 +39,24 @@ struct GroupSettingsView: View {
         groupModel.group(id: group.id, among: storedGroups) ?? group
     }
 
-    private var textChanged: Bool {
-        name != current.name || groupDescription != current.description
+    private var hasChanges: Bool {
+        name != current.name
+            || groupDescription != current.description
+            || picture.isChange(from: current.pictureURL)
     }
 
     var body: some View {
         NavigationStack {
             DesignSystem.Form {
+                Section {
+                    GroupPhotoPicker(
+                        $picture,
+                        savedPictureURL: current.pictureURL,
+                        onPickURL: { isPickingPictureURL = true }
+                    )
+                }
+                .listRowBackground(Color.clear)
+
                 Section {
                     TextField("groups.form.name", text: $name)
                         .textStyle(.content300)
@@ -74,6 +88,11 @@ struct GroupSettingsView: View {
                 )
             }
             .navigationTitle("groups.settings")
+            .navigationDestination(isPresented: $isPickingPictureURL) {
+                CoverURLView { jpeg, _ in
+                    picture = .replaced(jpeg)
+                }
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -84,7 +103,7 @@ struct GroupSettingsView: View {
                         save()
                         dismiss()
                     }
-                    .disabled(textChanged == false || GroupNameRule.accepts(name) == false)
+                    .disabled(hasChanges == false || GroupNameRule.accepts(name) == false)
                     .accessibilityIdentifier("e2e.groupSettings.save")
                 }
             }
@@ -99,6 +118,9 @@ struct GroupSettingsView: View {
         let trimmedDescription: String = groupDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedDescription != current.description {
             groupModel.update(.description(trimmedDescription), on: group.id, modelContext: modelContext)
+        }
+        if picture.isChange(from: current.pictureURL) {
+            groupModel.updatePicture(picture.imageData, on: group.id, modelContext: modelContext)
         }
     }
 }

@@ -70,7 +70,7 @@ struct AvatarThumbnail: View {
             }
         }
         .frame(width: side, height: side)
-        .clipShape(RoundedRectangle(cornerRadius: kind.isRound ? .full : .medium))
+        .clipShape(RoundedRectangle(cornerRadius: kind.cornerRadius))
         .thumbnailShadow()
         .accessibilityHidden(true)
     }

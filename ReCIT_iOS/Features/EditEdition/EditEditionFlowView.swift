@@ -129,7 +129,7 @@ struct EditEditionFlowView: View {
                         edit?.works[index].addAuthor(author)
                     }
                 case .coverFromURL:
-                    CoverURLView(
+                    BookCoverURLView(
                         // The work's title first, which is what a cover is known by.
                         searchedTitle: edit?.works.first?.trimmedTitle ?? edit?.trimmedTitle ?? edition.title,
                         isbn: edit?.original.normalizedISBN ?? ""

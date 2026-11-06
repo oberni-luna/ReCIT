@@ -44,6 +44,7 @@ One precise screen. Team names, in the discussion language. UI projects only.
 | Listes | — | `EntityListView` | my lists, then « Dans mon réseau » |
 | Liste | list detail | `EntityListDetail` | one list as a cover flow, Livres / Présentation |
 | Réseau | Community | `NetworkView` | Amis / Groupes |
+| Réglages du groupe | group settings | `GroupSettingsView` | what an admin changes about a group |
 | Recherche | — | `SearchTabView` | unified search: mine, friends, inventaire.io |
 | Profil | Settings | `ProfileView` | sheet behind the avatar → [[features/0038-profile-behind-the-avatar]] |
 | Fiche livre | book screen | `BookDetailView` | one edition: cover, work, copies, actions |

@@ -113,7 +113,7 @@ struct NewBookFlowView: View {
                         onClose: { dismiss() }
                     )
                 case .coverFromURL:
-                    CoverURLView(
+                    BookCoverURLView(
                         searchedTitle: draft.coverSearchTitle,
                         isbn: draft.normalizedISBN
                     ) { jpeg, url in

@@ -22,6 +22,11 @@ nonisolated enum AvatarKind: Hashable, Sendable {
         }
     }
 
+    /// The corner of its frame: a disc's for a reader, a rounded square's for a group.
+    var cornerRadius: DesignSystem.CornerRadius {
+        isRound ? .full : .medium
+    }
+
     /// The letters drawn without a photo; `nil` for a group, which is drawn with a glyph.
     var initials: String? {
         switch self {

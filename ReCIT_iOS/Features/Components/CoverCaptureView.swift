@@ -2,6 +2,8 @@
 //  CoverCaptureView.swift
 //  ReCIT_iOS
 //
+//  Created by Olivier Berni on 18/09/2026.
+//
 //  The camera, for the one photograph this app takes. The book is in the reader's hand — it is
 //  the only moment when photographing its cover is easy — and inventaire.io has no picture of
 //  the editions nobody has ever held up.
@@ -20,7 +22,6 @@ import SwiftUI
 import UIKit
 
 struct CoverCaptureView: UIViewControllerRepresentable {
-
     /// Whether this device can take a photograph — not the simulator.
     static var isCameraAvailable: Bool {
         UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -28,7 +29,7 @@ struct CoverCaptureView: UIViewControllerRepresentable {
 
     let onCapture: (Data) -> Void
 
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss: DismissAction
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker: UIImagePickerController = .init()
@@ -42,7 +43,9 @@ struct CoverCaptureView: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator {
         .init(onCapture: onCapture, onFinish: { dismiss() })
     }
+}
 
+extension CoverCaptureView {
     final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         private let onCapture: (Data) -> Void
         private let onFinish: () -> Void
@@ -56,11 +59,14 @@ struct CoverCaptureView: UIViewControllerRepresentable {
             _ picker: UIImagePickerController,
             didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
         ) {
-            if let image = info[.originalImage] as? UIImage,
-               let data = CoverImageReducer.jpegData(for: image) {
-                onCapture(data)
+            defer { onFinish() }
+            guard
+                let image = info[.originalImage] as? UIImage,
+                let data = CoverImageReducer.jpegData(for: image)
+            else {
+                return
             }
-            onFinish()
+            onCapture(data)
         }
 
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

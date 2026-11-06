@@ -1,6 +1,6 @@
 ---
 issue: 7
-status: todo
+status: to-test
 wiki: [[architecture]], [[testing]]
 note: migrated from docs/issues/0066 — a 429 on sign-in reads as a generic failure
 created: 2026-11-06
@@ -39,8 +39,18 @@ created: 2026-11-06
 
 ## Implementation
 
+- `ReCIT_iOS/Model/Authentication/AuthFailure.swift`: new `case rateLimited`; `classify` maps `429` onto it (`classifySignup` gets it through `classify`); `signupField` → `nil`; `message` → `auth.error.rate_limited`. File header: three failures told apart on screen, not two.
+- `ReCIT_iOS/Localizable.xcstrings`: `auth.error.rate_limited` — fr « Trop de tentatives. Réessayez dans quelques minutes. », en « Too many attempts. Try again in a few minutes. »
+- `ReCIT_iOS/Tests/AuthFailureTests.swift`: 4 tests — `classify` 429 (real server message and nil), `classifySignup` 429, `signupField` nil, message key distinct from generic / invalid credentials / network.
+- No view change: `LoginView` and `CreateAccountView` only read `message` and `signupField`; the only exhaustive switches are in `AuthFailure.swift`.
+- Lint: baseline matches by line text; the new test writes `.init(localized:)` so baselined copies of `let generic: String = String(localized: …)` keep matching. Baseline did not grow.
+- Android `AuthFailure.kt` has the same gap: out of scope.
+- Proof: build ✅ · `AuthFailureTests` 19/19 ✅.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent. Owed: sign-in screen on a real `429` shows the new sentence under both fields.
 
 ## Feedback

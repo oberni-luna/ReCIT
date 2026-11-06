@@ -16,9 +16,9 @@
 //  out of `message`, and that is what the suite asserts over arbitrary inputs rather than over
 //  the three strings production happens to send today.
 //
-//  Only two failures are told apart on screen, and deliberately: wrong credentials, which the
-//  user fixes by typing again, and an unreachable server, which they fix by finding a network.
-//  Everything else is one sentence — a user cannot act on the difference between a 500 and a
+//  Only three failures are told apart on screen, and deliberately: wrong credentials, which the
+//  user fixes by typing again, an unreachable server, which they fix by finding a network, and
+//  too many attempts, which they fix by waiting. Everything else is one sentence — a user cannot act on the difference between a 500 and a
 //  502, and pretending otherwise means writing copy for statuses nobody has ever seen.
 //
 //  Signing up adds five more, and they are the exception that proves that rule: each one *is*
@@ -37,6 +37,10 @@ enum AuthFailure: Error, Equatable, Sendable {
 
     /// The server refused the username and password it was given.
     case invalidCredentials
+
+    /// The server is turning attempts away for now (`429`): too many, too fast, from this account
+    /// or this network. Waiting a few minutes is what fixes it.
+    case rateLimited
 
     /// The request never completed: no network, a dropped connection, a timeout.
     case network
@@ -99,6 +103,10 @@ enum AuthFailure: Error, Equatable, Sendable {
             return .invalidCredentials
         }
 
+        if status == 429 {
+            return .rateLimited
+        }
+
         return .server(status: status, serverMessage: serverMessage)
     }
 
@@ -155,7 +163,7 @@ enum AuthFailure: Error, Equatable, Sendable {
         case .usernameTaken, .usernameInvalid: .username
         case .emailTaken, .emailInvalid: .email
         case .passwordRejected: .password
-        case .invalidCredentials, .network, .noSessionCookies, .keychain, .server: nil
+        case .invalidCredentials, .rateLimited, .network, .noSessionCookies, .keychain, .server: nil
         }
     }
 
@@ -165,6 +173,8 @@ enum AuthFailure: Error, Equatable, Sendable {
         switch self {
         case .invalidCredentials:
             "auth.error.invalid_credentials"
+        case .rateLimited:
+            "auth.error.rate_limited"
         case .network:
             "auth.error.network"
         case .usernameTaken:

@@ -1705,6 +1705,23 @@
         }
       }
     },
+    "auth.error.rate_limited" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too many attempts. Try again in a few minutes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop de tentatives. Réessayez dans quelques minutes."
+          }
+        }
+      }
+    },
     "author.birth_date %@" : {
       "localizations" : {
         "en" : {

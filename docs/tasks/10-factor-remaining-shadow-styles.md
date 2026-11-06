@@ -1,6 +1,6 @@
 ---
 issue: 10
-status: todo
+status: to-test
 wiki: [[design-system/figma-library]], [[features/0005-shelf-label-and-add]]
 note: Migrated from docs/issues/0014-factorize-shadow-styles.md. Android counterpart split to #49.
 created: 2026-11-06
@@ -56,8 +56,16 @@ created: 2026-11-06
 
 ## Implementation
 
+- `ReCIT_iOS/DesignSystem/Tokens/Shadow.swift`: `.paintedBook` (0.16, 1.5, 0/1.5), `.bookSpine` (0.45, 1, 0/0.5), `.lyingBook` (0.22, 3, 1/2), `.entityGlow` (0.1, 10, 0/0) next to `.light`; header no longer says the others stay literals. Five cases, no `.pressed` / `.thumbnail`.
+- Call sites: `PaintedBookView` and `CoverWallView` → `.shadow(.paintedBook)`; `ShelfBookTitle` → `.bookSpine`; `ShelfCoverView` → `.lyingBook`; `EntityImageView` → `.entityGlow`.
+- Acceptance grep returns zero hits (the modifier in `Shadow.swift` writes `self.shadow(` with `color:` on the next line).
+- `docs/wiki/design-system/figma-library.md`: « Styles d'effet — 7 ombres » names each case and its call sites (`Shadow/Light` call sites refreshed to its six real ones); `Pressed` and `Thumbnail` « retirée du code »; the only-non-literal paragraph replaced by the naming caveat (`.lyingBook` shades standing covers, `.bookSpine` the title text); the `shadow/*` token table lists the enum cases; the pending-migration note replaced. Left as is: ~l.780 still says `shadow/soft` consolidates three `0.1` literals, two of them gone.
+- Baseline unchanged. Proof: build ✅ (SwiftLint in the build).
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent. Same values, so nothing should change on screen; « looks the same, light and dark » unverified.
 
 ## Feedback

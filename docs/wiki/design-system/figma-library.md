@@ -748,11 +748,11 @@ modes (40 % contre 50 % en clair, 30 % contre 50 % en sombre). Le rôle distinct
 
 | Token | Valeur (les deux modes) | Symbole Swift |
 |---|---|---|
-| `shadow/soft` | noir 10 % | `Color.black.opacity(0.1)` |
-| `shadow/book` | noir 16 % | `Color.black.opacity(0.16)` |
+| `shadow/soft` | noir 10 % | `DesignSystem.Shadow.entityGlow` |
+| `shadow/book` | noir 16 % | `DesignSystem.Shadow.paintedBook` |
 | `shadow/light` | noir 18 % | `DesignSystem.Shadow.light` |
-| `shadow/lying-book` | noir 22 % | `Color.black.opacity(0.22)` |
-| `shadow/spine` | noir 45 % | `Color.black.opacity(0.45)` |
+| `shadow/lying-book` | noir 22 % | `DesignSystem.Shadow.lyingBook` |
+| `shadow/spine` | noir 45 % | `DesignSystem.Shadow.bookSpine` |
 | `shelf/parchment` | → `shelf/parchment` | `ShelfPalette.parchment` |
 | `shelf/ink/dark` | → `shelf/ink-dark` | `ShelfPalette.ink(onHex:)` |
 | `shelf/ink/cream` | → `shelf/ink-cream` | `ShelfPalette.ink(onHex:)` |
@@ -760,10 +760,10 @@ modes (40 % contre 50 % en clair, 30 % contre 50 % en sombre). Le rôle distinct
 | `shelf/label/paper` | → `color/gray/0` | `ShelfPalette.labelPaper` |
 | `shelf/label/ink` | → `color/gray/900` | `ShelfPalette.labelInk` |
 
-`shadow/light` est la **seule** ombre à porter un vrai symbole Swift : `DesignSystem.Shadow.light`, consommée par le
-modificateur `View.shadow(_:)` (`DesignSystem/Tokens/Shadow.swift`). Les cinq autres restent des littéraux
-`Color.black.opacity(…)` écrits dans le code des features ; leur reprise dans l'enum est suivie par l'**issue 0014**.
-Tant qu'elle n'est pas faite, la colonne « Symbole Swift » de ce tableau est la valeur littérale, pas un token.
+Chaque ombre que le code emploie porte un cas de `DesignSystem.Shadow`, consommé par le modificateur
+`View.shadow(_:)` (`DesignSystem/Tokens/Shadow.swift`) ; la couleur de la variable est celle du cas (`.color`). Aucune
+ombre littérale ne reste dans le code des features (issue #10). `shadow/soft` ne nomme que `.entityGlow` : les deux
+autres styles qui la portent, `Shadow/Pressed` et `Shadow/Thumbnail`, n'ont plus d'usage dans le code.
 
 Comme les autres `shadow/*`, `shadow/light` porte sa propre alpha et **n'est donc pas un alias** : valeur brute,
 identique en clair et en sombre.
@@ -884,17 +884,17 @@ Couleur **bindée** à `shadow/*`, donc mode-aware. Le rayon SwiftUI est repris 
 
 | Style | x, y | Flou | Couleur | Source |
 |---|---|---|---|---|
-| `Shadow/Pressed` | 0, 2 | 8 | `shadow/soft` | `ScaleButtonStyle.swift:20` — **uniquement pendant l'appui** ; au repos rayon et offset valent 0 |
-| `Shadow/Thumbnail` | 0, 0 | 2 | `shadow/soft` | `CellThumbnail.swift:49` |
-| `Shadow/Entity Glow` | 0, 0 | 10 | `shadow/soft` | `EntityImageView.swift:22` |
-| `Shadow/Painted Book` | 0, 1.5 | 1.5 | `shadow/book` | `PaintedBookView.swift:57` |
-| `Shadow/Book Spine` | 0, 0.5 | 1 | `shadow/spine` | `ShelfSpineView.swift:24`, `ShelfBooksView.swift:80` |
-| `Shadow/Lying Book` | 1, 2 | 3 | `shadow/lying-book` | `ShelfBooksView.swift:110` |
-| `Shadow/Light` | 0, 2 | 3 | `shadow/light` | `.shadow(.light)` — `ShelfLabelView.swift:52`, `ShelfFocusBookCell.swift:66` |
+| `Shadow/Pressed` | 0, 2 | 8 | `shadow/soft` | retirée du code — `ScaleButtonStyle` a été supprimé ; pas de cas dans `DesignSystem.Shadow` |
+| `Shadow/Thumbnail` | 0, 0 | 2 | `shadow/soft` | retirée du code — `CellThumbnail` n'a plus d'ombre ; pas de cas dans `DesignSystem.Shadow` |
+| `Shadow/Entity Glow` | 0, 0 | 10 | `shadow/soft` | `.shadow(.entityGlow)` — `EntityBrowser/EntityImageView.swift:25` |
+| `Shadow/Painted Book` | 0, 1.5 | 1.5 | `shadow/book` | `.shadow(.paintedBook)` — `Shelves/PaintedBookView.swift:75`, `Components/CoverWallView.swift:114` |
+| `Shadow/Book Spine` | 0, 0.5 | 1 | `shadow/spine` | `.shadow(.bookSpine)` — `Shelves/ShelfBookTitle.swift:36` |
+| `Shadow/Lying Book` | 1, 2 | 3 | `shadow/lying-book` | `.shadow(.lyingBook)` — `Components/ShelfCoverView.swift:74` |
+| `Shadow/Light` | 0, 2 | 3 | `shadow/light` | `.shadow(.light)` — `Shelves/ShelfPaperModifier.swift:29`, `Shelves/ShelfFocusBookCell.swift:65`, `Lists/ListCoverFlowItem.swift:119`, `Components/TipCardStyle.swift:58`, `Support/SupportExLibrisCard.swift:68`, `Scanner/ScanResultCoverView.swift:36` |
 
-`Shadow/Light` est arrivée avec le label papier (issue 0012), et c'est la seule dont la source ne soit pas un
-littéral : les deux points d'appel passent par `DesignSystem.Shadow.light`, donc la valeur ne peut plus diverger entre
-le label et la couverture de la cellule de focus.
+Les cas portent le nom de leur style Figma, même quand le nom ne décrit plus tous les usages : `.lyingBook` ombre
+chaque couverture d'étagère, debout comme couchée, et `.bookSpine` ombre le titre écrit sur le dos, pas le dos
+lui-même. Accepté pour garder un style ↔ un cas ; ne pas renommer d'un seul côté.
 
 **Le design a bougé, pas le code.** La feuille Figma portait jusque-là une ombre **brute** en (0, 1), flou 4, sur le
 label ; le code partage (0, 2), flou 3. Le code faisant foi, le style a été créé aux valeurs du code puis appliqué aux

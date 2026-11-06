@@ -22,7 +22,7 @@ struct EntityImageView<Content: View>: View {
             tappableImageView
                 .frame(maxWidth: .infinity)
                 .frame(height: 256)
-                .shadow(color: .black.opacity(0.1), radius: 10)
+                .shadow(.entityGlow)
                 .padding(.bottom, .sMedium)
 
             content()

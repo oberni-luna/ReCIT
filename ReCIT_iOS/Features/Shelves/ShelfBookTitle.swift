@@ -33,7 +33,7 @@ struct ShelfBookTitle: View {
         Text(title)
             .textStyle(.footnote200Bold)
             .foregroundStyle(ink)
-            .shadow(color: .black.opacity(0.45), radius: 1, x: 0, y: 0.5)
+            .shadow(.bookSpine)
             .lineLimit(1)
             .truncationMode(.tail)
     }

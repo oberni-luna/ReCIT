@@ -72,7 +72,7 @@ struct PaintedBookView<Overlay: View>: View {
         .overlay { overlay(titleColor) }
         .frame(width: size.width, height: size.height)
         .clipShape(.rect(cornerRadius: 1))
-        .shadow(color: .black.opacity(0.16), radius: 1.5, x: 0, y: 1.5)
+        .shadow(.paintedBook)
         .task(id: edition?.uri) { await load() }
     }
 

@@ -9,8 +9,11 @@
 
 import SwiftUI
 
-struct LensTabLabels<Tab: CaseIterable & Hashable, Label: View>: View {
+struct LensTabLabels<Tab: Hashable, Label: View>: View {
+    let tabs: [Tab]
     let color: DesignSystem.Color
+    /// The room around each word, which the capsule is drawn round.
+    let wordPadding: DesignSystem.Spacing
     /// The grey row's: each word's frame in `coordinateSpace`, for the capsule to be drawn
     /// between, and the selection VoiceOver reads and changes. `nil` on the lens's copy.
     var measuring: (
@@ -22,18 +25,20 @@ struct LensTabLabels<Tab: CaseIterable & Hashable, Label: View>: View {
 
     var body: some View {
         HStack(spacing: .zero) {
-            ForEach(Array(Tab.allCases), id: \.self) { tab in
+            ForEach(tabs, id: \.self) { tab in
                 let word = label(tab)
                     .textStyle(.action200)
                     .foregroundStyle(color)
                     // At the largest text sizes, shrunk rather than wrapped or cut.
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                    .padding(.horizontal, .sMedium)
+                    .padding(.horizontal, wordPadding)
                     .padding(.vertical, .small)
 
                 if let measuring {
                     word
+                        // What a row too wide for the screen is scrolled to.
+                        .id(tab)
                         .onGeometryChange(for: CGRect.self) {
                             $0.frame(in: .named(measuring.coordinateSpace))
                         } action: { frame in

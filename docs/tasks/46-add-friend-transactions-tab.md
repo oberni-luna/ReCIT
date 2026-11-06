@@ -1,6 +1,6 @@
 ---
 issue: 46
-status: todo
+status: to-test
 wiki: [[features/0064-a-friends-profile-with-tabs]], [[features/0066-a-friends-profile-tabs-as-pages]], [[features/0067-a-friends-profile-presentation-tab]], [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0071-a-request-names-what-it-asks-for]]
 note: un tab sur l'écran des ami·es pour afficher les transactions effectuées ou en cours avec cet·te ami·e
 created: 2026-11-06
@@ -46,8 +46,21 @@ created: 2026-11-06
 
 ## Implementation
 
+- `UserProfileTab` gains `.transactions` between `.lists` and `.presentation`; `UserProfileTab.pages(isMine:)` → four tabs on a friend's profile, three on mine; non-friends keep one page, no tabs.
+- `TabPager`, `LensTabPicker`, `LensTabLabels` take `tabs: [Tab]` (default `allCases`, so a list's Livres | Présentation is unchanged); `TabPager` rebuilds its pages when the list changes.
+- `ProfileScrollOffset` takes the page list (`among:`): Présentation is index 3 on a friend's profile, 2 on mine. `ProfileHeaderCollapseTests.clampedPosition()` updated (3 lines) to the new signature.
+- New `Features/Community/UserTransactionsTab.swift`, `UserTransactionsSection.swift`, `UserTransactionsTabTitle.swift` (« Échanges • N » + tinted unread dot); `Model/Transaction/TransactionsWithUser.swift` (owner or requester == the friend, newest `lastActionDate` first, split on `isCurrent`, from a plain `@Query`); rows are `TransactionCellView`, ids `e2e.user.transactionRow`.
+- `TransactionCellView.isRead` moved to `UserTransaction.isRead(by:)` (`Model/Transaction/UserTransaction+ReadStatus.swift`), used by the cell and the tab dot. Behaviour unchanged. **To check:** the rule reads "read" when my server `read` flag is `false`, while the app creates its requests with `requester: true` — the dots may show on read transactions. Kept as is, per the task.
+- Tab row: `ViewThatFits` — fits → laid out as before with the lens; overflows → horizontal `ScrollView` + `ScrollViewReader` bringing the selected word into view on tap and swipe. While it scrolls, a word is picked by a tap; the capsule cannot be dragged (the lens drag would block scrolling). The capsule still follows the pager.
+- Profile capsules padded `.small` through `.wordPadding(.small)`; a list keeps `.sMedium`.
+- Strings, fr + en: `user.tab.transactions`, `user.tab.transactions %lld`, `user.tab.transactions.accessibility %lld`, `user.tab.transactions.unread`, `user.transactions.current` « En cours », `user.transactions.finished` « Terminés », `user.transactions.empty.title %@`, `user.transactions.empty.message`. Existing « Transactions en cours / finies » headers not reused (glossary: Échange).
+- Members reordered in `TabPager` and `LensTabPicker` for SwiftLint; their baseline entries are now stale (baseline not grown).
+- Proof: build ✅ · tests ✅ — `TransactionsWithUserTests` 5, `UserProfileTabTests` 2, `LensTabTrackTests` 8, `ProfileHeaderCollapseTests` 8, `TransactionModelTests`.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent. Owed: every acceptance criterion on screen — counts, sections, both directions, row → Échange and back, dot, empty state, swipes, header fold on four pages, largest text size scrolling, my own profile with three tabs, light/dark, a list's Livres | Présentation unchanged.
 
 ## Feedback

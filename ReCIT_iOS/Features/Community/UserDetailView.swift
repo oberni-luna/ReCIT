@@ -9,11 +9,12 @@ import SwiftUI
 import SwiftData
 
 /// A reader's profile, shaped like the Contacts card of Messages: a header held at the top —
-/// their picture, their name and the Inventaire • 540 | Listes • 4 | Présentation tabs — that
-/// folds into the navigation bar as the page scrolls, and never stays half folded. Under
-/// Inventaire, their étagères scroll away under it, the books after them; the other tabs open
-/// on their content, their bio being Présentation's. See PRD 0031 and the « Détail d'un amis »
-/// section of the Figma file (`865:17783`).
+/// their picture, their name and the Inventaire • 540 | Listes • 4 | Échanges • 2 | Présentation
+/// tabs — that folds into the navigation bar as the page scrolls, and never stays half folded.
+/// Under Inventaire, their étagères scroll away under it, the books after them; the other tabs
+/// open on their content: their lists, the Échanges between us, their bio. Échanges is a
+/// friend's alone. See PRD 0031 and the « Détail d'un amis » section of the Figma file
+/// (`865:17783`).
 ///
 /// Each tab is a page of its own (`UserProfilePage`), an inset grouped `List` whose first row is
 /// as tall as the unfolded header, which lies over both. The pages sit in a pager: a tab is
@@ -53,6 +54,12 @@ struct UserDetailView: View {
     /// inventory is closed until the relation is, which is what the empty state says.
     private var showsInventory: Bool {
         isMe || user.relation == .friend
+    }
+
+    /// The pages in their order: a friend's four, mine without Échanges, and the single page of
+    /// anyone else.
+    private var tabs: [UserProfileTab] {
+        showsInventory ? UserProfileTab.pages(isMine: isMe) : [.inventory]
     }
 
     private var metrics: UserProfileStickyHeader.Metrics {
@@ -128,13 +135,14 @@ struct UserDetailView: View {
             }
     }
 
-    /// Inventaire, Listes and Présentation side by side, a swipe or a tab's name apart. Someone
-    /// whose books are closed to me has no tabs, and a single page, their bio at its top.
+    /// The pages side by side, a swipe or a tab's name apart. Someone whose books are closed to
+    /// me has no tabs, and a single page, their bio at its top.
     @ViewBuilder
     private var pages: some View {
         if showsInventory {
             TabPager(
                 selection: $tab,
+                tabs: tabs,
                 isFrozen: shelfFocus.isArmed,
                 position: scrollOffset
             ) { page in
@@ -195,6 +203,8 @@ struct UserDetailView: View {
             }
         case .lists:
             UserListsTab(user: user, load: listsLoad, path: $path)
+        case .transactions:
+            UserTransactionsTab(user: user)
         case .presentation:
             UserPresentationTab(user: user)
         }
@@ -206,13 +216,14 @@ struct UserDetailView: View {
         UserProfileStickyHeader(
             user: user,
             tab: showsInventory ? $tab : nil,
+            tabs: tabs,
             listsLoad: listsLoad,
             metrics: metrics,
             collapse: collapse,
             scrollOffset: scrollOffset
         )
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-            guard scrollOffset.isSettled(tab) else { return }
+            guard scrollOffset.isSettled(tab, among: tabs) else { return }
             headerTop = frame.minY
             expandedHeaderHeight = frame.height
         }

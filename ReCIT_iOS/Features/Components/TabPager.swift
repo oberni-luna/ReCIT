@@ -26,53 +26,6 @@ import SwiftUI
 import UIKit
 
 struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepresentable {
-    @Binding var selection: Tab
-    /// Holds the pages still — while a book is being picked off an étagère, or a comment written.
-    let isFrozen: Bool
-    let position: any TabPagerPositionStore
-    @ViewBuilder let page: (Tab) -> Page
-
-    func makeCoordinator() -> Coordinator {
-        .init(selection: $selection, position: position)
-    }
-
-    func makeUIViewController(context: Context) -> UIPageViewController {
-        let controller: UIPageViewController = .init(
-            transitionStyle: .scroll,
-            navigationOrientation: .horizontal
-        )
-        controller.view.backgroundColor = .clear
-        controller.dataSource = context.coordinator
-        controller.delegate = context.coordinator
-
-        context.coordinator.pages = Coordinator.tabs.map { tab in
-            let host: UIHostingController<HostedPage> = .init(rootView: hostedPage(tab, context: context))
-            host.view.backgroundColor = .clear
-            return host
-        }
-        controller.setViewControllers(
-            [context.coordinator.page(for: selection)],
-            direction: .forward,
-            animated: false
-        )
-        context.coordinator.attach(to: controller)
-        return controller
-    }
-
-    func updateUIViewController(_ controller: UIPageViewController, context: Context) {
-        let coordinator: Coordinator = context.coordinator
-        coordinator.selection = $selection
-        for (tab, host) in zip(Coordinator.tabs, coordinator.pages) {
-            host.rootView = hostedPage(tab, context: context)
-        }
-        coordinator.setFrozen(isFrozen)
-        coordinator.turn(controller, to: selection)
-    }
-
-    private func hostedPage(_ tab: Tab, context: Context) -> HostedPage {
-        .init(content: page(tab), environment: context.environment)
-    }
-
     /// A page with the environment of the screen that holds the pager: a hosting controller
     /// starts from an empty one, which has none of the app's models.
     ///
@@ -98,12 +51,9 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
 
     @MainActor
     final class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
-        static var tabs: [Tab] {
-            Array(Tab.allCases)
-        }
-
         var selection: Binding<Tab>
         let position: any TabPagerPositionStore
+        var tabs: [Tab] = []
         var pages: [UIHostingController<HostedPage>] = []
 
         private weak var controller: UIPageViewController?
@@ -123,17 +73,17 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
             self.position = position
         }
 
-        static func index(of tab: Tab) -> CGFloat {
+        func index(of tab: Tab) -> CGFloat {
             CGFloat(tabs.firstIndex(of: tab) ?? 0)
         }
 
         func page(for tab: Tab) -> UIHostingController<HostedPage> {
-            pages[Int(Self.index(of: tab))]
+            pages[Int(index(of: tab))]
         }
 
         private func tab(of viewController: UIViewController?) -> Tab? {
             guard let index = pages.firstIndex(where: { $0 === viewController }) else { return nil }
-            return Self.tabs[index]
+            return tabs[index]
         }
 
         /// Reads the finger off the pager's scroll view: where the pages are laid in it says how
@@ -191,11 +141,11 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
                 return
             }
 
-            let isForward: Bool = Self.index(of: target) > Self.index(of: shown)
+            let isForward: Bool = index(of: target) > index(of: shown)
             isTurningByName = true
             updateScrollEnabled()
             withAnimation(.snappy) {
-                position.pagePosition = Self.index(of: target)
+                position.pagePosition = index(of: target)
             }
             controller.setViewControllers(
                 [page(for: target)],
@@ -240,7 +190,7 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
         ) {
             guard let shown = tab(of: pageViewController.viewControllers?.first) else { return }
 
-            position.pagePosition = Self.index(of: shown)
+            position.pagePosition = index(of: shown)
             if let pendingTab {
                 self.pendingTab = nil
                 if pendingTab != shown {
@@ -252,5 +202,82 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
                 selection.wrappedValue = shown
             }
         }
+    }
+
+    @Binding var selection: Tab
+    /// The pages' tabs, in their order.
+    let tabs: [Tab]
+    /// Holds the pages still — while a book is being picked off an étagère, or a comment written.
+    let isFrozen: Bool
+    let position: any TabPagerPositionStore
+    let page: (Tab) -> Page
+
+    init(
+        selection: Binding<Tab>,
+        tabs: [Tab] = Array(Tab.allCases),
+        isFrozen: Bool,
+        position: any TabPagerPositionStore,
+        @ViewBuilder page: @escaping (Tab) -> Page
+    ) {
+        _selection = selection
+        self.tabs = tabs
+        self.isFrozen = isFrozen
+        self.position = position
+        self.page = page
+    }
+
+    func makeCoordinator() -> Coordinator {
+        .init(selection: $selection, position: position)
+    }
+
+    func makeUIViewController(context: Context) -> UIPageViewController {
+        let controller: UIPageViewController = .init(
+            transitionStyle: .scroll,
+            navigationOrientation: .horizontal
+        )
+        controller.view.backgroundColor = .clear
+        controller.dataSource = context.coordinator
+        controller.delegate = context.coordinator
+
+        context.coordinator.tabs = tabs
+        context.coordinator.pages = tabs.map { hostingController(for: $0, context: context) }
+        controller.setViewControllers(
+            [context.coordinator.page(for: selection)],
+            direction: .forward,
+            animated: false
+        )
+        context.coordinator.attach(to: controller)
+        return controller
+    }
+
+    func updateUIViewController(_ controller: UIPageViewController, context: Context) {
+        let coordinator: Coordinator = context.coordinator
+        coordinator.selection = $selection
+        if coordinator.tabs == tabs {
+            for (tab, host) in zip(tabs, coordinator.pages) {
+                host.rootView = hostedPage(tab, context: context)
+            }
+        } else {
+            // A page added or taken away: the pages are made again, on the selected one.
+            coordinator.tabs = tabs
+            coordinator.pages = tabs.map { hostingController(for: $0, context: context) }
+            controller.setViewControllers(
+                [coordinator.page(for: selection)],
+                direction: .forward,
+                animated: false
+            )
+        }
+        coordinator.setFrozen(isFrozen)
+        coordinator.turn(controller, to: selection)
+    }
+
+    private func hostingController(for tab: Tab, context: Context) -> UIHostingController<HostedPage> {
+        let host: UIHostingController<HostedPage> = .init(rootView: hostedPage(tab, context: context))
+        host.view.backgroundColor = .clear
+        return host
+    }
+
+    private func hostedPage(_ tab: Tab, context: Context) -> HostedPage {
+        .init(content: page(tab), environment: context.environment)
     }
 }

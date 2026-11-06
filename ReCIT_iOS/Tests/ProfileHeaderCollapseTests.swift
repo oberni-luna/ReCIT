@@ -24,9 +24,10 @@ struct ProfileHeaderCollapseTests {
     @Test("The pager's position is held between the first page and the last")
     @MainActor
     func clampedPosition() {
-        #expect(ProfileScrollOffset.clampedPosition(-0.3) == 0)
-        #expect(ProfileScrollOffset.clampedPosition(1.6) == 1.6)
-        #expect(ProfileScrollOffset.clampedPosition(2.4) == CGFloat(UserProfileTab.allCases.count - 1))
+        let pages: [UserProfileTab] = UserProfileTab.pages(isMine: true)
+        #expect(ProfileScrollOffset.clampedPosition(-0.3, among: pages) == 0)
+        #expect(ProfileScrollOffset.clampedPosition(1.6, among: pages) == 1.6)
+        #expect(ProfileScrollOffset.clampedPosition(2.4, among: pages) == CGFloat(pages.count - 1))
     }
 
     @Test("The page passes under the header only once it is folded")

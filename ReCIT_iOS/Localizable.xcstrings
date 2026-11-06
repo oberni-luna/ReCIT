@@ -589,6 +589,74 @@
         }
       }
     },
+    "user.tab.transactions" : {
+      "comment" : "Échanges tab of a friend's profile, its word alone.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transactions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échanges"
+          }
+        }
+      }
+    },
+    "user.tab.transactions %lld" : {
+      "comment" : "Échanges tab of a friend's profile, with how many transactions there are between us.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transactions • %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échanges • %lld"
+          }
+        }
+      }
+    },
+    "user.tab.transactions.accessibility %lld" : {
+      "comment" : "VoiceOver label of user.tab.transactions, read without its bullet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transactions, %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échanges, %lld"
+          }
+        }
+      }
+    },
+    "user.tab.transactions.unread" : {
+      "comment" : "VoiceOver label of the dot after user.tab.transactions, when one of those transactions is unread.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unread"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non lu"
+          }
+        }
+      }
+    },
     "🥲" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -17937,6 +18005,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Étagères de %@"
+          }
+        }
+      }
+    },
+    "user.transactions.current" : {
+      "comment" : "Échanges tab of a friend's profile: header of the transactions still going on.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ongoing"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En cours"
+          }
+        }
+      }
+    },
+    "user.transactions.empty.message" : {
+      "comment" : "Under user.transactions.empty.title.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When one of you asks the other for a book — to borrow it, buy it or take it — the transaction will show up here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand l’un·e de vous demandera un livre à l’autre — pour l’emprunter, l’acheter ou le récupérer —, l’échange apparaîtra ici."
+          }
+        }
+      }
+    },
+    "user.transactions.empty.title %@" : {
+      "comment" : "Échanges tab of a friend's profile, when there is no transaction between us. %@ is their username.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No transactions with %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun échange avec %@"
+          }
+        }
+      }
+    },
+    "user.transactions.finished" : {
+      "comment" : "Échanges tab of a friend's profile: header of the transactions that are over.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finished"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminés"
           }
         }
       }

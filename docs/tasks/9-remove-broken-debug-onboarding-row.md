@@ -1,6 +1,6 @@
 ---
 issue: 9
-status: to-test
+status: to-close
 wiki: [[testing]]
 note: migrated from docs/issues/0089 — « Ouvrir l'onboarding scan » presents nothing
 created: 2026-11-06
@@ -43,6 +43,15 @@ created: 2026-11-06
 - Proof: Debug build ✅ (SwiftLint in the build).
 
 ## Review
+
+### Round `validation` — 2026-11-06
+
+Scope: `origin/main..wa/9-remove-broken-debug-onboarding-row`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `ProfileDebugSection.swift:102` — [style] the comment above « Rejouer l'accueil en situation » still contrasted it with a button that no longer exists → **fixed** (comment only).
+- Round 2: ✅ review clean.
+- Checked: baseline shrinks by exactly one entry; acceptance grep finds only the historical comment in `UITests/E2EScenarioTests.swift:196`; no dead code left.
+- Wiki: nothing describes the removed row as existing; no page changed.
 
 ## Verification
 

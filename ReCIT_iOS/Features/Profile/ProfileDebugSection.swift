@@ -99,9 +99,9 @@ struct ProfileDebugSection: View {
             }
             .foregroundStyle(.foregroundTinted)
 
-            // The accueil in situ: presented by the gate rather than by a button, which is
-            // the one path the row above cannot exercise. Its binding is derived, so
-            // this takes effect at once where the conditions hold — not at the next launch.
+            // The accueil, presented by the gate the way a new user meets it: its binding is
+            // derived, so this takes effect at once where the conditions hold — not at the next
+            // launch.
             Button("Rejouer l'accueil en situation") {
                 guard let userId: String = userModel.myUser?._id else { return }
 

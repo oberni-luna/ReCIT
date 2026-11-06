@@ -71,7 +71,7 @@ struct ShelfCoverView: View {
         }
         .frame(width: size.width, height: size.height, alignment: alignment)
         .clipShape(.rect(cornerRadius: 2))
-        .shadow(color: .black.opacity(0.22), radius: 3, x: 1, y: 2)
+        .shadow(.lyingBook)
     }
 }
 

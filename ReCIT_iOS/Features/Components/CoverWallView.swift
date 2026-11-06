@@ -111,7 +111,7 @@ struct CoverWallView: View {
             ),
             size: .init(width: geometry.coverWidth, height: geometry.coverHeight)
         )
-        .shadow(color: .black.opacity(0.16), radius: 1.5, x: 0, y: 1.5)
+        .shadow(.paintedBook)
         .offset(
             x: geometry.x(ofColumn: column),
             y: geometry.y(ofRow: row, inColumn: column, at: elapsed, speedScale: pace)

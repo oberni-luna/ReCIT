@@ -2,7 +2,8 @@
 //  WorkSearchView.swift
 //  ReCIT_iOS
 //
-//  « De quel livre s'agit-il ? » — the question the sheet opens on when a scan found no edition.
+//  « De quel livre s'agit-il ? » — the question the sheet opens on when a scan found no edition,
+//  or Recherche found nothing on inventaire.io: then it opens on the query, already searched.
 //
 //  Most of the time it is *this edition* that inventaire.io lacks, not the book: the work — the
 //  text, its authors — is already there, and the reader only has to point at it. So the sheet
@@ -24,12 +25,16 @@
 import SwiftUI
 
 struct WorkSearchView: View {
+    /// Long enough that typing a title does not fire a request per letter, short enough that the
+    /// list feels like it is following the hand. The author picker's, for the same reasons.
+    private static let debounce: Duration = .milliseconds(300)
+
     @Environment(SearchModel.self) private var searchModel
     @Environment(EntityCreationModel.self) private var creationModel
 
     /// The barcode, said back in the opening sentence: it is the one thing the reader knows the
-    /// app has understood.
-    let isbn: String
+    /// app has understood. `nil` when there is none, and the sentence says only what to search.
+    let isbn: String?
 
     /// A work inventaire.io already has: the edition is attached to it.
     let onChoose: (WorkCandidate) -> Void
@@ -39,17 +44,29 @@ struct WorkSearchView: View {
 
     /// What the screen says before anything is typed. By default a new book's: inventaire.io
     /// does not know this ISBN.
-    var emptyTitle: LocalizedStringKey = "create_book.search.empty.title"
-    var emptyMessage: LocalizedStringKey?
+    let emptyTitle: LocalizedStringKey
+    let emptyMessage: LocalizedStringKey?
 
-    @State private var query: String = ""
+    @State private var query: String
     @State private var results: [WorkCandidate] = []
     @State private var hasSearched: Bool = false
     @State private var isSearchPresented: Bool = false
 
-    /// Long enough that typing a title does not fire a request per letter, short enough that the
-    /// list feels like it is following the hand. The author picker's, for the same reasons.
-    private static let debounce: Duration = .milliseconds(300)
+    init(
+        isbn: String?,
+        query: String = "",
+        onChoose: @escaping (WorkCandidate) -> Void,
+        onCreate: @escaping (String) -> Void,
+        emptyTitle: LocalizedStringKey = "create_book.search.empty.title",
+        emptyMessage: LocalizedStringKey? = nil
+    ) {
+        self.isbn = isbn
+        self.onChoose = onChoose
+        self.onCreate = onCreate
+        self.emptyTitle = emptyTitle
+        self.emptyMessage = emptyMessage
+        _query = State(initialValue: query)
+    }
 
     private var trimmedQuery: String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -64,7 +81,7 @@ struct WorkSearchView: View {
                     EmptyStateView(
                         glyph: "magnifyingglass",
                         title: emptyTitle,
-                        message: emptyMessage ?? "create_book.search.empty.message \(isbn)"
+                        message: emptyMessage ?? defaultEmptyMessage
                     )
                     .padding(.vertical, .xLarge)
                 }
@@ -120,6 +137,12 @@ struct WorkSearchView: View {
             // on the cover, and the first thing to do is type it.
             if query.isEmpty { isSearchPresented = true }
         }
+    }
+
+    /// A new book's opening sentence: the ISBN inventaire.io does not know, when there is one.
+    private var defaultEmptyMessage: LocalizedStringKey {
+        guard let isbn else { return "create_book.search.empty.no_isbn" }
+        return "create_book.search.empty.message \(isbn)"
     }
 
     /// Runs the search a beat after the last keystroke. Cancellation is the debounce: a new

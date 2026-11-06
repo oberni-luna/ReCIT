@@ -98,7 +98,7 @@ struct EditEditionFlowView: View {
                 switch step {
                 case .work:
                     WorkSearchView(
-                        isbn: edit?.original.isbn ?? "",
+                        isbn: edit?.original.isbn,
                         onChoose: { candidate in
                             edit?.addWork(candidate)
                             path.removeLast()

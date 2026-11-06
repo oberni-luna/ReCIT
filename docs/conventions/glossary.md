@@ -76,4 +76,4 @@ Screens chained for one goal. Steps name **Screens**. UI projects only.
 |---|---|---|---|
 | Connexion | login, sign-in | Accueil → connexion → Inventaire | first sign-in → [[adr/0008-session-login-signup-keychain]] |
 | Ajouter des livres | scan | Scanner → bilan → Ranger mes livres | scan a pile, then file it |
-| Nouveau livre | create book | Scanner → œuvre → édition | a scan inventaire.io lacks → [[features/0047-new-book-work-first]] |
+| Nouveau livre | create book | Scanner ou Recherche → œuvre → édition | a book inventaire.io lacks, from a scan or a search → [[features/0047-new-book-work-first]] |

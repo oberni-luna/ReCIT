@@ -3492,6 +3492,38 @@
         }
       }
     },
+    "create_book.isbn.invalid" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This ISBN is not valid. Check its digits."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet ISBN n’est pas valide. Vérifiez ses chiffres."
+          }
+        }
+      }
+    },
+    "create_book.isbn.placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facultatif"
+          }
+        }
+      }
+    },
     "create_book.keep_draft" : {
       "localizations" : {
         "en" : {
@@ -3728,6 +3760,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "inventaire.io ne connaît pas encore l’ISBN %@. Cherchez le titre ou l’auteur·ice : si l’œuvre y est déjà, il ne restera presque rien à saisir."
+          }
+        }
+      }
+    },
+    "create_book.search.empty.no_isbn" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for its title or its author: if the work is already on inventaire.io, there will be almost nothing left to type."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cherchez le titre ou l’auteur·ice\u202F: si l’œuvre est déjà sur inventaire.io, il ne restera presque rien à saisir."
           }
         }
       }
@@ -11305,6 +11353,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chercher sur inventaire.io"
+          }
+        }
+      }
+    },
+    "inventory.search.results.empty.add_book" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add this book"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter ce livre"
           }
         }
       }

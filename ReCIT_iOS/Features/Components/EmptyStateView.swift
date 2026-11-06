@@ -64,8 +64,14 @@ struct EmptyStateView: View {
             .fixedSize(horizontal: false, vertical: true)
 
             if let action {
-                Button(action.title, action: action.handler)
-                    .buttonStyle(.primary())
+                if let identifier = action.accessibilityIdentifier {
+                    Button(action.title, action: action.handler)
+                        .buttonStyle(.primary())
+                        .accessibilityIdentifier(identifier)
+                } else {
+                    Button(action.title, action: action.handler)
+                        .buttonStyle(.primary())
+                }
             }
         }
         .padding(.horizontal, .large)
@@ -80,13 +86,17 @@ extension EmptyStateView {
     /// handler that makes it do something.
     struct Action {
         let title: LocalizedStringKey
+        /// What a test finds the button by, when one has to.
+        let accessibilityIdentifier: String?
         let handler: () -> Void
 
         init(
             title: LocalizedStringKey,
+            accessibilityIdentifier: String? = nil,
             handler: @escaping () -> Void
         ) {
             self.title = title
+            self.accessibilityIdentifier = accessibilityIdentifier
             self.handler = handler
         }
     }

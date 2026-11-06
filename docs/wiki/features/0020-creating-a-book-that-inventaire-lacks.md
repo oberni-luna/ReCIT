@@ -4,6 +4,8 @@ Shipped on 2026-09-18. Les sept issues 0090–0096 ont été supprimées à ce c
 avec elles ; git les garde. L'issue 0097 — la même chose depuis une recherche — reste ouverte et
 n'est pas dans cette v1.
 
+> Since [0087](0087-book-creation-from-search.md), issue 0097 has shipped: Recherche opens « Nouveau livre » on a query inventaire.io finds nothing for, with an optional ISBN, and its drafts are kept by query as the scanner's are by ISBN.
+
 **Remplacé le 2026-10-25** par la [feature 0047](0047-new-book-work-first.md) : la feuille commence
 maintenant par chercher l'œuvre, et le formulaire titre-auteur décrit ci-dessous n'existe plus.
 Le reste — `autocreate`, la passe à blanc, la langue de l'ISBN, les échecs, les brouillons — vaut

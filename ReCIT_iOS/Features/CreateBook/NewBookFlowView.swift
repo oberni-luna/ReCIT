@@ -6,6 +6,10 @@
 //  search for the work first, then the screens that describe what is missing. « Nouveau livre
 //  v2 » (`712:21292`) in the Figma file; it replaces the single form of PRD 0015.
 //
+//  Recherche opens it too, on a query inventaire.io found nothing for (`NewBookOrigin`): the work
+//  search starts from that query, or from an empty field when the query was an ISBN, and the ISBN
+//  becomes a field of the edition's form.
+//
 //  A `.sheet` posed on the camera rather than a screen pushed into the flow's navigation
 //  stack: that stack belongs to the book screen, which a scanned row can already open, and the
 //  two paths must not braid. While the sheet is up the scanner accepts no barcode — not by a
@@ -39,6 +43,10 @@ struct NewBookFlowView: View {
     /// on it.
     let onKeepDraft: (NewBookDraft) -> Void
 
+    /// Where the sheet was opened from: what the work search starts on, and whether the ISBN is
+    /// typed.
+    let origin: NewBookOrigin
+
     @State private var draft: NewBookDraft
     @State private var path: [NewBookStep]
 
@@ -54,10 +62,12 @@ struct NewBookFlowView: View {
     @State private var isPublished: Bool = false
 
     init(
+        origin: NewBookOrigin,
         draft: NewBookDraft,
         onCreated: @escaping (ScannedBook) -> Void,
         onKeepDraft: @escaping (NewBookDraft) -> Void
     ) {
+        self.origin = origin
         self.onCreated = onCreated
         self.onKeepDraft = onKeepDraft
         _draft = State(initialValue: draft)
@@ -67,7 +77,8 @@ struct NewBookFlowView: View {
     var body: some View {
         NavigationStack(path: $path) {
             WorkSearchView(
-                isbn: draft.isbn,
+                isbn: origin.isbn,
+                query: origin.workQuery,
                 onChoose: choose,
                 onCreate: startNewWork
             )
@@ -87,6 +98,7 @@ struct NewBookFlowView: View {
                     NewEditionView(
                         draft: $draft,
                         failure: failure,
+                        isISBNEditable: origin.isISBNEditable,
                         onPublish: publish,
                         onClose: { dismiss() },
                         onPickCoverURL: pickCoverURL,
@@ -109,13 +121,14 @@ struct NewBookFlowView: View {
                         workUri: uri,
                         draft: $draft,
                         failure: failure,
+                        isISBNEditable: origin.isISBNEditable,
                         onPublish: create,
                         onClose: { dismiss() }
                     )
                 case .coverFromURL:
                     BookCoverURLView(
                         searchedTitle: draft.coverSearchTitle,
-                        isbn: draft.normalizedISBN
+                        isbn: draft.checkedISBN ?? ""
                     ) { jpeg, url in
                         // The address is what `resolve` fetches; the bytes fill the frame.
                         draft.coverImageData = jpeg
@@ -128,10 +141,15 @@ struct NewBookFlowView: View {
         .sheet(isPresented: $isShowingHelp) {
             BibliographicDataHelpView()
         }
-        .task {
-            // Asked once, as the sheet opens, and never blocking: the reader can describe the
-            // whole book before the answer lands, and publish whether or not it does.
-            draft.language = await creationModel.editionLanguage(isbn: draft.isbn)
+        .task(id: draft.checkedISBN) {
+            // Asked as the sheet opens, and again whenever a typed ISBN becomes another valid
+            // one — never blocking: the reader can describe the whole book before the answer
+            // lands, and publish whether or not it does.
+            guard let isbn = draft.checkedISBN else {
+                draft.language = nil
+                return
+            }
+            draft.language = await creationModel.editionLanguage(isbn: isbn)
         }
         .onDisappear {
             // Whatever took the sheet away — the close button, a swipe, a publication that

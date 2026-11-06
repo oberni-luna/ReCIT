@@ -8,7 +8,8 @@
 //
 //  The rules, all of them one sentence long:
 //
-//  - The ISBN travels normalized, as `wdt:P212`. It is the only thing the app is certain of.
+//  - The ISBN travels normalized, as `wdt:P212`, and not at all when there is none: inventaire.io
+//    validates an ISBN only when one is given.
 //  - Everything else the reader said about the edition — subtitle, publisher, date, language,
 //    format, contributors, identifiers — travels in the edition seed, each entity by its uri:
 //    the ones to create are created before this request is built.
@@ -57,7 +58,9 @@ enum ResolveRequestBuilder {
         // The catalogue's values first — publisher, date, language, format, contributors,
         // identifiers —, then what this builder decides about.
         var editionClaims: [String: [ClaimLiteral]] = draft.properties.claims
-        editionClaims[Property.isbn13] = [.string(draft.normalizedISBN)]
+        if draft.normalizedISBN.isEmpty == false {
+            editionClaims[Property.isbn13] = [.string(draft.normalizedISBN)]
+        }
         editionClaims[Property.editionTitle] = [.string(draft.trimmedTitle)]
 
         if draft.trimmedSubtitle.isEmpty == false {

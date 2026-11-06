@@ -99,6 +99,11 @@ or new work → edition form), opened from Recherche instead of the Scanner.
 
 ## Verification
 
-manual validation — not run by agent. Owed: every on-screen criterion, publishing included (never on a real account by an agent).
+PM on the simulator (iPhone 17, iOS 26.4, merged build, nothing published):
+- ✅ Recherche « zqxwvkjh plorfnu » → « Aucun résultat » with « Ajouter ce livre ».
+- ✅ « Ajouter ce livre » → « Nouveau livre » sheet, work search pre-filled with the query; « Créer l'œuvre » → « Nouvelle œuvre » form with the title.
+- Edition form's ISBN field not reached (needs an author picked).
+
+Still yours: Owed: every on-screen criterion, publishing included (never on a real account by an agent).
 
 ## Feedback

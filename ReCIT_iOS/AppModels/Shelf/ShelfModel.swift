@@ -217,26 +217,26 @@ final class ShelfModel: OptimisticMutating {
         )
     }
 
-    /// Optimistically files an item onto an étagère: the relation is mutated and saved at
+    /// Optimistically files items onto an étagère: the relation is mutated and saved at
     /// once, so the shelf card fills in before the network is touched, then the write runs
     /// in a model-owned background task and the server's post-write membership is
-    /// reconciled back in. On failure the book comes off again and the error is surfaced.
+    /// reconciled back in. On failure the books come off again and the error is surfaced.
     ///
     /// The relation declares its inverse, so appending on the shelf side moves the item
-    /// side too; a book may sit on several étagères at once. Already-filed items are a
-    /// no-op — the menu never offers them, this only guards against a double tap.
-    /// See ADR 0001 / PRD 0004.
-    func addItem(_ item: InventoryItem, to shelf: Shelf, modelContext: ModelContext) {
-        let itemId: String = item._id
-        guard shelf.items.contains(where: { $0._id == itemId }) == false else { return }
+    /// side too; a book may sit on several étagères at once. Already-filed items are
+    /// dropped — the menu never offers them, this only guards against a double tap.
+    /// One book from the menu (`addItem`), several from the v2 « Ajouter des livres ».
+    func addItems(_ items: [InventoryItem], to shelf: Shelf, modelContext: ModelContext) {
+        let newItems: [InventoryItem] = items.filter { item in !shelf.items.contains { $0._id == item._id } }
+        guard newItems.isEmpty == false else { return }
 
         membershipWrite(
             modelContext,
             action: "add-items",
             shelf: shelf,
-            item: item,
-            apply: { shelf.items.append(item) },
-            revert: { shelf.items.removeAll { $0._id == itemId } }
+            items: newItems,
+            apply: { shelf.items.append(contentsOf: newItems) },
+            revert: { shelf.items.removeAll { item in newItems.contains { $0._id == item._id } } }
         )
     }
 
@@ -257,7 +257,7 @@ final class ShelfModel: OptimisticMutating {
             modelContext,
             action: "remove-items",
             shelf: shelf,
-            item: item,
+            items: [item],
             apply: { shelf.items.removeAll { $0._id == itemId } },
             revert: { shelf.items.append(item) }
         )
@@ -275,16 +275,16 @@ final class ShelfModel: OptimisticMutating {
         _ modelContext: ModelContext,
         action: String,
         shelf: Shelf,
-        item: InventoryItem,
+        items: [InventoryItem],
         apply: () -> Void,
         revert: @escaping () -> Void
     ) {
         Self.raiseMembershipGate()
-        let itemId: String = item._id
+        let itemIds: [String] = items.map(\._id)
 
         let cycle: Task<Void, Never> = optimistic(
             modelContext,
-            subjects: [shelf, item],
+            subjects: [shelf] + items,
             apply: apply,
             revert: revert,
             request: { [weak self] in
@@ -292,7 +292,7 @@ final class ShelfModel: OptimisticMutating {
                 try await self.sendMembership(
                     action: action,
                     shelf: shelf,
-                    itemIds: [itemId],
+                    itemIds: itemIds,
                     modelContext: modelContext
                 )
             }

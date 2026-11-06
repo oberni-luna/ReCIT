@@ -10475,6 +10475,22 @@
         }
       }
     },
+    "inventory.item.private_note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What I keep to myself"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que je garde pour moi"
+          }
+        }
+      }
+    },
     "inventory.item.remove_from_inventory" : {
       "localizations" : {
         "en" : {
@@ -10552,6 +10568,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Écrire un commentaire"
+          }
+        }
+      }
+    },
+    "inventory.item.write_private_note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write a note"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrire une note"
           }
         }
       }

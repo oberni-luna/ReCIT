@@ -1,6 +1,6 @@
 ---
 issue: 38
-status: todo
+status: to-test
 wiki: [[book-and-editions]], [[architecture]], [[design-system/figma-library]]
 note: Figma — field `notes` 953:8367 (file S7IvC6GvlcUFe5IgbtvQq6)
 created: 2026-11-06
@@ -41,8 +41,27 @@ created: 2026-11-06
 
 ## Implementation
 
+Round 1 · autopilot · 2026-11-06
+
+- `Model/UserData/InventoryItemTextAttribute.swift` (new): `details` | `notes`, raw value = bulk-update attribute, `keyPath` to the `InventoryItem` property.
+- `Model/UserData/InventoryItem.swift`: `var notes: String = ""`; set from `itemDTO.notes ?? ""` at creation; `update(from:)` merges it only when the payload carries it. The init line is left as is so its SwiftLint baseline entries still match.
+- `AppModels/Inventory/ItemsDTO.swift`: `ItemDTO.notes: String?`.
+- `AppModels/Inventory/InventoryModel.swift`: `updateItemDetailsOptimistic` → `updateItemTextOptimistic(item:attribute:text:modelContext:)`, same optimistic write, revert and stale-failure guard, sent as `attribute.rawValue`.
+- `Features/Book/AutosavingTextField.swift` (new): the autosaving field lifted out of `BookMyCopySection` unchanged (1 s debounce, focus loss, `onDisappear`, background sync unless focused).
+- `Features/Book/BookMyCopySection.swift`: « Ce que j'en pense » (`.details`), then « Ce que je garde pour moi » (`.notes`), then the date and mode d'échange row; identifiers `e2e.book.details`, `e2e.book.notes`.
+- `Localizable.xcstrings`: `inventory.item.private_note` (« Ce que je garde pour moi » / "What I keep to myself"), `inventory.item.write_private_note` (« Écrire une note » / "Write a note").
+- Tests: `InventoryModelTests` (note sent as `attribute: notes` with `details` untouched, refused note reverted and reported, stale refusal keeps the newer note; the two details tests renamed), `ModelMappingTests` (`notes` decoded or nil, `update(from:)` keeps the local note when absent).
+- Build ✅ (scheme ReCIT_iOS, iPhone 17, SwiftLint plugin). Tests ✅ 22/22 on InventoryModelTests, ModelMappingTests, ModelContainerMigrationTests, OptimisticRunnerTests.
+- Note: a note emptied on inventaire.io's site may come back without `notes` in the payload, and the app would keep the old one (same as `details` today). To watch during the device pass.
+- Stale baseline entries (BookMyCopySection `type_contents_order`, two renamed `@Test`s) only shrink `.swiftlint.baseline`.
+
 ## Review
 
 ## Verification
+
+Round 1 · autopilot
+
+- ✅ Update over the previous store: the new build launched signed in on Inventaire, the store gained `ZNOTES`, 147 items kept, Commentaires intact.
+- ⚠️ Not run by agent: field order and placeholder, typing → PUT, leave and reopen, SnackBar on failure, book not owned. The simulator holds a real account (nothing typed), and input injection did not reach the app. Covered by unit tests: PUT with `attribute: notes`, revert, stale failure, merge.
 
 ## Feedback

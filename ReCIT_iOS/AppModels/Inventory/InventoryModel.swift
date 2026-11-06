@@ -222,26 +222,28 @@ final class InventoryModel: OptimisticMutating {
         )
     }
 
-    /// Optimistically sets the item's details/notes: persists locally at once,
+    /// Optimistically sets one of the item's texts: persists locally at once,
     /// pushes to the server in the background, and reverts on failure.
-    func updateItemDetailsOptimistic(
+    func updateItemTextOptimistic(
         item: InventoryItem,
-        details: String,
+        attribute: InventoryItemTextAttribute,
+        text: String,
         modelContext: ModelContext
     ) {
-        let previous: String = item.details
+        let keyPath: ReferenceWritableKeyPath<InventoryItem, String> = attribute.keyPath
+        let previous: String = item[keyPath: keyPath]
         inFlightTask = optimistic(
             modelContext,
             subjects: [item],
-            apply: { item.details = details },
+            apply: { item[keyPath: keyPath] = text },
             revert: {
                 // Autosave can queue several writes; a stale failure must not clobber a newer note.
-                if item.details == details {
-                    item.details = previous
+                if item[keyPath: keyPath] == text {
+                    item[keyPath: keyPath] = previous
                 }
             },
             request: { [weak self] in
-                let response: UpdateItemsResponseDTO? = try await self?.updateItems(ids: [item._id], attribute: "details", value: details)
+                let response: UpdateItemsResponseDTO? = try await self?.updateItems(ids: [item._id], attribute: attribute.rawValue, value: text)
                 guard response?.ok == true else { throw NetworkError.badResponse }
             }
         )

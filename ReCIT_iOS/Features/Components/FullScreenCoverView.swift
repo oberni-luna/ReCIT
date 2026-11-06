@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-/// A book's cover alone on a dark screen, fitted to the whole of it: double-tap to fill the screen
-/// and again to fit it, pinch to look closer, drag to move around a magnified cover, swipe down or
-/// « Fermer » to go back.
+/// A picture — a book's cover, a reader's or a group's photo — alone on a dark screen, fitted to
+/// the whole of it: double-tap to fill the screen and again to fit it, pinch to look closer, drag
+/// to move around a magnified picture, swipe down or « Fermer » to go back.
 struct FullScreenCoverView: View {
     @Environment(\.dismiss) var dismiss
 

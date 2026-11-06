@@ -13,7 +13,8 @@
 //  An overlay rather than anything of the bar's: a navigation bar's principal item cannot hold
 //  a 96 pt picture. The back button and « … » stay the system's, which keeps the swipe back.
 //
-//  Only the tabs take touches: the rest lets them through to the page underneath.
+//  Only the photo and the tabs take touches: the rest lets them through to the page underneath.
+//  The photo opens in the Plein écran, at rest and folded alike.
 //
 //  See PRD 0031.
 //
@@ -92,7 +93,6 @@ struct UserProfileStickyHeader: View {
     var body: some View {
         VStack(spacing: .zero) {
             identity
-                .allowsHitTesting(false)
 
             if let tab {
                 UserProfileTabPicker(
@@ -132,7 +132,12 @@ struct UserProfileStickyHeader: View {
                 .frame(height: metrics.nameHeight * folding(metrics.nameScale))
                 .padding(.top, .small)
                 .accessibilityAddTraits(.isHeader)
+                .allowsHitTesting(false)
         }
+    }
+
+    private var photoURL: URL? {
+        user.avatarURLValue.flatMap { URL(string: $0) }
     }
 
     /// The picture, or the person glyph on a grey disc when there is none: the header keeps its
@@ -141,8 +146,8 @@ struct UserProfileStickyHeader: View {
     private var avatar: some View {
         let size: CGFloat = folding(Metrics.avatar)
         Group {
-            if let image = user.avatarURLValue, let url = URL(string: image) {
-                CachedAsyncImage(url: url) { image in
+            if let photoURL {
+                CachedAsyncImage(url: photoURL) { image in
                     image
                         .resizable().scaledToFill()
                 } placeholder: {
@@ -161,6 +166,9 @@ struct UserProfileStickyHeader: View {
         .clipShape(.circle)
         .thumbnailShadow()
         .accessibilityHidden(true)
+        .enlargeablePhoto(photoURL, cornerRadius: .full)
+        .accessibilityIdentifier(AccessibilityID.photo)
+        .allowsHitTesting(photoURL != nil)
     }
 
     /// Nothing at rest — nothing is behind the header yet. Once the page passes under it, the
@@ -176,5 +184,11 @@ struct UserProfileStickyHeader: View {
             .animation(.easeOut(duration: 0.15), value: isContentUnder)
             .ignoresSafeArea(edges: .top)
             .allowsHitTesting(false)
+    }
+}
+
+private extension UserProfileStickyHeader {
+    enum AccessibilityID {
+        static let photo: String = "e2e.user.photo"
     }
 }

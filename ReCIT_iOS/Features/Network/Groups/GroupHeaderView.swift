@@ -4,7 +4,7 @@
 //
 //  The top of a group's screen — `Group Header`: its picture, its name, what it says of itself,
 //  and two facts in tags, who may come in and how many are there. Cousin of `UserHeaderView`,
-//  with the same padding and the same name style.
+//  with the same padding and the same name style. The picture opens in the Plein écran.
 //
 
 import SwiftUI
@@ -17,6 +17,11 @@ struct GroupHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: .small) {
             AvatarThumbnail(.group, imageUrl: group.pictureURL, size: .large)
+                .enlargeablePhoto(
+                    group.pictureURL.flatMap { URL(string: $0) },
+                    cornerRadius: .medium
+                )
+                .accessibilityIdentifier(AccessibilityID.photo)
 
             Text(group.name)
                 .textStyle(.content400Bold)
@@ -51,5 +56,11 @@ struct GroupHeaderView: View {
         }
         .padding(.vertical, .small)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private extension GroupHeaderView {
+    enum AccessibilityID {
+        static let photo: String = "e2e.group.photo"
     }
 }

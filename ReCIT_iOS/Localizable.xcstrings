@@ -2255,6 +2255,22 @@
         }
       }
     },
+    "photo.action.enlarge" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enlarge photo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrandir la photo"
+          }
+        }
+      }
+    },
     "create_book.author_field" : {
       "localizations" : {
         "en" : {

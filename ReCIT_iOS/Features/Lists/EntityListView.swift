@@ -100,6 +100,7 @@ struct EntityListView: View {
             }
             .applyListBackground(.backgroundGrouped)
         }
+        .hidesTabBarWhenPushed(on: path)
     }
 }
 

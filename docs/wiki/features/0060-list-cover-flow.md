@@ -4,6 +4,9 @@ Shipped on 2026-10-29. PRD 0029 and issues 0141 → 0143, deleted once this writ
 decision log is summarised below. Mockup: the `Liste détails` section of the Figma file (`843:12721`), its
 `Spec · Liste · Cover flow` panel (`848:500`).
 
+> Since [0088](0088-tab-bar-hidden-on-pushed-screens.md), the tab bar hides on every screen pushed in Listes, a friend's
+> list included, set once on the tab's `NavigationStack`; `ListCoverFlowScreen` no longer hides it itself.
+
 ## What it does
 
 A list of works or of authors no longer opens on a `List` of rows. It opens in two halves.

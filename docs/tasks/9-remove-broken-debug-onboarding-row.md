@@ -1,6 +1,6 @@
 ---
 issue: 9
-status: todo
+status: to-test
 wiki: [[testing]]
 note: migrated from docs/issues/0089 — « Ouvrir l'onboarding scan » presents nothing
 created: 2026-11-06
@@ -35,8 +35,17 @@ created: 2026-11-06
 
 ## Implementation
 
+- `ReCIT_iOS/Features/Profile/ProfileDebugSection.swift`: removed the « Ouvrir l'onboarding scan » button and its `e2e.debug.scanOnboarding` identifier, `isPresentingWelcome`, `scanWasChosen`, the `fullScreenCover` presenting `OnboardingWelcomeView`, `openScannerIfChosen()` and the comments describing them. « the two rows above » → « the row above » in the kept comment of « Rejouer l'accueil en situation ».
+- Kept: `sortFlow` (still used by the auto-sort cover), `OnboardingWelcomeView` (still used by `OnboardingWelcomeModifier`).
+- `ReCIT_iOS/.swiftlint.baseline`: stale `accessibility_id_constant` entry for the deleted identifier removed (baseline shrinks by one).
+- No catalogue key to remove: debug rows are not translated.
+- Acceptance grep returns nothing.
+- Proof: Debug build ✅ (SwiftLint in the build).
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent (autopilot: no UI-driving tool in the implementer). Owed: Debug section rows, « Ouvrir l'onboarding auto-sort », « Rejouer l'accueil en situation » → « Scanner mes livres ».
 
 ## Feedback

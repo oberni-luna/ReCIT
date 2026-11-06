@@ -46,6 +46,9 @@ created: 2026-11-06
 
 ## Verification
 
-manual validation — not run by agent (autopilot: no UI-driving tool in the implementer). Owed: Debug section rows, « Ouvrir l'onboarding auto-sort », « Rejouer l'accueil en situation » → « Scanner mes livres ».
+PM on the simulator (iPhone 17, iOS 26.4, merged build):
+- ✅ Profil → Debug shows « Ouvrir l'onboarding auto-sort », « Rejouer l'accueil en situation », « Réafficher les astuces » and the state line; no « Ouvrir l'onboarding scan ».
+
+Still yours: « Ouvrir l'onboarding auto-sort » opens the bilan; « Rejouer l'accueil en situation » → « Scanner mes livres » opens the scanner.
 
 ## Feedback

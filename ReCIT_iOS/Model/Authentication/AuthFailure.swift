@@ -18,8 +18,9 @@
 //
 //  Only three failures are told apart on screen, and deliberately: wrong credentials, which the
 //  user fixes by typing again, an unreachable server, which they fix by finding a network, and
-//  too many attempts, which they fix by waiting. Everything else is one sentence — a user cannot act on the difference between a 500 and a
-//  502, and pretending otherwise means writing copy for statuses nobody has ever seen.
+//  too many attempts, which they fix by waiting. Everything else is one sentence — a user cannot
+//  act on the difference between a 500 and a 502, and pretending otherwise means writing copy for
+//  statuses nobody has ever seen.
 //
 //  Signing up adds five more, and they are the exception that proves that rule: each one *is*
 //  actionable, and each one belongs to exactly one of the three fields. The sign-in screen shows
@@ -96,18 +97,17 @@ enum AuthFailure: Error, Equatable, Sendable {
     static func classify(status: Int, serverMessage: String?) -> AuthFailure? {
         guard !(200..<300).contains(status) else { return nil }
 
+        switch status {
         // 401 is what inventaire.io answers a wrong password; 403 covers an account the server
         // will not open a session for. Both are "the credentials you gave are not usable",
         // which is the one thing the user can do something about.
-        if status == 401 || status == 403 {
+        case 401, 403:
             return .invalidCredentials
-        }
-
-        if status == 429 {
+        case 429:
             return .rateLimited
+        default:
+            return .server(status: status, serverMessage: serverMessage)
         }
-
-        return .server(status: status, serverMessage: serverMessage)
     }
 
     /// The failure a **sign-up** status stands for, or `nil` when the status is a success.

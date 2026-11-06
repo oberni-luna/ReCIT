@@ -1,6 +1,6 @@
 ---
 issue: 7
-status: to-test
+status: to-close
 wiki: [[architecture]], [[testing]]
 note: migrated from docs/issues/0066 — a 429 on sign-in reads as a generic failure
 created: 2026-11-06
@@ -48,6 +48,15 @@ created: 2026-11-06
 - Proof: build ✅ · `AuthFailureTests` 19/19 ✅.
 
 ## Review
+
+### Round `validation` — 2026-11-06
+
+Scope: `origin/main..wa/7-fix-rate-limited-sign-in-message`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `AuthFailure.swift:21` — [style] edited header paragraph not wrapped like the rest → **fixed**.
+- 🟡 `AuthFailure.swift:102` — [elegance] chain of `if status == …` returns → **fixed**: one `switch status` (`401, 403` / `429` / `default`).
+- Round 2: ✅ review clean. Build ✅ · `AuthFailureTests` 19/19.
+- Wiki: `docs/wiki/features/0083-rate-limited-sign-in-message.md`, a line in `claude.md` « Shipped features », `architecture.md` (Sessions), `account-and-profile.md`, a pointer in 0012.
 
 ## Verification
 

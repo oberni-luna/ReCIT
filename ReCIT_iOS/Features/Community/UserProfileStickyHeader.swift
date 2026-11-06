@@ -166,7 +166,7 @@ struct UserProfileStickyHeader: View {
         .clipShape(.circle)
         .thumbnailShadow()
         .accessibilityHidden(true)
-        .enlargeablePhoto(photoURL, cornerRadius: .full)
+        .enlargeablePhoto(photoURL)
         .accessibilityIdentifier(AccessibilityID.photo)
         .allowsHitTesting(photoURL != nil)
     }

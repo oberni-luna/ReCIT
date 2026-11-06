@@ -25,10 +25,11 @@ created: 2026-11-06
 
 ## Acceptance criteria
 
-- Profil d'un ami with a photo, header at rest: tap the photo → it zooms out to the Plein écran, black backdrop, « Fermer » top right.
+- Profil d'un ami with a photo: the photo shows in the header, at rest and folded.
+- Same profile, header at rest: tap the photo → the Plein écran slides up, black backdrop, « Fermer » top right. No zoom: over `TabPager`'s UIKit pages, a zoom source hides the photo.
 - Same profile, scrolled until the header folds: tap the 48 pt photo in the bar → the Plein écran opens from there.
 - In the Plein écran: double-tap fills then fits; pinch zooms; swipe down or « Fermer » goes back to the profile, header in the state it was.
-- Groupe screen with a photo: tap the header's photo → the Plein écran opens.
+- Groupe screen with a photo: tap the header's photo → it zooms out to the Plein écran.
 - Friend or group without a photo: tapping the grey disc does nothing; VoiceOver reads no button there.
 - Réseau → Amis and Groupes lists: tapping a row's photo still opens the profile or the group, never the Plein écran.
 - VoiceOver on a header photo reads « Agrandir la photo », button.
@@ -54,8 +55,25 @@ Round 1 · autopilot · 2026-11-06
 
 ## Verification
 
+Round 2 · feedback · 2026-11-06
+
+- ✅ agent, simulator iPhone 17 (read only): OlivierB's profile before the fix — no photo; with `matchedTransitionSource` removed — photo back. After the fix: photo shown at rest, tap → Plein écran, « Fermer » back.
+- ⚠️ Not run: folded header, Groupe header zoom, VoiceOver. Yours.
+
 Round 1 · autopilot
 
 - ⚠️ Not run by agent: no UI-automation tool reached the simulator. All seven criteria are yours; check the folded photo first.
 
 ## Feedback
+
+Round 2 · 2026-11-06
+
+- Asked: « il y a un bug on ne voit plus la photo de l'ami.e quand on ouvre l'écran de détail d'un ami » (screenshot: PaulineM, empty space above the name).
+- Triage: defect. Cause: `matchedTransitionSource` on the avatar, laid over `TabPager`'s `UIPageViewController`, hides it (proved by removing it alone). Criteria adjusted: the friend's photo opens without the zoom.
+- Changes:
+  - `EnlargeablePhotoModifier`: `cornerRadius` → optional `zoomCornerRadius` (`enlargeablePhoto(_:zoomingFrom:)`, default `nil`); `nil` presents `FullScreenCoverView` without a transition source.
+  - `UserProfileStickyHeader`: `.enlargeablePhoto(photoURL)` — no zoom.
+  - `GroupHeaderView`: `zoomingFrom: .medium` — zoom kept.
+  - `inline`, and past micro-fix bounds (3 files, ~35 lines): judge harder at /wa-validate.
+- Review: deferred → /wa-validate. Verify: see Verification round 2.
+- Rule captured: none.

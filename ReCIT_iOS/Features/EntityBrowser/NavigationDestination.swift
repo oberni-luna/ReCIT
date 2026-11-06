@@ -19,7 +19,9 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// One list, by id. `focusURI` is the element it opens on, when pushed from a book screen's
     /// « Dans les listes »; `nil` opens it on its first element.
     case entityList(id: String, focusURI: String? = nil)
-    case shelf(id: String)
+    /// One étagère, by id. `layout` picks its screen: the first one, or the v2 with its two
+    /// tabs, reached from the Inventaire's « Étagères (v2) » section while both are tried.
+    case shelf(id: String, layout: ShelfScreenLayout = .list)
     /// Every copy on this device that answers a search — mine and my friends' — uncapped.
     /// Where « Tout voir » leads from the merged search's local section (issue 0075). The
     /// query is the whole payload: the search field stays on the screen below, so the
@@ -78,8 +80,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return "allTransactions"
         case let .entityList(id, focusURI):
             return focusURI.map { "entityList:\(id):\($0)" } ?? "entityList:\(id)"
-        case .shelf(let id):
-            return "shelf:\(id)"
+        case let .shelf(id, layout):
+            return "shelf:\(id):\(layout)"
         case .localSearchResults(let query):
             return "localSearchResults:\(query)"
         case .friendsLatestBooks:
@@ -178,8 +180,8 @@ extension NavigationDestination {
           AllTransactionsView()
       case let .entityList(id, focusURI):
           EntityListDetail(listId: id, focusURI: focusURI, path: path)
-      case .shelf(let id):
-          ShelfDetailView(shelfId: id, path: path)
+      case let .shelf(id, layout):
+          layout.screen(shelfId: id, path: path)
       case .localSearchResults(let query):
           SearchAllLocalView(query: query)
       case .friendsLatestBooks:

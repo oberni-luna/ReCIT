@@ -2,6 +2,24 @@
 
 Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ; Figma en est le reflet.
 
+- **Proposition du 2026-11-06 — `Étagère détails · V2`** (`973:8195`, page `Inventaire`, en bas de la page, clair
+  seul) : l'écran d'une étagère reprend celui d'une liste, deux onglets « Livres • N » | « Présentation » (`Profile / Tabs`,
+  libellés par les propriétés `Inventaire` et `Listes`, `tab/Échanges` masqué). `E1 · Étagère · Onglet Livres`
+  (`973:8227`) : les livres en liste encartée, `Cell / Book` sans propriétaire, tag « Inventorié » sans glyphe ; pas de barre
+  d'onglets, « Ajouter des livres » est un `Button / Large` Primary épinglé dans la safe area comme l'« Enregistrer »
+  des formulaires (`barre fixe (safeAreaInset)` + `Action Bar / Attached`, onglet Livres seulement). `E2 · Étagère · Onglet Présentation` (`973:8406`, clone de `B2`) : description, Visible par,
+  Créée le, Modifiée le. `E3 · Ajouter des livres · Rien de coché` (`973:8503`, clone de `L1`, la feuille posée sur
+  `E1` voilée de noir à 20 %) : un `Chrome / Search Field` « Titre ou auteur·ice » sous la barre, puis mes livres absents de l'étagère, un `Cell / Book · Checkable` chacun, `Button / Large`
+  Primary Disabled « Ajouter 0 livre » épinglé en bas. `E3b · Ajouter des livres · Recherche` (`978:8852`, `Chrome / Search Field` Typed « adler » sous la barre de la feuille, un livre filtré, la case cochée ailleurs reste comptée), `E3c · … · Aucun résultat` (`978:9100`, `Empty State` Centered Secondary, loupe), `E4 · … · Deux livres cochés` (`973:8827`), `E5 · Étagère · Après
+  l'ajout` (`973:9141`, « Livres • 5 »). Panneau `Spec · Étagère détails · V2` (`973:9313`). Prototype : le bouton
+  d'ajout de E1 et de E5 → E3, la liste de E3 → E4, le bouton de E4 → E5, la croix → E1, les onglets E1 ↔ E2. **Un composant
+  nouveau**, `Cell / Book · Checkable` (`972:684`, `Selected` ∈ {On, Off}, sur `Screens · Components`) : la marque de
+  `Form / Choice Row` puis une instance `Cell / Book` exposée. Même jour, seconde passe : barre d'onglets retirée
+  de E1, E2 et E5, carte d'ajout remplacée par le bouton épinglé. **Divergence** : le code garde la barre d'onglets
+  et la carte `Form / Action Row` en fin de liste ; la maquette fait foi pour la suite.
+  **Implémentée le même jour** (`Shelves/V2/`, derrière la section « Étagères (v2) » de l'Inventaire). Vu en passant :
+  les `Profile / Tabs` de `B1` / `B2` (page `Liste`) montrent un troisième onglet « Échanges • 5 », hérité de l'ajout
+  de `tab/Échanges` au composant — à masquer.
 - **Proposition du 2026-11-05 — `Fiche livre · Dans les listes`** (seconde rangée de la section
   `Fiche livre · Données bibliographiques`, `744:2382`, page `Inventaire`, clair seul) : la fiche livre gagne une
   section « Dans les listes », les listes d'œuvres qui contiennent l'œuvre de l'édition — les miennes par nom, puis
@@ -1074,7 +1092,7 @@ retoucher un seul nœud.
 | `Tokens` | `0:1` | 6 sections, 9 planches de tokens |
 | `Components` | `20:2` | Les 3 composants qui **miroitent le package** design system |
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
-| `Inventaire` | `737:22197` | `Étagères` (`734:22155`), `Étagère vide · Première étape` (`734:22157`), `Ranger mes livres` (`97:3755`), `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Inventaire` (`495:13490`), `Œuvre & édition` (`351:9412`), `Fiche livre · Données bibliographiques` (`744:2382`, proposition, avec `Dans les listes` en seconde rangée), `Modifier l'édition · Toutes les données` (`750:2508`, proposition), `Doublons · ISBN et signalement` (`767:4172`), `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, proposition), `Éditions · Filtre par langue` (`831:7654`, proposition) |
+| `Inventaire` | `737:22197` | `Étagères` (`734:22155`), `Étagère vide · Première étape` (`734:22157`), `Ranger mes livres` (`97:3755`), `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Inventaire` (`495:13490`), `Œuvre & édition` (`351:9412`), `Fiche livre · Données bibliographiques` (`744:2382`, proposition, avec `Dans les listes` en seconde rangée), `Modifier l'édition · Toutes les données` (`750:2508`, proposition), `Doublons · ISBN et signalement` (`767:4172`), `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, proposition), `Éditions · Filtre par langue` (`831:7654`, proposition), `Étagère détails · V2` (`973:8195`, proposition) |
 | `Liste` | `737:22198` | `Listes` (`735:22155`), `Listes · Aucune liste` (`735:22157`), `Liste ouverte, vide` (`735:22159`) |
 | `Réseau` | `737:22199` | `Réseau · Onglet & Groupes` (`499:14069`), `Réseau · Ajouter des amis lecteurs` (`407:10422`), `Synchronisation · Amis` (`735:22163`), `Réseau · Graphe` (`512:15486`) |
 | `Profil` | `737:22200` | `Profil` (`588:17841`), `Transactions` (`735:22166`) |
@@ -1124,6 +1142,7 @@ la palette de l'app, elle se recolore avec l'OS.
 | `Section Header` | `28:164` | — | `Label#28:0` | `Shelves/ShelfSectionHeader.swift` depuis l'issue 0010 ; ailleurs, des en-têtes de `Section` littéraux identiques. **Aucune variante avec action** — voir D35 |
 | `Separator` | `47:193` | — | — | Le filet entre rangs d'un groupe encarté |
 | `Cell / Book` | `29:154` | — | `Title#29:0`, `Subtitle#29:1`, `Show subtitle#29:2`, `Authors#29:3`, `Owner#29:4`, `Show owner#29:5`, `Show divider#29:6` | `Inventory/InventoryCell.swift` |
+| `Cell / Book · Checkable` | `972:684` | Selected ∈ {On, Off} | — (instance `Cell / Book` exposée) | `Shelves/V2/ShelfAddBookRow.swift` — la marque de `Form / Choice Row`, 12 pt, puis le livre ; 361 de large |
 | `Cell / Entity` | `31:188` | Type ∈ {Work, Author, Item} | `Title#31:15`, `Subtitle#31:16`, `Show subtitle#31:17`, `Owner#31:18`, `Show owner#31:19` | `Search/SearchResultCell.swift` **et** `Book/OtherEditionsCell.swift` |
 | `Cell / Transaction` | `30:162` | — | `Title#30:0`, `Description#30:1`, `Unread#30:2` | `Transactions/TransactionCellView.swift` |
 | `Cell / User` | `30:179` | — | `Username#30:3`, `Item count#30:4` | `Community/UserCellView.swift` |

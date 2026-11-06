@@ -1,6 +1,6 @@
 ---
 issue: 44
-status: todo
+status: to-test
 wiki: [[network]], [[book-and-editions]]
 note: les images des auteurs aussi doivent pouvoir être ouvertes en full screen. Et on va en profiter pour changer le background des images en full screen pour un Apple material regular.
 created: 2026-11-06
@@ -43,8 +43,17 @@ created: 2026-11-06
 
 ## Implementation
 
+- `ReCIT_iOS/Features/Components/FullScreenCoverView.swift`: backdrop `.black.opacity(backdropOpacity)` → `Rectangle().fill(.regularMaterial).opacity(backdropOpacity).ignoresSafeArea()`; fade-in `easeOut(0.3)` and 0.2 s fade-out kept; `.presentationBackground(.clear)` kept; forced `.environment(\.colorScheme, .dark)` removed — the Plein écran follows the appearance. « Fermer » (`glassButtonStyle`) adapts on its own.
+- Every caller gets the material with no call-site change: book cover (`EntityImageView`, zoom), friend's photo (`UserProfileStickyHeader`, slide-up), group's photo (`GroupHeaderView`, zoom).
+- `ReCIT_iOS/Features/EntityBrowser/Author/AuthorDetailView.swift`: the round `CellThumbnail` gets `.enlargeablePhoto(URL(string: image), opening: .zoom(from: .full))` and identifier `e2e.author.photo`. No photo → nothing shown, nothing to press.
+- `EnlargeablePhotoModifier.swift`: doc comment only. No new string (reuses `photo.action.enlarge`).
+- Glossary « Plein écran » still reads "on black": proposed change in the run report, not written.
+- Proof: build ✅ (SwiftLint in the build).
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent. Owed: zoom out of / back into the author circle; material in light and dark, iOS 26 and iOS 18; screen underneath blurred, never plain black; author row on the Fiche livre still opens the author.
 
 ## Feedback

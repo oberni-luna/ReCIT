@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// A reader's or a group's photo that opens in the Plein écran on a tap. Without a photo, the
-/// view is left as it is: nothing to open, nothing for VoiceOver to press.
+/// A reader's, a group's or an author's photo that opens in the Plein écran on a tap. Without a
+/// photo, the view is left as it is: nothing to open, nothing for VoiceOver to press.
 struct EnlargeablePhotoModifier: ViewModifier {
     /// How the Plein écran comes on screen.
     enum Opening {

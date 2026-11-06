@@ -46,6 +46,11 @@ struct AuthorDetailView: View {
                     VStack(alignment: .leading, spacing: .small) {
                         if let image = author.image {
                             CellThumbnail(imageUrl: image, cornerRadius: .full, size: .large)
+                                .enlargeablePhoto(
+                                    URL(string: image),
+                                    opening: .zoom(from: .full)
+                                )
+                                .accessibilityIdentifier(AccessibilityID.photo)
                         }
                         Text(author.name)
                             .textStyle(.content400Bold)
@@ -133,6 +138,12 @@ struct AuthorDetailView: View {
                 state = .error(error: error)
             }
         }
+    }
+}
+
+private extension AuthorDetailView {
+    enum AccessibilityID {
+        static let photo: String = "e2e.author.photo"
     }
 }
 

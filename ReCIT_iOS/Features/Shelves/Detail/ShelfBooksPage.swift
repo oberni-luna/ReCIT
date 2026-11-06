@@ -4,12 +4,11 @@
 //
 //  Created by Olivier Berni on 06/11/2026.
 //
-//  An étagère's « Livres » page in its v2 screen: its books in an inset grouped list
-//  (`DesignSystem.FormList`), newest first, each opening its book screen; on my own étagère a
-//  swipe takes a book off it, as on the first screen (`ShelfDetailView`), and « Ajouter des
-//  livres » is pinned at the page's foot as a form's « Enregistrer » is (`formActionBar`), so it
-//  leaves with the page and never stands under « Présentation ». One page of
-//  `ShelfDetailV2View`'s pager.
+//  An étagère's « Livres » page: its books in an inset grouped list (`DesignSystem.FormList`),
+//  newest first, each opening its book screen; on my own étagère a swipe takes a book off it, and
+//  « Ajouter des livres » is pinned at the page's foot as a form's « Enregistrer » is
+//  (`formActionBar`), so it leaves with the page and never stands under « Présentation ». One
+//  page of `ShelfDetailView`'s pager.
 //
 
 import SwiftData
@@ -60,7 +59,7 @@ struct ShelfBooksPage: View {
 
 private extension ShelfBooksPage {
     enum AccessibilityID {
-        static let addBooks: String = "e2e.shelfV2.addBooks"
+        static let addBooks: String = "e2e.shelf.addBooks"
     }
 }
 

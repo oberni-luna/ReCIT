@@ -4,9 +4,9 @@
 //
 //  Created by Olivier Berni on 06/11/2026.
 //
-//  The store the v2 étagère screens are previewed on: one étagère of mine holding two books,
-//  and two more books of mine not on it, with the models those screens read from the
-//  environment.
+//  The store an étagère's screen and its parts are previewed on: one étagère of mine holding
+//  two books, and two more books of mine not on it, with the models those screens read from
+//  the environment.
 //
 
 import SwiftData

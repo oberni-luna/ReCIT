@@ -16,7 +16,7 @@ it fades out and back in with the push and the pop.
   swipe changes nothing.
 - My lists keep « Ajouter un livre » at the bottom, in the bar's place. A friend's list, which kept the tab bar until
   now, hides it too.
-- Inventaire and Recherche are unchanged: they keep the tab bar on every screen. The rule is per tab, so a friend's
+- Inventaire and Recherche are unchanged: they keep the tab bar on every screen. *Amended by [0089](0089-tabbed-shelf-screen.md): the Inventaire now hides it too; Recherche alone keeps it.* The rule is per tab, so a friend's
   profile reached from Recherche keeps it, and a list opened from the Fiche livre's « Dans les listes »
   ([0079](0079-the-lists-a-book-is-in.md)) in Inventaire or Recherche keeps it too. On my list there, « Ajouter un
   livre » sits above the tab bar.

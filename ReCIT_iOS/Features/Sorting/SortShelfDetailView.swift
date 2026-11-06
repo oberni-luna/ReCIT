@@ -12,10 +12,8 @@
 //
 //  **Swiping takes a book off the étagère and nothing more.** It records a move into « à
 //  ranger » — no server call, no inventory deletion — so the book reappears among the books to
-//  file and the recap follows. The action is neither red nor destructive, for the reason
-//  `ShelfDetailView` already states: nothing is deleted, the copy stays in the inventory and on
-//  every other étagère, and red would teach the user to fear an action that costs one tap to
-//  undo.
+//  file and the recap follows. It is red as on an étagère's own screen (`ShelfBookRow`), though
+//  nothing is deleted: the copy stays in the inventory and on every other étagère.
 //
 //  It renders from the session's projection, so it is reactive without SwiftData: the app-scoped
 //  model is `@Observable`, and a screen pushed over the surface reads the same derivation the

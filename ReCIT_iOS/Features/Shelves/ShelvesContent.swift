@@ -95,9 +95,6 @@ struct ShelvesContent: View {
                     }
                 } else {
                     shelvesCarousel(cardWidth: cardWidth)
-
-                    ShelvesV2Section(shelves: shelves, path: $path)
-                        .padding(.top, .large)
                 }
 
                 ShelfSectionHeader(title: String(localized: "shelves.all_books_header \(myItems.count)"))

@@ -5,7 +5,7 @@
 //  Created by Olivier Berni on 06/11/2026.
 //
 //  One book on an étagère's « Livres » page: the inventory's own cell, opening its book screen,
-//  and on my own étagère a swipe taking it off, as on the first screen (`ShelfDetailView`).
+//  and on my own étagère a swipe taking it off (PRD 0004).
 //
 //  Books are pushed through the path rather than a `NavigationLink`: the page lives in a hosting
 //  controller of its own, as a reader's Inventaire tab does (`UserInventoryTab`).
@@ -45,8 +45,9 @@ struct ShelfBookRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(AccessibilityID.book)
-        // As on the first screen: nothing is deleted — the copy stays in the inventory and on
-        // every other étagère — and the label names the étagère. Mine only.
+        // Nothing is deleted: the copy stays in the inventory and on every other étagère, and
+        // the label names the étagère. Tinted red by hand: the app's tint wins over the role.
+        // Mine only.
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             if isMine {
                 Button(
@@ -64,7 +65,7 @@ struct ShelfBookRow: View {
 
 private extension ShelfBookRow {
     enum AccessibilityID {
-        static let book: String = "e2e.shelfV2.book"
+        static let book: String = "e2e.shelf.book"
     }
 }
 

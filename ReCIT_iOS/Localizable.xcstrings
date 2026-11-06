@@ -438,7 +438,7 @@
       }
     },
     "shelf.tab.books %lld" : {
-      "comment" : "Tab of an étagère's v2 screen, before the number of books it holds.",
+      "comment" : "Tab of an étagère's screen, before the number of books it holds.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -474,7 +474,7 @@
       }
     },
     "shelf.tab.presentation" : {
-      "comment" : "Tab of an étagère's v2 screen that shows its description and what it is.",
+      "comment" : "Tab of an étagère's screen that shows its description and what it is.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -492,7 +492,7 @@
       }
     },
     "shelf.tabs" : {
-      "comment" : "VoiceOver label of the tabs of an étagère's v2 screen.",
+      "comment" : "VoiceOver label of the tabs of an étagère's screen.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -505,66 +505,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pages de l'étagère"
-          }
-        }
-      }
-    },
-    "shelves.v2.count %lld" : {
-      "comment" : "Under an étagère's name in the Inventaire's v2 section.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld book"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld books"
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livre"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld livres"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "shelves.v2.header" : {
-      "comment" : "Header of the Inventaire's section that opens the v2 étagère screen.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Shelves (v2)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Étagères (v2)"
           }
         }
       }

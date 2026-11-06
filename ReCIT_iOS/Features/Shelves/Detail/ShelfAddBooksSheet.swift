@@ -144,8 +144,8 @@ struct ShelfAddBooksSheet: View {
 
 private extension ShelfAddBooksSheet {
     enum AccessibilityID {
-        static let submit: String = "e2e.shelfV2.addBooks.submit"
-        static let close: String = "e2e.shelfV2.addBooks.close"
+        static let submit: String = "e2e.shelf.addBooks.submit"
+        static let close: String = "e2e.shelf.addBooks.close"
     }
 }
 

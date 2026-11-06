@@ -1,25 +1,25 @@
 //
-//  ShelfDetailV2View.swift
+//  ShelfDetailView.swift
 //  ReCIT_iOS
 //
 //  Created by Olivier Berni on 06/11/2026.
 //
-//  The v2 of an étagère's screen, tried side by side with the first (`ShelfDetailView`) from
-//  the Inventaire's « Étagères (v2) » section. Built as a list's screen is
-//  (`ListCoverFlowScreen`): two pages in a `TabPager`, turned by a swipe or by their tab laid
-//  under the navigation bar — « Livres • 12 », the books in an inset grouped list over a pinned
-//  « Ajouter des livres » (`ShelfBooksPage`), and « Présentation », the description and what the
-//  étagère is (`ShelfPresentationPage`).
+//  An étagère's screen, opened by pressing its label in my carousel or in a friend's. Built as a
+//  list's screen is (`ListCoverFlowScreen`): two pages in a `TabPager`, turned by a swipe or by
+//  their tab laid under the navigation bar — « Livres • 12 », the books in an inset grouped list
+//  over a pinned « Ajouter des livres » (`ShelfBooksPage`), and « Présentation », the description
+//  and what the étagère is (`ShelfPresentationPage`).
 //
-//  Editing stays behind the navigation bar's pencil, and a deletion from the form pops the
-//  screen once the sheet has gone, as on the first screen. A friend's étagère is read-only:
-//  no pencil, no swipe, no « Ajouter des livres ». Derived from the shelf's owner.
+//  The étagère is edited behind the navigation bar's pencil (PRD 0003), and a deletion from the
+//  form pops the screen once the sheet has gone (issue 0021). A friend's étagère is read-only:
+//  no pencil, no swipe, no « Ajouter des livres » — absent rather than greyed (issue 0093).
+//  Derived from the shelf's owner.
 //
 
 import SwiftData
 import SwiftUI
 
-struct ShelfDetailV2View: View {
+struct ShelfDetailView: View {
     let shelfId: String
 
     @Query private var shelves: [Shelf]
@@ -112,9 +112,9 @@ struct ShelfDetailV2View: View {
         .toolbar {
             if isMine {
                 ToolbarItem(placement: .primaryAction) {
+                    // No identifier: the e2e scenario finds it by its « Modifier » label, as the list screen's pencil.
                     Button("action.edit", systemImage: "pencil") { isEditing = true }
                         .labelStyle(.titleAndIcon)
-                        .accessibilityIdentifier(AccessibilityID.edit)
                 }
             }
         }
@@ -132,15 +132,9 @@ struct ShelfDetailV2View: View {
     }
 }
 
-private extension ShelfDetailV2View {
-    enum AccessibilityID {
-        static let edit: String = "e2e.shelfV2.edit"
-    }
-}
-
 #Preview(traits: .modifier(ShelfPreviewStore())) {
     @Previewable @State var path: NavigationPath = .init()
     NavigationStack {
-        ShelfDetailV2View(shelfId: ShelfPreviewStore.shelfId, path: $path)
+        ShelfDetailView(shelfId: ShelfPreviewStore.shelfId, path: $path)
     }
 }

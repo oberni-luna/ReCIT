@@ -17,7 +17,7 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   `Form / Choice Row` puis une instance `Cell / Book` exposée. Même jour, seconde passe : barre d'onglets retirée
   de E1, E2 et E5, carte d'ajout remplacée par le bouton épinglé. **Divergence** : le code garde la barre d'onglets
   et la carte `Form / Action Row` en fin de liste ; la maquette fait foi pour la suite.
-  **Implémentée le même jour** (`Shelves/V2/`, derrière la section « Étagères (v2) » de l'Inventaire). Vu en passant :
+  **Implémentée le même jour** ([feature 0089](../features/0089-tabbed-shelf-screen.md), `Shelves/Detail/`) : d'abord derrière une section « Étagères (v2) » de l'Inventaire, elle a ensuite remplacé l'ancien écran. Titre de la feuille : « Ajouter à « <étagère> » » (E3 → E4). Vu en passant :
   les `Profile / Tabs` de `B1` / `B2` (page `Liste`) montrent un troisième onglet « Échanges • 5 », hérité de l'ajout
   de `tab/Échanges` au composant — à masquer.
 - **Proposition du 2026-11-05 — `Fiche livre · Dans les listes`** (seconde rangée de la section

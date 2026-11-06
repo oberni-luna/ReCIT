@@ -1,6 +1,6 @@
 ---
 issue: 51
-status: to-test
+status: done
 wiki: [[features/0001-shelf-carousel-and-creation]], [[features/0019-a-friends-shared-shelves]], [[features/0073-a-lists-presentation-tab]], [[features/0075-lens-tabs-and-a-lists-pager]], [[design-system/figma-library]]
 note: Écran étagère v2, maquetté dans Figma (section « Étagère détails · V2 », 973:8195) ; un premier jet du code est déjà sur cette branche.
 created: 2026-11-06
@@ -58,6 +58,18 @@ Round 1 — 2026-11-06. Base `main`; the first cut (routing, « Étagères (v2) 
 - `project.pbxproj` shows modified in the checkout (Xcode reordering its SwiftLint plugin dependencies); not part of this task, left out of the commit.
 
 ## Review
+
+Round 1 — 2026-11-06, after the merge of PR #52 (it skipped `/wa-validate`). 13 findings, all fixed on `wa/51-review-and-docs`:
+
+- 🟠 correctness — per-destination `.toolbar(.hidden, for: .tabBar)` was the route 0088 rejected (bar snapping away, back on the Fiche livre). User chose the maquette: `ShelvesView` gets `hidesTabBarWhenPushed(on:)`, every push from Inventaire hides the bar; 0088 amended.
+- 🟡 correctness — batch revert skipped when one book left the store: revert by captured ids, only the étagère as subject.
+- 🟡 correctness — no book at all read « Tous vos livres sont déjà… »: new empty state « Tu n'as pas encore de livre ».
+- 🟡 correctness — refusal test now checks the SnackBar (`reporter.lastFailure`).
+- 🟡 structure — `infoRow(label:)` shared in `WithLabel.swift`.
+- 🟡 elegance — `addItem` wrapper deleted, callers use `addItems([item], …)`; revert over a `Set` of ids.
+- 🟡 style — property order, accessibility ids, sub-views as structs (`ShelfBookRow`), `.contentShape(.rect)`, `Shelf.mock`, « tu » in the new strings.
+
+Same round, user decisions: the sheet's title is « Ajouter à « <étagère> » »; the tabbed screen replaces the old one (« Étagères (v2) » section, `ShelfScreenLayout` and the old `ShelfDetailView` removed, files in `Features/Shelves/Detail/`). Build green, `ShelfModelAddItemsTests` + `ShelfModelTests` + `FriendShelvesLifecycleTests` green, SwiftLint 0. Not seen on the simulator, e2e not run.
 
 ## Verification
 

@@ -39,7 +39,7 @@ struct ShelfAddBookRow: View {
 
 private extension ShelfAddBookRow {
     enum AccessibilityID {
-        static let row: String = "e2e.shelfV2.addBooks.row"
+        static let row: String = "e2e.shelf.addBooks.row"
     }
 }
 

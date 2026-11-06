@@ -1,6 +1,6 @@
 ---
 issue: 44
-status: to-test
+status: to-close
 wiki: [[network]], [[book-and-editions]]
 note: les images des auteurs aussi doivent pouvoir être ouvertes en full screen. Et on va en profiter pour changer le background des images en full screen pour un Apple material regular.
 created: 2026-11-06
@@ -52,6 +52,14 @@ created: 2026-11-06
 - Runtime fix (autopilot, PM check): the author photo was invisible at rest. Cause: `.zoom(from: .full)` handed `matchedTransitionSource` a `.rect(cornerRadius: 360)` clip on a 64 pt photo, which leaves nothing visible. `EnlargeablePhotoModifier` now measures the source (`onGeometryChange`) and caps the clip radius at half its smaller side (`sourceCornerRadius(_:)`): 32 pt for the author circle; `.medium` (group photo) unchanged.
 
 ## Review
+
+### Round `validation` — 2026-11-06
+
+Scope: `origin/main..wa/44-open-author-photos-full-screen`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `docs/conventions/glossary.md:51` — [style] « Plein écran » still read « one picture alone on black » → **fixed** (approved by Olivier): « one picture alone over the blurred screen, zoomable »; 0029 and 0081 get a « Since 0085 » quote.
+- Round 2: ✅ review clean.
+- Wiki: `docs/wiki/features/0085-author-photos-full-screen.md`, a line in `claude.md` « Shipped features », 0085 in `book-and-editions.md` and `network.md`.
 
 ## Verification
 

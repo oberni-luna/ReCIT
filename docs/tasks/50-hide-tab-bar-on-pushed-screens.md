@@ -1,6 +1,6 @@
 ---
 issue: 50
-status: todo
+status: to-test
 wiki: [[network]], [[lists]], [[platform-and-design]], [[features/0060-list-cover-flow]], [[features/0028-network-tab-and-groups]], [[features/0068-lists-in-my-network]]
 note: "quand on navigue depuis l'écran « Réseau » vers le détail d'un groupe ou d'un user, il faut faire disparaître la tabbar en bas. C'est déjà le cas pour les Listes, mais c'est pas fluide. Peux tu faire disparaître la tabbar pour l'écran des listes et pour l'écran réseau, mais que ce soit fluide et animé (en utilisant des features framework serait mieux)"
 created: 2026-11-06
@@ -45,8 +45,26 @@ created: 2026-11-06
 
 ## Implementation
 
+- **Route taken: SwiftUI, driven by the stack's path.** Three routes tried, judged on video frames (simulator, iPhone 17, iOS 26.4):
+  1. `toolbarVisibility(.hidden, for: .tabBar)` on each pushed destination: the bar vanished before the push slid in, and popped back ~300 ms after the pop ended. Rejected.
+  2. UIKit `hidesBottomBarWhenPushed` on the pushed hosting controller: no effect under SwiftUI's `TabView`, the bar stayed on the pushed screen. Rejected and removed.
+  3. Kept: `toolbarVisibility(isTabBarHidden ? .hidden : .visible, for: .tabBar)` on the `NavigationStack` itself, with `isTabBarHidden` set inside `withAnimation` from `onChange(of: !path.isEmpty, initial: true)`. The bar fades out during the push and back in during the pop.
+- New `ReCIT_iOS/DesignSystem/Extensions/View+hidesTabBarWhenPushed.swift`: `hidesTabBarWhenPushed(on: NavigationPath)` + private `TabBarHiddenWhenPushed` modifier.
+- `NetworkView`, `EntityListView`: `.hidesTabBarWhenPushed(on: path)` on their `NavigationStack`. Nothing inside the two stacks sets tab bar visibility.
+- `ListCoverFlowScreen`: `.toolbar(isMine ? .hidden : .automatic, for: .tabBar)` removed; « Ajouter un livre » keeps its place through `formActionBar`.
+- **Side effect, follows the decision:** a list opened from the Fiche livre's « Dans les listes » in Inventaire or Recherche keeps the tab bar; on my list there, « Ajouter un livre » sits above it.
+- Interactive swipe-back: the path changes only when the swipe completes, so the bar stays hidden during the swipe and fades in after; a cancelled swipe changes nothing.
+- Proof: build ✅ (SwiftLint in the build).
+
 ## Review
 
 ## Verification
+
+PM on the simulator (iPhone 17, iOS 26.4, video frames every 50–60 ms):
+- ✅ Réseau → friend's profile: the tab bar fades out while the profile slides in; no jump, no gap.
+- ✅ Back: the tab bar fades in while Réseau slides back.
+- ✅ Listes → « Dans mon réseau » → a friend's list: no tab bar.
+
+Still yours: a group and its members; « Ajouter des ami·es »; a book from a profile; my list with « Ajouter un livre »; swipe-back half-way then cancelled; switching tabs with a detail open; iOS 18.
 
 ## Feedback

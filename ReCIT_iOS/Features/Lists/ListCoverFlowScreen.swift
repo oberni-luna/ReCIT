@@ -150,8 +150,6 @@ struct ListCoverFlowScreen: View {
                     onShow: show
                 )
             }
-            // The add bar takes the tab bar's place; a list with nothing to add keeps the tab bar.
-            .toolbar(isMine ? .hidden : .automatic, for: .tabBar)
             .onAppear {
                 startArrival(in: uris)
                 if selectedURI == nil {

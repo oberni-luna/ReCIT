@@ -3,7 +3,7 @@
 //  ReCIT_iOS
 //
 //  Liquid Glass where the system has it, the closest thing to it before. The app runs from
-//  iOS 18, and glass only exists from iOS 26: these two keep the `#available` out of the
+//  iOS 18, and glass only exists from iOS 26: these keep the `#available` out of the
 //  screens that use it.
 //
 

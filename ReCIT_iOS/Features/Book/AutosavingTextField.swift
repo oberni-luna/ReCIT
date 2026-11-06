@@ -9,16 +9,18 @@ import SwiftUI
 
 /// A labelled multi-line field that hands its text to `save` after a pause in typing, on focus
 /// loss, and on leaving the screen. `save` decides whether the text changed.
-struct AutosavingTextField: View {
+struct AutosavingTextField<Field: Hashable>: View {
     /// How long typing must pause before the text is saved.
-    private static let autosaveDelay: Duration = .seconds(1)
+    private static var autosaveDelay: Duration {
+        .seconds(1)
+    }
 
     private let label: LocalizedStringResource
     private let placeholder: LocalizedStringKey
     private let value: String
     private let identifier: String
-    private let focus: FocusState<InventoryItemTextAttribute?>.Binding
-    private let field: InventoryItemTextAttribute
+    private let focus: FocusState<Field?>.Binding
+    private let field: Field
     private let save: (String) -> Void
 
     @State private var draft: String
@@ -28,8 +30,8 @@ struct AutosavingTextField: View {
         placeholder: LocalizedStringKey,
         value: String,
         identifier: String,
-        focus: FocusState<InventoryItemTextAttribute?>.Binding,
-        field: InventoryItemTextAttribute,
+        focus: FocusState<Field?>.Binding,
+        field: Field,
         save: @escaping (String) -> Void
     ) {
         self.label = label

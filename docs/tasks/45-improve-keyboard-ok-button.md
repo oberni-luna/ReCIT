@@ -1,6 +1,6 @@
 ---
 issue: 45
-status: to-test
+status: to-close
 wiki: [[lists]], [[book-and-editions]], [[platform-and-design]]
 note: screenshot — Liste, Commentaire focused, OK glued to the keyboard's top edge (iOS 26 glass)
 created: 2026-11-06
@@ -46,6 +46,15 @@ created: 2026-11-06
   - `ListElementsPage` unchanged: its toolbar sits on the `FormList`, not in a cell.
 
 ## Review
+
+### Round `validation` — 2026-11-06
+
+Scope: `origin/main..wa/45-improve-keyboard-ok-button`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `AutosavingTextField.swift:20` — [elegance] a domain-neutral component tied to `InventoryItemTextAttribute` → **fixed**: `AutosavingTextField<Field: Hashable>`, `focus: FocusState<Field?>.Binding`, `field: Field`; `autosaveDelay` became a computed static (no static stored property in a generic type). Call sites unchanged.
+- 🟡 `View+glass.swift:6` — [style] header said « these two » for three wrappers → **fixed**.
+- Round 2: ✅ review clean. Build ✅.
+- Wiki: `docs/wiki/features/0084-keyboard-ok-button.md`, a line in `claude.md` « Shipped features », 0084 in `lists.md`, `book-and-editions.md`, `platform-and-design.md`.
 
 ## Verification
 

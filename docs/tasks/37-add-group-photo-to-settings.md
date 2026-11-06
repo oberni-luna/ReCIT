@@ -1,6 +1,6 @@
 ---
 issue: 37
-status: todo
+status: to-test
 wiki: [[network]], [[book-and-editions]], [[features/0028-network-tab-and-groups]], [[features/0047-new-book-work-first]], [[features/0050-every-bibliographic-datum]]
 note: pouvoir modifier l'image d'un groupe depuis les réglages du groupe via le même composant que pour les editions
 created: 2026-11-06
@@ -41,8 +41,24 @@ created: 2026-11-06
 
 ## Implementation
 
+Round 1 · autopilot · 2026-11-06
+
+- **Shared menu** — `Features/Components/ImageSourceMenu.swift` (new): generic over its label; camera, Photos, Files, URL, « Retirer » + « Remplacer »; every pick through `CoverImageReducer`. `CreateBookCoverRow` uses it: frame, ISBN column, a11y label and id unchanged. Strings `create_book.cover.{camera,photos,file,url,replace}` renamed in place to `image_source.*`, same text.
+- **URL screen** — `CoverURLView` keeps `init(searchedTitle:isbn:onUse:)` for the editions (search, notice, « ? » as before) and gains `init(onUse:)`: address, paste, preview only. The Google section moved to `Features/CreateBook/CoverURLSearchSection.swift`.
+- **Setting** — `GroupSetting.picture(String?)`, `Value.null` encodes JSON null; `applied(to:baseUrl:)` makes the path absolute.
+- **Draft** — `Model/Groups/GroupPictureEdit.swift`: `.unchanged / .replaced(Data) / .removed`, `isChange(from:)`, `showsPicture(savedPictureURL:)`.
+- **Write** — `AppModels/Group/GroupModel+Picture.swift`: `updatePicture(_:on:modelContext:)`, server-first in a model-owned task: upload into `groups` → `update-settings picture` → place the absolute URL; failure → `errorReporter`, old photo stays. Removal sends null, uploads nothing.
+- **Form** — `GroupSettingsView`: photo section first (`GroupPhotoPicker`, `GroupPhotoPreview`, id `e2e.groupSettings.picture`), URL screen pushed by `navigationDestination(isPresented:)`, « Enregistrer » enabled by any change incl. the photo. Strings `groups.form.picture.{add,change,remove}`.
+- **Divergence from the task**: the slot is a 104 pt `AvatarThumbnail(.group)`, a rounded square (corner `.medium`), not a circle — group photos are rounded squares everywhere in the app. A circle is one clip in `GroupPhotoPreview`.
+- **Lint baseline**: `GroupModel.swift` is pinned at 486 lines by `file_length`/`type_body_length` reasons, hence the extension file; statics and `dropping` moved (clears its `type_contents_order` entries), `apiService`, `place`, `putSetting`, `inFlightTask` setter made internal. `CoverURLView` keeps two inits because `EditEditionFlowView`'s body length is pinned too.
+- Build ✅ (ReCIT_iOS, iPhone 17, SwiftLint). Tests ✅ 49/49 — GroupPictureTests (10 new), GroupModelTests, GroupModelAdministrationTests, ReaderGroupTests, GroupPersistenceTests.
+
 ## Review
 
 ## Verification
+
+Round 1 · autopilot
+
+- ⚠️ Not run by agent: no UI-automation tool reached the simulator, and the simulator holds a real account. Nothing uploaded or saved to inventaire.io. Covered by tests: upload container and order, null on removal, failed upload never writes, refused write keeps the old photo and reports.
 
 ## Feedback

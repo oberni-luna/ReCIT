@@ -17,50 +17,55 @@
 //  instead: `update-claim` takes a hash, not an address. Which is why the screen hands back
 //  both and lets the form choose.
 //
+//  A group's photo comes through the same screen, without the search and without the word about
+//  bibliographic data: those belong to a book's cover, and come with `init(searchedTitle:isbn:onUse:)`.
+//
 //  See PRD 0026.
 //
 
 import SwiftUI
 
 struct CoverURLView: View {
-    @Environment(\.openURL) private var openURL
+    /// Long enough that typing an address does not fetch every prefix of it.
+    private static let debounce: Duration = .milliseconds(400)
+
     @Environment(\.dismiss) private var dismiss
 
-    /// What the image search asks for, with the ISBN.
-    let searchedTitle: String
-    /// Without separators.
-    let isbn: String
     /// Handed the image chosen — its reduced JPEG, and the address it came from.
     let onUse: (Data, URL) -> Void
+    /// The book whose cover is looked for, when the image is one.
+    private let bookCover: BookCover?
 
     @State private var address: String = ""
     @State private var preview: CoverURLPreview = .empty
 
-    /// Long enough that typing an address does not fetch every prefix of it.
-    private static let debounce: Duration = .milliseconds(400)
+    /// Any picture found on the web: the address, and its preview.
+    init(onUse: @escaping (Data, URL) -> Void) {
+        self.onUse = onUse
+        self.bookCover = nil
+    }
+
+    /// A book's cover: the screen opens on a Google Images search for its title and ISBN, under
+    /// the word about bibliographic data, with the « ? » that explains them.
+    ///
+    /// - Parameters:
+    ///   - searchedTitle: What the image search asks for, with the ISBN.
+    ///   - isbn: Without separators.
+    init(
+        searchedTitle: String,
+        isbn: String,
+        onUse: @escaping (Data, URL) -> Void
+    ) {
+        self.onUse = onUse
+        self.bookCover = .init(title: searchedTitle, isbn: isbn)
+    }
 
     var body: some View {
         DesignSystem.Form {
-            BibliographicDataNotice()
+            if let bookCover {
+                BibliographicDataNotice()
 
-            Section {
-                Button {
-                    if let url = CoverAddress.googleImagesURL(title: searchedTitle, isbn: isbn) {
-                        openURL(url)
-                    }
-                } label: {
-                    Label("create_book.cover_url.search", systemImage: "magnifyingglass")
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundTinted)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("e2e.createBook.coverUrl.search")
-            } header: {
-                CreateBookSectionHeader("create_book.cover_url.find")
-            } footer: {
-                CreateBookSectionFooter("create_book.cover_url.find_help")
+                CoverURLSearchSection(title: bookCover.title, isbn: bookCover.isbn)
             }
 
             Section {
@@ -87,7 +92,9 @@ struct CoverURLView: View {
             } header: {
                 CreateBookSectionHeader("create_book.cover_url.address")
             } footer: {
-                CreateBookSectionFooter(footer)
+                if let footer {
+                    CreateBookSectionFooter(footer)
+                }
             }
         }
         .formActionBar {
@@ -103,16 +110,23 @@ struct CoverURLView: View {
         }
         .navigationTitle(String(localized: "create_book.cover_url.title"))
         .navigationBarTitleDisplayMode(.inline)
-        .bibliographicDataHelpButton()
+        .toolbar {
+            if bookCover != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    BibliographicDataHelpButton()
+                }
+            }
+        }
         .task(id: address) {
             await loadPreview()
         }
     }
 
-    private var footer: LocalizedStringKey {
+    /// A book's cover is asked to be the edition's; a group's photo has nothing to check.
+    private var footer: LocalizedStringKey? {
         switch preview {
         case .empty, .loading: "create_book.cover_url.help"
-        case .loaded: "create_book.cover_url.check"
+        case .loaded: bookCover == nil ? nil : "create_book.cover_url.check"
         case .failed: "create_book.cover_url.not_an_image"
         }
     }
@@ -147,6 +161,13 @@ struct CoverURLView: View {
 
         onUse(jpeg, url)
         dismiss()
+    }
+}
+
+private extension CoverURLView {
+    struct BookCover {
+        let title: String
+        let isbn: String
     }
 }
 

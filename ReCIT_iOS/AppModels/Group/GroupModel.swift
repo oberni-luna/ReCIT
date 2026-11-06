@@ -15,7 +15,7 @@
 //  **Writes are optimistic** (ADR 0001): a gesture is applied to the group first, through the
 //  same transition the server runs (`ReaderGroup.applying`), then sent in a task this model owns;
 //  a refusal puts the previous value back and speaks through the snack bar. Creating and
-//  deleting a group are the exceptions — see `createGroup` and `deleteGroup`.
+//  deleting a group, and its picture, are the exceptions — `createGroup`, `deleteGroup`, `updatePicture`.
 //
 //  **The sync is an upsert with a deletion scope** (feature 0019): every stored group is in its
 //  charge, except one whose read failed. A group I left, or whose invitation was withdrawn, is
@@ -29,14 +29,14 @@ import SwiftData
 @Observable
 final class GroupModel: OptimisticMutating {
 
-    private let apiService: APIServicing
-    private let ledger: GroupRequestLedger
-    private let defaults: UserDefaults
     private static let signedInReaderKey: String = "groups.signedInReader"
-
     /// The roles that make a group one of mine, and so a group the store keeps. A declined
     /// invitation is not one: `GET /api/groups` stops naming the group, and so does the device.
     private static let storedRoles: Set<GroupRole> = [.admin, .member, .invited, .requested]
+
+    let apiService: APIServicing
+    private let ledger: GroupRequestLedger
+    private let defaults: UserDefaults
 
     /// Shared channel used to surface a background optimistic failure to the UI.
     var errorReporter: AppErrorReporter?
@@ -55,9 +55,9 @@ final class GroupModel: OptimisticMutating {
     /// mine before the sync, nor at all offline. Forgotten with the groups at sign-out.
     private(set) var myUserId: String?
 
-    /// The most recent background task spawned by an optimistic write. Exposed so tests can
-    /// await completion; not observed by the UI.
-    @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
+    /// The most recent background task spawned by a write. Exposed so tests can await
+    /// completion; not observed by the UI.
+    @ObservationIgnored var inFlightTask: Task<Void, Never>?
 
     init(
         apiService: APIServicing,
@@ -70,6 +70,18 @@ final class GroupModel: OptimisticMutating {
         self.ledger = ledger
         self.defaults = defaults
         self.myUserId = defaults.string(forKey: Self.signedInReaderKey)
+    }
+
+    /// `group` once a sync has stopped naming it among mine: I hold none of the roles that keep
+    /// a group in the store any more. A refusal, which the sync does not read, is left as it was.
+    private static func dropping(_ userId: String?, from group: ReaderGroup) -> ReaderGroup {
+        guard let userId else { return group }
+        var group: ReaderGroup = group
+        group.admins.removeAll { $0.user == userId }
+        group.members.removeAll { $0.user == userId }
+        group.invited.removeAll { $0.user == userId }
+        group.requested.removeAll { $0.user == userId }
+        return group
     }
 
     // MARK: - Reading
@@ -262,7 +274,7 @@ final class GroupModel: OptimisticMutating {
     /// form that changed two sends two.
     func update(_ setting: GroupSetting, on groupId: String, modelContext: ModelContext) {
         guard let current = group(id: groupId, in: modelContext) else { return }
-        let next: ReaderGroup = setting.applied(to: current)
+        let next: ReaderGroup = setting.applied(to: current, baseUrl: apiService.baseUrl())
         guard next != current else { return }
 
         let wasStored: Bool = storedGroup(id: groupId, in: modelContext) != nil
@@ -363,7 +375,7 @@ final class GroupModel: OptimisticMutating {
     /// Writes a value the app computed — a gesture's outcome, a setting — where the group
     /// lives. A stored group stays stored whatever the gesture did to my role: the next sync is
     /// what takes it out, so a screen open on it does not lose it mid-gesture. Not saved.
-    private func place(_ group: ReaderGroup, in modelContext: ModelContext) {
+    func place(_ group: ReaderGroup, in modelContext: ModelContext) {
         if let stored = storedGroup(id: group.id, in: modelContext) {
             stored.overwrite(with: group)
         } else if isMine(group) {
@@ -427,18 +439,6 @@ final class GroupModel: OptimisticMutating {
         try modelContext.save()
     }
 
-    /// `group` once a sync has stopped naming it among mine: I hold none of the roles that keep
-    /// a group in the store any more. A refusal, which the sync does not read, is left as it was.
-    private static func dropping(_ userId: String?, from group: ReaderGroup) -> ReaderGroup {
-        guard let userId else { return group }
-        var group: ReaderGroup = group
-        group.admins.removeAll { $0.user == userId }
-        group.members.removeAll { $0.user == userId }
-        group.invited.removeAll { $0.user == userId }
-        group.requested.removeAll { $0.user == userId }
-        return group
-    }
-
     // MARK: - Private · the server
 
     private func put(_ action: GroupAction, groupId: String, target: String?) async throws {
@@ -449,7 +449,7 @@ final class GroupModel: OptimisticMutating {
         )
     }
 
-    private func putSetting(_ setting: GroupSetting, groupId: String) async throws {
+    func putSetting(_ setting: GroupSetting, groupId: String) async throws {
         let _: OkStatusDTO? = try await apiService.send(
             toEndpoint: "/api/groups/update-settings",
             method: "PUT",

@@ -180,9 +180,9 @@ struct ReaderGroupTests {
 
     @Test("A setting is written onto the group, and travels as a string or a boolean")
     func settings() throws {
-        let renamed: ReaderGroup = GroupSetting.name("Polars").applied(to: group())
+        let renamed: ReaderGroup = GroupSetting.name("Polars").applied(to: group(), baseUrl: "https://test.local")
         #expect(renamed.name == "Polars")
-        #expect(GroupSetting.open(true).applied(to: group()).open)
+        #expect(GroupSetting.open(true).applied(to: group(), baseUrl: "https://test.local").open)
 
         let payload: GroupSettingPayload = .init(group: "g1", attribute: "open", value: GroupSetting.open(true).value)
         let json: String = String(decoding: try JSONEncoder().encode(payload), as: UTF8.self)

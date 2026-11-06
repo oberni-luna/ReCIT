@@ -24,6 +24,8 @@ Decided in [ADR 0001](adr/0001-swiftdata-reactive-optimistic.md):
 
 [ADR 0008](adr/0008-session-login-signup-keychain.md): cookie sessions captured by `AuthService`, kept in the cookie jar and the keychain, public traffic through a cookieless session. Two releases broke by changing one piece without the others — read the ADR first.
 
+A failed sign-in reaches the screen as one of a few sentences owned by `AuthFailure`, never as the server's prose: wrong credentials, no network, too many attempts (a `429`, since [0083](features/0083-rate-limited-sign-in-message.md)), and one generic sentence for the rest.
+
 ## The book screen
 
 [ADR 0002](adr/0002-unified-book-detail.md): one screen over Work / Edition / InventoryItem. A search result is a work; tapping it resolves the best edition (`EditionRelevance`, `WorkEditionResolver`) and remembers it (`Work.preferredEditionUri`).

@@ -50,6 +50,17 @@ struct AuthFailureTests {
         )
     }
 
+    @Test
+    func `a 429 is the server asking to wait`() {
+        #expect(
+            AuthFailure.classify(
+                status: 429,
+                serverMessage: "Too many requests. See https://api.inventaire.io"
+            ) == .rateLimited
+        )
+        #expect(AuthFailure.classify(status: 429, serverMessage: nil) == .rateLimited)
+    }
+
     @Test("Everything else keeps its status and the server's own sentence")
     func otherStatusesClassifyToServer() {
         #expect(
@@ -162,6 +173,22 @@ struct AuthFailureTests {
         )
     }
 
+    @Test
+    func `a 429 on sign-up is the server asking to wait too`() {
+        #expect(
+            AuthFailure.classifySignup(
+                status: 429,
+                errorName: nil,
+                serverMessage: "Too many requests. See https://api.inventaire.io"
+            ) == .rateLimited
+        )
+    }
+
+    @Test
+    func `too many attempts belongs to no sign-up field`() {
+        #expect(AuthFailure.rateLimited.signupField == nil)
+    }
+
     // MARK: - What the user is told
 
     @Test("A refusal and an unreachable server do not read the same")
@@ -171,6 +198,17 @@ struct AuthFailureTests {
             String(localized: AuthFailure.invalidCredentials.message)
                 != String(localized: AuthFailure.network.message)
         )
+    }
+
+    @Test
+    func `too many attempts says to wait, not that something went wrong`() {
+        let shown: String = .init(localized: AuthFailure.rateLimited.message)
+        let generic: String = .init(localized: AuthFailure.server(status: 500, serverMessage: nil).message)
+
+        #expect(AuthFailure.rateLimited.message.key == "auth.error.rate_limited")
+        #expect(shown != generic)
+        #expect(shown != String(localized: AuthFailure.invalidCredentials.message))
+        #expect(shown != String(localized: AuthFailure.network.message))
     }
 
     @Test("Everything the user cannot act on falls to the one generic sentence")

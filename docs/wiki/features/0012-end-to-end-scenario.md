@@ -274,6 +274,7 @@ suggestion and only that one. The searches now cover all four ways:
   150 s, and that row is then a report about the data, not about the app.
 - **inventaire.io rate-limits sign-ins.** Several runs in quick succession (or a run after a
   session of manual API calls) can meet a `429`, which surfaces as a KO on step 2. Wait a few
-  minutes rather than retrying at once.
+  minutes rather than retrying at once. Since [0083](0083-rate-limited-sign-in-message.md), that
+  step's screenshot reads « Trop de tentatives. Réessayez dans quelques minutes. », not the generic error.
 - The whole run is one test. Steps are not independently runnable; the state each one needs is
   built by the ones before it.

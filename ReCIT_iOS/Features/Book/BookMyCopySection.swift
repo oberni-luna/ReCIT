@@ -17,13 +17,19 @@ import SwiftUI
 import SwiftData
 
 struct BookMyCopySection: View {
+    private let focus: FocusState<InventoryItemTextAttribute?>.Binding
+
     @Environment(InventoryModel.self) private var inventoryModel
     @Environment(\.modelContext) private var modelContext
 
     @Bindable var item: InventoryItem
 
-    init(item: InventoryItem) {
+    init(
+        item: InventoryItem,
+        focus: FocusState<InventoryItemTextAttribute?>.Binding
+    ) {
         _item = Bindable(item)
+        self.focus = focus
     }
 
     var body: some View {
@@ -42,6 +48,8 @@ struct BookMyCopySection: View {
                 placeholder: "inventory.item.write_notes",
                 value: item.details,
                 identifier: AccessibilityID.details,
+                focus: focus,
+                field: .details,
                 save: { save($0, to: .details) }
             )
 
@@ -50,6 +58,8 @@ struct BookMyCopySection: View {
                 placeholder: "inventory.item.write_private_note",
                 value: item.notes,
                 identifier: AccessibilityID.notes,
+                focus: focus,
+                field: .notes,
                 save: { save($0, to: .notes) }
             )
 

@@ -9,33 +9,43 @@ import SwiftUI
 
 /// A labelled multi-line field that hands its text to `save` after a pause in typing, on focus
 /// loss, and on leaving the screen. `save` decides whether the text changed.
-struct AutosavingTextField: View {
+struct AutosavingTextField<Field: Hashable>: View {
     /// How long typing must pause before the text is saved.
-    private static let autosaveDelay: Duration = .seconds(1)
+    private static var autosaveDelay: Duration {
+        .seconds(1)
+    }
 
     private let label: LocalizedStringResource
     private let placeholder: LocalizedStringKey
     private let value: String
     private let identifier: String
+    private let focus: FocusState<Field?>.Binding
+    private let field: Field
     private let save: (String) -> Void
 
     @State private var draft: String
-
-    @FocusState private var isFocused: Bool
 
     init(
         _ label: LocalizedStringResource,
         placeholder: LocalizedStringKey,
         value: String,
         identifier: String,
+        focus: FocusState<Field?>.Binding,
+        field: Field,
         save: @escaping (String) -> Void
     ) {
         self.label = label
         self.placeholder = placeholder
         self.value = value
         self.identifier = identifier
+        self.focus = focus
+        self.field = field
         self.save = save
         _draft = State(initialValue: value)
+    }
+
+    private var isFocused: Bool {
+        focus.wrappedValue == field
     }
 
     var body: some View {
@@ -48,7 +58,7 @@ struct AutosavingTextField: View {
         .foregroundStyle(.foregroundDefault)
         .accessibilityIdentifier(identifier)
         .withLabel(label: String(localized: label))
-        .focused($isFocused)
+        .focused(focus, equals: field)
         .onChange(of: isFocused) { _, focused in
             if !focused {
                 save(draft)
@@ -76,6 +86,8 @@ struct AutosavingTextField: View {
 }
 
 #Preview {
+    @Previewable @FocusState var focus: InventoryItemTextAttribute?
+
     List {
         Section("edition.my_inventory") {
             AutosavingTextField(
@@ -83,6 +95,8 @@ struct AutosavingTextField: View {
                 placeholder: "inventory.item.write_private_note",
                 value: "",
                 identifier: "preview.privateNote",
+                focus: $focus,
+                field: .notes,
                 save: { _ in }
             )
         }

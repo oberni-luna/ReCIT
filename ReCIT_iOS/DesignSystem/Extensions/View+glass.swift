@@ -3,7 +3,7 @@
 //  ReCIT_iOS
 //
 //  Liquid Glass where the system has it, the closest thing to it before. The app runs from
-//  iOS 18, and glass only exists from iOS 26: these two keep the `#available` out of the
+//  iOS 18, and glass only exists from iOS 26: these keep the `#available` out of the
 //  screens that use it.
 //
 
@@ -17,6 +17,16 @@ extension View {
             buttonStyle(.glass)
         } else {
             buttonStyle(.bordered)
+        }
+    }
+
+    /// `.buttonStyle(.glassProminent)` from iOS 26, `.borderedProminent` before it.
+    @ViewBuilder
+    func glassProminentButtonStyle() -> some View {
+        if #available(iOS 26.0, *) {
+            buttonStyle(.glassProminent)
+        } else {
+            buttonStyle(.borderedProminent)
         }
     }
 

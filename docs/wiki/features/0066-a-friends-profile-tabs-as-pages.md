@@ -5,6 +5,10 @@ pager redone in UIKit the same day after a pass on a phone. It reworks how the t
 [0064](0064-a-friends-profile-with-tabs.md) change; the header, the étagères, the lists and what they show are as
 0064 left them. The model is the Contacts card of Messages: a header above a pager, each page scrolling on its own.
 
+> Since [0086](0086-a-friends-transactions-tab.md), the pager holds four pages on a friend's profile (Inventaire,
+> Listes, Échanges, Présentation) and three on mine, given to `TabPager` as a list rather than every case of the
+> enum.
+
 ## What it does
 
 Choosing Inventaire or Listes no longer redraws the page in place. Seen on a phone, the change looked broken: the

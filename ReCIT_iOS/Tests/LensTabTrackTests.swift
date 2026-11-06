@@ -99,4 +99,14 @@ struct LensTabTrackTests {
         #expect(track.releaseIndex(position: 1.8, center: 194, velocity: -3_000) == 1)
         #expect(track.releaseIndex(position: 2, center: 210, velocity: 3_000) == 2)
     }
+
+    @Test
+    func `a tap picks the word under it, and nothing past the ends`() {
+        #expect(track.index(at: 20) == 0)
+        #expect(track.index(at: 130) == 1)
+        #expect(track.index(at: 259) == 2)
+        #expect(track.index(at: -5) == nil)
+        #expect(track.index(at: 300) == nil)
+        #expect(LensTabTrack(frames: []).index(at: 0) == nil)
+    }
 }

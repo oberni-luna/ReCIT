@@ -4,11 +4,11 @@
 //
 //  The head of a reader's profile, held just under the navigation bar and folding as the page
 //  scrolls — the Contacts card of Messages. At rest: their picture at 96 pt, their name large
-//  under it, and the Inventaire • 540 | Listes • 4 | Présentation tabs — how many books they hold
-//  is in the first tab, no longer a line under the name. Folded: the picture at 48 pt, risen into
-//  the bar's row between the back button and « … », the name small under it, the tabs still
-//  there. From there on the page scrolls under it, behind the
-//  bars' material, which reaches up under the bar, made transparent for it.
+//  under it, and the Inventaire • 540 | Listes • 4 | Échanges • 2 | Présentation tabs — how many
+//  books they hold is in the first tab, no longer a line under the name. Folded: the picture at
+//  48 pt, risen into the bar's row between the back button and « … », the name small under it,
+//  the tabs still there. From there on the page scrolls under it, behind the bars' material,
+//  which reaches up under the bar, made transparent for it.
 //
 //  An overlay rather than anything of the bar's: a navigation bar's principal item cannot hold
 //  a 96 pt picture. The back button and « … » stay the system's, which keeps the swipe back.
@@ -63,6 +63,8 @@ struct UserProfileStickyHeader: View {
     let user: User
     /// `nil` on the profile of someone whose books are closed to me: no tabs to show.
     var tab: Binding<UserProfileTab>?
+    /// The pages the tabs name, in their order — the ones the fold is blended between.
+    let tabs: [UserProfileTab]
     /// Where the fetch of their lists stands, for the Listes tab's count.
     let listsLoad: UserListsTab.Load
     let metrics: Metrics
@@ -72,18 +74,18 @@ struct UserProfileStickyHeader: View {
 
     /// Blended between the two pages while the pager moves: each page is scrolled its own way.
     private var progress: CGFloat {
-        scrollOffset.progress(in: collapse)
+        scrollOffset.progress(in: collapse, among: tabs)
     }
 
     private var isContentUnder: Bool {
-        scrollOffset.isContentUnder(in: collapse)
+        scrollOffset.isContentUnder(in: collapse, among: tabs)
     }
 
     /// How far the page is pulled down past its top — by a finger, or by the bounce of a fling
     /// back up. The header goes down with it, as the Contacts card does, instead of staying put
     /// while a gap opens under it.
     private var pull: CGFloat {
-        scrollOffset.pull
+        scrollOffset.pull(among: tabs)
     }
 
     private func folding(_ values: (rest: CGFloat, folded: CGFloat)) -> CGFloat {
@@ -97,6 +99,7 @@ struct UserProfileStickyHeader: View {
             if let tab {
                 UserProfileTabPicker(
                     selection: tab,
+                    tabs: tabs,
                     pagePosition: scrollOffset.pagePosition,
                     user: user,
                     listsLoad: listsLoad

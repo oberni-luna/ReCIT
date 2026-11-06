@@ -76,3 +76,59 @@ public class UserTransaction: Identifiable, Equatable, Hashable {
         var requester: Bool
     }
 }
+
+extension UserTransaction {
+    static func mock(
+        id: String = "transaction-1",
+        rev: String = "1",
+        item: InventoryItem = .init(
+            _id: "item-1",
+            _rev: "1",
+            transaction: .lending,
+            visibility: [.public],
+            ownerId: "camille",
+            created: .init(timeIntervalSince1970: 0),
+            updated: nil,
+            busy: nil,
+            edition: .init(uri: "isbn:9782070360024", title: "L'Étranger", lang: "fr", authorNames: ["Albert Camus"])
+        ),
+        owner: User = .init(
+            _id: "camille",
+            _rev: "1",
+            username: "Camille",
+            email: nil,
+            position: nil,
+            avatarURLValue: nil,
+            itemCount: 0
+        ),
+        requester: User = .init(
+            _id: "me",
+            _rev: "1",
+            username: "Moi",
+            email: nil,
+            position: nil,
+            avatarURLValue: nil,
+            itemCount: 0
+        ),
+        type: TransactionType = .lending,
+        created: Date = .init(timeIntervalSince1970: 0),
+        messages: [TransactionMessage] = [],
+        state: TransactionState = .requested,
+        actions: [TransactionAction] = [],
+        readStatus: MessageReadStatus = .init(owner: false, requester: false)
+    ) -> UserTransaction {
+        .init(
+            _id: id,
+            _rev: rev,
+            item: item,
+            owner: owner,
+            requester: requester,
+            type: type,
+            created: created,
+            messages: messages,
+            state: state,
+            actions: actions,
+            readStatus: readStatus
+        )
+    }
+}

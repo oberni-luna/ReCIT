@@ -3,7 +3,7 @@
 //  ReCIT_iOS
 //
 //  A tab's word on a reader's profile, with how many it holds after a « • »: « Inventaire • 540 »,
-//  « Listes • 4 », « Présentation ». The count used to be a line of its own under the name; in
+//  « Listes • 4 », « Échanges • 2 », « Présentation ». The count used to be a line of its own under the name; in
 //  the tab, it says what the page holds before the page is turned to. See the « Détail d'un
 //  amis » section of the Figma file (`865:17783`).
 //
@@ -33,6 +33,8 @@ struct UserProfileTabLabel: View {
             }
         case .lists:
             UserListsTabTitle(user: user, load: listsLoad)
+        case .transactions:
+            UserTransactionsTabTitle(user: user)
         case .presentation:
             Text(tab.title)
         }

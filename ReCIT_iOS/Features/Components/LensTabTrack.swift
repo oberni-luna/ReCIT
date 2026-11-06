@@ -112,4 +112,9 @@ struct LensTabTrack {
         let thrown: CGFloat = self.position(forCenter: center + projection) ?? current
         return Int(clamped(min(max(thrown.rounded(), current - 1), current + 1)))
     }
+
+    /// The word a tap at `location` lands on, `nil` outside all of them.
+    func index(at location: CGFloat) -> Int? {
+        frames.firstIndex { $0.minX...$0.maxX ~= location }
+    }
 }

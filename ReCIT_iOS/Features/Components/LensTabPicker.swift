@@ -25,14 +25,29 @@
 //  **A tick each time the held capsule reaches another word**, as a segmented control's thumb
 //  does: the selection haptic, under the finger and when a flick carries it one word further.
 //
+//  **Too wide for the screen, the row scrolls** — at the largest text sizes, on a reader's
+//  profile and its four tabs. The selected word is then scrolled into view, whether chosen or
+//  swiped to, and a word is picked by a tap: a finger sliding across the row scrolls it, so the
+//  capsule is not picked up there.
+//
 
 import SwiftUI
 
 struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
-    @Binding var selection: Tab
+    private static var coordinateSpace: String { "LensTabPicker" }
+    /// How much larger the capsule grows when lifted, and how much the words under it.
+    private static var liftScale: CGFloat { 1.15 }
+    private static var magnification: CGFloat { 1.2 }
+    private static var liftAnimation: Animation { .spring(duration: 0.35, bounce: 0.4) }
+    private static var settleAnimation: Animation { .spring(duration: 0.5, bounce: 0.35) }
+
+    /// The tabs in their order: all of the enum's, unless the screen shows fewer.
+    let tabs: [Tab]
     /// Where the pager stands: 0 on the first tab, 1 on the second, in between during a swipe.
     let pagePosition: CGFloat
-    @ViewBuilder let label: (Tab) -> Label
+    let label: (Tab) -> Label
+
+    private var wordPadding: DesignSystem.Spacing = .sMedium
 
     /// Each word's frame in the picker, which the capsule is drawn between.
     @State private var labelFrames: [Tab: CGRect] = [:]
@@ -52,16 +67,7 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
     @State private var feedbackTick: Int = 0
     @GestureState private var isTouching: Bool = false
 
-    private static var coordinateSpace: String { "LensTabPicker" }
-    /// How much larger the capsule grows when lifted, and how much the words under it.
-    private static var liftScale: CGFloat { 1.15 }
-    private static var magnification: CGFloat { 1.2 }
-    private static var liftAnimation: Animation { .spring(duration: 0.35, bounce: 0.4) }
-    private static var settleAnimation: Animation { .spring(duration: 0.5, bounce: 0.35) }
-
-    private var tabs: [Tab] {
-        Array(Tab.allCases)
-    }
+    @Binding var selection: Tab
 
     /// The words' frames in order, once all of them are measured.
     private var track: LensTabTrack {
@@ -73,18 +79,47 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
         dragPosition ?? track.clamped(pagePosition)
     }
 
-    private func nearestIndex(_ position: CGFloat) -> Int {
-        Int(position.rounded())
-    }
-
-    /// Moves the held capsule's word to `index`, with a tick if it is another one.
-    private func hold(_ index: Int) {
-        guard index != heldIndex else { return }
-        heldIndex = index
-        feedbackTick += 1
-    }
-
     var body: some View {
+        ViewThatFits(in: .horizontal) {
+            lensRow(scrolls: false)
+
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) {
+                    lensRow(scrolls: true)
+                }
+                .scrollIndicators(.hidden)
+                .contentMargins(.horizontal, DesignSystem.Spacing.medium.rawValue, for: .scrollContent)
+                .onChange(of: selection, initial: true) { _, selection in
+                    withAnimation(Self.settleAnimation) {
+                        proxy.scrollTo(selection, anchor: .center)
+                    }
+                }
+            }
+        }
+        .sensoryFeedback(.selection, trigger: feedbackTick)
+        .onChange(of: pagePosition) { _, newValue in
+            // The pager has reached where the capsule settled: it leads again.
+            if grabOffset == nil, let dragPosition, abs(newValue - dragPosition) < 0.001 {
+                self.dragPosition = nil
+            }
+        }
+        .onChange(of: isTouching) { _, isTouching in
+            // A touch taken away by the system rather than lifted: back where it was.
+            if isTouching == false, grabOffset != nil {
+                grabOffset = nil
+                heldIndex = nil
+                withAnimation(Self.settleAnimation) {
+                    isLifted = false
+                    overshoot = 0
+                    dragPosition = nil
+                }
+            }
+        }
+    }
+
+    /// The words in grey, holed where the capsule is, the capsule, and the words in the selected
+    /// colour through it — magnified while it is lifted.
+    private var drawnRow: some View {
         let track: LensTabTrack = track
         let lens: CGRect? = track.lensFrame(
             at: position,
@@ -92,8 +127,10 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
             overshoot: overshoot
         )
 
-        LensTabLabels(
+        return LensTabLabels(
+            tabs: tabs,
             color: .foregroundSecondary,
+            wordPadding: wordPadding,
             measuring: (
                 selection: $selection,
                 coordinateSpace: Self.coordinateSpace,
@@ -124,7 +161,7 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
         }
         .overlay(alignment: .topLeading) {
             if let lens, size.width > 0, size.height > 0 {
-                LensTabLabels(color: .foregroundDefault, label: label)
+                LensTabLabels(tabs: tabs, color: .foregroundDefault, wordPadding: wordPadding, label: label)
                     .scaleEffect(
                         isLifted ? Self.magnification : 1,
                         anchor: .init(x: lens.midX / size.width, y: lens.midY / size.height)
@@ -139,29 +176,6 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
             }
         }
         .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
-        .contentShape(.rect)
-        .gesture(drag)
-        .sensoryFeedback(.selection, trigger: feedbackTick)
-        .onChange(of: pagePosition) { _, newValue in
-            // The pager has reached where the capsule settled: it leads again.
-            if grabOffset == nil, let dragPosition, abs(newValue - dragPosition) < 0.001 {
-                self.dragPosition = nil
-            }
-        }
-        .onChange(of: isTouching) { _, isTouching in
-            // A touch taken away by the system rather than lifted: back where it was.
-            if isTouching == false, grabOffset != nil {
-                grabOffset = nil
-                heldIndex = nil
-                withAnimation(Self.settleAnimation) {
-                    isLifted = false
-                    overshoot = 0
-                    dragPosition = nil
-                }
-            }
-        }
-        .coordinateSpace(.named(Self.coordinateSpace))
-        .accessibilityElement(children: .contain)
     }
 
     private var drag: some Gesture {
@@ -217,7 +231,7 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
                 // Flung one word further than the finger had taken it.
                 hold(index)
                 heldIndex = nil
-                let target: CGFloat = CGFloat(index)
+                let target: CGFloat = .init(index)
                 // The spring carries the finger's speed past the word before it comes back.
                 withAnimation(Self.settleAnimation) {
                     isLifted = false
@@ -227,5 +241,63 @@ struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
                 }
                 selection = tabs[index]
             }
+    }
+
+    /// In a row that scrolls, a tap on a word picks it, with the tick a held capsule gives.
+    private var tap: some Gesture {
+        SpatialTapGesture(coordinateSpace: .named(Self.coordinateSpace))
+            .onEnded { value in
+                guard
+                    let index = track.index(at: value.location.x),
+                    tabs[index] != selection
+                else {
+                    return
+                }
+                feedbackTick += 1
+                selection = tabs[index]
+            }
+    }
+
+    init(
+        selection: Binding<Tab>,
+        tabs: [Tab] = Array(Tab.allCases),
+        pagePosition: CGFloat,
+        @ViewBuilder label: @escaping (Tab) -> Label
+    ) {
+        _selection = selection
+        self.tabs = tabs
+        self.pagePosition = pagePosition
+        self.label = label
+    }
+
+    private func nearestIndex(_ position: CGFloat) -> Int {
+        Int(position.rounded())
+    }
+
+    /// Moves the held capsule's word to `index`, with a tick if it is another one.
+    private func hold(_ index: Int) {
+        guard index != heldIndex else { return }
+        heldIndex = index
+        feedbackTick += 1
+    }
+
+    /// The words and their capsule. The capsule is picked up by a finger, unless the row scrolls:
+    /// a word is then picked by a tap.
+    private func lensRow(scrolls: Bool) -> some View {
+        drawnRow
+            .contentShape(.rect)
+            .gesture(drag, including: scrolls ? .subviews : .all)
+            .simultaneousGesture(tap, including: scrolls ? .all : .subviews)
+            .coordinateSpace(.named(Self.coordinateSpace))
+            .accessibilityElement(children: .contain)
+    }
+}
+
+extension LensTabPicker {
+    /// The room around each word, which the capsule is drawn round: `sMedium` unless told.
+    func wordPadding(_ padding: DesignSystem.Spacing) -> Self {
+        var copy: Self = self
+        copy.wordPadding = padding
+        return copy
     }
 }

@@ -17,8 +17,7 @@ struct TransactionCellView: View {
     }
 
     var isRead: Bool {
-        ( amIRequester && !transaction.readStatus.requester ) ||
-        ( !amIRequester && !transaction.readStatus.owner )
+        transaction.isRead(by: userModel.myUser?._id)
     }
 
     var body: some View {

@@ -64,15 +64,6 @@ struct ShelfPresentationPage: View {
     }
 }
 
-private extension View {
-    /// A value under its caption, as in the étagère's form.
-    func infoRow(label: String) -> some View {
-        textStyle(.content300)
-            .foregroundStyle(.foregroundDefault)
-            .withLabel(label: label)
-    }
-}
-
 #Preview(traits: .modifier(ShelfPreviewStore())) {
     @Previewable @Query var shelves: [Shelf]
     if let shelf = shelves.first {

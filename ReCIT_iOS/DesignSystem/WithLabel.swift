@@ -13,6 +13,15 @@ public extension View {
     }
 }
 
+extension View {
+    /// A value under its caption, as in a form: a list's or an étagère's Présentation.
+    func infoRow(label: String) -> some View {
+        textStyle(.content300)
+            .foregroundStyle(.foregroundDefault)
+            .withLabel(label: label)
+    }
+}
+
 struct WithLabel: ViewModifier {
     let label: String?
 

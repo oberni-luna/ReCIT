@@ -4,9 +4,9 @@
 //
 //  Created by Olivier Berni on 06/11/2026.
 //
-//  The store the v2 étagère screens are previewed on: one étagère of mine holding two books,
-//  and two more books of mine not on it, with the models those screens read from the
-//  environment.
+//  The store an étagère's screen and its parts are previewed on: one étagère of mine holding
+//  two books, and two more books of mine not on it, with the models those screens read from
+//  the environment.
 //
 
 import SwiftData
@@ -24,15 +24,13 @@ struct ShelfPreviewStore: PreviewModifier {
             User.self,
             configurations: .init(isStoredInMemoryOnly: true)
         )
-        let shelf: Shelf = .init(
-            _id: shelfId,
-            _rev: "1",
+        let shelf: Shelf = .mock(
+            id: shelfId,
             name: "Polars nordiques",
             slug: "polars-nordiques",
             shelfDescription: "Tout ce qui se passe dans le froid, de Stockholm à Reykjavik.",
             ownerId: ownerId,
             visibility: ["friends"],
-            colorHex: nil,
             created: .now.addingTimeInterval(-86_400 * 120),
             updated: .now
         )

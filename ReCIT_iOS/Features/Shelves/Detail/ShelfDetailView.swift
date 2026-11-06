@@ -1,29 +1,26 @@
 //
-//  ShelfDetailV2View.swift
+//  ShelfDetailView.swift
 //  ReCIT_iOS
 //
 //  Created by Olivier Berni on 06/11/2026.
 //
-//  The v2 of an étagère's screen, tried side by side with the first (`ShelfDetailView`) from
-//  the Inventaire's « Étagères (v2) » section. Built as a list's screen is
-//  (`ListCoverFlowScreen`): two pages in a `TabPager`, turned by a swipe or by their tab laid
-//  under the navigation bar — « Livres • 12 », the books in an inset grouped list over a pinned
-//  « Ajouter des livres » (`ShelfBooksPage`), and « Présentation », the description and what the
-//  étagère is (`ShelfPresentationPage`). No tab bar, mine or a friend's.
+//  An étagère's screen, opened by pressing its label in my carousel or in a friend's. Built as a
+//  list's screen is (`ListCoverFlowScreen`): two pages in a `TabPager`, turned by a swipe or by
+//  their tab laid under the navigation bar — « Livres • 12 », the books in an inset grouped list
+//  over a pinned « Ajouter des livres » (`ShelfBooksPage`), and « Présentation », the description
+//  and what the étagère is (`ShelfPresentationPage`).
 //
-//  Editing stays behind the navigation bar's pencil, and a deletion from the form pops the
-//  screen once the sheet has gone, as on the first screen. A friend's étagère is read-only:
-//  no pencil, no swipe, no « Ajouter des livres ». Derived from the shelf's owner.
+//  The étagère is edited behind the navigation bar's pencil (PRD 0003), and a deletion from the
+//  form pops the screen once the sheet has gone (issue 0021). A friend's étagère is read-only:
+//  no pencil, no swipe, no « Ajouter des livres » — absent rather than greyed (issue 0093).
+//  Derived from the shelf's owner.
 //
 
 import SwiftData
 import SwiftUI
 
-struct ShelfDetailV2View: View {
-    @Environment(UserModel.self) private var userModel: UserModel
-
+struct ShelfDetailView: View {
     let shelfId: String
-    @Binding var path: NavigationPath
 
     @Query private var shelves: [Shelf]
 
@@ -37,6 +34,10 @@ struct ShelfDetailV2View: View {
     /// Raised by the form when it deletes this screen's étagère, so the pop happens once the
     /// sheet has gone rather than out from under it.
     @State private var shelfWasDeleted: Bool = false
+
+    @Binding var path: NavigationPath
+
+    @Environment(UserModel.self) private var userModel: UserModel
 
     init(
         shelfId: String,
@@ -80,8 +81,8 @@ struct ShelfDetailV2View: View {
                                 books: books,
                                 isMine: isMine,
                                 tabsHeight: tabsHeight,
-                                path: $path,
-                                onAddBooks: { isAddingBooks = true }
+                                onAddBooks: { isAddingBooks = true },
+                                path: $path
                             )
                         case .presentation:
                             DesignSystem.FormList {
@@ -108,10 +109,10 @@ struct ShelfDetailV2View: View {
         }
         .navigationTitle(shelf?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             if isMine {
                 ToolbarItem(placement: .primaryAction) {
+                    // No identifier: the e2e scenario finds it by its « Modifier » label, as the list screen's pencil.
                     Button("action.edit", systemImage: "pencil") { isEditing = true }
                         .labelStyle(.titleAndIcon)
                 }
@@ -134,6 +135,6 @@ struct ShelfDetailV2View: View {
 #Preview(traits: .modifier(ShelfPreviewStore())) {
     @Previewable @State var path: NavigationPath = .init()
     NavigationStack {
-        ShelfDetailV2View(shelfId: ShelfPreviewStore.shelfId, path: $path)
+        ShelfDetailView(shelfId: ShelfPreviewStore.shelfId, path: $path)
     }
 }

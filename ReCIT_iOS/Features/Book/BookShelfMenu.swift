@@ -104,7 +104,7 @@ struct BookShelfMenu: View {
             shelfModel.removeItem(item, from: shelf, modelContext: modelContext)
             show(String(localized: "list.removed_from_named \(shelf.name)"))
         } else {
-            shelfModel.addItem(item, to: shelf, modelContext: modelContext)
+            shelfModel.addItems([item], to: shelf, modelContext: modelContext)
             show(String(localized: "list.added_to_named \(shelf.name)"))
         }
     }

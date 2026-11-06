@@ -16,21 +16,6 @@ import Testing
 @Suite("A friend's étagères", .serialized)
 struct FriendShelvesLifecycleTests {
 
-    private func shelf(id: String, owner: String) -> Shelf {
-        .init(
-            _id: id,
-            _rev: "1-abc",
-            name: "Polars",
-            slug: "polars",
-            shelfDescription: "",
-            ownerId: owner,
-            visibility: ["friends"],
-            colorHex: nil,
-            created: .init(timeIntervalSince1970: 0),
-            updated: nil
-        )
-    }
-
     @Test("Unfriending takes their étagères with their books")
     func unfriendPrunesTheirShelves() async throws {
         let context: ModelContext = try TestStore.makeContext()
@@ -46,8 +31,8 @@ struct FriendShelvesLifecycleTests {
         friend.relation = .friend
         context.insert(friend)
 
-        let mine: Shelf = shelf(id: "mine-1", owner: "user-1")
-        let theirs: Shelf = shelf(id: "theirs-1", owner: "user-2")
+        let mine: Shelf = .mock(id: "mine-1", ownerId: "user-1", visibility: ["friends"])
+        let theirs: Shelf = .mock(id: "theirs-1", ownerId: "user-2", visibility: ["friends"])
         context.insert(mine)
         context.insert(theirs)
         try context.save()
@@ -71,7 +56,7 @@ struct FriendShelvesLifecycleTests {
         let friend: User = Fixture.user(id: "user-2", username: "friend")
         friend.relation = .friend
         context.insert(friend)
-        context.insert(shelf(id: "theirs-1", owner: "user-2"))
+        context.insert(Shelf.mock(id: "theirs-1", ownerId: "user-2", visibility: ["friends"]))
         try context.save()
 
         model.unfriend(friend, modelContext: context)

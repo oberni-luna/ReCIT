@@ -8,10 +8,9 @@
 //
 //  `ShelfRowView` is reused untouched, and that is the point: it carries no editing
 //  affordance at all. Pressing a book grows it and lifting opens it; pressing the paper
-//  label opens the étagère, on its v2 screen (`ShelfDetailV2View`, through `opensShelf(on:)`).
-//  Everything that writes — renaming, deleting, filing a book — lives either in the header's
-//  "Ajouter" (which this section does not have) or in that screen's navigation bar and
-//  « Livres » page (which stand down for a shelf that is not mine).
+//  label opens the étagère. Everything that writes — renaming, deleting, filing a book —
+//  lives either in the header's "Ajouter" (which this section does not have) or in
+//  `ShelfDetailView`'s navigation bar (which stands down for a shelf that is not mine).
 //
 //  **Posed on nothing.** The carousel runs edge to edge over the screen's own background
 //  rather than sitting on a card like the books below. It is the one place on this screen
@@ -86,7 +85,6 @@ struct UserShelvesSection: View {
                 if hasWidth {
                     ForEach(shelves) { shelf in
                         ShelfRowView(shelf: shelf, width: cardWidth, path: $path)
-                            .opensShelf(on: .tabs)
                             .frame(width: cardWidth)
                     }
                 }

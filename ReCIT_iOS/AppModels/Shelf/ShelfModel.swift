@@ -225,18 +225,19 @@ final class ShelfModel: OptimisticMutating {
     /// The relation declares its inverse, so appending on the shelf side moves the item
     /// side too; a book may sit on several étagères at once. Already-filed items are
     /// dropped — the menu never offers them, this only guards against a double tap.
-    /// One book from the menu (`addItem`), several from the v2 « Ajouter des livres ».
+    /// One book from the menu, several from the v2 « Ajouter des livres »: the same write.
     func addItems(_ items: [InventoryItem], to shelf: Shelf, modelContext: ModelContext) {
         let newItems: [InventoryItem] = items.filter { item in !shelf.items.contains { $0._id == item._id } }
         guard newItems.isEmpty == false else { return }
+        let newIds: Set<String> = .init(newItems.map(\._id))
 
         membershipWrite(
             modelContext,
             action: "add-items",
             shelf: shelf,
-            items: newItems,
+            itemIds: newItems.map(\._id),
             apply: { shelf.items.append(contentsOf: newItems) },
-            revert: { shelf.items.removeAll { item in newItems.contains { $0._id == item._id } } }
+            revert: { shelf.items.removeAll { newIds.contains($0._id) } }
         )
     }
 
@@ -257,9 +258,9 @@ final class ShelfModel: OptimisticMutating {
             modelContext,
             action: "remove-items",
             shelf: shelf,
-            items: [item],
+            itemIds: [itemId],
             apply: { shelf.items.removeAll { $0._id == itemId } },
-            revert: { shelf.items.append(item) }
+            revert: { if item.isStillInTheStore { shelf.items.append(item) } }
         )
     }
 
@@ -275,16 +276,15 @@ final class ShelfModel: OptimisticMutating {
         _ modelContext: ModelContext,
         action: String,
         shelf: Shelf,
-        items: [InventoryItem],
+        itemIds: [String],
         apply: () -> Void,
         revert: @escaping () -> Void
     ) {
         Self.raiseMembershipGate()
-        let itemIds: [String] = items.map(\._id)
 
         let cycle: Task<Void, Never> = optimistic(
             modelContext,
-            subjects: [shelf] + items,
+            subjects: [shelf],
             apply: apply,
             revert: revert,
             request: { [weak self] in
@@ -411,14 +411,14 @@ final class ShelfModel: OptimisticMutating {
             return shelf
         }
 
-        addItem(item, to: shelf, modelContext: modelContext)
+        addItems([item], to: shelf, modelContext: modelContext)
         return shelf
     }
 
     /// Files several items onto an étagère in one `add-items` call and **waits** for the
     /// server's answer.
     ///
-    /// The awaiting counterpart of `addItem`, which is optimistic and fire-and-forget by
+    /// The awaiting counterpart of `addItems`, which is optimistic and fire-and-forget by
     /// design: that fits a menu tap on one book, but a sequenced bulk apply has to know
     /// per étagère whether the write landed before it ticks that étagère off and moves
     /// to the next one. Same endpoint, same payload, same reconcile — only the waiting

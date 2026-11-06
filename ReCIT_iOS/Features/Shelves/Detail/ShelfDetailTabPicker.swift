@@ -14,10 +14,21 @@
 import SwiftUI
 
 struct ShelfDetailTabPicker: View {
-    @Binding var selection: ShelfDetailTab
     let position: TabPagerPosition
     /// How many books the étagère holds, for the first tab's label.
     let count: Int
+
+    @Binding var selection: ShelfDetailTab
+
+    init(
+        selection: Binding<ShelfDetailTab>,
+        position: TabPagerPosition,
+        count: Int
+    ) {
+        self.position = position
+        self.count = count
+        self._selection = selection
+    }
 
     var body: some View {
         LensTabPicker(selection: $selection, pagePosition: position.pagePosition) { tab in

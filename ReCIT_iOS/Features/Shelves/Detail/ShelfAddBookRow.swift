@@ -28,11 +28,18 @@ struct ShelfAddBookRow: View {
                 InventoryCell(item: item, filterParameter: .userInventory)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .contentShape(Rectangle())
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(AccessibilityID.row)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    }
+}
+
+private extension ShelfAddBookRow {
+    enum AccessibilityID {
+        static let row: String = "e2e.shelf.addBooks.row"
     }
 }
 

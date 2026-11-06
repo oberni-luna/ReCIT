@@ -64,6 +64,7 @@ Scope: `origin/main..wa/50-hide-tab-bar-on-pushed-screens` (code). LENSES: style
 
 - 🟡 `View+hidesTabBarWhenPushed.swift:7` — [style] rationale in the file header (style.md: nothing after « Created by ») → **fixed**: header back to the Xcode default, one line of why in the `///` of `hidesTabBarWhenPushed(on:)`, plus `- Parameter path:`. Comments only.
 - Round 2: ✅ review clean.
+- Wiki: `docs/wiki/features/0088-tab-bar-hidden-on-pushed-screens.md`, a line in `claude.md` « Shipped features », 0088 in `network.md`, `lists.md`, `platform-and-design.md`, « Since 0088 » quote in 0060.
 - Noted, accepted by the criteria: on an interactive swipe-back the bar fades in after the swipe ends, not with it.
 
 ## Verification

@@ -61,6 +61,10 @@ created: 2026-11-06
 
 ## Verification
 
-manual validation — not run by agent. Owed: every acceptance criterion on screen — counts, sections, both directions, row → Échange and back, dot, empty state, swipes, header fold on four pages, largest text size scrolling, my own profile with three tabs, light/dark, a list's Livres | Présentation unchanged.
+PM on the simulator (iPhone 17, iOS 26.4, light, merged build):
+- ✅ Friend OlivierB: tab row « Inventaire • 138 · Listes • 2 · Échanges • 1 · Présentation » with a tinted dot, four tabs fit at default size.
+- ✅ Tap « Échanges » → « En cours » with the one ongoing transaction (« Vous souhaitez l'emprunter à OlivierB », Demandé), no « Terminés » section.
+
+Still yours: Owed: every acceptance criterion on screen — counts, sections, both directions, row → Échange and back, dot, empty state, swipes, header fold on four pages, largest text size scrolling, my own profile with three tabs, light/dark, a list's Livres | Présentation unchanged.
 
 ## Feedback

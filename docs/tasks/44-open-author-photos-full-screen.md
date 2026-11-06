@@ -49,11 +49,16 @@ created: 2026-11-06
 - `EnlargeablePhotoModifier.swift`: doc comment only. No new string (reuses `photo.action.enlarge`).
 - Glossary « Plein écran » still reads "on black": proposed change in the run report, not written.
 - Proof: build ✅ (SwiftLint in the build).
+- Runtime fix (autopilot, PM check): the author photo was invisible at rest. Cause: `.zoom(from: .full)` handed `matchedTransitionSource` a `.rect(cornerRadius: 360)` clip on a 64 pt photo, which leaves nothing visible. `EnlargeablePhotoModifier` now measures the source (`onGeometryChange`) and caps the clip radius at half its smaller side (`sourceCornerRadius(_:)`): 32 pt for the author circle; `.medium` (group photo) unchanged.
 
 ## Review
 
 ## Verification
 
-manual validation — not run by agent. Owed: zoom out of / back into the author circle; material in light and dark, iOS 26 and iOS 18; screen underneath blurred, never plain black; author row on the Fiche livre still opens the author.
+PM on the simulator (iPhone 17, iOS 26.4, light, merged build + fix):
+- ✅ Auteur·ice screen (John Steinbeck): round photo shown at rest (was blank before the fix).
+- ✅ Tap → Plein écran, photo fitted, light Regular material, « Fermer » legible; « Fermer » → back on the Auteur·ice screen, photo shown.
+
+Still yours: zoom out of / back into the author circle as an animation; material in light and dark, iOS 26 and iOS 18; screen underneath blurred, never plain black; author row on the Fiche livre still opens the author.
 
 ## Feedback

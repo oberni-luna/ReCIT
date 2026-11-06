@@ -1,6 +1,6 @@
 ---
 issue: 50
-status: to-test
+status: to-close
 wiki: [[network]], [[lists]], [[platform-and-design]], [[features/0060-list-cover-flow]], [[features/0028-network-tab-and-groups]], [[features/0068-lists-in-my-network]]
 note: "quand on navigue depuis l'écran « Réseau » vers le détail d'un groupe ou d'un user, il faut faire disparaître la tabbar en bas. C'est déjà le cas pour les Listes, mais c'est pas fluide. Peux tu faire disparaître la tabbar pour l'écran des listes et pour l'écran réseau, mais que ce soit fluide et animé (en utilisant des features framework serait mieux)"
 created: 2026-11-06
@@ -57,6 +57,14 @@ created: 2026-11-06
 - Proof: build ✅ (SwiftLint in the build).
 
 ## Review
+
+### Round `validation` — 2026-11-06
+
+Scope: `origin/main..wa/50-hide-tab-bar-on-pushed-screens` (code). LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `View+hidesTabBarWhenPushed.swift:7` — [style] rationale in the file header (style.md: nothing after « Created by ») → **fixed**: header back to the Xcode default, one line of why in the `///` of `hidesTabBarWhenPushed(on:)`, plus `- Parameter path:`. Comments only.
+- Round 2: ✅ review clean.
+- Noted, accepted by the criteria: on an interactive swipe-back the bar fades in after the swipe ends, not with it.
 
 ## Verification
 

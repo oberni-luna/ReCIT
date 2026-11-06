@@ -95,12 +95,8 @@ struct ListElementsPage: View {
             .toolbar {
                 // The comment spans lines, so the return key starts a new one: this is the way to
                 // say the comment is done, and leaving the field is what writes it.
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-
-                    Button("action.ok") {
-                        isCommentFocused = false
-                    }
+                KeyboardOKButton {
+                    isCommentFocused = false
                 }
             }
             .task {

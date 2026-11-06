@@ -1,6 +1,6 @@
 ---
 issue: 45
-status: todo
+status: to-test
 wiki: [[lists]], [[book-and-editions]], [[platform-and-design]]
 note: screenshot — Liste, Commentaire focused, OK glued to the keyboard's top edge (iOS 26 glass)
 created: 2026-11-06
@@ -34,8 +34,17 @@ created: 2026-11-06
 
 ## Implementation
 
+- New `ReCIT_iOS/Features/Components/KeyboardOKButton.swift`: a `ToolbarContent` (`ToolbarItemGroup(placement: .keyboard)`, `Spacer()` + `Button("action.ok")`), `.glassProminentButtonStyle()` then `.padding(.all, .small)` for the 8 pt gap; identifier `keyboard.ok`; `.sharedBackgroundVisibility(.hidden)` on iOS 26 so the button does not sit inside the bar's glass ring (same pattern as `ProfileToolbarItem`).
+- `View+glass.swift`: `glassProminentButtonStyle()` — `.glassProminent` on iOS 26+, `.borderedProminent` before.
+- `ListElementsPage`: inline keyboard `ToolbarItemGroup` replaced by `KeyboardOKButton { isCommentFocused = false }`.
+- `AutosavingTextField`: `.toolbar { if isFocused { KeyboardOKButton { isFocused = false } } }` — only the focused field adds the item, so Commentaire + Note privée show one OK; focus loss still calls `save`.
+- Return key untouched. No new string, no pbxproj edit, baseline untouched.
+- Proof: build ✅ (SwiftLint in the build).
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent. Unseen: the 8 pt gap above the keyboard on iOS 26 and iOS 18; the OK showing from an `AutosavingTextField` inside a `List` row of the Fiche livre.
 
 ## Feedback

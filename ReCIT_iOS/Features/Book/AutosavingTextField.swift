@@ -49,6 +49,15 @@ struct AutosavingTextField: View {
         .accessibilityIdentifier(identifier)
         .withLabel(label: String(localized: label))
         .focused($isFocused)
+        .toolbar {
+            // Keyboard items gather from the whole screen: only the focused field offers its
+            // « OK », so two fields on one screen still show one.
+            if isFocused {
+                KeyboardOKButton {
+                    isFocused = false
+                }
+            }
+        }
         .onChange(of: isFocused) { _, focused in
             if !focused {
                 save(draft)

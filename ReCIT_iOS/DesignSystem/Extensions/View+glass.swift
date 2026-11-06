@@ -20,6 +20,16 @@ extension View {
         }
     }
 
+    /// `.buttonStyle(.glassProminent)` from iOS 26, `.borderedProminent` before it.
+    @ViewBuilder
+    func glassProminentButtonStyle() -> some View {
+        if #available(iOS 26.0, *) {
+            buttonStyle(.glassProminent)
+        } else {
+            buttonStyle(.borderedProminent)
+        }
+    }
+
     /// An interactive glass circle from iOS 26, a material circle before it.
     @ViewBuilder
     func interactiveGlassCircle() -> some View {

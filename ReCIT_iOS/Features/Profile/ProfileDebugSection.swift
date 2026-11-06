@@ -45,11 +45,7 @@ struct ProfileDebugSection: View {
     /// `AutoSortModel` and the bilan's illustration read the inventory this way.
     @Query private var allItems: [InventoryItem]
 
-    @State private var isPresentingWelcome: Bool = false
     @State private var isPresentingTally: Bool = false
-    /// Set when the accueil is dismissed through its call to action, so the scanner opens
-    /// only then — a cover cannot be raised from inside the one that is leaving.
-    @State private var scanWasChosen: Bool = false
 
     /// What the bilan would report. The real one carries the count of the session that just
     /// ran; standing in for it with the books that are actually unshelved keeps the screen
@@ -98,28 +94,14 @@ struct ProfileDebugSection: View {
 
     var body: some View {
         Section("Debug") {
-            Button("Ouvrir l'onboarding scan") {
-                isPresentingWelcome = true
-            }
-            .foregroundStyle(.foregroundTinted)
-            // A tester's way of replaying the accueil without emptying their library. It was
-            // also the end-to-end scenario's fallback into the scanner, back when the only other
-            // toolbar carrying the scan action belonged to the search tab — which
-            // `Tab(role: .search)` withdrew from the screen. Issue 0074 deleted that tab and the
-            // inventory inherited the toolbar, so the scenario now opens the scanner from
-            // `e2e.shelves.scan` like a user would, and no longer passes through here. The
-            // identifier stays: it costs nothing and it is still the only way to reach the
-            // accueil on a full library.
-            .accessibilityIdentifier("e2e.debug.scanOnboarding")
-
             Button("Ouvrir l'onboarding auto-sort") {
                 isPresentingTally = true
             }
             .foregroundStyle(.foregroundTinted)
 
-            // The accueil in situ: presented by the gate rather than by a button, which is
-            // the one path the two rows above cannot exercise. Its binding is derived, so
-            // this takes effect at once where the conditions hold — not at the next launch.
+            // The accueil, presented by the gate the way a new user meets it: its binding is
+            // derived, so this takes effect at once where the conditions hold — not at the next
+            // launch.
             Button("Rejouer l'accueil en situation") {
                 guard let userId: String = userModel.myUser?._id else { return }
 
@@ -148,18 +130,6 @@ struct ProfileDebugSection: View {
             Text(stateLine)
                 .textStyle(.footnote200)
                 .foregroundStyle(.foregroundSecondary)
-        }
-        // The accueil, then the scanner it leads to, so the chain can be walked on a device
-        // exactly as a new user would walk it — including the real bilan at the end of the
-        // session, which the scanner owns and this section does not fake.
-        .fullScreenCover(isPresented: $isPresentingWelcome, onDismiss: openScannerIfChosen) {
-            OnboardingWelcomeView(
-                onScan: {
-                    scanWasChosen = true
-                    isPresentingWelcome = false
-                },
-                onLater: { isPresentingWelcome = false }
-            )
         }
         // The bilan on its own, standing in for the end of a session. Its CTA pushes onto
         // this screen's path rather than the session's, which is the one thing here that is
@@ -199,13 +169,6 @@ struct ProfileDebugSection: View {
         case .switchedOff: "désactivée"
         case .downloading: "téléchargement en cours"
         }
-    }
-
-    private func openScannerIfChosen() {
-        guard scanWasChosen else { return }
-
-        scanWasChosen = false
-        sortFlow.presentScanning()
     }
 }
 

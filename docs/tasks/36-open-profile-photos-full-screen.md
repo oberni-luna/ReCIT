@@ -1,6 +1,6 @@
 ---
 issue: 36
-status: to-test
+status: to-close
 wiki: [[network]], [[features/0029-full-screen-cover]], [[features/0064-a-friends-profile-with-tabs]], [[features/0028-network-tab-and-groups]]
 note: pouvoir ouvrir les photos des ami.e.s et des groupes en full screen, comme les covers des livres
 created: 2026-11-06
@@ -27,7 +27,7 @@ created: 2026-11-06
 
 - Profil d'un ami with a photo: the photo shows in the header, at rest and folded.
 - Same profile, header at rest: tap the photo → the Plein écran slides up, black backdrop, « Fermer » top right. No zoom: over `TabPager`'s UIKit pages, a zoom source hides the photo.
-- Same profile, scrolled until the header folds: tap the 48 pt photo in the bar → the Plein écran opens from there.
+- Same profile, scrolled until the header folds: the 48 pt photo in the bar opens nothing — the navigation bar takes the tap (accepted 2026-11-06).
 - In the Plein écran: double-tap fills then fits; pinch zooms; swipe down or « Fermer » goes back to the profile, header in the state it was.
 - Groupe screen with a photo: tap the header's photo → it zooms out to the Plein écran.
 - Friend or group without a photo: tapping the grey disc does nothing; VoiceOver reads no button there.
@@ -61,9 +61,10 @@ Round validation · /wa-close · 2026-11-06
   - [correctness] The button's label was `accessibilityHidden` → the button is its own element: label « Agrandir la photo », `.isButton`, `accessibilityAction`.
   - [elegance] Optional radius doubled as the zoom switch → `EnlargeablePhotoModifier.Opening` (`.slideUp`, `.zoom(from:)`), one `fullScreenCover`.
   - [style] `clipShape(RoundedRectangle(…))` → `.rect(cornerRadius:)`.
-- Open, the user's pick:
+- Open → accepted by the user (2026-11-06):
   - 🟠 [correctness] `UserProfileStickyHeader` — the folded 48 pt photo sits in the navigation bar's row; the bar takes the tap, nothing opens (criterion 3). A `ToolbarItem(.principal)` carrying the tap was tried and reverted: the item is in the accessibility tree but taps still opened nothing.
   - 🟡 [correctness] `GroupHeaderView` — a picture URL that fails to load still makes a button; a tap opens an empty black Plein écran (criterion 6).
+- Accepted limits: the folded photo does not open; a group picture URL that fails to load still opens an empty Plein écran.
 - Runtime, iPhone 17 sim (read only): photo shows at rest, tap → Plein écran, swipe down closes; one « Agrandir la photo » button `e2e.user.photo` in the accessibility tree; folded tap fails.
 - Build ✅ (SwiftLint). No unit test: no logic.
 

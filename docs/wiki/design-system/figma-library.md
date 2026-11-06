@@ -777,8 +777,8 @@ c'est ce qu'il faut lire avant de « réparer » leur binding. Même raisonnemen
 lieu d'être normalisé vers `shadow/soft`. Côté Swift, la règle est portée par `ShelfPalette`, pas par
 `DesignSystem.Color`, exactement pour la même raison : ces teintes dépeignent un objet physique, pas du chrome.
 
-`shadow/soft` consolide **trois** littéraux `0.1` séparés (`ScaleButtonStyle`, `CellThumbnail`, `EntityImageView`) —
-une valeur en dur qui revient trois fois est un token qui manque.
+`shadow/soft` est née pour consolider **trois** littéraux `0.1` séparés (`ScaleButtonStyle`, `CellThumbnail`,
+`EntityImageView`) ; seul `EntityImageView` reste, sous `.entityGlow`.
 
 Les alphas d'ombre vivent ici, dans des variables **couleur**, et non dans la collection `Opacity` : une couleur
 bindée porte son alpha elle-même, et `setBoundVariableForEffect(effect, 'color', v)` ne binde que la couleur.

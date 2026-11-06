@@ -1,6 +1,6 @@
 ---
 issue: 10
-status: to-test
+status: to-close
 wiki: [[design-system/figma-library]], [[features/0005-shelf-label-and-add]]
 note: Migrated from docs/issues/0014-factorize-shadow-styles.md. Android counterpart split to #49.
 created: 2026-11-06
@@ -63,6 +63,14 @@ created: 2026-11-06
 - Baseline unchanged. Proof: build ✅ (SwiftLint in the build).
 
 ## Review
+
+### Round `validation` — 2026-11-06
+
+Scope: `origin/main..wa/10-factor-remaining-shadow-styles`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `docs/wiki/design-system/figma-library.md:780` — [correctness] paragraph still said `shadow/soft` consolidates three `0.1` literals, contradicting l.765 → **fixed**: « née pour consolider trois littéraux … ; seul `EntityImageView` reste, sous `.entityGlow` ».
+- Round 2: ✅ review clean.
+- Checked: five cases, values identical to the removed literals, `.shadow(color:` zero hits, doc line numbers match the 11 call sites, baseline unchanged.
 
 ## Verification
 

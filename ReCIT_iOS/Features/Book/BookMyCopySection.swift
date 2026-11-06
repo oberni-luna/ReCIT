@@ -38,7 +38,7 @@ struct BookMyCopySection: View {
     private var section: some View {
         Section("edition.my_inventory") {
             AutosavingTextField(
-                String(localized: "inventory.item.my_notes"),
+                "inventory.item.my_notes",
                 placeholder: "inventory.item.write_notes",
                 value: item.details,
                 identifier: AccessibilityID.details,
@@ -46,7 +46,7 @@ struct BookMyCopySection: View {
             )
 
             AutosavingTextField(
-                String(localized: "inventory.item.private_note"),
+                "inventory.item.private_note",
                 placeholder: "inventory.item.write_private_note",
                 value: item.notes,
                 identifier: AccessibilityID.notes,

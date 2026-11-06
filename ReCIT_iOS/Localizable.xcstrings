@@ -10447,7 +10447,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "My notes"
+            "value" : "What I think"
           }
         },
         "fr" : {
@@ -10561,7 +10561,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Write a note"
+            "value" : "Write a comment"
           }
         },
         "fr" : {

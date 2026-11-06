@@ -29,8 +29,8 @@ Product objects and notions, their states, roles, plans. Users see these: one co
 | Groupe | Group | — | Communauté | `StoredGroup` | readers sharing their books → [[features/0028-network-tab-and-groups]] |
 | Échange | Transaction | demande, prêt | Order | `UserTransaction` | give, lend or sell request on a copy → [[features/0071-a-request-names-what-it-asks-for]] |
 | Données bibliographiques | Bibliographic data | métadonnées | — | `EditionBibliographicClaims` | an edition's claims on inventaire.io → [[features/0050-every-bibliographic-datum]] |
-| Commentaire | Comment | « Ce que j'en pense » | — | `InventoryItem.details` | my word on a book, seen by whoever sees the book |
-| Note privée | Private note | « Ce que je garde pour moi » | — | `InventoryItem.notes` | my word on a book, seen by me alone |
+| Commentaire | Comment | — | — | `InventoryItem.details` | labelled « Ce que j'en pense », seen by whoever sees the book |
+| Note privée | Private note | — | — | `InventoryItem.notes` | labelled « Ce que je garde pour moi », seen by me alone |
 
 
 ## Screens

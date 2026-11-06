@@ -37,6 +37,9 @@ final class MockAPIService: APIServicing {
     /// Called with the index of each send that carries a payload, before its stub answers. A
     /// throw fails that call alone — the second of three to one endpoint, say.
     var onSend: ((Int) throws -> Void)?
+    /// Awaited with the index of each send that carries a payload, after `onSend`: keeps that
+    /// call in flight while the model goes on.
+    var holdSend: (@MainActor (Int) async throws -> Void)?
 
     // MARK: - Stubbing
 
@@ -84,6 +87,7 @@ final class MockAPIService: APIServicing {
         let index: Int = sentPayloads.count
         sentPayloads.append((try? JSONEncoder().encode(payload)) ?? Data())
         try onSend?(index)
+        try await holdSend?(index)
         return try decodeStub(for: endpoint)
     }
 

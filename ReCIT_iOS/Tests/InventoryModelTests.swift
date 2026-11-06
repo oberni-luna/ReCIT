@@ -208,6 +208,37 @@ struct InventoryModelTests {
         #expect(reporter.lastFailure != nil)
     }
 
+    @Test
+    func `a second write of a note waits for the first to be answered`() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let item: InventoryItem = Fixture.inventoryItem(id: "i1", edition: Fixture.edition(uri: "isbn:1"))
+        context.insert(item)
+        try context.save()
+
+        let mock: MockAPIService = .init()
+        mock.stub("/api/items/bulk-update", json: #"{"ok":true}"#)
+        var sendsBeforeTheFirstAnswer: Int?
+        mock.holdSend = { [unowned mock] index in
+            guard index == 0 else { return }
+            try await Task.sleep(for: .milliseconds(100))
+            sendsBeforeTheFirstAnswer = mock.sentPayloads.count
+        }
+        let reporter: AppErrorReporter = .init()
+        let model: InventoryModel = .init(apiService: mock, errorReporter: reporter)
+
+        model.updateItemTextOptimistic(item: item, attribute: .notes, text: "ab", modelContext: context)
+        let firstWrite: Task<Void, Never>? = model.inFlightTask
+        model.updateItemTextOptimistic(item: item, attribute: .notes, text: "abc", modelContext: context)
+
+        await firstWrite?.value
+        await model.inFlightTask?.value
+        let sent: [String] = try mock.sentPayloads.map { try JSONDecoder().decode(UpdateItemsDTO.self, from: $0).value }
+        #expect(sendsBeforeTheFirstAnswer == 1)
+        #expect(sent == ["ab", "abc"])
+        #expect(item.notes == "abc")
+        #expect(reporter.lastFailure == nil)
+    }
+
     @Test("updateItemTransactionOptimistic persists locally immediately and confirms")
     func updateTransactionOptimistic() async throws {
         let context: ModelContext = try TestStore.makeContext()

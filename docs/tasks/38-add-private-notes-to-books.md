@@ -1,6 +1,6 @@
 ---
 issue: 38
-status: to-test
+status: to-close
 wiki: [[book-and-editions]], [[architecture]], [[design-system/figma-library]]
 note: Figma — field `notes` 953:8367 (file S7IvC6GvlcUFe5IgbtvQq6)
 created: 2026-11-06
@@ -56,6 +56,17 @@ Round 1 · autopilot · 2026-11-06
 - Stale baseline entries (BookMyCopySection `type_contents_order`, two renamed `@Test`s) only shrink `.swiftlint.baseline`.
 
 ## Review
+
+Round validation · /wa-close · 2026-11-06
+
+- Verifier, cumulative diff from `origin/main`, lenses style ✓ elegance ✓ structure ✓ correctness ✓. 5 findings, all 🟡, all fixed by autofix in one round; re-verified clean.
+  - [correctness] English Commentaire read "My notes" / "Write a note" above the private field → "What I think" / "Write a comment" (`inventory.item.my_notes`, `inventory.item.write_notes`; French unchanged).
+  - [correctness] Autosave PUTs of one field on one book could land out of order → `InventoryModel.lastTextWrites`: each write awaits the previous one. Test: a second write waits for the first (`MockAPIService.holdSend`).
+  - [style] Glossary `Also` held the app's own labels → moved into `Means`.
+  - [elegance] `AutosavingTextField` label → `LocalizedStringResource`, resolved in the view.
+  - [style] `autosaveDelay` → `private`.
+- Build ✅ (iPhone 17 Pro sim, SwiftLint). Tests ✅ 23/23: InventoryModelTests, ModelMappingTests, ModelContainerMigrationTests, OptimisticRunnerTests.
+- Code changed since the user's test: the write ordering and the English Commentaire strings. Not re-run on a device.
 
 ## Verification
 

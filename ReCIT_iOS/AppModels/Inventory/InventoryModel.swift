@@ -21,6 +21,8 @@ final class InventoryModel: OptimisticMutating {
 
     /// Most recent optimistic background task, exposed so tests can await it.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
+    /// The last write of each book's text, which the next write of that text waits for.
+    @ObservationIgnored private var lastTextWrites: [TextWrite: Task<Void, Never>] = [:]
 
     init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
@@ -232,7 +234,9 @@ final class InventoryModel: OptimisticMutating {
     ) {
         let keyPath: ReferenceWritableKeyPath<InventoryItem, String> = attribute.keyPath
         let previous: String = item[keyPath: keyPath]
-        inFlightTask = optimistic(
+        let write: TextWrite = .init(itemID: item._id, attribute: attribute)
+        let earlierWrite: Task<Void, Never>? = lastTextWrites[write]
+        let task: Task<Void, Never> = optimistic(
             modelContext,
             subjects: [item],
             apply: { item[keyPath: keyPath] = text },
@@ -243,10 +247,13 @@ final class InventoryModel: OptimisticMutating {
                 }
             },
             request: { [weak self] in
+                await earlierWrite?.value
                 let response: UpdateItemsResponseDTO? = try await self?.updateItems(ids: [item._id], attribute: attribute.rawValue, value: text)
                 guard response?.ok == true else { throw NetworkError.badResponse }
             }
         )
+        lastTextWrites[write] = task
+        inFlightTask = task
     }
 
     func updateItems(ids: [String], attribute: String, value: String?) async throws -> UpdateItemsResponseDTO? {
@@ -280,5 +287,12 @@ final class InventoryModel: OptimisticMutating {
             predicate: #Predicate { shelf in ids.contains(shelf._id) }
         )
         return (try? modelContext.fetch(descriptor)) ?? []
+    }
+}
+
+private extension InventoryModel {
+    struct TextWrite: Hashable {
+        let itemID: String
+        let attribute: InventoryItemTextAttribute
     }
 }

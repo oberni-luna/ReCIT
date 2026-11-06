@@ -11,9 +11,9 @@ import SwiftUI
 /// loss, and on leaving the screen. `save` decides whether the text changed.
 struct AutosavingTextField: View {
     /// How long typing must pause before the text is saved.
-    static let autosaveDelay: Duration = .seconds(1)
+    private static let autosaveDelay: Duration = .seconds(1)
 
-    private let label: String
+    private let label: LocalizedStringResource
     private let placeholder: LocalizedStringKey
     private let value: String
     private let identifier: String
@@ -24,7 +24,7 @@ struct AutosavingTextField: View {
     @FocusState private var isFocused: Bool
 
     init(
-        _ label: String,
+        _ label: LocalizedStringResource,
         placeholder: LocalizedStringKey,
         value: String,
         identifier: String,
@@ -47,7 +47,7 @@ struct AutosavingTextField: View {
         .textStyle(.content300)
         .foregroundStyle(.foregroundDefault)
         .accessibilityIdentifier(identifier)
-        .withLabel(label: label)
+        .withLabel(label: String(localized: label))
         .focused($isFocused)
         .onChange(of: isFocused) { _, focused in
             if !focused {
@@ -79,7 +79,7 @@ struct AutosavingTextField: View {
     List {
         Section("edition.my_inventory") {
             AutosavingTextField(
-                String(localized: "inventory.item.private_note"),
+                "inventory.item.private_note",
                 placeholder: "inventory.item.write_private_note",
                 value: "",
                 identifier: "preview.privateNote",

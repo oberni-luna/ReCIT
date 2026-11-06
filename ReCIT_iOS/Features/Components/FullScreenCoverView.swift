@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-/// A picture — a book's cover, a reader's or a group's photo — alone on a dark screen, fitted to
-/// the whole of it: double-tap to fill the screen and again to fit it, pinch to look closer, drag
-/// to move around a magnified picture, swipe down or « Fermer » to go back.
+/// A picture — a book's cover, a reader's, a group's or an author's photo — alone over the
+/// screen it opened from, blurred behind the Regular material, fitted to the whole of it:
+/// double-tap to fill the screen and again to fit it, pinch to look closer, drag to move around
+/// a magnified picture, swipe down or « Fermer » to go back.
 struct FullScreenCoverView: View {
     private static let swipeDownDistanceToClose: CGFloat = 120
 
@@ -23,9 +24,9 @@ struct FullScreenCoverView: View {
     @GestureState private var pan: CGSize = .zero
     @State private var fittedSize: CGSize = .zero
     @State private var screenSize: CGSize = .zero
-    /// The black behind the cover, faded in rather than there from the first frame: present at
-    /// once, it was a dark card zooming out of the header around a cover not yet drawn — the
-    /// flash this screen opened with.
+    /// The material behind the cover, faded in rather than there from the first frame: present at
+    /// once, it was a card zooming out of the header around a cover not yet drawn — the flash
+    /// this screen opened with.
     @State private var backdropOpacity: Double = 0
     @State private var swipeDownOffset: CGFloat = 0
 
@@ -49,8 +50,14 @@ struct FullScreenCoverView: View {
             .controlSize(.large)
             .padding(.all, .medium)
         }
-        .background(.black.opacity(backdropOpacity))
-        // The presentation's own background stays clear, so the only black is the one above.
+        .background {
+            Rectangle()
+                .fill(.regularMaterial)
+                .opacity(backdropOpacity)
+                .ignoresSafeArea()
+        }
+        // The presentation's own background stays clear, so the screen underneath shows through
+        // the material above, blurred.
         .presentationBackground(.clear)
         .onAppear {
             withAnimation(.easeOut(duration: 0.3)) {
@@ -61,10 +68,6 @@ struct FullScreenCoverView: View {
         .onChange(of: screenSize) { measure() }
         // Swiping down to close would fight the drag that moves a magnified cover.
         .interactiveDismissDisabled(zoom.isZoomed)
-        // Dark for this screen alone. `preferredColorScheme` would carry it up to the window, and
-        // a light-mode app would turn dark behind the cover for the length of the zoom — the
-        // flash it opened with in light mode, and only there.
-        .environment(\.colorScheme, .dark)
         .statusBarHidden()
     }
 

@@ -9,6 +9,9 @@ The cover at the top of a book's screen was only a picture. A tap on it now open
 fitted to the whole screen — under the Dynamic Island and the home indicator too — zooming out of the header and
 back into it when closed.
 
+> Since [0085](0085-author-photos-full-screen.md), the black is the system Regular material, light or dark with the
+> appearance, for every Plein écran; it still fades in over 0.3 s.
+
 - **Double-tap** a fitted cover to make it fill the screen; double-tap a filled one, or one pinched to any other
   size, to fit it again.
 - **Pinch** to magnify, from fitted to ×4 — or further, up to filled, for a cover much narrower than the screen.

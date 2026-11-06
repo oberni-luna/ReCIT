@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// A reader's or a group's photo that opens in the Plein écran on a tap. Without a photo, the
-/// view is left as it is: nothing to open, nothing for VoiceOver to press.
+/// A reader's, a group's or an author's photo that opens in the Plein écran on a tap. Without a
+/// photo, the view is left as it is: nothing to open, nothing for VoiceOver to press.
 struct EnlargeablePhotoModifier: ViewModifier {
     /// How the Plein écran comes on screen.
     enum Opening {
@@ -23,6 +23,7 @@ struct EnlargeablePhotoModifier: ViewModifier {
     let opening: Opening
 
     @State private var isShowingFullScreen: Bool = false
+    @State private var sourceSize: CGSize = .zero
     @Namespace private var transition: Namespace.ID
 
     func body(content: Content) -> some View {
@@ -61,10 +62,15 @@ struct EnlargeablePhotoModifier: ViewModifier {
             button
         case let .zoom(cornerRadius):
             button
+                .onGeometryChange(for: CGSize.self) { $0.size } action: { sourceSize = $0 }
                 .matchedTransitionSource(id: url, in: transition) { source in
-                    source.clipShape(.rect(cornerRadius: cornerRadius))
+                    source.clipShape(.rect(cornerRadius: sourceCornerRadius(cornerRadius)))
                 }
         }
+    }
+
+    private func sourceCornerRadius(_ cornerRadius: DesignSystem.CornerRadius) -> CGFloat {
+        min(cornerRadius.rawValue, min(sourceSize.width, sourceSize.height) / 2)
     }
 
     @ViewBuilder

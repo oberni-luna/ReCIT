@@ -3,6 +3,9 @@
 Shipped on 2026-11-06, iOS only (issue #36). A book's cover already opened full screen from the Fiche livre
 ([0029](0029-full-screen-cover.md)). A reader's photo and a group's photo could only be seen at header size.
 
+> Since [0085](0085-author-photos-full-screen.md), the Plein écran sits over the system Regular material, not
+> on black, and follows the appearance.
+
 ## What it does
 
 - Profil d'un ami: tap the photo in the header at rest (96 pt) → the Plein écran slides up. Folded (48 pt), the

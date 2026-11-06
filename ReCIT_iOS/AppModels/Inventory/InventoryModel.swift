@@ -21,6 +21,8 @@ final class InventoryModel: OptimisticMutating {
 
     /// Most recent optimistic background task, exposed so tests can await it.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
+    /// The last write of each book's text, which the next write of that text waits for.
+    @ObservationIgnored private var lastTextWrites: [TextWrite: Task<Void, Never>] = [:]
 
     init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
@@ -222,29 +224,36 @@ final class InventoryModel: OptimisticMutating {
         )
     }
 
-    /// Optimistically sets the item's details/notes: persists locally at once,
+    /// Optimistically sets one of the item's texts: persists locally at once,
     /// pushes to the server in the background, and reverts on failure.
-    func updateItemDetailsOptimistic(
+    func updateItemTextOptimistic(
         item: InventoryItem,
-        details: String,
+        attribute: InventoryItemTextAttribute,
+        text: String,
         modelContext: ModelContext
     ) {
-        let previous: String = item.details
-        inFlightTask = optimistic(
+        let keyPath: ReferenceWritableKeyPath<InventoryItem, String> = attribute.keyPath
+        let previous: String = item[keyPath: keyPath]
+        let write: TextWrite = .init(itemID: item._id, attribute: attribute)
+        let earlierWrite: Task<Void, Never>? = lastTextWrites[write]
+        let task: Task<Void, Never> = optimistic(
             modelContext,
             subjects: [item],
-            apply: { item.details = details },
+            apply: { item[keyPath: keyPath] = text },
             revert: {
                 // Autosave can queue several writes; a stale failure must not clobber a newer note.
-                if item.details == details {
-                    item.details = previous
+                if item[keyPath: keyPath] == text {
+                    item[keyPath: keyPath] = previous
                 }
             },
             request: { [weak self] in
-                let response: UpdateItemsResponseDTO? = try await self?.updateItems(ids: [item._id], attribute: "details", value: details)
+                await earlierWrite?.value
+                let response: UpdateItemsResponseDTO? = try await self?.updateItems(ids: [item._id], attribute: attribute.rawValue, value: text)
                 guard response?.ok == true else { throw NetworkError.badResponse }
             }
         )
+        lastTextWrites[write] = task
+        inFlightTask = task
     }
 
     func updateItems(ids: [String], attribute: String, value: String?) async throws -> UpdateItemsResponseDTO? {
@@ -278,5 +287,12 @@ final class InventoryModel: OptimisticMutating {
             predicate: #Predicate { shelf in ids.contains(shelf._id) }
         )
         return (try? modelContext.fetch(descriptor)) ?? []
+    }
+}
+
+private extension InventoryModel {
+    struct TextWrite: Hashable {
+        let itemID: String
+        let attribute: InventoryItemTextAttribute
     }
 }

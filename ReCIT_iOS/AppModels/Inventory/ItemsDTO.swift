@@ -23,6 +23,7 @@ struct ItemDTO: Codable {
     let entity: String
     let transaction: String
     let details: String?
+    let notes: String?
     let visibility: [String]?
     let owner: String
     let created: Double

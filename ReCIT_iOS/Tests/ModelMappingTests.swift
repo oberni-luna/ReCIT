@@ -56,6 +56,35 @@ struct ModelMappingTests {
         #expect(item.searchIndex.contains("frank herbert"))
     }
 
+    @Test
+    func `an item reads its private note, and an empty one when the payload carries none`() throws {
+        let withNote: ItemDTO = try JSONDecoder().decode(ItemDTO.self, from: Data(itemJSON(notes: #""lent to Léa""#).utf8))
+        let withoutNote: ItemDTO = try JSONDecoder().decode(ItemDTO.self, from: Data(itemJSON(notes: nil).utf8))
+        let owner: User = Fixture.user(username: "reader")
+        let edition: Edition = .init(uri: withNote.entity, entitySnapshotDTO: withNote.snapshot, apiService: MockAPIService())
+
+        #expect(withNote.notes == "lent to Léa")
+        #expect(withoutNote.notes == nil)
+        #expect(InventoryItem(itemDTO: withNote, forUser: owner, edition: edition).notes == "lent to Léa")
+        #expect(InventoryItem(itemDTO: withoutNote, forUser: owner, edition: edition).notes.isEmpty)
+    }
+
+    @Test
+    func `a sync takes the private note it carries, and keeps mine when it carries none`() throws {
+        let owner: User = Fixture.user(username: "reader")
+        let item: InventoryItem = Fixture.inventoryItem(id: "item-42", edition: Fixture.edition(uri: "isbn:123"))
+        item.notes = "mine"
+
+        let sparse: ItemDTO = try JSONDecoder().decode(ItemDTO.self, from: Data(itemJSON(notes: nil).utf8))
+        item.update(from: sparse, forUser: owner, apiService: MockAPIService())
+        #expect(item.notes == "mine")
+
+        let edited: ItemDTO = try JSONDecoder().decode(ItemDTO.self, from: Data(itemJSON(notes: #""written on the site""#).utf8))
+        item.update(from: edited, forUser: owner, apiService: MockAPIService())
+        #expect(item.notes == "written on the site")
+        #expect(item.details == "mint condition")
+    }
+
     @Test("An EntityList persists together with its elements")
     func listPersistsWithElements() throws {
         let context: ModelContext = try TestStore.makeContext()
@@ -153,5 +182,22 @@ struct ModelMappingTests {
         let list: EntityList = .init(listDTO: dto, baseUrl: "")
 
         #expect(list.created == Date(timeIntervalSince1970: 1_700_000_000))
+    }
+
+    private func itemJSON(notes: String?) -> String {
+        let notesLine: String = notes.map { #""notes": \#($0),"# } ?? ""
+        return """
+        {
+          "_id": "item-42",
+          "_rev": "3-xyz",
+          "entity": "isbn:123",
+          "transaction": "giving",
+          "details": "mint condition",
+          \(notesLine)
+          "owner": "owner-7",
+          "created": 1700000000000,
+          "snapshot": { "entity:title": "Dune", "entity:authors": "Frank Herbert" }
+        }
+        """
     }
 }

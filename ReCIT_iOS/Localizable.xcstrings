@@ -10447,7 +10447,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "My notes"
+            "value" : "What I think"
           }
         },
         "fr" : {
@@ -10471,6 +10471,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Autre édition de"
+          }
+        }
+      }
+    },
+    "inventory.item.private_note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What I keep to myself"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que je garde pour moi"
           }
         }
       }
@@ -10545,13 +10561,29 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Write a note"
+            "value" : "Write a comment"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Écrire un commentaire"
+          }
+        }
+      }
+    },
+    "inventory.item.write_private_note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write a private note"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrire une note privée"
           }
         }
       }

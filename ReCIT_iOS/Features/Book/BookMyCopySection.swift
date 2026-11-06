@@ -22,15 +22,8 @@ struct BookMyCopySection: View {
 
     @Bindable var item: InventoryItem
 
-    @State private var draftDetails: String
-    @FocusState private var notesFocused: Bool
-
-    /// How long typing must pause before the note is saved.
-    static let autosaveDelay: Duration = .seconds(1)
-
     init(item: InventoryItem) {
         _item = Bindable(item)
-        _draftDetails = State(initialValue: item.details)
     }
 
     var body: some View {
@@ -44,38 +37,21 @@ struct BookMyCopySection: View {
 
     private var section: some View {
         Section("edition.my_inventory") {
-            TextField(
-                "inventory.item.write_notes",
-                text: $draftDetails,
-                axis: .vertical
+            AutosavingTextField(
+                "inventory.item.my_notes",
+                placeholder: "inventory.item.write_notes",
+                value: item.details,
+                identifier: AccessibilityID.details,
+                save: { save($0, to: .details) }
             )
-            .textStyle(.content300)
-            .foregroundStyle(.foregroundDefault)
-            .withLabel(label: String(localized: "inventory.item.my_notes"))
-            .focused($notesFocused)
-            .onChange(of: notesFocused) { _, focused in
-                if !focused {
-                    commitNotes()
-                }
-            }
-            .task(id: draftDetails) {
-                // Autosave: a vertical field has no return key to end editing, so waiting
-                // for focus loss alone left the note unsaved. Each keystroke restarts the wait.
-                try? await Task.sleep(for: Self.autosaveDelay)
-                guard !Task.isCancelled else { return }
-                commitNotes()
-            }
-            .onDisappear {
-                // Leaving the screen cancels the pending autosave; flush it.
-                commitNotes()
-            }
-            .onChange(of: item.details) { _, newValue in
-                // Keep the field in sync with background syncs / optimistic
-                // reverts, but never clobber what the user is currently typing.
-                if !notesFocused {
-                    draftDetails = newValue
-                }
-            }
+
+            AutosavingTextField(
+                "inventory.item.private_note",
+                placeholder: "inventory.item.write_private_note",
+                value: item.notes,
+                identifier: AccessibilityID.notes,
+                save: { save($0, to: .notes) }
+            )
 
             HStack {
                 Text("inventory.item.created_date \(item.created.formatted(date: .abbreviated, time: .omitted))")
@@ -102,14 +78,22 @@ struct BookMyCopySection: View {
         }
     }
 
-    /// Persists the edited note optimistically — after a pause in typing, on focus
+    /// Persists an edited text optimistically — after a pause in typing, on focus
     /// loss, or on leaving the screen — but only when it actually changed.
-    private func commitNotes() {
-        guard item.isStillInTheStore, draftDetails != item.details else { return }
-        inventoryModel.updateItemDetailsOptimistic(
+    private func save(_ text: String, to attribute: InventoryItemTextAttribute) {
+        guard item.isStillInTheStore, text != item[keyPath: attribute.keyPath] else { return }
+        inventoryModel.updateItemTextOptimistic(
             item: item,
-            details: draftDetails,
+            attribute: attribute,
+            text: text,
             modelContext: modelContext
         )
+    }
+}
+
+private extension BookMyCopySection {
+    enum AccessibilityID {
+        static let details: String = "e2e.book.details"
+        static let notes: String = "e2e.book.notes"
     }
 }

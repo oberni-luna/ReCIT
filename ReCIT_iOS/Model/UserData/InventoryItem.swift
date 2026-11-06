@@ -20,6 +20,7 @@ public final class InventoryItem {
     var updated: Date?
     var busy: Bool?
     var details: String
+    var notes: String = ""
     var searchIndex: String = ""
     var edition: Edition?
     var owner: User?
@@ -81,6 +82,7 @@ public final class InventoryItem {
             edition: edition
         )
         self.owner = forUser
+        self.notes = itemDTO.notes ?? ""
         self.searchIndex = InventoryItem.buildSearchIndex(
             ownerUsername: forUser.username,
             authorNames: itemDTO.snapshot.authorNames,
@@ -100,6 +102,9 @@ public final class InventoryItem {
         busy = itemDTO.busy
         if let details = itemDTO.details {
             self.details = details
+        }
+        if let notes = itemDTO.notes {
+            self.notes = notes
         }
         searchIndex = InventoryItem.buildSearchIndex(
             ownerUsername: forUser.username,

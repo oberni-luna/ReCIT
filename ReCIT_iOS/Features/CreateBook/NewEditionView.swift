@@ -23,6 +23,10 @@ struct NewEditionView: View {
     /// What went wrong last time, in the reader's terms. `nil` until something does.
     let failure: CreateBookFailure?
 
+    /// Whether the ISBN is typed rather than read off a barcode: then it is checked before
+    /// « Publier ».
+    let isISBNEditable: Bool
+
     let onPublish: () async -> Void
     let onClose: () -> Void
 
@@ -52,7 +56,13 @@ struct NewEditionView: View {
             NewEditionWorkSection(draft: $draft, onFindWork: onFindWork, onOpenNewWork: onOpenNewWork)
 
             Section {
-                CreateBookCoverRow(isbn: draft.isbn, imageData: $draft.cover, onPickURL: onPickCoverURL)
+                CreateBookCoverRow(
+                    isbn: draft.isbn,
+                    editableISBN: isISBNEditable ? $draft.isbn : nil,
+                    isISBNValid: draft.isISBNValid,
+                    imageData: $draft.cover,
+                    onPickURL: onPickCoverURL
+                )
             } header: {
                 CreateBookSectionHeader("edit_edition.cover.header")
             } footer: {
@@ -94,7 +104,7 @@ struct NewEditionView: View {
         .formActionBar {
             CreateBookPublishFooter(
                 failure: failure,
-                isPublishable: draft.isPublishable,
+                isPublishable: draft.isPublishable && (isISBNEditable == false || draft.isISBNValid),
                 onPublish: onPublish,
                 onClose: onClose
             )

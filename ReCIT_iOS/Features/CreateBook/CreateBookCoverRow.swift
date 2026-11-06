@@ -18,6 +18,9 @@
 //  being changed shows its ISBN-10 under it, and nothing at all when it has no ISBN — a label
 //  over an empty line read as a field left blank.
 //
+//  A book created from Recherche had no barcode: there the ISBN is a field, optional, its check
+//  digit verified before « Publier ».
+//
 //  See PRD 0015 and PRD 0026.
 //
 
@@ -30,6 +33,10 @@ struct CreateBookCoverRow: View {
     var isbnLabel: String = "create_book.isbn"
     /// The ISBN-10, shown under the ISBN when there is one.
     var isbn10: String?
+    /// The ISBN to type, in place of the one shown, when no barcode was read.
+    var editableISBN: Binding<String>?
+    /// Whether the ISBN typed can be published: none, or one whose check digit is right.
+    var isISBNValid: Bool = true
     /// The picture, as JPEG bytes; `nil` is none. What changing it undoes — an upload already
     /// made for the old one — is the draft's business, behind the binding.
     @Binding var imageData: Data?
@@ -52,7 +59,9 @@ struct CreateBookCoverRow: View {
             .accessibilityIdentifier("e2e.createBook.cover")
 
             VStack(alignment: .leading, spacing: .small) {
-                if isbn.isEmpty == false {
+                if let editableISBN {
+                    CreateBookISBNField(editableISBN, isValid: isISBNValid)
+                } else if isbn.isEmpty == false {
                     Text(isbn)
                         .textStyle(.content300)
                         .foregroundStyle(.foregroundDefault)

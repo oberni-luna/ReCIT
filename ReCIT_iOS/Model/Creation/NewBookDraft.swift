@@ -9,8 +9,8 @@
 //  Two shapes, decided by the work search the sheet opens on. A work inventaire.io already has:
 //  `workUri` names it, and only the edition is described — its title, its cover. A work of the
 //  reader's own: its title and its authors are described too, and created with the edition.
-//  The ISBN comes from the camera and is never edited. Everything else inventaire.io accepts on
-//  an edition — publisher, date, format, contributors, identifiers — is `properties`, the same
+//  The ISBN comes from the camera and is never edited there; opened from Recherche it is typed, or
+//  left empty. Everything else inventaire.io accepts on an edition — publisher, date, format, contributors, identifiers — is `properties`, the same
 //  value « Modifier l'édition » holds.
 //
 //  See PRD 0015 and PRD 0026.
@@ -20,9 +20,9 @@ import Foundation
 
 struct NewBookDraft: Equatable, Sendable {
 
-    /// The barcode, as the camera read it. May carry hyphens; `normalizedISBN` is what goes on
-    /// the wire.
-    let isbn: String
+    /// The barcode, as the camera read it, or what the reader typed — empty when they know none.
+    /// May carry hyphens; `normalizedISBN` is what goes on the wire.
+    var isbn: String
 
     /// The title printed on *this* edition's cover, which is not necessarily the work's: a
     /// translation, a reissue and a boxed set share a work and disagree about their covers.
@@ -94,10 +94,22 @@ struct NewBookDraft: Equatable, Sendable {
         return work.isEmpty ? trimmedTitle : work
     }
 
-    /// The ISBN without its separators, which is the form inventaire.io keys editions by.
-    /// `X` survives, being a legitimate ISBN-10 check character.
+    /// The ISBN without its separators, which is the form inventaire.io keys editions by: its
+    /// thirteen digits once its check digit is right, an ISBN-10 included. Otherwise only stripped,
+    /// `X` surviving as a legitimate ISBN-10 check character. Empty when there is no ISBN.
     var normalizedISBN: String {
-        isbn.uppercased().filter { $0.isNumber || $0 == "X" }
+        checkedISBN ?? isbn.uppercased().filter { $0.isNumber || $0 == "X" }
+    }
+
+    /// The ISBN as thirteen digits, once its check digit is right. `nil` while it is empty, or
+    /// wrong.
+    var checkedISBN: String? {
+        IsbnQuery.isbn(in: isbn)
+    }
+
+    /// Whether the ISBN can be published: none at all, or one whose check digit is right.
+    var isISBNValid: Bool {
+        isbn.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || checkedISBN != nil
     }
 
     var trimmedTitle: String {

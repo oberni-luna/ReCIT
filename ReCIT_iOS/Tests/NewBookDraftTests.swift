@@ -191,6 +191,34 @@ struct NewBookDraftTests {
         #expect(draft.isPublishable)
     }
 
+    // MARK: - The ISBN
+
+    @Test
+    func `an empty ISBN is valid and goes nowhere`() {
+        let draft: NewBookDraft = .init(isbn: " ")
+
+        #expect(draft.isISBNValid)
+        #expect(draft.checkedISBN == nil)
+        #expect(draft.normalizedISBN.isEmpty)
+    }
+
+    @Test
+    func `an ISBN with a wrong check digit is invalid`() {
+        let draft: NewBookDraft = .init(isbn: "9782070360025")
+
+        #expect(draft.isISBNValid == false)
+        #expect(draft.checkedISBN == nil)
+    }
+
+    @Test
+    func `a valid ISBN is checked and normalized`() {
+        let draft: NewBookDraft = .init(isbn: "978-2-07-036822-8")
+
+        #expect(draft.isISBNValid)
+        #expect(draft.checkedISBN == "9782070368228")
+        #expect(draft.normalizedISBN == "9782070368228")
+    }
+
     @Test("Only the first letter is raised")
     func capitalizingFirstLetterOnly() {
         #expect(NewBookDraft.capitalizingFirstLetter("le Guin et moi") == "Le Guin et moi")

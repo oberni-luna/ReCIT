@@ -50,6 +50,30 @@ struct ResolveRequestBuilderTests {
         #expect(request.entries.first?.edition.claims?["wdt:P212"] == ["9782380192741"])
     }
 
+    @Test
+    func `an edition without ISBN sends no ISBN claim`() throws {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(isbn: ""),
+            create: true,
+            language: "fr"
+        )
+
+        let claims: [String: [ClaimLiteral]] = try #require(request.entries.first?.edition.claims)
+        #expect(claims.keys.contains("wdt:P212") == false)
+        #expect(claims["wdt:P1476"] == ["La Main gauche de la nuit"])
+    }
+
+    @Test
+    func `a typed ISBN-10 travels as its ISBN-13`() {
+        let request: EntityResolveRequest = ResolveRequestBuilder.request(
+            for: draft(isbn: "2-07-036822-X"),
+            create: true,
+            language: "fr"
+        )
+
+        #expect(request.entries.first?.edition.claims?["wdt:P212"] == ["9782070368228"])
+    }
+
     @Test("The edition carries the title that is printed on this cover")
     func editionCarriesItsOwnTitle() {
         let request: EntityResolveRequest = ResolveRequestBuilder.request(

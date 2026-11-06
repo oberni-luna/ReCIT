@@ -25,6 +25,10 @@
 //  The failure carries the way out: the SnackBar says what went wrong and then goes away, so
 //  the screen keeps the only thing still actionable — a button that sends the same query again.
 //
+//  The absence carries a way out too: « Ajouter ce livre » opens « Nouveau livre » on the query,
+//  whatever « Mes livres » or « Chez mes amis » found above it. Only here: under results, a work
+//  found means adding an edition to it, which is another gesture.
+//
 //  Its copy is its own, never the recents' one: a query that found nothing and a history that
 //  holds nothing are two different silences, and one text for both would say neither.
 //
@@ -42,6 +46,8 @@ struct SearchRemoteSection: View {
     /// Sends the same query again. The only thing left to do after a failure.
     let onRetry: () -> Void
 
+    @Environment(\.openNewBook) private var openNewBook: OpenNewBookAction
+
     var body: some View {
         switch state.sign {
         case .loading:
@@ -52,7 +58,12 @@ struct SearchRemoteSection: View {
             EmptyStateView(
                 glyph: "magnifyingglass",
                 title: "inventory.search.results.empty.title",
-                message: "inventory.search.results.empty.message \(query)"
+                message: "inventory.search.results.empty.message \(query)",
+                action: .init(
+                    title: "inventory.search.results.empty.add_book",
+                    accessibilityIdentifier: AccessibilityID.addBook,
+                    handler: { openNewBook(.search(query: query)) }
+                )
             )
             // An absence is a statement about the whole answer, not one of its lines: no
             // separator under it, and room around it so it does not read as a result.
@@ -74,6 +85,12 @@ struct SearchRemoteSection: View {
         case nil:
             SearchResultsSection(results: state.results)
         }
+    }
+}
+
+private extension SearchRemoteSection {
+    enum AccessibilityID {
+        static let addBook: String = "e2e.searchNoResult.addBook"
     }
 }
 

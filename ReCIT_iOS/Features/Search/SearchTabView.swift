@@ -16,6 +16,10 @@
 //  tap on this tab while it is already showing, which also goes back to the root. Both arrive
 //  through `TabRouter`.
 //
+//  « Nouveau livre », opened from the absence of « Sur inventaire.io », is held here too: the
+//  sheet, what was typed in it by query while the tab lives, and the push of the new edition's
+//  Fiche livre on this stack once it is published.
+//
 //  See PRD 0020 and issue 0116.
 //
 
@@ -37,6 +41,13 @@ struct SearchTabView: View {
     /// Whether the field is up. Held so `TabRouter` can raise it: `.searchable` only takes that
     /// from a binding.
     @State private var isSearchPresented: Bool = false
+
+    /// The query « Nouveau livre » is up for, and nothing else: the sheet presents on it.
+    @State private var newBookOrigin: NewBookOrigin?
+    /// What was typed in « Nouveau livre » and not published, by query.
+    @State private var newBookDrafts: NewBookDrafts = .init()
+    /// The edition just published, opened once its sheet has gone.
+    @State private var createdBookURI: String?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -74,6 +85,18 @@ struct SearchTabView: View {
                 }
             }
         }
+        .environment(\.openNewBook, .init { newBookOrigin = $0 })
+        .sheet(item: $newBookOrigin, onDismiss: openCreatedBook) { origin in
+            NewBookFlowView(
+                origin: origin,
+                draft: newBookDrafts.draft(for: origin),
+                onCreated: { book in
+                    newBookDrafts.forget(origin)
+                    createdBookURI = book.uri
+                },
+                onKeepDraft: { newBookDrafts.remember($0, for: origin) }
+            )
+        }
         // On appearing as well as on change: the first request made is usually the one that
         // builds this tab, and it is already standing by the time the tab exists to see it.
         .onAppear(perform: raiseFieldIfAsked)
@@ -85,6 +108,13 @@ struct SearchTabView: View {
         .onChange(of: router.searchRootRequest) { _, _ in
             path = .init()
         }
+    }
+
+    /// Opens the Fiche livre of the book « Nouveau livre » has just published, if it has.
+    private func openCreatedBook() {
+        guard let createdBookURI else { return }
+        self.createdBookURI = nil
+        path.append(NavigationDestination.book(anchor: .edition(uri: createdBookURI)))
     }
 
     private func raiseFieldIfAsked() {

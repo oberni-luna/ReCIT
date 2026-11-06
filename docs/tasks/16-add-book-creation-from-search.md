@@ -1,6 +1,6 @@
 ---
 issue: 16
-status: todo
+status: to-test
 wiki: [[search]], [[book-and-editions]], [[features/0047-new-book-work-first]], [[features/0020-creating-a-book-that-inventaire-lacks]]
 note: migrated from docs/issues/0097-the-second-door-from-search.md (frame C6 of PRD 0015, out of v1 scope)
 created: 2026-11-06
@@ -82,3 +82,23 @@ or new work → edition form), opened from Recherche instead of the Scanner.
 - [ ] Close the sheet after typing a title, tap « Ajouter ce livre » again on the same query → the title is still there; on another query → blank form.
 - [ ] Scanner's « Nouveau livre » unchanged: ISBN read-only, same opening sentence.
 - [ ] New strings in French and English.
+
+## Implementation
+
+- New `Model/Creation/NewBookOrigin.swift` (`.scan(isbn:)` / `.search(query:)`: `isbn` through `IsbnQuery.isbn(in:)`, `isISBNEditable`, `workQuery` empty for an ISBN query, `blankDraft`) and `Model/Creation/NewBookDrafts.swift` (in-memory drafts keyed by origin; the scanner's drafts-by-ISBN use it too).
+- New `Features/CreateBook/CreateBookISBNField.swift` (number pad, « ISBN » + « Facultatif », error in `.foregroundError`), `OpenNewBookAction.swift` + `EnvironmentValues+OpenNewBook.swift` (`\.openNewBook`, built like `showBibliographicDataHelp`).
+- `NewBookDraft`: `isbn` is a `var`; `checkedISBN`, `isISBNValid` (empty or right check digit); `normalizedISBN` prefers `checkedISBN` (ISBN-10 sent as ISBN-13). `ResolveRequestBuilder`: no `wdt:P212` when the ISBN is empty.
+- `NewBookFlowView` takes `origin:`; work search pre-filled from `origin.workQuery`; language lookup `.task(id: draft.checkedISBN)`; cover search on `checkedISBN`. `NewEditionView`: « Publier » needs `isISBNValid` when the ISBN is editable. `CreateBookCoverRow`: editable field when opened from Recherche. `WorkSearchView`: `query:` init, no-ISBN opening sentence.
+- `SearchRemoteSection`: `.noResult` gets « Ajouter ce livre » (`e2e.searchNoResult.addBook`) → `openNewBook(.search(query:))`. `SearchTabView` holds the sheet, the drafts and the created edition, and pushes its Fiche livre on dismiss. `EmptyStateView.Action` takes an optional identifier. `SearchContent.swift` untouched: it sits in the baseline for `file_length` at its exact count, hence the environment action instead of a closure.
+- Scanner: passes `.scan(isbn:)`; ISBN read-only, `isPublishable` unchanged. Language lookup and cover search now run only for a valid check digit.
+- Strings fr + en: `create_book.isbn.invalid`, `create_book.isbn.placeholder`, `create_book.search.empty.no_isbn`, `inventory.search.results.empty.add_book`.
+- Notes: the error shows on focus loss or at 13 digits; `X` accepted when pasted, not typeable on the number pad; the ISBN pre-fill is the normalized 13 digits; `e2e.searchNoResult` on the whole empty state may hide the button's own identifier; WorkSearchView's `type_contents_order` baseline entries are stale.
+- Proof: build ✅ · tests ✅ 67/67 (NewBookDraftTests, NewBookDraftsTests, NewBookOriginTests, ResolveRequestBuilderTests, EntityCreationModelTests, BatchScanViewModelTests; 10 new). Nothing sent to inventaire.io.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent. Owed: every on-screen criterion, publishing included (never on a real account by an agent).
+
+## Feedback

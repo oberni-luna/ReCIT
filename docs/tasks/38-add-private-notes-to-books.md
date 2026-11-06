@@ -30,7 +30,7 @@ created: 2026-11-06
 ## Acceptance criteria
 
 - Fiche livre of a book I own: « Dans mon inventaire » shows « Ce que j'en pense », then « Ce que je garde pour moi », then the date and the mode d'échange.
-- The new field is empty with the placeholder « Écrire une note » when the book has no note.
+- The new field is empty with the placeholder « Écrire une note privée » when the book has no note.
 - Type a note, wait 1 s → `PUT /api/items/bulk-update` with `attribute: notes` and the text; « Ce que j'en pense » untouched.
 - Type a note and leave the screen at once → the note is saved; reopen the Fiche livre → it is there.
 - A note written on inventaire.io's website shows in the field after a sync, and the reverse.
@@ -59,9 +59,21 @@ Round 1 · autopilot · 2026-11-06
 
 ## Verification
 
+Round 2 · feedback · 2026-11-06
+
+- manual validation — not run by agent. run: yours.
+
 Round 1 · autopilot
 
 - ✅ Update over the previous store: the new build launched signed in on Inventaire, the store gained `ZNOTES`, 147 items kept, Commentaires intact.
 - ⚠️ Not run by agent: field order and placeholder, typing → PUT, leave and reopen, SnackBar on failure, book not owned. The simulator holds a real account (nothing typed), and input injection did not reach the app. Covered by unit tests: PUT with `attribute: notes`, revert, stale failure, merge.
 
 ## Feedback
+
+Round 2 · 2026-11-06
+
+- Asked: « mets plutot "Ecrire une note privée" dans le placeholder, ça rassure. »
+- Triage: adjustment — placeholder reworded, criterion updated.
+- Changes: `Localizable.xcstrings` › `inventory.item.write_private_note` — « Écrire une note privée » / "Write a private note". `inline`.
+- Review: deferred → /wa-validate. Verify: not run by agent, yours.
+- Rule captured: none.

@@ -10577,13 +10577,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Write a note"
+            "value" : "Write a private note"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Écrire une note"
+            "value" : "Écrire une note privée"
           }
         }
       }

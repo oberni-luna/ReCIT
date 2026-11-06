@@ -25,6 +25,10 @@ import SwiftUI
 import UIKit
 
 struct ListElementsPage: View {
+    /// The room left under the list while the comment is written, when the keyboard's own height
+    /// is not known yet.
+    private static let minimumKeyboardRoom: CGFloat = 320
+
     let list: EntityList
     let items: [EntityListItem]
     let isMine: Bool
@@ -37,8 +41,10 @@ struct ListElementsPage: View {
     let onSearch: () -> Void
     let onOpen: (String) -> Void
     let onRemove: (EntityListItem) -> Void
+    private var highlightedURI: String?
 
     @FocusState private var isCommentFocused: Bool
+    @AccessibilityFocusState private var isTitleFocused: Bool
     /// Bumped by every edit of the comment and by its focus: what makes the list follow the field
     /// as it grows (`ListKeyboardReveal`).
     @State private var commentEdits: Int = 0
@@ -47,10 +53,6 @@ struct ListElementsPage: View {
     @State private var keyboardTop: CGFloat = .infinity
     /// The keyboard's height, for the room left under the list while the comment is written.
     @State private var keyboardHeight: CGFloat = 0
-
-    /// The room left under the list while the comment is written, when the keyboard's own height
-    /// is not known yet.
-    private static let minimumKeyboardRoom: CGFloat = 320
 
     private var uris: [String] {
         items.map(\.uri)
@@ -117,6 +119,11 @@ struct ListElementsPage: View {
                     keyboardTop = .infinity
                 }
             }
+            .onChange(of: highlightedURI) { _, uri in
+                if uri != nil {
+                    isTitleFocused = true
+                }
+            }
             .onChange(of: isCommentFocused) { _, focused in
                 if focused {
                     commentEdits += 1
@@ -147,10 +154,13 @@ struct ListElementsPage: View {
                         selectedURI: $selectedURI,
                         onOpen: onOpen
                     )
+                    .highlighting(highlightedURI)
 
                     if let selectedURI {
                         ListCrossFade(id: selectedURI) {
                             ListSelectedTitle(uri: selectedURI, listType: list.type)
+                                .accessibilityElement(children: .combine)
+                                .accessibilityFocused($isTitleFocused)
                         }
                         .padding(.horizontal, .medium)
                     }
@@ -220,5 +230,15 @@ struct ListElementsPage: View {
                 .foregroundStyle(.foregroundSecondary)
                 .frame(maxWidth: .infinity)
         }
+    }
+}
+
+extension ListElementsPage {
+    /// Rings the cover the list has just arrived on from a book screen, and moves VoiceOver to
+    /// its title.
+    func highlighting(_ uri: String?) -> Self {
+        var copy: Self = self
+        copy.highlightedURI = uri
+        return copy
     }
 }

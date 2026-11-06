@@ -30,6 +30,7 @@ struct ListCoverFlowView: View {
     let listType: EntityListType
     @Binding var selectedURI: String?
     let onOpen: (String) -> Void
+    private var highlightedURI: String?
 
     /// A work's cover is the mockup's 172 × 258; an author's portrait a 200 pt disc.
     private var coverSize: CGSize {
@@ -59,7 +60,11 @@ struct ListCoverFlowView: View {
         }
         .frame(height: coverSize.height)
         .padding(.vertical, .large)
-        .sensoryFeedback(.selection, trigger: selectedURI)
+        // Not for the first selection, made as the list opens: a list pushed from a book screen
+        // would tick on its first cover, then again on the book it arrives on.
+        .sensoryFeedback(.selection, trigger: selectedURI) { oldURI, newURI in
+            oldURI != nil && newURI != nil
+        }
     }
 
     private func strip(width stripWidth: CGFloat) -> some View {
@@ -77,6 +82,7 @@ struct ListCoverFlowView: View {
                     ) {
                         select(uri)
                     }
+                    .highlighted(uri == highlightedURI)
                     .frame(width: CoverFlowGeometry.step, height: coverSize.height)
                     .zIndex(-Double(abs(index - selectedIndex)))
                 }
@@ -110,5 +116,14 @@ struct ListCoverFlowView: View {
         withAnimation(.snappy) {
             selectedURI = uri
         }
+    }
+}
+
+extension ListCoverFlowView {
+    /// Rings the cover the list has just arrived on from a book screen.
+    func highlighting(_ uri: String?) -> Self {
+        var copy: Self = self
+        copy.highlightedURI = uri
+        return copy
     }
 }

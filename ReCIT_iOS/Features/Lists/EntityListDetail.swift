@@ -10,6 +10,7 @@ import SwiftData
 
 struct EntityListDetail: View {
     let listId: String
+    let focusURI: String?
     @Binding var path: NavigationPath
 
     @Environment(UserModel.self) private var userModel
@@ -17,8 +18,13 @@ struct EntityListDetail: View {
     @Query private var matchingLists: [EntityList]
     @State private var presentEditForm: Bool = false
 
-    init(listId: String, path: Binding<NavigationPath>) {
+    init(
+        listId: String,
+        focusURI: String?,
+        path: Binding<NavigationPath>
+    ) {
         self.listId = listId
+        self.focusURI = focusURI
         self._path = path
         _matchingLists = Query(filter: #Predicate<EntityList> { $0._id == listId })
     }
@@ -53,7 +59,11 @@ struct EntityListDetail: View {
             if let list {
                 switch list.type {
                 case .work, .author:
-                    ListCoverFlowScreen(list: list, path: $path)
+                    ListCoverFlowScreen(
+                        list: list,
+                        focusURI: focusURI,
+                        path: $path
+                    )
                 case .publisher:
                     List {
                         Text("list.empty")

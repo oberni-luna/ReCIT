@@ -1865,6 +1865,22 @@
         }
       }
     },
+    "book.in_lists" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In lists"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans les listes"
+          }
+        }
+      }
+    },
     "book.no_edition.message" : {
       "extractionState" : "manual",
       "localizations" : {

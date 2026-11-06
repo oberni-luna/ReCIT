@@ -79,6 +79,10 @@ struct BookDetailView: View {
                         otherEditionsSection()
                         communitySection(edition: edition)
                         myCopySection(edition: edition)
+                        BookListsSection(
+                            workUris: edition.workUris,
+                            myUserId: userModel.myUser?._id
+                        )
                         bibliographicDataSection(edition: edition)
                     }
                     .listRowBackground(DesignSystem.Color.backgroundFormCell.color)

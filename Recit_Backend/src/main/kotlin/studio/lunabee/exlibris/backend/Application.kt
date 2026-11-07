@@ -18,6 +18,7 @@ import studio.lunabee.exlibris.backend.plugins.installStatusPages
 import studio.lunabee.exlibris.backend.relations.relationsRoutes
 import studio.lunabee.exlibris.backend.search.searchRoutes
 import studio.lunabee.exlibris.backend.shelves.shelvesRoutes
+import studio.lunabee.exlibris.backend.transactions.transactionsRoutes
 import studio.lunabee.exlibris.backend.users.usersRoutes
 
 fun Application.module() {
@@ -44,5 +45,6 @@ fun Application.module() {
         itemsRoutes(container.itemsService, container.inventoryViewService)
         shelvesRoutes(container.shelvesService, container.shelfItemsService)
         listsRoutes(container.listsService, container.listElementsService)
+        transactionsRoutes(container.transactionsService, container.transactionMessagesService)
     }
 }

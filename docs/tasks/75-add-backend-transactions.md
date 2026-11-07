@@ -1,6 +1,6 @@
 ---
 issue: 75
-status: todo
+status: to-test
 wiki: [[architecture]], [[features/0071-a-request-names-what-it-asks-for]], [[features/0086-a-friends-transactions-tab]]
 note: Part of #62 (Ex-libris backend umbrella, decisions there). Blocked by #73 (books, busy, ownership). Lender-declared loans (#64) build on it later.
 created: 2026-11-07
@@ -43,3 +43,22 @@ The backend serves Échanges (inventaire.io's transactions) between Ex-libris re
 - After the owner deletes their account, the requester still sees the finished Échange with the book's title from its snapshot, and an open one as `cancelled`.
 - Every route answers the JSON of its fixture captured on inventaire.io (keys, types, error codes).
 - The iOS app launched with `-ExLibrisBackend http://localhost:8080` asks a friend for a book, and the friend's build accepts it; both see the Échange in « Toutes les transactions » and on each other's profile, with its messages.
+
+## Implementation
+
+stacked on: wa/74-add-backend-lists @ 6afbe45
+
+- **Migration `V7__transactions.sql`:** `transactions` (no FK to `users` or `items`, so an Échange outlives the book and either account; snapshot stored in columns), `transaction_actions`, `transaction_messages` (cascade with their Échange; `user_id` without FK, so a deleted reader's messages stay). `TransactionsTable.holdsItem()` is inventaire.io's `byBusyItem`: `accepted`, or a loan `confirmed`.
+- **Package `transactions`:** routes, `TransactionsService`, `TransactionMessagesService`, repositories, `TransactionRules`, `TransactionMoves` (the state machine, every from/to pair and actor tested), answer documents.
+- **Effects on the book:** `by-ids` now answers the real `busy`; a confirmed gift or sale moves the book to the requester (`visibility: []`, `shelves: []`, `transaction: inventorying`, `details` dropped) and moves `items:count`.
+- **Account deletion:** `transactions.cancelOpen` runs before the books cascade, as inventaire.io orders it; finished Échanges stay readable by the other side; when both accounts are gone the Échange goes with its messages.
+- **Apps unchanged.** iOS posts `/api/transactions` with the action in the body, `PUT update-state`, `POST messages`; Android posts `/transactions/request` and its error matching hits the backend's wording. `?action=` forms, legacy `get-messages` / `message` and the deprecated `transaction` key accepted.
+- **Differences from inventaire.io:** requesting a book one may not see → 403 for every visibility (inventaire.io lets a stranger through on `friends`/`groups` books), and visibility is checked before « already busy » so a stranger can't learn the book is lent; `GET messages` only for the Échange's two readers (inventaire.io answers any signed-in reader); no `history` on a moved book; list oldest first; `by-item` and `mark-as-read` not served; an unknown body action → 400; concurrent writes → 409; no e-mails, `warnings` or per-route limits.
+- **The state machine follows Codeberg where the spec's list was silent:** `confirmed` → `cancelled` allowed for either side; `accepted` already makes the book busy; only `cancelled` actions carry `actor`; the request answers 200, not 201.
+- **App notes, not backend bugs:** neither app marks an Échange read (iOS `readMessage` is an empty TODO), so a side's `read` turns true only when it acts or writes; iOS `isRead(by:)` is inverted (decision 5, left as is); iOS `syncTransactions` skips an Échange whose book isn't in the local store or whose other reader can't be fetched, so Échanges with a deleted reader or a given-away book disappear from iOS lists though the API returns them.
+
+## Verification
+
+- `./gradlew build`: 235 tests green, ktlint and detekt clean. iOS build + `ReCIT_iOSTests` (1327) green; Android build + 607 unit tests green.
+- Every backend criterion replayed by curl on the local backend (request with message and snapshot; refusals on an `inventorying` book, one's own book, a stranger on a `friends` book, nothing created; list on both sides with read flags; `accepted` by the wrong side refused; loan busy after accepted and confirmed, free after returned; gift confirmed moving the book and the counts; cancel by the requester; messages flipping `read`; owner's account deleted with the requester still seeing all four Échanges and the given book). ~7 anonymous inventaire.io GETs, no 429.
+- **On-screen journey NOT run.** Seed ready (friend_71's request on ios_70's « 1984 », id `7fdcdb682c954cee910baa7ae9da0145`; « L'étranger » to ask for). The iOS app launched on the local backend but sent no request, then the simulator stopped answering screenshots: the Mac's load stayed at 80–300 (92 system `SetStoreUpdateService` processes, plus another session's `xcodebuild` on a second iPhone 17 simulator). To do on the test branch: as `exlibris_ios_70`, « Toutes les transactions » › accept and write; as `exlibris_friend_71`, confirm « 1984 » and accept the request on « L'étranger »; back as ios_70, mark « 1984 » returned.

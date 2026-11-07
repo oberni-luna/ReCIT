@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory
 import studio.lunabee.exlibris.backend.db.ItemShelvesTable
 import studio.lunabee.exlibris.backend.db.ItemsTable
 import studio.lunabee.exlibris.backend.db.ShelvesTable
+import studio.lunabee.exlibris.backend.db.TransactionsTable
 import studio.lunabee.exlibris.backend.db.Visibility
 
 class ItemsRepository(
@@ -82,6 +83,17 @@ class ItemsRepository(
                         }.orderBy(ItemsTable.created to SortOrder.DESC, ItemsTable.id to SortOrder.ASC)
                         .toList()
                 records(rows, viewerId)
+            }
+        }
+
+    /** Those of [ids] an Échange holds `busy`: accepted, or a loan confirmed and not yet returned. */
+    suspend fun busy(ids: Collection<String>): Set<String> =
+        withContext(Dispatchers.IO) {
+            transaction(database) {
+                TransactionsTable
+                    .select(TransactionsTable.item)
+                    .where { (TransactionsTable.item inList ids) and TransactionsTable.holdsItem() }
+                    .mapTo(mutableSetOf()) { it[TransactionsTable.item] }
             }
         }
 

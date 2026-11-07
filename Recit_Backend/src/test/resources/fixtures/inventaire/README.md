@@ -47,6 +47,16 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   `lib/utils/lexicographic_ordinals.ts`: a list created, updated and deleted, `add-elements` with and without
   `alreadyInList`, its type and not-found refusals, `update-element`, `remove-elements` and its `404`, `wrong user`.
 
+- #75 captured, the same way on 2026-11-07, `transactions/transactions.anonymous.json` (`GET /api/transactions` signed
+  out). Every other answer needs a session: its `*.derived.json` come from `server/controllers/transactions/*.ts`,
+  `transactions/lib/{transactions,rights_verification,side_effects}.ts`, `server/models/{transaction,comment}.ts`,
+  `models/attributes/{transaction,item,user}.ts`, `controllers/comments/lib/comments.ts`,
+  `db/couchdb/design_docs/transactions.ts` and `lib/interactions.ts`, checked against the live OpenAPI spec (API
+  5.1.1): a request, the list, `update-state` (accepted, and cancelled with its `actor`), the messages, a message
+  posted (CouchDB's `{ok, id, rev}`), and each refusal — `wrong user`, `item already busy`, `user already made a
+  request on this item`, `this item can't be requested`, `not allowed with this item`, `invalid state update`,
+  `transaction and state mismatch`, an unknown state, an empty message, a missing `item`.
+
 ## Known departures
 
 - `status_verbose`: the skeleton's error shape (#69), repeating `message`. inventaire.io never sends it; the apps
@@ -72,7 +82,7 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   every read. `POST /api/items` takes an `isbn:` URI, and an entity inventaire.io redirects, and stores the book under
   the URI inventaire.io answers (inventaire.io refuses both with `400`). A snapshot that cannot be built (no title,
   neither an edition nor a work) refuses the creation with `400` where inventaire.io stores a book with an empty
-  snapshot. `busy` is always `false` until #75. `by-ids`' `with-users` (`users`), `context` and the deprecation
+  snapshot. `busy` is true while an Échange holds the book (#75). `by-ids`' `with-users` (`users`), `context` and the deprecation
   `warnings` inventaire.io adds to a `?action=` or a renamed parameter are not sent. A shelf's `add-items` on an
   unknown shelf changes nothing and answers `{"shelves":{}}` (inventaire.io files the books on an id that does not
   exist). Spam checks on `details` and shelf descriptions are not reproduced.
@@ -86,3 +96,14 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   finds nothing answers `not_found: missing`, as CouchDB's `get` does. No spam check on a description or a comment,
   no `warnings` (an unknown URI among those removed is passed over silently). Routes the apps do not call
   (`by-ids`, `by-entities`, `by-element-id`, `elements`) answer `404`.
+- Échanges (#75): a request on a book the requester may not see answers `403 not allowed with this item` whatever
+  its visibility (inventaire.io's `verifyRightToInteractWithItem` lets a `friends` or `groups` book through to a
+  stranger, its result unchecked), and is checked before `item already busy` (inventaire.io checks busy first, which
+  tells a stranger the book is held). `GET /api/transactions/messages` answers the Échange's two readers alone
+  (`wrong user` for anyone else, `not_found: missing` for an unknown id) where inventaire.io answers any signed-in
+  reader, an empty list for an unknown id. A gift or a sale confirmed moves the book without writing its `history`.
+  The list comes oldest first (inventaire.io orders by book id). `by-item` and `mark-as-read`, which neither app
+  calls, are not served; a `POST /api/transactions` whose body names no known action answers `400 unknown action`.
+  Two writes on one Échange at once: the second answers `409 document update conflict`, as CouchDB would. Deleting
+  an account cancels its open Échanges and keeps the others for the other reader; an Échange whose two readers are
+  both gone is deleted with its messages. No e-mail, no `warnings`, no rate limit per route.

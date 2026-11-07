@@ -46,6 +46,11 @@ import studio.lunabee.exlibris.backend.search.SearchService
 import studio.lunabee.exlibris.backend.shelves.ShelfItemsService
 import studio.lunabee.exlibris.backend.shelves.ShelvesRepository
 import studio.lunabee.exlibris.backend.shelves.ShelvesService
+import studio.lunabee.exlibris.backend.transactions.TransactionMessagesRepository
+import studio.lunabee.exlibris.backend.transactions.TransactionMessagesService
+import studio.lunabee.exlibris.backend.transactions.TransactionSubjectsRepository
+import studio.lunabee.exlibris.backend.transactions.TransactionsRepository
+import studio.lunabee.exlibris.backend.transactions.TransactionsService
 import studio.lunabee.exlibris.backend.users.UserDocumentsService
 import studio.lunabee.exlibris.backend.users.UserUpdateService
 import studio.lunabee.exlibris.backend.users.UsersRepository
@@ -126,14 +131,6 @@ class AppContainer(
             clock = clock,
         )
 
-    val usersService: UsersService =
-        UsersService(
-            repository = usersRepository,
-            documents = userDocumentsService,
-            groups = groupMembershipService,
-            images = imagesService,
-        )
-
     val userUpdateService: UserUpdateService =
         UserUpdateService(
             repository = usersRepository,
@@ -165,6 +162,32 @@ class AppContainer(
         )
 
     val snapshotRefreshJob: SnapshotRefreshJob = SnapshotRefreshJob(snapshotsService, elementUrisService)
+
+    private val transactionsRepository: TransactionsRepository = TransactionsRepository(database)
+
+    val transactionsService: TransactionsService =
+        TransactionsService(
+            repository = transactionsRepository,
+            subjects = TransactionSubjectsRepository(database),
+            snapshots = snapshotsService,
+            clock = clock,
+        )
+
+    val transactionMessagesService: TransactionMessagesService =
+        TransactionMessagesService(
+            transactions = transactionsRepository,
+            repository = TransactionMessagesRepository(database),
+            clock = clock,
+        )
+
+    val usersService: UsersService =
+        UsersService(
+            repository = usersRepository,
+            documents = userDocumentsService,
+            groups = groupMembershipService,
+            transactions = transactionsService,
+            images = imagesService,
+        )
 
     private val visibilityValidator: VisibilityValidator = VisibilityValidator(groupsService)
 

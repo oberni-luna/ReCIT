@@ -50,7 +50,10 @@ class ItemsService(
         return CreatedItem(item.document(ownerId, snapshots.snapshots(listOf(item.entity))[item.entity], busy = null))
     }
 
-    /** `GET /api/items/by-ids`, public: a book the caller may not see is absent, as on inventaire.io. */
+    /**
+     * `GET /api/items/by-ids`, public: a book the caller may not see is absent, as on inventaire.io; `busy` while an
+     * Échange holds it (#75).
+     */
     suspend fun byIds(
         ids: List<String>,
         limit: Int?,
@@ -61,8 +64,9 @@ class ItemsService(
         val start: Int = offset ?: 0
         val page: List<ItemRecord> = visible.drop(start).let { if (limit == null) it else it.take(limit) }
         val byUri: Map<String, ItemSnapshot> = snapshots.snapshots(page.map { it.entity })
+        val busy: Set<String> = repository.busy(page.map { it.id })
         return ItemsPage(
-            items = page.map { it.document(viewerId, byUri[it.entity], busy = false) },
+            items = page.map { it.document(viewerId, byUri[it.entity], busy = it.id in busy) },
             total = visible.size,
             offset = start,
         )

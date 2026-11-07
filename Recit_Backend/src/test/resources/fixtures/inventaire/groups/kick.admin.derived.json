@@ -1,0 +1,1 @@
+{"status":403,"message":"target user is also a group admin","context":{"reqUserId":"0b5c1b3e9b2a4f6e8d7c6b5a49382716","groupId":"2d7e3d5a1d4c6b8a0f9e8d7c6b5a4938","targetId":"1c6d2c4f0c3b5a7f9e8d7c6b5a493827"}}

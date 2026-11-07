@@ -1,12 +1,10 @@
 package studio.lunabee.exlibris.backend.users
 
 import io.ktor.http.HttpStatusCode
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
 import studio.lunabee.exlibris.backend.plugins.ApiException
 import studio.lunabee.exlibris.backend.plugins.ParameterPlace
@@ -61,7 +59,7 @@ object ProfileUpdateReader {
             }
 
             "position" -> {
-                ProfileUpdate.Position(nullable(value, ::position))
+                ProfileUpdate.Position(nullable(value, UserPosition::fromJson))
             }
 
             "fediversable" -> {
@@ -96,18 +94,6 @@ object ProfileUpdateReader {
         value: JsonElement,
         read: (JsonElement) -> T?,
     ): T? = if (value is JsonNull) null else valid(value, read(value))
-
-    /** Two numbers, `[latitude, longitude]`: inventaire.io checks nothing more. */
-    private fun position(value: JsonElement): UserPosition? {
-        val degrees: List<Double?> = (value as? JsonArray)?.map { literal(it)?.doubleOrNull }.orEmpty()
-        val latitude: Double? = degrees.firstOrNull()
-        val longitude: Double? = degrees.lastOrNull()
-        return if (degrees.size == 2 && latitude != null && longitude != null) {
-            UserPosition.truncated(latitude, longitude)
-        } else {
-            null
-        }
-    }
 
     private fun string(value: JsonElement): String? = (value as? JsonPrimitive)?.takeIf { it.isString }?.content
 

@@ -1,0 +1,1 @@
+{"status":400,"message":"missing parameter in query: id","error_type":"missing_parameter","error_name":"missing_id","context":{"url":"/api/groups/by-id"}}

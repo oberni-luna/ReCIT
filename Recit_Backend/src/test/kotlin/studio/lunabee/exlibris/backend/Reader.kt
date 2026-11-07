@@ -71,18 +71,22 @@ suspend fun HttpClient.postRelation(
     other: Reader,
 ): HttpResponse = postJson("/api/relations/$action", """{"user":"${other.id}"}""", reader.cookies)
 
-/** `POST /api/images/upload` of [bytes] as the apps send an avatar: one JPEG part named `avatar`. */
+/**
+ * `POST /api/images/upload` of [bytes] as the apps send an avatar: one JPEG part named `avatar`. A group's picture
+ * comes in a part named `picture`.
+ */
 suspend fun HttpClient.uploadAvatar(
     reader: Reader,
     bytes: ByteArray,
     container: String = "users",
+    fieldName: String = "avatar",
 ): HttpResponse =
     submitFormWithBinaryData(
         url = "/api/images/upload?container=$container",
         formData =
             formData {
                 append(
-                    "avatar",
+                    fieldName,
                     bytes,
                     Headers.build {
                         append(HttpHeaders.ContentType, "image/jpeg")

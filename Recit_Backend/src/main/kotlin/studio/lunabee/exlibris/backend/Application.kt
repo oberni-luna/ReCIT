@@ -4,6 +4,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.routing.routing
 import studio.lunabee.exlibris.backend.auth.authRoutes
+import studio.lunabee.exlibris.backend.groups.groupsRoutes
 import studio.lunabee.exlibris.backend.health.healthRoutes
 import studio.lunabee.exlibris.backend.images.imagesRoutes
 import studio.lunabee.exlibris.backend.plugins.installRateLimits
@@ -31,6 +32,7 @@ fun Application.module() {
         authRoutes(container.authService, container.accountLinkService)
         usersRoutes(container.usersService, container.userUpdateService)
         relationsRoutes(container.relationsService)
+        groupsRoutes(container.groupsService, container.groupMembershipService)
         searchRoutes(container.searchService)
         imagesRoutes(container.imagesService)
     }

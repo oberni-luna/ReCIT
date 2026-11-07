@@ -1,0 +1,1 @@
+{"status":400,"message":"invalid id: nope","error_type":"invalid_parameter","error_name":"invalid_id","context":{"parameter":"id","value":"nope","type":"string","config":{"type":"group"},"url":"/api/groups/by-id?id=nope"}}

@@ -38,11 +38,13 @@ fun Route.imagesRoutes(service: ImagesService) {
     get("/api/images/gravatar") {
         call.respond(service.gravatarUrl(call.requireSessionUser()))
     }
-    get("/img/users/{hash}") {
-        call.respondImage(service, call.parameters["hash"], dimensions = null)
-    }
-    get("/img/users/{dimensions}/{hash}") {
-        call.respondImage(service, call.parameters["hash"], call.parameters["dimensions"])
+    ImageContainer.entries.forEach { container ->
+        get("/img/${container.parameter}/{hash}") {
+            call.respondImage(service, container, call.parameters["hash"], dimensions = null)
+        }
+        get("/img/${container.parameter}/{dimensions}/{hash}") {
+            call.respondImage(service, container, call.parameters["hash"], call.parameters["dimensions"])
+        }
     }
 }
 
@@ -65,6 +67,7 @@ private suspend fun ApplicationCall.receiveFiles(): List<UploadedFile> {
 /** Immutable for a year, as inventaire.io: a path names its bytes by their hash, so they never change. */
 private suspend fun ApplicationCall.respondImage(
     service: ImagesService,
+    container: ImageContainer,
     hash: String?,
     dimensions: String?,
 ) {
@@ -74,7 +77,7 @@ private suspend fun ApplicationCall.respondImage(
             (dimensions == null || dimensionsPattern.matches(dimensions))
     val image: StoredImage =
         if (isValidPath) {
-            service.image(ImageContainer.USERS, requireNotNull(hash))
+            service.image(container, requireNotNull(hash))
                 ?: throw ApiException(HttpStatusCode.NotFound, "not found")
         } else {
             throw ApiException(HttpStatusCode.BadRequest, "invalid image path")

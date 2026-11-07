@@ -1,0 +1,1 @@
+{"status":401,"message":"unauthorized api access","context":{"roles":["public"],"requiredAccessLevel":"authentified","url":"/api/groups"}}

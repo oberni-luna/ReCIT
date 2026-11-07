@@ -24,16 +24,19 @@ class RelationsService(
             friends = friends,
             userRequested = byRelation[UserRelation.USER_REQUESTED].orEmpty(),
             otherRequested = byRelation[UserRelation.OTHER_REQUESTED].orEmpty(),
-            network = friends,
+            network = (friends + repository.groupCoMembersOf(userId).sorted()).distinct(),
         )
     }
 
-    /** The readers [userId] is friends with: who may see the `network` part of their snapshot, and theirs. */
-    suspend fun friendIds(userId: String): Set<String> =
+    /**
+     * inventaire.io's `getNetworkIds`: [userId]'s friends and the readers they share a group with, who may see the
+     * `network` part of their snapshot, as they see theirs.
+     */
+    suspend fun networkIds(userId: String): Set<String> =
         repository
             .statusesOf(userId)
             .filterValues { it == RelationStatus.FRIENDS }
-            .keys
+            .keys + repository.groupCoMembersOf(userId)
 
     /**
      * `POST /api/relations/<action>` with `{"user": otherId}`. Only a request checks that the other exists, as on

@@ -1,0 +1,1 @@
+{"status":404,"message":"not_found: missing","context":{"method":"GET","url":"/api/groups/by-id?id=00000000000000000000000000000001","body":{"error":"not_found","reason":"missing"},"status":404,"attempt":1}}

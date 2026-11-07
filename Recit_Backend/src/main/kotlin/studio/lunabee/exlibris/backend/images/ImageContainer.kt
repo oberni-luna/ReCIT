@@ -2,12 +2,13 @@ package studio.lunabee.exlibris.backend.images
 
 /**
  * Where an image is filed, the `container` of `/api/images/upload` and the folder of `/img/<container>/<hash>`.
- * Groups (#72) add theirs; the entities' covers go to inventaire.io (#77).
+ * The entities' covers go to inventaire.io (#77).
  */
 enum class ImageContainer(
     val parameter: String,
 ) {
     USERS("users"),
+    GROUPS("groups"),
     ;
 
     /** The path the apps store and resolve against the base URL. */
@@ -18,5 +19,8 @@ enum class ImageContainer(
         val uploadable: List<String> = listOf("entities", "groups", "users")
 
         fun of(parameter: String): ImageContainer? = entries.firstOrNull { it.parameter == parameter }
+
+        /** The container a stored path such as `/img/groups/<hash>` points into. */
+        fun ofPath(path: String): ImageContainer? = entries.firstOrNull { path.startsWith(it.path("")) }
     }
 }

@@ -93,7 +93,7 @@ class UserUpdateService(
             }
 
             is ProfileUpdate.Picture -> {
-                user.picture?.let { images.releaseUserPicture(it) }
+                user.picture?.let { images.releasePicture(it) }
             }
 
             else -> {

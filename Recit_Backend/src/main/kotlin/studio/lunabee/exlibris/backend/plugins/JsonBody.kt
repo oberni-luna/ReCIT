@@ -22,6 +22,9 @@ class JsonBody(
             else -> throw ApiException.invalidParameter(name, value.toString())
         }
     }
+
+    /** [name]'s value as sent, `JsonNull` included; `null` only when the key is absent. */
+    fun element(name: String): JsonElement? = fields[name]
 }
 
 /** An empty body is an empty object, as Express's body parser leaves it; anything but an object is refused. */

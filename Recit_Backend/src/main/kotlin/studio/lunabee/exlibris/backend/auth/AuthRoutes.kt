@@ -12,6 +12,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import studio.lunabee.exlibris.backend.plugins.JsonBody
+import studio.lunabee.exlibris.backend.plugins.OkResponse
 import studio.lunabee.exlibris.backend.plugins.RateLimits
 import studio.lunabee.exlibris.backend.plugins.closeSession
 import studio.lunabee.exlibris.backend.plugins.openUserSession

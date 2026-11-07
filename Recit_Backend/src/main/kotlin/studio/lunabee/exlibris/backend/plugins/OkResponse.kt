@@ -1,4 +1,4 @@
-package studio.lunabee.exlibris.backend.auth
+package studio.lunabee.exlibris.backend.plugins
 
 import kotlinx.serialization.Serializable
 

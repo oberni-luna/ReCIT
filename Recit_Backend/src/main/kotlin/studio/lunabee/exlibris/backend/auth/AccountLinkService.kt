@@ -20,6 +20,11 @@ class AccountLinkService(
         mails.sendConfirmation(account, issueToken(account, TokenPurpose.EMAIL_CONFIRMATION))
     }
 
+    /** Mails the link confirming the address [userId] just moved to (`PUT /api/user`). */
+    suspend fun sendAddressConfirmation(userId: String) {
+        repository.findById(userId)?.let { sendConfirmation(it) }
+    }
+
     /** Mails the confirmation link again, to the signed-in user. */
     suspend fun requestEmailConfirmation(userId: String) {
         val account: Account =

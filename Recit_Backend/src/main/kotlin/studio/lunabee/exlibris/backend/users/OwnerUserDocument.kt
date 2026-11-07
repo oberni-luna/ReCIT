@@ -3,13 +3,11 @@ package studio.lunabee.exlibris.backend.users
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.putJsonObject
 
 /**
- * `GET /api/user`, inventaire.io's `ownerSafeData` for the fields #70 stores. The ones it fills in when a
- * document lacks them — no roles, no OAuth, settings with empty notifications — are filled in the same way.
- * #71 adds the profile.
+ * `GET /api/user`, inventaire.io's `ownerSafeData`. The fields it fills in when a document lacks them — no
+ * roles, no OAuth, settings with empty notifications — are filled in the same way; an attribute never set is
+ * left out, as CouchDB leaves it out of the document.
  */
 @Serializable
 data class OwnerUserDocument(
@@ -20,11 +18,17 @@ data class OwnerUserDocument(
     val type: String = "user",
     val username: String,
     val created: Long,
+    val bio: String? = null,
     val email: String,
+    val fediversable: Boolean? = null,
     val language: String,
+    val picture: String? = null,
+    val position: List<Double>? = null,
     val validEmail: Boolean,
     val roles: List<String> = emptyList(),
-    val settings: JsonObject = buildJsonObject { putJsonObject("notifications") {} },
+    val settings: JsonObject,
+    val snapshot: UserSnapshot = UserSnapshot.forOwner(),
+    val summaryPeriodicity: Int? = null,
     val enabledOAuth: List<String> = emptyList(),
     val accessLevels: List<String> = emptyList(),
 )

@@ -1,0 +1,1 @@
+{"status":400,"message":"missing parameter in query: search or claim","error_type":"missing_parameter","error_name":"missing_search or claim","context":{"url":"/api/search?types=users"}}

@@ -114,3 +114,16 @@ manual validation — not run by agent
 - **Review**: deferred → /wa-validate.
 - **Verify**: round 3, manual validation, not run by agent. Build green, 1322 tests passed.
 - **Rule**: none.
+
+### Round 4 — 2026-11-07
+
+- **Asked**: « j'ai l'impression que si la liste n'appartient pas à un ami, je n'ai pas le long press, si elle appartient à un ami je l'ai. C'est une limitation de inventaire.io ou un bug ? Les 2 autres points sont bien corrigés. »
+- **Triage**: defect to investigate; confirmed: arrow colour and separators.
+- **Finding**: no code change. With identical data, my list and a friend's list behave the same. The menu is empty only when I own a copy of the friend's edition (`TransactionRequestRule`, the Fiche livre's rule).
+  - Olivier's lists mostly hold works he owns or once owned, often in a single edition, so the rule hides the request there.
+  - A local copy can also be stale: `InventoryModel.syncInventory` never prunes items gone from the server.
+  - Proof: a throwaway XCUITest harness on the real `ListCoverFlowScreen`, mine vs friend's list, with and without my own copy. It is deleted.
+- **Open**: Olivier to say whether he owns that edition, or whether the request should be offered even then.
+- **Review**: deferred → /wa-validate.
+- **Verify**: round 4, manual validation, not run by agent. Build green, 1324 tests passed.
+- **Rule**: none.

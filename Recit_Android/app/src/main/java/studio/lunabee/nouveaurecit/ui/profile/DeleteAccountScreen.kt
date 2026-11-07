@@ -84,7 +84,7 @@ fun DeleteAccountScreen(navigator: Navigator) {
 
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 SecondaryText(stringResource(R.string.delete_account_hosting))
-                SecondaryText(stringResource(R.string.delete_account_username_kept))
+                SecondaryText(stringResource(R.string.delete_account_username_released))
             }
 
             DestructiveButton(

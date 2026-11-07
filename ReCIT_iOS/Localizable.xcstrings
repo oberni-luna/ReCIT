@@ -4329,19 +4329,19 @@
         }
       }
     },
-    "delete_account.username_kept" : {
+    "delete_account.username_released" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your username stays reserved and cannot be used for a new account."
+            "value" : "Your username becomes free again: someone else can choose it."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre nom d'utilisateur·ice restera réservé et ne pourra pas servir à un nouveau compte."
+            "value" : "Votre nom d'utilisateur·ice redeviendra libre : quelqu'un d'autre pourra le choisir."
           }
         }
       }

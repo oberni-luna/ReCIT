@@ -75,7 +75,7 @@ struct DeleteAccountView: View {
 
                 VStack(alignment: .leading, spacing: .small) {
                     Text("delete_account.hosting")
-                    Text("delete_account.username_kept")
+                    Text("delete_account.username_released")
                 }
                 .textStyle(.content300)
                 .foregroundStyle(.foregroundSecondary)

@@ -69,11 +69,11 @@ struct ListElementsPage: View {
             DesignSystem.FormList {
                 elementSections
 
-                // Room for the comment to rise into. Below the comment the list holds only « Retirer de
-                // la liste » and its footer: it was already scrolled as far as it goes, so neither the
-                // caret nor `ListKeyboardReveal` could take the growing field any higher, and each new line
-                // went under the keyboard. A transparent row as tall as the keyboard, while the
-                // comment is being written.
+                // Room for the comment to rise into. What follows the comment — « Retirer de la liste »,
+                // and on a list of works « Où trouver ce livre ? » — can be shorter than the keyboard:
+                // the list then runs out of scroll, neither the caret nor `ListKeyboardReveal` can take
+                // the growing field any higher, and each new line goes under the keyboard. A
+                // transparent row as tall as the keyboard, while the comment is being written.
                 if isCommentFocused {
                     Section {
                         Color.clear
@@ -211,7 +211,6 @@ struct ListElementsPage: View {
                     }
                 }
             } else if let selectedItem, selectedItem.comment.isEmpty == false {
-                // Their comment when they wrote one.
                 Section {
                     ListCrossFade(id: selectedItem.uri) {
                         ListReadOnlyCommentRow(comment: selectedItem.comment)

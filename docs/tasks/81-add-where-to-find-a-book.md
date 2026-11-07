@@ -1,6 +1,6 @@
 ---
 issue: 81
-status: to-test
+status: to-close
 wiki: [[lists]], [[book-and-editions]], [[network]], [[design-system/figma-library]]
 note: Figma B3 · Liste · Où trouver ce livre ? (992:1760, fileKey S7IvC6GvlcUFe5IgbtvQq6)
 created: 2026-11-07
@@ -81,6 +81,19 @@ Round 1, 2026-11-07, coded in its own worktree (the main checkout is shared with
   - One baseline entry in `BookDetailView` (`let me`) is now stale.
 
 ## Review
+
+### Round validation — 2026-11-07
+
+Cumulative diff `ec0d13c..HEAD`. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. Verdict after autofix: clean.
+
+- 🟡 [elegance] `ListWhereToFindSection` `?? false` fallback on a copy without edition → fixed: `(edition, item)` pairs.
+- 🟡 [style] type annotation on `@Environment(UserModel.self)` (`ListWhereToFindSection`, `TransactionRequestSheet`) → accepted: SwiftLint `explicit_type_interface` fails the strict build without it (CLAUDE.md vs `.swiftlint.yml` conflict, outside this task).
+- 🟡 [style] stale keyboard-room comment in `ListElementsPage` → fixed.
+- 🟡 [style] comment restating a condition in `ListElementsPage` (inline round 2) → fixed, removed.
+- 🟡 [style] `ExternalLinkLogo` radius 6 / 1 pt literals → accepted, recorded as a Figma divergence in `figma-library.md`.
+- 🟡 [structure] Fiche livre `canBorrow` duplicating the rule → fixed: `BookDetailView` uses `TransactionRequestRule` too, same behaviour.
+
+Autofix: `ListWhereToFindSection.swift`, `ListElementsPage.swift`, `BookDetailView.swift`. Build green, 1322 tests passed. Code changed after Olivier's last test: the Fiche livre's request decision now goes through `TransactionRequestRule` (same outcome).
 
 ## Verification
 

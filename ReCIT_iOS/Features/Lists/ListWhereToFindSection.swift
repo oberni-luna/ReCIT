@@ -37,32 +37,32 @@ struct ListWhereToFindSection: View {
         if let work = works.first {
             // Deleted copies are dropped before `ownerId` is read: a sync can take one away
             // while the list is open. See `PersistentModel+StillInTheStore` and issue 0065.
-            let items: [InventoryItem] = work.editions
-                .flatMap(\.items)
-                .filter(\.isStillInTheStore)
+            let copies: [(edition: Edition, item: InventoryItem)] = work.editions
+                .flatMap { edition in edition.items.map { (edition: edition, item: $0) } }
+                .filter { $0.item.isStillInTheStore }
             let myUserId: String? = userModel.myUser?._id
-            let friendsItems: [InventoryItem] = items
-                .filter { $0.ownerId != myUserId && $0.owner != nil }
+            let friendsCopies: [(edition: Edition, item: InventoryItem)] = copies
+                .filter { $0.item.ownerId != myUserId && $0.item.owner != nil }
                 .sorted(using: [
-                    KeyPathComparator(\.owner?.username, comparator: .localizedStandard),
-                    KeyPathComparator(\._id)
+                    KeyPathComparator(\.item.owner?.username, comparator: .localizedStandard),
+                    KeyPathComparator(\.item._id)
                 ])
             let requestRule: TransactionRequestRule = .init(
-                copies: items.compactMap { item in item.edition.map { (item.ownerId, $0.uri) } },
+                copies: copies.map { ($0.item.ownerId, $0.edition.uri) },
                 myUserId: myUserId
             )
 
             Section("list.where_to_find.header") {
                 // Keyed on their place rather than on the copy, so a swipe to another work
                 // cross-fades each row instead of replacing it.
-                ForEach(Array(friendsItems.enumerated()), id: \.offset) { _, item in
-                    ListCrossFade(id: item._id) {
+                ForEach(Array(friendsCopies.enumerated()), id: \.offset) { _, copy in
+                    ListCrossFade(id: copy.item._id) {
                         FriendItemRow(
-                            item,
+                            copy.item,
                             onOpenFriend: onOpenFriend,
                             onRequest: onRequest
                         )
-                        .requestOffered(item.edition.map { requestRule.isRequestOffered(forEditionURI: $0.uri) } ?? false)
+                        .requestOffered(requestRule.isRequestOffered(forEditionURI: copy.edition.uri))
                     }
                     .alignmentGuide(.listRowSeparatorLeading) { _ in Self.separatorLeading }
                 }

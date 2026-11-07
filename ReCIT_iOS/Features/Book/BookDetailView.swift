@@ -189,7 +189,10 @@ struct BookDetailView: View {
         // this screen has just removed. See `PersistentModel+StillInTheStore` and issue 0065.
         let othersItems: [InventoryItem] = edition.items
             .filter { $0.isStillInTheStore && $0.ownerId != userModel.myUser?._id }
-        let canBorrow: Bool = iOwn(edition) == nil
+        let requestRule: TransactionRequestRule = .init(
+            copies: edition.items.filter(\.isStillInTheStore).map { ($0.ownerId, edition.uri) },
+            myUserId: userModel.myUser?._id
+        )
         if !othersItems.isEmpty {
             Section("nav.community") {
                 ForEach(othersItems) { item in
@@ -198,7 +201,7 @@ struct BookDetailView: View {
                         onOpenFriend: { nextEntityDestination = NavigationDestination.user(user: $0) },
                         onRequest: { borrowFromItem = $0 }
                     )
-                    .requestOffered(canBorrow)
+                    .requestOffered(requestRule.isRequestOffered(forEditionURI: edition.uri))
                 }
             }
         }

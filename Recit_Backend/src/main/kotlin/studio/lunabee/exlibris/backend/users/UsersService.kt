@@ -16,7 +16,7 @@ class UsersService(
     /** The signed-in user's own document. A session naming an account that is gone is refused like no session. */
     suspend fun ownerDocument(userId: String): OwnerUserDocument {
         val user: UserRecord = repository.findById(userId) ?: throw ApiException.unauthorized()
-        return UserDocuments.owner(user)
+        return UserDocuments.owner(user, repository.snapshots(listOf(userId))[userId] ?: UserSnapshot.EMPTY)
     }
 
     /**
@@ -35,9 +35,10 @@ class UsersService(
 
     /**
      * `DELETE /api/user`: the account leaves its groups as inventaire.io's `leaveAllGroups` has it leave them, then
-     * goes with its settings, links and relations, then its picture unless another account shares the file. Books
-     * and étagères (#73), lists (#74) and transactions (#75) add theirs. The username is free again: inventaire.io
-     * keeps a deleted user's, this backend keeps nothing.
+     * goes with its settings, links, relations, books and étagères (`ON DELETE CASCADE`), then its picture unless
+     * another account shares the file. The snapshots its books used are left for the nightly job to drop. Lists (#74)
+     * and transactions (#75) add theirs. The username is free again: inventaire.io keeps a deleted user's, this
+     * backend keeps nothing.
      */
     suspend fun deleteAccount(userId: String) {
         val user: UserRecord = repository.findById(userId) ?: throw ApiException.unauthorized()

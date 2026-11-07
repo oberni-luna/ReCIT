@@ -20,19 +20,26 @@ class UserDocumentsService(
         viewerId: String?,
     ): Map<String, JsonObject> {
         val network: Set<String> = viewerId?.let { relations.networkIds(it) }.orEmpty()
-        return repository.findByIds(ids.distinct()).associate { user -> user.id to document(user, viewerId, network) }
+        val users: List<UserRecord> = repository.findByIds(ids.distinct())
+        val snapshots: Map<String, UserSnapshot> = repository.snapshots(users.map { it.id })
+        return users.associate { user ->
+            user.id to document(user, viewerId, network, snapshots[user.id] ?: UserSnapshot.EMPTY)
+        }
     }
 
     private fun document(
         user: UserRecord,
         viewerId: String?,
         network: Set<String>,
+        snapshot: UserSnapshot,
     ): JsonObject =
         if (user.id == viewerId) {
-            apiJson.encodeToJsonElement(OwnerUserDocument.serializer(), UserDocuments.owner(user)).jsonObject
+            apiJson.encodeToJsonElement(OwnerUserDocument.serializer(), UserDocuments.owner(user, snapshot)).jsonObject
         } else {
             apiJson
-                .encodeToJsonElement(PublicUserDocument.serializer(), UserDocuments.public(user, user.id in network))
-                .jsonObject
+                .encodeToJsonElement(
+                    PublicUserDocument.serializer(),
+                    UserDocuments.public(user, user.id in network, snapshot),
+                ).jsonObject
         }
 }

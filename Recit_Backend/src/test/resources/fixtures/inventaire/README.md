@@ -27,6 +27,17 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   (`GET /api/entities/by-uris?uris=wd:Q8337&lang=fr`), which the relay's stub answers to prove the body comes back
   byte for byte. The relay's other tests answer from a stub: what goes through is inventaire.io's, not the backend's.
 
+- #73 captured, the same way on 2026-11-07, `entities/by-uris.isbn-9782070368228.relatives.json` (the « 1984 »
+  edition with its works, authors and series as `relatives`, the very request the backend sends for a snapshot) and
+  `entities/by-uris.not-found.json`, which the snapshot tests' stub answers; `items/by-ids.json` (a public item of a
+  public reader), `items/by-ids.unknown.json`, `items/inventory-view.json` (that reader's view, its lists cut to three
+  entries), `items/inventory-view.missing.json`, `shelves/by-owners.json` (two of their public shelves),
+  `shelves/by-ids.with-items.json` (one, its `items` cut to three) and `shelves/by-ids.not-found.json`. Its
+  `*.derived.json` come from `server/controllers/items/*.ts`, `items/lib/{items,bulk_update,snapshot/*,view/*}.ts`,
+  `server/controllers/shelves/*.ts`, `shelves/lib/shelves.ts`, `server/models/{item,shelf}.ts` and their
+  `attributes` and `validations`: a book created, the owner's `by-ids`, every refusal of `bulk-update`, `delete` and
+  the shelf actions, a shelf created, updated, filed and deleted with and without `with-items`.
+
 ## Known departures
 
 - `status_verbose`: the skeleton's error shape (#69), repeating `message`. inventaire.io never sends it; the apps
@@ -47,3 +58,12 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   `Cache-Control`, `ETag` and `Last-Modified`, come back. A JSON answer loses its `ETag`, and none carries
   `Set-Cookie`, inventaire.io's anonymous session or the backend's. Bibliographic writes answer `501` until #77,
   `POST /api/entities/resolve`'s dry run included, and an unreachable inventaire.io answers `502`.
+- Books (#73): a book's snapshot is read from inventaire.io when it is created and stored per entity, read again on
+  a `bulk-update` (at most once in ten minutes) and every night once a week old; inventaire.io builds it afresh on
+  every read. `POST /api/items` takes an `isbn:` URI, and an entity inventaire.io redirects, and stores the book under
+  the URI inventaire.io answers (inventaire.io refuses both with `400`). A snapshot that cannot be built (no title,
+  neither an edition nor a work) refuses the creation with `400` where inventaire.io stores a book with an empty
+  snapshot. `busy` is always `false` until #75. `by-ids`' `with-users` (`users`), `context` and the deprecation
+  `warnings` inventaire.io adds to a `?action=` or a renamed parameter are not sent. A shelf's `add-items` on an
+  unknown shelf changes nothing and answers `{"shelves":{}}` (inventaire.io files the books on an id that does not
+  exist). Spam checks on `details` and shelf descriptions are not reproduced.

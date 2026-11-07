@@ -23,9 +23,15 @@ class ApiException(
         /** A bibliographic write, refused until the backend signs them (#76 decision 6, #77). */
         fun notImplemented(): ApiException = ApiException(HttpStatusCode.NotImplemented, "not implemented")
 
-        /** inventaire.io refused the connection, or kept silent past the relay's timeout (#76 decision 4). */
-        fun badGateway(cause: Throwable): ApiException =
+        /**
+         * inventaire.io refused the connection, kept silent past the relay's timeout (#76 decision 4), or answered
+         * something the backend cannot read.
+         */
+        fun badGateway(cause: Throwable? = null): ApiException =
             ApiException(HttpStatusCode.BadGateway, "bad gateway", cause = cause)
+
+        /** A CouchDB `get` of a document that is not there, as inventaire.io lets it through. */
+        fun missingDocument(): ApiException = ApiException(HttpStatusCode.NotFound, "not_found: missing")
 
         /** inventaire.io's `newMissingError`: `missing parameter in body: email`, `missing_email`. */
         fun missingParameter(

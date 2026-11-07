@@ -35,9 +35,9 @@ class UsersService(
 
     /**
      * `DELETE /api/user`: the account leaves its groups as inventaire.io's `leaveAllGroups` has it leave them, then
-     * goes with its settings, links, relations, books and étagères (`ON DELETE CASCADE`), then its picture unless
-     * another account shares the file. The snapshots its books used are left for the nightly job to drop. Lists (#74)
-     * and transactions (#75) add theirs. The username is free again: inventaire.io keeps a deleted user's, this
+     * goes with its settings, links, relations, books, étagères, lists and their elements (`ON DELETE CASCADE`), then
+     * its picture unless another account shares the file. The snapshots its books used are left for the nightly job
+     * to drop. Transactions (#75) add theirs. The username is free again: inventaire.io keeps a deleted user's, this
      * backend keeps nothing.
      */
     suspend fun deleteAccount(userId: String) {

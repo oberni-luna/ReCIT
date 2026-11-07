@@ -1,0 +1,1 @@
+{"status":400,"message":"invalid type: shelf (possible values: work, author, publisher)","context":{"value":"shelf"}}

@@ -9,6 +9,7 @@ import studio.lunabee.exlibris.backend.groups.groupsRoutes
 import studio.lunabee.exlibris.backend.health.healthRoutes
 import studio.lunabee.exlibris.backend.images.imagesRoutes
 import studio.lunabee.exlibris.backend.items.itemsRoutes
+import studio.lunabee.exlibris.backend.lists.listsRoutes
 import studio.lunabee.exlibris.backend.plugins.installRateLimits
 import studio.lunabee.exlibris.backend.plugins.installRequestLogging
 import studio.lunabee.exlibris.backend.plugins.installSerialization
@@ -42,5 +43,6 @@ fun Application.module() {
         entitiesRoutes(container.entitiesService)
         itemsRoutes(container.itemsService, container.inventoryViewService)
         shelvesRoutes(container.shelvesService, container.shelfItemsService)
+        listsRoutes(container.listsService, container.listElementsService)
     }
 }

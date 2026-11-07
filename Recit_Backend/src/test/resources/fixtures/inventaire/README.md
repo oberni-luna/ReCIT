@@ -38,6 +38,15 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   `attributes` and `validations`: a book created, the owner's `by-ids`, every refusal of `bulk-update`, `delete` and
   the shelf actions, a shelf created, updated, filed and deleted with and without `with-items`.
 
+- #74 captured, the same way on 2026-11-07, `lists/by-creators.json` (`GET /api/lists/by-creators?with-elements=true`
+  for a reader with three public lists of works), `lists/by-creators.empty-list.json` (a public list without
+  elements), `entities/by-uris.info.json` (« 1984 » and George Orwell with `attributes=info`, the request the backend
+  sends to type what a list is given) and `entities/by-uris.info.redirect.json` (`wd:Q20050020`, which inventaire.io
+  redirects to `wd:Q146866`). Its `*.derived.json` come from `server/controllers/listings/*.ts`,
+  `listings/lib/{listings,elements}.ts`, `server/models/{listing,element}.ts`, `models/attributes/listing.ts` and
+  `lib/utils/lexicographic_ordinals.ts`: a list created, updated and deleted, `add-elements` with and without
+  `alreadyInList`, its type and not-found refusals, `update-element`, `remove-elements` and its `404`, `wrong user`.
+
 ## Known departures
 
 - `status_verbose`: the skeleton's error shape (#69), repeating `message`. inventaire.io never sends it; the apps
@@ -67,3 +76,13 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   `warnings` inventaire.io adds to a `?action=` or a renamed parameter are not sent. A shelf's `add-items` on an
   unknown shelf changes nothing and answers `{"shelves":{}}` (inventaire.io files the books on an id that does not
   exist). Spam checks on `details` and shelf descriptions are not reproduced.
+- Lists (#74): `add-elements` stores the target of a URI inventaire.io redirects, and answers a URI whose target the
+  list holds in `alreadyInList` (inventaire.io stores the URI sent). The nightly job checks each element's URI once a
+  week and moves it to a redirect's target, deleting it where the list holds the target already, its comment kept on
+  the target when that one has none. A list's `visibility` reaches whoever may see it, as inventaire.io sends it.
+  `update-element` takes `id`, `comment` and `list` as the live API does (`ordinal-after` / `ordinal-before`, in
+  Codeberg's main only, are not served). `by-creators`' `images` reads the covers from inventaire.io in the language
+  of `Accept-Language` (inventaire.io prefers the reader's account language). A database-backed list lookup that
+  finds nothing answers `not_found: missing`, as CouchDB's `get` does. No spam check on a description or a comment,
+  no `warnings` (an unknown URI among those removed is passed over silently). Routes the apps do not call
+  (`by-ids`, `by-entities`, `by-element-id`, `elements`) answer `404`.

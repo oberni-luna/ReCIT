@@ -11,8 +11,8 @@ import studio.lunabee.exlibris.backend.groups.GroupsService
 import studio.lunabee.exlibris.backend.plugins.ApiException
 
 /**
- * A book's or an étagère's `visibility` as sent, checked as inventaire.io checks it: `isVisibilityKeyArray`, then
- * `validateVisibilityKeys`, which wants the owner in every group a `group:<id>` names.
+ * A book's, an étagère's or a list's `visibility` as sent, checked as inventaire.io checks it:
+ * `isVisibilityKeyArray`, then `validateVisibilityKeys`, which wants the owner in every group a `group:<id>` names.
  */
 class VisibilityValidator(
     private val groups: GroupsService,
@@ -37,7 +37,8 @@ class VisibilityValidator(
         return keys
     }
 
-    private fun isKey(key: String): Boolean =
+    /** inventaire.io's `isVisibilityKey`: one of the keywords, or `group:` and a group id. */
+    fun isKey(key: String): Boolean =
         key in keywords ||
             (key.startsWith(Visibility.GROUP_PREFIX) && DocumentId.isValid(key.removePrefix(Visibility.GROUP_PREFIX)))
 

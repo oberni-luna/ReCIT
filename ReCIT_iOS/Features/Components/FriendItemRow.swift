@@ -40,8 +40,11 @@ struct FriendItemRow: View {
         .buttonStyle(.plain)
         .accessibilityIdentifier(AccessibilityID.row)
         .contextMenu {
-            if isRequestOffered, let owner = item.owner {
-                if item.transaction == .inventorying {
+            if let owner = item.owner {
+                if isRequestOffered == false {
+                    Button("community.book_in_my_inventory", systemImage: "books.vertical") { }
+                        .disabled(true)
+                } else if item.transaction == .inventorying {
                     Button("community.owner_not_lending \(owner.username)", systemImage: "hand.raised.slash") { }
                         .disabled(true)
                 } else {
@@ -55,7 +58,8 @@ struct FriendItemRow: View {
 }
 
 extension FriendItemRow {
-    /// Whether the long press offers to ask for the copy. Not when I own the book myself.
+    /// Whether the long press offers to ask for the copy. Not when I own the book myself: it then
+    /// says the book is in my inventory.
     func requestOffered(_ isOffered: Bool = true) -> Self {
         var copy: Self = self
         copy.isRequestOffered = isOffered

@@ -2671,6 +2671,23 @@
         }
       }
     },
+    "community.book_in_my_inventory" : {
+      "comment" : "Disabled long-press entry on a friend's copy when I own the same edition.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This book is in your inventory"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce livre est dans votre inventaire"
+          }
+        }
+      }
+    },
     "community.owner_not_lending %@" : {
       "localizations" : {
         "en" : {

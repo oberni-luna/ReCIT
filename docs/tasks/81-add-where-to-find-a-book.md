@@ -47,6 +47,7 @@ created: 2026-11-07
 - [ ] A work two friends own (any editions) → two rows, avatar, pseudo, status, as on the Fiche livre; my own copy never listed.
 - [ ] A work no friend owns → only the two links.
 - [ ] Tap a friend's row → Profil d'un ami. Long press, I own no copy of that edition → « Emprunter à X » (or Acheter / Récupérer by status, disabled « X ne prête pas » for Inventorié), which opens the request sheet.
+- [ ] Long press on a friend's copy of an edition I own → one disabled entry « Ce livre est dans votre inventaire », on the Liste and the Fiche livre.
 - [ ] The link rows' `arrow.up.right` has the exact colour of the friend rows' chevrons, light and dark.
 - [ ] Every separator of the card, friend rows and link rows, starts at the same x.
 - [ ] Swipe to another cover → the section's rows cross-fade to the new work.
@@ -126,4 +127,15 @@ manual validation — not run by agent
 - **Open**: Olivier to say whether he owns that edition, or whether the request should be offered even then.
 - **Review**: deferred → /wa-validate.
 - **Verify**: round 4, manual validation, not run by agent. Build green, 1324 tests passed.
+- **Rule**: none.
+
+### Round 5 — 2026-11-07
+
+- **Asked**: « Garder la règle mais au lieu de ne rien montrer, afficher un message qui dit "Ce livre est dans votre inventaire". »
+- **Triage**: adjustment. Criteria updated.
+- **Changes** (`inline`):
+  - `FriendItemRow.swift`: when the request is not offered, the long press shows a disabled « Ce livre est dans votre inventaire » (`books.vertical`) instead of an empty menu. The row is shared, so the Fiche livre changes too.
+  - `Localizable.xcstrings`: `community.book_in_my_inventory`, fr « Ce livre est dans votre inventaire » / en "This book is in your inventory".
+- **Review**: deferred → /wa-validate.
+- **Verify**: round 5, manual validation, not run by agent. Tests: first run failed on `CreateBookFailureTests`, a file this round does not touch; the rerun passed.
 - **Rule**: none.

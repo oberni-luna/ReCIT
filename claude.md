@@ -132,6 +132,46 @@ signing in each time, run it with `-e e2eKeepSession true` — read
 
 **Heads-up on the test target:** `Tests/ReCIT_iOSTests.swift` is an *integration* suite that logs into the real `inventaire.io` production server with hard-coded credentials (`OlivierB_test`) and mutates that account's data. It is now gated behind `.enabled(if: IntegrationConfig.isEnabled)`, so a normal run skips it — but the credentials are still in the repo. Do not add it to automated pipelines without first stubbing the network or moving them out. Everything else is a pure or `MockURLProtocol`-backed suite and is safe to run anywhere.
 
+## Backend
+
+`Recit_Backend/` is the Ex-libris backend (umbrella issue #62): Kotlin, Ktor, PostgreSQL through
+Exposed and Flyway, a standalone Gradle project with its own wrapper, nothing shared with
+`Recit_Android/`. It reproduces inventaire.io's API — same paths, payloads, error shape
+`{"status":…,"status_verbose":…}` and session cookie — so the apps switch by base URL alone. Read
+`docs/conventions/kotlin-backend.md` before writing Kotlin there. It needs JDK 21 (Gradle provisions
+one if none is installed) and Docker (OrbStack on this Mac).
+
+Two ways to run it, from `Recit_Backend/`, both on `http://localhost:8080`:
+
+```sh
+# Everything in containers: Postgres 17, Mailpit (http://localhost:8025) and the backend image
+docker compose up
+
+# The databases in containers, the backend from Gradle — Ktor's development mode, no image rebuild
+docker compose up db mail
+./gradlew run
+```
+
+`cp .env.example .env` to change a setting; the defaults work without it. `./gradlew build` runs
+ktlint, detekt and the tests (Testcontainers, so Docker must be up); every lint violation fails it,
+and no rule is ever silenced with `@Suppress`. `GET /health` answers `{"status":"ok","db":"ok"}`
+once Postgres answers.
+
+**Pointing an app at it — debug builds only**, ignored in release; without the argument both apps
+talk to inventaire.io as before:
+
+- **iOS**: launch with `-ExLibrisBackend http://localhost:8080` (scheme › Run › Arguments, or
+  `xcrun simctl launch booted studio.lunabee.nouveau-recit -ExLibrisBackend http://localhost:8080`).
+  `Env.apiBaseUrl` reads it from the arguments domain; ATS allows plain HTTP to local addresses
+  (`NSAllowsLocalNetworking`).
+- **Android**: `adb shell am start -S -n studio.lunabee.exlibris.android.dev/studio.lunabee.nouveaurecit.MainActivity -e exLibrisBackend http://10.0.2.2:8080`.
+  `BackendOverride` reads it before `AppContainer` is built, so only a process's first launch
+  counts — hence `-S`. A debug-only `network_security_config` allows cleartext to `10.0.2.2` and
+  `localhost`.
+- On both, the session store takes a `.exlibris` suffix while the argument is set (iOS
+  `Env.keychainKey`, Android `SESSION_STORE_NAME`), so the local session and the inventaire.io one
+  never overwrite each other.
+
 ## Architecture (the parts that span files)
 
 ### App entry & dependency injection

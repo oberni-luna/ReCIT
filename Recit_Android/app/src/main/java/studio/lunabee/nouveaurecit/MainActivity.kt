@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import studio.lunabee.nouveaurecit.e2e.E2EHooks
+import studio.lunabee.nouveaurecit.network.BackendOverride
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        BackendOverride.read(intent)
         val container: AppContainer = (application as RecitApplication).container
         E2EHooks.read(intent)
         setContent {

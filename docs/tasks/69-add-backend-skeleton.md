@@ -2,7 +2,7 @@
 issue: 69
 status: todo
 wiki: [[architecture]], [[testing]], [[android]]
-note: Part of #62 (Ex-libris backend umbrella, decisions there). First task of the sprint; #70 and #76 build on it.
+note: BLOCKED — Docker (OrbStack) not set up, compose and Testcontainers proofs not run. Part of #62 (Ex-libris backend umbrella, decisions there). First task of the sprint; #70 and #76 build on it.
 created: 2026-11-06
 ---
 
@@ -58,3 +58,38 @@ The empty backend every other task of the sprint fills, and the switch that poin
 - The Android debug build launched with `-e exLibrisBackend http://10.0.2.2:8080` sends its requests to the local backend; launched without it, unchanged.
 - An inventaire.io session survives a launch with the argument: relaunched without it, the app is still signed in.
 - `docs/conventions/kotlin-backend.md` exists and is listed in `review.modules`; `CLAUDE.md` has the Backend section.
+
+## Implementation
+
+**Blocked — open question:** Docker never came up on this Mac (OrbStack installed, first-run setup not finished: no `~/.orbstack/bin/docker`, no `/var/run/docker.sock`). Finish OrbStack's setup, then run the three proofs below; nothing else is missing.
+
+1. `cd Recit_Backend && JAVA_HOME=/opt/homebrew/Cellar/openjdk@21/21.0.13.0.3/libexec/openjdk.jdk/Contents/Home ./gradlew build` — includes the 3 Testcontainers tests, which today fail only with `IllegalStateException` at `DockerClientProviderStrategy` (no Docker).
+2. `docker compose up` then `curl localhost:8080/health` — first build of the `Dockerfile`; the backend healthcheck assumes `curl` exists in `eclipse-temurin:21-jre`.
+3. `docker compose up db mail` then `./gradlew run`.
+
+### What is built
+
+- `Recit_Backend/`: standalone Gradle 9.7 project (Kotlin 2.4, Ktor 3.6 Netty, Exposed 1.6, Flyway 13, Hikari, Testcontainers 2), base package `studio.lunabee.exlibris.backend`. `Application.kt`, `AppContainer.kt`; `plugins/` (StatusPages error shape `{status, status_verbose}`, `ApiException`, request logging, serialization); `db/` (Postgres + Flyway); `health/` (`HealthRoutes.kt`, `HealthService.kt`, `HealthRepository.kt`); `V1__init.sql` enables `pg_trgm`. `Dockerfile`, `docker-compose.yml` (Postgres 17, Mailpit, backend), `.env.example`.
+- ktlint (`ktlint_official`, 120 columns) + detekt fail `./gradlew build`.
+- iOS: `Env` reads the debug-only `-ExLibrisBackend` argument (`UserDefaults`), keychain key gets `.exlibris`; `ReCIT.swift` now hands `AuthService` `Env`'s URL and key (same strings as before without the argument); `NSAllowsLocalNetworking`; `Tests/EnvTests.swift`.
+- Android: `BackendOverride` reads the `exLibrisBackend` extra (debug only) before the container, now `by lazy`; `ApiService.BASE_URL` is a getter on it; debug `network_security_config` for `10.0.2.2` / `localhost`; session store suffix; `BackendOverrideTest`.
+- `docs/conventions/kotlin-backend.md`, `CLAUDE.md` Backend section, `kotlin-backend.md` in `review.modules`.
+
+### Proof
+
+- Backend `./gradlew build -x test`: green (compile, ktlint, detekt). A deliberate violation failed it (detekt MagicNumber/MayBeConst, ktlint), reverted.
+- Run with `./gradlew run` against a throwaway Homebrew Postgres 14 (not 17, no Docker): Flyway applied v1, `pg_trgm` present; `/health` → `200 {"status":"ok","db":"ok"}`; `/api/whatever` → `404 {"status":404,"status_verbose":"not found"}`; Postgres stopped → `503 {"status":503,"status_verbose":"database unreachable"}` in 2 s, back to 200 after restart; one log line per request (`GET /health 503 2027ms`).
+- iOS build + ReCIT_iOSTests green (EnvTests 2/2). On iPhone 17: with the argument, requests reach `http://localhost:8080` (backend logs `GET /api/user 404`); without it, `https://inventaire.io`; the inventaire.io session survives a launch with the argument.
+- Android `:app:assembleDebug :app:testDebugUnitTest` green (BackendOverrideTest 2/2). No emulator: no Android runtime check.
+
+### Notes
+
+- **For #70:** under the argument the app reads as signed in without a local session: `AuthService.sessionCookies()` matches cookies by name, not host, so `adoptJarSession()` copies the inventaire.io cookie into the `.exlibris` entry. #70 must scope session cookies to the base URL's host (Android's `SessionCookieJar` to check too).
+- File names are `<Domain>Routes.kt` / `Service` / `Repository` rather than bare `Routes.kt`: ktlint's `filename` rule, not silenced; `kotlin-backend.md` records it.
+- `SESSION_SECRET` and `SMTP_*` are not in the config yet: they come with #70.
+- A route throws `ApiException` rather than responding an error body, or StatusPages overwrites it.
+- Switching backend on Android needs `am start -S` (only a process's first launch reads the extra).
+
+## Verification
+
+Partial — see Proof. Compose and Testcontainers not run (Docker missing); Android runtime not run (no emulator).

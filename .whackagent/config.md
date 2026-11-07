@@ -64,7 +64,7 @@ review:
                                # false → every change go through implementer, whatever size.
   autofix: true                # wa-code verify phase re-dispatch implementer until clean
   public_doc: false            # require doc on public API — flip false per company
-  modules: [style.md, elegance.md, swiftui.md, testing.md, architecture-global.md, architecture-recit.md, apple.md, wording.md, glossary.md]
+  modules: [style.md, elegance.md, swiftui.md, testing.md, architecture-global.md, architecture-recit.md, apple.md, wording.md, glossary.md, kotlin-backend.md]
                                # what single wa-verifier load before judging. Setup drop
                                # swiftui.md if no SwiftUI, and swap architecture-app.md for
                                # architecture-package.md. Paths relative to {conventions}.

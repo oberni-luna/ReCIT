@@ -31,6 +31,7 @@ import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.data.groups.PreferencesGroupRequestLedger
 import studio.lunabee.nouveaurecit.data.sorting.SortSession
 import studio.lunabee.nouveaurecit.network.ApiService
+import studio.lunabee.nouveaurecit.network.BackendOverride
 
 /**
  * The composition root — `ReCIT.swift` plus `RootView`'s `@State` models. One instance per process,
@@ -72,7 +73,7 @@ class AppContainer(context: Context) {
             sessionClient = sessionClient,
             publicClient = publicClient,
             jar = cookieJar,
-            vault = KeystoreSessionVault(context, BuildConfig.SESSION_STORE_NAME),
+            vault = KeystoreSessionVault(context, BackendOverride.sessionStoreName(BuildConfig.SESSION_STORE_NAME)),
         ),
     )
 

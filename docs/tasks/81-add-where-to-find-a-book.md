@@ -54,8 +54,32 @@ created: 2026-11-07
 
 ## Implementation
 
+Round 1, 2026-11-07, coded in its own worktree (the main checkout is shared with other sessions).
+
+- **Model**: `Model/Books/Bookshop.swift` is a pure enum `recyclivre` / `chezMonLibraire` with `searchURL(title:authorName:)`. It builds the URL with URLComponents, trims both parts, drops an empty author, and encodes `+`. Tested by `Tests/BookshopTests.swift` (5 tests).
+- **Section**: `Features/Lists/ListWhereToFindSection.swift`, with `Bookshop+Link.swift` holding each site's title, subtitle and logo.
+  - It reads the Work by uri, then walks `editions → items`. It keeps copies with `ownerId ≠ me`, an owner, and `isStillInTheStore`, sorted by username.
+  - `InventoryModel.syncItems(ofWork:)` links friends' editions to their work through `mergeWorks`, so no fallback query was needed.
+- **Shared with the Fiche livre**:
+  - `Features/Components/FriendItemRow.swift` holds the row and its context menu; `.requestOffered(_:)` turns the request on or off.
+  - `Features/Transactions/TransactionRequestSheet.swift` holds the request sheet.
+  - `BookDetailView.communitySection` now uses both, with the same behaviour.
+- **Link row**: `Features/Components/ExternalLinkRow.swift` and `ExternalLinkLogo.swift`. The logo is 28 pt, radius 6, with a `borderDefault` hairline. It sits in a 36-pt column (`ThumbnailSize.small`), so titles start at 60 like the friends' pseudos.
+- **Wiring**: `ListElementsPage` adds the section after « Ajouté le … » on lists of works, mine and friends'. `ListCoverFlowScreen` pushes `NavigationDestination.user` and presents `TransactionRequestSheet`.
+- **Assets**: two imagesets, `BookshopRecyclivre` (the site's touch icon) and `BookshopChezMonLibraire` (its touch icon, white margins cropped).
+- **Strings**: five keys `list.where_to_find.*`, fr and en.
+- **Proof**: build green with SwiftLint strict, and `swiftlint lint --strict` passes on the touched files. ReCIT_iOSTests: 1319 cases passed.
+- **Notes**:
+  - The logo hairline uses the `borderDefault` token, not Figma's 8 % black.
+  - Walking the editions costs one fault per edition. This is not measured for a work with thousands of editions in the store.
+  - The Chez mon libraire search was checked with curl. Recyclivre was not checked (Cloudflare).
+  - The same request sheet is still copied in `BookActions.swift` and `UserDetailView.swift`, and the menu in `UserInventoryTab.swift`. They are left as they are.
+  - One baseline entry in `BookDetailView` (`let me`) is now stale.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent
 
 ## Feedback

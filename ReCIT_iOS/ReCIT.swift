@@ -26,7 +26,11 @@ struct ReCIT: App {
 
         DesignSystem.start()
         Self.startTips()
-        _authModel = State(initialValue: .init(authService: .init(config: .init())))
+        let authConfig: AuthService.Config = .init(
+            baseURL: "\(Env.production.apiBaseUrl)/api",
+            keychainKey: Env.production.keychainKey
+        )
+        _authModel = State(initialValue: .init(authService: .init(config: authConfig)))
         sharedModelContainer = Self.isRunningTests ? nil : Self.makeModelContainer()
     }
 

@@ -97,7 +97,8 @@ class ApiService(
     }
 
     companion object {
-        const val BASE_URL: String = "https://inventaire.io"
+        /** inventaire.io, unless a debug launch named another backend ([BackendOverride]). */
+        val BASE_URL: String get() = BackendOverride.baseUrl
         val JsonMediaType = "application/json".toMediaType()
 
         val DefaultJson: Json = Json {

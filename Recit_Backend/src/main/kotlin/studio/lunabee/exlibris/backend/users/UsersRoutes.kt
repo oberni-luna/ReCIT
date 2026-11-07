@@ -1,5 +1,6 @@
 package studio.lunabee.exlibris.backend.users
 
+import io.ktor.http.HttpMethod
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -7,6 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.put
 import studio.lunabee.exlibris.backend.plugins.JsonBody
 import studio.lunabee.exlibris.backend.plugins.OkResponse
+import studio.lunabee.exlibris.backend.plugins.action
 import studio.lunabee.exlibris.backend.plugins.closeSession
 import studio.lunabee.exlibris.backend.plugins.queryParameter
 import studio.lunabee.exlibris.backend.plugins.receiveJsonBody
@@ -32,7 +34,7 @@ fun Route.usersRoutes(
         call.closeSession()
         call.respond(OkResponse())
     }
-    get("/api/users/by-ids") {
+    action("/api/users", "by-ids", listOf(HttpMethod.Get)) {
         call.respond(users.byIds(call.queryParameter("ids"), call.sessionUserId))
     }
 }

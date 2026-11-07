@@ -8,6 +8,7 @@ import studio.lunabee.exlibris.backend.entities.entitiesRoutes
 import studio.lunabee.exlibris.backend.groups.groupsRoutes
 import studio.lunabee.exlibris.backend.health.healthRoutes
 import studio.lunabee.exlibris.backend.images.imagesRoutes
+import studio.lunabee.exlibris.backend.items.itemsRoutes
 import studio.lunabee.exlibris.backend.plugins.installRateLimits
 import studio.lunabee.exlibris.backend.plugins.installRequestLogging
 import studio.lunabee.exlibris.backend.plugins.installSerialization
@@ -15,12 +16,14 @@ import studio.lunabee.exlibris.backend.plugins.installSessionCookies
 import studio.lunabee.exlibris.backend.plugins.installStatusPages
 import studio.lunabee.exlibris.backend.relations.relationsRoutes
 import studio.lunabee.exlibris.backend.search.searchRoutes
+import studio.lunabee.exlibris.backend.shelves.shelvesRoutes
 import studio.lunabee.exlibris.backend.users.usersRoutes
 
 fun Application.module() {
     val container = AppContainer(AppConfig.from(environment.config))
     container.migrate()
     monitor.subscribe(ApplicationStopped) { container.close() }
+    container.snapshotRefreshJob.start(this)
 
     installSerialization()
     installRequestLogging()
@@ -37,5 +40,7 @@ fun Application.module() {
         searchRoutes(container.searchService, container.entitiesService)
         imagesRoutes(container.imagesService)
         entitiesRoutes(container.entitiesService)
+        itemsRoutes(container.itemsService, container.inventoryViewService)
+        shelvesRoutes(container.shelvesService, container.shelfItemsService)
     }
 }

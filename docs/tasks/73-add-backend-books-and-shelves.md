@@ -1,6 +1,6 @@
 ---
 issue: 73
-status: todo
+status: to-test
 wiki: [[architecture]], [[features/0001-shelf-carousel-and-creation]], [[features/0006-shelf-membership]], [[features/0019-a-friends-shared-shelves]], [[features/0027-first-sync-progress]], [[features/0080-a-private-note-on-my-copy]]
 note: Part of #62 (Ex-libris backend umbrella, decisions there). Blocked by #71 (users, relations) and #72 (groups, for the `groups` visibility). #74 and #75 build on it.
 created: 2026-11-07
@@ -55,3 +55,24 @@ The backend serves the books (inventaire.io's items) and étagères (shelves) of
 - `DELETE /api/user` removes the reader's books and étagères.
 - The iOS app launched with `-ExLibrisBackend http://localhost:8080` scans a book into the inventory, files it on a new étagère, edits its Commentaire and Note privée, removes it from the étagère and deletes it; a friend's profile shows that reader's shared books and étagères.
 - Every request the backend sends to inventaire.io carries the header naming Ex-libris.
+
+## Implementation
+
+stacked on: wa/76-add-bibliography-proxy @ 029f10c
+
+- **Migration `V5__items_and_shelves.sql`:** `entity_snapshots`, `snapshot_works`, `items`, `shelves`, `item_shelves`, all cascading on `users` deletion.
+- **`db/Visibility.kt`:** inventaire.io's `filterVisibleDocs` as an Exposed condition over any owner + visibility table, the five keys including `group:<id>`.
+- **Package `items`:** the item routes, `inventory-view` computed in SQL (author, genre, subject, owner, `workUriItemsMap`, `itemsByDate`), snapshots stored per entity (`SnapshotBuilder` ports `buildSnapshot`, read through `InventaireClient` from `/api/entities/by-uris`, redirects followed), `SnapshotRefreshJob` (nightly, >7 days, unused snapshots dropped), `VisibilityValidator`.
+- **Package `shelves`:** create, update, delete with or without its books, add/remove items, by-ids (`with-items`), by-owners.
+- **`plugins/ActionRoutes.kt`** mounts both `/x/<name>` and `/x?action=<name>`; every legacy alias the apps send is served. `by-entities` and `recent-public` stay relayed by #76 (tested).
+- `UserSnapshot` now carries the real `items:count` / `items:last-add`. Account deletion: items and shelves cascade. Apps unchanged.
+- **Differences from inventaire.io:** snapshots stored, not rebuilt per read; a `bulk-update` re-reads a snapshot only when it is older than 10 minutes (added so the Commentaire autosave does not call inventaire.io on every save — to confirm); creation accepts `isbn:` and redirected URIs and stores the canonical one (inventaire.io answers 400); a snapshot that cannot be built refuses creation with 400; inventaire.io down → 502; no `with-users`, `context`, deprecation `warnings`, spam checks; snapshot `lang` = the edition's original language, as inventaire.io's builder.
+- **For #74/#75:** `Visibility.visibleTo(viewerId, ownerCol, visibilityCol)`; `VisibilityValidator.read`; `plugins/action(...)`; `SnapshotsService.snapshots(uris)` / `store(uri)`; `ItemRecord.document(viewerId, snapshot, busy)` — `ItemsService.byIds` passes `busy = false`, #75 replaces it with an open-transaction lookup; `ItemsService.delete(ownerId, ids)`; FK cascades for account deletion; test kit `BooksTestKit`. Next migration V6.
+- **App behaviour noticed, not a backend bug:** a friend's tab reads « Inventaire • 1 » while 2 books show, because iOS shows the max of the snapshot's public / network / private counts, which are disjoint — same against inventaire.io.
+
+## Verification
+
+- `./gradlew build`: 177 tests green, ktlint and detekt clean. iOS build + `ReCIT_iOSTests` (1326) green; Android build + 607 unit tests green.
+- Every backend acceptance criterion replayed by curl against real inventaire.io snapshots (creation, unknown URI 400, inventory-view shape, by-ids, bulk-update, friends / groups / public visibility for friend, member, stranger and anonymous, delete, every shelf route, by-owners, counts, nightly refresh including a real redirect, account deletion). ~24 anonymous GETs, no 429.
+- **iOS, iPhone 17, local backend, as `exlibris_ios_70`:** Inventaire loads the three « 1984 » and « Étagère curl 73 bis » (empty, as in the database — the seed described by the implementer was wrong); Scanner › + adds « Un psaume pour les recyclés sauvages » (`POST /api/items 201`, 4 books); « … › Étagère › Ajouter à une nouvelle étagère » « Science-fiction » (`POST /api/shelves 201`, then add-items); Commentaire « Doux et lumineux » and Note privée « Garder pour moi » (two `PUT /api/items/bulk-update`); relaunched: the étagère holds the book, both texts are still there (and in the database); Supprimer de mon inventaire (`POST /api/items/delete`, 3 books, étagère emptied); Réseau › `exlibris_friend_71`: étagère « Prêtables » with « L'étranger », and « 1984 », « L'étranger » in the list.
+- **Android: not run.** The emulator booted, the app installed and opened, but the Mac's load (up to 183, from ~93 system `SetStoreUpdateService` processes) made Android ANR repeatedly — launcher included — and swallowed typed characters, so sign-in never completed. The Android app is unchanged by this task; its unit tests pass.

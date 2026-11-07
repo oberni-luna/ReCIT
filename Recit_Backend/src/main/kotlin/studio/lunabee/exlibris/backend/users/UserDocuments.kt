@@ -7,7 +7,10 @@ import studio.lunabee.exlibris.backend.db.DocumentId
 
 /** A [UserRecord] written as one of inventaire.io's user documents. */
 object UserDocuments {
-    fun owner(user: UserRecord): OwnerUserDocument =
+    fun owner(
+        user: UserRecord,
+        snapshot: UserSnapshot,
+    ): OwnerUserDocument =
         OwnerUserDocument(
             id = user.id,
             rev = DocumentId.revision(user.id, user.version),
@@ -21,12 +24,14 @@ object UserDocuments {
             position = user.position?.toList(),
             validEmail = user.isEmailValidated,
             settings = settings(user.settings),
+            snapshot = snapshot,
             summaryPeriodicity = user.summaryPeriodicity,
         )
 
     fun public(
         user: UserRecord,
         isInNetwork: Boolean,
+        snapshot: UserSnapshot,
     ): PublicUserDocument =
         PublicUserDocument(
             id = user.id,
@@ -36,7 +41,7 @@ object UserDocuments {
             fediversable = user.fediversable,
             picture = user.picture,
             position = user.position?.toList(),
-            snapshot = UserSnapshot.forViewer(isInNetwork),
+            snapshot = snapshot.forViewer(isInNetwork),
         )
 
     /** `{"notifications":{…}}` always, as `ownerSafeData` fills it in; each other category once it holds a switch. */

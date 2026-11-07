@@ -32,6 +32,16 @@ class GroupsService(
         return GroupById(GroupDocuments.of(group), documents.documents(group.memberIds, viewerId).values.toList())
     }
 
+    /** The groups [userId] is admin or member of: those a `group:<id>` visibility key may name. */
+    suspend fun memberGroupIds(userId: String): Set<String> =
+        repository.groupsOf(userId, setOf(GroupRole.ADMIN, GroupRole.MEMBER)).map { it.id }.toSet()
+
+    /** A group's admins and members, whose books its inventory gathers (`getGroupMembersIds`). */
+    suspend fun memberIds(groupId: String): List<String> {
+        if (!DocumentId.isValid(groupId)) throw ApiException.invalidParameter("group", groupId)
+        return (repository.findById(groupId) ?: throw GroupMembershipService.notFound()).memberIds
+    }
+
     /** `POST /api/groups`: the group, its creator its only admin, answered as `by-id` would show it. */
     suspend fun create(
         userId: String,

@@ -27,7 +27,7 @@ data class OwnerUserDocument(
     val validEmail: Boolean,
     val roles: List<String> = emptyList(),
     val settings: JsonObject,
-    val snapshot: UserSnapshot = UserSnapshot.forOwner(),
+    val snapshot: UserSnapshot,
     val summaryPeriodicity: Int? = null,
     val enabledOAuth: List<String> = emptyList(),
     val accessLevels: List<String> = emptyList(),

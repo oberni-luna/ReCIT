@@ -2,12 +2,16 @@ package studio.lunabee.exlibris.backend.users
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.v1.core.Count
+import org.jetbrains.exposed.v1.core.Max
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.max
 import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.core.plus
 import org.jetbrains.exposed.v1.core.statements.UpdateStatement
@@ -15,12 +19,14 @@ import org.jetbrains.exposed.v1.core.stringParam
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import org.jetbrains.exposed.v1.jdbc.upsert
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import studio.lunabee.exlibris.backend.db.ItemsTable
 import studio.lunabee.exlibris.backend.db.UserSettingsTable
 import studio.lunabee.exlibris.backend.db.UsersTable
 
@@ -44,6 +50,24 @@ class UsersRepository(
                     .selectAll()
                     .where { UsersTable.id inList ids }
                     .map { it.toUserRecord(settings[it[UsersTable.id]].orEmpty()) }
+            }
+        }
+
+    /** Each of [ownerIds]' `snapshot`, computed from their books as inventaire.io's `updateSnapshotItemsCounts`. */
+    suspend fun snapshots(ownerIds: Collection<String>): Map<String, UserSnapshot> =
+        withContext(Dispatchers.IO) {
+            transaction(database) {
+                val count: Count = ItemsTable.id.count()
+                val lastAdd: Max<Long, Long> = ItemsTable.created.max()
+                ItemsTable
+                    .select(ItemsTable.owner, ItemsTable.visibility, count, lastAdd)
+                    .where { ItemsTable.owner inList ownerIds }
+                    .groupBy(ItemsTable.owner, ItemsTable.visibility)
+                    .groupBy({ it[ItemsTable.owner] }, {
+                        it[ItemsTable.visibility] to
+                            ItemCount(it[count].toInt(), it[lastAdd])
+                    })
+                    .mapValues { (_, counts) -> UserSnapshot.of(counts.toMap()) }
             }
         }
 

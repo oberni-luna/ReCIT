@@ -1,0 +1,1 @@
+{"status":400,"message":"cant create relation between identical ids","context":{"action":"request","othersId":"36829e21389c27c629a3181e31c36301","reqUserId":"36829e21389c27c629a3181e31c36301"}}

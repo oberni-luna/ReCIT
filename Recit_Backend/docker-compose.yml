@@ -33,8 +33,11 @@ services:
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
       SMTP_HOST: mail
       SMTP_PORT: 1025
+      IMAGES_DIRECTORY: /data/images
     ports:
       - "8080:8080"
+    volumes:
+      - images:/data/images
     depends_on:
       db:
         condition: service_healthy
@@ -49,3 +52,4 @@ services:
 
 volumes:
   db-data:
+  images:

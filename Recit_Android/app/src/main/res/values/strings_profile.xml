@@ -67,7 +67,7 @@
         <item quantity="other">%d listes seront supprimées</item>
     </plurals>
     <string name="delete_account_hosting">Votre compte est hébergé par inventaire.io. Le supprimer ici le supprime aussi sur le site.</string>
-    <string name="delete_account_username_kept">Votre nom d\'utilisateur·ice restera réservé et ne pourra pas servir à un nouveau compte.</string>
+    <string name="delete_account_username_released">Votre nom d\'utilisateur·ice redeviendra libre : quelqu\'un d\'autre pourra le choisir.</string>
     <string name="delete_account_button">Supprimer mon compte</string>
     <string name="delete_account_confirm_title">Supprimer définitivement ?</string>
     <string name="delete_account_confirm_message">Vos livres, étagères, listes et échanges seront supprimés. Cette action ne peut pas être annulée.</string>

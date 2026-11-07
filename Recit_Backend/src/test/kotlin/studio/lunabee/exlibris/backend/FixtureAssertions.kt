@@ -25,16 +25,28 @@ object FixtureAssertions {
         fixture: String,
         actual: String,
     ) {
-        val expected: JsonObject = Json.parseToJsonElement(read(fixture)).jsonObject
-        val answer: JsonObject = Json.parseToJsonElement(actual).jsonObject
-        assertEquals(expected.keys - ignoredKeys, answer.keys - ignoredKeys, "keys of $fixture")
+        assertMatchesShape(fixture(fixture), Json.parseToJsonElement(actual).jsonObject, fixture)
+    }
+
+    /**
+     * The same comparison for one object inside an answer — a user of `by-ids`, a hit of a search — against the
+     * matching object inside a fixture, which [fixture] reads.
+     */
+    fun assertMatchesShape(
+        expected: JsonObject,
+        answer: JsonObject,
+        label: String,
+    ) {
+        assertEquals(expected.keys - ignoredKeys, answer.keys - ignoredKeys, "keys of $label")
         (expected.keys - ignoredKeys).forEach { key ->
             val expectedValue: JsonElement = expected.getValue(key)
             val answerValue: JsonElement = answer.getValue(key)
-            assertEquals(typeOf(expectedValue), typeOf(answerValue), "type of $key in $fixture")
-            if (key in matchedKeys) assertEquals(expectedValue, answerValue, "value of $key in $fixture")
+            assertEquals(typeOf(expectedValue), typeOf(answerValue), "type of $key in $label")
+            if (key in matchedKeys) assertEquals(expectedValue, answerValue, "value of $key in $label")
         }
     }
+
+    fun fixture(fixture: String): JsonObject = Json.parseToJsonElement(read(fixture)).jsonObject
 
     private fun read(fixture: String): String =
         requireNotNull(

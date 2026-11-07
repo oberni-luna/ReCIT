@@ -10,7 +10,12 @@ import java.util.UUID
 object DocumentId {
     const val LENGTH: Int = 32
 
+    private val pattern: Regex = Regex("^[0-9a-f]{$LENGTH}$")
+
     fun new(): String = UUID.randomUUID().toString().replace("-", "")
+
+    /** inventaire.io's `isCouchUuid`, which every id parameter is checked against. */
+    fun isValid(id: String): Boolean = pattern.matches(id)
 
     fun revision(
         id: String,

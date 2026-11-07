@@ -13,7 +13,15 @@ import studio.lunabee.exlibris.backend.auth.SessionCodec
 import studio.lunabee.exlibris.backend.db.Postgres
 import studio.lunabee.exlibris.backend.health.HealthRepository
 import studio.lunabee.exlibris.backend.health.HealthService
+import studio.lunabee.exlibris.backend.images.ImagesRepository
+import studio.lunabee.exlibris.backend.images.ImagesService
+import studio.lunabee.exlibris.backend.images.LocalImageStore
 import studio.lunabee.exlibris.backend.mail.MailSender
+import studio.lunabee.exlibris.backend.relations.RelationsRepository
+import studio.lunabee.exlibris.backend.relations.RelationsService
+import studio.lunabee.exlibris.backend.search.SearchRepository
+import studio.lunabee.exlibris.backend.search.SearchService
+import studio.lunabee.exlibris.backend.users.UserUpdateService
 import studio.lunabee.exlibris.backend.users.UsersRepository
 import studio.lunabee.exlibris.backend.users.UsersService
 import java.time.Clock
@@ -63,7 +71,32 @@ class AppContainer(
             clock = clock,
         )
 
-    val usersService: UsersService = UsersService(UsersRepository(database))
+    private val usersRepository: UsersRepository = UsersRepository(database)
+
+    val imagesService: ImagesService =
+        ImagesService(
+            store = LocalImageStore(config.images.directory),
+            repository = ImagesRepository(database),
+        )
+
+    val relationsService: RelationsService = RelationsService(RelationsRepository(database), clock)
+
+    val usersService: UsersService =
+        UsersService(
+            repository = usersRepository,
+            relations = relationsService,
+            images = imagesService,
+        )
+
+    val userUpdateService: UserUpdateService =
+        UserUpdateService(
+            repository = usersRepository,
+            links = accountLinkService,
+            images = imagesService,
+            addressChanges = AttemptLimiter(limit = 3, window = Duration.ofHours(1), clock = clock),
+        )
+
+    val searchService: SearchService = SearchService(SearchRepository(database))
 
     fun migrate() {
         Postgres.migrate(dataSource)

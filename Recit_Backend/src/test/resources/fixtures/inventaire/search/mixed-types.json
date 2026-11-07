@@ -1,0 +1,1 @@
+{"status":400,"message":"can not have both social and entity types","context":{"types":["users","works"],"url":"/api/search?types=users|works&search=oliv&limit=3"}}

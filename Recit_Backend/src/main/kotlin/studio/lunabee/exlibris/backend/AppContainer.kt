@@ -11,6 +11,8 @@ import studio.lunabee.exlibris.backend.auth.AuthService
 import studio.lunabee.exlibris.backend.auth.PasswordHasher
 import studio.lunabee.exlibris.backend.auth.SessionCodec
 import studio.lunabee.exlibris.backend.db.Postgres
+import studio.lunabee.exlibris.backend.entities.EntitiesService
+import studio.lunabee.exlibris.backend.entities.InventaireClient
 import studio.lunabee.exlibris.backend.groups.GroupMembershipService
 import studio.lunabee.exlibris.backend.groups.GroupsRepository
 import studio.lunabee.exlibris.backend.groups.GroupsService
@@ -122,11 +124,16 @@ class AppContainer(
 
     val searchService: SearchService = SearchService(SearchRepository(database))
 
+    private val inventaireClient: InventaireClient = InventaireClient(config.inventaire)
+
+    val entitiesService: EntitiesService = EntitiesService(inventaireClient)
+
     fun migrate() {
         Postgres.migrate(dataSource)
     }
 
     override fun close() {
+        inventaireClient.close()
         dataSource.close()
     }
 }

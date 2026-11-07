@@ -34,6 +34,7 @@ services:
       SMTP_HOST: mail
       SMTP_PORT: 1025
       IMAGES_DIRECTORY: /data/images
+      INVENTAIRE_BASE_URL: ${INVENTAIRE_BASE_URL:-https://inventaire.io}
     ports:
       - "8080:8080"
     volumes:

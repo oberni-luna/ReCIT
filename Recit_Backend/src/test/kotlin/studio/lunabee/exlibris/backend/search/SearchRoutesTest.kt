@@ -106,10 +106,4 @@ class SearchRoutesTest {
                     .startsWith("invalid types: foo"),
             )
         }
-
-    @Test
-    fun `the entity types are not served yet`() =
-        authTest {
-            assertEquals(HttpStatusCode.NotImplemented, client.getAs("/api/search?types=works&search=a", null).status)
-        }
 }

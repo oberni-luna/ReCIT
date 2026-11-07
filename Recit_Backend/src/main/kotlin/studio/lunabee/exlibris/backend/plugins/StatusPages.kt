@@ -9,7 +9,10 @@ import io.ktor.server.response.respond
 
 private const val FIRST_ERROR_STATUS: Int = 400
 
-/** Every error leaves in [ErrorBody]'s shape, whether a service threw it or Ktor answered it alone. */
+/**
+ * Every error leaves in [ErrorBody]'s shape, whether a service threw it or Ktor answered it alone; a relayed
+ * call's error is inventaire.io's, and leaves as inventaire.io wrote it ([markRelayed]).
+ */
 fun Application.installStatusPages() {
     install(StatusPages) {
         exception<ApiException> { call, cause ->
@@ -20,7 +23,9 @@ fun Application.installStatusPages() {
         }
         HttpStatusCode.allStatusCodes
             .filter { it.value >= FIRST_ERROR_STATUS }
-            .forEach { errorStatus -> status(errorStatus) { call, status -> call.respondError(status) } }
+            .forEach { errorStatus ->
+                status(errorStatus) { call, status -> if (!call.isRelayed) call.respondError(status) }
+            }
     }
 }
 

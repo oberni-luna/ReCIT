@@ -48,7 +48,8 @@ object FixtureAssertions {
 
     fun fixture(fixture: String): JsonObject = Json.parseToJsonElement(read(fixture)).jsonObject
 
-    private fun read(fixture: String): String =
+    /** The fixture as captured, byte for byte: what a relayed answer must equal. */
+    fun read(fixture: String): String =
         requireNotNull(
             FixtureAssertions::class.java.getResource("/fixtures/inventaire/$fixture"),
         ) { "no fixture $fixture" }

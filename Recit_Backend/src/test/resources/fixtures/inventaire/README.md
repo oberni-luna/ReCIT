@@ -23,6 +23,9 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   `lib/membership_validations.ts`, `lib/update_settings.ts`, `server/models/group.ts` and
   `server/models/validations/group.ts`: a group created, `GET /api/groups`, `update-settings`' answers, every refusal
   of the membership actions, and an upload into `groups`.
+- #76 captured, the same way on 2026-11-07, `entities/by-uris.wd-Q8337.fr.json`
+  (`GET /api/entities/by-uris?uris=wd:Q8337&lang=fr`), which the relay's stub answers to prove the body comes back
+  byte for byte. The relay's other tests answer from a stub: what goes through is inventaire.io's, not the backend's.
 
 ## Known departures
 
@@ -40,3 +43,7 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   apart), no `groupUpdate` / `userMadeAdmin` notification; `_score` is the name's `pg_trgm` similarity, where
   inventaire.io's Elasticsearch also weighs the description. `by-slug`, `slug` and `search-by-position` are not
   served: the apps never call them.
+- Relayed reads (#76) answer what inventaire.io answers, minus its headers: only `Content-Type`, and for images
+  `Cache-Control`, `ETag` and `Last-Modified`, come back. A JSON answer loses its `ETag`, and none carries
+  `Set-Cookie`, inventaire.io's anonymous session or the backend's. Bibliographic writes answer `501` until #77,
+  `POST /api/entities/resolve`'s dry run included, and an unreachable inventaire.io answers `502`.

@@ -78,7 +78,7 @@ class ImagesService(
 
     private fun container(parameter: String): ImageContainer =
         ImageContainer.of(parameter) ?: throw if (parameter in ImageContainer.uploadable) {
-            ApiException(HttpStatusCode.NotImplemented, "not implemented: container=$parameter")
+            ApiException.notImplemented()
         } else {
             ApiException(
                 HttpStatusCode.BadRequest,

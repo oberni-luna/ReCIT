@@ -14,7 +14,8 @@ private val callSessionKey: AttributeKey<CallSession> = AttributeKey("CallSessio
 
 /**
  * inventaire.io's global `cookie-session` middleware: every call opens the request's session, or an anonymous
- * one, and its answer — a route's, an error's, a rate limit's — carries whatever the session became.
+ * one, and its answer — a route's, an error's, a rate limit's — carries whatever the session became. A relayed
+ * call ([markRelayed]) carries none: it answers what inventaire.io gave, without a session (#76).
  */
 fun Application.installSessionCookies(codec: SessionCodec) {
     install(
@@ -30,7 +31,7 @@ fun Application.installSessionCookies(codec: SessionCodec) {
             }
             onCallRespond { call, _ ->
                 val session: CallSession? = call.attributes.getOrNull(callSessionKey)
-                if (session != null && !session.isSent) {
+                if (session != null && !session.isSent && !call.isRelayed) {
                     session.isSent = true
                     val headers: List<String> = codec.setCookieHeaders(session.state)
                     headers.forEach { call.response.headers.append(HttpHeaders.SetCookie, it) }

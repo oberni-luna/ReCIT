@@ -41,6 +41,8 @@ struct ListElementsPage: View {
     let onSearch: () -> Void
     let onOpen: (String) -> Void
     let onRemove: (EntityListItem) -> Void
+    let onOpenFriend: (User) -> Void
+    let onRequest: (InventoryItem) -> Void
     private var highlightedURI: String?
 
     @FocusState private var isCommentFocused: Bool
@@ -215,6 +217,14 @@ struct ListElementsPage: View {
                 } footer: {
                     addedFooter(selectedItem)
                 }
+            }
+
+            if list.type == .work, let selectedURI {
+                ListWhereToFindSection(
+                    workURI: selectedURI,
+                    onOpenFriend: onOpenFriend,
+                    onRequest: onRequest
+                )
             }
         }
     }

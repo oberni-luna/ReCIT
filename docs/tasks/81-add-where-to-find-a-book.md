@@ -1,6 +1,6 @@
 ---
 issue: 81
-status: todo
+status: to-test
 wiki: [[lists]], [[book-and-editions]], [[network]], [[design-system/figma-library]]
 note: Figma B3 · Liste · Où trouver ce livre ? (992:1760, fileKey S7IvC6GvlcUFe5IgbtvQq6)
 created: 2026-11-07

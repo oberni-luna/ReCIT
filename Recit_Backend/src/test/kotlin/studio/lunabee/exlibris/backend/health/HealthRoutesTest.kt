@@ -48,6 +48,6 @@ class HealthRoutesTest {
             val response = client.get("/api/whatever")
 
             assertEquals(HttpStatusCode.NotFound, response.status)
-            assertEquals("""{"status":404,"status_verbose":"not found"}""", response.bodyAsText())
+            assertEquals("""{"status":404,"status_verbose":"not found","message":"not found"}""", response.bodyAsText())
         }
 }

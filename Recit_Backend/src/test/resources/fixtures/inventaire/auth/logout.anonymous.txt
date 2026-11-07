@@ -1,0 +1,9 @@
+POST https://inventaire.io/api/auth/logout, no cookie sent (captured 2026-11-07)
+
+HTTP/2 302
+set-cookie: loggedIn=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT
+set-cookie: inventaire:session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax; secure; httponly
+set-cookie: inventaire:session.sig=VZWvF0Bn5-wRFgxGw5xLiGGWIAuc-CM1wfkLp-BorZ0; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax; secure; httponly
+location: /
+
+Found. Redirecting to /

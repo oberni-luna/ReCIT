@@ -1,0 +1,1 @@
+{"status":400,"message":"this username is already used","context":{"value":"maxlath","url":"/api/auth/username-availability?username=maxlath"}}

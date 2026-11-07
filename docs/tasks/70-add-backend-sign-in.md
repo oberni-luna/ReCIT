@@ -1,6 +1,6 @@
 ---
 issue: 70
-status: todo
+status: to-test
 wiki: [[architecture]], [[adr/0008-session-login-signup-keychain]], [[account-and-profile]], [[features/0083-rate-limited-sign-in-message]]
 note: Part of #62 (Ex-libris backend umbrella, decisions there). Blocked by #69 (skeleton). The domain used in e-mails is chosen with the hosting.
 created: 2026-11-06
@@ -69,3 +69,26 @@ The backend opens, checks and closes sessions exactly as inventaire.io does, so 
 - The iOS debug build with `-ExLibrisBackend http://localhost:8080`: Créer un compte, quit and relaunch (still signed in), Se déconnecter, Se connecter, all against the local backend.
 - The same on Android with `-e exLibrisBackend http://10.0.2.2:8080`.
 - Each route has a backend test against a fixture captured on inventaire.io.
+
+## Implementation
+
+stacked on: wa/69-add-backend-skeleton @ ea99de4
+
+- **Backend** (`Recit_Backend/`): `V2__users.sql` (users, user_tokens); packages `auth` (`AuthRoutes`, `AuthService`, `AccountLinkService` for confirmation and reset links, `SessionCodec` + `Keygrip`, `PasswordHasher` argon2id via password4j, `AttemptLimiter`, HTML pages and e-mails), `users` (minimal `GET /api/user` in inventaire.io's owner shape), `mail` (`MailSender` over Angus Mail); `plugins/` gained `SessionCookies`, `RateLimits` (Ktor RateLimit), `JsonBody`, `ParameterPlace`; `AppConfig` reads `SESSION_SECRET`, `PUBLIC_BASE_URL`, `SMTP_*`, `MAIL_FROM`.
+- **Cookie format, read from inventaire.io's source:** `inventaire:session` is base64 JSON `{user, timestamp}`, `.sig` is keygrip **HMAC-SHA256** base64url (the brief said SHA-1; the 43-character `.sig` in ADR 0008 confirms SHA-256). The backend writes unpadded base64url and reads both alphabets.
+- **Error body:** `{status, status_verbose, message, error_type?, error_name?}`; inventaire.io never sends `status_verbose`, kept from #69.
+- **Deliberate differences:** an old-secret session gets both cookies re-sent; no `loggedIn` cookie; a session naming a deleted account → `401` (inventaire.io: `400`); `PUT /api/auth/password` always wants `old-password`, reset goes through the HTML page; logout redirects to `/`, which is a JSON 404 here (apps ignore it). Pages and e-mails say « tu » per `wording.md`.
+- **Apps:** a session cookie is now one with the right name **and** a domain matching the base URL's host (`SessionCookieScope` on iOS and Android), in the jar, the keychain/vault and logout. iOS `AuthService.swift` stays at 519 lines (baseline-pinned). ADR 0008's "filtered by name" sentence needs updating at close.
+- **Infra:** Mailpit gets `MP_SMTP_DISABLE_RDNS` (its reverse-DNS lookup stalled SMTP 10 s). Per-IP limits read the socket IP: the hosting will need forwarded headers.
+- **For #71:** extend the `users` package; `_rev` from `DocumentId.revision(id, version)`; reuse `ApiException.unauthorized()/tooManyRequests()/missingParameter()/invalidParameter()`, `call.requireSessionUser()`, `receiveJsonBody()`, `queryParameter()`.
+- **Open:** Android's `SessionCookie` decodes base64url only, so an inventaire.io payload containing `+` or `/` reads as unreadable today — worth its own small task.
+- Fixtures: anonymous captures only (availability, a 404, an anonymous logout); authenticated shapes derived from Codeberg/OpenAPI (`*.derived.json`). Local test accounts are in `Recit_Backend/.env.example`.
+
+## Verification
+
+- `./gradlew build` (ktlint + detekt + 52 tests, Testcontainers + Mailpit): green.
+- iOS build and `ReCIT_iOSTests` (1327 tests): green. Android `:app:assembleDebug :app:testDebugUnitTest`: green.
+- Backend by curl: availability, signup (cookie payload names the user, Mailpit « Confirme ton adresse e-mail », link flips `validEmail`, second open refused), logout (`302`, then `/api/user` `401`), login by e-mail in upper case, wrong password `401`, tampered `.sig` anonymous, reset by mail (old password `401`, new one signs in, link single-use).
+- **iOS, iPhone 17 simulator, `-ExLibrisBackend http://localhost:8080`:** Créer un compte → Inventaire (`POST /api/auth/signup 200`, `GET /api/user 200`); relaunch → still signed in, Profil shows `exlibris_ios_70`; Se déconnecter → welcome (`POST /api/auth/logout 302`); Se connecter → Inventaire (`POST /api/auth/login 200`). Relaunched **without** the argument: the simulator's existing inventaire.io session (`OlivierB_test4`) is intact and nothing reaches localhost.
+- **Android, Pixel 8 API 35 emulator, `-e exLibrisBackend http://10.0.2.2:8080`:** Créer un compte → Inventaire; relaunch → still signed in, Profil shows `exlibris_and_70`; Se déconnecter → welcome; Se connecter → Inventaire; each call seen in the backend log. Relaunched without the extra: nothing reaches the local backend, the app shows the cached Inventaire a moment, then the welcome screen.
+- The 11th-login `429` and the password change are covered by backend tests only.

@@ -1,0 +1,1 @@
+{"status":400,"message":"reserved words can't be usernames","context":{"username":"profile","url":"/api/auth/username-availability?username=profile"}}

@@ -1,0 +1,1 @@
+{"status":400,"message":"invalid email: not-an-email","error_type":"invalid_parameter","error_name":"invalid_email","context":{"parameter":"email","value":"not-an-email","type":"string","config":{},"url":"/api/auth/email-availability?email=not-an-email"}}

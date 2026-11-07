@@ -1,0 +1,1 @@
+{"status":400,"message":"invalid username: a","error_type":"invalid_parameter","error_name":"invalid_username","context":{"parameter":"username","value":"a","type":"string","config":{},"url":"/api/auth/username-availability?username=a"}}

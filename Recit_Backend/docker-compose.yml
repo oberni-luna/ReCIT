@@ -17,6 +17,9 @@ services:
 
   mail:
     image: axllent/mailpit
+    environment:
+      # Its reverse DNS lookup of a client outside Compose's network stalls every connection for ten seconds.
+      MP_SMTP_DISABLE_RDNS: "true"
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -27,6 +30,9 @@ services:
       DATABASE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-exlibris}
       DATABASE_USER: ${POSTGRES_USER:-exlibris}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-exlibris}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      SMTP_HOST: mail
+      SMTP_PORT: 1025
     ports:
       - "8080:8080"
     depends_on:

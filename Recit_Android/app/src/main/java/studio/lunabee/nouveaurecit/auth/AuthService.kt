@@ -7,6 +7,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -17,6 +18,7 @@ import studio.lunabee.nouveaurecit.auth.model.FieldAvailability
 import studio.lunabee.nouveaurecit.auth.model.PasswordResetOutcome
 import studio.lunabee.nouveaurecit.auth.model.PostSignupSession
 import studio.lunabee.nouveaurecit.auth.model.SessionCookie
+import studio.lunabee.nouveaurecit.auth.model.SessionCookieScope
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.dto.ErrorBodyDto
 import java.io.IOException
@@ -59,6 +61,9 @@ class AuthService(
     )
 
     private val json: Json = ApiService.DefaultJson
+
+    /** The base URL's host: inventaire.io's session and the Ex-libris backend's share their names, not their host. */
+    private val sessionHost: String? = baseUrl.toHttpUrlOrNull()?.host
 
     init {
         restoreCookiesFromVault()
@@ -109,7 +114,7 @@ class AuthService(
     }
 
     fun forgetSession() {
-        jar.remove(SESSION_COOKIE_NAMES)
+        jar.remove { isSessionCookie(it.name, it.domain) }
         vault.delete()
     }
 
@@ -140,7 +145,10 @@ class AuthService(
             }
         }
 
-    private fun sessionCookies(): List<Cookie> = jar.all().filter { it.name in SESSION_COOKIE_NAMES }
+    private fun sessionCookies(): List<Cookie> = jar.all().filter { isSessionCookie(it.name, it.domain) }
+
+    private fun isSessionCookie(name: String, domain: String): Boolean =
+        name in SESSION_COOKIE_NAMES && sessionHost?.let { SessionCookieScope.covers(domain, it) } == true
 
     private fun isValid(cookies: List<Cookie>): Boolean = cookies.any { it.expiresAt > clock() }
 
@@ -174,7 +182,7 @@ class AuthService(
             return emptyList()
         }
         // Filtered on the way out as well as in, so an entry written under a wider rule cannot widen it today.
-        return stored.filter { it.name in SESSION_COOKIE_NAMES }.map { cookie ->
+        return stored.filter { isSessionCookie(it.name, it.domain) }.map { cookie ->
             Cookie.Builder()
                 .name(cookie.name)
                 .value(cookie.value)

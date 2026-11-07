@@ -36,7 +36,7 @@ class SessionCookieJar(private val clock: () -> Long = System::currentTimeMillis
     }
 
     @Synchronized
-    fun remove(names: Set<String>) {
-        cookies.removeAll { it.name in names }
+    fun remove(predicate: (Cookie) -> Boolean) {
+        cookies.removeAll(predicate)
     }
 }

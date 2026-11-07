@@ -1,6 +1,6 @@
 ---
 issue: 89
-status: todo
+status: to-test
 wiki: [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0086-a-friends-transactions-tab]], [[features/0045-running-on-ios-18]]
 note: "sur iOS 18, notre tab bar ne marche pas bien. Il faut enlever le \"liquid glass\" et les effets de zoom sur iOS 18." Screen recording on an iPhone 16 Pro (iOS 18), 2026-11-07, kept locally (~/Desktop/Screen Recording iPhone 16 Pro 07-11-2026 at 17.26.57.mp4).
 created: 2026-11-07
@@ -32,8 +32,16 @@ created: 2026-11-07
 
 ## Implementation
 
+- `DesignSystem/Extensions/View+glass.swift` — `glassCapsule()` below iOS 26: `background(DesignSystem.Color.backgroundDisable.color, in: .capsule)` instead of `.regularMaterial`. iOS 26 branch unchanged. Doc comment says what iOS 18 gets.
+- `Features/Components/LensTabPicker.swift` — `liftScale` / `magnification` stay static computed vars in place: 1.15 / 1.2 under `#available(iOS 26.0, *)`, 1 otherwise. Header gains a paragraph on iOS 18: picked up, follows the finger, rubber-bands, settles, nothing grows.
+- No statics moved: the frozen `type_contents_order` baseline entries still match. Baseline untouched, no `swiftlint:disable`.
+- Build: iPhone 17 (iOS 26) and iPhone 16 Pro (iOS 18.6, built for that destination) `BUILD SUCCEEDED`, lint clean. `LensTabTrackTests` 8/8 pass.
+- Not seen running: reaching a friend's profile needs a signed-in account. The cut word is drawn by the ×1.2-scaled overlay copy clipped by the ×1.15 capsule; both are 1 below iOS 26, so it should be gone — to check on device.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent
 
 ## Feedback

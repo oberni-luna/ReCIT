@@ -2,8 +2,7 @@ package studio.lunabee.exlibris.backend.search
 
 /**
  * inventaire.io's `indexedTypes`, the values `types` accepts, split as #62 decision 10 splits them: the social
- * ones searched here, the entity ones relayed to inventaire.io (#76). `groups` is #72's; `shelves` and `lists`
- * the apps never search.
+ * ones searched here, the entity ones relayed to inventaire.io (#76). `shelves` and `lists` the apps never search.
  */
 enum class SearchType(
     val parameter: String,

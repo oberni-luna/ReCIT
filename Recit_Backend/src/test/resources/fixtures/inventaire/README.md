@@ -16,6 +16,13 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
   `server/controllers/images/{upload,gravatar}.ts` and `server/models/user.ts` (a new account's `snapshot`).
 - `users/`, `search/` and the anonymous `401`s of `relations/` and `images/` were captured for #71 on 2026-11-07,
   the same way: `GET /api/users/by-ids`, `GET /api/search?types=users`, `GET /img/users/<hash>`.
+- #72 captured, the same way on 2026-11-07, `groups/by-id*.json` (`GET /api/groups/by-id`: a group with a picture
+  and no position, one with members, a request and a position, an unknown id, an invalid one, none),
+  `groups/groups.anonymous.json` (`GET /api/groups` signed out), `search/groups.json` (`types=groups&search=livres`)
+  and `images/img-groups.invalid-path.json`. Its `*.derived.json` come from `server/controllers/groups/*.ts`,
+  `lib/membership_validations.ts`, `lib/update_settings.ts`, `server/models/group.ts` and
+  `server/models/validations/group.ts`: a group created, `GET /api/groups`, `update-settings`' answers, every refusal
+  of the membership actions, and an upload into `groups`.
 
 ## Known departures
 
@@ -29,3 +36,7 @@ What inventaire.io answers to the calls the apps make, which the backend's answe
 - `_score` is `pg_trgm`'s similarity, from 0 to 1, where inventaire.io sends Elasticsearch's unbounded score: the
   apps only sort by it.
 - `invalid types: …`'s list of possible values is the backend's own; inventaire.io's names `genres` twice.
+- Groups: no spam check on a name or a description, no creation rate limit (inventaire.io: five, two seconds
+  apart), no `groupUpdate` / `userMadeAdmin` notification; `_score` is the name's `pg_trgm` similarity, where
+  inventaire.io's Elasticsearch also weighs the description. `by-slug`, `slug` and `search-by-position` are not
+  served: the apps never call them.

@@ -2,16 +2,24 @@ package studio.lunabee.exlibris.backend.relations
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.v1.core.Alias
+import org.jetbrains.exposed.v1.core.JoinType
+import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insertIgnore
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import studio.lunabee.exlibris.backend.db.GroupMembershipsTable
 import studio.lunabee.exlibris.backend.db.RelationsTable
 import studio.lunabee.exlibris.backend.db.UsersTable
+import studio.lunabee.exlibris.backend.groups.GroupRole
 
 class RelationsRepository(
     private val database: Database,
@@ -37,6 +45,33 @@ class RelationsRepository(
                         val pair: List<String> = listOf(row[RelationsTable.userA], row[RelationsTable.userB])
                         pair.single { it != userId } to RelationStatus.of(row[RelationsTable.status])
                     }
+            }
+        }
+
+    /**
+     * The readers who are admin or member of a group [userId] is admin or member of, inventaire.io's
+     * `getUserGroupsCoMembers`: an invitation or a request shares nothing yet.
+     */
+    suspend fun groupCoMembersOf(userId: String): Set<String> =
+        withContext(Dispatchers.IO) {
+            transaction(database) {
+                val mine: Alias<GroupMembershipsTable> = GroupMembershipsTable.alias("mine")
+                val theirs: Alias<GroupMembershipsTable> = GroupMembershipsTable.alias("theirs")
+                val inGroup: List<String> = GroupRole.entries.filter { it.isInGroup }.map { it.storedName }
+                mine
+                    .join(
+                        theirs,
+                        JoinType.INNER,
+                        mine[GroupMembershipsTable.groupId],
+                        theirs[GroupMembershipsTable.groupId],
+                    ).select(theirs[GroupMembershipsTable.userId])
+                    .where {
+                        (mine[GroupMembershipsTable.userId] eq userId) and
+                            (mine[GroupMembershipsTable.role] inList inGroup) and
+                            (theirs[GroupMembershipsTable.role] inList inGroup) and
+                            (theirs[GroupMembershipsTable.userId] neq userId)
+                    }.map { it[theirs[GroupMembershipsTable.userId]] }
+                    .toSet()
             }
         }
 

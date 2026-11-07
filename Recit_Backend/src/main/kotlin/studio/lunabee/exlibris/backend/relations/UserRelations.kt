@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * `GET /api/relations`. [network] is inventaire.io's `getNetworkIds`: friends, then the people the caller shares a
- * group with, which groups (#72) add.
+ * group with (#72).
  */
 @Serializable
 data class UserRelations(

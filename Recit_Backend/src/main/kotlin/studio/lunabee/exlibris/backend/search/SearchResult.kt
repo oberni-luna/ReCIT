@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 
 /**
  * One hit of `/api/search`, in inventaire.io's `normalizeResult` shape. For a reader: [label] is the username,
- * [description] the bio, [image] the picture's path, and `type` the plural `users` inventaire.io sends.
+ * [description] the bio, [image] the picture's path, and `type` the plural `users` inventaire.io sends; for a group,
+ * its name, description and picture, `type` `groups`.
  */
 @Serializable
 data class SearchResult(

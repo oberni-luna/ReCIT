@@ -108,9 +108,8 @@ class SearchRoutesTest {
         }
 
     @Test
-    fun `groups and the entity types are not served yet`() =
+    fun `the entity types are not served yet`() =
         authTest {
-            assertEquals(HttpStatusCode.NotImplemented, client.getAs("/api/search?types=groups&search=a", null).status)
             assertEquals(HttpStatusCode.NotImplemented, client.getAs("/api/search?types=works&search=a", null).status)
         }
 }

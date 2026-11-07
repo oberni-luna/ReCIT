@@ -11,6 +11,9 @@ import studio.lunabee.exlibris.backend.auth.AuthService
 import studio.lunabee.exlibris.backend.auth.PasswordHasher
 import studio.lunabee.exlibris.backend.auth.SessionCodec
 import studio.lunabee.exlibris.backend.db.Postgres
+import studio.lunabee.exlibris.backend.groups.GroupMembershipService
+import studio.lunabee.exlibris.backend.groups.GroupsRepository
+import studio.lunabee.exlibris.backend.groups.GroupsService
 import studio.lunabee.exlibris.backend.health.HealthRepository
 import studio.lunabee.exlibris.backend.health.HealthService
 import studio.lunabee.exlibris.backend.images.ImagesRepository
@@ -21,6 +24,7 @@ import studio.lunabee.exlibris.backend.relations.RelationsRepository
 import studio.lunabee.exlibris.backend.relations.RelationsService
 import studio.lunabee.exlibris.backend.search.SearchRepository
 import studio.lunabee.exlibris.backend.search.SearchService
+import studio.lunabee.exlibris.backend.users.UserDocumentsService
 import studio.lunabee.exlibris.backend.users.UserUpdateService
 import studio.lunabee.exlibris.backend.users.UsersRepository
 import studio.lunabee.exlibris.backend.users.UsersService
@@ -81,10 +85,30 @@ class AppContainer(
 
     val relationsService: RelationsService = RelationsService(RelationsRepository(database), clock)
 
+    private val userDocumentsService: UserDocumentsService = UserDocumentsService(usersRepository, relationsService)
+
+    private val groupsRepository: GroupsRepository = GroupsRepository(database)
+
+    val groupMembershipService: GroupMembershipService =
+        GroupMembershipService(
+            repository = groupsRepository,
+            images = imagesService,
+            clock = clock,
+        )
+
+    val groupsService: GroupsService =
+        GroupsService(
+            repository = groupsRepository,
+            documents = userDocumentsService,
+            images = imagesService,
+            clock = clock,
+        )
+
     val usersService: UsersService =
         UsersService(
             repository = usersRepository,
-            relations = relationsService,
+            documents = userDocumentsService,
+            groups = groupMembershipService,
             images = imagesService,
         )
 

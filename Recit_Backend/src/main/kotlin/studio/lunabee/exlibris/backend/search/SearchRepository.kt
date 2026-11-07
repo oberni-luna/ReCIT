@@ -5,7 +5,10 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.CustomFunction
 import org.jetbrains.exposed.v1.core.Expression
 import org.jetbrains.exposed.v1.core.FloatColumnType
+import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
@@ -14,6 +17,7 @@ import org.jetbrains.exposed.v1.core.stringParam
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import studio.lunabee.exlibris.backend.db.GroupsTable
 import studio.lunabee.exlibris.backend.db.UsersTable
 
 class SearchRepository(
@@ -31,14 +35,11 @@ class SearchRepository(
         withContext(Dispatchers.IO) {
             transaction(database) {
                 val name: Expression<String> = UsersTable.username.lowerCase()
-                val similarity: CustomFunction<Float> =
-                    CustomFunction("similarity", FloatColumnType(), name, stringParam(term.lowercase()))
+                val similarity: CustomFunction<Float> = similarity(name, term)
                 UsersTable
                     .select(UsersTable.id, UsersTable.username, UsersTable.bio, UsersTable.picture, similarity)
-                    .where {
-                        (name like "%${escapeLike(term.lowercase())}%") or
-                            (similarity greater SIMILARITY_THRESHOLD)
-                    }.orderBy(similarity to SortOrder.DESC, name to SortOrder.ASC)
+                    .where { matches(name, similarity, term) }
+                    .orderBy(similarity to SortOrder.DESC, name to SortOrder.ASC)
                     .limit(limit)
                     .map { row ->
                         ReaderMatch(
@@ -52,7 +53,44 @@ class SearchRepository(
             }
         }
 
+    /** The `searchable` groups whose name holds [term] or resembles it, as [readers] matches usernames. */
+    suspend fun groups(
+        term: String,
+        limit: Int,
+    ): List<GroupMatch> =
+        withContext(Dispatchers.IO) {
+            transaction(database) {
+                val name: Expression<String> = GroupsTable.name.lowerCase()
+                val similarity: CustomFunction<Float> = similarity(name, term)
+                GroupsTable
+                    .select(GroupsTable.id, GroupsTable.name, GroupsTable.description, GroupsTable.picture, similarity)
+                    .where { (GroupsTable.searchable eq true) and matches(name, similarity, term) }
+                    .orderBy(similarity to SortOrder.DESC, name to SortOrder.ASC)
+                    .limit(limit)
+                    .map { row ->
+                        GroupMatch(
+                            id = row[GroupsTable.id],
+                            name = row[GroupsTable.name],
+                            description = row[GroupsTable.description],
+                            picture = row[GroupsTable.picture],
+                            similarity = row[similarity].toDouble(),
+                        )
+                    }
+            }
+        }
+
     private companion object {
+        fun similarity(
+            name: Expression<String>,
+            term: String,
+        ): CustomFunction<Float> = CustomFunction("similarity", FloatColumnType(), name, stringParam(term.lowercase()))
+
+        fun matches(
+            name: Expression<String>,
+            similarity: CustomFunction<Float>,
+            term: String,
+        ): Op<Boolean> = (name like "%${escapeLike(term.lowercase())}%") or (similarity greater SIMILARITY_THRESHOLD)
+
         /** `pg_trgm.similarity_threshold`'s default. */
         const val SIMILARITY_THRESHOLD: Float = 0.3f
 

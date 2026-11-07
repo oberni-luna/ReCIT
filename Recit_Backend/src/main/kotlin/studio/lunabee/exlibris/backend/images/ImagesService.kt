@@ -50,11 +50,15 @@ class ImagesService(
             ImageFormat.of(bytes)?.let { StoredImage(bytes, it.contentType) }
         }
 
-    /** Deletes the file at [path] once no account points at it any more: a picture replaced, an account deleted. */
-    suspend fun releaseUserPicture(path: String) {
-        val hash: String = path.removePrefix(ImageContainer.USERS.path(""))
-        if (HASH_PATTERN.matches(hash) && !repository.isUserPicture(path)) {
-            store.delete(ImageContainer.USERS, hash)
+    /**
+     * Deletes the file at [path] once no account or group points at it any more: a picture replaced, an account
+     * deleted, a group ended.
+     */
+    suspend fun releasePicture(path: String) {
+        val container: ImageContainer = ImageContainer.ofPath(path) ?: return
+        val hash: String = path.removePrefix(container.path(""))
+        if (HASH_PATTERN.matches(hash) && !repository.isPicture(container, path)) {
+            store.delete(container, hash)
         }
     }
 
@@ -85,7 +89,7 @@ class ImagesService(
     private fun sha1(bytes: ByteArray): String = MessageDigest.getInstance("SHA-1").digest(bytes).toHexString()
 
     companion object {
-        /** What `/img/users/<hash>` accepts, and nothing a path could be climbed out of with. */
+        /** What `/img/<container>/<hash>` accepts, and nothing a path could be climbed out of with. */
         val HASH_PATTERN: Regex = Regex("^[0-9a-f]{40}$")
 
         private const val GRAVATAR_SIZE: Int = 500

@@ -20,6 +20,13 @@ class ApiException(
         /** A limit reached: the `429` the apps already tell apart (feature 0083). */
         fun tooManyRequests(): ApiException = ApiException(HttpStatusCode.TooManyRequests, "too many requests")
 
+        /** A bibliographic write, refused until the backend signs them (#76 decision 6, #77). */
+        fun notImplemented(): ApiException = ApiException(HttpStatusCode.NotImplemented, "not implemented")
+
+        /** inventaire.io refused the connection, or kept silent past the relay's timeout (#76 decision 4). */
+        fun badGateway(cause: Throwable): ApiException =
+            ApiException(HttpStatusCode.BadGateway, "bad gateway", cause = cause)
+
         /** inventaire.io's `newMissingError`: `missing parameter in body: email`, `missing_email`. */
         fun missingParameter(
             place: ParameterPlace,

@@ -14,12 +14,13 @@ object TestPostgres {
     fun container(): PostgreSQLContainer = PostgreSQLContainer("postgres:17")
 
     /**
-     * What `module()` reads, pointed at [container] and, when given, at [mailpit]. No `ktor.application.modules`:
-     * nothing loads twice.
+     * What `module()` reads, pointed at [container], when given at [mailpit], and at [inventaireBaseUrl]: by default
+     * a port nothing listens on, never inventaire.io. No `ktor.application.modules`: nothing loads twice.
      */
     fun config(
         container: PostgreSQLContainer,
         mailpit: TestMailpit? = null,
+        inventaireBaseUrl: String = "http://127.0.0.1:9",
     ): ApplicationConfig =
         MapApplicationConfig(
             "database.url" to container.jdbcUrl,
@@ -32,5 +33,6 @@ object TestPostgres {
             "mail.startTls" to "false",
             "mail.from" to "Ex-libris <no-reply@exlibris.test>",
             "images.directory" to imagesDirectory.toString(),
+            "inventaire.baseUrl" to inventaireBaseUrl,
         )
 }

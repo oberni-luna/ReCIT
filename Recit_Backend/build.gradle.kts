@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.ktor.server.rate.limit)
     implementation(libs.ktor.server.html.builder)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.cio)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.flyway.core)
@@ -57,6 +58,16 @@ dependencies {
     testImplementation(libs.testcontainers)
     testImplementation(libs.testcontainers.postgresql)
     testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+// The version `InventaireConfig` names the backend with, in the `User-Agent` every relayed request carries.
+val backendVersion: String = version.toString()
+
+tasks.processResources {
+    inputs.property("version", backendVersion)
+    filesMatching("version.properties") {
+        expand("version" to backendVersion)
+    }
 }
 
 tasks.test {

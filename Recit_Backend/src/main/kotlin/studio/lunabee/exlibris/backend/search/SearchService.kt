@@ -6,12 +6,19 @@ import studio.lunabee.exlibris.backend.plugins.ParameterPlace
 
 /**
  * `GET /api/search`, refused as inventaire.io refuses it — an unknown type, social and entity types mixed, no
- * `search` — and answered for `users` (#71) and `groups` (#72), alone or together, the closest first. The entity
- * types (#76), `shelves` and `lists` answer `501` until their tasks land.
+ * `search` — and answered for `users` (#71) and `groups` (#72), alone or together, the closest first. Entity types
+ * alone are relayed to inventaire.io ([isRelayed], #76); `shelves` and `lists` answer `501` until their tasks land.
  */
 class SearchService(
     private val repository: SearchRepository,
 ) {
+    /** Whether [typesParameter] names entity types only, which inventaire.io searches; a mix is refused. */
+    fun isRelayed(typesParameter: String): Boolean {
+        val types: Set<SearchType> = types(typesParameter)
+        if (isMixed(types)) throw mixedTypes()
+        return types.none { it.isSocial }
+    }
+
     suspend fun search(
         typesParameter: String,
         search: String?,
@@ -21,8 +28,8 @@ class SearchService(
         val limit: Int = limitParameter?.let(::limit) ?: DEFAULT_LIMIT
         val refusal: ApiException? =
             when {
-                types.any { it.isSocial } && types.any { !it.isSocial } -> {
-                    ApiException(HttpStatusCode.BadRequest, "can not have both social and entity types")
+                isMixed(types) -> {
+                    mixedTypes()
                 }
 
                 search.isNullOrBlank() -> {
@@ -73,6 +80,11 @@ class SearchService(
                 score = group.similarity,
             )
         }
+
+    private fun isMixed(types: Set<SearchType>): Boolean = types.any { it.isSocial } && types.any { !it.isSocial }
+
+    private fun mixedTypes(): ApiException =
+        ApiException(HttpStatusCode.BadRequest, "can not have both social and entity types")
 
     private fun types(parameter: String): Set<SearchType> =
         parameter

@@ -1,6 +1,6 @@
 ---
 issue: 76
-status: todo
+status: to-test
 wiki: [[architecture]], [[features/0013-welcome-cover-wall]], [[features/0047-new-book-work-first]], [[features/0050-every-bibliographic-datum]], [[features/0051-edition-duplicates]]
 note: Part of #62 (Ex-libris backend umbrella, decisions there). Blocked by #69 (skeleton). #73 and #74 read inventaire.io through its client; #77 adds the signed writes.
 created: 2026-11-07
@@ -40,3 +40,20 @@ The apps call only the Ex-libris backend (#62). Everything bibliographic it does
 - A `429` from inventaire.io (stub) reaches the app as `429` and writes one log line with the path.
 - `PUT /api/entities/update-claim`, `POST /api/entities`, `POST /api/entities/resolve` and `POST /api/images/upload?container=entities` answer `501`.
 - The iOS app launched with `-ExLibrisBackend http://localhost:8080` opens a book screen with its cover, an author with its photo and works, the « Éditions » screen, a search for « dune » on inventaire.io, the welcome wall of covers, and scans an ISBN to a known edition.
+
+## Implementation
+
+stacked on: wa/72-add-backend-groups @ d2622ce (blocked by #69 only; stacked on #72 so the app can sign in for the on-screen check and #73 gets a linear stack)
+
+- **Package `entities`:** `InventaireClient` (base URL from `INVENTAIRE_BASE_URL`, default `https://inventaire.io`; `User-Agent: Ex-libris/<build version> (+https://github.com/oberni-luna/ReCIT)`; 10 s JSON / 30 s images; anonymous; logs every `429` with its path; `ApiException.badGateway` on refusal or timeout), `InventaireConfig`, `EntitiesService`, `EntitiesRoutes`, `RelayedResource`, `RelayedAnswer`. `plugins/RelayedCall.kt`: `markRelayed()` makes StatusPages leave inventaire.io's error bodies alone and stops SessionCookies adding a cookie. Bodies streamed through `ReadChannelContent`; a `304` leaves as `NoContent`.
+- **Relayed:** every GET under `/api/entities/*`, `/api/data/*`, `/api/tasks/*`, `/img/entities/*`, `/img/remote/*`; `/api/items/by-entities`, `/api/items/recent-public`; `/api/search` when every type is an entity type (social+entity → `400`). `Cookie`/`Authorization` dropped; `Accept`, `Accept-Language`, `If-None-Match` forwarded; `Set-Cookie` dropped.
+- **501** `{"status":501,"status_verbose":"not implemented","message":"not implemented"}` for `POST /api/entities`, `POST /api/entities/resolve`, `PUT update-claim|update-label|merge`, any other non-GET under the prefixes, and `upload?container=entities` (401 first when anonymous).
+- `ktor-client-cio` added; `version.properties` filled by `processResources`. Apps unchanged.
+- **Differences from inventaire.io:** JSON answers keep only `Content-Type` (its weak `ETag` is dropped, so JSON can't be revalidated); CORS and security headers dropped; Ktor sends `Content-Length: 0` on the 304; redirects followed by the backend; an unknown search type gets the backend's own 400 wording.
+- **For #73/#74:** `InventaireClient.get(pathAndQuery, headers, timeout) { response -> … }` (a private val in `AppContainer`, pass it to their services; `RelayedResource.DATA.timeout`); `relay(service, resource)` for any further GET; tests with `InventaireStub` and `TestPostgres.config(…, inventaireBaseUrl = stub.baseUrl)` (defaults to a closed port, never inventaire.io).
+
+## Verification
+
+- `./gradlew build`: 136 tests green (stub tests for cookie never forwarded, User-Agent, Set-Cookie dropped, byte-identical JSON, image headers and 304, error bodies passed through, 429 passed and logged once, 502 within 11 s, 501 writes never reaching the stub, the mixed-types 400). iOS `ReCIT_iOSTests` green; Android build + 607 unit tests green.
+- Against the real inventaire.io, backend vs direct anonymous call: by-uris `wd:Q8337`, search `dune`, data/isbn, author-works, reverse-claims, tasks/by-uris, items/by-entities, items/recent-public, `/img/entities` with and without `If-None-Match` (304), `/img/remote` — all identical (one `_score` differing in the last decimal). About 30 anonymous GETs, no 429.
+- **iOS, iPhone 17, local backend:** Recherche « dune » › Livres · 15 with their covers (`/api/search`, `/img/entities/*`); Dune's book screen with cover, summary, genres and Frank Herbert; the author with photo and works (`author-works`); « Autres éditions » › Éditions de Dune with the language menu (`by-uris`, `reverse-claims`, `tasks/by-uris`); the scanner (launched with `-uitest`) resolving an edition through the relay — the placard handed its own constant (« 1984 », George Orwell), not `E2E_SCAN_CODES`; signed out, the welcome wall of covers (`/api/items/recent-public`).

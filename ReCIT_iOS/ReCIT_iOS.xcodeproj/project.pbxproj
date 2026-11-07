@@ -346,17 +346,17 @@
 			target = 094FD19B2E4A38D40023705A /* ReCIT_iOS */;
 			targetProxy = 094FD1B62E4A38D60023705A /* PBXContainerItemProxy */;
 		};
-		D4AF77D22F237E82EA99C6AD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 308C31CBAB2D75BBD84E1DDC /* plugin:SwiftLintBuildToolPlugin */;
-		};
 		5A16BDD837DE46428B242CE5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			productRef = 16DE5CD82D2A23AA4842F809 /* plugin:SwiftLintBuildToolPlugin */;
+			productRef = 16DE5CD82D2A23AA4842F809 /* SwiftLintBuildToolPlugin */;
 		};
 		94C01AEAA2949306845BD03F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			productRef = 819B81E926892E461A65FBC1 /* plugin:SwiftLintBuildToolPlugin */;
+			productRef = 819B81E926892E461A65FBC1 /* SwiftLintBuildToolPlugin */;
+		};
+		D4AF77D22F237E82EA99C6AD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 308C31CBAB2D75BBD84E1DDC /* SwiftLintBuildToolPlugin */;
 		};
 /* End PBXTargetDependency section */
 
@@ -492,7 +492,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = VH79XGK7M2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -510,7 +510,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "studio.lunabee.nouveau-recit";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -532,7 +532,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = VH79XGK7M2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -550,7 +550,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "studio.lunabee.nouveau-recit";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -746,22 +746,22 @@
 			package = 09F415772F203469000D3E4D /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
 			productName = AsyncAlgorithms;
 		};
+		16DE5CD82D2A23AA4842F809 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 913DB1AA1BA516CF2B673012 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		308C31CBAB2D75BBD84E1DDC /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 913DB1AA1BA516CF2B673012 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
 		507BE6B72F3B5592003AF5B3 /* Nuke */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 507BE6B62F3B5592003AF5B3 /* XCRemoteSwiftPackageReference "Nuke" */;
 			productName = Nuke;
 		};
-		308C31CBAB2D75BBD84E1DDC /* plugin:SwiftLintBuildToolPlugin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 913DB1AA1BA516CF2B673012 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
-			productName = "plugin:SwiftLintBuildToolPlugin";
-		};
-		16DE5CD82D2A23AA4842F809 /* plugin:SwiftLintBuildToolPlugin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 913DB1AA1BA516CF2B673012 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
-			productName = "plugin:SwiftLintBuildToolPlugin";
-		};
-		819B81E926892E461A65FBC1 /* plugin:SwiftLintBuildToolPlugin */ = {
+		819B81E926892E461A65FBC1 /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 913DB1AA1BA516CF2B673012 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
 			productName = "plugin:SwiftLintBuildToolPlugin";

@@ -12,6 +12,6 @@
     "keywords": "books,reading,library,borrow,lend,inventory,share,friends,readers,comics",
     "supportUrl": "https://inventaire.io/",
     "marketingUrl": "https://inventaire.io/",
-    "whatsNew": "What's new in 1.9:\n• Find your friends' lists in the Lists tab, under \"Dans mon réseau\" (in my network)\n• Swipe from a list to its \"Présentation\" page: its description and who can see it, which you choose when you create or edit the list\n• Link your Wikidata account to edit Wikidata works and authors\n• On a friend's book, ask to borrow, buy or take it, depending on whether it is for lending, for sale or to give away"
+    "whatsNew": "What's new in 1.10:\n• A shelf opens on two tabs, Books and About, and takes several books at once with \"Add books\"\n• On a book's page, \"In lists\" shows the lists that hold it, yours and your friends'\n• Keep a private note on your copy of a book, under \"What I keep to myself\"\n• On a friend's profile, the Transactions tab gathers your ongoing and finished exchanges\n• A book the search can't find can be added to inventaire.io, with or without an ISBN\n• Friends', groups' and authors' photos open full screen, and a group's photo can be changed in its settings"
   }
 }

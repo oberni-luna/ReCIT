@@ -25,6 +25,9 @@ class HealthDatabaseDownTest {
             val response = client.get("/health")
 
             assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
-            assertEquals("""{"status":503,"status_verbose":"database unreachable"}""", response.bodyAsText())
+            assertEquals(
+                """{"status":503,"status_verbose":"database unreachable","message":"database unreachable"}""",
+                response.bodyAsText(),
+            )
         }
 }

@@ -1,0 +1,8 @@
+GET https://inventaire.io/api/auth/email-availability?email=exlibris-fixture-free-8213@example.org, no cookie sent
+(captured 2026-11-07): every public answer hands out an anonymous session.
+
+HTTP/2 200
+set-cookie: inventaire:session=eyJ0aW1lc3RhbXAiOjE3OTQwNDM5MTQ0NDZ9; path=/; expires=Thu, 06 May 2027 09:31:54 GMT; samesite=lax; secure; httponly
+set-cookie: inventaire:session.sig=bjnQFrURgDrflKjPxRWdFZJwdCn3f_IMNheardQHJek; path=/; expires=Thu, 06 May 2027 09:31:54 GMT; samesite=lax; secure; httponly
+
+eyJ0aW1lc3RhbXAiOjE3OTQwNDM5MTQ0NDZ9 = {"timestamp":1794043914446}

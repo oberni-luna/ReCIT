@@ -3,6 +3,7 @@ package studio.lunabee.nouveaurecit.auth
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
+import okhttp3.Cookie
 import okhttp3.OkHttpClient
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -122,4 +123,43 @@ class AuthServiceTest {
         runCatching { auth.login("olive", "wrong") }
         assertFalse(auth.isLoggedIn())
     }
+
+    @Test
+    fun another_backend_session_in_the_jar_is_neither_held_nor_adopted() {
+        val vault = MemoryVault()
+        val jar = SessionCookieJar()
+        inventaireSession().forEach(jar::put)
+
+        val auth: AuthService = service(jar = jar, vault = vault)
+
+        assertFalse(auth.isLoggedIn())
+        assertEquals(null, vault.data)
+    }
+
+    @Test
+    fun signing_out_spares_another_backend_session() = runTest {
+        val jar = SessionCookieJar()
+        inventaireSession().forEach(jar::put)
+        server.enqueue(sessionResponse())
+        server.enqueue(MockResponse.Builder().code(302).addHeader("Location", "/").build())
+        server.enqueue(MockResponse.Builder().code(404).build())
+        val auth: AuthService = service(jar = jar)
+        auth.login("olive", "secret")
+
+        auth.logout()
+
+        assertFalse(auth.isLoggedIn())
+        assertEquals(listOf("inventaire.io", "inventaire.io"), jar.all().map { it.domain })
+    }
+
+    private fun inventaireSession(): List<Cookie> =
+        listOf("inventaire:session" to userPayload, "inventaire:session.sig" to "sig").map { (name, value) ->
+            Cookie.Builder()
+                .name(name)
+                .value(value)
+                .domain("inventaire.io")
+                .path("/")
+                .expiresAt(System.currentTimeMillis() + 86_400_000)
+                .build()
+        }
 }

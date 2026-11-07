@@ -411,12 +411,12 @@ final class AuthService {
         }
     }
 
-    /// The session cookies currently held, wherever the jar filed them. Matched by name rather
-    /// than by the jar's own URL matching: a cookie set for `.inventaire.io` and one set for
-    /// `inventaire.io` are the same session, and a purge that misses one leaves the user signed
-    /// in after signing out.
+    /// The session cookies currently held, wherever the jar filed them: by name and by the base
+    /// URL's host rather than by the jar's own URL matching. `.inventaire.io` and `inventaire.io`
+    /// are the same session, and another backend's cookies under the same names are not this
+    /// one's. `SessionCookieScope` says why both halves matter.
     private func sessionCookies() -> [HTTPCookie] {
-        (cookieStorage.cookies ?? []).filter { cfg.sessionCookieNames.contains($0.name) }
+        SessionCookieScope(baseURL: cfg.baseURL, names: cfg.sessionCookieNames).filter(cookieStorage.cookies ?? [])
     }
 
     /// Whether the jar holds an unexpired session that **names a user** — one this app can only
@@ -476,7 +476,7 @@ final class AuthService {
 
             // Filtered on the way out as well as on the way in: an entry written by an older
             // build under a wider rule must not widen what counts as a session today.
-            return (cookies ?? []).filter { cfg.sessionCookieNames.contains($0.name) }
+            return SessionCookieScope(baseURL: cfg.baseURL, names: cfg.sessionCookieNames).filter(cookies ?? [])
         } catch {
             // An entry we cannot read is an entry we will never read: drop it rather than
             // fail the same way at every launch.

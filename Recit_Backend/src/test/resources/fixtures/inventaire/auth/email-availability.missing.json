@@ -1,0 +1,1 @@
+{"status":400,"message":"missing parameter in query: email","error_type":"missing_parameter","error_name":"missing_email","context":{"url":"/api/auth/email-availability"}}

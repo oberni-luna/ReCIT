@@ -94,6 +94,7 @@ struct AuthorDetailView: View {
                         }
                     }
                 }
+                .textCase(nil)
             }
             .applyListBackground()
             .readableContentMargins()

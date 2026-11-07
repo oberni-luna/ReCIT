@@ -84,6 +84,7 @@ struct SearchRemoteSection: View {
 
         case nil:
             SearchResultsSection(results: state.results)
+                .textCase(nil)
         }
     }
 }

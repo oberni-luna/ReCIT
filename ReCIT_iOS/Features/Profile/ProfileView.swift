@@ -6,17 +6,14 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ProfileView: View {
     @Environment(AuthModel.self) private var authModel
     @Environment(UserModel.self) private var userModel
-    @Environment(SyncStatusStore.self) private var syncStatus
     @Environment(DonationModel.self) private var donationModel
     @Environment(\.dismiss) var dismiss
 
     @State private var path: NavigationPath = .init()
-    @Query private var allTransactions: [UserTransaction]
     /// Whether the card asking for a coffee has been put away. Kept on the device, not on the
     /// account: it speaks of the app, so signing out and in again does not bring it back.
     @AppStorage("profile.supportCard.dismissed") private var isSupportCardDismissed: Bool = false
@@ -25,10 +22,6 @@ struct ProfileView: View {
     /// The card shows until it is put away, or until a donation has gone through on this device.
     private var showsSupportCard: Bool {
         isSupportCardDismissed == false && donationModel.hasDonated == false
-    }
-
-    var currentTransactions: [UserTransaction] {
-        allTransactions.filter(\.isCurrent)
     }
 
     var body: some View {
@@ -62,131 +55,76 @@ struct ProfileView: View {
     @ViewBuilder
     func connectedView(user: User) -> some View {
         List {
-            // First on the screen, above the account: the one place the app asks for anything.
-            // See the Figma frame `P1 · Profil · Soutenir & À propos`.
-            if showsSupportCard {
-                Section {
-                    SupportExLibrisCard {
-                        isSupportSheetPresented = true
-                    } onDismiss: {
-                        withAnimation {
-                            isSupportCardDismissed = true
-                        }
-                    }
-                    // Inset above and below, so the section's rounded clip leaves the shadow
-                    // room; not on the sides, so the card lines up with the cells under it.
-                    .listRowInsets(top: .small, bottom: .small)
-                    .listRowBackground(Color.clear)
-                }
-            }
-
-            Section {
-                UserHeaderView(user: user)
-
-                NavigationLink(value: NavigationDestination.editProfile(user: user)) {
-                    Text("profile.edit")
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundTinted)
-                }
-                .accessibilityIdentifier("e2e.profile.edit")
-            }
-
-            Section {
-                NavigationLink(value: NavigationDestination.accountSettings) {
-                    Text("profile.account_settings")
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundTinted)
-                }
-                .accessibilityIdentifier("e2e.profile.account")
-
-                NavigationLink(value: NavigationDestination.notificationSettings) {
-                    Text("profile.notification_settings")
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundTinted)
-                }
-                .accessibilityIdentifier("e2e.profile.notifications")
-            } header: {
-                Text("profile.settings")
-                    .textStyle(.action200)
-                    .foregroundStyle(.foregroundSecondary)
-            }
-
-            Section {
-                if syncStatus.shouldShowPlaceholder(.transactions) {
-                    SyncingInlineRow()
-                } else {
-                    if !currentTransactions.isEmpty {
-                        ForEach(currentTransactions.sorted { $0.lastActionDate > $1.lastActionDate }) { transaction in
-                            NavigationLink(
-                                value: NavigationDestination.transaction(transaction: transaction)
-                            ) {
-                                TransactionCellView(transaction: transaction)
+            Group {
+                // First on the screen, above the account: the one place the app asks for anything.
+                // See the Figma frame `P1 · Profil · Soutenir & À propos`.
+                if showsSupportCard {
+                    Section {
+                        SupportExLibrisCard {
+                            isSupportSheetPresented = true
+                        } onDismiss: {
+                            withAnimation {
+                                isSupportCardDismissed = true
                             }
                         }
-                    } else {
-                        Text("profile.current_transactions.empty")
+                        // Inset above and below, so the section's rounded clip leaves the shadow
+                        // room; not on the sides, so the card lines up with the cells under it.
+                        .listRowInsets(top: .small, bottom: .small)
+                        .listRowBackground(Color.clear)
                     }
+                }
 
-                    NavigationLink(value: NavigationDestination.allTransactions) {
-                        Text("transactions.see_all")
+                Section {
+                    UserHeaderView(user: user)
+
+                    NavigationLink(value: NavigationDestination.editProfile(user: user)) {
+                        Text("profile.edit")
                             .textStyle(.action300)
                             .foregroundStyle(.foregroundTinted)
                     }
+                    .accessibilityIdentifier(AccessibilityID.edit)
                 }
-            } header: {
-                Text("profile.current_transactions")
-                    .textStyle(.action200)
-                    .foregroundStyle(.foregroundSecondary)
-            }
 
-            // Where the app says it is inventaire.io underneath — the screen took over from the
-            // paper tag that used to sit under the account (feature 0026).
-            Section {
-                NavigationLink(value: NavigationDestination.aboutInventaire) {
-                    Text("profile.about_inventaire")
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundTinted)
+                ProfileSettingsSection()
+
+                ProfileTransactionsSection()
+
+                // Where the app says it is inventaire.io underneath — the screen took over from the
+                // paper tag that used to sit under the account (feature 0026).
+                ProfileAboutInventaireSection()
+
+                Section {
+                    AsyncButton(
+                        action: { await signOut() },
+                        actionOptions: [.showProgressView],
+                        label: {
+                            Text("profile.logout")
+                                .textStyle(.action300)
+                                .foregroundStyle(.foregroundError)
+                        }
+                    )
+                    .accessibilityIdentifier(AccessibilityID.logout)
                 }
-                .accessibilityIdentifier("e2e.profile.about")
-            }
 
-            Section {
-                AsyncButton(
-                    action: { await signOut() },
-                    actionOptions: [.showProgressView],
-                    label: {
-                        Text("profile.logout")
-                            .textStyle(.action300)
-                            .foregroundStyle(.foregroundError)
-                    }
-                )
-                .accessibilityIdentifier("e2e.profile.logout")
-            }
+                // Its own section, below signing out and away from it: one row ends a session, the
+                // other ends an account, and they should not be two adjacent red lines under the
+                // same thumb. Last of the real screen, which is where a door of this kind belongs —
+                // and where Apple expects to find it (App Review 5.1.1(v): an app that creates
+                // accounts must let them be deleted from inside the app).
+                ProfileDeleteAccountSection()
 
-            // Its own section, below signing out and away from it: one row ends a session, the
-            // other ends an account, and they should not be two adjacent red lines under the
-            // same thumb. Last of the real screen, which is where a door of this kind belongs —
-            // and where Apple expects to find it (App Review 5.1.1(v): an app that creates
-            // accounts must let them be deleted from inside the app).
-            Section {
-                NavigationLink(value: NavigationDestination.deleteAccount) {
-                    Text("profile.delete_account")
-                        .textStyle(.action300)
-                        .foregroundStyle(.foregroundError)
+                Section {
+                    ProfileVersionFooter(version: .current)
                 }
-                .accessibilityIdentifier("e2e.profile.deleteAccount")
-            }
 
-            Section {
-                ProfileVersionFooter(version: .current)
+                // Scaffolding, and last on the screen so it reads as such. Both onboarding
+                // screens are meant to be seen once, which leaves no way to look at them again
+                // without one. Absent from Release builds — see `ProfileDebugSection`.
+                #if DEBUG
+                ProfileDebugSection(path: $path)
+                #endif
             }
-
-            // Scaffolding, and last on the screen so it reads as such. Both onboarding
-            // screens are meant to be seen once, which leaves no way to look at them again
-            // without one. Absent from Release builds — see `ProfileDebugSection`.
-            #if DEBUG
-            ProfileDebugSection(path: $path)
-            #endif
+            .textCase(nil)
         }
         .applyListBackground(.backgroundGroupedElevated)
     }
@@ -235,5 +173,12 @@ struct ProfileView: View {
     /// included — see `RootView.forgetSignedOutUser()`.
     private func signOut() async {
         await authModel.logout()
+    }
+}
+
+private extension ProfileView {
+    enum AccessibilityID {
+        static let edit: String = "e2e.profile.edit"
+        static let logout: String = "e2e.profile.logout"
     }
 }

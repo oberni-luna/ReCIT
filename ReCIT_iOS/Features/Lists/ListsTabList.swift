@@ -49,6 +49,7 @@ struct ListsTabList: View {
                         Text("lists.section.mine")
                     }
                 }
+                .textCase(nil)
             }
 
             if !sections.network.isEmpty {
@@ -62,6 +63,7 @@ struct ListsTabList: View {
                         }
                     }
                 }
+                .textCase(nil)
             }
         }
     }

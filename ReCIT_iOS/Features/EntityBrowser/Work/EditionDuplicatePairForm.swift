@@ -53,11 +53,13 @@ struct EditionDuplicatePairForm: View {
                     .textStyle(.footnote200)
                     .foregroundStyle(.foregroundSecondary)
             }
+            .textCase(nil)
 
             if let first, let second {
                 EditionDifferencesSection(
                     comparison: .init(first: .init(edition: first), second: .init(edition: second))
                 )
+                .textCase(nil)
             }
         }
         .listStyle(.insetGrouped)

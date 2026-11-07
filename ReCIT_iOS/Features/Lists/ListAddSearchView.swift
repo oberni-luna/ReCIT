@@ -74,30 +74,33 @@ struct ListAddSearchView: View {
     var body: some View {
         NavigationStack {
             List {
-                if trimmedQuery.count < Self.threshold {
-                    EmptyStateView(
-                        glyph: "magnifyingglass",
-                        title: isAuthorList ? "list.add.search.title.author" : "list.add.search.title.work",
-                        message: isAuthorList ? "list.add.search.explanation.author" : "list.add.search.explanation.work"
-                    )
-                    .listRowBackground(Color.clear)
-                } else {
-                    if localItems.isEmpty == false {
-                        Section {
-                            ForEach(localItems, id: \._id) { item in
-                                localRow(item)
+                Group {
+                    if trimmedQuery.count < Self.threshold {
+                        EmptyStateView(
+                            glyph: "magnifyingglass",
+                            title: isAuthorList ? "list.add.search.title.author" : "list.add.search.title.work",
+                            message: isAuthorList ? "list.add.search.explanation.author" : "list.add.search.explanation.work"
+                        )
+                        .listRowBackground(Color.clear)
+                    } else {
+                        if localItems.isEmpty == false {
+                            Section {
+                                ForEach(localItems, id: \._id) { item in
+                                    localRow(item)
+                                }
+                            } header: {
+                                sectionHeader("list.add.search.local")
                             }
+                        }
+
+                        Section {
+                            remoteSection
                         } header: {
-                            sectionHeader("list.add.search.local")
+                            sectionHeader(isAuthorList ? "list.add.search.humans" : "list.add.search.works")
                         }
                     }
-
-                    Section {
-                        remoteSection
-                    } header: {
-                        sectionHeader(isAuthorList ? "list.add.search.humans" : "list.add.search.works")
-                    }
                 }
+                .textCase(nil)
             }
             .applyListBackground(.backgroundForm)
             .navigationTitle(Text("list.add.title \(list.name)"))

@@ -71,6 +71,7 @@ struct SearchLocalSection: View {
                     showsSeeAll: ranked.totalCount > InventorySearchRanking.displayLimit
                 )
             }
+            .textCase(nil)
         }
     }
 }

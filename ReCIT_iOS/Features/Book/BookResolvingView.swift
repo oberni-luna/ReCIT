@@ -36,6 +36,7 @@ struct BookResolvingView: View {
                     imageUrl: placeholder.imageUrl
                 )
             }
+            .textCase(nil)
         }
         .applyListBackground(.backgroundForm)
         .accessibilityIdentifier("e2e.book.resolving")

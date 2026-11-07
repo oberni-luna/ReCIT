@@ -59,6 +59,7 @@ struct SearchRecentsSection: View {
                         .accessibilityIdentifier("e2e.searchRecents.clear")
                 }
             }
+            .textCase(nil)
         }
     }
 }

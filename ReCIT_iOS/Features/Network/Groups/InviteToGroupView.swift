@@ -37,34 +37,37 @@ struct InviteToGroupView: View {
 
     var body: some View {
         List {
-            if friends.isEmpty {
-                Section {
-                    EmptyStateView(
-                        glyph: "person.2",
-                        title: "groups.invite.no_friends",
-                        message: "groups.invite.no_friends.message"
-                    )
-                    .padding(.vertical, .large)
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            } else {
-                Section {
-                    ForEach(friends) { friend in
-                        HStack(spacing: .sMedium) {
-                            UserCellView(user: friend)
-                            Spacer(minLength: .zero)
-                            trailing(for: friend)
-                        }
+            Group {
+                if friends.isEmpty {
+                    Section {
+                        EmptyStateView(
+                            glyph: "person.2",
+                            title: "groups.invite.no_friends",
+                            message: "groups.invite.no_friends.message"
+                        )
+                        .padding(.vertical, .large)
                     }
-                } header: {
-                    Text("groups.invite.friends")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
-                } footer: {
-                    GroupNote("groups.invite.footer")
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                } else {
+                    Section {
+                        ForEach(friends) { friend in
+                            HStack(spacing: .sMedium) {
+                                UserCellView(user: friend)
+                                Spacer(minLength: .zero)
+                                trailing(for: friend)
+                            }
+                        }
+                    } header: {
+                        Text("groups.invite.friends")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
+                    } footer: {
+                        GroupNote("groups.invite.footer")
+                    }
                 }
             }
+            .textCase(nil)
         }
         .applyListBackground()
         .navigationTitle("groups.invite")

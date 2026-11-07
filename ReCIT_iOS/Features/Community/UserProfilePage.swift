@@ -61,47 +61,50 @@ struct UserProfilePage<Content: View>: View {
 
     var body: some View {
         List {
-            Section {
-                // The room the unfolded header takes, as the page's first row rather than a
-                // content margin: the scroll's insets are then the bars' alone, and the offset
-                // counts from the page at rest whatever the header measures.
-                Color.clear
-                    .frame(height: max(expandedHeaderHeight - listTopRoom, 0))
-                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
-                        guard scrollOffset.isAtRest(page) else { return }
-                        firstRowTop = top
-                    }
-
-                if showsBio, let bio = user.bio, bio.isEmpty == false {
-                    Text(bio)
-                        .textStyle(.content300)
-                        .foregroundStyle(.foregroundSecondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, .medium)
-                        .padding(.top, .small)
-                }
-            }
-            .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-
-            if showsShelves {
-                // Their étagères sit between who they are and what they own, which is the
-                // order the two are read in: a shelf says how the library is arranged, the
-                // tabs say what is in it.
+            Group {
                 Section {
-                    UserShelvesSection(user: user, path: $path)
+                    // The room the unfolded header takes, as the page's first row rather than a
+                    // content margin: the scroll's insets are then the bars' alone, and the offset
+                    // counts from the page at rest whatever the header measures.
+                    Color.clear
+                        .frame(height: max(expandedHeaderHeight - listTopRoom, 0))
+                        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
+                            guard scrollOffset.isAtRest(page) else { return }
+                            firstRowTop = top
+                        }
+
+                    if showsBio, let bio = user.bio, bio.isEmpty == false {
+                        Text(bio)
+                            .textStyle(.content300)
+                            .foregroundStyle(.foregroundSecondary)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, .medium)
+                            .padding(.top, .small)
+                    }
                 }
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
-                // Edge to edge, as the inventory's carousel: the inset grouped margins would
-                // clip the peeking étagère and the books leaning out of the first one.
-                .listSectionHorizontalMargins(0)
-            }
 
-            content
+                if showsShelves {
+                    // Their étagères sit between who they are and what they own, which is the
+                    // order the two are read in: a shelf says how the library is arranged, the
+                    // tabs say what is in it.
+                    Section {
+                        UserShelvesSection(user: user, path: $path)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    // Edge to edge, as the inventory's carousel: the inset grouped margins would
+                    // clip the peeking étagère and the books leaning out of the first one.
+                    .listSectionHorizontalMargins(0)
+                }
+
+                content
+            }
+            .textCase(nil)
         }
         .listStyle(.insetGrouped)
         .readableContentMargins(isEnabled: holdsReadableWidth)

@@ -40,26 +40,29 @@ struct GroupMembersView: View {
 
     var body: some View {
         List {
-            if let group {
-                section("groups.members.admins", users: users(group.admins), role: .admin)
-                section("groups.members.members", users: users(group.members), role: .member)
+            Group {
+                if let group {
+                    section("groups.members.admins", users: users(group.admins), role: .admin)
+                    section("groups.members.members", users: users(group.members), role: .member)
 
-                if amAdmin && group.requested.isEmpty == false {
-                    Section {
-                        ForEach(users(group.requested)) { user in
-                            GroupRequestRowView(user: user, groupId: groupId) {
-                                path.append(NavigationDestination.user(user: user))
+                    if amAdmin && group.requested.isEmpty == false {
+                        Section {
+                            ForEach(users(group.requested)) { user in
+                                GroupRequestRowView(user: user, groupId: groupId) {
+                                    path.append(NavigationDestination.user(user: user))
+                                }
                             }
+                        } header: {
+                            header("groups.requests.to_review")
                         }
-                    } header: {
-                        header("groups.requests.to_review")
+                    }
+
+                    if group.invited.isEmpty == false {
+                        section("groups.members.invited", users: users(group.invited), role: .invited)
                     }
                 }
-
-                if group.invited.isEmpty == false {
-                    section("groups.members.invited", users: users(group.invited), role: .invited)
-                }
             }
+            .textCase(nil)
         }
         .applyListBackground()
         .navigationTitle("groups.members")

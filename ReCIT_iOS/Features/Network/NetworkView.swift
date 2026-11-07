@@ -41,10 +41,12 @@ struct NetworkView: View {
                 switch segment {
                 case .friends:
                     FriendsSegmentView(path: $path)
+                        .textCase(nil)
                 case .groups:
                     GroupsSegmentView(path: $path) {
                         isCreatingGroup = true
                     }
+                    .textCase(nil)
                 }
             }
             .applyListBackground(.backgroundGrouped)

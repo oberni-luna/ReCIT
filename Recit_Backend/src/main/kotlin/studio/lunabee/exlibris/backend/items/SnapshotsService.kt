@@ -1,12 +1,8 @@
 package studio.lunabee.exlibris.backend.items
 
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import studio.lunabee.exlibris.backend.entities.InventaireClient
-import studio.lunabee.exlibris.backend.entities.RelayedResource
 import studio.lunabee.exlibris.backend.plugins.ApiException
 import java.time.Clock
 import java.time.Duration
@@ -17,7 +13,7 @@ import java.time.Duration
  * builds its own on every read; the backend reads inventaire.io as little as it can.
  */
 class SnapshotsService(
-    private val inventaire: InventaireClient,
+    private val inventaire: InventaireEntitiesReader,
     private val repository: SnapshotsRepository,
     private val clock: Clock,
 ) {
@@ -94,32 +90,13 @@ class SnapshotsService(
             },
         )
 
-    private suspend fun read(uris: List<String>): InventaireEntities {
-        // `|` encoded: inventaire.io takes either, a stricter server only this.
-        val path: String =
-            "/api/entities/by-uris?uris=${uris.joinToString(SEPARATOR)}" +
-                "&relatives=${SnapshotBuilder.relatives.joinToString(SEPARATOR)}"
-        return inventaire.get(path, emptyMap(), RelayedResource.DATA.timeout) { response -> parse(response) }
-    }
-
-    private suspend fun parse(response: HttpResponse): InventaireEntities {
-        if (response.status != HttpStatusCode.OK) {
-            logger.warn("inventaire.io answered {} to by-uris", response.status.value)
-            throw ApiException.badGateway()
-        }
-        // kotlinx's `SerializationException` and a body of the wrong shape are both `IllegalArgumentException`s.
-        return try {
-            InventaireEntities.parse(response.bodyAsText())
-        } catch (error: IllegalArgumentException) {
-            throw ApiException.badGateway(error)
-        }
-    }
+    private suspend fun read(uris: List<String>): InventaireEntities =
+        inventaire.read(uris, mapOf("relatives" to SnapshotBuilder.relatives))
 
     private companion object {
         val REREAD_AFTER: Duration = Duration.ofMinutes(10)
         val STALE_AFTER: Duration = Duration.ofDays(7)
         const val BATCH: Int = 30
-        const val SEPARATOR: String = "%7C"
 
         val logger: Logger = LoggerFactory.getLogger(SnapshotsService::class.java)
     }

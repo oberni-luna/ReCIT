@@ -21,6 +21,7 @@ import studio.lunabee.exlibris.backend.health.HealthService
 import studio.lunabee.exlibris.backend.images.ImagesRepository
 import studio.lunabee.exlibris.backend.images.ImagesService
 import studio.lunabee.exlibris.backend.images.LocalImageStore
+import studio.lunabee.exlibris.backend.items.InventaireEntitiesReader
 import studio.lunabee.exlibris.backend.items.InventoryViewRepository
 import studio.lunabee.exlibris.backend.items.InventoryViewService
 import studio.lunabee.exlibris.backend.items.ItemsRepository
@@ -29,6 +30,14 @@ import studio.lunabee.exlibris.backend.items.SnapshotRefreshJob
 import studio.lunabee.exlibris.backend.items.SnapshotsRepository
 import studio.lunabee.exlibris.backend.items.SnapshotsService
 import studio.lunabee.exlibris.backend.items.VisibilityValidator
+import studio.lunabee.exlibris.backend.lists.ElementUrisRepository
+import studio.lunabee.exlibris.backend.lists.ElementUrisService
+import studio.lunabee.exlibris.backend.lists.ListElementsRepository
+import studio.lunabee.exlibris.backend.lists.ListElementsService
+import studio.lunabee.exlibris.backend.lists.ListEntitiesChecker
+import studio.lunabee.exlibris.backend.lists.ListImagesSampler
+import studio.lunabee.exlibris.backend.lists.ListsRepository
+import studio.lunabee.exlibris.backend.lists.ListsService
 import studio.lunabee.exlibris.backend.mail.MailSender
 import studio.lunabee.exlibris.backend.relations.RelationsRepository
 import studio.lunabee.exlibris.backend.relations.RelationsService
@@ -139,14 +148,23 @@ class AppContainer(
 
     val entitiesService: EntitiesService = EntitiesService(inventaireClient)
 
+    private val inventaireEntitiesReader: InventaireEntitiesReader = InventaireEntitiesReader(inventaireClient)
+
     val snapshotsService: SnapshotsService =
         SnapshotsService(
-            inventaire = inventaireClient,
+            inventaire = inventaireEntitiesReader,
             repository = SnapshotsRepository(database),
             clock = clock,
         )
 
-    val snapshotRefreshJob: SnapshotRefreshJob = SnapshotRefreshJob(snapshotsService)
+    val elementUrisService: ElementUrisService =
+        ElementUrisService(
+            inventaire = inventaireEntitiesReader,
+            repository = ElementUrisRepository(database),
+            clock = clock,
+        )
+
+    val snapshotRefreshJob: SnapshotRefreshJob = SnapshotRefreshJob(snapshotsService, elementUrisService)
 
     private val visibilityValidator: VisibilityValidator = VisibilityValidator(groupsService)
 
@@ -171,6 +189,27 @@ class AppContainer(
             shelfItems = shelfItemsService,
             items = itemsService,
             visibility = visibilityValidator,
+            clock = clock,
+        )
+
+    private val listsRepository: ListsRepository = ListsRepository(database)
+
+    private val listElementsRepository: ListElementsRepository = ListElementsRepository(database)
+
+    val listsService: ListsService =
+        ListsService(
+            repository = listsRepository,
+            elements = listElementsRepository,
+            visibility = visibilityValidator,
+            images = ListImagesSampler(inventaireEntitiesReader),
+            clock = clock,
+        )
+
+    val listElementsService: ListElementsService =
+        ListElementsService(
+            lists = listsRepository,
+            repository = listElementsRepository,
+            entities = ListEntitiesChecker(inventaireEntitiesReader),
             clock = clock,
         )
 

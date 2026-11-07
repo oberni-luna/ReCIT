@@ -1,6 +1,6 @@
 ---
 issue: 74
-status: todo
+status: to-test
 wiki: [[architecture]], [[features/0060-list-cover-flow]], [[features/0061-move-to-another-list]], [[features/0068-lists-in-my-network]], [[features/0073-a-lists-presentation-tab]], [[features/0074-a-lists-visibility-in-its-form]]
 note: Part of #62 (Ex-libris backend umbrella, decisions there). Blocked by #73 (visibility rules, nightly job). Group lists (#63) and list element discussions (#66) build on it later.
 created: 2026-11-07
@@ -47,3 +47,22 @@ The backend serves the lists of Ex-libris readers and their elements with invent
 - The nightly job, run by hand on an element whose URI inventaire.io redirects, replaces it by the target; on a list that already holds the target, only one element remains, carrying the comment.
 - `DELETE /api/user` removes the reader's lists and their elements.
 - The iOS app launched with `-ExLibrisBackend http://localhost:8080` creates a list, adds a book to it by search, comments it, moves it to another list, removes it and deletes the list; « Dans mon réseau » shows a friend's shared list.
+
+## Implementation
+
+stacked on: wa/73-add-backend-books-and-shelves @ b47993b
+
+- **Migration `V6__lists.sql`:** `lists` (cascade on `users`), `list_elements` (cascade on `lists`, `UNIQUE(list_id, uri)`, `previous_uris`, `uri_checked`).
+- **Package `lists`:** `ListsRoutes`, `ListsService`, `ListElementsService`, `ElementUrisService` (nightly fix-up of redirected element URIs, comment kept, merged when the target is already in the list), repositories, `ListEntitiesChecker` (type and redirect checks on inventaire.io), `ListImagesSampler` (`attributes=images`), `LexicographicOrdinals`, `ListRules`, documents.
+- **`items/InventaireEntitiesReader`:** the one way to `/api/entities/by-uris`; `SnapshotsService` moved onto it. `SnapshotRefreshJob` also runs the element-URI round, each half catching its own failure.
+- All 7 routes in path and `?action=` forms, legacy POSTs included. Apps unchanged.
+- **Decision 2 not applied, on purpose:** the spec says a friend sees my `friends` list « without its `visibility`, as inventaire.io strips it ». inventaire.io does not strip it (anonymous capture of `by-creators` shows `"visibility":["public"]`; Codeberg's `by_creators.ts` / `filterVisibleDocs` keep it), and stripping it would break iOS, whose `ListDTO.visibility` is a non-optional `[String]` — « Dans mon réseau » would decode nothing. Parity kept; the choice is one line in `ListRecord.document()`.
+- **Other differences from inventaire.io:** the redirect target is stored (inventaire.io stores the URI sent), and a URI whose target is already in the list comes back in `alreadyInList`; `update-element` takes `id`, `comment`, `list` as the live API 5.1.1 (Codeberg main's `ordinal-after/before` not served); `by-creators` accepts `limit` (default 100), `offset`, `context`, `with-elements`, `attributes=total|images`; covers sampled in the `Accept-Language` language; first ordinal `11`; inventaire.io down → 502, nothing written; no spam checks, no `warnings`.
+- **For #75:** `InventaireEntitiesReader.read(uris, parameters)`; `ListsService.wrongUser()` pattern; `VisibilityValidator.isKey`; the two-halves pattern of `SnapshotRefreshJob.attempt`; FK cascades; `ListsTestKit.entitiesAnswer`; `seedCreator` (seed many readers by SQL past the sign-up limit). Next migration V7.
+
+## Verification
+
+- `./gradlew build`: 205 tests green, ktlint and detekt clean. iOS `ReCIT_iOSTests` (1327) green; Android build + 607 unit tests green.
+- Every backend criterion replayed by curl against real inventaire.io type checks (create, add, wrong type 403, same work twice → `alreadyInList` without calling inventaire.io, real Wikidata redirect stored as its target, comment, remove, update, delete, friends / stranger / anonymous visibility and the friend's writes refused, fifty-creator query, the nightly round run by hand, account deletion). ~21 anonymous GETs, no 429.
+- **iOS, iPhone 17, local backend, as `exlibris_ios_70`:** Listes shows « À relire » and « Polars nordiques », then « Dans mon réseau » with `exlibris_friend_71`'s « Entre ami·es » and « Lectures d'automne », not the stranger's private list; + › « Liste test 74 » (`POST /api/lists 201`); Rechercher « dune » › + on Dune (`add-elements`); Mon commentaire « Le premier du cycle » (`update-element`); Déplacer dans une autre liste › « À relire » (`add-elements`, `update-element`, `remove-elements`; « À relire » now shows Dune); crayon › Supprimer la liste (`POST /api/lists/delete`).
+- Android not run on screen (the Mac's load froze the emulator during #73); the Android app is unchanged.

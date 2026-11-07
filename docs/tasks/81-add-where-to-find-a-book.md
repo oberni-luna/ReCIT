@@ -41,7 +41,8 @@ created: 2026-11-07
 
 ## Acceptance criteria
 
-- [ ] A list of works, a book selected → « Où trouver ce livre ? » under « Ajouté le … », on my list and on a friend's list.
+- [ ] A list of works, a book selected → « Où trouver ce livre ? » as the last section, on my list and on a friend's list.
+- [ ] Any list, a book selected → « Ajouté le … » sits 2 pt under the title + author block (Figma `1000:31633`), no longer as the footer of « Retirer de la liste »; a friend's element without comment shows no empty card.
 - [ ] A list of authors → no « Où trouver ce livre ? » section.
 - [ ] A work two friends own (any editions) → two rows, avatar, pseudo, status, as on the Fiche livre; my own copy never listed.
 - [ ] A work no friend owns → only the two links.
@@ -83,3 +84,14 @@ Round 1, 2026-11-07, coded in its own worktree (the main checkout is shared with
 manual validation — not run by agent
 
 ## Feedback
+
+### Round 2 — 2026-11-07
+
+- **Asked**: « la date d'ajout à la liste devrait être beaucoup plus proche du bloc titre + auteur, j'ai modifié le Figma ici https://www.figma.com/design/S7IvC6GvlcUFe5IgbtvQq6/Nouveau-r%C3%A9cits?node-id=992-1760, regarde et ajuste le code et la documentation. »
+- **Triage**: adjustment. Criteria updated: date position added, section placement reworded.
+- **Changes** (`inline`):
+  - `ListElementsPage.swift`: « Ajouté le … » moves from the section footers into the title block, under `ListSelectedTitle`, at `.xxSmall` (2 pt), and cross-fades with it. A friend's element without comment drops its now-empty section.
+  - `figma-library.md`: the 2026-11-07 proposal records the retouch, the title + author addresses, and the code files of `Cell / External Link` and `Brand / Logo`. This doc and the glossary rows came over from uncommitted edits in the main checkout.
+- **Review**: deferred → /wa-validate.
+- **Verify**: round 2, manual validation, not run by agent. Installed on Olivier's iPhone.
+- **Rule**: none.

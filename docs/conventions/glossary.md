@@ -66,6 +66,8 @@ A named piece of UI, reused or talked about on its own. UI projects only.
 | Étiquette papier | paper tag | — | Inventaire, Listes | tilted label naming a shelf or a first step |
 | SnackBar | toast | `SnackBarView` | everywhere | background write failed or done |
 | Dans les listes | in lists | `BookListsSection` | Fiche livre | the lists, mine and friends', holding the book's work → [[features/0079-the-lists-a-book-is-in]] |
+| Où trouver ce livre ? | where to find | `ListWhereToFindSection` | Liste | friends' copies of the work, then Recyclivre and Chez mon libraire |
+| Lien extérieur | external link | `ExternalLinkRow` | Liste | site logo, title, subtitle, arrow; opens Safari |
 
 
 ## Flows

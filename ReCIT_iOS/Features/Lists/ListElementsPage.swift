@@ -156,9 +156,15 @@ struct ListElementsPage: View {
 
                     if let selectedURI {
                         ListCrossFade(id: selectedURI) {
-                            ListSelectedTitle(uri: selectedURI, listType: list.type)
-                                .accessibilityElement(children: .combine)
-                                .accessibilityFocused($isTitleFocused)
+                            VStack(spacing: .xxSmall) {
+                                ListSelectedTitle(uri: selectedURI, listType: list.type)
+
+                                if let selectedItem {
+                                    addedLine(selectedItem)
+                                }
+                            }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityFocused($isTitleFocused)
                         }
                         .padding(.horizontal, .medium)
                     }
@@ -202,20 +208,14 @@ struct ListElementsPage: View {
                         }
                         .textStyle(.action300)
                         .foregroundStyle(.foregroundError)
-                    } footer: {
-                        addedFooter(selectedItem)
                     }
                 }
-            } else if let selectedItem {
-                // Their comment when they wrote one, and the day the element was added.
+            } else if let selectedItem, selectedItem.comment.isEmpty == false {
+                // Their comment when they wrote one.
                 Section {
-                    if selectedItem.comment.isEmpty == false {
-                        ListCrossFade(id: selectedItem.uri) {
-                            ListReadOnlyCommentRow(comment: selectedItem.comment)
-                        }
+                    ListCrossFade(id: selectedItem.uri) {
+                        ListReadOnlyCommentRow(comment: selectedItem.comment)
                     }
-                } footer: {
-                    addedFooter(selectedItem)
                 }
             }
 
@@ -229,13 +229,11 @@ struct ListElementsPage: View {
         }
     }
 
-    private func addedFooter(_ item: EntityListItem) -> some View {
-        ListCrossFade(id: item.uri) {
-            Text("list.detail.added \(item.created.formatted(.dateTime.day().month(.wide).year()))")
-                .textStyle(.footnote200)
-                .foregroundStyle(.foregroundSecondary)
-                .frame(maxWidth: .infinity)
-        }
+    private func addedLine(_ item: EntityListItem) -> some View {
+        Text("list.detail.added \(item.created.formatted(.dateTime.day().month(.wide).year()))")
+            .textStyle(.footnote200)
+            .foregroundStyle(.foregroundSecondary)
+            .frame(maxWidth: .infinity)
     }
 }
 

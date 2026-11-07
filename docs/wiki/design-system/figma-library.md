@@ -2,6 +2,26 @@
 
 Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ; Figma en est le reflet.
 
+- **Proposition du 2026-11-07 — `B3 · Liste · Où trouver ce livre ?`** (`992:1760`, page `Liste`, section
+  `Liste détails · Description de la liste`, à droite de `B2`, clair seul, toute la longueur : 393 × 1 379, la barre
+  « Ajouter un livre » reste en bas) : clone de `B1`. Sous « Ajouté le … », une section `section · Où trouver ce
+  livre ?` (`992:1795`) : un `Section Header` sans glyphe, puis **une seule** carte `list group` (rayon 8,
+  `background/form-cell`) — les exemplaires de l'œuvre chez mes ami·es, trois `Cell / Owner Item` (`348:278`), puis
+  deux `Cell / External Link` (nouveau) : « Trouver sur Recyclivre » (« Pour l'acheter d'occasion ») et « Trouver sur
+  Chez Mon Libraire » (« Pour le réserver dans une librairie indépendante près de chez vous »), séparés par des
+  `Separator`. Retouchée à la main par Olivier le même jour (liens dans la carte des ami·es, titre et sous-titre,
+  flèche), puis factorisée : **deux composants nouveaux** sur `Screens · Components`, `Brand / Logo` (`994:680`) et
+  `Cell / External Link` (`994:688`), et une variante `Glyph=arrow.up.right` ajoutée à `Icon`. Les titres des liens
+  s'alignent sur les pseudos à 60 pt (écart 8, comme `Cell / Owner Item`), et non plus 64 comme dans la retouche.
+  Retouchée encore par Olivier le 2026-11-07 : « Ajouté le … » (`1000:31633`, `Footnote/footnote200`,
+  `foreground/secondary`, centré) quitte le pied de la carte « Retirer de la liste » pour le bloc `titre`
+  (`992:1770`), à 2 pt sous l'auteur·ice, comme le code (`ListElementsPage`, `Spacing.xxSmall`).
+  **Adresses** : le code cherche par titre et auteur·ice, jamais par ISBN, puisqu'une liste connaît l'œuvre et pas
+  l'édition — `https://www.recyclivre.com/search?q=…` (non vérifiée en direct, le site répond 403 Cloudflare aux
+  clients automatisés) et `https://www.chez-mon-libraire.fr/listeliv.php?mots_recherche=…`
+  (`Model/Books/Bookshop.swift`). `https://www.chez-mon-libraire.fr/livre/{EAN13}/` ouvrirait la fiche d'une
+  édition par redirection. Dans le code depuis #81 ; `Brand / Logo` y porte un filet `border/default` et non le noir
+  8 % de Figma. Les onglets de `B3` héritent du « Échanges • 5 » de `B1`.
 - **Proposition du 2026-11-06 — `Étagère détails · V2`** (`973:8195`, page `Inventaire`, en bas de la page, clair
   seul) : l'écran d'une étagère reprend celui d'une liste, deux onglets « Livres • N » | « Présentation » (`Profile / Tabs`,
   libellés par les propriétés `Inventaire` et `Listes`, `tab/Échanges` masqué). `E1 · Étagère · Onglet Livres`
@@ -1132,7 +1152,7 @@ la palette de l'app, elle se recolore avec l'OS.
 | `Chrome / Tab Bar` | `25:234` | Active ∈ {Inventaire, Listes, Réglages, Recherche} × Theme | — | 393 × 83. Teinte active **bindée** à `foreground/tinted` (`ReCIT.swift:31`) |
 | `Chrome / Nav Bar` | `26:162` | Style ∈ {Large, Inline, Inline + Back} × Theme | `Title#26:18`, `Action glyph#26:19`, `Show action#26:20` | Large 96, Inline 44. Titres **bindés** — l'app configure `UINavigationBarAppearance` |
 | `Chrome / Search Field` | `27:172` | State ∈ {Idle, Active} × Theme | `Placeholder#27:4` | 393 × 52. `Active` signifie aussi que le carrousel d'étagères a disparu |
-| `Icon` | `21:60` | Glyph ∈ 18 valeurs | — | À consommer par `INSTANCE_SWAP`, jamais une variante par icône |
+| `Icon` | `21:60` | Glyph ∈ 37 valeurs (la dernière, `arrow.up.right`, le 2026-11-07 pour `Cell / External Link`) | — | À consommer par `INSTANCE_SWAP`, jamais une variante par icône |
 
 ### Composites de feature
 
@@ -1143,6 +1163,8 @@ la palette de l'app, elle se recolore avec l'OS.
 | `Separator` | `47:193` | — | — | Le filet entre rangs d'un groupe encarté |
 | `Cell / Book` | `29:154` | — | `Title#29:0`, `Subtitle#29:1`, `Show subtitle#29:2`, `Authors#29:3`, `Owner#29:4`, `Show owner#29:5`, `Show divider#29:6` | `Inventory/InventoryCell.swift` |
 | `Cell / Book · Checkable` | `972:684` | Selected ∈ {On, Off} | — (instance `Cell / Book` exposée) | `Shelves/V2/ShelfAddBookRow.swift` — la marque de `Form / Choice Row`, 12 pt, puis le livre ; 361 de large |
+| `Cell / External Link` | `994:688` | — | `Title#994:0`, `Subtitle#994:1`, `Show subtitle#994:2`, `Logo#994:3` (INSTANCE_SWAP sur `Brand / Logo`) | `Features/Components/ExternalLinkRow.swift` (`B3`, page `Liste`). Logo 28 centré dans une colonne de 36, la largeur de l'avatar de `Cell / Owner Item` : les titres s'alignent à 60. Titre `Content/content400Bold`, sous-titre `Footnote/footnote200` / `foreground/secondary`, `Icon arrow.up.right` en fin ; padding 12 / 16, écart 8 ; sans fond, posée dans un `list group` |
+| `Brand / Logo` | `994:680` | Site ∈ {Recyclivre, Chez mon libraire} | — | `Features/Components/ExternalLinkLogo.swift` (filet `border/default` en code). 28 × 28, coins de 6, filet noir 8 % en dedans. Les icônes publiques des sites (favicon Google 256 px ; `apple-touch-icon` recadré à 84 % sur blanc), pas des fichiers de marque fournis par eux |
 | `Cell / Entity` | `31:188` | Type ∈ {Work, Author, Item} | `Title#31:15`, `Subtitle#31:16`, `Show subtitle#31:17`, `Owner#31:18`, `Show owner#31:19` | `Search/SearchResultCell.swift` **et** `Book/OtherEditionsCell.swift` |
 | `Cell / Transaction` | `30:162` | — | `Title#30:0`, `Description#30:1`, `Unread#30:2` | `Transactions/TransactionCellView.swift` |
 | `Cell / User` | `30:179` | — | `Username#30:3`, `Item count#30:4` | `Community/UserCellView.swift` |

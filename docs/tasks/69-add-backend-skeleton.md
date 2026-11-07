@@ -1,8 +1,8 @@
 ---
 issue: 69
-status: todo
+status: to-test
 wiki: [[architecture]], [[testing]], [[android]]
-note: BLOCKED — Docker (OrbStack) not set up, compose and Testcontainers proofs not run. Part of #62 (Ex-libris backend umbrella, decisions there). First task of the sprint; #70 and #76 build on it.
+note: Part of #62 (Ex-libris backend umbrella, decisions there). First task of the sprint; #70 and #76 build on it.
 created: 2026-11-06
 ---
 
@@ -61,12 +61,6 @@ The empty backend every other task of the sprint fills, and the switch that poin
 
 ## Implementation
 
-**Blocked — open question:** Docker never came up on this Mac (OrbStack installed, first-run setup not finished: no `~/.orbstack/bin/docker`, no `/var/run/docker.sock`). Finish OrbStack's setup, then run the three proofs below; nothing else is missing.
-
-1. `cd Recit_Backend && JAVA_HOME=/opt/homebrew/Cellar/openjdk@21/21.0.13.0.3/libexec/openjdk.jdk/Contents/Home ./gradlew build` — includes the 3 Testcontainers tests, which today fail only with `IllegalStateException` at `DockerClientProviderStrategy` (no Docker).
-2. `docker compose up` then `curl localhost:8080/health` — first build of the `Dockerfile`; the backend healthcheck assumes `curl` exists in `eclipse-temurin:21-jre`.
-3. `docker compose up db mail` then `./gradlew run`.
-
 ### What is built
 
 - `Recit_Backend/`: standalone Gradle 9.7 project (Kotlin 2.4, Ktor 3.6 Netty, Exposed 1.6, Flyway 13, Hikari, Testcontainers 2), base package `studio.lunabee.exlibris.backend`. `Application.kt`, `AppContainer.kt`; `plugins/` (StatusPages error shape `{status, status_verbose}`, `ApiException`, request logging, serialization); `db/` (Postgres + Flyway); `health/` (`HealthRoutes.kt`, `HealthService.kt`, `HealthRepository.kt`); `V1__init.sql` enables `pg_trgm`. `Dockerfile`, `docker-compose.yml` (Postgres 17, Mailpit, backend), `.env.example`.
@@ -78,7 +72,10 @@ The empty backend every other task of the sprint fills, and the switch that poin
 ### Proof
 
 - Backend `./gradlew build -x test`: green (compile, ktlint, detekt). A deliberate violation failed it (detekt MagicNumber/MayBeConst, ktlint), reverted.
-- Run with `./gradlew run` against a throwaway Homebrew Postgres 14 (not 17, no Docker): Flyway applied v1, `pg_trgm` present; `/health` → `200 {"status":"ok","db":"ok"}`; `/api/whatever` → `404 {"status":404,"status_verbose":"not found"}`; Postgres stopped → `503 {"status":503,"status_verbose":"database unreachable"}` in 2 s, back to 200 after restart; one log line per request (`GET /health 503 2027ms`).
+- `./gradlew build` with Docker: green, Testcontainers `postgres:17`, 3/3 tests (health 200, 404 shape, 503 when the database stops).
+- `docker compose up -d --build`: backend, db (Postgres 17.11) and mail all healthy; `/health` → `200 {"status":"ok","db":"ok"}`; `/api/whatever` → 404 shape; `docker compose stop db` → `/health` 503 shape; `curl` present in the JRE image for the healthcheck.
+- `docker compose up -d --wait db mail` + `./gradlew run`: Flyway on Postgres 17.11, `/health` → 200.
+- Earlier, before Docker, `./gradlew run` against a throwaway Homebrew Postgres 14: Flyway applied v1, `pg_trgm` present; `/health` → `200 {"status":"ok","db":"ok"}`; `/api/whatever` → `404 {"status":404,"status_verbose":"not found"}`; Postgres stopped → `503 {"status":503,"status_verbose":"database unreachable"}` in 2 s, back to 200 after restart; one log line per request (`GET /health 503 2027ms`).
 - iOS build + ReCIT_iOSTests green (EnvTests 2/2). On iPhone 17: with the argument, requests reach `http://localhost:8080` (backend logs `GET /api/user 404`); without it, `https://inventaire.io`; the inventaire.io session survives a launch with the argument.
 - Android `:app:assembleDebug :app:testDebugUnitTest` green (BackendOverrideTest 2/2). No emulator: no Android runtime check.
 
@@ -92,4 +89,4 @@ The empty backend every other task of the sprint fills, and the switch that poin
 
 ## Verification
 
-Partial — see Proof. Compose and Testcontainers not run (Docker missing); Android runtime not run (no emulator).
+Run by the agent: backend through Compose and `./gradlew run` on Postgres 17, iOS on the iPhone 17 simulator with and without `-ExLibrisBackend`. Not run: Android at runtime (no emulator) — build and unit tests only.

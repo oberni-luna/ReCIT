@@ -20,6 +20,8 @@ public extension DesignSystem {
         case foregroundTintedInverse
         case foregroundError
         case foregroundPlaceholder
+        /// The system's own disclosure chevron, for an accessory drawn beside one.
+        case foregroundDisclosure
 
         case backgroundDefault
         case backgroundInverse
@@ -63,6 +65,8 @@ public extension DesignSystem {
                 .init(light: .init("color/red/800"), dark: .init("color/red/400"))
             case .foregroundPlaceholder:
                 .init(light: .black.opacity(0.4), dark: .white.opacity(0.3))
+            case .foregroundDisclosure:
+                .init(uiColor: .tertiaryLabel)
             case .backgroundDefault:
                 .init(light: .init("color/gray/0"), dark: .init("color/gray/1000"))
             case .backgroundInverse:

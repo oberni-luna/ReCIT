@@ -54,6 +54,8 @@ struct ListCoverFlowScreen: View {
     @State private var selectAfterAdd: String?
     @State private var isPresentingSearch: Bool = false
     @State private var isPresentingScanner: Bool = false
+    /// The friend's copy « Où trouver ce livre ? » asks for, while the request sheet is up.
+    @State private var requestedItem: InventoryItem?
     /// Where the pager stands between the two pages, for the tabs' capsule to follow.
     @State private var pagerPosition: TabPagerPosition = .init()
     /// Whether the comment is being written on « Livres », which holds the pager still.
@@ -111,7 +113,9 @@ struct ListCoverFlowScreen: View {
                             onScan: { isPresentingScanner = true },
                             onSearch: { isPresentingSearch = true },
                             onOpen: open,
-                            onRemove: remove
+                            onRemove: remove,
+                            onOpenFriend: { path.append(NavigationDestination.user(user: $0)) },
+                            onRequest: { requestedItem = $0 }
                         )
                         .highlighting(arrival.highlightedURI)
                     case .presentation:
@@ -149,6 +153,9 @@ struct ListCoverFlowScreen: View {
                     onAdd: add,
                     onShow: show
                 )
+            }
+            .sheet(item: $requestedItem) { item in
+                TransactionRequestSheet(item)
             }
             .onAppear {
                 startArrival(in: uris)

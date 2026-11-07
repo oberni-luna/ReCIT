@@ -119,24 +119,7 @@ struct BookDetailView: View {
             onRemoved: { dismiss() }
         )
         .sheet(item: $borrowFromItem) { item in
-            if let owner = item.owner, let me = userModel.myUser {
-                TransactionFormView(
-                    transaction: .init(
-                        _id: "",
-                        _rev: "",
-                        item: item,
-                        owner: owner,
-                        requester: me,
-                        type: item.transaction,
-                        created: .now,
-                        messages: [],
-                        state: .requested,
-                        actions: [],
-                        readStatus: .init(owner: false, requester: true)
-                    ),
-                    transition: TransactionStateMachine.requestTransition
-                )
-            }
+            TransactionRequestSheet(item)
         }
         .sheet(item: $editedEdition) { edition in
             EditEditionFlowView(edition: edition)
@@ -206,32 +189,19 @@ struct BookDetailView: View {
         // this screen has just removed. See `PersistentModel+StillInTheStore` and issue 0065.
         let othersItems: [InventoryItem] = edition.items
             .filter { $0.isStillInTheStore && $0.ownerId != userModel.myUser?._id }
-        let canBorrow: Bool = iOwn(edition) == nil
+        let requestRule: TransactionRequestRule = .init(
+            copies: edition.items.filter(\.isStillInTheStore).map { ($0.ownerId, edition.uri) },
+            myUserId: userModel.myUser?._id
+        )
         if !othersItems.isEmpty {
             Section("nav.community") {
                 ForEach(othersItems) { item in
-                    Button {
-                        if let owner = item.owner {
-                            nextEntityDestination = NavigationDestination.user(user: owner)
-                        }
-                    } label: {
-                        NavigationLink(value: UUID()) {
-                            UserItemCellView(item: item)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        if canBorrow, let owner = item.owner {
-                            if item.transaction == .inventorying {
-                                Button("community.owner_not_lending \(owner.username)", systemImage: "hand.raised.slash") { }
-                                    .disabled(true)
-                            } else {
-                                Button(String(localized: item.transaction.requestMenuLabel(owner: owner.username)), systemImage: "hand.wave") {
-                                    borrowFromItem = item
-                                }
-                            }
-                        }
-                    }
+                    FriendItemRow(
+                        item,
+                        onOpenFriend: { nextEntityDestination = NavigationDestination.user(user: $0) },
+                        onRequest: { borrowFromItem = $0 }
+                    )
+                    .requestOffered(requestRule.isRequestOffered(forEditionURI: edition.uri))
                 }
             }
         }

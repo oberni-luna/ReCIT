@@ -41,6 +41,8 @@ struct ListElementsPage: View {
     let onSearch: () -> Void
     let onOpen: (String) -> Void
     let onRemove: (EntityListItem) -> Void
+    let onOpenFriend: (User) -> Void
+    let onRequest: (InventoryItem) -> Void
     private var highlightedURI: String?
 
     @FocusState private var isCommentFocused: Bool
@@ -67,11 +69,11 @@ struct ListElementsPage: View {
             DesignSystem.FormList {
                 elementSections
 
-                // Room for the comment to rise into. Below the comment the list holds only « Retirer de
-                // la liste » and its footer: it was already scrolled as far as it goes, so neither the
-                // caret nor `ListKeyboardReveal` could take the growing field any higher, and each new line
-                // went under the keyboard. A transparent row as tall as the keyboard, while the
-                // comment is being written.
+                // Room for the comment to rise into. What follows the comment — « Retirer de la liste »,
+                // and on a list of works « Où trouver ce livre ? » — can be shorter than the keyboard:
+                // the list then runs out of scroll, neither the caret nor `ListKeyboardReveal` can take
+                // the growing field any higher, and each new line goes under the keyboard. A
+                // transparent row as tall as the keyboard, while the comment is being written.
                 if isCommentFocused {
                     Section {
                         Color.clear
@@ -154,9 +156,15 @@ struct ListElementsPage: View {
 
                     if let selectedURI {
                         ListCrossFade(id: selectedURI) {
-                            ListSelectedTitle(uri: selectedURI, listType: list.type)
-                                .accessibilityElement(children: .combine)
-                                .accessibilityFocused($isTitleFocused)
+                            VStack(spacing: .xxSmall) {
+                                ListSelectedTitle(uri: selectedURI, listType: list.type)
+
+                                if let selectedItem {
+                                    addedLine(selectedItem)
+                                }
+                            }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityFocused($isTitleFocused)
                         }
                         .padding(.horizontal, .medium)
                     }
@@ -200,32 +208,31 @@ struct ListElementsPage: View {
                         }
                         .textStyle(.action300)
                         .foregroundStyle(.foregroundError)
-                    } footer: {
-                        addedFooter(selectedItem)
                     }
                 }
-            } else if let selectedItem {
-                // Their comment when they wrote one, and the day the element was added.
+            } else if let selectedItem, selectedItem.comment.isEmpty == false {
                 Section {
-                    if selectedItem.comment.isEmpty == false {
-                        ListCrossFade(id: selectedItem.uri) {
-                            ListReadOnlyCommentRow(comment: selectedItem.comment)
-                        }
+                    ListCrossFade(id: selectedItem.uri) {
+                        ListReadOnlyCommentRow(comment: selectedItem.comment)
                     }
-                } footer: {
-                    addedFooter(selectedItem)
                 }
+            }
+
+            if list.type == .work, let selectedURI {
+                ListWhereToFindSection(
+                    workURI: selectedURI,
+                    onOpenFriend: onOpenFriend,
+                    onRequest: onRequest
+                )
             }
         }
     }
 
-    private func addedFooter(_ item: EntityListItem) -> some View {
-        ListCrossFade(id: item.uri) {
-            Text("list.detail.added \(item.created.formatted(.dateTime.day().month(.wide).year()))")
-                .textStyle(.footnote200)
-                .foregroundStyle(.foregroundSecondary)
-                .frame(maxWidth: .infinity)
-        }
+    private func addedLine(_ item: EntityListItem) -> some View {
+        Text("list.detail.added \(item.created.formatted(.dateTime.day().month(.wide).year()))")
+            .textStyle(.footnote200)
+            .foregroundStyle(.foregroundSecondary)
+            .frame(maxWidth: .infinity)
     }
 }
 

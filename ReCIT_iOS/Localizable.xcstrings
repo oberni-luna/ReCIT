@@ -798,6 +798,91 @@
         }
       }
     },
+    "list.where_to_find.header" : {
+      "comment" : "Header of the section of a Liste, under the selected work, listing friends' copies and bookshops' searches.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where to find this book?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Où trouver ce livre ?"
+          }
+        }
+      }
+    },
+    "list.where_to_find.recyclivre.title" : {
+      "comment" : "Link opening Recyclivre's search for the selected work, in Safari.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find on Recyclivre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver sur Recyclivre"
+          }
+        }
+      }
+    },
+    "list.where_to_find.recyclivre.subtitle" : {
+      "comment" : "Under « Trouver sur Recyclivre »: what the site is for.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To buy it second-hand"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour l’acheter d’occasion"
+          }
+        }
+      }
+    },
+    "list.where_to_find.chez_mon_libraire.title" : {
+      "comment" : "Link opening Chez mon libraire's search for the selected work, in Safari.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find on Chez mon libraire"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver sur Chez mon libraire"
+          }
+        }
+      }
+    },
+    "list.where_to_find.chez_mon_libraire.subtitle" : {
+      "comment" : "Under « Trouver sur Chez mon libraire »: what the site is for. « vous » like the rest of the Liste screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To reserve it at an independent bookshop near you"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour le réserver dans une librairie indépendante près de chez vous"
+          }
+        }
+      }
+    },
     "user.tab.inventory %lld" : {
       "comment" : "Inventory tab of a reader's profile, with how many books they hold.",
       "localizations" : {
@@ -2582,6 +2667,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mot de passe"
+          }
+        }
+      }
+    },
+    "community.book_in_my_inventory" : {
+      "comment" : "Disabled long-press entry on a friend's copy when I own the same edition.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This book is in your inventory"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce livre est dans votre inventaire"
           }
         }
       }

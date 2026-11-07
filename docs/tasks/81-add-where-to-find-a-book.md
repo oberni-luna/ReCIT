@@ -21,7 +21,7 @@ created: 2026-11-07
   - Every copy of the work, any edition, owned by someone other than me, read from the store (`@Query` / store relations, no network call).
   - The work's editions → their items; `InventoryItem.workUris` is computed, so not usable in a `#Predicate`.
   - Row = `UserItemCellView`, same as « Dans la communauté » on the Fiche livre.
-  - Tap → Profil d'un ami. Long press → the Fiche livre's menu: « Emprunter à X / Acheter à X / Récupérer de X » by the copy's status, disabled « X ne prête pas » for `inventorying`, opening the request sheet. Not offered when I own a copy of the work myself (same rule as the Fiche livre).
+  - Tap → Profil d'un ami. Long press → the Fiche livre's menu: « Emprunter à X / Acheter à X / Récupérer de X » by the copy's status, disabled « X ne prête pas » for `inventorying`, opening the request sheet. Not offered when I own a copy of that same edition (the Fiche livre's rule, copy by copy — round 3: « any edition of the work » hid the menu).
   - None → no rows, the two links stay.
 - **Links**: search by title + author, never an ISBN. A list knows the work, not the edition; the sites then show every edition they stock.
   - Recyclivre → `https://www.recyclivre.com/search?q=<title author>`. Not verified live (Cloudflare 403 to automated clients): check it on a phone while coding.
@@ -46,7 +46,9 @@ created: 2026-11-07
 - [ ] A list of authors → no « Où trouver ce livre ? » section.
 - [ ] A work two friends own (any editions) → two rows, avatar, pseudo, status, as on the Fiche livre; my own copy never listed.
 - [ ] A work no friend owns → only the two links.
-- [ ] Tap a friend's row → Profil d'un ami. Long press, I own no copy → « Emprunter à X » (or Acheter / Récupérer), which opens the request sheet.
+- [ ] Tap a friend's row → Profil d'un ami. Long press, I own no copy of that edition → « Emprunter à X » (or Acheter / Récupérer by status, disabled « X ne prête pas » for Inventorié), which opens the request sheet.
+- [ ] The link rows' `arrow.up.right` has the exact colour of the friend rows' chevrons, light and dark.
+- [ ] Every separator of the card, friend rows and link rows, starts at the same x.
 - [ ] Swipe to another cover → the section's rows cross-fade to the new work.
 - [ ] Tap « Trouver sur Chez mon libraire » for « Petit pays », Gaël Faye → Safari opens their search for « Petit pays Gaël Faye » and lists it.
 - [ ] Tap « Trouver sur Recyclivre » for the same work → Safari opens Recyclivre's search results for it.
@@ -94,4 +96,21 @@ manual validation — not run by agent
   - `figma-library.md`: the 2026-11-07 proposal records the retouch, the title + author addresses, and the code files of `Cell / External Link` and `Brand / Logo`. This doc and the glossary rows came over from uncommitted edits in the main checkout.
 - **Review**: deferred → /wa-validate.
 - **Verify**: round 2, manual validation, not run by agent. Installed on Olivier's iPhone.
+- **Rule**: none.
+
+### Round 3 — 2026-11-07
+
+- **Asked**: « je voudrais un appuie-long sur les cells de mes ami.e.s avec une entrée "Emprunter à ..." (en fonction du statut) · je veux que les arrows.up.right soient de la même couleur que les chevrons au dessus pour ouvrir le profil des amis · je veux que le séparateur entre "Recyclivre" et "Chez mon libraire" soit aligné sur les autres séparateurs au dessus. »
+- **Triage**:
+  - Long press: defect.
+  - Arrow colour: adjustment.
+  - Separator: adjustment.
+  - Criteria updated.
+- **Changes** (implementer):
+  - **Long press**: the menu was empty, not blocked. `iOwnTheWork` was true as soon as any edition of the work held a copy of mine. It is replaced by `Model/Transaction/TransactionRequestRule.swift`, a pure rule decided copy by copy: a friend's copy may be asked for unless I own that same edition. Tested by `TransactionRequestRuleTests` (4 tests). A throwaway XCUITest harness reproduced the bug and ruled out the gestures; it is deleted.
+  - **Arrow colour**: new token `foregroundDisclosure` (`UIColor.tertiaryLabel`, the system chevron) in `Color.swift`, used by `ExternalLinkRow`. On screenshots it matches the chevron in light and dark.
+  - **Separators**: `.alignmentGuide(.listRowSeparatorLeading)` at `Spacing.sMedium` (12 pt) on the friend rows and link rows, in `ListWhereToFindSection` only. The Fiche livre is untouched.
+  - **Docs**: `figma-library.md` records the code-only token and the separator x.
+- **Review**: deferred → /wa-validate.
+- **Verify**: round 3, manual validation, not run by agent. Build green, 1322 tests passed.
 - **Rule**: none.

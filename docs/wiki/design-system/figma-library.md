@@ -21,7 +21,9 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   clients automatisés) et `https://www.chez-mon-libraire.fr/listeliv.php?mots_recherche=…`
   (`Model/Books/Bookshop.swift`). `https://www.chez-mon-libraire.fr/livre/{EAN13}/` ouvrirait la fiche d'une
   édition par redirection. Dans le code depuis #81 ; `Brand / Logo` y porte un filet `border/default` et non le noir
-  8 % de Figma. Les onglets de `B3` héritent du « Échanges • 5 » de `B1`.
+  8 % de Figma, et la flèche `arrow.up.right` prend `foregroundDisclosure` (`UIColor.tertiaryLabel`, la couleur du
+  chevron système des `Cell / Owner Item`), un token du code seul, sans variable Figma. Les séparateurs de la carte
+  partent tous à 12 pt du bord de la cellule. Les onglets de `B3` héritent du « Échanges • 5 » de `B1`.
 - **Proposition du 2026-11-06 — `Étagère détails · V2`** (`973:8195`, page `Inventaire`, en bas de la page, clair
   seul) : l'écran d'une étagère reprend celui d'une liste, deux onglets « Livres • N » | « Présentation » (`Profile / Tabs`,
   libellés par les propriétés `Inventaire` et `Listes`, `tab/Échanges` masqué). `E1 · Étagère · Onglet Livres`

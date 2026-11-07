@@ -47,7 +47,7 @@ struct ExternalLinkRow: View {
                 .multilineTextAlignment(.leading)
 
                 Image(systemName: "arrow.up.right")
-                    .foregroundStyle(.foregroundSecondary)
+                    .foregroundStyle(.foregroundDisclosure)
                     .accessibilityHidden(true)
             }
             .contentShape(.rect)

@@ -12,6 +12,8 @@ import SwiftUI
 /// edition, then a search for it on Recyclivre and on Chez mon libraire. Read from the store
 /// alone; absent until the work is in it.
 struct ListWhereToFindSection: View {
+    private static let separatorLeading: CGFloat = DesignSystem.Spacing.sMedium.rawValue
+
     private let workURI: String
     private let onOpenFriend: (User) -> Void
     private let onRequest: (InventoryItem) -> Void
@@ -45,7 +47,10 @@ struct ListWhereToFindSection: View {
                     KeyPathComparator(\.owner?.username, comparator: .localizedStandard),
                     KeyPathComparator(\._id)
                 ])
-            let iOwnTheWork: Bool = items.contains { $0.ownerId == myUserId }
+            let requestRule: TransactionRequestRule = .init(
+                copies: items.compactMap { item in item.edition.map { (item.ownerId, $0.uri) } },
+                myUserId: myUserId
+            )
 
             Section("list.where_to_find.header") {
                 // Keyed on their place rather than on the copy, so a swipe to another work
@@ -57,8 +62,9 @@ struct ListWhereToFindSection: View {
                             onOpenFriend: onOpenFriend,
                             onRequest: onRequest
                         )
-                        .requestOffered(iOwnTheWork == false)
+                        .requestOffered(item.edition.map { requestRule.isRequestOffered(forEditionURI: $0.uri) } ?? false)
                     }
+                    .alignmentGuide(.listRowSeparatorLeading) { _ in Self.separatorLeading }
                 }
 
                 ForEach(Bookshop.allCases, id: \.self) { bookshop in
@@ -70,6 +76,7 @@ struct ListWhereToFindSection: View {
                             destination: url
                         )
                         .accessibilityIdentifier(bookshop.linkAccessibilityID)
+                        .alignmentGuide(.listRowSeparatorLeading) { _ in Self.separatorLeading }
                     }
                 }
             }

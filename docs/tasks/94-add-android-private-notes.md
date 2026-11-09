@@ -1,0 +1,31 @@
+---
+issue: 94
+status: todo
+wiki: [[features/0080-a-private-note-on-my-copy]], [[features/0031-android-app]], [[adr/0001-swiftdata-reactive-optimistic]]
+note: Rattrapage iOS 1.10.0 (feature 0080) on Android. Android writes only `details` today (BookViewModel.commitNotes → updateDetails).
+created: 2026-11-09
+---
+
+## Context / Decisions
+
+Port of iOS [0080](../wiki/features/0080-a-private-note-on-my-copy.md) to `Recit_Android/`. The iOS doc is the spec; only the Android specifics are settled here.
+
+- **Data.** `ItemDto.notes: String?` (`network/dto/InventoryDtos.kt`), `InventoryItemEntity.notes: String = ""` (`data/db/Entities.kt`), a DAO setter beside `setDetails`. Room goes from version 2 to 3 by `AutoMigration(2, 3)` (`data/db/AppDatabase.kt`), schema 3 exported to `app/schemas/`.
+- **Merge** (`data/model/Merges.kt`): insert sets `notes = dto.notes.orEmpty()`, update `notes = dto.notes ?: existing.notes` — a friend's item or a sparse payload never wipes my note, as `details`.
+- **Write.** Same path as the Commentaire: `PUT /api/items/bulk-update` with `attribute: "notes"`, optimistic through `OptimisticRunner`, early return when unchanged, revert only if the stored value is still the new one, error to `ErrorReporter` → SnackBar. `updateDetails` becomes one function over an attribute (`details` | `notes`) rather than a copy.
+- **Writes of one field on one book leave one after the other** (iOS `lastTextWrites`): a write waits for the server's answer to the previous one on the same item + attribute, so the older text never lands last.
+- **UI.** « Dans mon inventaire » (`BookScreen.myCopy()`): « Ce que j'en pense », then « Ce que je garde pour moi » (placeholder « Écrire une note privée »), then the date / mode d'échange row. The autosaving cell (`MyNotesCell`: 1 s pause, focus loss, dispose) is shared by both fields, not duplicated. Commit runs on `backgroundScope` like `commitNotes`.
+- **Nowhere else.** Not on `CommunityItemRow`, not on a book row, not in Recherche. A book I don't own has no « Dans mon inventaire », as now.
+- French strings only (Android has no English values). Commentaire's French label unchanged.
+- Out of scope: a note emptied on the website coming back without `notes` (kept, as `details`).
+
+## Acceptance criteria
+
+- On my copy's Fiche livre, « Dans mon inventaire » shows « Ce que j'en pense », then « Ce que je garde pour moi » with the placeholder « Écrire une note privée », then the date row.
+- Typing a note, waiting 1 s, leaving and reopening the book: the note is there; after an app restart it is still there.
+- The request sent is `PUT /api/items/bulk-update` with `attribute: "notes"` and the item id; `details` is not sent.
+- Server refuses (unit test with a failing API): the field goes back to the previous note and the SnackBar shows; a note typed after the failed one is not overwritten.
+- Two writes of the note on the same book: the second request starts only after the first answered (unit test).
+- A friend's copy of the same book shows its Commentaire, never a private note.
+- An app installed with database version 2 upgrades to 3 without losing items (AutoMigration test or schema check).
+- A sync payload without `notes` keeps the local note (merge unit test).

@@ -373,13 +373,6 @@ final class AuthService {
         deleteCookiesFromKeychain()
     }
 
-    /// The session, for a web view that has to open a page of inventaire.io as the signed-in
-    /// user — linking a Wikidata account goes through redirects only a browser follows. A copy
-    /// handed out: the web view keeps it in a store of its own, which nothing writes back here.
-    func webSessionCookies() -> [HTTPCookie] {
-        sessionCookies()
-    }
-
     // MARK: - Cookies
 
     /// Reads `Set-Cookie` off the response into our own jar.

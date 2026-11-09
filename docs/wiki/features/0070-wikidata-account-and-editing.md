@@ -7,26 +7,32 @@ web` (`906:1833`), `W3 · Compte et connexion · Wikidata relié` (`906:1486`), 
 (`906:1652`) and the `Spec · Wikidata` panel (`907:3088`). It opens to Wikidata what
 [0057](0057-edit-works-and-authors.md) did for inventaire.io's own works and people.
 
+**The in-app link was removed on 2026-11-09** ([#114](https://github.com/oberni-luna/ReCIT/issues/114)): it
+never worked on iOS. The « Wikidata » section of « Compte et connexion », its sheet and its web view are gone.
+Editing Wikidata works and people stays, signed by inventaire.io's bot. An account linked on the inventaire.io
+website still signs its own edits, and the notice still says so. The sections below describe the link as it
+was shipped, struck where it no longer holds.
+
 ## What it does
 
 - **A Wikidata work or person opens in « Modifier l'œuvre » / « Modifier l'auteur·ice »**, the whole screen of
   0057, like one of inventaire.io's. Before, a Wikidata work showed its title read-only and a Wikidata author
   had no chevron.
 - **A line at the head of the screen** says that « Enregistrer » publishes on Wikidata, and under whose name:
-  - the reader's Wikidata account once it is linked;
-  - otherwise inventaire.io's bot, which names the reader's account, with where to link it.
+  - the reader's Wikidata account once it is linked (since #114, on the inventaire.io website only);
+  - otherwise inventaire.io's bot, which names the reader's account. ~~With where to link it~~: gone in #114.
 - **Its properties name Wikidata entities only.** inventaire.io refuses to link a Wikidata entity to one of its
   own (« wikidata entities can't link to inventaire entities »). The picker of a Wikidata work or person
   therefore shows Wikidata's results alone and offers no « Créer ». With no Wikidata result, its footer says to
   create the missing entry on wikidata.org.
-- **« Compte et connexion » ends on a « Wikidata » section.**
-  - Not linked: « Relier mon compte Wikidata » opens wikidata.org in a sheet titled « Wikidata ».
-  - Linked: « Compte Wikidata · Relié », and « Gérer l'accès sur Wikimedia », which opens
-    `Special:OAuthManageMyGrants`.
-  - The footer says who signs an edit.
-- **The sheet** shows Wikimedia's own pages: sign in to Wikimedia if needed, allow inventaire.io. It closes by
+- ~~**« Compte et connexion » ends on a « Wikidata » section.**~~ Removed in #114.
+  - ~~Not linked: « Relier mon compte Wikidata » opens wikidata.org in a sheet titled « Wikidata ».~~
+  - ~~Linked: « Compte Wikidata · Relié », and « Gérer l'accès sur Wikimedia », which opens
+    `Special:OAuthManageMyGrants`.~~
+  - ~~The footer says who signs an edit.~~
+- ~~**The sheet** shows Wikimedia's own pages: sign in to Wikimedia if needed, allow inventaire.io. It closes by
   itself when the server sends the browser back, or with its cross. The account is read again either way, and a
-  SnackBar says « Compte Wikidata relié » when it is.
+  SnackBar says « Compte Wikidata relié » when it is.~~ Removed in #114.
 
 ## Technical surface
 
@@ -37,7 +43,10 @@ web` (`906:1833`), `W3 · Compte et connexion · Wikidata relié` (`906:1486`), 
   - so **no Wikidata account is needed to edit**: linking changes who signs.
 - **Linking** is `GET /api/auth/wikidata-oauth?redirect=/settings/account`: OAuth 1.0a in three legs, all
   redirects. The server stores the tokens and sends the browser to `https://inventaire.io/settings/account`.
-  - `WikidataOAuthFlow` (pure, `Model/Authentication/`) holds the start address, the return address and the
+  **Since #114 the app no longer runs it**: `WikidataWebView`, `AuthModel.webSessionCookies()` and
+  `AuthService.webSessionCookies()` and `WikidataOAuthFlow` are deleted; the `enabledOAuth` key lives in
+  `AccountSettings`. The bullets below are the shipped design.
+  - `WikidataOAuthFlow` (pure, `Model/Authentication/`) held the start address, the return address and the
     grants page.
   - `WikidataWebView` is a `WKWebView` in a `UIViewRepresentable`. SwiftUI's `WebView` starts at iOS 26.
   - It gets the session cookies from `AuthModel.webSessionCookies()` → `AuthService.webSessionCookies()`. The
@@ -56,7 +65,7 @@ web` (`906:1833`), `W3 · Compte et connexion · Wikidata relié` (`906:1486`), 
 - **The save is unchanged**: the same `update-claim` and `update-label` calls, on the `wd:` uri, with the same
   failure banner when Wikidata refuses.
 - Thirteen strings, `account.wikidata.*`, `edit_entity.wikidata.*` and `entity_picker.wikidata_only*`, in
-  English and French.
+  English and French. #114 deleted the nine `account.wikidata.*` keys.
 
 ## Decisions
 

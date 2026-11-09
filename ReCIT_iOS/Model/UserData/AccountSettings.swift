@@ -19,6 +19,10 @@ struct AccountSettings: Equatable, Sendable {
     /// (`server/db/couchdb/design_docs/users.ts`).
     static let defaultSummaryPeriodicity: Int = 20
 
+    /// The key `GET /api/user` lists in `enabledOAuth` once an account is linked, on the
+    /// inventaire.io website.
+    private static let wikidataOAuthProvider: String = "wikidata"
+
     var email: String?
     var isEmailValidated: Bool
     var language: String?
@@ -68,7 +72,7 @@ struct AccountSettings: Equatable, Sendable {
             anonymizesContributions: userDTO.settings?.contributions?["anonymize"] ?? true,
             summaryPeriodicity: userDTO.summaryPeriodicity ?? Self.defaultSummaryPeriodicity,
             notifications: notifications,
-            linksWikidata: userDTO.enabledOAuth?.contains(WikidataOAuthFlow.provider) ?? false
+            linksWikidata: userDTO.enabledOAuth?.contains(Self.wikidataOAuthProvider) ?? false
         )
     }
 

@@ -5,7 +5,7 @@
 //  The line at the head of « Modifier l'œuvre » and « Modifier l'auteur·ice » for a work or a
 //  person of Wikidata's (`W5` in the Figma file): « Enregistrer » publishes on Wikidata, and
 //  under whose name — the reader's Wikidata account when it is linked, inventaire.io's bot
-//  naming their account otherwise, with where to link it.
+//  naming their account otherwise.
 //
 
 import SwiftUI

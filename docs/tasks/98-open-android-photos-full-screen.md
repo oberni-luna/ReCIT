@@ -1,6 +1,6 @@
 ---
 issue: 98
-status: todo
+status: to-test
 wiki: [[features/0081-a-friends-and-a-groups-photo-full-screen]], [[features/0085-author-photos-full-screen]], [[features/0029-full-screen-cover]], [[features/0052-android-cover-zoom-edition-editing-context-menu]]
 note: Rattrapage iOS 1.10.0 (features 0081 and 0085). Android has FullScreenCoverDialog for covers only, on black.
 created: 2026-11-09
@@ -31,3 +31,23 @@ Port of iOS [0081](../wiki/features/0081-a-friends-and-a-groups-photo-full-scree
 - Double-tap, pinch and pan work on the three photos as on a cover.
 - TalkBack reads « Agrandir la photo, bouton » on each photo.
 - Réseau → Amis row tap opens the profile; Fiche livre → author row opens the author.
+
+## Implementation
+
+- `ui/book/FullScreenCover.kt` and `CoverZoom.kt` moved to `ui/common/` (+ `CoverZoomTest`). `FullScreenCoverDialog(url, contentDescription, onDismiss)`; the black backdrop is `FullScreenBackdrop.veil(...)`, still faded in 300 ms and with the swipe. API 31+: window blur (`FLAG_BLUR_BEHIND` + `blurBehindRadius`, 30 dp at full) follows the same level through a `snapshotFlow`, `addCrossWindowBlurEnabledListener` while open; navigation-bar icons follow the theme; « Fermer » `backgroundSecondary` / `foregroundDefault`. `coverMemoryCacheKey` → `fullScreenMemoryCacheKey` (`full-screen:$url`).
+- `ui/common/FullScreenBackdrop.kt`: pure `Blurred` / `Opaque`, `of(sdkInt, isCrossWindowBlurEnabled)`, `veil(colors)` → `backgroundMaterial` or `backgroundDefault`.
+- `ui/common/EnlargeablePhoto.kt` (port of iOS `enlargeablePhoto`): url + enabled → clickable, semantics « Agrandir la photo », role Button, opens the dialog; null url or disabled → unchanged. Cache key independent of `isEnabled`.
+- Design system: `RecitColors.backgroundMaterial` (Gray0 70 % light, Gray900 70 % dark — new Android token, no Figma counterpart yet); `CellThumbnail` and `GroupThumbnail` gain `memoryCacheKey`; `rememberImageModel(url, memoryCacheKey)` shared with `HeaderCover`.
+- Headers: `GroupScreen` GroupHeader, `AuthorScreen` AuthorHeader, `UserProfileHeader` (`isEnabled = fold == 0f`: at rest only) wrap their photo in `EnlargeablePhoto`.
+- `res/values/strings_photo.xml`: `photo_action_enlarge` « Agrandir la photo », `photo_accessibility_label` « Photo ».
+- Tests: `FullScreenBackdropTest` (5). Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest` ✅ 605 tests, 0 failures. Android lint (NewApi) not run; API 31 calls behind `SDK_INT >= S` / `@RequiresApi(S)`.
+- Side effect to check: the friend's photo at rest now takes touches, so a scroll or page swipe starting on it does not move the page (letting it through would also leak capsule-tab taps to the pages).
+- Runtime not run: no inventaire.io credentials for the agent. Blur radius and 70 % alpha are unseen guesses.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.designsystem
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +30,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -35,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import studio.lunabee.nouveaurecit.R
 import kotlin.math.abs
 
@@ -236,7 +240,8 @@ enum class ThumbnailShape { Square, Portrait, Circle }
 /**
  * `CellThumbnail` — a remote image with the placeholder background and the light shadow. A
  * portrait is a book cover, 2:3. Given a [fallbackName], a circle without a picture — or whose
- * picture fails — shows that name's initials instead of an empty disc.
+ * picture fails — shows that name's initials instead of an empty disc. Given a [memoryCacheKey], the
+ * picture is kept in memory under it, for a Plein écran to open on.
  */
 @Composable
 fun CellThumbnail(
@@ -246,6 +251,7 @@ fun CellThumbnail(
     shape: ThumbnailShape = ThumbnailShape.Portrait,
     cornerRadius: Dp = CornerRadius.minimal,
     fallbackName: String? = null,
+    memoryCacheKey: String? = null,
 ) {
     val height: Dp = if (shape == ThumbnailShape.Portrait) size.width * 3 / 2 else size.width
     val clip: Shape = if (shape == ThumbnailShape.Circle) CircleShape else RoundedCornerShape(cornerRadius)
@@ -273,12 +279,21 @@ fun CellThumbnail(
         }
         if (url != null) {
             AsyncImage(
-                model = url,
+                model = rememberImageModel(url, memoryCacheKey),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
         }
+    }
+}
+
+/** What Coil is asked to load for [url]: the url itself, or a request kept in memory under [memoryCacheKey]. */
+@Composable
+fun rememberImageModel(url: String, memoryCacheKey: String?): Any {
+    val context: Context = LocalContext.current
+    return remember(url, memoryCacheKey) {
+        memoryCacheKey?.let { ImageRequest.Builder(context).data(url).memoryCacheKey(it).build() } ?: url
     }
 }
 

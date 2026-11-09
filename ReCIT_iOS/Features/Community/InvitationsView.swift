@@ -32,46 +32,49 @@ struct InvitationsView: View {
 
     var body: some View {
         List {
-            if received.isEmpty && sent.isEmpty {
-                Section {
-                    EmptyStateView(
-                        glyph: "envelope",
-                        title: "network.invitations.empty",
-                        message: "network.invitations.empty.message"
-                    )
-                    .padding(.vertical, .large)
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
-
-            if received.isEmpty == false {
-                Section {
-                    ForEach(received) { user in
-                        InvitationRowView(user: user) {
-                            path.append(NavigationDestination.user(user: user))
-                        }
+            Group {
+                if received.isEmpty && sent.isEmpty {
+                    Section {
+                        EmptyStateView(
+                            glyph: "envelope",
+                            title: "network.invitations.empty",
+                            message: "network.invitations.empty.message"
+                        )
+                        .padding(.vertical, .large)
                     }
-                } header: {
-                    Text("network.invitations.received")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
-            }
 
-            if sent.isEmpty == false {
-                Section {
-                    ForEach(sent) { user in
-                        ReaderRowView(user: user) {
-                            path.append(NavigationDestination.user(user: user))
+                if received.isEmpty == false {
+                    Section {
+                        ForEach(received) { user in
+                            InvitationRowView(user: user) {
+                                path.append(NavigationDestination.user(user: user))
+                            }
                         }
+                    } header: {
+                        Text("network.invitations.received")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
                     }
-                } header: {
-                    Text("network.invitations.sent")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
+                }
+
+                if sent.isEmpty == false {
+                    Section {
+                        ForEach(sent) { user in
+                            ReaderRowView(user: user) {
+                                path.append(NavigationDestination.user(user: user))
+                            }
+                        }
+                    } header: {
+                        Text("network.invitations.sent")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
+                    }
                 }
             }
+            .textCase(nil)
         }
         .applyListBackground()
         .navigationTitle("network.invitations")

@@ -48,7 +48,7 @@ extension View {
     /// The tabs laid over a list's pages, just under the navigation bar, as if they were part of
     /// it. From iOS 26 on nothing behind them: each page's list fades out under its own soft
     /// scroll edge (`listDetailTabsRoom`). Before it the bars' material, reaching up under the
-    /// navigation bar.
+    /// navigation bar in place of its own background and stopping on a hairline.
     @ViewBuilder
     func listDetailTabsBar() -> some View {
         let tabs: some View = frame(maxWidth: .infinity)
@@ -59,10 +59,10 @@ extension View {
         } else {
             tabs
                 .background {
-                    Rectangle()
-                        .fill(.bar)
+                    BarBackdrop()
                         .ignoresSafeArea(edges: .top)
                 }
+                .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         }
     }
 

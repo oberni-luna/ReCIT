@@ -14,6 +14,8 @@ extension DesignSystem {
     /// The title is always inline: a large one says nothing the form's first field does not,
     /// and on a wide screen it sat at the bar's margin while the rows narrowed to the readable
     /// column.
+    ///
+    /// Section headers read as typed, as from iOS 26: iOS 18 would put them in capitals.
     struct Form<Content: View>: View {
         @ViewBuilder let content: Content
 
@@ -21,6 +23,7 @@ extension DesignSystem {
             SwiftUI.Form {
                 content
                     .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
+                    .textCase(nil)
             }
             .applyListBackground(.backgroundForm)
             .readableContentMargins()

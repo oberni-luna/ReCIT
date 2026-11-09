@@ -62,25 +62,28 @@ struct GroupDetailView: View {
 
     var body: some View {
         List {
-            if let group {
-                content(for: group)
-            } else if loadFailed {
-                Section {
-                    EmptyStateView(
-                        glyph: "exclamationmark.circle",
-                        title: "groups.detail.load_failed",
-                        message: "groups.detail.load_failed.message"
-                    )
-                    .padding(.vertical, .large)
+            Group {
+                if let group {
+                    content(for: group)
+                } else if loadFailed {
+                    Section {
+                        EmptyStateView(
+                            glyph: "exclamationmark.circle",
+                            title: "groups.detail.load_failed",
+                            message: "groups.detail.load_failed.message"
+                        )
+                        .padding(.vertical, .large)
+                    }
+                    .listRowBackground(Color.clear)
+                } else {
+                    Section {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                    }
+                    .listRowBackground(Color.clear)
                 }
-                .listRowBackground(Color.clear)
-            } else {
-                Section {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                }
-                .listRowBackground(Color.clear)
             }
+            .textCase(nil)
         }
         .listSectionSpacing(.custom(DesignSystem.Spacing.medium.rawValue))
         .applyListBackground()

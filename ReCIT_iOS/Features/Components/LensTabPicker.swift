@@ -30,14 +30,29 @@
 //  swiped to, and a word is picked by a tap: a finger sliding across the row scrolls it, so the
 //  capsule is not picked up there.
 //
+//  **Before iOS 26 the lens is a plain capsule**, filled with `backgroundDisable` by
+//  `glassCapsule()`: it is still picked up, follows the finger, rubber-bands and settles, but
+//  neither it nor the words under it grow.
+//
 
 import SwiftUI
 
 struct LensTabPicker<Tab: CaseIterable & Hashable, Label: View>: View {
     private static var coordinateSpace: String { "LensTabPicker" }
-    /// How much larger the capsule grows when lifted, and how much the words under it.
-    private static var liftScale: CGFloat { 1.15 }
-    private static var magnification: CGFloat { 1.2 }
+    /// How much larger the capsule grows when lifted, and how much the words under it. Neither
+    /// grows before iOS 26, where the zoom drew the words off the capsule.
+    private static var liftScale: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 1.15
+        }
+        return 1
+    }
+    private static var magnification: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 1.2
+        }
+        return 1
+    }
     private static var liftAnimation: Animation { .spring(duration: 0.35, bounce: 0.4) }
     private static var settleAnimation: Animation { .spring(duration: 0.5, bounce: 0.35) }
 

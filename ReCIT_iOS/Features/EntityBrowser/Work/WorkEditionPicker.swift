@@ -49,11 +49,14 @@ struct WorkEditionPicker: View {
         let editions: [Edition] = orderedEditions.filter(\.isStillInTheStore)
 
         List {
-            headerSection
-            EditionDuplicatesBanner(work: work, duplicates: duplicates) {
-                path.append(NavigationDestination.editionDuplicates(workUri: work.uri, language: listing?.language ?? .all))
+            Group {
+                headerSection
+                EditionDuplicatesBanner(work: work, duplicates: duplicates) {
+                    path.append(NavigationDestination.editionDuplicates(workUri: work.uri, language: listing?.language ?? .all))
+                }
+                editionsSection(editions: editions, duplicates: duplicates)
             }
-            editionsSection(editions: editions, duplicates: duplicates)
+            .textCase(nil)
         }
         .listStyle(.insetGrouped)
         .applyListBackground()

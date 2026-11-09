@@ -27,31 +27,34 @@ struct FindGroupsView: View {
 
     var body: some View {
         List {
-            if results.isEmpty {
-                Section {
-                    placeholder
-                        .padding(.vertical, .large)
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            } else {
-                Section {
-                    ForEach(results) { result in
-                        NavigationLink(value: NavigationDestination.group(id: result.id)) {
-                            GroupRowView(
-                                cell: .init(result: result),
-                                role: groupModel.group(id: result.id, among: storedGroups)?.role(of: groupModel.myUserId)
-                            )
-                        }
+            Group {
+                if results.isEmpty {
+                    Section {
+                        placeholder
+                            .padding(.vertical, .large)
                     }
-                } header: {
-                    Text("groups.search.header")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
-                } footer: {
-                    GroupNote("groups.search.footer")
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                } else {
+                    Section {
+                        ForEach(results) { result in
+                            NavigationLink(value: NavigationDestination.group(id: result.id)) {
+                                GroupRowView(
+                                    cell: .init(result: result),
+                                    role: groupModel.group(id: result.id, among: storedGroups)?.role(of: groupModel.myUserId)
+                                )
+                            }
+                        }
+                    } header: {
+                        Text("groups.search.header")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
+                    } footer: {
+                        GroupNote("groups.search.footer")
+                    }
                 }
             }
+            .textCase(nil)
         }
         .applyListBackground()
         .navigationTitle("groups.find")

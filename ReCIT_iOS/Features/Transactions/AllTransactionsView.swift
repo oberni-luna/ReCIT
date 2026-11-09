@@ -19,8 +19,11 @@ struct AllTransactionsView: View {
         } else {
             let sections: TransactionSections = .init(allTransactions)
             List {
-                TransactionsSection("profile.current_transactions", transactions: sections.current)
-                TransactionsSection("transactions.past", transactions: sections.finished)
+                Group {
+                    TransactionsSection("profile.current_transactions", transactions: sections.current)
+                    TransactionsSection("transactions.past", transactions: sections.finished)
+                }
+                .textCase(nil)
             }
             .applyListBackground()
             .navigationTitle("transactions.all")

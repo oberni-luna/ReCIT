@@ -178,11 +178,7 @@ struct UserProfileStickyHeader: View {
     /// bars' own material from the top of the screen down to the header's foot, where it stops
     /// on a hairline, as a navigation bar does.
     private var backdrop: some View {
-        Rectangle()
-            .fill(.bar)
-            .overlay(alignment: .bottom) {
-                Divider()
-            }
+        BarBackdrop()
             .opacity(isContentUnder ? 1 : 0)
             .animation(.easeOut(duration: 0.15), value: isContentUnder)
             .ignoresSafeArea(edges: .top)

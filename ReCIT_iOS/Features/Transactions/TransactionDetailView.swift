@@ -37,26 +37,29 @@ struct TransactionDetailView: View {
 
     var body: some View {
         List {
-            Section {
-                Button {
-                    path.append(NavigationDestination.book(anchor: .item(transaction.item)))
-                } label: {
-                    NavigationLink(value: UUID()) {
-                        TransactionCellView(transaction: transaction)
+            Group {
+                Section {
+                    Button {
+                        path.append(NavigationDestination.book(anchor: .item(transaction.item)))
+                    } label: {
+                        NavigationLink(value: UUID()) {
+                            TransactionCellView(transaction: transaction)
+                        }
                     }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
-            }
 
-            if let user = userModel.myUser {
-                if transaction.messages.count >= 1 {
-                    Section("transaction.messages.header") {
-                        ForEach(transaction.getUIMessages(for: user).sorted { $0.timestamp < $1.timestamp }) { message in
-                            messageView(message: message)
+                if let user = userModel.myUser {
+                    if transaction.messages.count >= 1 {
+                        Section("transaction.messages.header") {
+                            ForEach(transaction.getUIMessages(for: user).sorted { $0.timestamp < $1.timestamp }) { message in
+                                messageView(message: message)
+                            }
                         }
                     }
                 }
             }
+            .textCase(nil)
         }
         .applyListBackground()
         .formActionBar(isPresented: transaction.state.isFinished == false) {

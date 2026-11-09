@@ -88,6 +88,7 @@ struct BookDetailView: View {
                         bibliographicDataSection(edition: edition)
                     }
                     .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
+                    .textCase(nil)
                 }
                 .applyListBackground(.backgroundForm)
                 .readableContentMargins()

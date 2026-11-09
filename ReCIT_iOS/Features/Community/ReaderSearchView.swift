@@ -54,45 +54,48 @@ struct ReaderSearchView: View {
 
     var body: some View {
         List {
-            if pendingRequests.isEmpty == false {
-                Section {
-                    ForEach(pendingRequests) { user in
-                        ReaderRowView(user: user) {
-                            path.append(NavigationDestination.user(user: user))
-                        }
-                    }
-                } header: {
-                    Text("network.requests.pending")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
-                }
-            }
-
-            if results.isEmpty {
-                // The explanation gives way to the requests: one does not re-read the
-                // instructions for something one has already managed. With nothing in flight it
-                // is the whole screen, as before.
-                if pendingRequests.isEmpty {
+            Group {
+                if pendingRequests.isEmpty == false {
                     Section {
-                        placeholder
-                            .padding(.vertical, .large)
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                }
-            } else {
-                Section {
-                    ForEach(results) { user in
-                        ReaderRowView(user: user) {
-                            path.append(NavigationDestination.user(user: user))
+                        ForEach(pendingRequests) { user in
+                            ReaderRowView(user: user) {
+                                path.append(NavigationDestination.user(user: user))
+                            }
                         }
+                    } header: {
+                        Text("network.requests.pending")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
                     }
-                } header: {
-                    Text("network.search.header")
-                        .textStyle(.action200)
-                        .foregroundStyle(.foregroundSecondary)
+                }
+
+                if results.isEmpty {
+                    // The explanation gives way to the requests: one does not re-read the
+                    // instructions for something one has already managed. With nothing in flight it
+                    // is the whole screen, as before.
+                    if pendingRequests.isEmpty {
+                        Section {
+                            placeholder
+                                .padding(.vertical, .large)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
+                } else {
+                    Section {
+                        ForEach(results) { user in
+                            ReaderRowView(user: user) {
+                                path.append(NavigationDestination.user(user: user))
+                            }
+                        }
+                    } header: {
+                        Text("network.search.header")
+                            .textStyle(.action200)
+                            .foregroundStyle(.foregroundSecondary)
+                    }
                 }
             }
+            .textCase(nil)
         }
         .applyListBackground()
         .navigationTitle("network.add_friends")

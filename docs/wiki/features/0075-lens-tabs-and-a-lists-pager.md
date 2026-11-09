@@ -8,7 +8,8 @@ private API (App Review guideline 2.5.1), so the lens is rebuilt from public Swi
 ## What it does
 
 - **On a reader's profile and on a list's screen, the tabs' capsule can be picked up.** A touch lifts it: it grows
-  by 15 % and the words under it are magnified by 20 %. It follows the finger across the words. A word under its
+  by 15 % and the words under it are magnified by 20 % — from iOS 26; on iOS 18 nothing grows (#89, see
+  [0045](0045-running-on-ios-18.md)). It follows the finger across the words. A word under its
   edge is half dark, half grey, as in Messages. Let go, it settles on the nearest word, or on the next one if
   flung, springs a little past it and comes back. The pager turns to that page.
 - **Past the first or last word** the capsule follows less and less, like a scroll view's rubber band, up to 36 pt.
@@ -54,8 +55,8 @@ private API (App Review guideline 2.5.1), so the lens is rebuilt from public Swi
 - **`ListElementsPage`** (new) — the Livres page. It holds the comment's `@FocusState`, the keyboard's frame and
   its « OK », the room for the keyboard and the add bar. A focus held by the screen does not reach into a page's
   `UIHostingController`. The page reports `isWritingComment` back, and the screen freezes the pager with it.
-- **`listDetailTabsBar()` / `listDetailTabsRoom(height:)`** — the tabs over the pages (on the bars' material
-  before iOS 26), and the empty top bar each page leaves for them. From iOS 26 that bar is a `safeAreaBar` with
+- **`listDetailTabsBar()` / `listDetailTabsRoom(height:)`** — the tabs over the pages (before iOS 26, on the bars'
+  material from the top of the screen down to a hairline, the navigation bar's own background hidden), and the empty top bar each page leaves for them. From iOS 26 that bar is a `safeAreaBar` with
   the soft scroll edge, so the list fades out under the tabs.
 
 ## Notable decisions
@@ -85,5 +86,5 @@ private API (App Review guideline 2.5.1), so the lens is rebuilt from public Swi
   - a real reader's profile with the header folding;
   - one of my lists: add bar, comment focus, keyboard, the pager frozen while writing;
   - Présentation scrolled under the tabs;
-  - iOS 18, a device, the iPhone Duo.
+  - a device, the iPhone Duo. iOS 18 was seen at #89, on the iPhone 16 Pro simulator.
 - **Android** not done: its profile and list keep their tabs as they were. e2e not run.

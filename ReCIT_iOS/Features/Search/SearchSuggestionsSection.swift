@@ -39,6 +39,7 @@ struct SearchSuggestionsSection: View {
                     .accessibilityIdentifier("e2e.searchSuggestion.\(suggestion.kind.rawValue)")
                 }
             }
+            .textCase(nil)
         }
     }
 }

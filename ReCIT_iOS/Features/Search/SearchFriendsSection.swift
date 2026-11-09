@@ -43,6 +43,7 @@ struct SearchFriendsSection: View {
             } header: {
                 Text("inventory.search.friends_section")
             }
+            .textCase(nil)
         case .recent(_, let showsSeeAll):
             Section {
                 carousel
@@ -55,6 +56,7 @@ struct SearchFriendsSection: View {
             // Edge to edge, like the plain list it used to sit in: an inset section would cut
             // the row of covers a margin short of the screen's edge.
             .listSectionHorizontalMargins(0)
+            .textCase(nil)
         }
     }
 

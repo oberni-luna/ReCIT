@@ -40,14 +40,15 @@ extension View {
         }
     }
 
-    /// A glass capsule from iOS 26, a material capsule before it — the selected tab of a
-    /// strip of tabs, as in the Contacts card.
+    /// A glass capsule from iOS 26, a capsule filled with `backgroundDisable` before it — the
+    /// selected tab of a strip of tabs, as in the Contacts card. A veil rather than a material,
+    /// which barely showed on a dark ground.
     @ViewBuilder
     func glassCapsule() -> some View {
         if #available(iOS 26.0, *) {
             glassEffect(.regular, in: .capsule)
         } else {
-            background(.regularMaterial, in: .capsule)
+            background(DesignSystem.Color.backgroundDisable.color, in: .capsule)
         }
     }
 

@@ -21,6 +21,9 @@ import studio.lunabee.nouveaurecit.ui.network.groups.InviteToGroupScreen
 import studio.lunabee.nouveaurecit.ui.profile.AboutInventaireScreen
 import studio.lunabee.nouveaurecit.ui.profile.DeleteAccountScreen
 import studio.lunabee.nouveaurecit.ui.profile.ProfileScreen
+import studio.lunabee.nouveaurecit.ui.profile.account.AccountSettingsScreen
+import studio.lunabee.nouveaurecit.ui.profile.account.ChangeEmailScreen
+import studio.lunabee.nouveaurecit.ui.profile.account.ChangePasswordScreen
 import studio.lunabee.nouveaurecit.ui.profile.edit.EditProfileScreen
 import studio.lunabee.nouveaurecit.ui.search.FriendsLatestBooksScreen
 import studio.lunabee.nouveaurecit.ui.search.LocalSearchResultsScreen
@@ -54,4 +57,7 @@ fun EntryProviderScope<NavKey>.appEntries(navigator: Navigator) {
     entry<Destination.DeleteAccount> { DeleteAccountScreen(navigator) }
     entry<Destination.AboutInventaire> { AboutInventaireScreen(navigator) }
     entry<Destination.EditProfile> { EditProfileScreen(navigator) }
+    entry<Destination.AccountSettings> { AccountSettingsScreen(navigator) }
+    entry<Destination.ChangeEmail> { ChangeEmailScreen(navigator) }
+    entry<Destination.ChangePassword> { ChangePasswordScreen(navigator) }
 }

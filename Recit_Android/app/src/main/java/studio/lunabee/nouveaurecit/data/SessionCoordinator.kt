@@ -15,6 +15,7 @@ import studio.lunabee.nouveaurecit.auth.AuthRepository
 import studio.lunabee.nouveaurecit.auth.model.SessionExpiry
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.sorting.SortSession
+import studio.lunabee.nouveaurecit.data.user.AccountRepository
 
 /**
  * `RootView+RefreshUserData` and `RootView+ForgetSignedOutUser`: the sync order of a signed-in
@@ -28,6 +29,7 @@ class SessionCoordinator(
     private val scope: CoroutineScope,
     private val auth: AuthRepository,
     private val users: UserRepository,
+    private val account: AccountRepository,
     private val groups: GroupRepository,
     private val shelves: ShelfRepository,
     private val inventory: InventoryRepository,
@@ -49,7 +51,7 @@ class SessionCoordinator(
         if (!auth.isAuthenticated.value) return@withLock
         runCatching { users.restoreMyUserId() }.onFailure { Log.w(TAG, "restore failed", it) }
         try {
-            users.syncMyUser()
+            account.take(users.syncMyUser())
         } catch (error: Exception) {
             Log.w(TAG, "user sync failed", error)
             if (SessionExpiry.isSessionGone(error)) signOut()
@@ -106,6 +108,7 @@ class SessionCoordinator(
     suspend fun forgetSignedOutUser() {
         syncStatus.reset()
         groups.reset()
+        account.forget()
         // The sorting draft is the user's, like their étagères: the next account must not open on it.
         sortSession.reset()
         runCatching { users.wipeUserData() }.onFailure { Log.w(TAG, "wipe failed", it) }
@@ -116,6 +119,7 @@ class SessionCoordinator(
         users.deleteAccount()
         syncStatus.reset()
         groups.reset()
+        account.forget()
         sortSession.reset()
         auth.forgetSession()
     }

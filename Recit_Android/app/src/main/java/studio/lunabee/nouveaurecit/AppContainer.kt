@@ -33,6 +33,7 @@ import studio.lunabee.nouveaurecit.data.groups.PreferencesGroupRequestLedger
 import studio.lunabee.nouveaurecit.data.shelves.RoomShelfMembershipStore
 import studio.lunabee.nouveaurecit.data.shelves.ShelfMembership
 import studio.lunabee.nouveaurecit.data.sorting.SortSession
+import studio.lunabee.nouveaurecit.data.user.AccountRepository
 import studio.lunabee.nouveaurecit.data.user.ProfileRepository
 import studio.lunabee.nouveaurecit.data.user.RequestPacer
 import studio.lunabee.nouveaurecit.network.ApiService
@@ -93,6 +94,9 @@ class AppContainer(context: Context) {
     /** « Modifier le profil » (feature 0055), server first. The Gravatar is downloaded without the session. */
     val profile: ProfileRepository = ProfileRepository(api, publicClient, userUpdatePacer, users)
 
+    /** « Compte et connexion » (feature 0055): the owner's settings, held in memory, written through [profile]'s pacer. */
+    val account: AccountRepository = AccountRepository(api, profile, optimisticRunner, users)
+
     /** The groups are held in memory for the launch, their members in the store (feature 0046). */
     val groups: GroupRepository = GroupRepository(
         api = api,
@@ -133,6 +137,7 @@ class AppContainer(context: Context) {
         scope = applicationScope,
         auth = auth,
         users = users,
+        account = account,
         groups = groups,
         shelves = shelves,
         inventory = inventory,

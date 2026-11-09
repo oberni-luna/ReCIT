@@ -21,6 +21,24 @@ data class UserDto(
     val snapshot: Map<String, ItemCountDto>? = null,
     val created: Double? = null,
     val bio: String? = null,
+    /** Owner only (feature 0055): whether the address has been confirmed. */
+    val validEmail: Boolean? = null,
+    /** Owner only: visible on the fediverse. Absent until first set, and read as off by the server. */
+    val fediversable: Boolean? = null,
+    /** Owner only. */
+    val settings: UserSettingsDto? = null,
+)
+
+/**
+ * `UserSettingsDTO`: the `settings` object of `GET /api/user`, as inventaire.io stores it — two groups of
+ * booleans keyed by the names `PUT /api/user` takes after `settings.<group>.`. A key the account never
+ * touched is absent, and the server reads absent as on in both groups (`notifications[label] === false`,
+ * `anonymize !== false`).
+ */
+@Serializable
+data class UserSettingsDto(
+    val notifications: Map<String, Boolean>? = null,
+    val contributions: Map<String, Boolean>? = null,
 )
 
 @Serializable
@@ -55,3 +73,10 @@ data class RelationActionPayload(val user: String)
  */
 @Serializable
 data class GravatarDto(val url: String)
+
+/** `PasswordChangePayload`: the body of `PUT /api/auth/password`, under the server's hyphenated names. */
+@Serializable
+data class PasswordChangePayload(
+    @SerialName("old-password") val currentPassword: String,
+    @SerialName("new-password") val newPassword: String,
+)

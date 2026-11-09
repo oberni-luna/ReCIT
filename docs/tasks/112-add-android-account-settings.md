@@ -1,6 +1,6 @@
 ---
 issue: 112
-status: todo
+status: to-test
 wiki: [[features/0055-profile-editing]], [[features/0083-rate-limited-sign-in-message]]
 note: Split from #111 (Android port of iOS 0055 profile editing), 2026-11-09
 created: 2026-11-09
@@ -28,3 +28,25 @@ Port of « Compte et connexion » from iOS [0055](../wiki/features/0055-profile-
 - Address screen: a new address is sent server first; refusal says why, the old address stays.
 - Password screen: wrong current password → its sentence; success → back to the screen with a confirmation.
 - Sign-out then another account: no setting of the previous account shows.
+
+## Implementation
+
+stacked on: wa/111-add-android-profile-editing @ 53d3b6c
+
+- New `data/user/`: `AccountSettings` (`email`, `isEmailValidated`, `language`, `isFediversable`, `anonymizesContributions`, `of(UserDto)`); `AccountRepository` (in-memory `StateFlow`, `take(dto)` / `forget()`; language and the two switches optimistic through `OptimisticRunner`, each one paced `PUT /api/user` via `ProfileRepository.updateUserAttribute`; `changeEmail` server first; `resendEmailConfirmation`; `changePassword`); `PasswordChangeFailure` (`WrongCurrentPassword` | `Other`, each its sentence); `AccountLanguage` (the 29 server codes named in the phone's locale). `UserAttributeUpdate.of(attribute, Boolean)`.
+- `UserDto` gains `validEmail`, `fediversable`, `settings` (`UserSettingsDto` with `notifications` and `contributions`, ready for #113); `PasswordChangePayload` (`old-password` / `new-password`). `UserRepository.syncMyUser()` returns the dto; `SessionCoordinator` runs `account.take(...)`, `account.forget()` in `forgetSignedOutUser` (sign-out, 401) and `deleteAccount`. `AppContainer.account`. Settings live in `AccountRepository`, not `UserRepository` (dependency cycle, Room).
+- New `ui/profile/account/`: `AccountSettingsScreen` (+ VM), `EmailConfirmationNotice`, `ChangeEmailScreen` (+ VM, UiState), `ChangePasswordScreen` (+ VM, UiState; « Mot de passe oublié ? » through `AuthRepository.requestPasswordReset`). `Destination.AccountSettings`, `ChangeEmail`, `ChangePassword`. Profil: « Réglages » section with « Compte et connexion » under « Modifier le profil ».
+- Shared: `designsystem/Forms.kt` `SwitchRow` (was `GroupComponents`' private `AccessSwitch`, which now calls it); `FormTextRow` gains `visualTransformation`. Strings in `strings_profile.xml` (iOS copy, « vous »; « la langue du téléphone »).
+- API contracts verified (live `api_specs.json`, Codeberg `update_password.ts`, `email_confirmation.ts`, `user/update.ts`, `lib/update_email.ts`, `models/user.ts`, `user_session.ts`): attributes `language`, `fediversable`, `settings.contributions.anonymize`; email via `PUT /api/user` (`400 this email is already used` / `invalid email` → under the field); resend `POST /api/auth/email-confirmation` (own 2 000 ms limit, not paced); password `PUT /api/auth/password` (`400 invalid old-password` → WrongCurrentPassword, `invalid new-password` → Other; 8–256 characters enforced on screen). Neither email nor password change rotates the session cookie (only login/signup call `serializeUserSession`): nothing in `auth/` touched (ADR 0008).
+- Deviation from the task's wording: an absent `fediversable` reads as **off**, as the server (`!user.fediversable`) and iOS (`?? false`) do; absent `anonymize` reads on; absent `validEmail` reads unconfirmed.
+- Tests: `AccountRepositoryTest` (10), `AccountSettingsTest` (3), `AccountLanguageTest` (2). Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest` ✅ 640 tests, 0 failures.
+- Known edge (as iOS): a switch refused after a sign-out + sign-in to another account would revert that field on the new account.
+- Runtime not run: no inventaire.io credentials; nothing written.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

@@ -18,14 +18,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.launch
+import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.groups.GroupNameRule
+import studio.lunabee.nouveaurecit.data.groups.GroupPictureEdit
 import studio.lunabee.nouveaurecit.data.groups.GroupSetting
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SheetHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
+import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 
 /**
  * `GroupSettingsView`: what an admin can change about a group, as a sheet like « Modifier
@@ -34,7 +38,11 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
  * `PUT /api/groups/update-settings` takes one attribute at a time, and the form follows it: a switch
  * is written the moment it moves, optimistically, and the two texts go together on « Enregistrer »,
  * one call each for whichever changed. [group] is live, so a switch shows what was written — or put
- * back. The photo and the place are not offered yet.
+ * back. The place is not offered yet.
+ *
+ * The photo (feature 0082) goes with the texts on « Enregistrer », server first: the sheet closes,
+ * then `GroupRepository.updatePicture` uploads it in the application scope, which outlives the
+ * sheet, and the group shows it once the server has agreed. Closing the sheet sends nothing.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,16 +51,23 @@ fun GroupSettingsSheet(
     onUpdate: (GroupSetting) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val container: AppContainer = LocalAppContainer.current
     val sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var name: String by rememberSaveable { mutableStateOf(group.name) }
     var description: String by rememberSaveable { mutableStateOf(group.description) }
+    var picture: GroupPictureEdit by rememberSaveable { mutableStateOf<GroupPictureEdit>(GroupPictureEdit.Unchanged) }
     val textChanged: Boolean = name != group.name || description != group.description
+    val pictureChanged: Boolean = picture.isChange(from = group.pictureUrl)
 
     fun save() {
         val trimmedName: String = name.trim()
         if (trimmedName != group.name) onUpdate(GroupSetting.Name(trimmedName))
         val trimmedDescription: String = description.trim()
         if (trimmedDescription != group.description) onUpdate(GroupSetting.Description(trimmedDescription))
+        if (pictureChanged) {
+            val edit: GroupPictureEdit = picture
+            container.applicationScope.launch { container.groups.updatePicture(edit, group.id) }
+        }
         onDismiss()
     }
 
@@ -75,6 +90,11 @@ fun GroupSettingsSheet(
                 closeLabel = stringResource(R.string.action_close),
                 onClose = onDismiss,
             )
+            GroupPhotoPicker(
+                picture = picture,
+                savedPictureUrl = group.pictureUrl,
+                onPictureChange = { picture = it },
+            )
             GroupTextFields(
                 name = name,
                 onNameChange = { name = it },
@@ -94,7 +114,7 @@ fun GroupSettingsSheet(
             PrimaryButton(
                 text = stringResource(R.string.action_save),
                 onClick = ::save,
-                enabled = textChanged && GroupNameRule.accepts(name),
+                enabled = (textChanged || pictureChanged) && GroupNameRule.accepts(name),
             )
         }
     }

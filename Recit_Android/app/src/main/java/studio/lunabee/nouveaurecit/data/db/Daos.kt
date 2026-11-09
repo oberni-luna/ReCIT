@@ -213,6 +213,9 @@ interface InventoryDao {
     @Query("UPDATE inventory_items SET details = :details WHERE id = :id")
     suspend fun setDetails(id: String, details: String)
 
+    @Query("UPDATE inventory_items SET notes = :notes WHERE id = :id")
+    suspend fun setNotes(id: String, notes: String)
+
     @Query("DELETE FROM inventory_items WHERE id = :id")
     suspend fun delete(id: String)
 

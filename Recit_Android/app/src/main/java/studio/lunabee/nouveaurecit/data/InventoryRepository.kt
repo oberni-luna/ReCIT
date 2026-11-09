@@ -4,9 +4,12 @@ import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.data.db.EditionEntity
-import studio.lunabee.nouveaurecit.data.db.InventoryItemEntity
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.UserEntity
+import studio.lunabee.nouveaurecit.data.inventory.InventoryItemTextAttribute
+import studio.lunabee.nouveaurecit.data.inventory.InventoryItemTextWriter
+import studio.lunabee.nouveaurecit.data.inventory.RoomInventoryItemTextStore
+import studio.lunabee.nouveaurecit.data.inventory.bulkUpdateItem
 import studio.lunabee.nouveaurecit.data.model.Merges
 import studio.lunabee.nouveaurecit.data.model.TransactionType
 import studio.lunabee.nouveaurecit.data.model.Visibility
@@ -19,7 +22,6 @@ import studio.lunabee.nouveaurecit.network.dto.ItemsDto
 import studio.lunabee.nouveaurecit.network.dto.NewItemDto
 import studio.lunabee.nouveaurecit.network.dto.OkMapDto
 import studio.lunabee.nouveaurecit.network.dto.PostItemResponseDto
-import studio.lunabee.nouveaurecit.network.dto.UpdateItemsDto
 
 /** `InventoryModel`: my copies and my friends', synced work by work, edited optimistically. */
 class InventoryRepository(
@@ -30,6 +32,7 @@ class InventoryRepository(
     private val syncStatus: SyncStatus,
 ) {
     private val dao = db.inventoryDao()
+    private val textWriter: InventoryItemTextWriter = InventoryItemTextWriter(api, RoomInventoryItemTextStore(dao), runner)
 
     fun observeItemsOf(ownerId: String): Flow<List<ItemRow>> = dao.observeItemsOf(ownerId)
 
@@ -135,26 +138,14 @@ class InventoryRepository(
         runner.run(
             apply = { dao.setTransaction(itemId, newValue.raw) },
             revert = { dao.setTransaction(itemId, previous.raw) },
-            request = { bulkUpdate(itemId, "transaction", newValue.raw) },
+            request = { api.bulkUpdateItem(itemId, "transaction", newValue.raw) },
             stillThere = { dao.get(itemId) != null },
         )
     }
 
-    suspend fun updateDetails(itemId: String, details: String) {
-        val item: InventoryItemEntity = dao.get(itemId) ?: return
-        if (item.details == details) return
-        val previous: String = item.details
-        runner.run(
-            apply = { dao.setDetails(itemId, details) },
-            revert = { if (dao.get(itemId)?.details == details) dao.setDetails(itemId, previous) },
-            request = { bulkUpdate(itemId, "details", details) },
-            stillThere = { dao.get(itemId) != null },
-        )
-    }
-
-    private suspend fun bulkUpdate(itemId: String, attribute: String, value: String) {
-        val response: OkMapDto = api.send("/api/items/bulk-update", method = "PUT", body = UpdateItemsDto(listOf(itemId), attribute, value))
-        if (!response.ok) throw NetworkError.BadResponse()
+    /** The Commentaire or the Note privée, optimistically — see [InventoryItemTextWriter]. */
+    suspend fun updateText(itemId: String, attribute: InventoryItemTextAttribute, text: String) {
+        textWriter.write(itemId, attribute, text)
     }
 
     private companion object {

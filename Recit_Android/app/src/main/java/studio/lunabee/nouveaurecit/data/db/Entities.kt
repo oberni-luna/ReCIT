@@ -101,6 +101,8 @@ data class InventoryItemEntity(
     val updated: Double? = null,
     val busy: Boolean? = null,
     val details: String = "",
+    /** The Note privée — added in version 3, hence the column default the migration fills old rows with. */
+    @ColumnInfo(defaultValue = "") val notes: String = "",
     /** Owner, authors, title and subtitle, folded once — what the unified search matches against. */
     val searchIndex: String = "",
 )

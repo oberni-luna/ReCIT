@@ -1,6 +1,6 @@
 ---
 issue: 99
-status: todo
+status: to-test
 wiki: [[features/0082-a-groups-photo-from-its-settings]], [[features/0046-android-groups]], [[features/0052-android-cover-zoom-edition-editing-context-menu]]
 note: Rattrapage iOS 1.10.0 (feature 0082). GroupSetting on Android excludes picture on purpose; CoverSources has camera + photos.
 created: 2026-11-09
@@ -29,3 +29,23 @@ Port of iOS [0082](../wiki/features/0082-a-groups-photo-from-its-settings.md).
 - Upload fails (unit test): no `update-settings` sent, SnackBar, old photo kept.
 - `update-settings` refused (unit test): SnackBar, old photo kept.
 - Name changed + photo replaced, name refused: the new photo stays, the name goes back.
+
+## Implementation
+
+- `data/groups/GroupSetting.kt`: `Picture(path: String?)` — attribute `picture`, `JsonNull` when null, `applied` sets `pictureUrl` through `ImageUrl.absolute`; `restored(on:from:)` (iOS `held(by:)`). KDoc no longer excludes picture.
+- `data/groups/GroupPictureEdit.kt`: `Unchanged` / `Replaced(path)` / `Removed`, `showsPicture(savedPictureUrl)`, `isChange(from)`, `Serializable` for `rememberSaveable`.
+- `data/groups/GroupPictureUpload.kt`: cached JPEG → `POST /api/images/upload?container=groups`, field `picture`, file `group.jpg`; path read back under `picture`, missing → `NetworkError.BadResponse`. Contract checked against the Codeberg server sources (`controllers/images/upload.ts` answers `{ [field]: url }`, `lib/containers.ts` allows `groups`, `models/attributes/group.ts` `picture` updatable and nullable, `update_settings.ts` `canBeNull`).
+- `data/GroupRepository.kt` (305 lines): server-first `updatePicture(edit, groupId)` — Unchanged returns, Removed PUTs null without upload, Replaced uploads then PUTs; on success the picture is written onto the group as it is then, only if the account is the same; failure → `ErrorReporter`, old photo kept, a failed upload never PUTs. `update()`'s revert → `rewrite(groupId) { setting.restored(on = it, from = current) }`: a refused name no longer undoes a photo that landed. `putSetting` factored out.
+- `ui/network/groups/GroupPhotoPicker.kt`: `GroupThumbnail(XLarge)` slot (96 dp; iOS 104 pt — `designsystem/Components.kt` off-limits) + « Ajouter une photo » / « Modifier la photo »; menu « Retirer la photo », « Remplacer par », « Prendre une photo », « Choisir dans la galerie » through `rememberCoverSources` / `CoverPhoto.reduce`; local preview via `file://`. `PhotoMenuLine` is a 6-line copy of `EditionFormSections`' private `MenuLine` (file edited by another branch) — share once both land.
+- `GroupSettingsSheet.kt`: slot first; « Enregistrer » enabled on `textChanged || pictureChanged`; `save()` launches `container.groups.updatePicture` in `container.applicationScope` (outlives the sheet), then closes; closing sends nothing. Reaches `LocalAppContainer` as `CreateGroupSheet` does; `GroupScreen` / `GroupViewModel` unchanged.
+- `strings_groups.xml`: `groups_form_picture_add`, `_change`, `_remove`; menu reuses `create_book_cover_camera`, `_photos`, `_replace`.
+- Tests: `GroupPictureTest` (8, MockWebServer: upload then PUT in order with exact bodies; removal null without upload; Unchanged sends nothing; failed upload no PUT + report; refused PUT keeps photo + report; refused name while a photo lands keeps the photo — fails with the old whole-group revert; draft rules). Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest --rerun` ✅ 608 tests, 0 failures; `GroupRepositoryTest` 18 still pass.
+- Runtime not run: no inventaire.io credentials; nothing uploaded.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

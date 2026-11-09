@@ -108,4 +108,7 @@
     <string name="groups_form_create_note">Vous en serez l’admin. Vous pourrez inviter vos ami·es dès sa création.</string>
     <string name="groups_form_create_failed">inventaire.io n’a pas créé le groupe. Vérifiez votre connexion et réessayez dans un instant.</string>
     <string name="groups_form_address">Adresse : inventaire.io/groups/%1$s</string>
+    <string name="groups_form_picture_add">Ajouter une photo</string>
+    <string name="groups_form_picture_change">Modifier la photo</string>
+    <string name="groups_form_picture_remove">Retirer la photo</string>
 </resources>

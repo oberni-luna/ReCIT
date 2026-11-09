@@ -12,6 +12,6 @@
     "keywords": "books,reading,library,borrow,lend,inventory,share,friends,readers,comics",
     "supportUrl": "https://inventaire.io/",
     "marketingUrl": "https://inventaire.io/",
-    "whatsNew": "What's new in 1.10:\n• A shelf opens on two tabs, Books and About, and takes several books at once with \"Add books\"\n• On a book's page, \"In lists\" shows the lists that hold it, yours and your friends'\n• Keep a private note on your copy of a book, under \"What I keep to myself\"\n• On a friend's profile, the Transactions tab gathers your ongoing and finished exchanges\n• A book the search can't find can be added to inventaire.io, with or without an ISBN\n• Friends', groups' and authors' photos open full screen, and a group's photo can be changed in its settings"
+    "whatsNew": "What's new in 1.11:\n• On a list of works, \"Where to find this book?\" shows the friends who own it, whom you can ask for it with a long press, and searches for it on Recyclivre or Chez mon libraire\n• On iOS 18, the tabs of a profile, a list and a shelf now display properly, and section headers are no longer in capitals"
   }
 }

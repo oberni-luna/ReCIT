@@ -156,7 +156,7 @@ class BookActions(
     /** Optimistic, in the application scope. */
     fun toggleShelf(itemId: String, entry: MembershipEntry) {
         container.applicationScope.launch {
-            if (entry.isMember) container.shelves.removeItem(entry.id, itemId) else container.shelves.addItem(entry.id, itemId)
+            if (entry.isMember) container.shelves.removeItem(entry.id, itemId) else container.shelves.addItems(entry.id, listOf(itemId))
         }
     }
 

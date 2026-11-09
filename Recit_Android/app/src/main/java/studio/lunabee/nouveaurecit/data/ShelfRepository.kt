@@ -9,11 +9,12 @@ import studio.lunabee.nouveaurecit.data.db.ShelfWithItems
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.Merges
 import studio.lunabee.nouveaurecit.data.model.Visibility
+import studio.lunabee.nouveaurecit.data.shelves.RoomShelfMembershipStore
+import studio.lunabee.nouveaurecit.data.shelves.ShelfMembership
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.dto.IdsPayload
 import studio.lunabee.nouveaurecit.network.dto.NewShelfDto
 import studio.lunabee.nouveaurecit.network.dto.OkStatusDto
-import studio.lunabee.nouveaurecit.network.dto.ShelfItemsDto
 import studio.lunabee.nouveaurecit.network.dto.ShelfResponseDto
 import studio.lunabee.nouveaurecit.network.dto.ShelvesResponseDto
 import studio.lunabee.nouveaurecit.network.dto.ShelvesWithItemsResponseDto
@@ -29,6 +30,7 @@ class ShelfRepository(
     private val runner: OptimisticRunner,
 ) {
     private val dao = db.shelfDao()
+    private val membership: ShelfMembership = ShelfMembership(api, RoomShelfMembershipStore(db), runner)
 
     fun observeShelvesOf(ownerId: String): Flow<List<ShelfWithItems>> = dao.observeShelvesOf(ownerId)
 
@@ -88,7 +90,7 @@ class ShelfRepository(
                     dao.delete(listOf(placeholder.id))
                     dao.upsert(listOf(Merges.shelf(null, response.shelf)))
                 }
-                if (itemIds.isNotEmpty()) sendMembership(response.shelf.id, itemIds, add = true)
+                if (itemIds.isNotEmpty()) membership.send(response.shelf.id, itemIds, add = true)
             },
             stillThere = { true },
         )
@@ -127,22 +129,13 @@ class ShelfRepository(
         )
     }
 
-    suspend fun addItem(shelfId: String, itemId: String) {
-        runner.run(
-            apply = { dao.link(listOf(ShelfItemCrossRef(shelfId, itemId))) },
-            revert = { dao.unlink(shelfId, itemId) },
-            request = { sendMembership(shelfId, listOf(itemId), add = true) },
-            stillThere = { dao.get(shelfId) != null && db.inventoryDao().get(itemId) != null },
-        )
+    /** `ShelfModel.addItems`: one optimistic `add-items` with the books not on the étagère yet — see [ShelfMembership.add]. */
+    suspend fun addItems(shelfId: String, itemIds: List<String>) {
+        membership.add(shelfId, itemIds)
     }
 
     suspend fun removeItem(shelfId: String, itemId: String) {
-        runner.run(
-            apply = { dao.unlink(shelfId, itemId) },
-            revert = { dao.link(listOf(ShelfItemCrossRef(shelfId, itemId))) },
-            request = { sendMembership(shelfId, listOf(itemId), add = false) },
-            stillThere = { dao.get(shelfId) != null && db.inventoryDao().get(itemId) != null },
-        )
+        membership.remove(shelfId, itemId)
     }
 
     /**
@@ -167,32 +160,10 @@ class ShelfRepository(
      * answer. Items the shelf already holds are dropped from the payload, and an empty payload is a
      * no-op — which is what makes a sorting apply that stopped partway safe to resume.
      */
-    suspend fun addItemsNow(shelfId: String, itemIds: List<String>) {
-        val held: Set<String> = dao.itemIds(shelfId).toSet()
-        val toSend: List<String> = itemIds.distinct().filter { it !in held }
-        if (toSend.isEmpty()) return
-        sendMembership(shelfId, toSend, add = true)
-    }
+    suspend fun addItemsNow(shelfId: String, itemIds: List<String>) = membership.addNow(shelfId, itemIds)
 
     /** `removeItemsAwaitingServer`: the mirror of [addItemsNow] — only items the shelf holds are sent. */
-    suspend fun removeItemsNow(shelfId: String, itemIds: List<String>) {
-        val held: Set<String> = dao.itemIds(shelfId).toSet()
-        val toSend: List<String> = itemIds.distinct().filter { it in held }
-        if (toSend.isEmpty()) return
-        sendMembership(shelfId, toSend, add = false)
-    }
-
-    /** One membership call, and the shelf's local items replaced by what the server says it now holds. */
-    private suspend fun sendMembership(shelfId: String, itemIds: List<String>, add: Boolean) {
-        val response: ShelvesWithItemsResponseDto = api.send(
-            "/api/shelves",
-            body = ShelfItemsDto(shelfId, itemIds),
-            query = listOf("action" to if (add) "add-items" else "remove-items"),
-        )
-        val serverItems: List<String> = response.shelves[shelfId]?.items.orEmpty()
-        val known: Set<String> = db.inventoryDao().get(serverItems).map { it.id }.toSet()
-        if (dao.get(shelfId) != null) dao.replaceItems(shelfId, serverItems.filter { it in known })
-    }
+    suspend fun removeItemsNow(shelfId: String, itemIds: List<String>) = membership.removeNow(shelfId, itemIds)
 
     fun observeCountOf(ownerId: String): Flow<Int> = dao.observeCountOf(ownerId)
 }

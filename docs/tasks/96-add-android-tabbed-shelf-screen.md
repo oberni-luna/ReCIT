@@ -1,6 +1,6 @@
 ---
 issue: 96
-status: todo
+status: to-test
 wiki: [[features/0089-tabbed-shelf-screen]], [[features/0073-a-lists-presentation-tab]], [[features/0077-android-catches-up-with-1-9-0]], [[adr/0001-swiftdata-reactive-optimistic]]
 note: Rattrapage iOS 1.10.0 (feature 0089). ShelfScreen is a plain list; AddBooksToShelfSheet toggles one book per tap.
 created: 2026-11-09
@@ -32,3 +32,24 @@ Port of iOS [0089](../wiki/features/0089-tabbed-shelf-screen.md). Builds on #95:
 - Swipe on a book removes it from the étagère.
 - Pencil → delete the étagère: the screen pops back to the Inventaire.
 - A friend's profile → their étagère: same tabs, no pencil, no swipe, no button.
+
+## Implementation
+
+stacked on: wa/95-hide-android-tab-bar-on-push @ 0bba5e8
+
+- New `data/shelves/`: `ShelfMembershipStore` (+ `RoomShelfMembershipStore`) and `ShelfMembership` — `add` (one optimistic `add-items` for the books not yet on the étagère, nothing sent when none left; revert checks only the étagère still exists, as iOS; errors to `ErrorReporter`), `remove`, `addNow`, `removeNow`, `send`. Separate class so the batch add is testable without Robolectric (pattern of `GroupRepository`'s ledger).
+- `data/ShelfRepository.kt`: membership through `ShelfMembership`; `addItem` → `addItems(shelfId, itemIds)`; `removeItem`, `addItemsNow`, `removeItemsNow` unchanged; `createShelf` calls `membership.send`. `ui/book/BookActions.kt`: the « … » menu calls `addItems(id, listOf(itemId))`.
+- `ui/inventory/ShelfScreen.kt` rewritten: name + back, pencil on mine, `CapsuleTabs` over a `HorizontalPager`, on `backgroundGrouped`; deleting from `ShelfFormSheet` still pops. New `ShelfDetailTab`, `ShelfBooksPage` (inset grouped rows newest first, `RemovableRow` moved here, empty state with the « Ranger mes livres » icon + « Cette étagère est vide », no action; pinned button on mine), `ShelfPresentationPage`, `ShelfPinnedButton`. `ShelfHeader` gone.
+- `ShelfAddBooksSheet` + `ShelfAddBooksViewModel` + pure `ShelfAddBooksSelection` replace `AddBooksToShelfSheet.kt` (deleted): ticks kept by id (`rememberSaveable`), a book reaching the étagère meanwhile drops out of the count, search folds title + displayed authors with `Merges.fold` (not `searchIndex`), French plural « Ajouter N livres », 0 disabled. The Inventaire carousel's « Ajouter des livres » opens it too.
+- Shared out of brief: `designsystem/GroupedCell.kt` (private `groupedCell` from `ui/search/SearchContent.kt`); `ui/lists/PresentationPage.kt` (description + facts cards from `ListPresentationPage`, now used by both).
+- `res/values/strings_inventory.xml`: `shelf_tab_*`, `shelf_presentation_empty`, `shelf_info_*`, `shelf_add_books_*`, plural `shelf_add_books_submit`; unused keys removed. New strings say « tu » (spec); the rest of the file says « vous ».
+- Tests: `ShelfMembershipTest` (4, MockWebServer + in-memory store), `ShelfAddBooksSelectionTest` (7). Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest` ✅ 614 tests, 0 failures.
+- Runtime not run: no inventaire.io credentials for the agent.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

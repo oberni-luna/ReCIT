@@ -48,6 +48,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -127,6 +128,7 @@ fun FormTextRow(
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     val color: Color = if (enabled) RecitTheme.colors.foregroundDefault else RecitTheme.colors.foregroundSecondary
     WithLabel(label = label, modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.sMedium)) {
@@ -139,6 +141,7 @@ fun FormTextRow(
             cursorBrush = SolidColor(RecitTheme.colors.foregroundTinted),
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
+            visualTransformation = visualTransformation,
             modifier = Modifier.fillMaxWidth(),
             decorationBox = { field ->
                 Box {

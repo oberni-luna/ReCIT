@@ -1,6 +1,6 @@
 ---
 issue: 94
-status: todo
+status: to-test
 wiki: [[features/0080-a-private-note-on-my-copy]], [[features/0031-android-app]], [[adr/0001-swiftdata-reactive-optimistic]]
 note: Rattrapage iOS 1.10.0 (feature 0080) on Android. Android writes only `details` today (BookViewModel.commitNotes → updateDetails).
 created: 2026-11-09
@@ -29,3 +29,21 @@ Port of iOS [0080](../wiki/features/0080-a-private-note-on-my-copy.md) to `Recit
 - A friend's copy of the same book shows its Commentaire, never a private note.
 - An app installed with database version 2 upgrades to 3 without losing items (AutoMigration test or schema check).
 - A sync payload without `notes` keeps the local note (merge unit test).
+
+## Implementation
+
+- Data: `ItemDto.notes: String? = null`; `InventoryItemEntity.notes` (`@ColumnInfo(defaultValue = "")`); `ItemDao.setNotes`; Room version 3 by `AutoMigration(2, 3)`, `schemas/…/3.json` generated; `Merges.kt` insert `dto.notes.orEmpty()`, update `dto.notes ?: existing.notes`.
+- New `data/inventory/`: `InventoryItemTextAttribute` (`Details("details")` | `Notes("notes")`), `InventoryItemTextStore` (+ `RoomInventoryItemTextStore`), `InventoryItemTextWriter` — the one optimistic write path, port of iOS `updateItemTextOptimistic`: last `Job` per (item, attribute) under a `Mutex`, each request joins the previous one; local apply immediate; early return when unchanged or item gone; revert only if the stored text is still the refused one; error to `ErrorReporter`. `ItemBulkUpdate.kt`: `ApiService.bulkUpdateItem`, shared with `updateTransaction`.
+- `InventoryRepository.updateText(itemId, attribute, text)` replaces `updateDetails` / `bulkUpdate`; `BookViewModel.commitText` on `backgroundScope`.
+- UI: `MyNotesCell` → `MyCopyTextCell(row, attribute, onCommit)` shared by both fields; `myCopy()` shows « Ce que j'en pense », « Ce que je garde pour moi » (placeholder « Écrire une note privée »), then the date row. `CommunityItemRow` untouched (reads `details` only).
+- Tests: `InventoryItemTextWriterTest` (MockWebServer, 6: exact body with `attribute: notes`, details still `details`, nothing sent unchanged / item gone, refusal reverts + reports, stale refusal keeps newer note, second request waits for the first — fails with the `join()` removed), `InMemoryInventoryItemTextStore`, `AppDatabaseSchemaTest` (3.json = 2.json + `inventory_items.notes` NOT NULL default `''`; no MigrationTestHelper, which needs instrumented tests), `MergesTest` note merge.
+- Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest --rerun-tasks` ✅ 0 failures. `EntityCreationRepositoryEntityTest.aWikidataWorkOrAnEditionIsNotOpened` failed once (404 from MockWebServer) on a first full run, then passed: looks flaky, unrelated.
+- Runtime not run: no inventaire.io credentials for the agent.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.ui.book
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import kotlinx.coroutines.delay
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.WorkEntity
+import studio.lunabee.nouveaurecit.data.inventory.InventoryItemTextAttribute
 import studio.lunabee.nouveaurecit.data.model.TransactionType
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
@@ -46,7 +48,7 @@ import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.designsystem.formFieldColors
 import studio.lunabee.nouveaurecit.ui.common.Formatting
 
-/** How long typing must pause before the note is saved — `BookMyCopySection.autosaveDelay`. */
+/** How long typing must pause before the text is saved — `BookMyCopySection.autosaveDelay`. */
 private const val AutosaveDelayMillis: Long = 1_000
 
 /** `OtherEditionsCell`: the work's cover and title, « Autres éditions » under it. */
@@ -89,23 +91,25 @@ internal fun CommunityItemRow(row: ItemRow, onClick: () -> Unit) {
 }
 
 /**
- * `BookMyCopySection`'s notes field: saved after a pause of a second in typing, on focus loss and on
- * leaving the screen — only when the text actually changed (the repository checks). Background syncs
- * and reverts flow back in, never over what is being typed.
+ * `BookMyCopySection`'s `AutosavingTextField`, for the Commentaire or the Note privée: saved after a
+ * pause of a second in typing, on focus loss and on leaving the screen — only when the text actually
+ * changed (the repository checks). Background syncs and reverts flow back in, never over what is
+ * being typed.
  */
 @Composable
-internal fun MyNotesCell(row: ItemRow, onCommit: (String) -> Unit) {
+internal fun MyCopyTextCell(row: ItemRow, attribute: InventoryItemTextAttribute, onCommit: (String) -> Unit) {
     val itemId: String = row.item.id
-    var draft: String by rememberSaveable(itemId) { mutableStateOf(row.item.details) }
+    val stored: String = attribute.read(row.item)
+    var draft: String by rememberSaveable(itemId, attribute) { mutableStateOf(stored) }
     var focused: Boolean by remember { mutableStateOf(false) }
     val latestDraft: State<String> = rememberUpdatedState(draft)
     val commit: State<(String) -> Unit> = rememberUpdatedState(onCommit)
 
-    LaunchedEffect(row.item.details) {
-        if (!focused) draft = row.item.details
+    LaunchedEffect(stored) {
+        if (!focused) draft = stored
     }
     LaunchedEffect(draft) {
-        if (draft == row.item.details) return@LaunchedEffect
+        if (draft == stored) return@LaunchedEffect
         delay(AutosaveDelayMillis)
         commit.value(draft)
     }
@@ -118,8 +122,8 @@ internal fun MyNotesCell(row: ItemRow, onCommit: (String) -> Unit) {
         OutlinedTextField(
             value = draft,
             onValueChange = { draft = it },
-            label = { Text(stringResource(R.string.inventory_item_my_notes)) },
-            placeholder = { Text(stringResource(R.string.inventory_item_write_notes), style = RecitTheme.typography.content300) },
+            label = { Text(stringResource(attribute.label)) },
+            placeholder = { Text(stringResource(attribute.placeholder), style = RecitTheme.typography.content300) },
             textStyle = RecitTheme.typography.content300,
             minLines = 2,
             colors = formFieldColors(),
@@ -132,6 +136,18 @@ internal fun MyNotesCell(row: ItemRow, onCommit: (String) -> Unit) {
         )
     }
 }
+
+private val InventoryItemTextAttribute.label: Int
+    @StringRes get() = when (this) {
+        InventoryItemTextAttribute.Details -> R.string.inventory_item_my_notes
+        InventoryItemTextAttribute.Notes -> R.string.inventory_item_private_note
+    }
+
+private val InventoryItemTextAttribute.placeholder: Int
+    @StringRes get() = when (this) {
+        InventoryItemTextAttribute.Details -> R.string.inventory_item_write_notes
+        InventoryItemTextAttribute.Notes -> R.string.inventory_item_write_private_note
+    }
 
 /** « Créé le %s », then the label-hidden transaction picker (`Picker` → `ExposedDropdownMenuBox`). */
 @Composable

@@ -6,6 +6,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
@@ -16,25 +19,29 @@ import studio.lunabee.nouveaurecit.data.creation.EntitySearchHit
 import studio.lunabee.nouveaurecit.data.creation.EntitySearchType
 import studio.lunabee.nouveaurecit.data.creation.NewBookAuthor
 import studio.lunabee.nouveaurecit.data.creation.NewBookDraft
+import studio.lunabee.nouveaurecit.data.creation.NewBookOrigin
 import studio.lunabee.nouveaurecit.data.creation.WorkCandidate
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.TransactionType
 import studio.lunabee.nouveaurecit.data.model.Visibility
-import studio.lunabee.nouveaurecit.data.scan.ScannedBook
-import studio.lunabee.nouveaurecit.network.ImageUrl
 import studio.lunabee.nouveaurecit.ui.editedition.DebouncedSearch
 import studio.lunabee.nouveaurecit.ui.editedition.EditionPropertyStep
 import studio.lunabee.nouveaurecit.ui.editedition.PageStack
 
 /** Everything « Nouveau livre » draws, in one immutable value. */
 data class CreateBookState(
+    /** Where the creation was opened from: what the search says, and whether the ISBN is typed. */
+    val origin: NewBookOrigin,
     val draft: NewBookDraft,
     /** The pages over the work search; empty is the search. */
     val pages: PageStack<CreateBookPage> = CreateBookPage.resuming(draft),
     /** What went wrong last time, in the user's terms. `null` until something does. */
     val failure: CreateBookFailure? = null,
     val isPublishing: Boolean = false,
-)
+) {
+    /** « Publier »'s condition: the form filled in, and a typed ISBN either empty or right. */
+    val canPublish: Boolean get() = draft.isPublishable(origin.isIsbnEditable)
+}
 
 /**
  * `NewBookFlowView` (features 0020, iOS 0047 and 0050): one creation, from the work search that opens on
@@ -42,9 +49,10 @@ data class CreateBookState(
  * œuvre » for a work nobody has entered, « Œuvre déjà connue » when the dry run recognises it after all.
  * Pages are a stack in this state, as « Modifier l'édition » keeps its own.
  *
- * Owned by the scanning session, not by a screen: `ScanViewModel` opens one in its own scope and drops
- * it when the form goes, so rotation keeps it and nothing outlives the session. [onCreated] is told the
- * book once it exists *and* is filed — only on a full success.
+ * Owned by whoever opened it, not by a screen: `ScanViewModel` and Recherche's `SearchViewModel` open one
+ * in their own scope and drop it when the form goes, so rotation keeps it and nothing outlives them.
+ * [onCreated] is told the edition's uri and the draft that became it once the book exists *and* is filed —
+ * only on a full success; each opener makes of it what it needs (iOS feature 0087).
  *
  * Publishing waits for the server, every step of it, and nothing is touched or left while it does. A
  * failure leaves the draft as it was, with the entities that did get created recorded in it: trying again
@@ -53,12 +61,13 @@ data class CreateBookState(
 class CreateBookSession(
     private val container: AppContainer,
     parentScope: CoroutineScope,
+    val origin: NewBookOrigin,
     draft: NewBookDraft,
-    private val onCreated: (ScannedBook) -> Unit,
+    private val onCreated: (editionUri: String, draft: NewBookDraft) -> Unit,
 ) {
     private val job: Job = Job(parentScope.coroutineContext[Job])
     private val scope: CoroutineScope = CoroutineScope(parentScope.coroutineContext + job)
-    private val _state: MutableStateFlow<CreateBookState> = MutableStateFlow(CreateBookState(draft = draft))
+    private val _state: MutableStateFlow<CreateBookState> = MutableStateFlow(CreateBookState(origin = origin, draft = draft))
     val state: StateFlow<CreateBookState> = _state.asStateFlow()
 
     val draft: NewBookDraft get() = _state.value.draft
@@ -73,11 +82,17 @@ class CreateBookSession(
     }
 
     init {
-        // Asked once, as the creation opens, and never blocking: the user can describe the whole book
-        // before the answer lands, and publish whether or not it does.
-        if (draft.language == null) {
-            scope.launch {
-                val language = container.creation.editionLanguage(draft.isbn) ?: return@launch
+        workSearch.setQuery(origin.workQuery)
+        // Asked as the creation opens, and again whenever a typed ISBN becomes another valid one — never
+        // blocking: the user can describe the whole book before the answer lands, and publish whether or
+        // not it does. An ISBN that stops being valid says nothing about the language any more.
+        scope.launch {
+            _state.map { it.draft.checkedIsbn }.distinctUntilChanged().collectLatest { isbn ->
+                if (isbn == null) {
+                    record { it.copy(language = null) }
+                    return@collectLatest
+                }
+                val language = container.creation.editionLanguage(isbn) ?: return@collectLatest
                 record { it.withLanguage(language) }
             }
         }
@@ -154,6 +169,9 @@ class CreateBookSession(
 
     fun setSubtitle(subtitle: String) = edit { it.copy(subtitle = subtitle) }
 
+    /** The ISBN typed in Recherche's « Nouveau livre »; the scanner's is never edited. */
+    fun setIsbn(isbn: String) = edit { if (origin.isIsbnEditable) it.copy(isbn = isbn) else it }
+
     /** A new picture invalidates one uploaded on a failed attempt: the next publication sends it. `null` takes it away. */
     fun setCover(path: String?) = edit { it.copy(coverImagePath = path, coverImageUrl = null) }
 
@@ -168,7 +186,7 @@ class CreateBookSession(
      */
     fun publish() {
         val current: CreateBookState = _state.value
-        if (current.isPublishing || !current.draft.isPublishable) return
+        if (current.isPublishing || !current.canPublish) return
         _state.update { it.copy(isPublishing = true) }
         scope.launch {
             if (draft.asksWhichWork) {
@@ -188,7 +206,7 @@ class CreateBookSession(
     /** « Publier » on « Œuvre déjà connue », with whatever has just been decided there. */
     fun publishEdition() {
         val current: CreateBookState = _state.value
-        if (current.isPublishing || !current.draft.isPublishable) return
+        if (current.isPublishing || !current.canPublish) return
         _state.update { it.copy(isPublishing = true) }
         scope.launch { create() }
     }
@@ -216,15 +234,7 @@ class CreateBookSession(
             // Same defaults as the scanner's own add, so a created book is indistinguishable afterwards.
             container.inventory.postNewItem(uri, me, TransactionType.Inventorying, listOf(Visibility.Friends))
             _state.update { it.copy(isPublishing = false) }
-            onCreated(
-                ScannedBook(
-                    uri = uri,
-                    title = draft.trimmedTitle,
-                    authors = draft.chosenWork?.authors ?: draft.namedAuthors.map { it.trimmedName },
-                    coverImageUrl = ImageUrl.absolute(draft.coverImageUrl),
-                    code = draft.isbn,
-                ),
-            )
+            onCreated(uri, draft)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {

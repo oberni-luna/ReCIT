@@ -82,6 +82,7 @@ internal fun SearchContent(
     onClearRecents: () -> Unit,
     onSuggestion: (SearchSuggestion) -> Unit,
     onRetry: () -> Unit,
+    onAddBook: (String) -> Unit,
     onInvite: () -> Unit,
     onPush: (Destination) -> Unit,
 ) {
@@ -160,7 +161,7 @@ internal fun SearchContent(
                 suggestions(phase.query, onSuggestion)
             }
             if (phase is SearchPhase.Results) {
-                remote(remoteState, phase.query, onRetry, onPush)
+                remote(remoteState, phase.query, onRetry, onAddBook, onPush)
             }
         }
     }
@@ -202,6 +203,7 @@ private fun LazyListScope.remote(
     state: RemoteSearchState,
     query: String,
     onRetry: () -> Unit,
+    onAddBook: (String) -> Unit,
     onPush: (Destination) -> Unit,
 ) {
     when (state.sign) {
@@ -216,6 +218,8 @@ private fun LazyListScope.remote(
                 title = stringResource(R.string.inventory_search_results_empty_title),
                 message = stringResource(R.string.inventory_search_results_empty_message, query),
                 icon = Icons.Default.Search,
+                actionTitle = stringResource(R.string.create_book_search_add_book),
+                onAction = { onAddBook(query) },
                 modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.large),
             )
         }

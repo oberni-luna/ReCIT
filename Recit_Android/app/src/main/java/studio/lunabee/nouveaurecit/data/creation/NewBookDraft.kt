@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.data.creation
 
+import studio.lunabee.nouveaurecit.data.search.IsbnQuery
 import java.util.UUID
 
 /**
@@ -9,14 +10,15 @@ import java.util.UUID
  *
  * Two shapes, decided by the work search: a work inventaire.io already has — [workUri] names it, and only
  * the edition is described; or a work of the user's own — its title and authors are described too, and
- * created with the edition. The ISBN comes from the camera and is never edited. Everything else
- * inventaire.io accepts on an edition is [properties], the same value « Modifier l'édition » holds.
+ * created with the edition. The ISBN comes from the camera and is never edited there; from Recherche it is
+ * typed, or left empty (iOS feature 0087). Everything else inventaire.io accepts on an edition is
+ * [properties], the same value « Modifier l'édition » holds.
  *
  * The scanner's form of feature 0043 asks for no work title: the work being created is then named after
  * the edition ([workLabel]), as it always was.
  */
 data class NewBookDraft(
-    /** The barcode, as the camera read it; [normalizedIsbn] is what goes on the wire. */
+    /** The barcode as the camera read it, or what was typed — possibly nothing; [normalizedIsbn] is what goes on the wire. */
     val isbn: String,
     /** The title printed on *this* edition's cover, which is not necessarily the work's. */
     val title: String = "",
@@ -41,8 +43,17 @@ data class NewBookDraft(
     /** What the ISBN says about the language, once asked; `null` for good if the call fails. */
     val language: EditionLanguage? = null,
 ) {
-    /** The ISBN without separators, as inventaire.io keys editions. `X`, an ISBN-10 check digit, survives. */
-    val normalizedIsbn: String get() = normalizeIsbn(isbn)
+    /**
+     * The ISBN without separators, as inventaire.io keys editions: [checkedIsbn] once the check digit is
+     * right, so a valid ISBN-10 goes out as thirteen digits. Otherwise `X`, an ISBN-10 check digit, survives.
+     */
+    val normalizedIsbn: String get() = checkedIsbn ?: normalizeIsbn(isbn)
+
+    /** The ISBN as thirteen digits, an ISBN-10 converted, once its check digit is right. `null` while empty, or wrong. */
+    val checkedIsbn: String? get() = IsbnQuery.isbn(isbn)
+
+    /** Whether the ISBN can be published: none at all, or one whose check digit is right. */
+    val isIsbnValid: Boolean get() = isbn.isBlank() || checkedIsbn != null
 
     val trimmedTitle: String get() = title.trim()
 
@@ -68,6 +79,12 @@ data class NewBookDraft(
         get() = trimmedTitle.isNotEmpty() &&
             !properties.hasOrphanCollection &&
             (workUri != null || (workLabel.isNotEmpty() && namedAuthors.isNotEmpty()))
+
+    /**
+     * [isPublishable], and a valid ISBN when it was typed: a scanned ISBN never blocks publishing, a typed
+     * one with a wrong check digit does.
+     */
+    fun isPublishable(isIsbnEditable: Boolean): Boolean = isPublishable && (!isIsbnEditable || isIsbnValid)
 
     /** Whether the draft names a work: one inventaire.io has, or one being described. */
     val hasWork: Boolean get() = workUri != null || trimmedWorkTitle.isNotEmpty()

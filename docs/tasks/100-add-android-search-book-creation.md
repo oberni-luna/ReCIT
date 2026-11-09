@@ -1,6 +1,6 @@
 ---
 issue: 100
-status: todo
+status: to-test
 wiki: [[features/0087-book-creation-from-search]], [[features/0043-android-create-a-missing-book]], [[features/0052-android-cover-zoom-edition-editing-context-menu]], [[features/0041-android-catches-up-with-ios]]
 note: Rattrapage iOS 1.10.0 (feature 0087). Android opens Nouveau livre only from the scanner; NewBookDraft.isbn is non-null and always sent.
 created: 2026-11-09
@@ -34,3 +34,25 @@ Port of iOS [0087](../wiki/features/0087-book-creation-from-search.md).
 - Valid ISBN-10 typed: sent as 13 digits (unit test).
 - Scanner, unknown barcode → « Nouveau livre »: ISBN read-only, publishing counts in the bilan, as before.
 - Unit tests: origin rules, drafts by origin, check-digit validity (empty valid), publishability with editable vs scanned ISBN, resolve without P212.
+
+## Implementation
+
+- `data/creation/NewBookOrigin.kt`: sealed `Scan(isbn)` | `Search(query)` — `isbn` (via `IsbnQuery.isbn(query)`), `isIsbnEditable`, `workQuery` (trimmed query; empty after a scan or an ISBN query), `blankDraft`; the origin is the drafts' key.
+- `data/creation/NewBookDrafts.kt`: in-memory `draft(origin)` / `remember(draft, origin)` / `forget(origin)`, used by `ScanViewModel` (`Scan(code)`) and `SearchViewModel` (`Search(query)`, tab-root lifetime).
+- `NewBookDraft`: `checkedIsbn`, `isIsbnValid` (blank or valid), `normalizedIsbn` prefers `checkedIsbn` (ISBN-10 → 13), `isPublishable(isIsbnEditable)`. `ResolveRequestBuilder` omits `wdt:P212` when empty.
+- `CreateBookSession(origin)` → `onCreated(editionUri, draft)`; the scanner builds its `ScannedBook` (`code = origin.isbn`), bilan unchanged. `CreateBookState.origin` / `canPublish` drive both « Publier » bars. Init `workSearch.setQuery(origin.workQuery)`. Language lookup follows `checkedIsbn` (`distinctUntilChanged` + `collectLatest`), null when invalid. `setIsbn` only when editable.
+- `ui/createbook/CreateBookIsbnField.kt` in an optional `editableIsbn` slot of `EditionCoverSection` (scanner and « Modifier l'édition » unchanged): « ISBN », placeholder « Facultatif », number keyboard, error after focus loss or at 13 digits; tags `e2e.createBook.isbnField`, `e2e.createBook.isbnError`. Work-search sentence without ISBN: `create_book_search_empty_message_no_isbn`.
+- `ui/createbook/CreateBookDialog.kt`: full-screen `Dialog` (no dismiss on back or outside tap) holding `CreateBookScreen` unchanged — chosen over a bottom sheet so a swipe cannot close it mid-publication; same kind of dialog as `ListScanScreen`.
+- Recherche: `SearchContent` NoResult `EmptyState` action « Ajouter ce livre » → `onAddBook(query)` (also shown when a people-only search finds nothing, as iOS); `SearchViewModel.openCreation(query)`; on success forget the draft, close, `createdEditionUri` consumed once by `SearchScreen`, which pushes `Destination.Book(BookAnchor.Edition(uri))`. Closing keeps the draft. `groupedCell` untouched.
+- Strings (`strings_create_book.xml`): `create_book_search_add_book`, `create_book_search_empty_message_no_isbn`, `create_book_isbn_placeholder`, `create_book_isbn_invalid`.
+- Tests: `NewBookOriginTest` (4), `NewBookDraftsTest` (4), `NewBookDraftTest` (+3), `ResolveRequestBuilderTest` (+2). Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest` ✅ 0 failures.
+- Not done: no test tag on « Ajouter ce livre » (`EmptyState` has no slot).
+- Runtime not run: no inventaire.io credentials; nothing published. Status-bar icon colour and back handling inside the dialog unseen.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

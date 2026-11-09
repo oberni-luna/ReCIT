@@ -103,6 +103,8 @@ fun EditionWorksSection(
  * `CreateBookCoverRow` in its section: the cover — a menu of where a picture can come from, and once one
  * is set, taking it away first — and the ISBN, shown and never edited. [coverPath] is a local picture,
  * [coverUrl] the one the server holds; [onCover] is handed a new picture's path, or `null` to remove it.
+ * [editableIsbn], when given, is drawn in place of [isbn]: Recherche's « Nouveau livre » has no barcode,
+ * and its ISBN is typed (iOS `.editableISBN(_:isValid:)`, feature 0087).
  */
 @Composable
 fun EditionCoverSection(
@@ -114,6 +116,7 @@ fun EditionCoverSection(
     onCover: (String?) -> Unit,
     modifier: Modifier = Modifier,
     footer: String? = stringResource(R.string.edit_edition_cover_footer),
+    editableIsbn: (@Composable () -> Unit)? = null,
 ) {
     FormSection(header = stringResource(R.string.edit_edition_cover_header), footer = footer, modifier = modifier) {
         Row(
@@ -123,7 +126,9 @@ fun EditionCoverSection(
             CoverFrame(coverPath = coverPath, coverUrl = coverUrl, onCover = onCover)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 // Nothing at all without an ISBN: a label over an empty line reads as a field left blank.
-                if (isbn.isNotEmpty()) {
+                if (editableIsbn != null) {
+                    editableIsbn()
+                } else if (isbn.isNotEmpty()) {
                     WithLabel(label = isbnLabel) {
                         Text(isbn, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
                     }

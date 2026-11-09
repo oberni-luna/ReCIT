@@ -25,15 +25,19 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.SearchResult
+import studio.lunabee.nouveaurecit.data.creation.NewBookDrafts
+import studio.lunabee.nouveaurecit.data.creation.NewBookOrigin
 import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.UserRelation
 import studio.lunabee.nouveaurecit.data.search.IsbnQuery
+import studio.lunabee.nouveaurecit.ui.createbook.CreateBookSession
 
 /**
  * `SearchTabView` + `SearchContent`'s state (features 0014, 0037): the field, its phase, the
- * recents, « Chez mes amis », and the call to inventaire.io.
+ * recents, « Chez mes amis », and the call to inventaire.io — and « Nouveau livre » on a query it found
+ * nothing for (iOS feature 0087).
  *
  * The field's own state (`query`, `submission`) is Compose state, so the text field never lags
  * behind a flow; everything read from the store is a `StateFlow`. Scoped to the tab's root entry,
@@ -81,6 +85,18 @@ class SearchViewModel(private val container: AppContainer) : ViewModel() {
 
     private var answered: SearchAttempt? = null
 
+    private val _creation: MutableStateFlow<CreateBookSession?> = MutableStateFlow(null)
+
+    /** « Nouveau livre », opened from inventaire.io's « Aucun résultat », while it is up. */
+    val creation: StateFlow<CreateBookSession?> = _creation.asStateFlow()
+
+    /** Books started from a query and not yet published, by query, for as long as the tab lives. */
+    private val drafts: NewBookDrafts = NewBookDrafts()
+
+    /** The edition just published from here, until its Fiche livre has been pushed. */
+    var createdEditionUri: String? by mutableStateOf(null)
+        private set
+
     init {
         viewModelScope.launch {
             snapshotFlow { activeAttempt() }.distinctUntilChanged().collectLatest(::search)
@@ -121,6 +137,30 @@ class SearchViewModel(private val container: AppContainer) : ViewModel() {
     fun retry() {
         attempt += 1
     }
+
+    /** « Ajouter ce livre »: « Nouveau livre » on [query], on the draft left from a previous attempt if any. */
+    fun openCreation(query: String) {
+        if (_creation.value != null) return
+        val origin: NewBookOrigin.Search = NewBookOrigin.Search(query)
+        _creation.value = CreateBookSession(
+            container = container,
+            parentScope = viewModelScope,
+            origin = origin,
+            draft = drafts.draft(origin),
+            onCreated = { uri, _ -> bookCreated(origin, uri) },
+        )
+    }
+
+    /** Whatever takes the form away keeps what was typed. */
+    fun closeCreation() {
+        val session: CreateBookSession = _creation.value ?: return
+        drafts.remember(session.draft, session.origin)
+        session.cancel()
+        _creation.value = null
+    }
+
+    /** Hands over the edition just published, once: its Fiche livre is pushed a single time. */
+    fun consumeCreatedEdition(): String? = createdEditionUri.also { createdEditionUri = null }
 
     private fun recentsFlow(userId: String): Flow<List<String>> =
         container.preferences.observeStrings(RecentSearches.preferenceKey(userId))
@@ -178,6 +218,14 @@ class SearchViewModel(private val container: AppContainer) : ViewModel() {
                 score = 1.0,
             ),
         )
+    }
+
+    /** The book exists and is in my Inventaire: the form goes, and the Fiche livre follows. */
+    private fun bookCreated(origin: NewBookOrigin.Search, uri: String) {
+        drafts.forget(origin)
+        _creation.value?.cancel()
+        _creation.value = null
+        createdEditionUri = uri
     }
 
     private data class SearchAttempt(val submission: SearchSuggestion, val count: Int)

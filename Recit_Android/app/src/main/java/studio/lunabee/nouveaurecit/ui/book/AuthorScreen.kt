@@ -28,6 +28,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingInlineRow
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
+import studio.lunabee.nouveaurecit.ui.common.EnlargeablePhoto
 import studio.lunabee.nouveaurecit.ui.common.Formatting
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
@@ -66,7 +67,10 @@ private fun CenteredText(text: String) {
     }
 }
 
-/** Who the author·ice is: the portrait (or initials), the name as the page's title, Wikidata's line, the dates. */
+/**
+ * Who the author·ice is: the portrait (or initials), which a tap opens in the Plein écran (feature 0085),
+ * the name as the page's title, Wikidata's line, the dates.
+ */
 @Composable
 private fun AuthorHeader(author: AuthorEntity) {
     val birth: String? = Formatting.wikidataDate(author.dateOfBirth)
@@ -76,7 +80,15 @@ private fun AuthorHeader(author: AuthorEntity) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        CellThumbnail(url = author.image, size = ThumbnailSize.XLarge, shape = ThumbnailShape.Circle, fallbackName = author.name)
+        EnlargeablePhoto(url = author.image) { memoryCacheKey ->
+            CellThumbnail(
+                url = author.image,
+                size = ThumbnailSize.XLarge,
+                shape = ThumbnailShape.Circle,
+                fallbackName = author.name,
+                memoryCacheKey = memoryCacheKey,
+            )
+        }
         Text(author.name, style = RecitTheme.typography.title200, color = RecitTheme.colors.foregroundDefault, textAlign = TextAlign.Center)
         author.subtitle?.takeIf { it.isNotBlank() }?.let {
             Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary, textAlign = TextAlign.Center)

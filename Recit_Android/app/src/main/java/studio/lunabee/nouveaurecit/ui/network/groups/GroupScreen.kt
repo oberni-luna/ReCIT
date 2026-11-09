@@ -56,6 +56,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.TagLabel
 import studio.lunabee.nouveaurecit.designsystem.TagStyle
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
+import studio.lunabee.nouveaurecit.ui.common.EnlargeablePhoto
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
@@ -335,8 +336,9 @@ private fun GroupActions(
 }
 
 /**
- * `GroupHeaderView`: the group's picture, its name, what it says of itself — four lines, the rest on
- * a tap — and two facts in tags: who may come in, and how many are there.
+ * `GroupHeaderView`: the group's picture, opening the Plein écran on a tap (feature 0081), its name, what
+ * it says of itself — four lines, the rest on a tap — and two facts in tags: who may come in, and how many
+ * are there.
  */
 @Composable
 private fun GroupHeader(group: ReaderGroup) {
@@ -345,7 +347,9 @@ private fun GroupHeader(group: ReaderGroup) {
         modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        GroupThumbnail(url = group.pictureUrl, size = ThumbnailSize.Large)
+        EnlargeablePhoto(url = group.pictureUrl) { memoryCacheKey ->
+            GroupThumbnail(url = group.pictureUrl, size = ThumbnailSize.Large, memoryCacheKey = memoryCacheKey)
+        }
         Text(group.name, style = RecitTheme.typography.title50, color = RecitTheme.colors.foregroundDefault)
         if (group.description.isNotEmpty()) {
             // Up to 5000 characters on the server.

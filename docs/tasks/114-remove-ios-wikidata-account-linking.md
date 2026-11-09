@@ -1,6 +1,6 @@
 ---
 issue: 114
-status: to-test
+status: to-close
 wiki: [[features/0070-wikidata-account-and-editing]], [[adr/0008-session-login-signup-keychain]]
 note: enlever la connexion WikiData qui ne fonctionne pas sur iOS
 created: 2026-11-09
@@ -59,10 +59,19 @@ created: 2026-11-09
   test `baseURL` force unwraps, two deleted test names). The two `AuthService` length entries rewritten with the
   lower counts (512 lines, body 259): SwiftLint matches by reason, which carries the count. Ceilings only went
   down.
+- Review fix: `WikidataOAuthFlow` deleted; the `enabledOAuth` key is `AccountSettings.wikidataOAuthProvider`
+  (private), its `file_header` baseline entry removed.
 - Build: `** BUILD SUCCEEDED **` (ReCIT_iOS, iPhone 17, SwiftLint in the build).
 - Tests: `** TEST SUCCEEDED **` — `WikidataAccountTests` (2) and `WikidataEntityEditingTests` (4).
 
 ## Review
+
+### Round validation
+
+- 🟡 [structure] `WikidataOAuthFlow` held no flow, one constant with one caller → moved into `AccountSettings`
+  as `private static let wikidataOAuthProvider`, file deleted. Autofix round 1: fixed.
+- No reference left to removed symbols, strings or `e2e.account.wikidata.*` ids; baseline only went down.
+- LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓ — verdict clean.
 
 ## Verification
 

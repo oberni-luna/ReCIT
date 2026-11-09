@@ -48,3 +48,10 @@ data class UserSearchResultDto(
 
 @Serializable
 data class RelationActionPayload(val user: String)
+
+/**
+ * `GravatarDTO`: what `GET /api/images/gravatar` answers — the Gravatar address of the account's e-mail,
+ * built by the server so that the address itself never leaves it.
+ */
+@Serializable
+data class GravatarDto(val url: String)

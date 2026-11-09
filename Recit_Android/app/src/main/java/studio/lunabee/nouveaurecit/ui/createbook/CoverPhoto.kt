@@ -8,6 +8,7 @@ import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -33,9 +34,14 @@ object CoverPhoto {
      * down to [MAX_DIMENSION] and writes it as a JPEG. Answers the reduced file's path, or `null` when the
      * image cannot be read: the form then simply has no cover, which it never needed.
      */
-    suspend fun reduce(context: Context, source: Uri): String? = withContext(Dispatchers.IO) {
+    suspend fun reduce(context: Context, source: Uri): String? = reduce(context, ImageDecoder.createSource(context.contentResolver, source))
+
+    /** The same, from a picture already in memory — the account's Gravatar (feature 0055). */
+    suspend fun reduce(context: Context, bytes: ByteArray): String? = reduce(context, ImageDecoder.createSource(ByteBuffer.wrap(bytes)))
+
+    private suspend fun reduce(context: Context, source: ImageDecoder.Source): String? = withContext(Dispatchers.IO) {
         runCatching {
-            val decoded: Bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, source)) { decoder, info, _ ->
+            val decoded: Bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
                 // In memory the encoder can read: a hardware bitmap's pixels are out of its reach.
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
                 val longest: Int = max(info.size.width, info.size.height)

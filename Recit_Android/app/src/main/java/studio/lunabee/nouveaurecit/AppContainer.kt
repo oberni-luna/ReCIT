@@ -4,6 +4,7 @@ import android.content.Context
 import coil3.ImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,6 +31,8 @@ import studio.lunabee.nouveaurecit.data.creation.EntityCreationRepository
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.data.groups.PreferencesGroupRequestLedger
 import studio.lunabee.nouveaurecit.data.sorting.SortSession
+import studio.lunabee.nouveaurecit.data.user.ProfileRepository
+import studio.lunabee.nouveaurecit.data.user.RequestPacer
 import studio.lunabee.nouveaurecit.network.ApiService
 
 /**
@@ -78,6 +81,15 @@ class AppContainer(context: Context) {
 
     val entities: EntityRepository = EntityRepository(api, database.entityDao())
     val users: UserRepository = UserRepository(api, database, optimisticRunner, preferences)
+
+    /**
+     * The one slot every `PUT /api/user` waits for: the server refuses a second write within a second of
+     * the first (`minTimeBetweenRequests: 1000`), so they leave 1.1 s apart, whichever screen sends them.
+     */
+    val userUpdatePacer: RequestPacer = RequestPacer(interval = 1_100.milliseconds)
+
+    /** « Modifier le profil » (feature 0055), server first. The Gravatar is downloaded without the session. */
+    val profile: ProfileRepository = ProfileRepository(api, publicClient, userUpdatePacer, users)
 
     /** The groups are held in memory for the launch, their members in the store (feature 0046). */
     val groups: GroupRepository = GroupRepository(

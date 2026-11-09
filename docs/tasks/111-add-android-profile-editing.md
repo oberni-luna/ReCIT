@@ -1,6 +1,6 @@
 ---
 issue: 111
-status: todo
+status: to-test
 wiki: [[features/0055-profile-editing]], [[features/0041-android-catches-up-with-ios]], [[features/0031-android-app]]
 note: "Je voudrais ajouter les fonctionnalités d'édition du profil aussi dans ce sprint Android" — split into #111 (profil), #112 (compte et connexion), #113 (notifications).
 created: 2026-11-09
@@ -37,3 +37,22 @@ Port of the « Modifier le profil » third of iOS [0055](../wiki/features/0055-p
 - Second PUT refused (unit test): first change kept, banner names the refused attribute, next save sends only it.
 - Position sent with two decimals (unit test).
 - Works on the NoGMS_API_35 emulator (map shows, search hidden if no geocoder).
+
+## Implementation
+
+- New `data/user/`: `RequestPacer` (Mutex; each call waits for the previous one, then 1.1 s after its start — singleton `container.userUpdatePacer`), `UserAttributeUpdate` (`value: JsonElement` so `JsonNull` is sent as `"value":null` despite `explicitNulls = false`), `Coordinates`, `ProfileChange`, `ProfileDraft` (changed attributes in order picture, username, bio, position; bio ≤ 1 000 UTF-16 units; position rounded to 2 decimals; `markLanded`), `ProfileSaveFailure` (`isUsernameTaken` reads « already used »), `MyProfileStore` (implemented by `UserRepository.updateMyUser`), `ProfileRepository` (upload `container=users` field `avatar`, then one paced `PUT /api/user` per change, each written onto my `UserEntity`; Gravatar `GET /api/images/gravatar` then image through `publicClient`, none on 404). #112 / #113 call `container.profile.updateUserAttribute(...)`.
+- New `ui/profile/edit/`: `EditProfileScreen` + `EditProfileViewModel` + `EditProfileUiState`, `ProfilePhotoPicker` (Appareil photo, « Choisir dans la galerie », Gravatar, Retirer; `CoverPhoto.reduce(bytes)` overload added), `ProfileBioField`, `ProfilePositionSection`, `ProfilePositionScreen` (a state of the form's ViewModel, not a Destination — the draft must not outlive the form, as `EditEditionPage`), `PositionMap` (osmdroid in `AndroidView`, fixed above the list; zoom 13 around a position, 6 on France without), `OsmConfiguration` (user agent = application id, cache under `cacheDir/osmdroid`), `PlaceSearch` / `FoundPlace` (`Geocoder` when present; `GeocodeListener` API 33+, else sync on IO; 5 results). « Retirer ma position » on the form and on the position page.
+- osmdroid-android 6.1.20 (libs.versions.toml, app/build.gradle.kts); `ACCESS_NETWORK_STATE` in the manifest (osmdroid requirement, normal permission). OSM attribution « © les contributeur·ices d'OpenStreetMap » at the map's corner (new copy, tile policy).
+- `Destination.EditProfile` + entry; `ProfileScreen`: « Modifier le profil » under the header, my bio under the counts. `EditionFormSections.MenuLine` private → internal for the photo menu. `UserDtos.GravatarDto`. Strings in `strings_profile.xml` (iOS copy, « vous »).
+- API contracts verified 2026-11-09 against Codeberg `inventaire/inventaire` main and live `api_specs.json` v5.1.1: upload answers `{ field: url }`, `/img/users/<40 hex>`; gravatar `{ url }` with `d=404`; `PUT /api/user` `{ attribute, value }`, `acceptNullValue` position + picture, position `[lat, lng]`, bio `BoundedString(0, 1000)`, `minTimeBetweenRequests: 1000`, unchanged value → `400 already up-to-date`.
+- Tests: `ProfileDraftTest` (12), `ProfileRepositoryTest` (6: order upload → PUT picture → PUT bio, ≥ 1 000 ms apart in virtual time, each written onto my user, partial failure, retry), `RequestPacerTest` (4), `UserAttributeUpdateTest` (3). Build: `./gradlew :app:assembleDebug :app:testDebugUnitTest` ✅ 625 tests, 0 failures.
+- Known gap (out of scope): `Merges.user` never clears `avatarUrl` / position when a sync payload lacks them — a removal made on another device does not reach this one.
+- Runtime not run: no inventaire.io credentials; nothing written.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

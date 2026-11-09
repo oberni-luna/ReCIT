@@ -1,6 +1,7 @@
 package studio.lunabee.nouveaurecit.ui.lists
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,14 +30,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.OptimisticRunner
 import studio.lunabee.nouveaurecit.data.db.EntityListEntity
+import studio.lunabee.nouveaurecit.data.lists.ListArrivalFocus
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
@@ -49,6 +58,7 @@ import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.common.rememberReducesMotion
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
@@ -66,13 +76,24 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
  *
  * « Modifier » opens the form; the screen leaves by itself when the list stops existing. The « Livres »
  * page of a list of publishers says it is empty, as on iOS; its « Présentation » reads as any other's.
+ *
+ * Pushed from « Dans les listes » on the book screen (iOS feature 0079), the list arrives on that book: it
+ * opens on its first one, then scrolls to it and rings its cover — see [followArrival].
  */
 @Composable
 fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) {
+    val reducesMotion: Boolean = rememberReducesMotion()
     val viewModel: EntityListViewModel = recitViewModel(key = destination.id) {
-        EntityListViewModel(destination.id, it.lists, it.entities, it.users.myUserId)
+        EntityListViewModel(destination.id, destination.focusUri, reducesMotion, it.lists, it.entities, it.users.myUserId)
     }
     val state: EntityListViewModel.State by viewModel.state.collectAsStateWithLifecycle()
+    val arrival: ListArrivalFocus by viewModel.arrival.collectAsStateWithLifecycle()
+    val haptics: HapticFeedback = LocalHapticFeedback.current
+    LaunchedEffect(arrival.phase) { followArrival(arrival.phase, viewModel) }
+    // The arrival's one haptic when the cover flow has none to give: the book was already in front.
+    LaunchedEffect(arrival.landingFeedbackUri) {
+        if (arrival.landingFeedbackUri != null) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+    }
     var showsForm: Boolean by rememberSaveable { mutableStateOf(false) }
     var showsSearch: Boolean by rememberSaveable { mutableStateOf(false) }
     var showsScanner: Boolean by rememberSaveable { mutableStateOf(false) }
@@ -123,6 +144,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 else -> ListDetailPages(
                     list = list,
                     state = state,
+                    highlightedUri = arrival.highlightedUri,
                     viewModel = viewModel,
                     navigator = navigator,
                     canAdd = canAdd,
@@ -167,6 +189,32 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
 }
 
 /**
+ * `ListCoverFlowScreen.follow(_:)`: plays the arrival's current phase — the move to the book, then the halo's
+ * fade. A scroll waits for the covers to be laid out, as on iOS; a jump has already selected the book.
+ */
+private suspend fun followArrival(phase: ListArrivalFocus.Phase, viewModel: EntityListViewModel) {
+    when (phase) {
+        is ListArrivalFocus.Phase.Arriving -> when (val move: ListArrivalFocus.Move = phase.move) {
+            is ListArrivalFocus.Move.Jump -> viewModel.landArrival()
+            is ListArrivalFocus.Move.Scroll -> {
+                delay(ARRIVAL_LAYOUT_DELAY_MILLIS)
+                viewModel.requestSelection(move.uri)
+                delay(SELECTION_SCROLL_MILLIS.toLong())
+                viewModel.landArrival()
+            }
+        }
+        is ListArrivalFocus.Phase.Highlighted -> {
+            delay(HALO_FADE_MILLIS.toLong())
+            viewModel.endArrivalHighlight()
+        }
+        is ListArrivalFocus.Phase.Waiting, ListArrivalFocus.Phase.Done -> Unit
+    }
+}
+
+/** How long a scrolling arrival leaves the list on its first book. */
+private const val ARRIVAL_LAYOUT_DELAY_MILLIS: Long = 300
+
+/**
  * `ListCoverFlowScreen`'s `TabPager`: the tabs pinned under the bar, over two pages side by side, each keeping
  * its own scroll. A swipe on the covers moves the covers; anywhere else on « Livres » it turns the page. The
  * add bar belongs to « Livres » and slides with it; it steps aside while the comment is written, so the
@@ -177,6 +225,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
 private fun ListDetailPages(
     list: EntityListEntity,
     state: EntityListViewModel.State,
+    highlightedUri: String?,
     viewModel: EntityListViewModel,
     navigator: Navigator,
     canAdd: Boolean,
@@ -209,6 +258,7 @@ private fun ListDetailPages(
                             ListCoverFlowContent(
                                 list = list,
                                 state = state,
+                                highlightedUri = highlightedUri,
                                 viewModel = viewModel,
                                 navigator = navigator,
                                 isCommentFocused = isCommentFocused,
@@ -243,6 +293,7 @@ private fun listDetailTabs(type: EntityListType, count: Int): List<CapsuleTab> =
 private fun ListCoverFlowContent(
     list: EntityListEntity,
     state: EntityListViewModel.State,
+    highlightedUri: String?,
     viewModel: EntityListViewModel,
     navigator: Navigator,
     isCommentFocused: Boolean,
@@ -260,15 +311,19 @@ private fun ListCoverFlowContent(
     ) {
         item(key = "cover-flow") {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                ListCoverFlow(
-                    rows = state.rows,
-                    isAuthor = isAuthor,
-                    selectedUri = state.selectedUri,
-                    onSelect = viewModel::select,
-                    onOpen = open,
-                )
+                // Not before the selection is known: the strip opens on it, so a jump never shows the first book.
+                if (state.selectedUri != null) {
+                    ListCoverFlow(
+                        rows = state.rows,
+                        isAuthor = isAuthor,
+                        selectedUri = state.selectedUri,
+                        onSelect = viewModel::select,
+                        onOpen = open,
+                        highlightedUri = highlightedUri,
+                    )
+                }
                 Crossfade(targetState = state.selectedRow, label = "list.title") { row ->
-                    if (row != null) ListSelectedTitle(row)
+                    if (row != null) ListSelectedTitle(row, isArrivedOn = row.uri == highlightedUri)
                 }
             }
         }
@@ -336,11 +391,23 @@ private fun ListCoverFlowContent(
     }
 }
 
-/** `ListSelectedTitle`: the element's title, and who wrote it — or what inventaire.io says an author is. */
+/**
+ * `ListSelectedTitle`: the element's title, and who wrote it — or what inventaire.io says an author is. When
+ * the list has just arrived on it from a book screen ([isArrivedOn]), TalkBack moves to it.
+ */
 @Composable
-private fun ListSelectedTitle(row: ListElementRowModel) {
+private fun ListSelectedTitle(row: ListElementRowModel, isArrivedOn: Boolean) {
+    val focusRequester: FocusRequester = remember { FocusRequester() }
+    LaunchedEffect(isArrivedOn) {
+        if (isArrivedOn) focusRequester.requestFocus()
+    }
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.medium)
+            .semantics(mergeDescendants = true) {}
+            .focusRequester(focusRequester)
+            .focusable(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall),
     ) {

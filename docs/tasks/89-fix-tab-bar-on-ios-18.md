@@ -21,6 +21,7 @@ created: 2026-11-07
 - **Capsule fill below iOS 26 = `backgroundDisable`** (white at 10 % in dark, `gray/200` in light), instead of `.regularMaterial`. A veil, so it reads on the profile's, the Liste's and the étagère's grounds alike. `glassCapsule()` (`DesignSystem/Extensions/View+glass.swift`) has no other caller: its fallback changes there.
 - **Widened at feedback round 1: uppercase section headers on iOS 18.** iOS 18 uppercases whatever sits in a `List` / `Form` `Section` header; iOS 26 no longer does. Seen on the Fiche livre (the title in `EntityHeaderView`, « L'ÉTRANGER », while the screen before shows « L'étranger ») and on the request sheet (`TransactionFormView`, « BORROW 1984 FROM EXLIBRIS_IOS_70 »).
 - **Every header, not only those two:** no section header is uppercased on iOS 18 — the iOS 26 look, plain titles such as « In my inventory » included. Set once (`.textCase(nil)`) where it reaches every list and form, not header by header.
+- **Widened at feedback round 2: the Liste's and the étagère's tabs sit in the navigation bar on iOS 18**, as on a friend's profile. Before, the navigation bar kept its own material and hairline, and a second `.bar` lay under the capsules: a line cut the two apart. Now one material from the top of the screen to the tabs' foot, ending on a hairline. iOS 26+ unchanged (no backdrop, soft scroll edge).
 - Out of scope: the system tab bar, the two-colour word while the capsule sits between two words (intended, as on iOS 26).
 
 ## Acceptance criteria
@@ -35,6 +36,8 @@ created: 2026-11-07
 - iOS 18: the request sheet's title and sentence read as typed (« Borrow 1984 from exlibris_ios_70 »).
 - iOS 18: no section header in capitals anywhere — « In my inventory », the Profil's, Réseau's, Recherche's, forms' and sheets' sections included.
 - iOS 26+: section headers unchanged.
+- iOS 18: on a Liste and an étagère, no line between the navigation bar and the tabs; one material from the top of the screen to under the capsules, a hairline under them — as on a friend's profile.
+- iOS 26+: a Liste's and an étagère's tabs unchanged — no backdrop, the page fading under the soft scroll edge.
 
 ## Implementation
 
@@ -55,6 +58,12 @@ created: 2026-11-07
 - Skipped: Lists with no section header (EntityListDetail's empty state, SearchAllLocalView, FriendsLatestBooksView, SortShelfDetailView — footer only), `#Preview`s.
 - Build: iPhone 17 (iOS 26) and iPhone 16 Pro (iOS 18.6) `BUILD SUCCEEDED`, lint clean. `LensTabTrackTests` 8/8. Real screens not seen running (signed-in account needed).
 
+### Feedback round 2 — the Liste's and the étagère's tabs in the navigation bar on iOS 18
+
+- `Features/Lists/ListDetailTabPicker.swift` — `listDetailTabsBar()` below iOS 26: a `Divider` at the foot of its `.bar` backdrop, and `.toolbarBackgroundVisibility(.hidden, for: .navigationBar)`, so the navigation bar draws no material or hairline of its own over the tabs' backdrop — what `UserDetailView` does with `UserProfileStickyHeader`. The modifier is the Liste's (`ListCoverFlowScreen`) and the étagère's (`ShelfDetailView`), its only two callers. iOS 26 branch untouched.
+- Backdrop always shown, not only once the page passes under it as on the profile: the Liste's and the étagère's tabs had it always.
+- Build: iPhone 17 (iOS 26) and iPhone 16 Pro (iOS 18.6) `BUILD SUCCEEDED`, lint clean. `LensTabTrackTests` pass. Real screens not seen running (signed-in account needed).
+
 ## Review
 
 ## Verification
@@ -62,6 +71,8 @@ created: 2026-11-07
 manual validation — not run by agent
 
 round 1: manual validation — not run by agent
+
+round 2: manual validation — not run by agent
 
 ## Feedback
 
@@ -71,4 +82,12 @@ round 1: manual validation — not run by agent
 - Cause: iOS 18 uppercases Section header content in List / Form; iOS 26 does not.
 - Triage: adjustment — not in #89's scope; user chose to widen #89 (renamed « Fix iOS 18 visuals ») over a new task, and to cover every header, one line per List.
 - Changes: see `## Implementation` → Feedback round 1. Implementer, no inline hunks.
+- Review: deferred → /wa-validate. Verify: manual, not run by agent. No rule captured.
+
+### Round 2 — 2026-11-09
+
+- Asked: « L'écran de profil est propre sur iOS 18, alors que les écrans de détail d'une liste ou d'une étagère sont moches. il y a une bar entre la navigation bar et les capsules (cf screenshots). Tu peux corriger pour avoir toujours le même rendu que dans l'écran de profil : capsule stackées en haut comme si elles étaient dans la navigation bar. Attention à ne pas faire de regression sur iOS 26+. »
+- Cause: below iOS 26 the navigation bar kept its own material and hairline, and `listDetailTabsBar()` laid a second `.bar` under the capsules; the profile hides the navigation bar's background and draws one backdrop down to the tabs' foot.
+- Triage: adjustment — the iOS 18 criteria covered the capsule, not the bar behind it; two criteria added.
+- Changes: see `## Implementation` → Feedback round 2. `inline`: `ListDetailTabPicker.swift`, `listDetailTabsBar()` (+4 lines).
 - Review: deferred → /wa-validate. Verify: manual, not run by agent. No rule captured.

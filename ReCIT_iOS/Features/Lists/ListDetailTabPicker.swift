@@ -61,8 +61,12 @@ extension View {
                 .background {
                     Rectangle()
                         .fill(.bar)
+                        .overlay(alignment: .bottom) {
+                            Divider()
+                        }
                         .ignoresSafeArea(edges: .top)
                 }
+                .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         }
     }
 

@@ -60,6 +60,9 @@ sealed interface Destination : NavKey {
 
     @Serializable data object DeleteAccount : Destination
 
+    /** « Modifier le profil » (feature 0055): its position page is a state of the form, not a destination. */
+    @Serializable data object EditProfile : Destination
+
     @Serializable data object AboutInventaire : Destination
 }
 

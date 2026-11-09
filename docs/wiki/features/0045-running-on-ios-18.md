@@ -26,6 +26,17 @@ nothing changes. On iOS 18 the app wears the system's own iOS 18 look, and one f
 - **« Chez mes amis » keeps the inset** of the sections around it in Recherche, instead of running
   its covers to the screen's edges, and its title lines up with theirs.
 - **The buttons under a group's header** keep the list's own insets, above and below too.
+- **The tabs' capsule does not zoom** (#89). On a friend's profile, a Liste and an étagère it is
+  still picked up, follows the finger, rubber-bands and settles, but neither it nor the words under
+  it grow: on iOS 18 the magnified word was drawn off the capsule and cut. The capsule is a veil
+  (`backgroundDisable`) instead of a material, which barely showed on the profile's dark ground.
+  See [0075](0075-lens-tabs-and-a-lists-pager.md).
+- **A Liste's and an étagère's tabs sit in the navigation bar** (#89), as a friend's profile's do:
+  one material from the top of the screen down to under the capsules, ending on a hairline. Before,
+  the navigation bar kept its own material and hairline, and a second bar lay under the tabs.
+- **Section headers read as typed** (#89). iOS 18 uppercases what sits in a `List` or `Form`
+  section header (« L'ÉTRANGER » on the Fiche livre, the request sheet's title); iOS 26 no longer
+  does, and the app now looks the same on both.
 - **On iOS 18.0 only**, a requested exchange is drawn with `questionmark.bubble.fill`:
   `questionmark.message.fill` arrived in 18.1.
 
@@ -39,6 +50,14 @@ nothing changes. On iOS 18 the app wears the system's own iOS 18 look, and one f
 - **`DesignSystem/List/View+listMargins.swift`** — `listRowVerticalInsets(_:)` and
   `listSectionHorizontalMargins(_:)`, the iOS 26 per-edge forms, and the list's own below it; for
   `GroupDetailView` and `SearchFriendsSection`.
+- **`glassCapsule()`** (same file) — glass, else a `backgroundDisable` capsule; the tabs'
+  capsule. **`LensTabPicker`**'s `liftScale` and `magnification` are 1 below iOS 26.
+- **`listDetailTabsBar()`** — below iOS 26, the `.bar` backdrop ends on a `Divider` and the
+  navigation bar's background is hidden, as `UserDetailView` does for the profile's header.
+- **`.textCase(nil)`** — in `DesignSystem.Form`, `DesignSystem.FormList`, and in each plain `List`
+  with section headers, on its content. `ProfileView`'s sections were split into
+  `ProfileSettingsSection`, `ProfileTransactionsSection`, `ProfileAboutInventaireSection` and
+  `ProfileDeleteAccountSection` to make room under the length baseline.
 - **`ProfileToolbarItem`** — `sharedBackgroundVisibility(_:)` behind `#available(iOS 26.0, *)`.
 - **`AutoSortModel`** — `availability` returns `.deviceNotEligible` below iOS 26; `proposePlan`
   returns a plan that proposes nothing there (unreachable: no entry point calls it); the two phases
@@ -95,6 +114,11 @@ nothing changes. On iOS 18 the app wears the system's own iOS 18 look, and one f
 - **Unseen on iOS 18**: Réseau and a group's buttons, « Chez mes amis », the avatar's material
   circle, the full-screen cover's bordered « Fermer », exchanges, TipKit's cards, the donation
   sheet.
+- **`.textCase(nil)` acts only inside a list** (#89): on the `Section`, or a view in the `List`'s
+  content. Set on the `List` or any ancestor, iOS 18 ignores it — so it is set list by list, and a
+  new `List` with section headers needs it too.
+- **Seen by the owner on the iPhone 16 Pro simulator, iOS 18.6** (#89, 2026-11-09): a friend's
+  profile, a Liste and an étagère with their tabs, the Fiche livre and the request sheet.
 - **iOS 18.0 to 18.5 not run**: only 18.6 has an iPhone runtime on the Mac. **No real device on
   iOS 18**; the build ran on an iPhone 18 Pro on iOS 27.2.
 - **Unit tests**: 848 passed, 1 skipped (the integration suite), on iOS 18.6 and on iOS 26.5.

@@ -1,6 +1,6 @@
 ---
 issue: 89
-status: to-test
+status: to-close
 wiki: [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0086-a-friends-transactions-tab]], [[features/0045-running-on-ios-18]]
 note: "sur iOS 18, notre tab bar ne marche pas bien. Il faut enlever le \"liquid glass\" et les effets de zoom sur iOS 18." Screen recording on an iPhone 16 Pro (iOS 18), 2026-11-07, kept locally (~/Desktop/Screen Recording iPhone 16 Pro 07-11-2026 at 17.26.57.mp4).
 created: 2026-11-07
@@ -65,6 +65,16 @@ created: 2026-11-07
 - Build: iPhone 17 (iOS 26) and iPhone 16 Pro (iOS 18.6) `BUILD SUCCEEDED`, lint clean. `LensTabTrackTests` pass. Real screens not seen running (signed-in account needed).
 
 ## Review
+
+### Round validation — 2026-11-09
+
+Scope: cumulative diff `origin/main...HEAD` @ 92281ea. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+
+- 🟡 `ListDetailTabPicker.swift:48` — [style] `listDetailTabsBar()` doc stale: did not say it replaces the navigation bar's background and ends on a hairline → fixed (autofix 1).
+- 🟡 `ListDetailTabPicker.swift:62` — [structure] bar + hairline backdrop duplicated with `UserProfileStickyHeader.backdrop` → fixed (autofix 1): new `Features/Components/BarBackdrop.swift`, used by both.
+- 🟡 `BarBackdrop.swift:10` — [style] doc tied to the profile's fade-in → fixed (autofix 2, inline).
+
+Autofix changed code: `BarBackdrop` extracted; the profile's header backdrop and the Liste's / étagère's tabs backdrop now share it, same modifiers on top, rendering unchanged. Builds iOS 18.6 and iOS 26 succeeded, lint clean, `LensTabTrackTests` pass. Verdict: clean.
 
 ## Verification
 

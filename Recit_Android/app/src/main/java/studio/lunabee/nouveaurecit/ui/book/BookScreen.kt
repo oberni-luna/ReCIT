@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -196,6 +198,9 @@ private fun BookContent(state: BookUiState, viewModel: BookViewModel, navigator:
         community(state, navigator)
         myCopy(state, viewModel)
         bibliographicData(edition.uri, navigator)
+        // The screen is drawn edge to edge: its end scrolls clear of the system navigation bar, unless the
+        // tab bar already stands there.
+        item(key = "navigation-bar") { Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars)) }
     }
 }
 

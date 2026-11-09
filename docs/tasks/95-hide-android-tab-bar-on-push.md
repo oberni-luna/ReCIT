@@ -1,6 +1,6 @@
 ---
 issue: 95
-status: todo
+status: to-test
 wiki: [[features/0088-tab-bar-hidden-on-pushed-screens]], [[features/0089-tabbed-shelf-screen]], [[features/0031-android-app]]
 note: Rattrapage iOS 1.10.0 (feature 0088, amended by 0089). MainScaffold always shows the NavigationBar.
 created: 2026-11-09
@@ -29,3 +29,25 @@ Port of iOS [0088](../wiki/features/0088-tab-bar-hidden-on-pushed-screens.md) as
 - With a pushed screen in Réseau, tapping the Réseau tab again pops to root and the bar shows.
 - Switching from Réseau (pushed screen, no bar) to Recherche shows the bar; back to Réseau hides it again.
 - Profile overlay and « Ranger mes livres » open and close as before.
+
+## Implementation
+
+- `ui/navigation/AppTab.kt`: `hidesTabBarOnPush` (Search = false) and the pure rule `showsTabBar(isAtRoot) = isAtRoot || !hidesTabBarOnPush`.
+- `ui/root/MainScaffold.kt`: Shell reads `selected.showsTabBar(isAtRoot = stacks.getValue(selected).size == 1)`; the `NavigationBar` moved to a private `TabBar` in `AnimatedVisibility` (`slideIn/OutVertically { it }` + fade, `tween(700)`, NavDisplay's default crossfade). A `NavEntryDecorator` (`tabBarRoomDecorator`) pads and consumes the bar's height only on entries the bar shows over (the root, every Recherche entry): a pushed screen gets the full height from its first frame, the bar slides away over it, no jump, no blank strip. Root identified by `entries(tab.root).contentKey`. Scaffold `contentWindowInsets` → `WindowInsets.navigationBars.only(Bottom)` so the SnackBar stays above the system bar.
+- `ui/lists/ListAddBar.kt`: KDoc only — in the tab bar's place, above the system bar; above the tab bar from Recherche.
+- `ui/lists/EntityListScreen.kt`: `.consumeWindowInsets(padding)` on the content Box, so the comment field's `imePadding` does not count the system bar twice.
+- `ui/book/BookScreen.kt`: last list item `Spacer(windowInsetsBottomHeight(navigationBars))` — the only pushed screen with `contentWindowInsets = WindowInsets(0)`; adds nothing in Recherche where the insets are consumed.
+- Tests: `ui/navigation/AppTabTest.kt` (3: every tab shows the bar at root; Inventaire, Listes, Réseau hide it pushed; Recherche keeps it).
+- Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest` ✅ 603 tests, 0 failures.
+- Other pushed screens (User, Shelf, Group, GroupMembers, Author, Work, AddFriends, Invitations, FindGroups, InviteToGroup, EntityList, EditEdition) use default Scaffold insets: they now get the system-bar inset themselves, as they already do inside ProfileSheet and the sort flow.
+- Known, left alone: `EditEditionScreen` / `FormPageScaffold` add `imePadding` to unconsumed Scaffold padding; with the keyboard up in Inventaire the gap may be one system-bar height too tall (already so in the sort flow).
+- Predictive back: the bar returns once the pop is committed (accepted by the task).
+- Runtime not run: no inventaire.io credentials for the agent.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

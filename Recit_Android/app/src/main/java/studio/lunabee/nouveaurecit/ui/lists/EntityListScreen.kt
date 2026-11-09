@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -117,7 +118,8 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
         },
         containerColor = RecitTheme.colors.backgroundGrouped,
     ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
+        // Consumed, so that the keyboard's inset under the comment does not count the system bar twice.
+        Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             when {
                 !state.isLoaded -> Unit
                 list == null ->

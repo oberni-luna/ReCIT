@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.ListRepository
@@ -21,6 +23,7 @@ import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.data.db.EntityListItemEntity
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
 import studio.lunabee.nouveaurecit.data.lists.CoverFlowSelection
+import studio.lunabee.nouveaurecit.data.lists.ListArrivalFocus
 import studio.lunabee.nouveaurecit.data.lists.ListMoveDestination
 import studio.lunabee.nouveaurecit.data.model.EntityListType
 
@@ -34,10 +37,16 @@ import studio.lunabee.nouveaurecit.data.model.EntityListType
  * element whose optimistic id is replaced by the server's stays selected; an element removed hands the
  * selection to the one that took its place; a uri asked for by an add is selected as soon as the list
  * holds it.
+ *
+ * **Opened from a book screen** on [focusUri], the list arrives on that book ([ListArrivalFocus]): the screen
+ * plays the arrival's phases, this keeps them — so a rotation does not play it again. With the system's
+ * animations off ([reducesMotion]), the selection jumps onto the book before the covers first show.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntityListViewModel(
     private val listId: String,
+    focusUri: String?,
+    private val reducesMotion: Boolean,
     private val lists: ListRepository,
     private val entities: EntityRepository,
     myUserId: StateFlow<String?>,
@@ -82,6 +91,9 @@ class EntityListViewModel(
 
     private val isMoving: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
+    private val _arrival: MutableStateFlow<ListArrivalFocus> = MutableStateFlow(ListArrivalFocus.on(focusUri))
+    val arrival: StateFlow<ListArrivalFocus> = _arrival.asStateFlow()
+
     val state: StateFlow<State> = combine(content, selection, lists.observeMyLists(), isMoving, myUserId) { current, selected, all, moving, myId ->
         val list: EntityListEntity? = current.list
         val uri: String? = selected.selected
@@ -110,7 +122,11 @@ class EntityListViewModel(
     init {
         viewModelScope.launch {
             content.map { current -> current.rows.map { it.uri } }.distinctUntilChanged().collect { uris ->
-                selection.value = CoverFlowSelection.next(shownUris, uris, selection.value.selected, selection.value.requested)
+                val selected: String? = selection.value.selected
+                val arrival: ListArrivalFocus = _arrival.value.start(uris, selected, reducesMotion)
+                val jump: String? = arrival.jumpUri.takeIf { arrival != _arrival.value }
+                _arrival.value = arrival
+                setSelection(CoverFlowSelection.next(shownUris, uris, selected, jump ?: selection.value.requested))
                 shownUris = uris
             }
         }
@@ -118,12 +134,22 @@ class EntityListViewModel(
 
     /** The cover facing the reader, as the strip settles on it. */
     fun select(uri: String) {
-        if (uri in shownUris) selection.value = selection.value.copy(selected = uri)
+        if (uri in shownUris) setSelection(selection.value.copy(selected = uri))
     }
 
     /** Selects [uri] as soon as the list holds it — at once when it already does. */
     fun requestSelection(uri: String) {
-        selection.value = CoverFlowSelection.next(shownUris, shownUris, selection.value.selected, uri)
+        setSelection(CoverFlowSelection.next(shownUris, shownUris, selection.value.selected, uri))
+    }
+
+    /** The arrival's move is over: the halo lights if the selection stands on the book. */
+    fun landArrival() {
+        _arrival.update { it.land(selection.value.selected) }
+    }
+
+    /** The halo has faded. */
+    fun endArrivalHighlight() {
+        _arrival.update(ListArrivalFocus::endHighlight)
     }
 
     /** What the scanner or the search chose: added optimistically, the list landing on the first of it at once. */
@@ -165,6 +191,12 @@ class EntityListViewModel(
     } catch (error: Exception) {
         onError(error)
         false
+    }
+
+    /** Every selection change goes through here: one made elsewhere than the book puts the halo out. */
+    private fun setSelection(result: CoverFlowSelection.Result) {
+        selection.value = result
+        _arrival.update { it.select(result.selected) }
     }
 
     private fun rowsOf(entry: ListWithElements?): Flow<List<ListElementRowModel>> {

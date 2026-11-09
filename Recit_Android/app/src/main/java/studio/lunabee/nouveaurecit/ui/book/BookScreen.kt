@@ -198,6 +198,7 @@ private fun BookContent(state: BookUiState, viewModel: BookViewModel, navigator:
         otherEditions(state, navigator)
         community(state, navigator)
         myCopy(state, viewModel)
+        bookLists(state.inLists, navigator)
         bibliographicData(edition.uri, navigator)
         // The screen is drawn edge to edge: its end scrolls clear of the system navigation bar, unless the
         // tab bar already stands there.

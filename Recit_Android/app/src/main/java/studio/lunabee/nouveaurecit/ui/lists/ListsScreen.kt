@@ -141,8 +141,9 @@ fun ListsScreen(navigator: Navigator) {
     }
 }
 
+/** The rule between two list rows, from their text's margin. */
 @Composable
-private fun ListRowDivider() {
+internal fun ListRowDivider() {
     HorizontalDivider(color = RecitTheme.colors.borderDefault, modifier = Modifier.padding(start = Spacing.medium))
 }
 

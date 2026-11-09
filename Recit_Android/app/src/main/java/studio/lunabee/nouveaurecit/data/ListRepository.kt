@@ -53,6 +53,9 @@ class ListRepository(
 
     fun observeList(id: String): Flow<ListWithElements?> = dao.observeList(id)
 
+    /** The lists holding one of [uris] — a book's works —, mine and everyone else's: nothing is fetched. */
+    fun observeListsHolding(uris: List<String>): Flow<List<ListWithElements>> = dao.observeHolding(uris)
+
     /** Syncs **my** lists — the one sync allowed to prune the lists stored before `creatorId` was read. */
     suspend fun syncLists(user: UserEntity) = syncLists(creatorIds = setOf(user.id), claimsUnstamped = true)
 

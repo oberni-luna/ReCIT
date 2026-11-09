@@ -1,6 +1,6 @@
 ---
 issue: 97
-status: todo
+status: to-test
 wiki: [[features/0079-the-lists-a-book-is-in]], [[features/0068-lists-in-my-network]], [[features/0077-android-catches-up-with-1-9-0]], [[features/0062-android-catches-up-with-1-7-0]]
 note: Rattrapage iOS 1.10.0 (feature 0079). Friends' lists and elements are already in Room since 0077.
 created: 2026-11-09
@@ -37,3 +37,26 @@ Port of iOS [0079](../wiki/features/0079-the-lists-a-book-is-in.md), whole, arri
 - Back: the Fiche livre at the same scroll position.
 - Opening any list from the Lists tab: no vibration on opening.
 - Unit tests: entries filter/dedupe/order; arrival state machine.
+
+## Implementation
+
+stacked on: wa/94-add-android-private-notes @ 302df91
+
+- Pure rules, `data/lists/`: `BookListEntry.entries(lists, workUris, myUserId, friends)` (mine or a friend's lists of works; a recueil once, focused on its lowest `ordinal`; `lastChanged` desc, then id) and `ListArrivalFocus` (Waiting → Arriving(Scroll|Jump) → Highlighted → Done, `landingFeedbackUri`, `jumpUri`).
+- Data: `EntityListEntity.lastChanged` + `friendCreator(myUserId, friendsById)` (now also used by `ListsTabSections`, unchanged behaviour); `ListDao.observeHolding(uris)` Flow — no migration, no index; `ListRepository.observeListsHolding(uris)`.
+- Fiche livre: `BookUiState.inLists` built reactively from the works' uris, friends (`observeByRelation(Friend)`) and `myUserId`, starts empty; `BookListsSection.kt` (`bookLists` + `BookListRow`), the Lists tab's `ListRow` drawn on `backgroundFormCell` with `ListRowDivider`; one line in `BookScreen` between `myCopy` and `bibliographicData`. `ListRowFeed` fetches missing preview covers, as the Lists tab — the only network traffic.
+- Navigation: `Destination.EntityList(id, focusUri: String? = null)`; existing push sites untouched.
+- Arrival: `EntityListViewModel(focusUri, reducesMotion)` with `arrival` StateFlow, `landArrival()`, `endArrivalHighlight()`; every selection change through `setSelection`, which puts the halo out; a jump selects the book with the first rows. `EntityListScreen.followArrival`: 300 ms, `requestSelection`, 400 ms, land, halo off after 1.2 s; landing haptic from `landingFeedbackUri`; `ListSelectedTitle` takes focus on arrival (merged semantics + focusRequester). `ui/lists/ListCoverHalo.kt` (2 dp at 5 dp + 14 % 8 dp at 11 dp, `foregroundTinted`) — starts visible and fades out over 1.2 s, as the iOS code does (the iOS doc says "fades in").
+- `ListCoverFlow`: haptic only on a selection change between two non-null books (first selection on opening never ticks, on every list; a swipe now ticks at settle); programmatic moves take a 400 ms FastOutSlowIn tween (arrival, tap on a side cover, add); cover split outer Box / inner clip so the halo draws outside.
+- `ui/common/ReducedMotion.kt`: `rememberReducesMotion()` (ANIMATOR_DURATION_SCALE == 0), also used by `CoverWall`. Reduced motion: no scroll, the halo still fades.
+- `ListRow` optional `background`; `ListRowDivider` internal. String `book_in_lists` « Dans les listes ».
+- Tests: `BookListEntryTest` (5), `ListArrivalFocusTest` (11). Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest --rerun` ✅ 624 tests, 0 failures.
+- Runtime not run: no inventaire.io credentials for the agent. Timing, halo, haptic count, TalkBack focus, dark rendering unseen.
+
+## Review
+
+## Verification
+
+manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
+
+## Feedback

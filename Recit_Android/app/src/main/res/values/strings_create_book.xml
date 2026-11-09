@@ -7,9 +7,12 @@
 -->
 <resources>
     <string name="create_book_row_action">Créer ce livre sur inventaire.io</string>
+    <!-- Recherche's « Aucun résultat » on inventaire.io (iOS inventory.search.results.empty.add_book). -->
+    <string name="create_book_search_add_book">Ajouter ce livre</string>
 
     <string name="create_book_title">Nouveau livre</string>
     <string name="create_book_search_empty_title">De quel livre s’agit-il ?</string>
+    <string name="create_book_search_empty_message_no_isbn">Cherchez le titre ou l’auteur·ice\u202F: si l’œuvre est déjà sur inventaire.io, il ne restera presque rien à saisir.</string>
     <string name="create_book_search_empty_message">inventaire.io ne connaît pas encore l’ISBN %1$s. Cherchez le titre ou l’auteur·ice : si l’œuvre y est déjà, il ne restera presque rien à saisir.</string>
 
     <string name="create_book_edition_title">Nouvelle édition</string>
@@ -18,6 +21,8 @@
     <string name="create_book_edition_no_work_help">Un livre est l’édition d’une œuvre : retrouvez-la, ou créez-la, pour publier.</string>
     <string name="create_book_edition_title_help">Repris de l’œuvre. Corrigez-le s’il diffère de la couverture : une traduction, un sous-titre.</string>
     <string name="create_book_isbn">ISBN, lu sur le code-barres</string>
+    <string name="create_book_isbn_placeholder">Facultatif</string>
+    <string name="create_book_isbn_invalid">Cet ISBN n’est pas valide. Vérifiez ses chiffres.</string>
     <string name="create_book_language">Langue, déduite de l’ISBN : %1$s</string>
     <string name="create_book_public_notice">Ce livre rejoindra inventaire.io, la base ouverte : ce que vous écrivez ici sera public, et modifiable par les autres lecteur·ices.</string>
     <string name="create_book_title_field">Titre de cette édition</string>

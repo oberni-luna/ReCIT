@@ -193,6 +193,35 @@ class NewBookDraftTest {
         assertEquals(another, another.leavingRecognised("wd:Q1"))
     }
 
+    // The ISBN
+
+    @Test
+    fun aRightCheckDigitGivesThirteenDigitsAnIsbn10Included() {
+        assertEquals("9782070360024", NewBookDraft(isbn = "978-2-07-036002-4").checkedIsbn)
+        assertEquals("9782070360024", NewBookDraft(isbn = "2-07-036002-4").checkedIsbn)
+        assertEquals("9782070360024", NewBookDraft(isbn = "2070360024").normalizedIsbn)
+    }
+
+    @Test
+    fun aWrongCheckDigitIsInvalidAndAnEmptyIsbnIsValid() {
+        assertNull(NewBookDraft(isbn = "9782070360025").checkedIsbn)
+        assertFalse(NewBookDraft(isbn = "9782070360025").isIsbnValid)
+        assertNull(NewBookDraft(isbn = "").checkedIsbn)
+        assertTrue(NewBookDraft(isbn = "").isIsbnValid)
+        assertTrue(NewBookDraft(isbn = "  ").isIsbnValid)
+    }
+
+    @Test
+    fun aWrongTypedIsbnBlocksPublishingAndAScannedOneNever() {
+        val wrong: NewBookDraft = NewBookDraft(isbn = "9782070360025").choose(ministry)
+        assertTrue(wrong.isPublishable)
+        assertFalse(wrong.isPublishable(isIsbnEditable = true))
+        assertTrue(wrong.isPublishable(isIsbnEditable = false))
+        assertTrue(wrong.copy(isbn = "").isPublishable(isIsbnEditable = true))
+        assertTrue(wrong.copy(isbn = "9782070360024").isPublishable(isIsbnEditable = true))
+        assertFalse(wrong.copy(title = "").isPublishable(isIsbnEditable = false))
+    }
+
     @Test
     fun onlyTheFirstLetterIsRaised() {
         assertEquals("Le Guin et moi", NewBookDraft.capitalizingFirstLetter("le Guin et moi"))

@@ -7,7 +7,8 @@ import java.util.Locale
  * `ResolveRequestBuilder` (features 0020, iOS 0047 and 0050): what the user typed, into the request that
  * creates a book. Pure, so the rules are asserted against the body that goes on the wire.
  *
- * - The ISBN travels normalized, as `wdt:P212`. It is the only thing the app is certain of.
+ * - The ISBN travels normalized, as `wdt:P212` — and not at all when there is none: `resolve` validates an
+ *   ISBN only when one is given (iOS feature 0087).
  * - Everything else said about the edition — subtitle, publisher, date, language, format, contributors,
  *   identifiers, links — travels in the edition seed, each entity by its uri: the ones to create are
  *   created before this request is built (`EntityCreationRepository.createPendingEntities`).
@@ -37,7 +38,7 @@ object ResolveRequestBuilder {
 
         // The catalogue's values first, then what this builder decides about.
         val editionClaims: MutableMap<String, List<ClaimLiteral>> = LinkedHashMap(draft.properties.claims)
-        editionClaims[ISBN_13] = listOf(ClaimLiteral.Text(draft.normalizedIsbn))
+        if (draft.normalizedIsbn.isNotEmpty()) editionClaims[ISBN_13] = listOf(ClaimLiteral.Text(draft.normalizedIsbn))
         editionClaims[EDITION_TITLE] = listOf(ClaimLiteral.Text(draft.trimmedTitle))
         if (draft.trimmedSubtitle.isNotEmpty()) editionClaims[SUBTITLE] = listOf(ClaimLiteral.Text(draft.trimmedSubtitle))
 

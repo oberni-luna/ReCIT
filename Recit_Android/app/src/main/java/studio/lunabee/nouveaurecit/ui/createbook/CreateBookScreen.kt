@@ -92,7 +92,7 @@ fun CreateBookScreen(session: CreateBookSession, onClose: () -> Unit) {
         null -> WorkSearchPage(
             title = stringResource(R.string.create_book_title),
             emptyTitle = stringResource(R.string.create_book_search_empty_title),
-            emptyMessage = stringResource(R.string.create_book_search_empty_message, draft.isbn),
+            emptyMessage = workSearchMessage(state.origin.isbn),
             search = workSearch,
             onQueryChange = session.workSearch::setQuery,
             onChoose = session::chooseWork,
@@ -134,8 +134,19 @@ fun CreateBookScreen(session: CreateBookSession, onClose: () -> Unit) {
 }
 
 /**
+ * What the work search says before anything is typed: the ISBN inventaire.io does not know, or — from a
+ * text query in Recherche, which has none — only how to go on.
+ */
+@Composable
+private fun workSearchMessage(isbn: String?): String = if (isbn == null) {
+    stringResource(R.string.create_book_search_empty_message_no_isbn)
+} else {
+    stringResource(R.string.create_book_search_empty_message, isbn)
+}
+
+/**
  * `NewEditionView`: the book in hand, described with « Modifier l'édition »'s sections — the work found or
- * being described, the cover and the ISBN the camera read, the title (the work's to begin with), and every
+ * being described, the cover and the ISBN the camera read — or the one typed, from Recherche — the title (the work's to begin with), and every
  * property inventaire.io accepts on an edition, the language already filled in from the ISBN.
  */
 @Composable
@@ -174,6 +185,11 @@ private fun NewEditionPage(state: CreateBookState, session: CreateBookSession, o
                         coverUrl = draft.coverImageUrl.takeIf { draft.coverImagePath == null },
                         onCover = session::setCover,
                         footer = editionNotes(draft),
+                        editableIsbn = if (state.origin.isIsbnEditable) {
+                            { CreateBookIsbnField(isbn = draft.isbn, isValid = draft.isIsbnValid, onIsbnChange = session::setIsbn) }
+                        } else {
+                            null
+                        },
                     )
                 }
                 item(key = "title") {
@@ -255,7 +271,7 @@ private fun CreateBookPublishBar(state: CreateBookState, onPublish: () -> Unit, 
     FormActionBar(
         text = stringResource(if (state.failure?.isWorthRetrying == true) R.string.create_book_retry else R.string.create_book_publish),
         onClick = onPublish,
-        enabled = state.draft.isPublishable,
+        enabled = state.canPublish,
         isLoading = state.isPublishing,
     ) {
         if (state.failure != null) {

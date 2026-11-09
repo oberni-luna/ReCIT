@@ -41,6 +41,21 @@ class ResolveRequestBuilderTest {
     }
 
     @Test
+    fun anEmptyIsbnIsLeftOut() {
+        val claims: Map<String, List<ClaimLiteral>>? = entry(draft.copy(isbn = "")).edition.claims
+        assertNull(claims?.get("wdt:P212"))
+        assertEquals(text("La Main gauche de la nuit"), claims?.get("wdt:P1476"))
+        val edition: JsonObject = encoded(ResolveRequestBuilder.request(draft.copy(isbn = ""), create = true, language = "fr"))
+            .getValue("entries").jsonArray.single().jsonObject.getValue("edition").jsonObject
+        assertFalse("wdt:P212" in edition.getValue("claims").jsonObject)
+    }
+
+    @Test
+    fun aValidIsbn10TravelsAsThirteenDigits() {
+        assertEquals(text("9782070360024"), entry(draft.copy(isbn = "2-07-036002-4")).edition.claims?.get("wdt:P212"))
+    }
+
+    @Test
     fun aNewAuthorAndANewWorkAreDescribedInTheLabelLanguage() {
         val entry: EntityResolveRequest.Entry = entry(draft, language = "en")
         assertEquals(mapOf("en" to "Ursula K. Le Guin"), entry.authors?.single()?.labels)

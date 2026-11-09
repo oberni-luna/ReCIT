@@ -1,6 +1,6 @@
 ---
 issue: 114
-status: todo
+status: to-test
 wiki: [[features/0070-wikidata-account-and-editing]], [[adr/0008-session-login-signup-keychain]]
 note: enlever la connexion WikiData qui ne fonctionne pas sur iOS
 created: 2026-11-09
@@ -45,8 +45,27 @@ created: 2026-11-09
 
 ## Implementation
 
+- Deleted `AccountWikidataSection`, `WikidataConnectSheet`, `WikidataWebView` (synchronized group: no
+  `project.pbxproj` change).
+- `AccountSettingsView`: the Wikidata section call and its header mention removed.
+- `WikidataOAuthFlow`: only `provider` left; header says linking happens on the inventaire.io website.
+- `AuthModel.webSessionCookies()` and `AuthService.webSessionCookies()` deleted; the private `sessionCookies()`
+  stays (4 other callers).
+- `WikidataAccountTests`: `startURL`, `returnAddress` and `baseURL` deleted; `linked` / `notLinked` kept.
+- `WikidataEditNotice`: header comment only.
+- `Localizable.xcstrings`: 9 `account.wikidata.*` keys removed; `edit_entity.wikidata.bot` loses its last
+  sentence in fr and en. No other key touched.
+- `.swiftlint.baseline`: 4180 → 4154 entries — 22 for the deleted files, 4 made stale (`manageGrantsURL` and
+  test `baseURL` force unwraps, two deleted test names). The two `AuthService` length entries rewritten with the
+  lower counts (512 lines, body 259): SwiftLint matches by reason, which carries the count. Ceilings only went
+  down.
+- Build: `** BUILD SUCCEEDED **` (ReCIT_iOS, iPhone 17, SwiftLint in the build).
+- Tests: `** TEST SUCCEEDED **` — `WikidataAccountTests` (2) and `WikidataEntityEditingTests` (4).
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent
 
 ## Feedback

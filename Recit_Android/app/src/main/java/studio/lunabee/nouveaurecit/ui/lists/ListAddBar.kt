@@ -21,7 +21,9 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 /**
  * `ListAddBar` (iOS feature 0060): « Ajouter un livre » over « Scanner » and « Rechercher » — « Ajouter
  * un·e auteur·ice » over « Rechercher » alone for a list of authors. Pinned at the foot of the list's
- * screen, above the tab bar, which Android keeps.
+ * screen, in the tab bar's place: a list pushed in Inventaire, Listes or Réseau hides the tab bar (iOS
+ * features 0088 and 0089), and the screen's insets keep « Ajouter un livre » above the system navigation
+ * bar. Opened from Recherche, which keeps the tab bar, it sits above that bar.
  */
 @Composable
 internal fun ListAddBar(isAuthor: Boolean, onScan: () -> Unit, onSearch: () -> Unit, modifier: Modifier = Modifier) {

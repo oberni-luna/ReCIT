@@ -2,13 +2,20 @@ package studio.lunabee.nouveaurecit.ui.root
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -33,8 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -69,6 +79,10 @@ import studio.lunabee.nouveaurecit.ui.profile.ProfileSheet
  * `NavigationStack(path:)` per tab. Switching tab keeps every stack where it was; re-selecting the
  * current tab pops it to its root, as tapping a selected tab does on iOS. The [TabRouter] says which
  * tab shows and whether the profile sheet is up over them (feature 0038).
+ *
+ * The tab bar slides down and fades out as a screen is pushed in Inventaire, Listes or Réseau, and comes
+ * back as their root returns (iOS features 0088 and 0089, [AppTab.hidesTabBarOnPush]). The rule is
+ * read from the selected stack here, and nowhere else: no screen sets the bar's visibility.
  *
  * Failures reported by background writes, and every sentence a screen wants said, surface here once
  * as a snackbar — in the profile sheet while it is up, since it covers the shell's.
@@ -139,55 +153,90 @@ private fun Shell(
     showsSnackbar: Boolean,
 ) {
     val selected: AppTab = router.selected
+    val showsTabBar: Boolean = selected.showsTabBar(isAtRoot = stacks.getValue(selected).size == 1)
     Scaffold(
-        contentWindowInsets = WindowInsets(0),
+        // Without the tab bar, the snackbar stays above the system navigation bar.
+        contentWindowInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom),
         snackbarHost = { if (showsSnackbar && !router.isProfilePresented) SnackbarHost(snackbarHostState) { RecitSnackbar(it) } },
         bottomBar = {
-            NavigationBar(containerColor = RecitTheme.colors.backgroundSecondary) {
-                AppTab.entries.forEach { tab ->
-                    val isSelected: Boolean = tab == selected
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = {
-                            if (router.select(tab)) Navigator(stacks.getValue(tab)).popToRoot()
-                        },
-                        icon = {
-                            BadgedBox(badge = { if (tab == AppTab.Network && badge > 0) Badge { Text("$badge") } }) {
-                                Icon(if (isSelected) tab.selectedIcon else tab.icon, contentDescription = null)
-                            }
-                        },
-                        label = { Text(stringResource(tab.title), style = RecitTheme.typography.action200) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = RecitTheme.colors.foregroundTinted,
-                            selectedTextColor = RecitTheme.colors.foregroundTinted,
-                            indicatorColor = RecitTheme.colors.backgroundTinted,
-                            unselectedIconColor = RecitTheme.colors.foregroundSecondary,
-                            unselectedTextColor = RecitTheme.colors.foregroundSecondary,
-                        ),
-                    )
-                }
+            AnimatedVisibility(
+                visible = showsTabBar,
+                enter = slideInVertically(tabBarSlide) { it } + fadeIn(tabBarFade),
+                exit = slideOutVertically(tabBarSlide) { it } + fadeOut(tabBarFade),
+            ) {
+                TabBar(router, stacks, badge)
             }
         },
     ) { padding: PaddingValues ->
-        Box(Modifier.padding(padding).consumeWindowInsets(padding)) {
-            TabContent(stacks.getValue(selected))
+        TabContent(selected, stacks.getValue(selected), tabBarPadding = padding)
+    }
+}
+
+@Composable
+private fun TabBar(router: TabRouter, stacks: Map<AppTab, NavBackStack<NavKey>>, badge: Int) {
+    NavigationBar(containerColor = RecitTheme.colors.backgroundSecondary) {
+        AppTab.entries.forEach { tab ->
+            val isSelected: Boolean = tab == router.selected
+            NavigationBarItem(
+                selected = isSelected,
+                onClick = {
+                    if (router.select(tab)) Navigator(stacks.getValue(tab)).popToRoot()
+                },
+                icon = {
+                    BadgedBox(badge = { if (tab == AppTab.Network && badge > 0) Badge { Text("$badge") } }) {
+                        Icon(if (isSelected) tab.selectedIcon else tab.icon, contentDescription = null)
+                    }
+                },
+                label = { Text(stringResource(tab.title), style = RecitTheme.typography.action200) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = RecitTheme.colors.foregroundTinted,
+                    selectedTextColor = RecitTheme.colors.foregroundTinted,
+                    indicatorColor = RecitTheme.colors.backgroundTinted,
+                    unselectedIconColor = RecitTheme.colors.foregroundSecondary,
+                    unselectedTextColor = RecitTheme.colors.foregroundSecondary,
+                ),
+            )
         }
     }
 }
 
 @Composable
-private fun TabContent(backStack: NavBackStack<NavKey>) {
+private fun TabContent(tab: AppTab, backStack: NavBackStack<NavKey>, tabBarPadding: PaddingValues) {
     val navigator: Navigator = remember(backStack) { Navigator(backStack) }
+    val entries: (NavKey) -> NavEntry<NavKey> = remember(navigator) { entryProvider { appEntries(navigator) } }
+    val rootContentKey: Any = remember(entries, tab) { entries(tab.root).contentKey }
     NavDisplay(
         backStack = backStack,
         onBack = { navigator.pop() },
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator(),
+            tabBarRoomDecorator(tab, rootContentKey, tabBarPadding),
         ),
-        entryProvider = entryProvider { appEntries(navigator) },
+        entryProvider = entries,
     )
 }
+
+/**
+ * Keeps the tab bar's room under each screen the bar shows over, and none under the others: a screen
+ * pushed in a tab that hides the bar has the whole height from its first frame, the bar sliding away
+ * over it, so nothing jumps when the bar is gone. Such a screen keeps clear of the system navigation
+ * bar by its own insets, which nothing above it consumes.
+ */
+private fun tabBarRoomDecorator(tab: AppTab, rootContentKey: Any, tabBarPadding: PaddingValues): NavEntryDecorator<NavKey> =
+    NavEntryDecorator { entry ->
+        val room: PaddingValues = if (tab.showsTabBar(isAtRoot = entry.contentKey == rootContentKey)) tabBarPadding else NoRoom
+        Box(Modifier.padding(room).consumeWindowInsets(room)) {
+            entry.Content()
+        }
+    }
+
+private val NoRoom: PaddingValues = PaddingValues()
+
+/** `NavDisplay`'s default transition is a 700 ms crossfade: the bar leaves and returns in step with it. */
+private const val TabBarTransitionMillis: Int = 700
+private val tabBarSlide: FiniteAnimationSpec<IntOffset> = tween(TabBarTransitionMillis)
+private val tabBarFade: FiniteAnimationSpec<Float> = tween(TabBarTransitionMillis)
 
 /** What the snackbar says under « Une erreur s'est produite »: the sorting run names its étagère. */
 private fun failureMessage(context: Context, error: Throwable): String? = when (error) {

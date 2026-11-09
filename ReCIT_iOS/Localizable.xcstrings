@@ -7,162 +7,18 @@
     ", " : {
 
     },
-    "account.wikidata.account" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wikidata account"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compte Wikidata"
-          }
-        }
-      }
-    },
-    "account.wikidata.connect" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Link my Wikidata account"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Relier mon compte Wikidata"
-          }
-        }
-      }
-    },
-    "account.wikidata.footer" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Works and authors that come from Wikidata are edited on Wikidata. Without a linked account, inventaire.io publishes your changes there with its bot, naming your account; once it is linked, they appear under your own Wikidata name."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les œuvres et les auteur·ices venus de Wikidata se modifient sur Wikidata. Sans compte relié, inventaire.io y publie vos modifications avec son robot, en citant votre compte ; une fois relié, elles y paraissent sous votre nom."
-          }
-        }
-      }
-    },
-    "account.wikidata.footer.linked" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your changes to works and authors from Wikidata appear there under your name. To unlink your account, remove inventaire.io’s access on Wikimedia."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vos modifications des œuvres et des auteur·ices de Wikidata y paraissent sous votre nom. Pour délier votre compte, retirez l’accès d’inventaire.io sur Wikimedia."
-          }
-        }
-      }
-    },
-    "account.wikidata.header" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wikidata"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wikidata"
-          }
-        }
-      }
-    },
-    "account.wikidata.linked" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Linked"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Relié"
-          }
-        }
-      }
-    },
-    "account.wikidata.linked.confirmation" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wikidata account linked"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compte Wikidata relié"
-          }
-        }
-      }
-    },
-    "account.wikidata.manage" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manage access on Wikimedia"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gérer l’accès sur Wikimedia"
-          }
-        }
-      }
-    },
-    "account.wikidata.sheet.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wikidata"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wikidata"
-          }
-        }
-      }
-    },
     "edit_entity.wikidata.bot" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This one lives on Wikidata: Save publishes your changes there through inventaire.io’s bot, which names your account. Link your Wikidata account in Account and sign-in to publish them under your own name."
+            "value" : "This one lives on Wikidata: Save publishes your changes there through inventaire.io’s bot, which names your account."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cette fiche vit sur Wikidata : « Enregistrer » y publie vos modifications par le robot d’inventaire.io, qui cite votre compte. Reliez votre compte Wikidata dans Compte et connexion pour les publier sous votre nom."
+            "value" : "Cette fiche vit sur Wikidata : « Enregistrer » y publie vos modifications par le robot d’inventaire.io, qui cite votre compte."
           }
         }
       }

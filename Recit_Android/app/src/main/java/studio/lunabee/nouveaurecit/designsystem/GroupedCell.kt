@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.Dp
  */
 fun Modifier.groupedCell(index: Int, count: Int, color: Color): Modifier {
     val radius: Dp = CornerRadius.rounded
-    val shape = RoundedCornerShape(
+    val shape: RoundedCornerShape = RoundedCornerShape(
         topStart = if (index == 0) radius else CornerRadius.none,
         topEnd = if (index == 0) radius else CornerRadius.none,
         bottomStart = if (index == count - 1) radius else CornerRadius.none,

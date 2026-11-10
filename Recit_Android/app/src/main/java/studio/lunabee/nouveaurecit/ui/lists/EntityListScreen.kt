@@ -1,8 +1,6 @@
 package studio.lunabee.nouveaurecit.ui.lists
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
@@ -32,7 +29,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,13 +38,13 @@ import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.OptimisticRunner
 import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.data.model.EntityListType
-import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.CapsuleTab
 import studio.lunabee.nouveaurecit.ui.common.CapsuleTabs
 import studio.lunabee.nouveaurecit.ui.common.Formatting
+import studio.lunabee.nouveaurecit.ui.common.ListCard
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
@@ -352,21 +348,5 @@ private fun ListSelectedTitle(row: ListElementRowModel) {
         (row.authors ?: row.subtitle)?.takeIf { it.isNotBlank() }?.let {
             Text(it, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundSecondary, textAlign = TextAlign.Center)
         }
-    }
-}
-
-/** A cell of the grouped list below the covers, on the screen's margins. */
-@Composable
-internal fun ListCard(onClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.medium)
-            .clip(RoundedCornerShape(CornerRadius.rounded))
-            .background(RecitTheme.colors.backgroundGroupedCell)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
-    ) {
-        content()
     }
 }

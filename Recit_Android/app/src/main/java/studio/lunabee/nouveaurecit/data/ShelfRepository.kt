@@ -9,7 +9,6 @@ import studio.lunabee.nouveaurecit.data.db.ShelfWithItems
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.Merges
 import studio.lunabee.nouveaurecit.data.model.Visibility
-import studio.lunabee.nouveaurecit.data.shelves.RoomShelfMembershipStore
 import studio.lunabee.nouveaurecit.data.shelves.ShelfMembership
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.dto.IdsPayload
@@ -28,9 +27,9 @@ class ShelfRepository(
     private val api: ApiService,
     private val db: AppDatabase,
     private val runner: OptimisticRunner,
+    private val membership: ShelfMembership,
 ) {
     private val dao = db.shelfDao()
-    private val membership: ShelfMembership = ShelfMembership(api, RoomShelfMembershipStore(db), runner)
 
     fun observeShelvesOf(ownerId: String): Flow<List<ShelfWithItems>> = dao.observeShelvesOf(ownerId)
 
@@ -160,10 +159,14 @@ class ShelfRepository(
      * answer. Items the shelf already holds are dropped from the payload, and an empty payload is a
      * no-op — which is what makes a sorting apply that stopped partway safe to resume.
      */
-    suspend fun addItemsNow(shelfId: String, itemIds: List<String>) = membership.addNow(shelfId, itemIds)
+    suspend fun addItemsNow(shelfId: String, itemIds: List<String>) {
+        membership.addNow(shelfId, itemIds)
+    }
 
     /** `removeItemsAwaitingServer`: the mirror of [addItemsNow] — only items the shelf holds are sent. */
-    suspend fun removeItemsNow(shelfId: String, itemIds: List<String>) = membership.removeNow(shelfId, itemIds)
+    suspend fun removeItemsNow(shelfId: String, itemIds: List<String>) {
+        membership.removeNow(shelfId, itemIds)
+    }
 
     fun observeCountOf(ownerId: String): Flow<Int> = dao.observeCountOf(ownerId)
 }

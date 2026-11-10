@@ -29,8 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ItemRow
@@ -143,7 +146,10 @@ private fun ShelfAddBookRow(row: ItemRow, isTicked: Boolean, onToggle: () -> Uni
         imageUrl = row.image,
         onClick = onToggle,
         authors = row.authorNames.joinToString(", "),
-        modifier = Modifier.semantics { selected = isTicked },
+        modifier = Modifier.semantics {
+            role = Role.Checkbox
+            toggleableState = ToggleableState(isTicked)
+        },
         trailing = {
             Icon(
                 imageVector = if (isTicked) Icons.Filled.CheckCircle else Icons.Outlined.Circle,

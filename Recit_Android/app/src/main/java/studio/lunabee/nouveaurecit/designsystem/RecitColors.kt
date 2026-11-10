@@ -42,6 +42,11 @@ data class RecitColors(
     val backgroundFormCell: Color,
     /** Figma's `background/shade`: a veil that darkens whatever it lies on — by nothing in light, black at 40 % in dark. */
     val backgroundShade: Color,
+    /**
+     * iOS's Regular material, behind the Plein écran (feature 0085): a translucent veil of the theme over
+     * the window behind, which Android blurs from Android 12.
+     */
+    val backgroundMaterial: Color,
     val borderDefault: Color,
     val isDark: Boolean,
 ) {
@@ -84,6 +89,7 @@ data class RecitColors(
             backgroundForm = Primitive.Gray50,
             backgroundFormCell = Primitive.Gray0,
             backgroundShade = Color.Black.copy(alpha = 0f),
+            backgroundMaterial = Primitive.Gray0.copy(alpha = 0.7f),
             borderDefault = Color.Black.copy(alpha = 0.1f),
             isDark = false,
         )
@@ -111,6 +117,7 @@ data class RecitColors(
             // The shade's veil spelled out, as on iOS.
             backgroundFormCell = Color.Black.copy(alpha = 0.4f),
             backgroundShade = Color.Black.copy(alpha = 0.4f),
+            backgroundMaterial = Primitive.Gray900.copy(alpha = 0.7f),
             borderDefault = Color.White.copy(alpha = 0.1f),
             isDark = true,
         )

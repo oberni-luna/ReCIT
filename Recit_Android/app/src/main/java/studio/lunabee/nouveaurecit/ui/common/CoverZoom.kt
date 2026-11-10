@@ -1,4 +1,4 @@
-package studio.lunabee.nouveaurecit.ui.book
+package studio.lunabee.nouveaurecit.ui.common
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size

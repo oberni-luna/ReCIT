@@ -22,7 +22,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,14 +30,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.AuthorEntity
 import studio.lunabee.nouveaurecit.designsystem.CellThumbnail
@@ -48,7 +45,10 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.designsystem.WithLabel
+import studio.lunabee.nouveaurecit.designsystem.rememberImageModel
 import studio.lunabee.nouveaurecit.ui.common.BookRow
+import studio.lunabee.nouveaurecit.ui.common.FullScreenCoverDialog
+import studio.lunabee.nouveaurecit.ui.common.fullScreenMemoryCacheKey
 
 /*
  * The pieces the book, work and author screens share: `EntityHeaderView` + `EntityImageView`,
@@ -99,20 +99,13 @@ internal fun EntityHeader(title: String, subtitle: String?, imageUrl: String?, m
 
 /**
  * `EntityImageView`'s cover: a tap opens it full screen (feature 0029). It is kept in memory under
- * [coverMemoryCacheKey], so the full-screen cover has it to draw on its first frame.
+ * [fullScreenMemoryCacheKey], so the Plein écran has it to draw on its first frame.
  */
 @Composable
 private fun HeaderCover(imageUrl: String) {
     var showsFullScreen: Boolean by rememberSaveable { mutableStateOf(false) }
-    val context = LocalContext.current
-    val request: ImageRequest = remember(imageUrl) {
-        ImageRequest.Builder(context)
-            .data(imageUrl)
-            .memoryCacheKey(coverMemoryCacheKey(imageUrl))
-            .build()
-    }
     AsyncImage(
-        model = request,
+        model = rememberImageModel(imageUrl, fullScreenMemoryCacheKey(imageUrl)),
         contentDescription = stringResource(R.string.entity_cover_enlarge),
         contentScale = ContentScale.Fit,
         modifier = Modifier
@@ -121,7 +114,11 @@ private fun HeaderCover(imageUrl: String) {
             .clickable(role = Role.Button) { showsFullScreen = true },
     )
     if (showsFullScreen) {
-        FullScreenCoverDialog(url = imageUrl, onDismiss = { showsFullScreen = false })
+        FullScreenCoverDialog(
+            url = imageUrl,
+            contentDescription = stringResource(R.string.entity_cover),
+            onDismiss = { showsFullScreen = false },
+        )
     }
 }
 

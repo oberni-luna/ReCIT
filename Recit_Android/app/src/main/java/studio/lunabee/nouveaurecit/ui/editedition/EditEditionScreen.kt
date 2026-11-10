@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -173,7 +174,7 @@ private fun EditEditionForm(state: EditEditionUiState, viewModel: EditEditionVie
         },
         containerColor = RecitTheme.colors.backgroundForm,
     ) { padding ->
-        Box(Modifier.padding(padding).fillMaxSize()) {
+        Box(Modifier.padding(padding).consumeWindowInsets(padding).fillMaxSize()) {
             when (state.phase) {
                 EditEditionPhase.Loading -> CircularProgressIndicator(
                     color = RecitTheme.colors.foregroundSecondary,

@@ -31,8 +31,6 @@ Port of « Compte et connexion » from iOS [0055](../wiki/features/0055-profile-
 
 ## Implementation
 
-stacked on: wa/111-add-android-profile-editing @ 3903d40
-
 - New `data/user/`: `AccountSettings` (`email`, `isEmailValidated`, `language`, `isFediversable`, `anonymizesContributions`, `of(UserDto)`); `AccountRepository` (in-memory `StateFlow`, `take(dto)` / `forget()`; language and the two switches optimistic through `OptimisticRunner`, each one paced `PUT /api/user` via `ProfileRepository.updateUserAttribute`; `changeEmail` server first; `resendEmailConfirmation`; `changePassword`); `PasswordChangeFailure` (`WrongCurrentPassword` | `Other`, each its sentence); `AccountLanguage` (the 29 server codes named in the phone's locale). `UserAttributeUpdate.of(attribute, Boolean)`.
 - `UserDto` gains `validEmail`, `fediversable`, `settings` (`UserSettingsDto` with `notifications` and `contributions`, ready for #113); `PasswordChangePayload` (`old-password` / `new-password`). `UserRepository.syncMyUser()` returns the dto; `SessionCoordinator` runs `account.take(...)`, `account.forget()` in `forgetSignedOutUser` (sign-out, 401) and `deleteAccount`. `AppContainer.account`. Settings live in `AccountRepository`, not `UserRepository` (dependency cycle, Room).
 - New `ui/profile/account/`: `AccountSettingsScreen` (+ VM), `EmailConfirmationNotice`, `ChangeEmailScreen` (+ VM, UiState), `ChangePasswordScreen` (+ VM, UiState; « Mot de passe oublié ? » through `AuthRepository.requestPasswordReset`). `Destination.AccountSettings`, `ChangeEmail`, `ChangePassword`. Profil: « Réglages » section with « Compte et connexion » under « Modifier le profil ».
@@ -59,7 +57,7 @@ stacked on: wa/111-add-android-profile-editing @ 3903d40
 - ⚠️ Code changed since the user's test: « Compte et connexion » when offline, the e-mail error under the field, switch rows' touch area (also the group settings' two switches).
 - Wiki: nothing task-specific; the sprint's feature doc is written with #101.
 - Screenshots: none — `verify.platform: ios`, this task is Android.
-- ⛔ Lands after #111: PR stays draft on `wa/111-…` until #111 merges, then rebase onto the sprint branch and `gh pr edit --base`.
+- Landing — #111 merged; rebased onto `sprint/android-1-4-0` without conflict. Build ✅.
 
 ## Verification
 

@@ -1,6 +1,6 @@
 ---
 issue: 94
-status: to-test
+status: to-close
 wiki: [[features/0080-a-private-note-on-my-copy]], [[features/0031-android-app]], [[adr/0001-swiftdata-reactive-optimistic]]
 note: Rattrapage iOS 1.10.0 (feature 0080) on Android. Android writes only `details` today (BookViewModel.commitNotes → updateDetails).
 created: 2026-11-09
@@ -42,6 +42,18 @@ Port of iOS [0080](../wiki/features/0080-a-private-note-on-my-copy.md) to `Recit
 - Round 1 (feedback): `BookScreen.myCopy()` — the date row's `LazyColumn` key `mine-details:<id>` → `mine-transaction:<id>`. `inline`.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: `origin/sprint/android-1-4-0...wa/94-add-android-private-notes`, the feedback round's `inline` hunk judged harder.
+- Findings (all 🟡 minor), fixed by autofix, re-verified clean:
+  - [correctness] `InventoryItemTextWriter`: a refusal reverted to the queue-time `previous`, which could be an earlier refused text. Now reverts to the last server-accepted text per (item, attribute) (`acceptedTexts`); tests `twoRefusalsInARowPutBackTheLastAcceptedNote`, `aRefusalAfterAnAcceptedNotePutsTheAcceptedOneBack`.
+  - [structure] `BookScreen`: text cells keyed `mine-text-${attribute.name}:<id>`, out of the `mine-` namespace the date row uses.
+  - [style] `MyCopyDetailsCell` → `MyCopyTransactionCell`.
+- Final: `LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓` — clean. Build ✅, 610 tests, 0 failures.
+- ⚠️ Code changed since the user's test: a refused note now falls back to the last saved one.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
 
 ## Verification
 

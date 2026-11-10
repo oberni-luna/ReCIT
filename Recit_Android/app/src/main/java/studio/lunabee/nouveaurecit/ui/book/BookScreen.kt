@@ -249,11 +249,11 @@ private fun LazyListScope.myCopy(state: BookUiState, viewModel: BookViewModel) {
     val mine = state.myItem ?: return
     item(key = "mine-header") { SectionHeader(title = stringResource(R.string.edition_my_inventory)) }
     InventoryItemTextAttribute.entries.forEach { attribute ->
-        item(key = "mine-${attribute.raw}:${mine.item.id}") {
+        item(key = "mine-text-${attribute.name}:${mine.item.id}") {
             MyCopyTextCell(mine, attribute) { viewModel.commitText(mine.item.id, attribute, it) }
         }
     }
-    item(key = "mine-transaction:${mine.item.id}") { MyCopyDetailsCell(mine) { viewModel.updateTransaction(mine.item.id, it) } }
+    item(key = "mine-transaction:${mine.item.id}") { MyCopyTransactionCell(mine) { viewModel.updateTransaction(mine.item.id, it) } }
 }
 
 /** `BookAnchor.stableId`: the same book is one entry however it was labelled. */

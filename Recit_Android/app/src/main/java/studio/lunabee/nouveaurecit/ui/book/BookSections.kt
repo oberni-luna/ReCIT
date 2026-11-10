@@ -151,7 +151,7 @@ private val InventoryItemTextAttribute.placeholder: Int
 
 /** « Créé le %s », then the label-hidden transaction picker (`Picker` → `ExposedDropdownMenuBox`). */
 @Composable
-internal fun MyCopyDetailsCell(row: ItemRow, onTransaction: (TransactionType) -> Unit) {
+internal fun MyCopyTransactionCell(row: ItemRow, onTransaction: (TransactionType) -> Unit) {
     var expanded: Boolean by remember { mutableStateOf(false) }
     val current: TransactionType = row.item.transaction
     val pickerDescription: String = stringResource(R.string.inventory_item_transaction_mode)

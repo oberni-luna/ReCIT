@@ -127,6 +127,33 @@ class InventoryItemTextWriterTest {
     }
 
     @Test
+    fun twoRefusalsInARowPutBackTheLastAcceptedNote() = runTest {
+        answer("oops", code = 500)
+        answer("oops", code = 500)
+        val first: Job? = writer.write("i1", InventoryItemTextAttribute.Notes, "Première")
+        val second: Job? = writer.write("i1", InventoryItemTextAttribute.Notes, "Seconde")
+        first?.join()
+        second?.join()
+
+        assertEquals("Prêté à Léa", store.text("i1", InventoryItemTextAttribute.Notes))
+        awaitErrors(2)
+        assertEquals(2, server.requestCount)
+    }
+
+    @Test
+    fun aRefusalAfterAnAcceptedNotePutsTheAcceptedOneBack() = runTest {
+        answer("""{"ok":true}""")
+        answer("oops", code = 500)
+        val first: Job? = writer.write("i1", InventoryItemTextAttribute.Notes, "Première")
+        val second: Job? = writer.write("i1", InventoryItemTextAttribute.Notes, "Seconde")
+        first?.join()
+        second?.join()
+
+        assertEquals("Première", store.text("i1", InventoryItemTextAttribute.Notes))
+        awaitErrors(1)
+    }
+
+    @Test
     fun aSecondWriteLeavesOnlyOnceTheFirstIsAnswered() = runTest {
         val firstAnswered: AtomicBoolean = AtomicBoolean(false)
         val secondSawFirstAnswered: AtomicBoolean = AtomicBoolean(false)

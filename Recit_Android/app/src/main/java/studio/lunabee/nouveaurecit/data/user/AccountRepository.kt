@@ -58,7 +58,7 @@ class AccountRepository(
 
     /** One e-mail switch, sent as its own `settings.notifications.<key>`. */
     suspend fun setNotification(setting: NotificationSetting, isOn: Boolean): Job? =
-        write(UserAttributeUpdate.of(setting.attribute, isOn), isOn, { it.isEnabled(setting) }) { with(setting, it) }
+        write(UserAttributeUpdate.of(setting.attribute, isOn), isOn, { it.isEnabled(setting) }) { withNotification(setting, it) }
 
     suspend fun setSummaryPeriodicity(days: Int): Job? =
         write(UserAttributeUpdate.of(SUMMARY_PERIODICITY, days), days, AccountSettings::summaryPeriodicity) { copy(summaryPeriodicity = it) }

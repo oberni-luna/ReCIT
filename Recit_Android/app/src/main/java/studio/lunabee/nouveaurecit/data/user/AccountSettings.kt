@@ -26,8 +26,8 @@ data class AccountSettings(
     /** An absent switch is read the way the server reads it (`notifications[label] === false`): on. */
     fun isEnabled(setting: NotificationSetting): Boolean = notifications[setting] ?: true
 
-    fun with(setting: NotificationSetting, isEnabled: Boolean): AccountSettings =
-        copy(notifications = notifications + (setting to isEnabled))
+    fun withNotification(setting: NotificationSetting, isOn: Boolean): AccountSettings =
+        copy(notifications = notifications + (setting to isOn))
 
     /** The general switch off greys every other one: they keep their value, but nothing is sent. */
     fun canEdit(setting: NotificationSetting): Boolean =

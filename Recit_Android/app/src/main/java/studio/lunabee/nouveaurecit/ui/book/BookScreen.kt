@@ -253,7 +253,7 @@ private fun LazyListScope.myCopy(state: BookUiState, viewModel: BookViewModel) {
             MyCopyTextCell(mine, attribute) { viewModel.commitText(mine.item.id, attribute, it) }
         }
     }
-    item(key = "mine-details:${mine.item.id}") { MyCopyDetailsCell(mine) { viewModel.updateTransaction(mine.item.id, it) } }
+    item(key = "mine-transaction:${mine.item.id}") { MyCopyDetailsCell(mine) { viewModel.updateTransaction(mine.item.id, it) } }
 }
 
 /** `BookAnchor.stableId`: the same book is one entry however it was labelled. */

@@ -6,9 +6,12 @@ import studio.lunabee.nouveaurecit.R
 /**
  * `Model/Authentication/AuthFailure.swift`: every way signing in or up can fail, each owning the
  * sentence the user reads. The server's English prose is carried for the log and never rendered.
+ * Three failures are told apart on screen: wrong credentials, no network, too many attempts;
+ * everything else is one sentence. Signing up adds the five that name a field.
  */
 sealed interface AuthFailure {
     data object InvalidCredentials : AuthFailure
+    data object RateLimited : AuthFailure
     data object Network : AuthFailure
     data object NoSessionCookies : AuthFailure
     data object Storage : AuthFailure
@@ -33,6 +36,7 @@ sealed interface AuthFailure {
     val message: Int
         get() = when (this) {
             InvalidCredentials -> R.string.auth_error_invalid_credentials
+            RateLimited -> R.string.auth_error_rate_limited
             Network -> R.string.auth_error_network
             UsernameTaken -> R.string.signup_error_username_taken
             UsernameInvalid -> R.string.signup_error_username_invalid
@@ -46,6 +50,7 @@ sealed interface AuthFailure {
         fun classify(status: Int, serverMessage: String?): AuthFailure? {
             if (status in 200..299) return null
             if (status == 401 || status == 403) return InvalidCredentials
+            if (status == 429) return RateLimited
             return Server(status, serverMessage)
         }
 

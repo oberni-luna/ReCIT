@@ -1,6 +1,6 @@
 ---
 issue: 101
-status: todo
+status: to-close
 wiki: [[integrations/google-play]], [[features/0065-android-end-to-end-scenario]], [[features/0077-android-catches-up-with-1-9-0]]
 note: "Tu peux ajouter une dernière tâche à exécuter avec celles qu'on vient de créer pour Android, de pusher une version 1.4.0 sur le store"
 created: 2026-11-09
@@ -35,3 +35,24 @@ created: 2026-11-09
 - `app-release.aab` built, `jarsigner -verify` says it is signed with the upload key; its path is in the report.
 - Tag `Android-1.4.0-#6` on the bump commit, pushed.
 - Nothing uploaded to Google Play by the agent.
+
+## Implementation
+
+- `Recit_Android/app/build.gradle.kts`: `versionCode = 6`, `versionName = "1.4.0"`.
+- `metadata/play-store/{fr-FR,en-US}/changelogs/6.txt` (488 / 411 characters).
+- `docs/wiki/integrations/google-play.md`: Photos covers group and profile pictures; new row Location › Approximate location (the profile's position, rounded to ~1 km); « Not collected » reworded.
+- `docs/wiki/features/0091-android-catches-up-with-1-10-0.md` and its line in `CLAUDE.md`: the sprint's feature doc.
+- `app-release.aab` built from this branch on `sprint/android-1-4-0` after the eleven tasks landed; `jarsigner -verify` ✅, certificate SHA256 `74:6B:86:…:0E:AC` = the upload key. Copied to `build/exlibris-android-1.4.0-6.aab`.
+- Tag `Android-1.4.0-#6` (annotated, like 1.3.0) on the version commit, pushed.
+
+## Review
+
+### Round validation — 2026-11-10
+
+- Version bump, changelogs and docs only, no code: no verifier pass.
+
+## Verification
+
+- e2e gate skipped on Olivier's call (« Bundle direct »). The last run, before the review fixes, was 11 OK / 2 KO, the KO being #94's duplicate-key crash, fixed since.
+- The 1.4.0 debug build installed and launched on a Galaxy S22 (Android 16), no crash; the Profil's foot not checked by the agent.
+- Nothing uploaded to Google Play.

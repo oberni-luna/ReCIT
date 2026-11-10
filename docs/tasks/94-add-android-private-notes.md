@@ -39,6 +39,7 @@ Port of iOS [0080](../wiki/features/0080-a-private-note-on-my-copy.md) to `Recit
 - Tests: `InventoryItemTextWriterTest` (MockWebServer, 6: exact body with `attribute: notes`, details still `details`, nothing sent unchanged / item gone, refusal reverts + reports, stale refusal keeps newer note, second request waits for the first — fails with the `join()` removed), `InMemoryInventoryItemTextStore`, `AppDatabaseSchemaTest` (3.json = 2.json + `inventory_items.notes` NOT NULL default `''`; no MigrationTestHelper, which needs instrumented tests), `MergesTest` note merge.
 - Build: `./gradlew :app:assembleDebug` ✅ · `./gradlew :app:testDebugUnitTest --rerun-tasks` ✅ 0 failures. `EntityCreationRepositoryEntityTest.aWikidataWorkOrAnEditionIsNotOpened` failed once (404 from MockWebServer) on a first full run, then passed: looks flaky, unrelated.
 - Runtime not run: no inventaire.io credentials for the agent.
+- Round 1 (feedback): `BookScreen.myCopy()` — the date row's `LazyColumn` key `mine-details:<id>` → `mine-transaction:<id>`. `inline`.
 
 ## Review
 
@@ -46,4 +47,17 @@ Port of iOS [0080](../wiki/features/0080-a-private-note-on-my-copy.md) to `Recit
 
 manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
 
+round 1: manual validation — not run by agent · run: yours
+
 ## Feedback
+
+### Round 1 — 2026-11-10
+
+- **Asked:** « l'App n'arrête pas de crash sur le simulateur, corrige »
+- **Cause:** `IllegalArgumentException: Key "mine-details:<id>" was already used` (emulator crash buffer). The Commentaire cell's key is `mine-${attribute.raw}:<id>`, and `InventoryItemTextAttribute.Details.raw` is `details`, so it collided with the date row's `mine-details:<id>`: every Fiche livre of a book I own crashed. Also explains e2e step 12 (« l'écran du livre n'est pas apparu »).
+- **Triage:** defect — the first criterion (« Dans mon inventaire » shows both fields then the date row) never held at runtime. Criteria unchanged.
+- **Change:** `ui/book/BookScreen.kt` — date row key `mine-transaction:<id>`. `inline`.
+- **Build / tests:** `./gradlew :app:assembleDebug :app:testDebugUnitTest` ✅ 608 tests, 0 failures.
+- **Review:** deferred → `/wa-validate`.
+- **Verify:** manual — run: yours.
+- **Rule captured:** none.

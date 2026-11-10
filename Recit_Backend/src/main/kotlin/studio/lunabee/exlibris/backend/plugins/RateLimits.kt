@@ -19,7 +19,7 @@ object RateLimits {
 
 /**
  * The per-IP limits of #70 decision 9, in memory: one instance of the backend. Their `429` is what the apps
- * already show (feature 0083). The IP is the socket's: behind a reverse proxy, the hosting must forward it.
+ * already show (feature 0083). The IP is the client's, from nginx's `X-Forwarded-For` (`installForwardedHeaders`).
  */
 fun Application.installRateLimits() {
     install(RateLimit) {

@@ -20,6 +20,7 @@ import studio.lunabee.nouveaurecit.data.groups.GroupSetting
 import studio.lunabee.nouveaurecit.data.groups.GroupTransitionError
 import studio.lunabee.nouveaurecit.data.groups.MyGroups
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
+import studio.lunabee.nouveaurecit.data.images.ImageUpload
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.ImageUrl
 import studio.lunabee.nouveaurecit.network.NetworkError
@@ -58,7 +59,7 @@ class GroupRepository(
     private val errorReporter: ErrorReporter,
     private val myUserId: StateFlow<String?>,
 ) {
-    private val pictureUpload: GroupPictureUpload = GroupPictureUpload(api)
+    private val pictureUpload: GroupPictureUpload = GroupPictureUpload(ImageUpload(api))
 
     private val _groups: MutableStateFlow<Map<String, ReaderGroup>> = MutableStateFlow(emptyMap())
 
@@ -248,7 +249,7 @@ class GroupRepository(
             val setting: GroupSetting.Picture = when (edit) {
                 GroupPictureEdit.Unchanged -> return
                 GroupPictureEdit.Removed -> GroupSetting.Picture(path = null)
-                is GroupPictureEdit.Replaced -> GroupSetting.Picture(path = pictureUpload.path(edit.path))
+                is GroupPictureEdit.Replaced -> GroupSetting.Picture(path = pictureUpload.upload(edit.path))
             }
             putSetting(setting, groupId)
             if (myUserId.value == me) rewrite(groupId, setting::applied)

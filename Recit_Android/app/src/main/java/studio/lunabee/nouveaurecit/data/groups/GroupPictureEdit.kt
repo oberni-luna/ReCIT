@@ -17,13 +17,6 @@ sealed interface GroupPictureEdit : Serializable {
 
     data object Removed : GroupPictureEdit
 
-    /** Whether the slot shows a photo, for a group whose photo on the server is [savedPictureUrl]. */
-    fun showsPicture(savedPictureUrl: String?): Boolean = when (this) {
-        Unchanged -> savedPictureUrl != null
-        is Replaced -> true
-        Removed -> false
-    }
-
     /** Whether « Enregistrer » has a photo to write: taking away a photo the group does not have is nothing. */
     fun isChange(from: String?): Boolean = when (this) {
         Unchanged -> false

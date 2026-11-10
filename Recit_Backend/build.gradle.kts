@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.server.rate.limit)
+    implementation(libs.ktor.server.forwarded.header)
     implementation(libs.ktor.server.html.builder)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.cio)

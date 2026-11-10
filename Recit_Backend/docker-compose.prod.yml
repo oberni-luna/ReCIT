@@ -1,0 +1,67 @@
+# The hosted stack (#93), on the shared VPS behind its nginx: see docs/wiki/integrations/hosting.md.
+# scripts/deploy-backend.sh runs it with `-p exlibris --env-file /opt/exlibris/.env`; the secrets come from that
+# file, never from git. No Mailpit: e-mails leave through Brevo's SMTP relay.
+name: exlibris
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "5"
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: exlibris
+      POSTGRES_USER: exlibris
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in the env file}
+    volumes:
+      - exlibris-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    logging: *logging
+
+  backend:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/exlibris
+      DATABASE_USER: exlibris
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in the env file}
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in the env file}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?set PUBLIC_BASE_URL in the env file}
+      SMTP_HOST: ${SMTP_HOST:?set SMTP_HOST in the env file}
+      SMTP_PORT: ${SMTP_PORT:?set SMTP_PORT in the env file}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:?set MAIL_FROM in the env file}
+      IMAGES_DIRECTORY: /data/images
+      INVENTAIRE_BASE_URL: ${INVENTAIRE_BASE_URL:-https://inventaire.io}
+    # Loopback only: nginx is the one way in, and the other projects on the VPS hold 127.0.0.1:86x0.
+    ports:
+      - "127.0.0.1:8630:8080"
+    volumes:
+      - exlibris-images:/data/images
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    logging: *logging
+
+# Named after the project so they read as Ex-libris's in `docker volume ls`, and survive every deploy.
+volumes:
+  exlibris-db:
+    name: exlibris-db
+  exlibris-images:
+    name: exlibris-images

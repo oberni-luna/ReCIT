@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A reader's, a group's or an author's photo opened in the Plein écran (features 0081 and 0085). French
+  values of ReCIT_iOS/Localizable.xcstrings, keys with '.' turned into '_'.
+-->
+<resources>
+    <string name="photo_action_enlarge">Agrandir la photo</string>
+    <!-- Android only: the iOS Plein écran reads « Couverture » whatever it shows. -->
+    <string name="photo_accessibility_label">Photo</string>
+</resources>

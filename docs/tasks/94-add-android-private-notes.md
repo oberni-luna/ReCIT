@@ -47,7 +47,7 @@ Port of iOS [0080](../wiki/features/0080-a-private-note-on-my-copy.md) to `Recit
 
 manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)
 
-round 1: manual validation — not run by agent · run: yours
+round 1: sprint test build installed on emulator-5554 (signed in as the user left it), « Claude Gueux » opened from « Tous les livres »: « Dans mon inventaire » shows both fields and the date row, no entry in the crash buffer. Typing and saving a note not exercised · run: agent + yours
 
 ## Feedback
 
@@ -59,5 +59,5 @@ round 1: manual validation — not run by agent · run: yours
 - **Change:** `ui/book/BookScreen.kt` — date row key `mine-transaction:<id>`. `inline`.
 - **Build / tests:** `./gradlew :app:assembleDebug :app:testDebugUnitTest` ✅ 608 tests, 0 failures.
 - **Review:** deferred → `/wa-validate`.
-- **Verify:** manual — run: yours.
+- **Verify:** owned book's Fiche livre opened on the emulator, no crash; writing a note not exercised.
 - **Rule captured:** none.

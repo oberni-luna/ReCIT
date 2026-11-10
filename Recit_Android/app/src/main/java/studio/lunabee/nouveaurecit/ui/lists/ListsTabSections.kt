@@ -33,10 +33,9 @@ data class ListsTabSections(
                 mine = ListsPresentation.filter(lists.filter { it.list.isCreatedByMe(myUserId) }, query = ""),
                 network = lists
                     .mapNotNull { entry ->
-                        val owner: UserEntity? = entry.list.creatorId?.takeIf { it != myUserId }?.let(friendsById::get)
-                        owner?.let { NetworkListEntry(entry, it) }
+                        entry.list.friendCreator(myUserId, friendsById)?.let { NetworkListEntry(entry, it) }
                     }
-                    .sortedByDescending { it.list.list.updated ?: it.list.list.created },
+                    .sortedByDescending { it.list.list.lastChanged },
             )
         }
     }

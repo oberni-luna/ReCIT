@@ -1,6 +1,5 @@
 package studio.lunabee.nouveaurecit.ui.auth.coverwall
 
-import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -25,7 +24,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Density
@@ -38,6 +36,7 @@ import kotlinx.coroutines.isActive
 import studio.lunabee.nouveaurecit.designsystem.Primitive
 import studio.lunabee.nouveaurecit.designsystem.ShelfPalette
 import studio.lunabee.nouveaurecit.network.ApiService
+import studio.lunabee.nouveaurecit.ui.common.rememberReducesMotion
 
 /**
  * `CoverWallView`: four columns of covers drifting slowly, read on a clock rather than animated —
@@ -50,12 +49,9 @@ import studio.lunabee.nouveaurecit.network.ApiService
  */
 @Composable
 fun CoverWall(paths: List<String>, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val elapsed: MutableFloatState = remember { mutableFloatStateOf(0f) }
-    val animates: Boolean = remember {
-        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
-    }
+    val animates: Boolean = !rememberReducesMotion()
 
     LaunchedEffect(animates) {
         if (!animates) return@LaunchedEffect

@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -31,14 +33,15 @@ import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 
 /**
  * `ListRowView`: the cover fan, then a line saying how much the list holds — headed, for a friend's list, by
- * their picture and name —, its name, and what it is for on up to three lines.
+ * their picture and name —, its name, and what it is for on up to three lines. [background] is the cell's,
+ * where the row sits elsewhere than the Lists tab.
  */
 @Composable
-internal fun ListRow(row: ListRowModel, onClick: () -> Unit) {
+internal fun ListRow(row: ListRowModel, background: Color = RecitTheme.colors.backgroundDefault, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(RecitTheme.colors.backgroundDefault)
+            .background(background)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
@@ -65,6 +68,12 @@ internal fun ListRow(row: ListRowModel, onClick: () -> Unit) {
             }
         }
     }
+}
+
+/** The rule between two list rows, from their text's margin. */
+@Composable
+internal fun ListRowDivider() {
+    HorizontalDivider(color = RecitTheme.colors.borderDefault, modifier = Modifier.padding(start = Spacing.medium))
 }
 
 /** `ListRowMetaLine`: « 14 œuvres », or « Léa • 14 œuvres » after Léa's picture — whose the list is before what it is called. */

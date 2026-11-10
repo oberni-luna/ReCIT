@@ -313,6 +313,11 @@ interface ListDao {
     @Query("SELECT * FROM lists WHERE id = :id")
     fun observeList(id: String): Flow<ListWithElements?>
 
+    /** Every list holding one of [uris], whoever made it — « Dans les listes » keeps mine and my friends'. */
+    @Transaction
+    @Query("SELECT * FROM lists WHERE id IN (SELECT listId FROM list_elements WHERE uri IN (:uris))")
+    fun observeHolding(uris: List<String>): Flow<List<ListWithElements>>
+
     @Query("SELECT * FROM lists WHERE id = :id")
     suspend fun get(id: String): EntityListEntity?
 

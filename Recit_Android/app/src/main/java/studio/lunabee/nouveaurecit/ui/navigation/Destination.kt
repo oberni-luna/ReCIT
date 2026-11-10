@@ -36,7 +36,12 @@ sealed interface Destination : NavKey {
 
     @Serializable data class User(val id: String) : Destination
 
-    @Serializable data class EntityList(val id: String) : Destination
+    /**
+     * A list, on its « Livres » page. [focusUri] is the work it arrives on when opened from « Dans les listes »
+     * on the book screen (`NavigationDestination.entityList(id:focusURI:)`): it opens on its first book, then
+     * moves to that one and rings its cover.
+     */
+    @Serializable data class EntityList(val id: String, val focusUri: String? = null) : Destination
 
     @Serializable data class Shelf(val id: String) : Destination
 

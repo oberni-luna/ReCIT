@@ -14,8 +14,8 @@ android {
         applicationId = "studio.lunabee.exlibris.android"
         minSdk = 28
         targetSdk = 37
-        versionCode = 6
-        versionName = "1.4.0"
+        versionCode = 7
+        versionName = "1.4.1"
     }
 
     // The upload key lives outside the repository: its path and passwords are read from
@@ -38,7 +38,12 @@ android {
             buildConfigField("String", "SESSION_STORE_NAME", "\"asso.recits.auth.cookies.dev\"")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             signingConfig = signingConfigs.findByName("upload")
             buildConfigField("String", "SESSION_STORE_NAME", "\"asso.recits.auth.cookies\"")
         }

@@ -1,6 +1,6 @@
 ---
 issue: 97
-status: to-test
+status: to-close
 wiki: [[features/0079-the-lists-a-book-is-in]], [[features/0068-lists-in-my-network]], [[features/0077-android-catches-up-with-1-9-0]], [[features/0062-android-catches-up-with-1-7-0]]
 note: Rattrapage iOS 1.10.0 (feature 0079). Friends' lists and elements are already in Room since 0077.
 created: 2026-11-09
@@ -40,7 +40,7 @@ Port of iOS [0079](../wiki/features/0079-the-lists-a-book-is-in.md), whole, arri
 
 ## Implementation
 
-stacked on: wa/94-add-android-private-notes @ 302df91
+stacked on: wa/94-add-android-private-notes @ 83722e6
 
 - Pure rules, `data/lists/`: `BookListEntry.entries(lists, workUris, myUserId, friends)` (mine or a friend's lists of works; a recueil once, focused on its lowest `ordinal`; `lastChanged` desc, then id) and `ListArrivalFocus` (Waiting → Arriving(Scroll|Jump) → Highlighted → Done, `landingFeedbackUri`, `jumpUri`).
 - Data: `EntityListEntity.lastChanged` + `friendCreator(myUserId, friendsById)` (now also used by `ListsTabSections`, unchanged behaviour); `ListDao.observeHolding(uris)` Flow — no migration, no index; `ListRepository.observeListsHolding(uris)`.
@@ -54,6 +54,20 @@ stacked on: wa/94-add-android-private-notes @ 302df91
 - Runtime not run: no inventaire.io credentials for the agent. Timing, halo, haptic count, TalkBack focus, dark rendering unseen.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: from the stack point, `origin/wa/94-add-android-private-notes...wa/97-add-android-books-lists-section`; rebased onto #94's reviewed tip (`83722e6`) first.
+- Findings, fixed, re-verified clean:
+  - 🔴 [correctness] The branch still had #94's duplicate `mine-details:` key (Fiche livre of an owned book crashed): gone with the rebase onto #94's fix.
+  - 🟠 [correctness] `inLists` was seeded by `onStart { emit(emptyList()) }`, so coming back after 5 s dropped « Dans les listes » for a frame and could shift the scroll: now `stateIn(viewModelScope, WhileSubscribed(5_000), emptyList())`, replaying the last rows. No unit test: `BookViewModel` has no test harness.
+  - 🟡 [structure] `ListRowDivider` moved to `ui/lists/ListRow.kt`.
+  - 🟡 [style] `book_in_lists` has its own comment in `strings_book.xml`.
+- Final: `LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓` — clean; every `BookScreen` lazy key unique. Build ✅, 626 tests, 0 failures.
+- ⚠️ Code changed since the user's test: coming back to a Fiche livre from a list.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
+- ⛔ Lands after #94: PR stays draft on `wa/94-…` until #94 merges, then rebase onto the sprint branch and `gh pr edit --base`.
 
 ## Verification
 

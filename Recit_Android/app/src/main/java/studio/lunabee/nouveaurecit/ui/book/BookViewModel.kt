@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -149,12 +148,12 @@ class BookViewModel(
         }
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    private val inLists: Flow<List<BookListRow>> = combine(
+    private val inLists: StateFlow<List<BookListRow>> = combine(
         listEntries,
         ListRowFeed(container.entities, viewModelScope).images(listEntries.map { entries -> entries.map(BookListEntry::list) }),
     ) { entries, images ->
         entries.map { BookListRow(ListsPresentation.row(it.list, images, it.owner), it.focusUri) }
-    }.onStart { emit(emptyList()) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val membership: Flow<Pair<List<MembershipEntry>, List<MembershipEntry>>> = combine(actions.myShelves, actions.myLists) { s, l -> s to l }
 

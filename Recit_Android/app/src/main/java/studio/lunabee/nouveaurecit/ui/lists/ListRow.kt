@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -67,6 +68,12 @@ internal fun ListRow(row: ListRowModel, background: Color = RecitTheme.colors.ba
             }
         }
     }
+}
+
+/** The rule between two list rows, from their text's margin. */
+@Composable
+internal fun ListRowDivider() {
+    HorizontalDivider(color = RecitTheme.colors.borderDefault, modifier = Modifier.padding(start = Spacing.medium))
 }
 
 /** `ListRowMetaLine`: « 14 œuvres », or « Léa • 14 œuvres » after Léa's picture — whose the list is before what it is called. */

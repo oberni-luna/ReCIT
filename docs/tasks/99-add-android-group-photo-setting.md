@@ -1,6 +1,6 @@
 ---
 issue: 99
-status: to-test
+status: to-close
 wiki: [[features/0082-a-groups-photo-from-its-settings]], [[features/0046-android-groups]], [[features/0052-android-cover-zoom-edition-editing-context-menu]]
 note: Rattrapage iOS 1.10.0 (feature 0082). GroupSetting on Android excludes picture on purpose; CoverSources has camera + photos.
 created: 2026-11-09
@@ -43,6 +43,22 @@ Port of iOS [0082](../wiki/features/0082-a-groups-photo-from-its-settings.md).
 - Runtime not run: no inventaire.io credentials; nothing uploaded.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: `origin/sprint/android-1-4-0...wa/99-add-android-group-photo-setting`.
+- Findings (all 🟡 minor), fixed by autofix in two rounds:
+  - [structure] Group photo menu copied the edition cover's: shared `ui/editedition/ImageSourceMenu`, used by both.
+  - [structure] Second copy of `POST /api/images/upload`: one `data/images/ImageUpload` keyed by `ImageContainer` (container, multipart field, file name — the field differs: `cover` / `picture`), used by `EntityCreationRepository` and `GroupPictureUpload`.
+  - [structure] `GroupPictureUpload.path(localPath:)` → `upload(localPath:)`.
+  - [structure] The sheet wrote the picture through `LocalAppContainer`: now `onUpdatePicture` → `GroupViewModel.updatePicture` on `applicationScope`.
+  - [elegance] `GroupPictureEdit.showsPicture` dropped, derived from `shownUrl`.
+  - [correctness] "Close without saving sends nothing" now unit-tested: `GroupSettingsDraft.writes(exit, group)`, `GroupSettingsDraftTest` (4 tests).
+  - Round 2 [style]: `ImageContainer.container` → `value`.
+- Final: all fixed; round 2's rename checked by hand. Build ✅, 611 tests, 0 failures.
+- ⚠️ Code changed since the user's test: Réglages du groupe (photo menu, save/close), and the edition cover's upload path.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
 
 ## Verification
 

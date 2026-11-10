@@ -13,13 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.PhotoCamera
-import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +31,6 @@ import androidx.compose.ui.geometry.CornerRadius as GeometryCornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -178,39 +172,15 @@ private fun CoverFrame(coverPath: String?, coverUrl: String?, onCover: (String?)
                 }
             }
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, containerColor = RecitTheme.colors.backgroundRaised) {
-            if (hasCover) {
-                MenuLine(stringResource(R.string.create_book_cover_remove), Icons.Outlined.Delete, RecitTheme.colors.foregroundError) {
-                    expanded = false
-                    onCover(null)
-                }
-                HorizontalDivider(color = RecitTheme.colors.borderDefault)
-                Text(
-                    text = stringResource(R.string.create_book_cover_replace),
-                    style = RecitTheme.typography.footnote200,
-                    color = RecitTheme.colors.foregroundSecondary,
-                    modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small),
-                )
-            }
-            MenuLine(stringResource(R.string.create_book_cover_camera), Icons.Outlined.PhotoCamera) {
-                expanded = false
-                sources.camera()
-            }
-            MenuLine(stringResource(R.string.create_book_cover_photos), Icons.Outlined.PhotoLibrary) {
-                expanded = false
-                sources.photos()
-            }
-        }
+        ImageSourceMenu(
+            expanded = expanded,
+            removeLabel = stringResource(R.string.create_book_cover_remove),
+            showsRemove = hasCover,
+            sources = sources,
+            onRemove = { onCover(null) },
+            onDismiss = { expanded = false },
+        )
     }
-}
-
-@Composable
-private fun MenuLine(text: String, icon: ImageVector, color: Color = RecitTheme.colors.foregroundDefault, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(text, style = RecitTheme.typography.content400, color = color) },
-        leadingIcon = { Icon(icon, contentDescription = null, tint = color) },
-        onClick = onClick,
-    )
 }
 
 /** « Titre »: the edition's title, required, and its subtitle. */

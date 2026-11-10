@@ -129,6 +129,7 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
         GroupSettingsSheet(
             group = current,
             onUpdate = viewModel::update,
+            onUpdatePicture = viewModel::updatePicture,
             onDismiss = { isEditingSettings = false },
         )
     }

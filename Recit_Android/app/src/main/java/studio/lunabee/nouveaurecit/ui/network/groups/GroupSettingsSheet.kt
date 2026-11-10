@@ -18,18 +18,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import kotlinx.coroutines.launch
-import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.groups.GroupNameRule
 import studio.lunabee.nouveaurecit.data.groups.GroupPictureEdit
 import studio.lunabee.nouveaurecit.data.groups.GroupSetting
+import studio.lunabee.nouveaurecit.data.groups.GroupSettingsDraft
+import studio.lunabee.nouveaurecit.data.groups.GroupSettingsExit
+import studio.lunabee.nouveaurecit.data.groups.GroupSettingsWrites
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SheetHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
-import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 
 /**
  * `GroupSettingsView`: what an admin can change about a group, as a sheet like « Modifier
@@ -41,38 +41,32 @@ import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
  * back. The place is not offered yet.
  *
  * The photo (feature 0082) goes with the texts on « Enregistrer », server first: the sheet closes,
- * then `GroupRepository.updatePicture` uploads it in the application scope, which outlives the
- * sheet, and the group shows it once the server has agreed. Closing the sheet sends nothing.
+ * then [onUpdatePicture] has it uploaded in the application scope, which outlives the sheet, and the
+ * group shows it once the server has agreed. Closing the sheet sends nothing ([GroupSettingsDraft]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupSettingsSheet(
     group: ReaderGroup,
     onUpdate: (GroupSetting) -> Unit,
+    onUpdatePicture: (GroupPictureEdit) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val container: AppContainer = LocalAppContainer.current
     val sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var name: String by rememberSaveable { mutableStateOf(group.name) }
     var description: String by rememberSaveable { mutableStateOf(group.description) }
     var picture: GroupPictureEdit by rememberSaveable { mutableStateOf<GroupPictureEdit>(GroupPictureEdit.Unchanged) }
-    val textChanged: Boolean = name != group.name || description != group.description
-    val pictureChanged: Boolean = picture.isChange(from = group.pictureUrl)
+    val draft: GroupSettingsDraft = GroupSettingsDraft(name = name, description = description, picture = picture)
 
-    fun save() {
-        val trimmedName: String = name.trim()
-        if (trimmedName != group.name) onUpdate(GroupSetting.Name(trimmedName))
-        val trimmedDescription: String = description.trim()
-        if (trimmedDescription != group.description) onUpdate(GroupSetting.Description(trimmedDescription))
-        if (pictureChanged) {
-            val edit: GroupPictureEdit = picture
-            container.applicationScope.launch { container.groups.updatePicture(edit, group.id) }
-        }
+    fun leave(exit: GroupSettingsExit) {
+        val writes: GroupSettingsWrites = draft.writes(exit, group)
+        writes.settings.forEach(onUpdate)
+        if (writes.picture != GroupPictureEdit.Unchanged) onUpdatePicture(writes.picture)
         onDismiss()
     }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { leave(GroupSettingsExit.Dismiss) },
         sheetState = sheetState,
         containerColor = RecitTheme.colors.backgroundRaised,
     ) {
@@ -88,7 +82,7 @@ fun GroupSettingsSheet(
             SheetHeader(
                 title = stringResource(R.string.groups_settings),
                 closeLabel = stringResource(R.string.action_close),
-                onClose = onDismiss,
+                onClose = { leave(GroupSettingsExit.Dismiss) },
             )
             GroupPhotoPicker(
                 picture = picture,
@@ -113,8 +107,8 @@ fun GroupSettingsSheet(
             )
             PrimaryButton(
                 text = stringResource(R.string.action_save),
-                onClick = ::save,
-                enabled = (textChanged || pictureChanged) && GroupNameRule.accepts(name),
+                onClick = { leave(GroupSettingsExit.Save) },
+                enabled = draft.canSave(group),
             )
         }
     }

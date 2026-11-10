@@ -214,16 +214,6 @@ class GroupPictureTest {
         assertFalse(GroupPictureEdit.Removed.isChange(from = null))
     }
 
-    @Test
-    fun theSlotShowsTheSavedPhotoUntilItIsReplacedOrTakenAway() {
-        val picked: GroupPictureEdit = GroupPictureEdit.Replaced("/cache/covers/cover.jpg")
-
-        assertTrue(GroupPictureEdit.Unchanged.showsPicture(savedPictureUrl = OLD_PATH))
-        assertFalse(GroupPictureEdit.Unchanged.showsPicture(savedPictureUrl = null))
-        assertTrue(picked.showsPicture(savedPictureUrl = null))
-        assertFalse(GroupPictureEdit.Removed.showsPicture(savedPictureUrl = OLD_PATH))
-    }
-
     private companion object {
         const val OLD_PATH: String = "/img/groups/old"
         const val NEW_PATH: String = "/img/groups/0123456789012345678901234567890123456789"

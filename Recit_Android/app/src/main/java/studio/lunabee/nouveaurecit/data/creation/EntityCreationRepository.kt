@@ -3,6 +3,8 @@ package studio.lunabee.nouveaurecit.data.creation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import studio.lunabee.nouveaurecit.data.images.ImageContainer
+import studio.lunabee.nouveaurecit.data.images.ImageUpload
 import studio.lunabee.nouveaurecit.data.model.EntityLabel
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.ImageUrl
@@ -38,6 +40,8 @@ class EntityCreationRepository(
     private val api: ApiService,
     private val publicApi: ApiService,
 ) {
+    private val images: ImageUpload = ImageUpload(api)
+
     // Creating a book
 
     /**
@@ -60,7 +64,7 @@ class EntityCreationRepository(
      * The url is made **absolute**: the upload answers a path, and `resolve` refuses an edition seed whose
      * `image` is not a url it can fetch (`isUrl` in `sanitize_seed.ts`) — the whole entry, not the picture.
      */
-    suspend fun uploadCover(bytes: ByteArray): String? = quietly { upload(bytes) }?.let { ImageUrl.absolute(it) }
+    suspend fun uploadCover(bytes: ByteArray): String? = quietly { images.upload(bytes, ImageContainer.Entities) }?.let { ImageUrl.absolute(it) }
 
     /**
      * The dry run: asks what inventaire.io already knows, **writing nothing**. Answers the uri of a work
@@ -334,7 +338,7 @@ class EntityCreationRepository(
     private suspend fun run(step: EditionEditStep, edit: EditionEdit): EditionEdit = when (step) {
         is EditionEditStep.UploadCover -> {
             val bytes: ByteArray = readFile(step.path) ?: throw NetworkError.BadResponse()
-            val hash: String = EntityImageHash.from(upload(bytes)) ?: throw NetworkError.BadResponse()
+            val hash: String = EntityImageHash.from(images.upload(bytes, ImageContainer.Entities)) ?: throw NetworkError.BadResponse()
             edit.coverUploaded(hash)
         }
         is EditionEditStep.CreateAuthor ->
@@ -385,15 +389,6 @@ class EntityCreationRepository(
     private suspend fun createEntity(labels: Map<String, String>, claims: Map<String, List<String>>): String =
         api.send<EntityCreationRequest, CreatedEntityDto>("/api/entities", body = EntityCreationRequest(labels, claims)).entity.uri
 
-    /** `POST /api/images/upload`: the path the picture was filed under, `/img/entities/<hash>`. */
-    private suspend fun upload(bytes: ByteArray): String? = api.upload(
-        path = "/api/images/upload",
-        query = listOf("container" to "entities"),
-        fieldName = COVER_FIELD,
-        fileName = "cover.jpg",
-        bytes = bytes,
-    )[COVER_FIELD]
-
     /** The name the form shows for an entity: its label, or — for a collection, which has none — its title. */
     private fun displayName(dto: EntityResultDto): String? =
         EntityLabel.resolve(dto.labels, dto.originalLang) ?: dto.claimString(WikidataProperty.TITLE)
@@ -411,9 +406,6 @@ class EntityCreationRepository(
     }
 
     private companion object {
-        /** The server keys its answer by the form field's name, so this is also the key read back. */
-        const val COVER_FIELD: String = "cover"
-
         /** Every step lands or throws: far more than any form can ask, and a stop for a step that does neither. */
         const val MAX_SAVE_STEPS: Int = 100
 

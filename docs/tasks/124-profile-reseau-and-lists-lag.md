@@ -1,7 +1,7 @@
 ---
 issue: 124
-status: todo
-wiki: [[architecture]], [[network]], [[lists]]
+status: to-test
+wiki: [[architecture]], [[network]], [[lists]], [[performance]]
 note: First of the 2026-11-10 perf pass — lag felt in Réseau and Listes. #125–#131 are blocked by it.
 created: 2026-11-10
 ---
@@ -46,8 +46,20 @@ The lag is felt, never traced. This task leaves two things behind: sync signpost
 
 ## Implementation
 
+Round 1 (2026-11-11).
+
+- `AppModels/Common/UserDataSync.swift` — `private static let signposter` (`asso.recits` / `sync`); private `signposted(_:_:)` opens an interval and ends it in a `defer`. `sync(_:signpostedAs:_:)` takes the interval's name. Nine intervals in sync order: My user, My shelves, Relations, Groups, My inventory, Lists, Transactions, Network lists, Friends inventories (the whole loop).
+- `AppModels/Inventory/InventoryModel.swift` — its own `signposter`; one « Inventory sync » interval per `syncInventory` call, ended in a `defer` on every path. End message: `firstSync` and `items` (distinct item ids announced), both `.public`, nothing naming a reader. `isFirstSync` moved above the early return so the `defer` can read it.
+- `run` keeps its exact length: its `function_body_length` entry in `.swiftlint.baseline` matches on the line count, so each wrapped call is a one-line trailing closure. Baseline and lint config untouched.
+- `print`s left in place (#125).
+- `docs/wiki/performance.md` + `index.md` line: protocol, both scenarios, empty baseline and before/after tables.
+- Proof: Debug and Release builds ✅ (iPhone 17 simulator, SwiftLint in the build); full `ReCIT_iOSTests` ✅, 1321 tests, `UserDataSyncTests` and `InventorySyncProgressTests` included.
+- Open: the baseline needs Olivier's two Release traces from his iPhone; the agent then reads them with `xctrace export` and fills the page.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent.
 
 ## Feedback

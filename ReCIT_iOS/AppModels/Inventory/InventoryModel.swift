@@ -8,11 +8,13 @@
 import SwiftData
 import Foundation
 import AsyncAlgorithms
+import OSLog
 
 @MainActor
 @Observable
 final class InventoryModel: OptimisticMutating {
     private static let unkownAuthorId: String = "unknown"
+    private static let signposter: OSSignposter = .init(subsystem: "asso.recits", category: "sync")
     private let apiService: APIServicing
     private var entityModel: EntityModel?
 
@@ -47,6 +49,12 @@ final class InventoryModel: OptimisticMutating {
     }
 
     func syncInventory(forUser: User, modelContext: ModelContext) async throws {
+        let isFirstSync: Bool = forUser.lastInventorySync == nil
+        var announcedItemCount: Int = 0
+        let signpostState: OSSignpostIntervalState = Self.signposter.beginInterval("Inventory sync", id: Self.signposter.makeSignpostID())
+        defer {
+            Self.signposter.endInterval("Inventory sync", signpostState, "firstSync: \(isFirstSync, privacy: .public), items: \(announcedItemCount, privacy: .public)")
+        }
         print("## Sync inventory for user \(forUser.username)")
         // Sync when never synced (lastInventorySync == nil) or when new items
         // were added on the server since the last sync.
@@ -57,7 +65,6 @@ final class InventoryModel: OptimisticMutating {
         print("     -> syncing... ")
 
         let userId: String = forUser._id
-        let isFirstSync: Bool = forUser.lastInventorySync == nil
         if isFirstSync {
             firstSyncProgress[userId] = .init()
         }
@@ -67,6 +74,7 @@ final class InventoryModel: OptimisticMutating {
 
         let result: InventoryResultDTO? = try await apiService.fetchData(fromEndpoint: "/api/items/inventory-view?user=\(forUser._id)")
         guard let result else { return }
+        announcedItemCount = Set(result.workUriItemsMap.values.joined()).count
 
         if isFirstSync {
             firstSyncProgress[userId] = .init(workUriItemsMap: result.workUriItemsMap)

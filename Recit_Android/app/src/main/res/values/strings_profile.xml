@@ -154,8 +154,11 @@
     <string name="notifications_summary">Les nouveautés de mon réseau</string>
     <string name="notifications_summary_detail">Les livres que vos ami·es et vos groupes ont ajoutés.</string>
     <string name="notifications_summary_periodicity">Fréquence</string>
-    <string name="notifications_summary_daily">Tous les jours</string>
-    <string name="notifications_summary_every">Tous les %1$d jours</string>
+    <plurals name="notifications_summary_every">
+        <item quantity="one">Tous les jours</item>
+        <item quantity="many">Tous les %1$d jours</item>
+        <item quantity="other">Tous les %1$d jours</item>
+    </plurals>
     <string name="notifications_friends_header">Ami·es</string>
     <string name="notifications_friendship_request">On me demande en ami·e</string>
     <string name="notifications_friend_accepted_request">On accepte ma demande</string>

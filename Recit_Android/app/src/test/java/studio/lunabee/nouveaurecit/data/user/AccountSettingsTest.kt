@@ -47,8 +47,8 @@ class AccountSettingsTest {
                 isFediversable = true,
                 anonymizesContributions = false,
             )
-                .with(NotificationSetting.Global, false)
-                .with(NotificationSetting.GroupInvite, true),
+                .withNotification(NotificationSetting.Global, false)
+                .withNotification(NotificationSetting.GroupInvite, true),
             settings,
         )
     }
@@ -86,7 +86,7 @@ class AccountSettingsTest {
         assertFalse("each keeps its value", settings.isEnabled(NotificationSetting.FriendshipRequest))
         assertTrue(settings.isEnabled(NotificationSetting.GroupInvite))
 
-        val back: AccountSettings = settings.with(NotificationSetting.Global, true)
+        val back: AccountSettings = settings.withNotification(NotificationSetting.Global, true)
         assertTrue(NotificationSetting.entries.all { back.canEdit(it) })
         assertTrue(back.canEditSummaryPeriodicity)
     }

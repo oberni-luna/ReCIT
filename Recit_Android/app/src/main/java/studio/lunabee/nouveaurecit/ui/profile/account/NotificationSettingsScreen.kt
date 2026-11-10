@@ -7,38 +7,27 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.user.AccountSettings
 import studio.lunabee.nouveaurecit.data.user.NotificationSetting
-import studio.lunabee.nouveaurecit.designsystem.DISABLED_ALPHA
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SwitchRow
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
-import studio.lunabee.nouveaurecit.ui.editedition.EditionPropertyRow
 import studio.lunabee.nouveaurecit.ui.editedition.FormDivider
 import studio.lunabee.nouveaurecit.ui.editedition.FormSection
-import studio.lunabee.nouveaurecit.ui.editedition.PropertyRowTrailing
+import studio.lunabee.nouveaurecit.ui.editedition.MenuPropertyRow
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
 /**
@@ -121,48 +110,28 @@ private fun NotificationSwitch(
         checked = account.isEnabled(setting),
         onCheckedChange = { isOn: Boolean -> viewModel.setNotification(setting, isOn) },
         enabled = account.canEdit(setting),
-        modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.sMedium).testTag("e2e.notifications.${setting.key}"),
+        modifier = Modifier.testTag("e2e.notifications.${setting.key}"),
+        contentPadding = PaddingValues(horizontal = Spacing.medium, vertical = Spacing.sMedium),
     )
 }
 
 /** « Fréquence »: the days between two summaries, from a menu; greyed while the summary is not sent. */
 @Composable
 private fun PeriodicityRow(days: Int, enabled: Boolean, onPick: (Int) -> Unit) {
-    var expanded: Boolean by rememberSaveable { mutableStateOf(false) }
-    Box(Modifier.alpha(if (enabled) 1f else DISABLED_ALPHA)) {
-        EditionPropertyRow(
-            label = stringResource(R.string.notifications_summary_periodicity),
-            value = periodicityLabel(days),
-            placeholder = "",
-            trailing = PropertyRowTrailing.Menu,
-            onClick = if (enabled) ({ expanded = true }) else null,
-            modifier = Modifier.testTag("e2e.notifications.periodicity"),
-        )
-        DropdownMenu(
-            expanded = expanded && enabled,
-            onDismissRequest = { expanded = false },
-            containerColor = RecitTheme.colors.backgroundRaised,
-        ) {
-            NotificationSettingsViewModel.periodicities(including = days).forEach { option: Int ->
-                DropdownMenuItem(
-                    text = { Text(text = periodicityLabel(option), style = RecitTheme.typography.content300) },
-                    trailingIcon = {
-                        if (option == days) Icon(Icons.Default.Check, contentDescription = null, tint = RecitTheme.colors.foregroundTinted)
-                    },
-                    onClick = {
-                        expanded = false
-                        onPick(option)
-                    },
-                )
-            }
-        }
-    }
+    MenuPropertyRow(
+        label = stringResource(R.string.notifications_summary_periodicity),
+        value = periodicityLabel(days),
+        options = NotificationSettingsViewModel.periodicities(including = days),
+        optionLabel = { option: Int -> periodicityLabel(option) },
+        selected = days,
+        onPick = onPick,
+        rowModifier = Modifier.testTag("e2e.notifications.periodicity"),
+        enabled = enabled,
+    )
 }
 
-/** « Tous les jours », else « Tous les N jours »: French has no singular past one day here. */
 @Composable
-private fun periodicityLabel(days: Int): String =
-    if (days == 1) stringResource(R.string.notifications_summary_daily) else stringResource(R.string.notifications_summary_every, days)
+private fun periodicityLabel(days: Int): String = pluralStringResource(R.plurals.notifications_summary_every, days, days)
 
 /** A section of switches under its header: friends, groups and exchanges, as iOS orders them. */
 private class NotificationGroup(val key: String, @StringRes val header: Int, val settings: List<NotificationSetting>)

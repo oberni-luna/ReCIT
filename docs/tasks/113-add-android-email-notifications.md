@@ -1,6 +1,6 @@
 ---
 issue: 113
-status: to-test
+status: to-close
 wiki: [[features/0055-profile-editing]]
 note: Split from #111 (Android port of iOS 0055 profile editing), 2026-11-09
 created: 2026-11-09
@@ -36,6 +36,19 @@ stacked on: wa/112-add-android-account-settings @ a769ec22
 - Runtime not run: no inventaire.io credentials; nothing written. « Shown after relaunch » rests on the tested decoding.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: from the stack point, `origin/wa/112-add-android-account-settings...wa/113-add-android-email-notifications`; rebased onto #112's reviewed tip (`a769ec22`) first — two conflicts (`AccountSettings.of`, `SwitchRow`) resolved by keeping both sides, checked by the verifier; the notification switches now pass their padding as `contentPadding`.
+- Findings (all 🟡 minor), fixed by autofix in two rounds:
+  - [structure] `PeriodicityRow` copied `LanguageRow`: shared `ui/editedition/MenuPropertyRow` (round 2: caller's `modifier` on the root the menu anchors to, `rowModifier` for the test tag).
+  - [elegance] `AccountSettings.with` shadowed the stdlib: `withNotification(setting, isOn)`.
+  - [elegance] The frequency's label picked by hand: `<plurals name="notifications_summary_every">`.
+- Final: all fixed; round 2's modifier move checked by hand. Build ✅, 655 tests, 0 failures.
+- ⚠️ Code changed since the user's test: « Fréquence » and « Langue » menus (shared row), switch rows' touch area.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
+- ⛔ Lands after #112 (after #111): PR stays draft on `wa/112-…` until #112 merges, then rebase onto the sprint branch and `gh pr edit --base`.
 
 ## Verification
 

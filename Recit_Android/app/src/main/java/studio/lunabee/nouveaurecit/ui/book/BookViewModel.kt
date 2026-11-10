@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
@@ -22,9 +23,14 @@ import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.EditionWithWorks
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.WorkEntity
+import studio.lunabee.nouveaurecit.data.inventory.InventoryItemTextAttribute
+import studio.lunabee.nouveaurecit.data.lists.BookListEntry
 import studio.lunabee.nouveaurecit.data.model.TransactionType
+import studio.lunabee.nouveaurecit.data.model.UserRelation
 import studio.lunabee.nouveaurecit.data.transactions.TransactionRequestTarget
 import studio.lunabee.nouveaurecit.network.NetworkError
+import studio.lunabee.nouveaurecit.ui.lists.ListRowFeed
+import studio.lunabee.nouveaurecit.ui.lists.ListsPresentation
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
 
 /** What the book screen shows: the [BookPhase] decides the frame, the rest fills it. */
@@ -39,6 +45,8 @@ data class BookUiState(
     val summary: SummaryState = SummaryState.Loading,
     val myShelves: List<MembershipEntry> = emptyList(),
     val myLists: List<MembershipEntry> = emptyList(),
+    /** « Dans les listes »: mine and my friends' lists of works holding the book, the most recently changed first. */
+    val inLists: List<BookListRow> = emptyList(),
 ) {
     /** Listes hold works: an edition behind several works offers no list menu at all. */
     val singleWorkUri: String? get() = works.singleOrNull()?.uri
@@ -98,9 +106,11 @@ class BookViewModel(
 
     private val editionWithWorks: Flow<EditionWithWorks?> = actions.editionWithWorks
 
-    private val authors: Flow<List<AuthorEntity>> = editionWithWorks
+    private val workUris: Flow<List<String>> = editionWithWorks
         .map { it?.works.orEmpty().map(WorkEntity::uri) }
         .distinctUntilChanged()
+
+    private val authors: Flow<List<AuthorEntity>> = workUris
         .flatMapLatest { uris -> if (uris.isEmpty()) flowOf(emptyList()) else container.entities.entities.observeAuthorsOfWorks(uris) }
         .map { list -> list.distinctBy { it.uri }.sortedBy { it.name } }
 
@@ -120,6 +130,31 @@ class BookViewModel(
             }
         }
 
+    /**
+     * `BookListsSection`'s two queries: the lists holding one of the works, and my friends — so an add or a
+     * removal made elsewhere shows here (ADR 0001). Nothing is fetched but the covers the rows lack.
+     */
+    private val listEntries: Flow<List<BookListEntry>> = workUris
+        .flatMapLatest { uris ->
+            if (uris.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    container.lists.observeListsHolding(uris),
+                    container.users.observeByRelation(UserRelation.Friend),
+                    container.users.myUserId,
+                ) { lists, friends, myId -> BookListEntry.entries(lists, uris, myId, friends) }
+            }
+        }
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+
+    private val inLists: StateFlow<List<BookListRow>> = combine(
+        listEntries,
+        ListRowFeed(container.entities, viewModelScope).images(listEntries.map { entries -> entries.map(BookListEntry::list) }),
+    ) { entries, images ->
+        entries.map { BookListRow(ListsPresentation.row(it.list, images, it.owner), it.focusUri) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     private val membership: Flow<Pair<List<MembershipEntry>, List<MembershipEntry>>> = combine(actions.myShelves, actions.myLists) { s, l -> s to l }
 
     private val content: Flow<BookUiState> = combine(editionWithWorks, authors, actions.ownership, summary, membership) { edition, authorList, owned, summaryState, (shelfEntries, listEntries) ->
@@ -135,10 +170,11 @@ class BookViewModel(
         )
     }
 
-    val state: StateFlow<BookUiState> = combine(phase, content, worksWithOtherEditionUris) { currentPhase, current, otherUris ->
+    val state: StateFlow<BookUiState> = combine(phase, content, worksWithOtherEditionUris, inLists) { currentPhase, current, otherUris, lists ->
         current.copy(
             phase = currentPhase,
             worksWithOtherEditions = current.works.filter { it.uri in otherUris }.sortedBy { it.title },
+            inLists = lists,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BookUiState())
 
@@ -212,8 +248,8 @@ class BookViewModel(
 
     // Actions ---------------------------------------------------------------------------------
 
-    fun commitNotes(itemId: String, details: String) {
-        backgroundScope.launch { container.inventory.updateDetails(itemId, details) }
+    fun commitText(itemId: String, attribute: InventoryItemTextAttribute, text: String) {
+        backgroundScope.launch { container.inventory.updateText(itemId, attribute, text) }
     }
 
     fun updateTransaction(itemId: String, type: TransactionType) {

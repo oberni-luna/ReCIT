@@ -72,4 +72,102 @@
     <string name="delete_account_confirm_title">Supprimer définitivement ?</string>
     <string name="delete_account_confirm_message">Vos livres, étagères, listes et échanges seront supprimés. Cette action ne peut pas être annulée.</string>
     <string name="delete_account_confirm_delete">Supprimer</string>
+    <!-- Modifier le profil (feature 0055) -->
+    <string name="profile_edit">Modifier le profil</string>
+    <string name="edit_profile_title">Modifier le profil</string>
+    <string name="edit_profile_photo_change">Modifier la photo</string>
+    <string name="edit_profile_photo_camera">Prendre une photo</string>
+    <string name="edit_profile_photo_gallery">Choisir dans la galerie</string>
+    <string name="edit_profile_photo_gravatar">Photo Gravatar</string>
+    <string name="edit_profile_photo_remove">Retirer la photo</string>
+    <string name="edit_profile_photo_no_gravatar">Votre adresse n’a pas de photo Gravatar</string>
+    <string name="edit_profile_username">Nom d’utilisateur·ice</string>
+    <string name="edit_profile_bio">Bio</string>
+    <string name="edit_profile_bio_placeholder">Quelques mots sur vous et vos livres</string>
+    <string name="edit_profile_bio_count">%1$d / %2$d</string>
+    <string name="edit_profile_public_footer">Nom d’utilisateur·ice\u202F: de 2 à 20 lettres, chiffres ou «\u202F_\u202F». Le nom, la photo et la bio sont publics, sur inventaire.io comme dans l’app de vos ami·es.</string>
+    <string name="edit_profile_position_header">Position</string>
+    <string name="edit_profile_position_add">Ajouter une position</string>
+    <string name="edit_profile_position_edit">Modifier la position</string>
+    <string name="edit_profile_position_footer">Elle fait apparaître vos livres aux lecteur·ices et aux groupes proches. Elle est publique\u202F: placez-la à l’échelle du quartier, pas de votre porte.</string>
+    <string name="edit_profile_position_none">Sans position, vos livres n’apparaissent pas aux lecteur·ices proches. Vos ami·es les voient toujours.</string>
+    <string name="edit_profile_failure_title">Le profil n’a pas été entièrement enregistré</string>
+    <string name="edit_profile_failure_picture">inventaire.io a refusé la photo, et rien n’a été envoyé après elle. Enregistrez à nouveau pour réessayer.</string>
+    <string name="edit_profile_failure_username">inventaire.io a refusé le nom d’utilisateur·ice. Ce qui le précédait est enregistré\u202F; enregistrez à nouveau pour envoyer le reste.</string>
+    <string name="edit_profile_failure_username_taken">Ce nom d’utilisateur·ice vient d’être pris. Choisissez-en un autre, puis enregistrez à nouveau.</string>
+    <string name="edit_profile_failure_bio">inventaire.io a refusé la bio. Ce qui la précédait est enregistré\u202F; enregistrez à nouveau pour envoyer le reste.</string>
+    <string name="edit_profile_failure_position">inventaire.io a refusé la position. Ce qui la précédait est enregistré\u202F; enregistrez à nouveau pour réessayer.</string>
+
+    <!-- Position (feature 0055) -->
+    <string name="profile_position_title">Position</string>
+    <string name="profile_position_map">Carte de votre position</string>
+    <string name="profile_position_map_footer">Déplacez la carte pour poser l’épingle. L’app arrondit la position à un kilomètre environ avant de l’envoyer.</string>
+    <string name="profile_position_search">Chercher une ville ou une adresse</string>
+    <string name="profile_position_search_empty">Aucun lieu trouvé</string>
+    <string name="profile_position_confirm">Valider</string>
+    <string name="profile_position_remove">Retirer ma position</string>
+    <string name="profile_position_remove_footer">Sans position, vos livres n’apparaissent plus aux lecteur·ices proches. Vos ami·es les voient toujours.</string>
+    <string name="profile_position_attribution">© les contributeur·ices d’OpenStreetMap</string>
+
+    <!-- Réglages › Compte et connexion (feature 0055) -->
+    <string name="profile_settings">Réglages</string>
+    <string name="profile_account_settings">Compte et connexion</string>
+    <string name="account_title">Compte et connexion</string>
+    <string name="account_sign_in_header">Connexion</string>
+    <string name="account_email">Adresse e-mail</string>
+    <string name="account_password">Mot de passe</string>
+    <string name="account_language_header">Langue</string>
+    <string name="account_language">Langue du compte</string>
+    <string name="account_language_footer">Celle des e-mails d’inventaire.io et des titres des œuvres quand une traduction existe. L’app, elle, suit la langue du téléphone.</string>
+    <string name="account_visibility_header">Visibilité</string>
+    <string name="account_fediverse">Visible sur le fédivers</string>
+    <string name="account_fediverse_detail">Mastodon et les autres réseaux du fédivers peuvent suivre les livres que vous rendez publics.</string>
+    <string name="account_anonymize">Contributions anonymes</string>
+    <string name="account_anonymize_detail">Seule l’équipe d’inventaire.io voit qui a modifié les données bibliographiques.</string>
+    <string name="account_unconfirmed_title">Adresse e-mail non confirmée</string>
+    <string name="account_unconfirmed_body">Ouvrez le lien qu’inventaire.io vous a envoyé à %1$s pour la confirmer.</string>
+    <string name="account_unconfirmed_resend">Renvoyer l’e-mail</string>
+    <string name="account_unconfirmed_sent">E-mail de confirmation envoyé à %1$s</string>
+    <string name="account_load_failed">inventaire.io ne répond pas</string>
+    <string name="account_load_failed_message">Vérifiez votre connexion, puis réessayez.</string>
+    <string name="change_email_title">Adresse e-mail</string>
+    <string name="change_email_current">Adresse actuelle</string>
+    <string name="change_email_new">Nouvelle adresse</string>
+    <string name="change_email_footer">Un e-mail de confirmation part vers la nouvelle adresse. C’est elle qui sert ensuite à vous connecter et à vous écrire.</string>
+    <string name="change_email_done">Lien de confirmation envoyé à %1$s</string>
+    <string name="change_password_title">Mot de passe</string>
+    <string name="change_password_current">Mot de passe actuel</string>
+    <string name="change_password_new">Nouveau mot de passe</string>
+    <string name="change_password_footer">8 caractères au moins.</string>
+    <string name="change_password_done">Mot de passe modifié</string>
+    <string name="change_password_failure_current">Le mot de passe actuel est incorrect.</string>
+    <string name="change_password_failure_other">inventaire.io a refusé le nouveau mot de passe. Réessayez.</string>
+    <string name="change_password_forgot">Mot de passe oublié\u202F?</string>
+    <string name="change_password_forgot_footer">inventaire.io envoie un lien de réinitialisation à %1$s.</string>
+
+    <!-- Réglages › Notifications par e-mail (feature 0055) -->
+    <string name="profile_notification_settings">Notifications par e-mail</string>
+    <string name="notifications_title">Notifications par e-mail</string>
+    <string name="notifications_global">Recevoir des e-mails</string>
+    <string name="notifications_global_detail">Coupé, inventaire.io ne vous envoie plus aucune des notifications ci-dessous.</string>
+    <string name="notifications_summary_header">Résumé d’activité</string>
+    <string name="notifications_summary">Les nouveautés de mon réseau</string>
+    <string name="notifications_summary_detail">Les livres que vos ami·es et vos groupes ont ajoutés.</string>
+    <string name="notifications_summary_periodicity">Fréquence</string>
+    <plurals name="notifications_summary_every">
+        <item quantity="one">Tous les jours</item>
+        <item quantity="many">Tous les %1$d jours</item>
+        <item quantity="other">Tous les %1$d jours</item>
+    </plurals>
+    <string name="notifications_friends_header">Ami·es</string>
+    <string name="notifications_friendship_request">On me demande en ami·e</string>
+    <string name="notifications_friend_accepted_request">On accepte ma demande</string>
+    <string name="notifications_groups_header">Groupes</string>
+    <string name="notifications_group_invite">Un groupe m’invite</string>
+    <string name="notifications_group_accept_request">Un groupe accepte ma demande</string>
+    <string name="notifications_group_join_request">On demande à rejoindre un de mes groupes</string>
+    <string name="notifications_transactions_header">Échanges</string>
+    <string name="notifications_your_item_was_requested">On me demande un livre</string>
+    <string name="notifications_update_on_your_item">Un échange sur un de mes livres avance</string>
+    <string name="notifications_update_on_item_you_requested">Un échange sur un livre que j’ai demandé avance</string>
 </resources>

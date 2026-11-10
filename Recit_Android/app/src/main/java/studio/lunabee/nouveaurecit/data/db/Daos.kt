@@ -213,6 +213,9 @@ interface InventoryDao {
     @Query("UPDATE inventory_items SET details = :details WHERE id = :id")
     suspend fun setDetails(id: String, details: String)
 
+    @Query("UPDATE inventory_items SET notes = :notes WHERE id = :id")
+    suspend fun setNotes(id: String, notes: String)
+
     @Query("DELETE FROM inventory_items WHERE id = :id")
     suspend fun delete(id: String)
 
@@ -309,6 +312,11 @@ interface ListDao {
     @Transaction
     @Query("SELECT * FROM lists WHERE id = :id")
     fun observeList(id: String): Flow<ListWithElements?>
+
+    /** Every list holding one of [uris], whoever made it — « Dans les listes » keeps mine and my friends'. */
+    @Transaction
+    @Query("SELECT * FROM lists WHERE id IN (SELECT listId FROM list_elements WHERE uri IN (:uris))")
+    fun observeHolding(uris: List<String>): Flow<List<ListWithElements>>
 
     @Query("SELECT * FROM lists WHERE id = :id")
     suspend fun get(id: String): EntityListEntity?

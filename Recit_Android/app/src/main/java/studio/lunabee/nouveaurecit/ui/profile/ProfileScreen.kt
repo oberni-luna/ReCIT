@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -49,9 +50,10 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
 
 /**
- * `ProfileView`: the account, « À propos d’inventaire.io » (feature 0034), signing out, the door to
- * deleting the account (feature 0017) under signing out, and the version. Rows run full width on
- * the sheet's raised background, as the rest of the Android app does.
+ * `ProfileView`: the account, « Réglages » with « Compte et connexion » and « Notifications par e-mail »
+ * (feature 0055), « À propos d’inventaire.io » (feature 0034), signing out, the door to deleting the
+ * account (feature 0017) under signing out, and the version. Rows run full width on the sheet's raised
+ * background, as the rest of the Android app does.
  *
  * It lives in the profile sheet (feature 0038), closed by « Fermer » at the top left. Signing out
  * needs no navigation: the root swaps the tabs, sheet included, for the welcome screen as soon as the
@@ -92,6 +94,27 @@ fun ProfileScreen(navigator: Navigator) {
             user?.let { me: UserEntity ->
                 item(key = "header") {
                     UserHeader(user = me, itemCount = itemCount, shelfCount = shelfCount, listCount = listCount)
+                }
+                item(key = "editProfile") {
+                    ProfileLinkRow(
+                        text = stringResource(R.string.profile_edit),
+                        onClick = { navigator.push(Destination.EditProfile) },
+                    )
+                }
+                item(key = "settings-header") { SectionHeader(title = stringResource(R.string.profile_settings)) }
+                item(key = "accountSettings") {
+                    ProfileLinkRow(
+                        text = stringResource(R.string.profile_account_settings),
+                        onClick = { navigator.push(Destination.AccountSettings) },
+                        modifier = Modifier.testTag("e2e.profile.account"),
+                    )
+                }
+                item(key = "notificationSettings") {
+                    ProfileLinkRow(
+                        text = stringResource(R.string.profile_notification_settings),
+                        onClick = { navigator.push(Destination.NotificationSettings) },
+                        modifier = Modifier.testTag("e2e.profile.notifications"),
+                    )
                 }
             }
             item(key = "about") {
@@ -134,7 +157,7 @@ fun ProfileScreen(navigator: Navigator) {
     }
 }
 
-/** `UserHeaderView`: the portrait (or initials), the username, then what the account holds. */
+/** `UserHeaderView`: the portrait (or initials), the username, what the account holds, then my bio (feature 0055). */
 @Composable
 private fun UserHeader(user: UserEntity, itemCount: Int, shelfCount: Int, listCount: Int) {
     Row(
@@ -154,6 +177,9 @@ private fun UserHeader(user: UserEntity, itemCount: Int, shelfCount: Int, listCo
                 style = RecitTheme.typography.content300,
                 color = RecitTheme.colors.foregroundSecondary,
             )
+            user.bio?.takeIf { it.isNotBlank() }?.let { bio: String ->
+                Text(bio, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
+            }
         }
     }
 }
@@ -187,9 +213,9 @@ private fun ProfileActionRow(
 
 /** A row that pushes a screen: its title in the default ink, and the chevron. */
 @Composable
-private fun ProfileLinkRow(text: String, onClick: () -> Unit) {
+private fun ProfileLinkRow(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.medium, vertical = Spacing.medium),

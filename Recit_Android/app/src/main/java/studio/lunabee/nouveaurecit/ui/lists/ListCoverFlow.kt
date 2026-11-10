@@ -1,5 +1,7 @@
 package studio.lunabee.nouveaurecit.ui.lists
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -16,7 +18,6 @@ import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +25,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +73,10 @@ import kotlin.math.roundToInt
  * nothing; their order follows the distance to the centre, nearest on top.
  *
  * Tapping a turned cover brings it to the front; tapping the one in front opens its page.
+ *
+ * Every change of the selection ticks but the first, made as the list opens: a list pushed from a book
+ * screen would tick on its first cover, then again on the book it arrives on. The cover [highlightedUri]
+ * names wears the arrival's halo ([ListCoverHalo]).
  */
 @Composable
 internal fun ListCoverFlow(
@@ -78,6 +86,7 @@ internal fun ListCoverFlow(
     onSelect: (String) -> Unit,
     onOpen: (String) -> Unit,
     modifier: Modifier = Modifier,
+    highlightedUri: String? = null,
 ) {
     val selectedIndex: Int = rows.indexOfFirst { it.uri == selectedUri }.coerceAtLeast(0)
     val pagerState: PagerState = rememberPagerState(initialPage = selectedIndex) { rows.size }
@@ -85,11 +94,19 @@ internal fun ListCoverFlow(
     val currentOnSelect: State<(String) -> Unit> = rememberUpdatedState(onSelect)
     val haptics: HapticFeedback = LocalHapticFeedback.current
     val geometry: CoverFlowGeometry = CoverFlowGeometry(coverWidth = COVER_WIDTH.value)
+    var lastSelectedUri: String? by remember { mutableStateOf(null) }
 
-    // The selection moved without the finger — an add, a removal: the strip follows it.
+    // The selection moved without the finger — an add, a removal, an arrival: the strip follows it.
     LaunchedEffect(selectedIndex, rows.size) {
         if (rows.isNotEmpty() && pagerState.currentPage != selectedIndex && !pagerState.isScrollInProgress) {
-            pagerState.animateScrollToPage(selectedIndex)
+            pagerState.animateScrollToPage(selectedIndex, animationSpec = tween(SELECTION_SCROLL_MILLIS, easing = FastOutSlowInEasing))
+        }
+    }
+    LaunchedEffect(selectedUri) {
+        val previous: String? = lastSelectedUri
+        lastSelectedUri = selectedUri
+        if (previous != null && selectedUri != null && previous != selectedUri) {
+            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         }
     }
     // The finger moved the strip: the cover it settled on is the selection. Only changes count, so a list
@@ -98,9 +115,6 @@ internal fun ListCoverFlow(
         snapshotFlow { pagerState.settledPage }.drop(1).collect { page ->
             currentRows.value.getOrNull(page)?.uri?.let { currentOnSelect.value(it) }
         }
-    }
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.drop(1).collect { haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove) }
     }
 
     BoxWithConstraints(modifier.fillMaxWidth().height(STRIP_HEIGHT)) {
@@ -128,6 +142,7 @@ internal fun ListCoverFlow(
                         row = row,
                         isAuthor = isAuthor,
                         isFront = index == current,
+                        isHighlighted = row.uri == highlightedUri,
                         onOpen = { onOpen(row.uri) },
                         onSelect = { onSelect(row.uri) },
                         shade = { geometry.placement((index - position()) * CoverFlowGeometry.STEP).shade },
@@ -186,22 +201,42 @@ private fun coverAt(x: Float, position: Float, count: Int, geometry: CoverFlowGe
     }
 }
 
-/** `ListCoverFlowItem`: a cover, or a portrait in a disc for an author; a title stands in for no image. */
+/**
+ * `ListCoverFlowItem`: a cover, or a portrait in a disc for an author; a title stands in for no image. The
+ * halo, when [isHighlighted], rings it from outside its clip.
+ */
 @Composable
 private fun ListCoverFlowItem(
+    row: ListElementRowModel,
+    isAuthor: Boolean,
+    isFront: Boolean,
+    isHighlighted: Boolean,
+    onOpen: () -> Unit,
+    onSelect: () -> Unit,
+    shade: () -> Float,
+    modifier: Modifier = Modifier,
+) {
+    val cornerRadius: Dp = if (isAuthor) COVER_WIDTH / 2 else CornerRadius.minimal
+    val height: Dp = if (isAuthor) COVER_WIDTH else COVER_WIDTH * 3 / 2
+    Box(modifier.size(width = COVER_WIDTH, height = height)) {
+        ListCoverFlowCover(row, isAuthor, isFront, onOpen, onSelect, shade, RoundedCornerShape(cornerRadius))
+        if (isHighlighted) ListCoverHalo(cornerRadius = cornerRadius, modifier = Modifier.matchParentSize())
+    }
+}
+
+@Composable
+private fun ListCoverFlowCover(
     row: ListElementRowModel,
     isAuthor: Boolean,
     isFront: Boolean,
     onOpen: () -> Unit,
     onSelect: () -> Unit,
     shade: () -> Float,
-    modifier: Modifier = Modifier,
+    shape: Shape,
 ) {
-    val shape: Shape = if (isAuthor) CircleShape else RoundedCornerShape(CornerRadius.minimal)
-    val height: Dp = if (isAuthor) COVER_WIDTH else COVER_WIDTH * 3 / 2
     Box(
-        modifier = modifier
-            .size(width = COVER_WIDTH, height = height)
+        modifier = Modifier
+            .fillMaxSize()
             .shadow(elevation = 6.dp, shape = shape)
             .clip(shape)
             .background(RecitTheme.colors.backgroundSecondary)
@@ -237,6 +272,9 @@ private fun ListCoverFlowItem(
         )
     }
 }
+
+/** How long the strip takes to bring a cover to the front without the finger — `arrivalScrollDuration`. */
+internal const val SELECTION_SCROLL_MILLIS: Int = 400
 
 /** The width of the cover facing the reader. */
 private val COVER_WIDTH: Dp = 160.dp

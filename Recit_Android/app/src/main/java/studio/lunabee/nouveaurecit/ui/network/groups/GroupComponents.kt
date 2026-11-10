@@ -5,12 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,8 +19,6 @@ import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +30,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -46,19 +43,29 @@ import studio.lunabee.nouveaurecit.designsystem.PillButton
 import studio.lunabee.nouveaurecit.designsystem.PillStyle
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
+import studio.lunabee.nouveaurecit.designsystem.SwitchRow
 import studio.lunabee.nouveaurecit.designsystem.TagLabel
 import studio.lunabee.nouveaurecit.designsystem.TagStyle
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
+import studio.lunabee.nouveaurecit.designsystem.rememberImageModel
 import studio.lunabee.nouveaurecit.ui.network.FirstSyncState
 import studio.lunabee.nouveaurecit.ui.network.ReaderCell
 
 /**
  * `AvatarThumbnail(.group)`: a group's picture as a square with rounded corners, where a reader's is
  * a circle — a group should never be read as a person at a glance. Without a picture, or when it
- * will not load, the square shows the groups glyph on the tinted fill.
+ * will not load, the square shows the groups glyph on the tinted fill. Given a [memoryCacheKey], the
+ * picture is kept in memory under it, for a Plein écran to open on. [onLoad] is called once the picture
+ * has loaded.
  */
 @Composable
-fun GroupThumbnail(url: String?, size: ThumbnailSize, modifier: Modifier = Modifier) {
+fun GroupThumbnail(
+    url: String?,
+    size: ThumbnailSize,
+    modifier: Modifier = Modifier,
+    memoryCacheKey: String? = null,
+    onLoad: () -> Unit = {},
+) {
     val shape: Shape = RoundedCornerShape(CornerRadius.medium)
     Box(
         modifier = modifier
@@ -75,7 +82,13 @@ fun GroupThumbnail(url: String?, size: ThumbnailSize, modifier: Modifier = Modif
             modifier = Modifier.size(size.width / 2),
         )
         if (url != null) {
-            AsyncImage(model = url, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            AsyncImage(
+                model = rememberImageModel(url, memoryCacheKey),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                onSuccess = { onLoad() },
+            )
         }
     }
 }
@@ -272,47 +285,19 @@ fun GroupAccessSection(
             style = RecitTheme.typography.action200,
             color = RecitTheme.colors.foregroundSecondary,
         )
-        AccessSwitch(
+        SwitchRow(
             title = stringResource(R.string.groups_form_searchable),
             detail = stringResource(R.string.groups_form_searchable_detail),
             checked = searchable,
             onCheckedChange = onSearchableChange,
+            contentPadding = PaddingValues(vertical = Spacing.xSmall),
         )
-        AccessSwitch(
+        SwitchRow(
             title = stringResource(R.string.groups_form_open),
             detail = stringResource(if (open) R.string.groups_form_open_on else R.string.groups_form_open_off),
             checked = open,
             onCheckedChange = onOpenChange,
-        )
-    }
-}
-
-/** A title, what it means under it, and the switch — the whole row toggles, as one control for TalkBack. */
-@Composable
-private fun AccessSwitch(title: String, detail: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
-            .padding(vertical = Spacing.xSmall),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
-            Text(title, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
-            Text(detail, style = RecitTheme.typography.footnote200, color = RecitTheme.colors.foregroundSecondary)
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = null,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = RecitTheme.colors.foregroundTintedInverse,
-                checkedTrackColor = RecitTheme.colors.backgroundTintedInverse,
-                checkedBorderColor = RecitTheme.colors.backgroundTintedInverse,
-                uncheckedThumbColor = RecitTheme.colors.foregroundSecondary,
-                uncheckedTrackColor = RecitTheme.colors.backgroundSecondary,
-                uncheckedBorderColor = RecitTheme.colors.foregroundDisable,
-            ),
+            contentPadding = PaddingValues(vertical = Spacing.xSmall),
         )
     }
 }

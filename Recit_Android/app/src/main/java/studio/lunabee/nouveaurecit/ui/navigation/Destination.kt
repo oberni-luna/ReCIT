@@ -36,7 +36,12 @@ sealed interface Destination : NavKey {
 
     @Serializable data class User(val id: String) : Destination
 
-    @Serializable data class EntityList(val id: String) : Destination
+    /**
+     * A list, on its « Livres » page. [focusUri] is the work it arrives on when opened from « Dans les listes »
+     * on the book screen (`NavigationDestination.entityList(id:focusURI:)`): it opens on its first book, then
+     * moves to that one and rings its cover.
+     */
+    @Serializable data class EntityList(val id: String, val focusUri: String? = null) : Destination
 
     @Serializable data class Shelf(val id: String) : Destination
 
@@ -59,6 +64,19 @@ sealed interface Destination : NavKey {
     @Serializable data class InviteToGroup(val id: String) : Destination
 
     @Serializable data object DeleteAccount : Destination
+
+    /** « Modifier le profil » (feature 0055): its position page is a state of the form, not a destination. */
+    @Serializable data object EditProfile : Destination
+
+    /** « Compte et connexion » (feature 0055), and the address and the password, each on a screen of its own. */
+    @Serializable data object AccountSettings : Destination
+
+    @Serializable data object ChangeEmail : Destination
+
+    @Serializable data object ChangePassword : Destination
+
+    /** « Notifications par e-mail » (feature 0055). */
+    @Serializable data object NotificationSettings : Destination
 
     @Serializable data object AboutInventaire : Destination
 }

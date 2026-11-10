@@ -30,6 +30,7 @@ import studio.lunabee.nouveaurecit.designsystem.ThumbnailShape
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.ui.common.CapsuleTab
 import studio.lunabee.nouveaurecit.ui.common.CapsuleTabs
+import studio.lunabee.nouveaurecit.ui.common.EnlargeablePhoto
 
 /**
  * `UserProfileStickyHeader`: a reader's picture and name, and the capsule of their pages, laid over the
@@ -39,7 +40,8 @@ import studio.lunabee.nouveaurecit.ui.common.CapsuleTabs
  * hairline at its foot show only once the page passes under it ([backdrop]). Both are read here, so a
  * scroll redraws the header and not the pages.
  *
- * Only the capsule takes touches: everywhere else a finger goes through to the page below.
+ * Only the capsule and, at rest, the picture take touches — a tap on the picture opens it in the Plein
+ * écran (feature 0081): everywhere else a finger goes through to the page below.
  */
 @Composable
 internal fun UserProfileHeader(
@@ -64,19 +66,24 @@ internal fun UserProfileHeader(
     ) {
         Spacer(Modifier.height(metrics.topExpanded - UserProfileHeaderMetrics.BarRise * fold))
         Box(Modifier.size(pictureSize), contentAlignment = Alignment.Center) {
-            CellThumbnail(
-                url = user.avatarUrl,
-                size = ThumbnailSize.XLarge,
-                shape = ThumbnailShape.Circle,
-                fallbackName = user.username,
-                modifier = Modifier
-                    .requiredSize(UserProfileHeaderMetrics.PictureExpanded)
-                    .graphicsLayer {
-                        val scale: Float = pictureSize / UserProfileHeaderMetrics.PictureExpanded
-                        scaleX = scale
-                        scaleY = scale
-                    },
-            )
+            // Folded, the picture sits in the bar's row and opens nothing, as on iOS.
+            EnlargeablePhoto(url = user.avatarUrl, isEnabled = fold == 0f) { memoryCacheKey, onLoad ->
+                CellThumbnail(
+                    url = user.avatarUrl,
+                    size = ThumbnailSize.XLarge,
+                    shape = ThumbnailShape.Circle,
+                    fallbackName = user.username,
+                    memoryCacheKey = memoryCacheKey,
+                    onLoad = onLoad,
+                    modifier = Modifier
+                        .requiredSize(UserProfileHeaderMetrics.PictureExpanded)
+                        .graphicsLayer {
+                            val scale: Float = pictureSize / UserProfileHeaderMetrics.PictureExpanded
+                            scaleX = scale
+                            scaleY = scale
+                        },
+                )
+            }
         }
         Spacer(Modifier.height(Spacing.small))
         Box(

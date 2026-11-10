@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import studio.lunabee.nouveaurecit.data.groups.GroupAction
 import studio.lunabee.nouveaurecit.data.groups.GroupPeople
+import studio.lunabee.nouveaurecit.data.groups.GroupPictureEdit
+import studio.lunabee.nouveaurecit.data.groups.GroupPictureUpload
 import studio.lunabee.nouveaurecit.data.groups.GroupRequestLedger
 import studio.lunabee.nouveaurecit.data.groups.GroupRole
 import studio.lunabee.nouveaurecit.data.groups.GroupSearchResult
@@ -18,6 +20,7 @@ import studio.lunabee.nouveaurecit.data.groups.GroupSetting
 import studio.lunabee.nouveaurecit.data.groups.GroupTransitionError
 import studio.lunabee.nouveaurecit.data.groups.MyGroups
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
+import studio.lunabee.nouveaurecit.data.images.ImageUpload
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.ImageUrl
 import studio.lunabee.nouveaurecit.network.NetworkError
@@ -42,8 +45,8 @@ import kotlin.coroutines.cancellation.CancellationException
  *
  * **Writes are optimistic** (ADR 0001): a gesture is applied to the group first, through the same
  * transition the server runs ([ReaderGroup.applying]), then sent by the [runner]; a refusal puts the
- * previous value back and speaks through the snackbar. Creating a group is the exception — see
- * [createGroup].
+ * previous value back and speaks through the snackbar. Creating a group and setting its picture are
+ * the exceptions — see [createGroup] and [updatePicture].
  *
  * [myUserId] is `UserRepository`'s: every gesture is made in that reader's name, and every role a
  * screen shows is theirs.
@@ -56,6 +59,8 @@ class GroupRepository(
     private val errorReporter: ErrorReporter,
     private val myUserId: StateFlow<String?>,
 ) {
+    private val pictureUpload: GroupPictureUpload = GroupPictureUpload(ImageUpload(api))
+
     private val _groups: MutableStateFlow<Map<String, ReaderGroup>> = MutableStateFlow(emptyMap())
 
     /** Every group known this launch, by id: mine, and the ones opened from a search. */
@@ -211,7 +216,8 @@ class GroupRepository(
 
     /**
      * Writes one setting, optimistically. `update-settings` takes one attribute per call, so a form
-     * that changed two sends two.
+     * that changed two sends two. A refusal puts back that attribute alone, on the group as it
+     * stands: a photo that landed meanwhile stays.
      *
      * @return The request's job, for the tests; `null` when nothing changed.
      */
@@ -221,16 +227,37 @@ class GroupRepository(
         if (next == current) return null
         return runner.run(
             apply = { _groups.update { it + (groupId to next) } },
-            revert = { _groups.update { it + (groupId to current) } },
-            request = {
-                api.send<GroupSettingPayload, OkStatusDto>(
-                    path = "/api/groups/update-settings",
-                    method = "PUT",
-                    body = GroupSettingPayload(group = groupId, attribute = setting.attribute, value = setting.value),
-                )
-            },
+            revert = { rewrite(groupId) { setting.restored(on = it, from = current) } },
+            request = { putSetting(setting, groupId) },
             stillThere = { groupId in _groups.value },
         )
+    }
+
+    /**
+     * `GroupModel.updatePicture`: writes the group's picture, server first — the bytes are uploaded
+     * into the `groups` container, then named in `update-settings`; [GroupPictureEdit.Removed] sends
+     * `null` and uploads nothing. Failures go to the snackbar.
+     *
+     * **Not optimistic**, unlike [update]. The upload is the slow half, and a picture shown before it
+     * lands would too often have to be taken back: the group shows the new picture once the server
+     * has agreed, and keeps its old one when it refuses. The picture is written onto the group as it
+     * stands then, so a name changed meanwhile stays; nothing is written once the account changed.
+     */
+    suspend fun updatePicture(edit: GroupPictureEdit, groupId: String) {
+        val me: String? = myUserId.value
+        try {
+            val setting: GroupSetting.Picture = when (edit) {
+                GroupPictureEdit.Unchanged -> return
+                GroupPictureEdit.Removed -> GroupSetting.Picture(path = null)
+                is GroupPictureEdit.Replaced -> GroupSetting.Picture(path = pictureUpload.upload(edit.path))
+            }
+            putSetting(setting, groupId)
+            if (myUserId.value == me) rewrite(groupId, setting::applied)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            errorReporter.report(error)
+        }
     }
 
     // Signing out
@@ -248,6 +275,20 @@ class GroupRepository(
         val answer: GroupByIdDto = api.get("/api/groups/by-id", "id" to id)
         people.store(answer.users)
         return ReaderGroup.of(answer.group)
+    }
+
+    /** `PUT /api/groups/update-settings`, one attribute. */
+    private suspend fun putSetting(setting: GroupSetting, groupId: String) {
+        api.send<GroupSettingPayload, OkStatusDto>(
+            path = "/api/groups/update-settings",
+            method = "PUT",
+            body = GroupSettingPayload(group = groupId, attribute = setting.attribute, value = setting.value),
+        )
+    }
+
+    /** Changes the group as it stands now; nothing when it has gone. */
+    private fun rewrite(groupId: String, change: (ReaderGroup) -> ReaderGroup) {
+        _groups.update { groups -> groups[groupId]?.let { groups + (groupId to change(it)) } ?: groups }
     }
 
     private companion object {

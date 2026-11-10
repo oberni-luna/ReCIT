@@ -21,7 +21,31 @@ data class UserDto(
     val snapshot: Map<String, ItemCountDto>? = null,
     val created: Double? = null,
     val bio: String? = null,
+    /** Owner only (feature 0055): whether the address has been confirmed. */
+    val validEmail: Boolean? = null,
+    /** Owner only: visible on the fediverse. Absent until first set, and read as off by the server. */
+    val fediversable: Boolean? = null,
+    /** Owner only: days between two activity summaries. Absent until first set, and read as 20 by the server. */
+    val summaryPeriodicity: Int? = null,
+    /** Owner only. */
+    val settings: UserSettingsDto? = null,
 )
+
+/**
+ * `UserSettingsDTO`: the `settings` object of `GET /api/user`, as inventaire.io stores it — two groups of
+ * booleans keyed by the names `PUT /api/user` takes after `settings.<group>.`. A key the account never
+ * touched is absent, and the server reads absent as on in both groups (`notifications[label] === false`,
+ * `anonymize !== false`).
+ */
+@Serializable
+data class UserSettingsDto(
+    val notifications: Map<String, Boolean>? = null,
+    val contributions: ContributionSettingsDto? = null,
+)
+
+/** `settings.contributions`: whether the account's edits to bibliographic data are signed. */
+@Serializable
+data class ContributionSettingsDto(val anonymize: Boolean? = null)
 
 @Serializable
 data class UsersDto(val users: Map<String, UserDto> = emptyMap())
@@ -48,3 +72,17 @@ data class UserSearchResultDto(
 
 @Serializable
 data class RelationActionPayload(val user: String)
+
+/**
+ * `GravatarDTO`: what `GET /api/images/gravatar` answers — the Gravatar address of the account's e-mail,
+ * built by the server so that the address itself never leaves it.
+ */
+@Serializable
+data class GravatarDto(val url: String)
+
+/** `PasswordChangePayload`: the body of `PUT /api/auth/password`, under the server's hyphenated names. */
+@Serializable
+data class PasswordChangePayload(
+    @SerialName("old-password") val currentPassword: String,
+    @SerialName("new-password") val newPassword: String,
+)

@@ -14,6 +14,7 @@ import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.groups.GroupPeople
 import studio.lunabee.nouveaurecit.data.model.Merges
 import studio.lunabee.nouveaurecit.data.model.UserRelation
+import studio.lunabee.nouveaurecit.data.user.MyProfileStore
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.NetworkError
 import studio.lunabee.nouveaurecit.network.dto.OkStatusDto
@@ -29,7 +30,7 @@ class UserRepository(
     private val db: AppDatabase,
     private val runner: OptimisticRunner,
     private val preferences: UserPreferences,
-) : GroupPeople {
+) : GroupPeople, MyProfileStore {
     private val dao = db.userDao()
 
     private val _myUserId: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -56,6 +57,12 @@ class UserRepository(
 
     suspend fun myUser(): UserEntity? = _myUserId.value?.let { dao.get(it) }
 
+    /** What « Modifier le profil » writes once the server has taken it (feature 0055). */
+    override suspend fun updateMyUser(transform: (UserEntity) -> UserEntity) {
+        val me: UserEntity = myUser() ?: return
+        dao.upsert(listOf(transform(me)))
+    }
+
     /** Puts back the id of the last session's user, when its row is still in the store. */
     suspend fun restoreMyUserId() {
         if (_myUserId.value != null) return
@@ -63,11 +70,13 @@ class UserRepository(
         if (dao.get(id) != null) _myUserId.value = id
     }
 
-    suspend fun syncMyUser() {
+    /** Returns my user as the server served it: the owner's settings ride along, and are not stored (feature 0055). */
+    suspend fun syncMyUser(): UserDto {
         val dto: UserDto = api.get("/api/user")
         dao.upsert(listOf(Merges.user(dao.get(dto.id), dto, ApiService.BASE_URL)))
         _myUserId.value = dto.id
         preferences.setString(MY_USER_ID_KEY, dto.id)
+        return dto
     }
 
     suspend fun getOrFetchUsers(ids: List<String>): List<UserEntity> {

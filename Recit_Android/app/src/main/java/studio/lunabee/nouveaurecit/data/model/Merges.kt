@@ -189,6 +189,7 @@ object Merges {
                 updated = dto.updated,
                 busy = dto.busy,
                 details = dto.details.orEmpty(),
+                notes = dto.notes.orEmpty(),
                 searchIndex = index,
             )
         }
@@ -199,6 +200,7 @@ object Merges {
             updated = dto.updated,
             busy = dto.busy,
             details = dto.details ?: existing.details,
+            notes = dto.notes ?: existing.notes,
             searchIndex = index,
         )
     }

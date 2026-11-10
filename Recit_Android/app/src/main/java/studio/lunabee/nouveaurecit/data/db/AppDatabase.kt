@@ -11,7 +11,8 @@ import androidx.room.TypeConverters
  * The one store — `ReCIT.swift`'s `ModelContainer`. On disk, never synced anywhere else.
  *
  * Version 2 adds a list's `creatorId` and a reader's `bio`, two nullable columns: Room derives the
- * migration from the exported schemas, so the cache of 1.2.0 survives the update.
+ * migration from the exported schemas, so the cache of 1.2.0 survives the update. Version 3 adds an
+ * item's `notes`, the Note privée, a column defaulting to `""`.
  */
 @Database(
     entities = [
@@ -28,9 +29,12 @@ import androidx.room.TypeConverters
         EntityListItemEntity::class,
         WpExtractEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
+    ],
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

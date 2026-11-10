@@ -32,14 +32,15 @@ sent there but the IP and the user agent.
 |---|---|---|---|
 | Personal info › Email address | Sign-up (`POST /api/auth/signup`), password reset | Required | Account management |
 | Personal info › User IDs | The username, at sign-up and sign-in | Required | Account management, app functionality |
-| Photos and videos › Photos | A book's cover, photographed when creating a book inventaire.io lacks (`POST /api/images/upload`). Re-encoded JPEG, 1600 px max, EXIF (GPS included) dropped. Becomes a public image of the book | Optional | App functionality |
-| App activity › Other user-generated content | Inventory items (book, transaction, visibility, free-text details), étagères, lists and their comments, created books and authors | Optional | App functionality |
+| Photos and videos › Photos | A book's cover, photographed when creating a book inventaire.io lacks; a group's photo, from its settings; the user's profile picture, picked or taken from Gravatar (`POST /api/images/upload`, containers `entities`, `groups`, `users`). Re-encoded JPEG, 1600 px max, EXIF (GPS included) dropped. Each becomes a public image (since 1.4.0 for groups and profiles) | Optional | App functionality |
+| Location › Approximate location | The user's position, placed on a map in « Modifier le profil » and rounded to two decimals (about a kilometre) before it leaves the device (`PUT /api/user` `position`). Public on inventaire.io. No location permission: the pin is placed by hand. Since 1.4.0 | Optional | App functionality |
+| App activity › Other user-generated content | Inventory items (book, transaction, visibility, free-text details, private notes), the profile's bio, étagères, lists and their comments, created books and authors | Optional | App functionality |
 | App activity › In-app search history | What the user types in Recherche, sent to `GET /api/search` | Optional | App functionality |
 | App activity › Other actions | Friend requests, accepting, refusing, removing a friend (`/api/relations/*`) | Optional | App functionality |
 | App info and performance › Diagnostics | Usage and error telemetry sent to Google by the bundled ML Kit barcode scanner (see below) | Required | Analytics (Google's own) |
 
-Not collected: location (the app reads a friend's position from the server but never sends one,
-and asks no location permission), contacts, financial info, device IDs, advertising ID. Passwords
+Not collected: precise location (the app asks no location permission; the only position it
+sends is the one the user places on a map, rounded to about a kilometre), contacts, financial info, device IDs, advertising ID. Passwords
 are sent at sign-in and sign-up and are not a Play data type.
 
 **Shared?** Play counts as *sharing* a transfer to a third party. inventaire.io is not Lunabee's

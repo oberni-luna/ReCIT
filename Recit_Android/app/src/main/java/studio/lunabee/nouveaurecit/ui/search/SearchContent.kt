@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Search
@@ -29,8 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -43,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.SearchResult
 import studio.lunabee.nouveaurecit.data.db.ItemRow
-import studio.lunabee.nouveaurecit.designsystem.CornerRadius
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitColors
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
@@ -51,6 +47,7 @@ import studio.lunabee.nouveaurecit.designsystem.SectionHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingInlineRow
 import studio.lunabee.nouveaurecit.designsystem.TintedTextButton
+import studio.lunabee.nouveaurecit.designsystem.groupedCell
 import studio.lunabee.nouveaurecit.ui.book.InventoryItemRowWithActions
 import studio.lunabee.nouveaurecit.ui.common.BookRow
 import studio.lunabee.nouveaurecit.ui.common.LargeTitleRefreshBox
@@ -82,6 +79,7 @@ internal fun SearchContent(
     onClearRecents: () -> Unit,
     onSuggestion: (SearchSuggestion) -> Unit,
     onRetry: () -> Unit,
+    onAddBook: (String) -> Unit,
     onInvite: () -> Unit,
     onPush: (Destination) -> Unit,
 ) {
@@ -160,7 +158,7 @@ internal fun SearchContent(
                 suggestions(phase.query, onSuggestion)
             }
             if (phase is SearchPhase.Results) {
-                remote(remoteState, phase.query, onRetry, onPush)
+                remote(remoteState, phase.query, onRetry, onAddBook, onPush)
             }
         }
     }
@@ -202,6 +200,7 @@ private fun LazyListScope.remote(
     state: RemoteSearchState,
     query: String,
     onRetry: () -> Unit,
+    onAddBook: (String) -> Unit,
     onPush: (Destination) -> Unit,
 ) {
     when (state.sign) {
@@ -216,6 +215,8 @@ private fun LazyListScope.remote(
                 title = stringResource(R.string.inventory_search_results_empty_title),
                 message = stringResource(R.string.inventory_search_results_empty_message, query),
                 icon = Icons.Default.Search,
+                actionTitle = stringResource(R.string.create_book_search_add_book),
+                onAction = { onAddBook(query) },
                 modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.large),
             )
         }
@@ -307,19 +308,4 @@ private fun emphasised(query: String, sentence: String): AnnotatedString = build
     SearchSuggestion.emphasisRange(query, sentence)?.let { range ->
         addStyle(SpanStyle(fontWeight = FontWeight.Bold), range.first, range.last + 1)
     }
-}
-
-/**
- * One row of an inset-grouped section (feature 0039): the cell colour, inset by the screen's margin,
- * rounded at the section's two ends — so the section reads as one card on the list's background.
- */
-private fun Modifier.groupedCell(index: Int, count: Int, color: Color): Modifier {
-    val radius = CornerRadius.rounded
-    val shape = RoundedCornerShape(
-        topStart = if (index == 0) radius else CornerRadius.none,
-        topEnd = if (index == 0) radius else CornerRadius.none,
-        bottomStart = if (index == count - 1) radius else CornerRadius.none,
-        bottomEnd = if (index == count - 1) radius else CornerRadius.none,
-    )
-    return padding(horizontal = Spacing.medium).clip(shape).background(color)
 }

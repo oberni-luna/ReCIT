@@ -30,11 +30,19 @@
     <string name="shelf_empty_action_search_detail">par titre ou auteur·ice</string>
     <string name="shelf_empty_action_add_title">Ajouter des livres</string>
     <string name="shelf_empty_action_add_detail">depuis votre inventaire</string>
-    <string name="shelf_add_books_title">Ajouter à %1$s</string>
-    <string name="shelf_add_books_empty_title">Aucun livre dans votre inventaire</string>
-    <string name="shelf_add_books_empty_message">Cherchez un livre, ajoutez-le à votre inventaire, et il pourra aller sur une étagère.</string>
-    <string name="shelf_add_books_on_shelf">Sur l’étagère, toucher pour le retirer</string>
-    <string name="shelf_add_books_add">Ajouter à l’étagère</string>
+
+    <!-- « Ajouter des livres » on an étagère (iOS feature 0089) -->
+    <string name="shelf_add_books_title">Ajouter à «\u00A0%1$s\u00A0»</string>
+    <string name="shelf_add_books_search_prompt">Titre ou auteur·ice</string>
+    <string name="shelf_add_books_search_clear">Effacer</string>
+    <string name="shelf_add_books_search_empty">Aucun de tes livres ne correspond à «\u00A0%1$s\u00A0»</string>
+    <string name="shelf_add_books_all_on_shelf">Tous tes livres sont déjà sur cette étagère</string>
+    <string name="shelf_add_books_no_books">Tu n’as pas encore de livre</string>
+    <plurals name="shelf_add_books_submit">
+        <item quantity="one">Ajouter %1$d livre</item>
+        <item quantity="many">Ajouter %1$d livres</item>
+        <item quantity="other">Ajouter %1$d livres</item>
+    </plurals>
 
     <!-- The search (features 0014 and 0037) -->
     <string name="inventory_search_placeholder">Rechercher</string>
@@ -64,14 +72,13 @@
     <!-- Shelf screen -->
     <string name="shelf_detail_edit">Modifier</string>
     <string name="shelf_detail_empty">Cette étagère est vide</string>
-    <string name="shelf_detail_empty_message">Choisissez dans votre inventaire les livres qui y vont.</string>
-    <string name="shelf_detail_visibility_private">Privée</string>
-    <string name="shelf_detail_visibility_friends">Visible par vos ami·es</string>
-    <string name="shelf_detail_visibility_public">Publique</string>
-    <plurals name="shelf_detail_count">
-        <item quantity="one">%1$d livre</item>
-        <item quantity="other">%1$d livres</item>
-    </plurals>
+    <string name="shelf_tab_books">Livres • %1$d</string>
+    <string name="shelf_tab_books_description">Livres, %1$d</string>
+    <string name="shelf_tab_presentation">Présentation</string>
+    <string name="shelf_presentation_empty">Cette étagère n’a pas de description</string>
+    <string name="shelf_info_visibility">Visible par</string>
+    <string name="shelf_info_created">Créée le</string>
+    <string name="shelf_info_updated">Modifiée le</string>
     <string name="shelf_remove_from_named">Retirer de %1$s</string>
 
     <!-- Shelf form (literals on iOS) -->

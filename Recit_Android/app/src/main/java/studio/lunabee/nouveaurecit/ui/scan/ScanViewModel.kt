@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.creation.NewBookDraft
+import studio.lunabee.nouveaurecit.data.creation.NewBookOrigin
 import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.TransactionType
@@ -24,7 +25,9 @@ import studio.lunabee.nouveaurecit.data.scan.BatchScanEvent
 import studio.lunabee.nouveaurecit.data.scan.BatchScanState
 import studio.lunabee.nouveaurecit.data.scan.BatchScanStateMachine
 import studio.lunabee.nouveaurecit.data.scan.ScannedBook
+import studio.lunabee.nouveaurecit.network.ImageUrl
 import studio.lunabee.nouveaurecit.ui.createbook.CreateBookSession
+import studio.lunabee.nouveaurecit.ui.createbook.NewBookCreation
 
 /**
  * `BatchScanViewModel` (feature 0007): the camera's sightings, through [BatchScanStateMachine], into
@@ -52,17 +55,16 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
 
     val addedBookCount: Int get() = machine.addedBookCount
 
-    private val _creation: MutableStateFlow<CreateBookSession?> = MutableStateFlow(null)
+    /**
+     * Drafts of books being created, by ISBN ([NewBookOrigin.Scan]). The form is short-lived and the
+     * session is not: closing a form that failed and coming back to the same barcode finds what was typed
+     * rather than asking twice. Only a draft that became a book is forgotten — losing one is worse than
+     * keeping a few hundred bytes.
+     */
+    private val newBook: NewBookCreation = NewBookCreation(container, viewModelScope)
 
     /** « Nouveau livre », while it is up. The camera is released under it and no barcode counts. */
-    val creation: StateFlow<CreateBookSession?> = _creation.asStateFlow()
-
-    /**
-     * Drafts of books being created, by ISBN. The form is short-lived and the session is not: closing a
-     * form that failed and coming back to the same barcode finds what was typed rather than asking twice.
-     * Only a draft that became a book is forgotten — losing one is worse than keeping a few hundred bytes.
-     */
-    private val drafts: MutableMap<String, NewBookDraft> = mutableMapOf()
+    val creation: StateFlow<CreateBookSession?> = newBook.session
 
     private var lookupJob: Job? = null
     private var noticeJob: Job? = null
@@ -70,7 +72,7 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
 
     fun codeSeen(code: String) {
         if (code.length != EAN_13_LENGTH || !code.all(Char::isDigit)) return
-        if (_creation.value != null) return
+        if (creation.value != null) return
         if (!apply(BatchScanEvent.CodeSeen(code))) return
         _feedback.tryEmit(ScanFeedback.Accepted)
         lookupJob?.cancel()
@@ -102,31 +104,26 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
     /** The unknown row's button: « Nouveau livre », on the draft left from a previous attempt if any. */
     fun openCreation() {
         val pending: BatchScanState = machine.state
-        if (pending !is BatchScanState.NotFound || _creation.value != null) return
-        _creation.value = CreateBookSession(
-            container = container,
-            parentScope = viewModelScope,
-            draft = drafts[pending.code] ?: NewBookDraft(isbn = pending.code),
-            onCreated = ::bookCreated,
-        )
+        if (pending !is BatchScanState.NotFound) return
+        val origin: NewBookOrigin.Scan = NewBookOrigin.Scan(pending.code)
+        newBook.open(origin) { uri, draft -> bookCreated(origin, uri, draft) }
     }
 
     /** Whatever takes the form away keeps what was typed. */
-    fun closeCreation() {
-        val session: CreateBookSession = _creation.value ?: return
-        drafts[session.draft.isbn] = session.draft
-        session.cancel()
-        _creation.value = null
-    }
+    fun closeCreation() = newBook.close()
 
     /**
      * The book now exists on inventaire.io and is in the inventory: the form did both writes. Same ending
      * as an add — the confirmed row, held as proof, then the camera — because to the user it is one act.
      */
-    private fun bookCreated(book: ScannedBook) {
-        drafts.remove(book.code)
-        _creation.value?.cancel()
-        _creation.value = null
+    private fun bookCreated(origin: NewBookOrigin.Scan, uri: String, draft: NewBookDraft) {
+        val book: ScannedBook = ScannedBook(
+            uri = uri,
+            title = draft.trimmedTitle,
+            authors = draft.chosenWork?.authors ?: draft.namedAuthors.map { it.trimmedName },
+            coverImageUrl = ImageUrl.absolute(draft.coverImageUrl),
+            code = origin.isbn,
+        )
         if (!apply(BatchScanEvent.CreationFinished(book))) return
         _feedback.tryEmit(ScanFeedback.Added)
         confirmationJob?.cancel()

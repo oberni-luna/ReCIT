@@ -1,7 +1,9 @@
-package studio.lunabee.nouveaurecit.ui.book
+package studio.lunabee.nouveaurecit.ui.common
 
+import android.os.Build
 import android.view.View
 import android.view.Window
+import android.view.WindowManager
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -39,12 +41,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.isSpecified
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
@@ -52,8 +54,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.times
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -66,76 +71,135 @@ import coil3.compose.AsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.network.ImageUrl
+import java.util.function.Consumer
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /*
- * iOS `FullScreenCoverView` + `FullScreenCoverImage` (feature 0029): a book's cover alone on
- * black, fitted to the whole screen. Double-tap to fill the screen and again to fit it, pinch to
- * look closer, drag to move around a magnified cover, swipe a fitted cover down or « Fermer » to go
- * back. The arithmetic between gestures is [CoverZoom]'s.
+ * iOS `FullScreenCoverView` + `FullScreenCoverImage` (features 0029, 0081 and 0085), the Plein écran: a
+ * book's cover, or a reader's, a group's or an author's photo, alone over the screen it opened from and
+ * fitted to the whole of it. That screen shows through blurred under the theme's veil, or is hidden by
+ * the veil made opaque when there is no blur to be had ([FullScreenBackdrop]). Double-tap to fill the
+ * screen and again to fit it, pinch to look closer, drag to move around a magnified picture, swipe a
+ * fitted one down or « Fermer » to go back. The arithmetic between gestures is [CoverZoom]'s.
  */
 
 /**
- * The memory-cache key the header's cover is stored under, so that the full-screen cover can draw
- * it on its first frame while the full-size image loads.
+ * The memory-cache key the picture a Plein écran opens from is stored under, so that the Plein écran can
+ * draw it on its first frame while the full-size image loads.
  */
-internal fun coverMemoryCacheKey(url: String): String = "entity-cover:$url"
+internal fun fullScreenMemoryCacheKey(url: String): String = "full-screen:$url"
 
-/** How long the black behind the cover takes to come in, as on iOS. */
+/** How long the veil behind the picture takes to come in, as on iOS. */
 private const val BackdropFadeMillis: Int = 300
 
-/** The « Fermer » button's veil, white over the black: this screen is dark whatever the theme. */
-private const val CloseContainerAlpha: Float = 0.2f
+/** How far the window behind is blurred once the veil is in: about iOS's Regular material. */
+private val BackdropBlurRadius: Dp = 30.dp
 
+/** The Plein écran of [url], which TalkBack reads as [contentDescription] — « Couverture », « Photo ». */
 @Composable
-internal fun FullScreenCoverDialog(url: String, onDismiss: () -> Unit) {
+internal fun FullScreenCoverDialog(url: String, contentDescription: String, onDismiss: () -> Unit) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        ImmersiveDialogWindow()
-        FullScreenCover(url = url, onClose = onDismiss)
+        val view: View = LocalView.current
+        val window: Window? = (view.parent as? DialogWindowProvider)?.window
+        val blurRadius: Int = with(LocalDensity.current) { BackdropBlurRadius.roundToPx() }
+        val backdrop: FullScreenBackdrop = FullScreenBackdrop.of(
+            sdkInt = Build.VERSION.SDK_INT,
+            isCrossWindowBlurEnabled = window != null && rememberCrossWindowBlurEnabled(window.windowManager),
+        )
+        ImmersiveDialogWindow(window = window, view = view, isDark = RecitTheme.colors.isDark)
+        FullScreenCover(
+            url = url,
+            contentDescription = contentDescription,
+            backdrop = backdrop,
+            onBackdropLevel = { level ->
+                window?.blurBehind(if (backdrop == FullScreenBackdrop.Blurred) (blurRadius * level).roundToInt() else 0)
+            },
+            onClose = onDismiss,
+        )
     }
 }
 
 /**
- * The dialog's window without the platform's dim — the black fades in on its own, rather than a
- * grey veil being there from the first frame — and without the status bar, as on iOS.
+ * The dialog's window without the platform's dim — the veil fades in on its own, rather than a grey one
+ * being there from the first frame — and without the status bar, as on iOS. The navigation bar's buttons
+ * follow the theme, the veil being light or dark with it.
  */
 @Composable
-private fun ImmersiveDialogWindow() {
-    val view: View = LocalView.current
-    val window: Window? = (view.parent as? DialogWindowProvider)?.window
-    DisposableEffect(window) {
+private fun ImmersiveDialogWindow(window: Window?, view: View, isDark: Boolean) {
+    DisposableEffect(window, isDark) {
         if (window != null) {
             window.setDimAmount(0f)
             val controller: WindowInsetsControllerCompat = WindowCompat.getInsetsController(window, view)
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(WindowInsetsCompat.Type.statusBars())
+            controller.isAppearanceLightNavigationBars = !isDark
         }
         onDispose { }
     }
 }
 
+/**
+ * Whether the system allows cross-window blur, which it may stop and resume while the Plein écran is open.
+ * Never before Android 12, which has none.
+ */
 @Composable
-private fun FullScreenCover(url: String, onClose: () -> Unit) {
+private fun rememberCrossWindowBlurEnabled(windowManager: WindowManager): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return false
+    var isEnabled: Boolean by remember(windowManager) { mutableStateOf(windowManager.isCrossWindowBlurEnabled) }
+    DisposableEffect(windowManager) {
+        val listener: Consumer<Boolean> = Consumer { isEnabled = it }
+        windowManager.addCrossWindowBlurEnabledListener(listener)
+        onDispose { windowManager.removeCrossWindowBlurEnabledListener(listener) }
+    }
+    return isEnabled
+}
+
+/** Blurs whatever lies behind the window by [radius] pixels, or stops blurring it at 0. Nothing before Android 12. */
+private fun Window.blurBehind(radius: Int) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || attributes.blurBehindRadius == radius) return
+    if (radius > 0) {
+        addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+    } else {
+        clearFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+    }
+    attributes = attributes.apply { blurBehindRadius = radius }
+}
+
+/**
+ * The picture over the veil. [onBackdropLevel] is told how far in the veil is, from 0 to 1, each time
+ * that changes — fading in, then out with a swipe down —, for the blur behind to follow it.
+ */
+@Composable
+private fun FullScreenCover(
+    url: String,
+    contentDescription: String,
+    backdrop: FullScreenBackdrop,
+    onBackdropLevel: (Float) -> Unit,
+    onClose: () -> Unit,
+) {
     val close: () -> Unit by rememberUpdatedState(onClose)
+    val blurBehind: (Float) -> Unit by rememberUpdatedState(onBackdropLevel)
     // What the previous gestures left, and the gesture in flight on top of it.
     var zoom: CoverZoom by remember { mutableStateOf(CoverZoom()) }
     var pinch: Float by remember { mutableFloatStateOf(1f) }
     var pan: Offset by remember { mutableStateOf(Offset.Zero) }
-    // How far a fitted cover has been swiped down, towards closing.
+    // How far a fitted picture has been swiped down, towards closing.
     var swipe: Float by remember { mutableFloatStateOf(0f) }
     var gesturing: Boolean by remember { mutableStateOf(false) }
     var screen: Size by remember { mutableStateOf(Size.Zero) }
     var intrinsic: Size by remember { mutableStateOf(Size.Unspecified) }
     var loading: Boolean by remember { mutableStateOf(true) }
-    val backdrop: Animatable<Float, *> = remember { Animatable(0f) }
+    val fade: Animatable<Float, *> = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
-        backdrop.animateTo(1f, tween(BackdropFadeMillis, easing = LinearOutSlowInEasing))
+        fade.animateTo(1f, tween(BackdropFadeMillis, easing = LinearOutSlowInEasing))
     }
     LaunchedEffect(intrinsic, screen) {
         if (intrinsic.isSpecified && intrinsic.minDimension > 0f && screen.minDimension > 0f) {
@@ -151,13 +215,21 @@ private fun FullScreenCover(url: String, onClose: () -> Unit) {
     val scale: Float by animateFloatAsState(shown.scale, floatSpec, label = "coverScale")
     val offset: Offset by animateOffsetAsState(shown.offset, offsetSpec, label = "coverOffset")
     val swiped: Float by animateFloatAsState(swipe, floatSpec, label = "coverSwipe")
-    val swipeFade: Float = if (screen.height > 0f) (swiped / screen.height * 2f).coerceIn(0f, 1f) else 0f
+    // Read where it is drawn, and by the blur behind, so the fade and the swipe redraw and recompose nothing.
+    val backdropLevel: () -> Float = {
+        val swipeFade: Float = if (screen.height > 0f) (swiped / screen.height * 2f).coerceIn(0f, 1f) else 0f
+        fade.value * (1f - swipeFade)
+    }
+
+    LaunchedEffect(backdrop) {
+        snapshotFlow(backdropLevel).collect { blurBehind(it) }
+    }
 
     val context = LocalContext.current
     val request: ImageRequest = remember(url) {
         ImageRequest.Builder(context)
             .data(ImageUrl.fullScreen(url))
-            .placeholderMemoryCacheKey(coverMemoryCacheKey(url))
+            .placeholderMemoryCacheKey(fullScreenMemoryCacheKey(url))
             .size(coil3.size.Size.ORIGINAL)
             .crossfade(true)
             .build()
@@ -167,8 +239,8 @@ private fun FullScreenCover(url: String, onClose: () -> Unit) {
         Box(
             Modifier
                 .fillMaxSize()
-                .graphicsLayer { alpha = backdrop.value * (1f - swipeFade) }
-                .background(Color.Black),
+                .graphicsLayer { alpha = backdropLevel() }
+                .background(backdrop.veil(RecitTheme.colors)),
         )
         Box(
             Modifier
@@ -231,7 +303,7 @@ private fun FullScreenCover(url: String, onClose: () -> Unit) {
         ) {
             AsyncImage(
                 model = request,
-                contentDescription = stringResource(R.string.entity_cover),
+                contentDescription = contentDescription,
                 contentScale = ContentScale.Fit,
                 onState = { state ->
                     state.painter?.intrinsicSize?.takeIf { it.isSpecified }?.let { intrinsic = it }
@@ -247,15 +319,16 @@ private fun FullScreenCover(url: String, onClose: () -> Unit) {
                     },
             )
             if (loading) {
-                CircularProgressIndicator(color = Color.White)
+                CircularProgressIndicator(color = RecitTheme.colors.foregroundSecondary)
             }
         }
         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing), contentAlignment = Alignment.TopEnd) {
+            // Light on the light veil, dark on the dark one: legible over either, and over the picture.
             FilledIconButton(
                 onClick = close,
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = Color.White.copy(alpha = CloseContainerAlpha),
-                    contentColor = Color.White,
+                    containerColor = RecitTheme.colors.backgroundSecondary,
+                    contentColor = RecitTheme.colors.foregroundDefault,
                 ),
                 modifier = Modifier.padding(Spacing.medium),
             ) {

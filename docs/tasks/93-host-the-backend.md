@@ -53,3 +53,7 @@ stacked on: wa/75-add-backend-transactions @ abfc463d
 - **Client IP behind nginx** (approved during the round): `RateLimits.kt` keyed sign-in and sign-up on the socket's address, which behind nginx + Docker is the bridge gateway — one bucket for every reader. `plugins/ForwardedHeaders.kt` installs Ktor's `XForwardedHeaders { useLastProxy() }` before the rate limits (new dependency `ktor-server-forwarded-header`, Ktor's version); nginx appends `$remote_addr` last and the port is host-only, so the value cannot be spoofed. Test in `LoginRoutesTest`.
 - `Recit_Backend/.env.example` gains the « Production (#93) » keys, no values; `docs/wiki/integrations/hosting.md` (server, layout, deploy, rollback, logs, secrets' names, Brevo, backups → #110), linked from the wiki index.
 - Proof before deploying: `./gradlew build` green (ktlint, detekt, 236 tests; Testcontainers needs `DOCKER_HOST=unix://$HOME/.orbstack/run/docker.sock` on this Mac); the prod stack started locally (`{"status":"ok","db":"ok"}` on 127.0.0.1:8630 only, no db port, then `down -v`); both site files pass `nginx -t` on nginx 1.22 and 1.27; the script's every branch run against stubs (no VPS).
+
+## Verification
+
+round 1: manual validation — not run by agent. The first `scripts/deploy-backend.sh --setup origin/wa/93-host-the-backend` on the VPS was refused to Claude by the session's permission guard (production deploy): Olivier runs it. Nothing was changed on the server during this round.

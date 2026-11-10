@@ -26,8 +26,6 @@ Port of « Notifications par e-mail » from iOS [0055](../wiki/features/0055-pro
 
 ## Implementation
 
-stacked on: wa/112-add-android-account-settings @ a769ec22
-
 - New `data/user/NotificationSetting.kt`: the 10 keys of `settings.notifications` (camel-case `group_acceptRequest` included), `attribute` = `settings.notifications.<key>`, `of(key)`.
 - `AccountSettings`: `summaryPeriodicity` (default 20) and the notifications map; `isEnabled` (absent key = on), `with`, `canEdit(setting)` (only Global while Global is off), `canEditSummaryPeriodicity` (summary on too); unknown keys dropped. `AccountRepository.setNotification(setting, isOn)` / `setSummaryPeriodicity(days)` through the existing optimistic, paced `write(...)` (120 lines). `UserAttributeUpdate.of(attribute, Int)`; `UserDto.summaryPeriodicity`.
 - New `ui/profile/account/NotificationSettingsScreen.kt` + `NotificationSettingsViewModel` (pure `periodicities(including:)`: 1, 7, 14, 20, 30 + the account's own value). Groups Ami·es / Groupes / Échanges. « Tous les jours » for 1, « Tous les %1$d jours » otherwise (iOS says « Tous les 1 jours »). `Destination.NotificationSettings`; Profil row below « Compte et connexion ». `SwitchRow` gains `enabled` (0.38 alpha, `DISABLED_ALPHA`). 21 strings in `strings_profile.xml`, « vous ».
@@ -48,7 +46,7 @@ stacked on: wa/112-add-android-account-settings @ a769ec22
 - ⚠️ Code changed since the user's test: « Fréquence » and « Langue » menus (shared row), switch rows' touch area.
 - Wiki: nothing task-specific; the sprint's feature doc is written with #101.
 - Screenshots: none — `verify.platform: ios`, this task is Android.
-- ⛔ Lands after #112 (after #111): PR stays draft on `wa/112-…` until #112 merges, then rebase onto the sprint branch and `gh pr edit --base`.
+- Landing — #112 merged; rebased onto `sprint/android-1-4-0` without conflict. Build ✅.
 
 ## Verification
 

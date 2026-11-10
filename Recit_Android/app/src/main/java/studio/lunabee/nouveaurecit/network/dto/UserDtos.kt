@@ -38,8 +38,12 @@ data class UserDto(
 @Serializable
 data class UserSettingsDto(
     val notifications: Map<String, Boolean>? = null,
-    val contributions: Map<String, Boolean>? = null,
+    val contributions: ContributionSettingsDto? = null,
 )
+
+/** `settings.contributions`: whether the account's edits to bibliographic data are signed. */
+@Serializable
+data class ContributionSettingsDto(val anonymize: Boolean? = null)
 
 @Serializable
 data class UsersDto(val users: Map<String, UserDto> = emptyMap())

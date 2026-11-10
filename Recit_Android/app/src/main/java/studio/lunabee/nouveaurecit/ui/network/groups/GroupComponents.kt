@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -289,14 +290,14 @@ fun GroupAccessSection(
             detail = stringResource(R.string.groups_form_searchable_detail),
             checked = searchable,
             onCheckedChange = onSearchableChange,
-            modifier = Modifier.padding(vertical = Spacing.xSmall),
+            contentPadding = PaddingValues(vertical = Spacing.xSmall),
         )
         SwitchRow(
             title = stringResource(R.string.groups_form_open),
             detail = stringResource(if (open) R.string.groups_form_open_on else R.string.groups_form_open_off),
             checked = open,
             onCheckedChange = onOpenChange,
-            modifier = Modifier.padding(vertical = Spacing.xSmall),
+            contentPadding = PaddingValues(vertical = Spacing.xSmall),
         )
     }
 }

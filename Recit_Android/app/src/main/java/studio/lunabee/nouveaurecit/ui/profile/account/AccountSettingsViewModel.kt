@@ -21,6 +21,28 @@ class AccountSettingsViewModel(private val container: AppContainer) : ViewModel(
     private val _isResending: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isResending: StateFlow<Boolean> = _isResending.asStateFlow()
 
+    private val _loadFailed: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /** The settings could not be read: the screen offers « Réessayer » rather than waiting for them. */
+    val loadFailed: StateFlow<Boolean> = _loadFailed.asStateFlow()
+
+    init {
+        if (settings.value == null) load()
+    }
+
+    fun load() {
+        _loadFailed.value = false
+        viewModelScope.launch {
+            try {
+                container.session.syncAccount()
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                _loadFailed.value = settings.value == null
+            }
+        }
+    }
+
     fun setLanguage(code: String) {
         viewModelScope.launch { container.account.setLanguage(code) }
     }

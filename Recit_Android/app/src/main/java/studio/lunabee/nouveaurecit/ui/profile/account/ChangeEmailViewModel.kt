@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.auth.model.FieldAvailability
-import studio.lunabee.nouveaurecit.network.NetworkError
+import studio.lunabee.nouveaurecit.data.user.EmailChangeFailure
 
 /**
  * `ChangeEmailView`'s state (iOS feature 0055): the new address, its live check, and the save — server
@@ -55,7 +55,7 @@ class ChangeEmailViewModel(private val container: AppContainer) : ViewModel() {
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (error: Exception) {
-                val refusal: FieldAvailability.Outcome? = refusal(error)
+                val refusal: FieldAvailability.Outcome? = EmailChangeFailure.of(error)
                 _state.update { state ->
                     state.copy(isSaving = false, check = refusal?.let { state.check.apply(it, address) } ?: state.check)
                 }
@@ -64,18 +64,7 @@ class ChangeEmailViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    companion object {
-        private const val CHECK_DELAY_MS: Long = 600
-
-        /**
-         * What `PUT /api/user` says of an address it refuses, when it is about the address:
-         * `this email is already used`, or `invalid email: …`.
-         */
-        fun refusal(error: Throwable): FieldAvailability.Outcome? = when {
-            error !is NetworkError.BadStatus || error.code != 400 -> null
-            "already used" in error.body -> FieldAvailability.Outcome.Taken
-            "invalid email" in error.body -> FieldAvailability.Outcome.Invalid
-            else -> null
-        }
+    private companion object {
+        const val CHECK_DELAY_MS: Long = 600
     }
 }

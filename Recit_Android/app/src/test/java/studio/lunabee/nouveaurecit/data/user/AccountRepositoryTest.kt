@@ -29,7 +29,6 @@ import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.NetworkError
 import studio.lunabee.nouveaurecit.network.dto.UserDto
-import studio.lunabee.nouveaurecit.ui.profile.account.ChangeEmailViewModel
 import java.util.Collections
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -195,7 +194,17 @@ class AccountRepositoryTest {
         assertEquals("l@example.org", repository.current.email)
         assertTrue(repository.current.isEmailValidated)
         assertEquals("l@example.org", store.me.email)
-        assertEquals(FieldAvailability.Outcome.Taken, ChangeEmailViewModel.refusal(error))
+        assertEquals(FieldAvailability.Outcome.Taken, EmailChangeFailure.of(error))
+    }
+
+    @Test
+    fun onlyRefusalsAboutTheAddressAreSaidUnderTheField() {
+        val invalid: NetworkError.BadStatus =
+            NetworkError.BadStatus(400, """{"status":400,"error_name":"invalid_email","status_verbose":"invalid email: x"}""")
+
+        assertEquals(FieldAvailability.Outcome.Invalid, EmailChangeFailure.of(invalid))
+        assertNull(EmailChangeFailure.of(NetworkError.BadStatus(429, """{"status":429}""")))
+        assertNull(EmailChangeFailure.of(NetworkError.BadResponse()))
     }
 
     @Test
@@ -260,5 +269,19 @@ class AccountRepositoryTest {
         assertEquals("autre@example.org", repository.current.email)
         assertNull(repository.current.language)
         assertEquals(0, server.requestCount)
+    }
+
+    @Test
+    fun aRefusalArrivingAfterAnotherAccountSignedInLeavesItsSettingsAlone() = runTest {
+        val repository: AccountRepository = repository()
+        answer("""{"status":429}""", code = 429)
+
+        val write: Job? = repository.setFediversable(true)
+        repository.forget()
+        repository.take(UserDto(id = "u2", username = "autre", email = "autre@example.org", fediversable = true))
+        write?.join()
+
+        assertEquals("u2", repository.current.userId)
+        assertTrue("the previous account's value is not put back", repository.current.isFediversable)
     }
 }

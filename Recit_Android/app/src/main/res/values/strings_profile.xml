@@ -128,6 +128,8 @@
     <string name="account_unconfirmed_body">Ouvrez le lien qu’inventaire.io vous a envoyé à %1$s pour la confirmer.</string>
     <string name="account_unconfirmed_resend">Renvoyer l’e-mail</string>
     <string name="account_unconfirmed_sent">E-mail de confirmation envoyé à %1$s</string>
+    <string name="account_load_failed">inventaire.io ne répond pas</string>
+    <string name="account_load_failed_message">Vérifiez votre connexion, puis réessayez.</string>
     <string name="change_email_title">Adresse e-mail</string>
     <string name="change_email_current">Adresse actuelle</string>
     <string name="change_email_new">Nouvelle adresse</string>

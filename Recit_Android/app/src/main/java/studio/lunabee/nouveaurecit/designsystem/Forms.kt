@@ -2,8 +2,10 @@ package studio.lunabee.nouveaurecit.designsystem
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
@@ -136,12 +138,13 @@ fun SwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(),
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
-            .then(modifier),
+            .padding(contentPadding),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
         verticalAlignment = Alignment.CenterVertically,
     ) {

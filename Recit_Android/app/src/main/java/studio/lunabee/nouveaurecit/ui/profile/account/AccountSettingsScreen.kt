@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -28,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.user.AccountLanguage
 import studio.lunabee.nouveaurecit.data.user.AccountSettings
+import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SwitchRow
@@ -54,6 +56,7 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 fun AccountSettingsScreen(navigator: Navigator) {
     val viewModel: AccountSettingsViewModel = recitViewModel { AccountSettingsViewModel(it) }
     val settings: AccountSettings? by viewModel.settings.collectAsStateWithLifecycle()
+    val loadFailed: Boolean by viewModel.loadFailed.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { RecitTopBar(title = stringResource(R.string.account_title), onBack = navigator::pop) },
@@ -61,10 +64,17 @@ fun AccountSettingsScreen(navigator: Navigator) {
     ) { padding: PaddingValues ->
         Box(Modifier.padding(padding).fillMaxSize()) {
             val account: AccountSettings? = settings
-            if (account == null) {
-                CircularProgressIndicator(color = RecitTheme.colors.foregroundSecondary, modifier = Modifier.align(Alignment.Center))
-            } else {
-                AccountSettingsForm(account = account, viewModel = viewModel, navigator = navigator)
+            when {
+                account != null -> AccountSettingsForm(account = account, viewModel = viewModel, navigator = navigator)
+                loadFailed -> EmptyState(
+                    title = stringResource(R.string.account_load_failed),
+                    message = stringResource(R.string.account_load_failed_message),
+                    icon = Icons.Filled.ErrorOutline,
+                    actionTitle = stringResource(R.string.action_retry),
+                    onAction = viewModel::load,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+                else -> CircularProgressIndicator(color = RecitTheme.colors.foregroundSecondary, modifier = Modifier.align(Alignment.Center))
             }
         }
     }
@@ -130,7 +140,8 @@ private fun AccountSettingsForm(account: AccountSettings, viewModel: AccountSett
                     detail = stringResource(R.string.account_fediverse_detail),
                     checked = account.isFediversable,
                     onCheckedChange = viewModel::setFediversable,
-                    modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.sMedium).testTag("e2e.account.fediverse"),
+                    modifier = Modifier.testTag("e2e.account.fediverse"),
+                    contentPadding = PaddingValues(horizontal = Spacing.medium, vertical = Spacing.sMedium),
                 )
                 FormDivider()
                 SwitchRow(
@@ -138,7 +149,8 @@ private fun AccountSettingsForm(account: AccountSettings, viewModel: AccountSett
                     detail = stringResource(R.string.account_anonymize_detail),
                     checked = account.anonymizesContributions,
                     onCheckedChange = viewModel::setAnonymizesContributions,
-                    modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.sMedium).testTag("e2e.account.anonymize"),
+                    modifier = Modifier.testTag("e2e.account.anonymize"),
+                    contentPadding = PaddingValues(horizontal = Spacing.medium, vertical = Spacing.sMedium),
                 )
             }
         }

@@ -4,7 +4,6 @@ import android.os.Build
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -110,16 +109,17 @@ internal fun FullScreenCoverDialog(url: String, contentDescription: String, onDi
         val view: View = LocalView.current
         val window: Window? = (view.parent as? DialogWindowProvider)?.window
         val blurRadius: Int = with(LocalDensity.current) { BackdropBlurRadius.roundToPx() }
-        val backdrop: FullScreenBackdrop = rememberFullScreenBackdrop(window)
+        val backdrop: FullScreenBackdrop = FullScreenBackdrop.of(
+            sdkInt = Build.VERSION.SDK_INT,
+            isCrossWindowBlurEnabled = window != null && rememberCrossWindowBlurEnabled(window.windowManager),
+        )
         ImmersiveDialogWindow(window = window, view = view, isDark = RecitTheme.colors.isDark)
         FullScreenCover(
             url = url,
             contentDescription = contentDescription,
             backdrop = backdrop,
             onBackdropLevel = { level ->
-                if (window != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    window.blurBehind(if (backdrop == FullScreenBackdrop.Blurred) (blurRadius * level).roundToInt() else 0)
-                }
+                window?.blurBehind(if (backdrop == FullScreenBackdrop.Blurred) (blurRadius * level).roundToInt() else 0)
             },
             onClose = onDismiss,
         )
@@ -145,31 +145,25 @@ private fun ImmersiveDialogWindow(window: Window?, view: View, isDark: Boolean) 
     }
 }
 
-/** Blurred while the system allows cross-window blur, which it may stop and resume while the Plein écran is open. */
+/**
+ * Whether the system allows cross-window blur, which it may stop and resume while the Plein écran is open.
+ * Never before Android 12, which has none.
+ */
 @Composable
-private fun rememberFullScreenBackdrop(window: Window?): FullScreenBackdrop =
-    if (window != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        rememberCrossWindowBlur(window.windowManager)
-    } else {
-        FullScreenBackdrop.Opaque
-    }
-
-@RequiresApi(Build.VERSION_CODES.S)
-@Composable
-private fun rememberCrossWindowBlur(windowManager: WindowManager): FullScreenBackdrop {
+private fun rememberCrossWindowBlurEnabled(windowManager: WindowManager): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return false
     var isEnabled: Boolean by remember(windowManager) { mutableStateOf(windowManager.isCrossWindowBlurEnabled) }
     DisposableEffect(windowManager) {
         val listener: Consumer<Boolean> = Consumer { isEnabled = it }
         windowManager.addCrossWindowBlurEnabledListener(listener)
         onDispose { windowManager.removeCrossWindowBlurEnabledListener(listener) }
     }
-    return FullScreenBackdrop.of(Build.VERSION.SDK_INT, isEnabled)
+    return isEnabled
 }
 
-/** Blurs whatever lies behind the window by [radius] pixels, or stops blurring it at 0. */
-@RequiresApi(Build.VERSION_CODES.S)
+/** Blurs whatever lies behind the window by [radius] pixels, or stops blurring it at 0. Nothing before Android 12. */
 private fun Window.blurBehind(radius: Int) {
-    if (attributes.blurBehindRadius == radius) return
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || attributes.blurBehindRadius == radius) return
     if (radius > 0) {
         addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
     } else {

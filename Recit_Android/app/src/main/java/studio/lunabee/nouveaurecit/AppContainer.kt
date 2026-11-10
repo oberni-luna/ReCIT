@@ -30,6 +30,8 @@ import studio.lunabee.nouveaurecit.data.UserRepository
 import studio.lunabee.nouveaurecit.data.creation.EntityCreationRepository
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.data.groups.PreferencesGroupRequestLedger
+import studio.lunabee.nouveaurecit.data.shelves.RoomShelfMembershipStore
+import studio.lunabee.nouveaurecit.data.shelves.ShelfMembership
 import studio.lunabee.nouveaurecit.data.sorting.SortSession
 import studio.lunabee.nouveaurecit.data.user.ProfileRepository
 import studio.lunabee.nouveaurecit.data.user.RequestPacer
@@ -101,7 +103,12 @@ class AppContainer(context: Context) {
         myUserId = users.myUserId,
     )
     val inventory: InventoryRepository = InventoryRepository(api, database, entities, optimisticRunner, syncStatus)
-    val shelves: ShelfRepository = ShelfRepository(api, database, optimisticRunner)
+    val shelves: ShelfRepository = ShelfRepository(
+        api = api,
+        db = database,
+        runner = optimisticRunner,
+        membership = ShelfMembership(api, RoomShelfMembershipStore(database), optimisticRunner),
+    )
     val lists: ListRepository = ListRepository(api, database, optimisticRunner, users.myUserId)
     val search: SearchRepository = SearchRepository(api)
 

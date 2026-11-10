@@ -190,7 +190,7 @@ private fun InventoryContent(
         ShelfFormSheet(shelfId = null, fileItemId = null, onDismiss = { isCreatingShelf = false })
     }
     addingBooksTo?.let { shelf ->
-        AddBooksToShelfSheet(shelfId = shelf.shelf.id, shelfName = shelf.shelf.name, onDismiss = { addingBooksTo = null })
+        ShelfAddBooksSheet(shelfId = shelf.shelf.id, shelfName = shelf.shelf.name, onDismiss = { addingBooksTo = null })
     }
 }
 

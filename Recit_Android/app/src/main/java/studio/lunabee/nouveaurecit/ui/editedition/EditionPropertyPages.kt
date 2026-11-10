@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -178,7 +179,7 @@ fun FormPageScaffold(
         containerColor = RecitTheme.colors.backgroundForm,
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.padding(padding).fillMaxSize().imePadding(),
+            modifier = Modifier.padding(padding).consumeWindowInsets(padding).fillMaxSize().imePadding(),
             contentPadding = PaddingValues(bottom = Spacing.large),
             verticalArrangement = Arrangement.spacedBy(Spacing.xSmall),
             content = content,

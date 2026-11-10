@@ -1,6 +1,6 @@
 ---
 issue: 111
-status: to-test
+status: to-close
 wiki: [[features/0055-profile-editing]], [[features/0041-android-catches-up-with-ios]], [[features/0031-android-app]]
 note: "Je voudrais ajouter les fonctionnalités d'édition du profil aussi dans ce sprint Android" — split into #111 (profil), #112 (compte et connexion), #113 (notifications).
 created: 2026-11-09
@@ -50,6 +50,21 @@ Port of the « Modifier le profil » third of iOS [0055](../wiki/features/0055-p
 - Runtime not run: no inventaire.io credentials; nothing written.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: `origin/sprint/android-1-4-0...wa/111-add-android-profile-editing`.
+- Findings (all 🟡 minor), fixed by autofix in two rounds, re-verified clean:
+  - [correctness] Picking the same place twice didn't move the map back: the move is keyed on a `moves` counter, not on state equality.
+  - [correctness] Rotation snapped the map back and « Valider » returned the old position: `center` and `zoom` are `rememberSaveable`; a pinch-zoom is still not restored (cosmetic).
+  - [correctness] Any non-200 from gravatar.com read as « pas de photo Gravatar »: only 404 is « none », other codes throw `NetworkError.BadStatus` (test on 503).
+  - [elegance] A picture gone from the cache was a network error: `MissingPictureFile`, read through the new `data/CachedPicture` (round 2 — `CoverPhoto.bytes` delegates to it, no data→ui import).
+  - [structure] `DestructiveRow` in its own file.
+  - [style] `val observer: LifecycleEventObserver`.
+- Final: `LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓` — clean. Build ✅, 627 tests, 0 failures.
+- ⚠️ Code changed since the user's test: the position map (search pick, rotation) and the Gravatar error message.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
 
 ## Verification
 

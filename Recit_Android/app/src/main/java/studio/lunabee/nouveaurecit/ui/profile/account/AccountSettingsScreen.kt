@@ -7,20 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -40,7 +32,7 @@ import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.editedition.EditionPropertyRow
 import studio.lunabee.nouveaurecit.ui.editedition.FormDivider
 import studio.lunabee.nouveaurecit.ui.editedition.FormSection
-import studio.lunabee.nouveaurecit.ui.editedition.PropertyRowTrailing
+import studio.lunabee.nouveaurecit.ui.editedition.MenuPropertyRow
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
@@ -160,36 +152,16 @@ private fun AccountSettingsForm(account: AccountSettings, viewModel: AccountSett
 /** The account's language, and the menu of the 29 inventaire.io writes in, named in the phone's language. */
 @Composable
 private fun LanguageRow(code: String?, onPick: (String) -> Unit) {
-    var expanded: Boolean by rememberSaveable { mutableStateOf(false) }
     val languages: List<AccountLanguage> = remember { AccountLanguage.all() }
-    Box {
-        EditionPropertyRow(
-            label = stringResource(R.string.account_language),
-            value = code?.let { AccountLanguage.name(it) },
-            placeholder = "",
-            trailing = PropertyRowTrailing.Menu,
-            onClick = { expanded = true },
-            modifier = Modifier.testTag("e2e.account.language"),
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            containerColor = RecitTheme.colors.backgroundRaised,
-        ) {
-            languages.forEach { language: AccountLanguage ->
-                DropdownMenuItem(
-                    text = { Text(text = language.name, style = RecitTheme.typography.content300) },
-                    trailingIcon = {
-                        if (language.code == code) Icon(Icons.Default.Check, contentDescription = null, tint = RecitTheme.colors.foregroundTinted)
-                    },
-                    onClick = {
-                        expanded = false
-                        onPick(language.code)
-                    },
-                )
-            }
-        }
-    }
+    MenuPropertyRow(
+        label = stringResource(R.string.account_language),
+        value = code?.let { AccountLanguage.name(it) },
+        options = languages,
+        optionLabel = { language: AccountLanguage -> language.name },
+        selected = languages.firstOrNull { it.code == code },
+        onPick = { language: AccountLanguage -> onPick(language.code) },
+        rowModifier = Modifier.testTag("e2e.account.language"),
+    )
 }
 
 /** The password is never read back: ten dots say there is one, as on iOS. */

@@ -25,6 +25,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -129,7 +130,7 @@ fun DestructiveTextButton(
 /**
  * A title, what it does under it, and the switch — `Row / Toggle` in the Figma file (`GroupAccessSection`,
  * `AccountToggleLabel`). The whole row toggles, as one control for TalkBack; the switch takes the primary
- * button's green.
+ * button's green. Not [enabled], the row fades to [DISABLED_ALPHA] and keeps its value, as `.disabled` does on iOS.
  */
 @Composable
 fun SwitchRow(
@@ -139,11 +140,13 @@ fun SwitchRow(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .padding(contentPadding),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
         verticalAlignment = Alignment.CenterVertically,
@@ -166,3 +169,6 @@ fun SwitchRow(
         )
     }
 }
+
+/** How far a control the screen keeps but does not let you change fades: Material's disabled content opacity. */
+const val DISABLED_ALPHA: Float = 0.38f

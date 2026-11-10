@@ -144,4 +144,30 @@
     <string name="change_password_failure_other">inventaire.io a refusé le nouveau mot de passe. Réessayez.</string>
     <string name="change_password_forgot">Mot de passe oublié\u202F?</string>
     <string name="change_password_forgot_footer">inventaire.io envoie un lien de réinitialisation à %1$s.</string>
+
+    <!-- Réglages › Notifications par e-mail (feature 0055) -->
+    <string name="profile_notification_settings">Notifications par e-mail</string>
+    <string name="notifications_title">Notifications par e-mail</string>
+    <string name="notifications_global">Recevoir des e-mails</string>
+    <string name="notifications_global_detail">Coupé, inventaire.io ne vous envoie plus aucune des notifications ci-dessous.</string>
+    <string name="notifications_summary_header">Résumé d’activité</string>
+    <string name="notifications_summary">Les nouveautés de mon réseau</string>
+    <string name="notifications_summary_detail">Les livres que vos ami·es et vos groupes ont ajoutés.</string>
+    <string name="notifications_summary_periodicity">Fréquence</string>
+    <plurals name="notifications_summary_every">
+        <item quantity="one">Tous les jours</item>
+        <item quantity="many">Tous les %1$d jours</item>
+        <item quantity="other">Tous les %1$d jours</item>
+    </plurals>
+    <string name="notifications_friends_header">Ami·es</string>
+    <string name="notifications_friendship_request">On me demande en ami·e</string>
+    <string name="notifications_friend_accepted_request">On accepte ma demande</string>
+    <string name="notifications_groups_header">Groupes</string>
+    <string name="notifications_group_invite">Un groupe m’invite</string>
+    <string name="notifications_group_accept_request">Un groupe accepte ma demande</string>
+    <string name="notifications_group_join_request">On demande à rejoindre un de mes groupes</string>
+    <string name="notifications_transactions_header">Échanges</string>
+    <string name="notifications_your_item_was_requested">On me demande un livre</string>
+    <string name="notifications_update_on_your_item">Un échange sur un de mes livres avance</string>
+    <string name="notifications_update_on_item_you_requested">Un échange sur un livre que j’ai demandé avance</string>
 </resources>

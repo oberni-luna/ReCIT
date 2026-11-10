@@ -35,8 +35,6 @@ Port of iOS [0089](../wiki/features/0089-tabbed-shelf-screen.md). Builds on #95:
 
 ## Implementation
 
-stacked on: wa/95-hide-android-tab-bar-on-push @ 1356ad4
-
 - New `data/shelves/`: `ShelfMembershipStore` (+ `RoomShelfMembershipStore`) and `ShelfMembership` — `add` (one optimistic `add-items` for the books not yet on the étagère, nothing sent when none left; revert checks only the étagère still exists, as iOS; errors to `ErrorReporter`), `remove`, `addNow`, `removeNow`, `send`. Separate class so the batch add is testable without Robolectric (pattern of `GroupRepository`'s ledger).
 - `data/ShelfRepository.kt`: membership through `ShelfMembership`; `addItem` → `addItems(shelfId, itemIds)`; `removeItem`, `addItemsNow`, `removeItemsNow` unchanged; `createShelf` calls `membership.send`. `ui/book/BookActions.kt`: the « … » menu calls `addItems(id, listOf(itemId))`.
 - `ui/inventory/ShelfScreen.kt` rewritten: name + back, pencil on mine, `CapsuleTabs` over a `HorizontalPager`, on `backgroundGrouped`; deleting from `ShelfFormSheet` still pops. New `ShelfDetailTab`, `ShelfBooksPage` (inset grouped rows newest first, `RemovableRow` moved here, empty state with the « Ranger mes livres » icon + « Cette étagère est vide », no action; pinned button on mine), `ShelfPresentationPage`, `ShelfPinnedButton`. `ShelfHeader` gone.
@@ -61,7 +59,7 @@ stacked on: wa/95-hide-android-tab-bar-on-push @ 1356ad4
 - ⚠️ Code changed since the user's test: swiping a book off an étagère now needs half the row.
 - Wiki: nothing task-specific; the sprint's feature doc is written with #101.
 - Screenshots: none — `verify.platform: ios`, this task is Android.
-- ⛔ Lands after #95: PR stays draft on `wa/95-…` until #95 merges, then rebase onto the sprint branch and `gh pr edit --base`.
+- Landing — #95 merged; rebased onto `sprint/android-1-4-0` without conflict. Build ✅.
 
 ## Verification
 

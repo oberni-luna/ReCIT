@@ -1,6 +1,6 @@
 ---
 issue: 47
-status: to-test
+status: to-close
 wiki: [[features/0083-rate-limited-sign-in-message]], [[adr/0008-session-login-signup-keychain]]
 note: Android half of #7. Recit_Android/…/auth/model/AuthFailure.kt maps 429 onto Server; add RateLimited, same copy as iOS.
 created: 2026-11-09
@@ -35,6 +35,13 @@ Port of iOS [0083](../wiki/features/0083-rate-limited-sign-in-message.md).
 - Runtime not run: no inventaire.io credentials for the agent; the two on-screen criteria follow from unchanged screens reading only `message` / `signupField`.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: `origin/sprint/android-1-4-0...wa/47-fix-android-sign-in-429-message`.
+- Verdict: clean. `LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓`.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
 
 ## Verification
 

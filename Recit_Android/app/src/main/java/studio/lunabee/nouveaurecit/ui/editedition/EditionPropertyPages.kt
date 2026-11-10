@@ -46,13 +46,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.TextLocale
 import studio.lunabee.nouveaurecit.data.creation.ClaimLiteral
 import studio.lunabee.nouveaurecit.data.creation.EditionEntityValue
 import studio.lunabee.nouveaurecit.data.creation.EditionProperties
@@ -444,7 +444,7 @@ private fun YearRow(date: PublicationDate, update: (PublicationDate) -> Unit) {
 @Composable
 private fun MonthRow(date: PublicationDate, update: (PublicationDate) -> Unit) {
     var expanded: Boolean by remember { mutableStateOf(false) }
-    val locale: Locale = LocalConfiguration.current.locales[0]
+    val locale: Locale = TextLocale.current
     val name: (Int) -> String = { month ->
         Month.of(month).getDisplayName(TextStyle.FULL_STANDALONE, locale).replaceFirstChar { it.titlecase(locale) }
     }

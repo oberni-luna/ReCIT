@@ -1,6 +1,6 @@
 ---
 issue: 95
-status: to-test
+status: to-close
 wiki: [[features/0088-tab-bar-hidden-on-pushed-screens]], [[features/0089-tabbed-shelf-screen]], [[features/0031-android-app]]
 note: Rattrapage iOS 1.10.0 (feature 0088, amended by 0089). MainScaffold always shows the NavigationBar.
 created: 2026-11-09
@@ -45,6 +45,16 @@ Port of iOS [0088](../wiki/features/0088-tab-bar-hidden-on-pushed-screens.md) as
 - Runtime not run: no inventaire.io credentials for the agent.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: `origin/sprint/android-1-4-0...wa/95-hide-android-tab-bar-on-push`.
+- Finding (🟡 minor), fixed by autofix, re-verified clean:
+  - [correctness] With the tab bar gone, nothing above pushed forms consumed the bottom inset, so `imePadding()` counted it twice and a strip opened above the keyboard. `.consumeWindowInsets(padding)` after `.padding(padding)` in `EditEditionScreen` and `FormPageScaffold`.
+- Final: `LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓` — clean. Build ✅, 603 tests, 0 failures.
+- ⚠️ Code changed since the user's test: edition and property forms with the keyboard up.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
 
 ## Verification
 

@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.groups.GroupAction
+import studio.lunabee.nouveaurecit.data.groups.GroupPictureEdit
 import studio.lunabee.nouveaurecit.data.groups.GroupSetting
 import studio.lunabee.nouveaurecit.data.groups.ReaderGroup
 import kotlin.coroutines.cancellation.CancellationException
@@ -53,6 +54,11 @@ class GroupViewModel(
     /** One setting, written at once and put back if refused. */
     fun update(setting: GroupSetting) {
         viewModelScope.launch { container.groups.update(setting, groupId) }
+    }
+
+    /** The group's photo, written server first in the application scope, which outlives the settings sheet and this screen. */
+    fun updatePicture(edit: GroupPictureEdit) {
+        container.applicationScope.launch { container.groups.updatePicture(edit, groupId) }
     }
 
     init {

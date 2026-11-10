@@ -7,12 +7,12 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import studio.lunabee.nouveaurecit.data.CachedPicture
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.ImageUrl
 import studio.lunabee.nouveaurecit.network.NetworkError
 import studio.lunabee.nouveaurecit.network.dto.GravatarDto
 import studio.lunabee.nouveaurecit.network.dto.OkStatusDto
-import java.io.File
 import java.io.IOException
 
 /**
@@ -57,7 +57,8 @@ class ProfileRepository(
 
     /**
      * The account's Gravatar, as bytes ready to be reduced and uploaded like any picture, or `null` when its
-     * address has none — the url the server builds answers `404` then (`?d=404`).
+     * address has none — the url the server builds answers `404` then (`?d=404`). Any other refusal throws
+     * [NetworkError.BadStatus].
      *
      * Downloaded rather than handed to the server as a url: the form shows the picture before it is saved,
      * and saving it is then the same upload as a photograph's. The download goes to gravatar.com, which
@@ -69,7 +70,11 @@ class ProfileRepository(
         return withContext(Dispatchers.IO) {
             try {
                 publicClient.newCall(Request.Builder().url(url).get().build()).execute().use { response ->
-                    if (response.code == 200) response.body.bytes() else null
+                    when {
+                        response.isSuccessful -> response.body.bytes()
+                        response.code == NOT_FOUND -> null
+                        else -> throw NetworkError.BadStatus(response.code, response.body.string())
+                    }
                 }
             } catch (error: IOException) {
                 throw NetworkError.Transport(error)
@@ -110,14 +115,13 @@ class ProfileRepository(
         bytes = bytes,
     )[PICTURE_FIELD] ?: throw NetworkError.BadResponse()
 
-    private suspend fun readPicture(path: String): ByteArray = withContext(Dispatchers.IO) {
-        File(path).takeIf(File::exists)?.readBytes() ?: throw NetworkError.BadResponse()
-    }
+    private suspend fun readPicture(path: String): ByteArray = CachedPicture.bytes(path) ?: throw MissingPictureFile(path)
 
     private companion object {
         const val USER_PATH: String = "/api/user"
         const val UPLOAD_PATH: String = "/api/images/upload"
         const val GRAVATAR_PATH: String = "/api/images/gravatar"
         const val PICTURE_FIELD: String = "avatar"
+        const val NOT_FOUND: Int = 404
     }
 }

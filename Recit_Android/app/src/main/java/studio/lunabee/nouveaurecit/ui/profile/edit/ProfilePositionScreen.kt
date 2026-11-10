@@ -3,12 +3,10 @@ package studio.lunabee.nouveaurecit.ui.profile.edit
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,12 +18,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -47,7 +47,6 @@ import studio.lunabee.nouveaurecit.ui.editedition.FormDivider
 import studio.lunabee.nouveaurecit.ui.editedition.FormFootnote
 import studio.lunabee.nouveaurecit.ui.editedition.FormSection
 import studio.lunabee.nouveaurecit.ui.editedition.FormTextRow
-import studio.lunabee.nouveaurecit.ui.editedition.MinRowHeight
 
 /**
  * `ProfilePositionView` (iOS feature 0055): placing the account on the map. The pin stays at the centre and
@@ -69,9 +68,10 @@ fun ProfilePositionScreen(
     val placeSearch: PlaceSearch = remember { PlaceSearch(context) }
     val scope: CoroutineScope = rememberCoroutineScope()
     val start: Coordinates = position ?: FALLBACK_CENTER
-    var target: Coordinates by remember { mutableStateOf(start) }
-    var zoom: Double by remember { mutableDoubleStateOf(if (position == null) COUNTRY_ZOOM else NEIGHBOURHOOD_ZOOM) }
-    var center: Coordinates by remember { mutableStateOf(start) }
+    var center: Coordinates by rememberSaveable(stateSaver = CoordinatesSaver) { mutableStateOf(start) }
+    var zoom: Double by rememberSaveable { mutableDoubleStateOf(if (position == null) COUNTRY_ZOOM else NEIGHBOURHOOD_ZOOM) }
+    var target: Coordinates by remember { mutableStateOf(center) }
+    var moves: Int by remember { mutableIntStateOf(0) }
     var query: String by rememberSaveable { mutableStateOf("") }
     var results: List<FoundPlace> by remember { mutableStateOf(emptyList()) }
     var hasSearched: Boolean by remember { mutableStateOf(false) }
@@ -92,6 +92,7 @@ fun ProfilePositionScreen(
             PositionMap(
                 target = target,
                 zoom = zoom,
+                moves = moves,
                 interactive = true,
                 onCenterChange = { center = it },
                 modifier = Modifier
@@ -125,6 +126,7 @@ fun ProfilePositionScreen(
                                 target = place.coordinates
                                 zoom = NEIGHBOURHOOD_ZOOM
                                 center = place.coordinates
+                                moves += 1
                                 results = emptyList()
                                 hasSearched = false
                             },
@@ -189,20 +191,10 @@ private fun PlaceSearchSection(
     }
 }
 
-/** A row that takes something away: its words in the error colour, the whole row the target. */
-@Composable
-internal fun DestructiveRow(text: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = MinRowHeight)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = Spacing.medium, vertical = Spacing.sMedium),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = text, style = RecitTheme.typography.action300, color = RecitTheme.colors.foregroundError)
-    }
-}
+private val CoordinatesSaver: Saver<Coordinates, Any> = listSaver(
+    save = { listOf(it.latitude, it.longitude) },
+    restore = { Coordinates(latitude = it[0], longitude = it[1]) },
+)
 
 /** Mainland France, when there is no position yet to open on. */
 private val FALLBACK_CENTER: Coordinates = Coordinates(latitude = 46.6, longitude = 2.4)

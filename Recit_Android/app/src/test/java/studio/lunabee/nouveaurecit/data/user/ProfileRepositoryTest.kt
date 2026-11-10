@@ -206,4 +206,38 @@ class ProfileRepositoryTest {
 
         assertArrayEquals(byteArrayOf(9, 8, 7), repository.gravatarImage())
     }
+
+    @Test
+    fun aGravatarRefusedOtherwiseThanNotFoundIsAnError() = runTest {
+        val repository: ProfileRepository = repository()
+        answer("""{"url":"https://www.gravatar.com/avatar/0123?d=404&s=500"}""")
+        answer("Service Unavailable", code = 503)
+
+        val failure: NetworkError.BadStatus = try {
+            repository.gravatarImage()
+            fail("gravatar.com was unavailable")
+            return@runTest
+        } catch (error: NetworkError.BadStatus) {
+            error
+        }
+
+        assertEquals(503, failure.code)
+    }
+
+    @Test
+    fun aPictureGoneFromTheCacheIsRefusedBeforeAnyRequest() = runTest {
+        val repository: ProfileRepository = repository()
+        val missing: String = File.createTempFile("avatar", ".jpg").apply { delete() }.path
+
+        val failure: ProfileSaveFailure = try {
+            repository.saveProfile(listOf(ProfileChange.Picture(missing)))
+            fail("The picture was gone")
+            return@runTest
+        } catch (error: ProfileSaveFailure) {
+            error
+        }
+
+        assertTrue(failure.cause is MissingPictureFile)
+        assertEquals(0, server.requestCount)
+    }
 }

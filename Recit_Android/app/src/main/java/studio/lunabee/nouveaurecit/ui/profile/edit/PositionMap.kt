@@ -50,8 +50,8 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 /**
  * The map of « Position » (iOS feature 0055), drawn by osmdroid from OpenStreetMap's tiles — no key, no
  * Google services, so it shows on every phone. The pin stays at the centre and the map moves under it;
- * [onCenterChange] hears where the centre went. [target] and [zoom] move the map whenever they change —
- * a place found by the search.
+ * [onCenterChange] hears where the centre went. [target] and [zoom] move the map whenever they change,
+ * and so does each new count of [moves] — a place found by the search, even where the map started.
  *
  * Still when not [interactive]: the form's preview of the position, which only shows where it is.
  */
@@ -61,6 +61,7 @@ fun PositionMap(
     zoom: Double,
     interactive: Boolean,
     modifier: Modifier = Modifier,
+    moves: Int = 0,
     onCenterChange: (Coordinates) -> Unit = {},
 ) {
     val context: Context = LocalContext.current
@@ -70,7 +71,7 @@ fun PositionMap(
     val description: String = stringResource(R.string.profile_position_map)
 
     DisposableEffect(lifecycleOwner, mapView) {
-        val observer = LifecycleEventObserver { _, event ->
+        val observer: LifecycleEventObserver = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> mapView.onResume()
                 Lifecycle.Event.ON_PAUSE -> mapView.onPause()
@@ -96,7 +97,7 @@ fun PositionMap(
         }
     }
 
-    LaunchedEffect(mapView, target, zoom) {
+    LaunchedEffect(mapView, target, zoom, moves) {
         mapView.controller.setZoom(zoom)
         mapView.controller.setCenter(GeoPoint(target.latitude, target.longitude))
     }

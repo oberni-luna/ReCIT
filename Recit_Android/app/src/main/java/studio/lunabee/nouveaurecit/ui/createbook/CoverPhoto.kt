@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import studio.lunabee.nouveaurecit.data.CachedPicture
 import java.io.File
 import java.nio.ByteBuffer
 import kotlin.math.max
@@ -57,9 +58,7 @@ object CoverPhoto {
     }
 
     /** The reduced photograph's bytes, as they go to the upload; `null` if the cache lost the file. */
-    suspend fun bytes(path: String): ByteArray? = withContext(Dispatchers.IO) {
-        File(path).takeIf(File::exists)?.readBytes()
-    }
+    suspend fun bytes(path: String): ByteArray? = CachedPicture.bytes(path)
 
     private fun coverDirectory(context: Context): File = File(context.cacheDir, "covers").apply { mkdirs() }
 }

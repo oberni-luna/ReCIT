@@ -1,6 +1,6 @@
 ---
 issue: 123
-status: todo
+status: to-test
 wiki: [[features/0031-android-app]], [[features/0065-android-end-to-end-scenario]]
 note: Play Console on the production release — « L'optimisation du code DEX est inférieure à notre seuil … Obscurcissement (0 %) »
 created: 2026-11-10
@@ -47,8 +47,29 @@ created: 2026-11-10
 
 ## Implementation
 
+- `Recit_Android/app/build.gradle.kts` — `release`: `isMinifyEnabled = true`, `isShrinkResources = true`,
+  `proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")`;
+  `versionCode` 7, `versionName` "1.4.1". `debug` untouched.
+- `Recit_Android/app/proguard-rules.pro` (new) — one rule, kept for a break seen at runtime: ML Kit's
+  `MlKitInitProvider` builds its `ComponentRegistrar`s through their no-arg constructor, which
+  firebase-components' consumer rule does not keep under R8 full mode. Without it the first minified
+  launch logged `Could not instantiate com.google.mlkit.vision.barcode.internal.BarcodeRegistrar`
+  (`NoSuchMethodException <init>`), leaving the scanner without its components.
+- Build: `./gradlew :app:bundleRelease :app:assembleRelease :app:assembleDebug :app:testDebugUnitTest :e2e:assemble`
+  green, unit tests all pass, no R8 warning, no `-dontwarn`.
+- Obfuscation: `mapping.txt` written and bundled in the AAB
+  (`BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map`); 1752 of 1756 classes under
+  `studio.lunabee.nouveaurecit` renamed — kept: `MainActivity`, `RecitApplication` (manifest),
+  `AppDatabase`, `AppDatabase_Impl` (Room).
+- Smoke run, not proof: the upload-signed release on emulator `Pixel_8_API_35`, `pm clear`, cold
+  launch → the welcome screen's wall of covers loads (public JSON through kotlinx.serialization,
+  images through Coil); no crash, no serialization / reflection error in logcat. Not signed in.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent. Most at risk: the scanner reading an ISBN (the ML Kit rule), and
+Navigation 3 restoring its back stack after the process dies (« Don't keep activities »).
 
 ## Feedback

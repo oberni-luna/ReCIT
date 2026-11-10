@@ -24,6 +24,7 @@ import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.lists.ListMoveDestination
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
+import studio.lunabee.nouveaurecit.ui.common.ListCard
 
 /**
  * `ListMoveRow` (iOS feature 0061): « Déplacer dans une autre liste » on the selected element — a menu of

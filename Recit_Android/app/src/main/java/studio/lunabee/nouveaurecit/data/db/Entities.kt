@@ -151,6 +151,19 @@ data class EntityListEntity(
      * never taken for mine.
      */
     fun isCreatedByMe(myUserId: String?): Boolean = creatorId == null || creatorId == myUserId
+
+    /**
+     * `EntityList.lastChanged`: its update, else its creation — what lists made by my friends, and those
+     * holding a book, are ordered by, the most recent first.
+     */
+    val lastChanged: Double get() = updated ?: created
+
+    /**
+     * `EntityList.friendCreator(myUserId:friendsById:)`: the friend who made this list — `null` for one of
+     * mine, and for a stranger's, which the store holds once their profile has been opened.
+     */
+    fun friendCreator(myUserId: String?, friendsById: Map<String, UserEntity>): UserEntity? =
+        creatorId?.takeIf { it != myUserId }?.let(friendsById::get)
 }
 
 @Entity(

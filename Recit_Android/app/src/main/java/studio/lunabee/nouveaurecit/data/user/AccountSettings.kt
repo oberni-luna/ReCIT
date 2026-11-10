@@ -11,6 +11,7 @@ import studio.lunabee.nouveaurecit.network.dto.UserDto
  * where a friend's profile reads it too.
  */
 data class AccountSettings(
+    val userId: String,
     val email: String?,
     val isEmailValidated: Boolean,
     val language: String?,
@@ -25,13 +26,12 @@ data class AccountSettings(
          * `validEmail` is always served to the owner.
          */
         fun of(dto: UserDto): AccountSettings = AccountSettings(
+            userId = dto.id,
             email = dto.email,
             isEmailValidated = dto.validEmail ?: false,
             language = dto.language,
             isFediversable = dto.fediversable ?: false,
-            anonymizesContributions = dto.settings?.contributions?.get(ANONYMIZE_KEY) ?: true,
+            anonymizesContributions = dto.settings?.contributions?.anonymize ?: true,
         )
-
-        private const val ANONYMIZE_KEY: String = "anonymize"
     }
 }

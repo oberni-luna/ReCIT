@@ -97,6 +97,7 @@ class AccountRepository(
             apply = { _settings.update { it?.assign(value) } },
             revert = { _settings.update { it?.assign(previous) } },
             request = { profile.updateUserAttribute(update) },
+            stillThere = { _settings.value?.userId == current.userId },
         )
     }
 

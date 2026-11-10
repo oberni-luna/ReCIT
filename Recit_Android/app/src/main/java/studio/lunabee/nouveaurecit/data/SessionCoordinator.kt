@@ -16,6 +16,7 @@ import studio.lunabee.nouveaurecit.auth.model.SessionExpiry
 import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.sorting.SortSession
 import studio.lunabee.nouveaurecit.data.user.AccountRepository
+import studio.lunabee.nouveaurecit.network.dto.UserDto
 
 /**
  * `RootView+RefreshUserData` and `RootView+ForgetSignedOutUser`: the sync order of a signed-in
@@ -51,7 +52,7 @@ class SessionCoordinator(
         if (!auth.isAuthenticated.value) return@withLock
         runCatching { users.restoreMyUserId() }.onFailure { Log.w(TAG, "restore failed", it) }
         try {
-            account.take(users.syncMyUser())
+            syncAccount()
         } catch (error: Exception) {
             Log.w(TAG, "user sync failed", error)
             if (SessionExpiry.isSessionGone(error)) signOut()
@@ -66,6 +67,12 @@ class SessionCoordinator(
         // Outside the tracking: the Lists tab's placeholder waits on my lists alone.
         runCatching { lists.syncNetworkLists(users.friends().map { it.id }) }.onFailure { Log.w(TAG, "network lists", it) }
         syncFriendsInventories()
+    }
+
+    /** My user alone, and the account settings it carries: what « Compte et connexion » asks for when it opens without them. */
+    suspend fun syncAccount() {
+        val me: UserDto = users.syncMyUser()
+        if (auth.isAuthenticated.value) account.take(me)
     }
 
     private suspend fun syncFriendsInventories() {

@@ -1,6 +1,6 @@
 ---
 issue: 112
-status: to-test
+status: to-close
 wiki: [[features/0055-profile-editing]], [[features/0083-rate-limited-sign-in-message]]
 note: Split from #111 (Android port of iOS 0055 profile editing), 2026-11-09
 created: 2026-11-09
@@ -31,7 +31,7 @@ Port of « Compte et connexion » from iOS [0055](../wiki/features/0055-profile-
 
 ## Implementation
 
-stacked on: wa/111-add-android-profile-editing @ 53d3b6c
+stacked on: wa/111-add-android-profile-editing @ 3903d40
 
 - New `data/user/`: `AccountSettings` (`email`, `isEmailValidated`, `language`, `isFediversable`, `anonymizesContributions`, `of(UserDto)`); `AccountRepository` (in-memory `StateFlow`, `take(dto)` / `forget()`; language and the two switches optimistic through `OptimisticRunner`, each one paced `PUT /api/user` via `ProfileRepository.updateUserAttribute`; `changeEmail` server first; `resendEmailConfirmation`; `changePassword`); `PasswordChangeFailure` (`WrongCurrentPassword` | `Other`, each its sentence); `AccountLanguage` (the 29 server codes named in the phone's locale). `UserAttributeUpdate.of(attribute, Boolean)`.
 - `UserDto` gains `validEmail`, `fediversable`, `settings` (`UserSettingsDto` with `notifications` and `contributions`, ready for #113); `PasswordChangePayload` (`old-password` / `new-password`). `UserRepository.syncMyUser()` returns the dto; `SessionCoordinator` runs `account.take(...)`, `account.forget()` in `forgetSignedOutUser` (sign-out, 401) and `deleteAccount`. `AppContainer.account`. Settings live in `AccountRepository`, not `UserRepository` (dependency cycle, Room).
@@ -44,6 +44,22 @@ stacked on: wa/111-add-android-profile-editing @ 53d3b6c
 - Runtime not run: no inventaire.io credentials; nothing written.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: from the stack point, `origin/wa/111-add-android-profile-editing...wa/112-add-android-account-settings`; rebased onto #111's reviewed tip (`3903d40`) first.
+- Findings (all 🟡 minor), fixed by autofix in two rounds:
+  - [correctness] A write refused after signing in to another account reverted onto it: `AccountSettings.userId` + `stillThere`; test `aRefusalArrivingAfterAnotherAccountSignedInLeavesItsSettingsAlone`. The generic SnackBar (« Une erreur s'est produite ») can still show there; it carries no value of the previous account.
+  - [correctness] A sign-out during `GET /api/user` restored the signed-out account's settings: `SessionCoordinator.syncAccount()` takes the reply only if still signed in. No unit test (no `SessionCoordinator` harness).
+  - [correctness] « Compte et connexion » spun forever when the first sync failed: it syncs on open and shows « inventaire.io ne répond pas » / « Vérifiez votre connexion, puis réessayez. » with « Réessayer » (round 2 rewrote the wording).
+  - [structure] E-mail refusal parsing moved to `data/user/EmailChangeFailure`, on `FieldAvailability.Outcome.from` — checked against inventaire.io's `checkEmailAvailability` (`error_name: invalid_email`, « this email is already used »).
+  - [elegance] `contributions` typed (`ContributionSettingsDto.anonymize`).
+  - [elegance] `SwitchRow`: caller's `modifier` first, `contentPadding` inside the touch area.
+- Final: all fixed; round 2's two strings checked by hand. Build ✅, 644 tests, 0 failures.
+- ⚠️ Code changed since the user's test: « Compte et connexion » when offline, the e-mail error under the field, switch rows' touch area (also the group settings' two switches).
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
+- ⛔ Lands after #111: PR stays draft on `wa/111-…` until #111 merges, then rebase onto the sprint branch and `gh pr edit --base`.
 
 ## Verification
 

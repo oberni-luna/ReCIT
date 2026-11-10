@@ -40,6 +40,7 @@ class AccountSettingsTest {
 
         assertEquals(
             AccountSettings(
+                userId = "u1",
                 email = "l@example.org",
                 isEmailValidated = true,
                 language = "fr",

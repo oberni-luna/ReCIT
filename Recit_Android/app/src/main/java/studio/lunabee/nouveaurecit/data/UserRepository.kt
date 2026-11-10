@@ -70,11 +70,13 @@ class UserRepository(
         if (dao.get(id) != null) _myUserId.value = id
     }
 
-    suspend fun syncMyUser() {
+    /** Returns my user as the server served it: the owner's settings ride along, and are not stored (feature 0055). */
+    suspend fun syncMyUser(): UserDto {
         val dto: UserDto = api.get("/api/user")
         dao.upsert(listOf(Merges.user(dao.get(dto.id), dto, ApiService.BASE_URL)))
         _myUserId.value = dto.id
         preferences.setString(MY_USER_ID_KEY, dto.id)
+        return dto
     }
 
     suspend fun getOrFetchUsers(ids: List<String>): List<UserEntity> {

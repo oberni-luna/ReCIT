@@ -59,7 +59,7 @@ fun ImageSourceMenu(
 }
 
 @Composable
-private fun MenuLine(text: String, icon: ImageVector, color: Color = RecitTheme.colors.foregroundDefault, onClick: () -> Unit) {
+internal fun MenuLine(text: String, icon: ImageVector, color: Color = RecitTheme.colors.foregroundDefault, onClick: () -> Unit) {
     DropdownMenuItem(
         text = { Text(text, style = RecitTheme.typography.content400, color = color) },
         leadingIcon = { Icon(icon, contentDescription = null, tint = color) },

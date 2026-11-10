@@ -72,4 +72,40 @@
     <string name="delete_account_confirm_title">Supprimer définitivement ?</string>
     <string name="delete_account_confirm_message">Vos livres, étagères, listes et échanges seront supprimés. Cette action ne peut pas être annulée.</string>
     <string name="delete_account_confirm_delete">Supprimer</string>
+    <!-- Modifier le profil (feature 0055) -->
+    <string name="profile_edit">Modifier le profil</string>
+    <string name="edit_profile_title">Modifier le profil</string>
+    <string name="edit_profile_photo_change">Modifier la photo</string>
+    <string name="edit_profile_photo_camera">Prendre une photo</string>
+    <string name="edit_profile_photo_gallery">Choisir dans la galerie</string>
+    <string name="edit_profile_photo_gravatar">Photo Gravatar</string>
+    <string name="edit_profile_photo_remove">Retirer la photo</string>
+    <string name="edit_profile_photo_no_gravatar">Votre adresse n’a pas de photo Gravatar</string>
+    <string name="edit_profile_username">Nom d’utilisateur·ice</string>
+    <string name="edit_profile_bio">Bio</string>
+    <string name="edit_profile_bio_placeholder">Quelques mots sur vous et vos livres</string>
+    <string name="edit_profile_bio_count">%1$d / %2$d</string>
+    <string name="edit_profile_public_footer">Nom d’utilisateur·ice\u202F: de 2 à 20 lettres, chiffres ou «\u202F_\u202F». Le nom, la photo et la bio sont publics, sur inventaire.io comme dans l’app de vos ami·es.</string>
+    <string name="edit_profile_position_header">Position</string>
+    <string name="edit_profile_position_add">Ajouter une position</string>
+    <string name="edit_profile_position_edit">Modifier la position</string>
+    <string name="edit_profile_position_footer">Elle fait apparaître vos livres aux lecteur·ices et aux groupes proches. Elle est publique\u202F: placez-la à l’échelle du quartier, pas de votre porte.</string>
+    <string name="edit_profile_position_none">Sans position, vos livres n’apparaissent pas aux lecteur·ices proches. Vos ami·es les voient toujours.</string>
+    <string name="edit_profile_failure_title">Le profil n’a pas été entièrement enregistré</string>
+    <string name="edit_profile_failure_picture">inventaire.io a refusé la photo, et rien n’a été envoyé après elle. Enregistrez à nouveau pour réessayer.</string>
+    <string name="edit_profile_failure_username">inventaire.io a refusé le nom d’utilisateur·ice. Ce qui le précédait est enregistré\u202F; enregistrez à nouveau pour envoyer le reste.</string>
+    <string name="edit_profile_failure_username_taken">Ce nom d’utilisateur·ice vient d’être pris. Choisissez-en un autre, puis enregistrez à nouveau.</string>
+    <string name="edit_profile_failure_bio">inventaire.io a refusé la bio. Ce qui la précédait est enregistré\u202F; enregistrez à nouveau pour envoyer le reste.</string>
+    <string name="edit_profile_failure_position">inventaire.io a refusé la position. Ce qui la précédait est enregistré\u202F; enregistrez à nouveau pour réessayer.</string>
+
+    <!-- Position (feature 0055) -->
+    <string name="profile_position_title">Position</string>
+    <string name="profile_position_map">Carte de votre position</string>
+    <string name="profile_position_map_footer">Déplacez la carte pour poser l’épingle. L’app arrondit la position à un kilomètre environ avant de l’envoyer.</string>
+    <string name="profile_position_search">Chercher une ville ou une adresse</string>
+    <string name="profile_position_search_empty">Aucun lieu trouvé</string>
+    <string name="profile_position_confirm">Valider</string>
+    <string name="profile_position_remove">Retirer ma position</string>
+    <string name="profile_position_remove_footer">Sans position, vos livres n’apparaissent plus aux lecteur·ices proches. Vos ami·es les voient toujours.</string>
+    <string name="profile_position_attribution">© les contributeur·ices d’OpenStreetMap</string>
 </resources>

@@ -93,6 +93,12 @@ fun ProfileScreen(navigator: Navigator) {
                 item(key = "header") {
                     UserHeader(user = me, itemCount = itemCount, shelfCount = shelfCount, listCount = listCount)
                 }
+                item(key = "editProfile") {
+                    ProfileLinkRow(
+                        text = stringResource(R.string.profile_edit),
+                        onClick = { navigator.push(Destination.EditProfile) },
+                    )
+                }
             }
             item(key = "about") {
                 ProfileLinkRow(
@@ -134,7 +140,7 @@ fun ProfileScreen(navigator: Navigator) {
     }
 }
 
-/** `UserHeaderView`: the portrait (or initials), the username, then what the account holds. */
+/** `UserHeaderView`: the portrait (or initials), the username, what the account holds, then my bio (feature 0055). */
 @Composable
 private fun UserHeader(user: UserEntity, itemCount: Int, shelfCount: Int, listCount: Int) {
     Row(
@@ -154,6 +160,9 @@ private fun UserHeader(user: UserEntity, itemCount: Int, shelfCount: Int, listCo
                 style = RecitTheme.typography.content300,
                 color = RecitTheme.colors.foregroundSecondary,
             )
+            user.bio?.takeIf { it.isNotBlank() }?.let { bio: String ->
+                Text(bio, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
+            }
         }
     }
 }

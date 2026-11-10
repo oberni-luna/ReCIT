@@ -5,6 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.auth.model.AuthFailure
 import studio.lunabee.nouveaurecit.auth.model.FieldAvailability
 import studio.lunabee.nouveaurecit.auth.model.PasswordResetOutcome
@@ -26,6 +27,15 @@ class AuthFailureTest {
         assertEquals(AuthFailure.InvalidCredentials, AuthFailure.classify(401, "unauthorized"))
         assertEquals(AuthFailure.InvalidCredentials, AuthFailure.classify(403, null))
         assertEquals(AuthFailure.Server(500, "boom"), AuthFailure.classify(500, "boom"))
+        assertEquals(R.string.auth_error_generic, AuthFailure.Server(500, "boom").message)
+    }
+
+    @Test
+    fun too_many_attempts_is_429_on_sign_in_and_sign_up() {
+        assertEquals(AuthFailure.RateLimited, AuthFailure.classify(429, "Too many requests, please try again later"))
+        assertEquals(AuthFailure.RateLimited, AuthFailure.classifySignup(429, null, "Too many requests"))
+        assertEquals(R.string.auth_error_rate_limited, AuthFailure.RateLimited.message)
+        assertNull(AuthFailure.RateLimited.signupField)
     }
 
     @Test

@@ -59,6 +59,7 @@
     <string name="login_button_forgot_password">Mot de passe oublié ?</string>
 
     <string name="auth_error_invalid_credentials">Nom d\'utilisateur·ice ou mot de passe incorrect.</string>
+    <string name="auth_error_rate_limited">Trop de tentatives. Réessayez dans quelques minutes.</string>
     <string name="auth_error_network">Impossible de joindre le serveur. Vérifiez votre connexion internet.</string>
     <string name="auth_error_generic">Une erreur est survenue. Réessayez plus tard.</string>
 

@@ -27,6 +27,10 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.SyncingPlaceholder
 import studio.lunabee.nouveaurecit.ui.common.RecitLargeTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.createbook.CreateBookDialog
+import studio.lunabee.nouveaurecit.ui.createbook.CreateBookSession
+import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
+import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.LocalTabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
@@ -40,12 +44,16 @@ import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
  * The field is the app's [RecitSearchField], on the cells' colour so it stands out from the grouped
  * background; what it answers is drawn under it by [SearchContent]. Not a Material 3 `SearchBar`: it
  * pads itself with the status bar's height, which opened a gap between the title and the field.
+ *
+ * « Nouveau livre », opened from inventaire.io's « Aucun résultat », sits full height above the tabs;
+ * once published, the new edition's Fiche livre is pushed here (iOS feature 0087).
  */
 @Composable
 fun SearchScreen(navigator: Navigator) {
     val viewModel: SearchViewModel = recitViewModel { SearchViewModel(it) }
     val router: TabRouter = LocalTabRouter.current
     val myUser: UserEntity? by viewModel.myUser.collectAsStateWithLifecycle()
+    val creation: CreateBookSession? by viewModel.creation.collectAsStateWithLifecycle()
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val focusManager: FocusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
@@ -55,6 +63,12 @@ fun SearchScreen(navigator: Navigator) {
     LaunchedEffect(router.wantsSearchField, user != null) {
         if (user != null && router.consumeSearchField()) runCatching { focusRequester.requestFocus() }
     }
+
+    LaunchedEffect(viewModel.createdEditionUri) {
+        viewModel.consumeCreatedEdition()?.let { uri -> navigator.push(Destination.Book(BookAnchor.Edition(uri))) }
+    }
+
+    creation?.let { session -> CreateBookDialog(session = session, onClose = viewModel::closeCreation) }
 
     Scaffold(
         topBar = {
@@ -133,6 +147,7 @@ private fun SearchSurface(
             focusManager.clearFocus()
         },
         onRetry = viewModel::retry,
+        onAddBook = viewModel::openCreation,
         onInvite = router::openNetwork,
         onPush = navigator::push,
     )

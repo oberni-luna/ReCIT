@@ -75,6 +75,9 @@ sealed interface Destination : NavKey {
 
     @Serializable data object ChangePassword : Destination
 
+    /** « Notifications par e-mail » (feature 0055). */
+    @Serializable data object NotificationSettings : Destination
+
     @Serializable data object AboutInventaire : Destination
 }
 

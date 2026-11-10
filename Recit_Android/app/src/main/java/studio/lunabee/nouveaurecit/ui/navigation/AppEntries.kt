@@ -24,6 +24,7 @@ import studio.lunabee.nouveaurecit.ui.profile.ProfileScreen
 import studio.lunabee.nouveaurecit.ui.profile.account.AccountSettingsScreen
 import studio.lunabee.nouveaurecit.ui.profile.account.ChangeEmailScreen
 import studio.lunabee.nouveaurecit.ui.profile.account.ChangePasswordScreen
+import studio.lunabee.nouveaurecit.ui.profile.account.NotificationSettingsScreen
 import studio.lunabee.nouveaurecit.ui.profile.edit.EditProfileScreen
 import studio.lunabee.nouveaurecit.ui.search.FriendsLatestBooksScreen
 import studio.lunabee.nouveaurecit.ui.search.LocalSearchResultsScreen
@@ -60,4 +61,5 @@ fun EntryProviderScope<NavKey>.appEntries(navigator: Navigator) {
     entry<Destination.AccountSettings> { AccountSettingsScreen(navigator) }
     entry<Destination.ChangeEmail> { ChangeEmailScreen(navigator) }
     entry<Destination.ChangePassword> { ChangePasswordScreen(navigator) }
+    entry<Destination.NotificationSettings> { NotificationSettingsScreen(navigator) }
 }

@@ -25,6 +25,8 @@ data class UserDto(
     val validEmail: Boolean? = null,
     /** Owner only: visible on the fediverse. Absent until first set, and read as off by the server. */
     val fediversable: Boolean? = null,
+    /** Owner only: days between two activity summaries. Absent until first set, and read as 20 by the server. */
+    val summaryPeriodicity: Int? = null,
     /** Owner only. */
     val settings: UserSettingsDto? = null,
 )

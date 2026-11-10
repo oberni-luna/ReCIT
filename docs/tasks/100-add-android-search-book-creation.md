@@ -1,6 +1,6 @@
 ---
 issue: 100
-status: to-test
+status: to-close
 wiki: [[features/0087-book-creation-from-search]], [[features/0043-android-create-a-missing-book]], [[features/0052-android-cover-zoom-edition-editing-context-menu]], [[features/0041-android-catches-up-with-ios]]
 note: Rattrapage iOS 1.10.0 (feature 0087). Android opens Nouveau livre only from the scanner; NewBookDraft.isbn is non-null and always sent.
 created: 2026-11-09
@@ -50,6 +50,19 @@ Port of iOS [0087](../wiki/features/0087-book-creation-from-search.md).
 - Runtime not run: no inventaire.io credentials; nothing published. Status-bar icon colour and back handling inside the dialog unseen.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: `origin/sprint/android-1-4-0...wa/100-add-android-search-book-creation`.
+- Findings (all 🟡 minor), fixed by autofix in three rounds, re-verified clean:
+  - [correctness] The ISBN-deduced language stayed on the edition after the ISBN changed: `NewBookDraft.withoutLanguage()` takes off only the deduced `wdt:P407`, a language the user chose stays. Round 2: a resumed scanner draft no longer loses its language when the lookup answers nothing offline (`languageIsbn`, `answeringLanguage`). Round 3: an answer for an ISBN no longer typed is ignored. Tests in `NewBookDraftTest`.
+  - [structure] Scan and Recherche duplicated the creation session's open / close: shared `ui/createbook/NewBookCreation`.
+  - [elegance] `NewBookOrigin.workQuery` overridden per case, no type check.
+  - [style] `CreateBookScreen` / `NewEditionPage` KDoc name both origins and hosts.
+- Final: `LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓` — clean. Build ✅, 617 tests, 0 failures.
+- ⚠️ Code changed since the user's test: the language deduced from a typed ISBN, and the scanner's « Nouveau livre » (same behaviour, shared code).
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
 
 ## Verification
 

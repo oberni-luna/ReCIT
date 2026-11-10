@@ -42,6 +42,8 @@ data class NewBookDraft(
     val hasAnsweredWorkQuestion: Boolean = false,
     /** What the ISBN says about the language, once asked; `null` for good if the call fails. */
     val language: EditionLanguage? = null,
+    /** The [checkedIsbn] [language] was deduced from. */
+    val languageIsbn: String? = null,
 ) {
     /**
      * The ISBN without separators, as inventaire.io keys editions: [checkedIsbn] once the check digit is
@@ -95,15 +97,39 @@ data class NewBookDraft(
 
     /**
      * What the ISBN says becomes the edition's language, unless one was chosen: the form shows it, and
-     * the user can change it there.
+     * the user can change it there. What an earlier ISBN said goes first; [isbn] is the one that said it.
      */
-    fun withLanguage(language: EditionLanguage): NewBookDraft {
-        val properties: EditionProperties = if (properties.entities(EditionProperty.Language).isEmpty()) {
-            properties.add(EditionEntityValue(uri = language.uri, label = language.displayName() ?: language.code), EditionProperty.Language)
+    fun withLanguage(language: EditionLanguage, isbn: String? = checkedIsbn): NewBookDraft {
+        val draft: NewBookDraft = withoutLanguage()
+        val properties: EditionProperties = if (draft.properties.entities(EditionProperty.Language).isEmpty()) {
+            draft.properties.add(EditionEntityValue(uri = language.uri, label = language.displayName() ?: language.code), EditionProperty.Language)
         } else {
-            properties
+            draft.properties
         }
-        return copy(language = language, properties = properties)
+        return draft.copy(language = language, languageIsbn = isbn, properties = properties)
+    }
+
+    /**
+     * What the lookup of [isbn] answered: a language replaces what an earlier ISBN said, and no answer
+     * keeps what this same ISBN said before — an ISBN that is gone, or another one, says nothing any more.
+     * An answer about an ISBN the draft no longer holds changes nothing.
+     */
+    fun answeringLanguage(language: EditionLanguage?, isbn: String?): NewBookDraft = when {
+        isbn != checkedIsbn -> this
+        language != null -> withLanguage(language, isbn)
+        isbn != null && isbn == languageIsbn -> this
+        else -> withoutLanguage()
+    }
+
+    /** Forgets what the ISBN said, and the edition's language with it while it is still the one deduced. */
+    fun withoutLanguage(): NewBookDraft {
+        val deduced: EditionLanguage = language ?: return this
+        val indices: Set<Int> = properties.values(EditionProperty.Language)
+            .withIndex()
+            .filter { it.value.entityValue?.uri == deduced.uri }
+            .map { it.index }
+            .toSet()
+        return copy(language = null, languageIsbn = null, properties = properties.remove(indices, EditionProperty.Language))
     }
 
     /** What a swipe on « Détacher » takes away: the work, picked or being described. */

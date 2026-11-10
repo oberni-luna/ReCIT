@@ -19,7 +19,6 @@ sealed interface NewBookOrigin {
      * query that was an ISBN, which says nothing about the work.
      */
     val workQuery: String
-        get() = if (this is Search && isbn == null) query.trim() else ""
 
     /** The draft the form starts from when there is none to resume. */
     val blankDraft: NewBookDraft get() = NewBookDraft(isbn = isbn.orEmpty())
@@ -27,6 +26,8 @@ sealed interface NewBookOrigin {
     /** A barcode the scanner read and inventaire.io did not know. Its ISBN is never edited. */
     data class Scan(override val isbn: String) : NewBookOrigin {
         override val isIsbnEditable: Boolean get() = false
+
+        override val workQuery: String get() = ""
     }
 
     /** A query Recherche found nothing for on inventaire.io. The ISBN is a field to fill in, or not. */
@@ -34,5 +35,7 @@ sealed interface NewBookOrigin {
         override val isbn: String? get() = IsbnQuery.isbn(query)
 
         override val isIsbnEditable: Boolean get() = true
+
+        override val workQuery: String get() = if (isbn == null) query.trim() else ""
     }
 }

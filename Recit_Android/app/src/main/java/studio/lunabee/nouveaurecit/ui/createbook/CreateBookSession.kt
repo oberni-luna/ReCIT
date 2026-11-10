@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.creation.CreateBookFailure
+import studio.lunabee.nouveaurecit.data.creation.EditionLanguage
 import studio.lunabee.nouveaurecit.data.creation.EditionProperties
 import studio.lunabee.nouveaurecit.data.creation.EditionProperty
 import studio.lunabee.nouveaurecit.data.creation.EntitySearchHit
@@ -88,12 +89,8 @@ class CreateBookSession(
         // not it does. An ISBN that stops being valid says nothing about the language any more.
         scope.launch {
             _state.map { it.draft.checkedIsbn }.distinctUntilChanged().collectLatest { isbn ->
-                if (isbn == null) {
-                    record { it.copy(language = null) }
-                    return@collectLatest
-                }
-                val language = container.creation.editionLanguage(isbn) ?: return@collectLatest
-                record { it.withLanguage(language) }
+                val language: EditionLanguage? = isbn?.let { container.creation.editionLanguage(it) }
+                record { it.answeringLanguage(language, isbn) }
             }
         }
     }

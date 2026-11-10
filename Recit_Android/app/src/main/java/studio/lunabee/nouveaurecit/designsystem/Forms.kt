@@ -1,8 +1,13 @@
 package studio.lunabee.nouveaurecit.designsystem
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -12,6 +17,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
@@ -19,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 
@@ -115,5 +123,46 @@ fun DestructiveTextButton(
         } else {
             Text(text = text, style = RecitTheme.typography.action300)
         }
+    }
+}
+
+/**
+ * A title, what it does under it, and the switch — `Row / Toggle` in the Figma file (`GroupAccessSection`,
+ * `AccountToggleLabel`). The whole row toggles, as one control for TalkBack; the switch takes the primary
+ * button's green.
+ */
+@Composable
+fun SwitchRow(
+    title: String,
+    detail: String?,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(),
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .padding(contentPadding),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sMedium),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxSmall)) {
+            Text(title, style = RecitTheme.typography.content300, color = RecitTheme.colors.foregroundDefault)
+            detail?.let { Text(it, style = RecitTheme.typography.footnote200, color = RecitTheme.colors.foregroundSecondary) }
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = RecitTheme.colors.foregroundTintedInverse,
+                checkedTrackColor = RecitTheme.colors.backgroundTintedInverse,
+                checkedBorderColor = RecitTheme.colors.backgroundTintedInverse,
+                uncheckedThumbColor = RecitTheme.colors.foregroundSecondary,
+                uncheckedTrackColor = RecitTheme.colors.backgroundSecondary,
+                uncheckedBorderColor = RecitTheme.colors.foregroundDisable,
+            ),
+        )
     }
 }

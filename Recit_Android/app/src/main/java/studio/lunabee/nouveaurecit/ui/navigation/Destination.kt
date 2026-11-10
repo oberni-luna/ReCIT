@@ -68,6 +68,13 @@ sealed interface Destination : NavKey {
     /** « Modifier le profil » (feature 0055): its position page is a state of the form, not a destination. */
     @Serializable data object EditProfile : Destination
 
+    /** « Compte et connexion » (feature 0055), and the address and the password, each on a screen of its own. */
+    @Serializable data object AccountSettings : Destination
+
+    @Serializable data object ChangeEmail : Destination
+
+    @Serializable data object ChangePassword : Destination
+
     @Serializable data object AboutInventaire : Destination
 }
 

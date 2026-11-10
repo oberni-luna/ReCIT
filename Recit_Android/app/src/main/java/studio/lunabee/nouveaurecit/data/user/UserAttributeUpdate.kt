@@ -18,6 +18,9 @@ data class UserAttributeUpdate(val attribute: String, val value: JsonElement) {
         fun of(attribute: String, value: String?): UserAttributeUpdate =
             UserAttributeUpdate(attribute, value?.let(::JsonPrimitive) ?: JsonNull)
 
+        /** A switch of the account: `fediversable`, `settings.<group>.<key>`. */
+        fun of(attribute: String, value: Boolean): UserAttributeUpdate = UserAttributeUpdate(attribute, JsonPrimitive(value))
+
         /** `position` is `[latitude, longitude]`, or `null` to take it away. */
         fun of(attribute: String, value: Coordinates?): UserAttributeUpdate = UserAttributeUpdate(
             attribute,

@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.data.SearchResult
-import studio.lunabee.nouveaurecit.data.creation.NewBookDrafts
 import studio.lunabee.nouveaurecit.data.creation.NewBookOrigin
 import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.ItemRow
@@ -33,6 +32,7 @@ import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.model.UserRelation
 import studio.lunabee.nouveaurecit.data.search.IsbnQuery
 import studio.lunabee.nouveaurecit.ui.createbook.CreateBookSession
+import studio.lunabee.nouveaurecit.ui.createbook.NewBookCreation
 
 /**
  * `SearchTabView` + `SearchContent`'s state (features 0014, 0037): the field, its phase, the
@@ -85,13 +85,11 @@ class SearchViewModel(private val container: AppContainer) : ViewModel() {
 
     private var answered: SearchAttempt? = null
 
-    private val _creation: MutableStateFlow<CreateBookSession?> = MutableStateFlow(null)
+    /** Books started from a query and not yet published, by query, for as long as the tab lives. */
+    private val newBook: NewBookCreation = NewBookCreation(container, viewModelScope)
 
     /** « Nouveau livre », opened from inventaire.io's « Aucun résultat », while it is up. */
-    val creation: StateFlow<CreateBookSession?> = _creation.asStateFlow()
-
-    /** Books started from a query and not yet published, by query, for as long as the tab lives. */
-    private val drafts: NewBookDrafts = NewBookDrafts()
+    val creation: StateFlow<CreateBookSession?> = newBook.session
 
     /** The edition just published from here, until its Fiche livre has been pushed. */
     var createdEditionUri: String? by mutableStateOf(null)
@@ -139,25 +137,10 @@ class SearchViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     /** « Ajouter ce livre »: « Nouveau livre » on [query], on the draft left from a previous attempt if any. */
-    fun openCreation(query: String) {
-        if (_creation.value != null) return
-        val origin: NewBookOrigin.Search = NewBookOrigin.Search(query)
-        _creation.value = CreateBookSession(
-            container = container,
-            parentScope = viewModelScope,
-            origin = origin,
-            draft = drafts.draft(origin),
-            onCreated = { uri, _ -> bookCreated(origin, uri) },
-        )
-    }
+    fun openCreation(query: String) = newBook.open(NewBookOrigin.Search(query)) { uri, _ -> createdEditionUri = uri }
 
     /** Whatever takes the form away keeps what was typed. */
-    fun closeCreation() {
-        val session: CreateBookSession = _creation.value ?: return
-        drafts.remember(session.draft, session.origin)
-        session.cancel()
-        _creation.value = null
-    }
+    fun closeCreation() = newBook.close()
 
     /** Hands over the edition just published, once: its Fiche livre is pushed a single time. */
     fun consumeCreatedEdition(): String? = createdEditionUri.also { createdEditionUri = null }
@@ -218,14 +201,6 @@ class SearchViewModel(private val container: AppContainer) : ViewModel() {
                 score = 1.0,
             ),
         )
-    }
-
-    /** The book exists and is in my Inventaire: the form goes, and the Fiche livre follows. */
-    private fun bookCreated(origin: NewBookOrigin.Search, uri: String) {
-        drafts.forget(origin)
-        _creation.value?.cancel()
-        _creation.value = null
-        createdEditionUri = uri
     }
 
     private data class SearchAttempt(val submission: SearchSuggestion, val count: Int)

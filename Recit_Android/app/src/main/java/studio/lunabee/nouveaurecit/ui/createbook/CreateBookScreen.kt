@@ -64,13 +64,15 @@ import studio.lunabee.nouveaurecit.ui.editedition.WorkRow
 import studio.lunabee.nouveaurecit.ui.editedition.WorkSearchPage
 
 /**
- * `NewBookFlowView` (features 0020, iOS 0047 and 0050): what a scan which found nothing turns into — a
- * contribution to inventaire.io. It opens on the search for the work; « Nouvelle édition » is the edition's
- * form, the same sections as « Modifier l'édition »; « Nouvelle œuvre », « Œuvre déjà connue », the
- * property pages and the help are pushed over it, as pages of [CreateBookSession] under one [BackHandler].
+ * `NewBookFlowView` (features 0020, iOS 0047, 0050 and 0087): what a scan with no result, or a query
+ * Recherche found nothing for, turns into — a contribution to inventaire.io. It opens on the search for the
+ * work; « Nouvelle édition » is the edition's form, the same sections as « Modifier l'édition »;
+ * « Nouvelle œuvre », « Œuvre déjà connue », the property pages and the help are pushed over it, as pages
+ * of [CreateBookSession] under one [BackHandler].
  *
- * Drawn by the camera in place of its feed, the way iOS poses a sheet on it: the flow's back stack
- * belongs to the book screen a row can open, and the two paths must not braid.
+ * Drawn by the camera in place of its feed, the way iOS poses a sheet on it, and from Recherche in a
+ * [CreateBookDialog]: the flow's back stack belongs to neither host's navigation, and the paths must not
+ * braid.
  *
  * Publishing waits for the server, and nothing can be left or changed while it does — a half-heard
  * publication is the one way to make a duplicate. A failure is said on the page that published, beside
@@ -146,8 +148,9 @@ private fun workSearchMessage(isbn: String?): String = if (isbn == null) {
 
 /**
  * `NewEditionView`: the book in hand, described with « Modifier l'édition »'s sections — the work found or
- * being described, the cover and the ISBN the camera read — or the one typed, from Recherche — the title (the work's to begin with), and every
- * property inventaire.io accepts on an edition, the language already filled in from the ISBN.
+ * being described, the cover and the ISBN (read by the camera, or typed from Recherche), the title (the
+ * work's to begin with), and every property inventaire.io accepts on an edition, the language already
+ * filled in from the ISBN.
  */
 @Composable
 private fun NewEditionPage(state: CreateBookState, session: CreateBookSession, onClose: () -> Unit) {

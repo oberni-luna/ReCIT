@@ -116,6 +116,63 @@ class NewBookDraftTest {
     }
 
     @Test
+    fun aTypedIsbnThatChangesLanguageTakesTheEarlierDeductionAwayFromTheEdition() {
+        val french = EditionLanguage(uri = "wd:Q150", code = "fr")
+        val english = EditionLanguage(uri = "wd:Q1860", code = "en")
+        val deduced: NewBookDraft = NewBookDraft(isbn = "9782494289857").withLanguage(french)
+
+        val invalid: NewBookDraft = deduced.copy(isbn = "978249428985").withoutLanguage()
+        assertNull(invalid.language)
+        assertTrue(invalid.properties.entities(EditionProperty.Language).isEmpty())
+
+        val retyped: NewBookDraft = invalid.copy(isbn = "9780141036144").withLanguage(english)
+        assertEquals(english, retyped.language)
+        assertEquals(listOf("wd:Q1860"), retyped.properties.entities(EditionProperty.Language).map { it.uri })
+
+        val directly: NewBookDraft = deduced.copy(isbn = "9780141036144").withLanguage(english)
+        assertEquals(listOf("wd:Q1860"), directly.properties.entities(EditionProperty.Language).map { it.uri })
+    }
+
+    @Test
+    fun aResumedDraftKeepsItsLanguageWhenTheSameIsbnGetsNoAnswer() {
+        val french = EditionLanguage(uri = "wd:Q150", code = "fr")
+        val resumed: NewBookDraft = NewBookDraft(isbn = "9782494289857").withLanguage(french)
+
+        val unanswered: NewBookDraft = resumed.answeringLanguage(null, "9782494289857")
+        assertEquals(french, unanswered.language)
+        assertEquals(listOf("wd:Q150"), unanswered.properties.entities(EditionProperty.Language).map { it.uri })
+
+        val another: NewBookDraft = resumed.copy(isbn = "9780141036144").answeringLanguage(null, "9780141036144")
+        assertNull(another.language)
+        assertTrue(another.properties.entities(EditionProperty.Language).isEmpty())
+    }
+
+    @Test
+    fun anAnswerAboutAnIsbnNoLongerTypedChangesNothing() {
+        val french = EditionLanguage(uri = "wd:Q150", code = "fr")
+        val retyped: NewBookDraft = NewBookDraft(isbn = "9780141036144")
+
+        val stale: NewBookDraft = retyped.answeringLanguage(french, "9782494289857")
+        assertEquals(retyped, stale)
+
+        val unanswered: NewBookDraft = stale.answeringLanguage(null, "9780141036144")
+        assertNull(unanswered.language)
+        assertTrue(unanswered.properties.entities(EditionProperty.Language).isEmpty())
+    }
+
+    @Test
+    fun aLanguageChosenByTheUserOutlivesTheIsbnItWasNotDeducedFrom() {
+        val french = EditionLanguage(uri = "wd:Q150", code = "fr")
+        val chosen: NewBookDraft = NewBookDraft(isbn = "9782494289857").withLanguage(french).let {
+            it.copy(properties = it.properties.remove(setOf(0), EditionProperty.Language).add(EditionEntityValue(uri = "wd:Q188", label = "allemand"), EditionProperty.Language))
+        }
+
+        val invalid: NewBookDraft = chosen.copy(isbn = "978249428985").withoutLanguage()
+        assertNull(invalid.language)
+        assertEquals(listOf("wd:Q188"), invalid.properties.entities(EditionProperty.Language).map { it.uri })
+    }
+
+    @Test
     fun aWorkDetachedLeavesTheDraftWithoutOneAndUnpublishable() {
         val draft: NewBookDraft = NewBookDraft(isbn = "9782494289857").choose(ministry)
         assertTrue(draft.isPublishable)

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.creation.EditionClaims
+import studio.lunabee.nouveaurecit.data.inventory.InventoryItemTextAttribute
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SectionHeader
@@ -247,8 +248,12 @@ private fun LazyListScope.community(state: BookUiState, navigator: Navigator) {
 private fun LazyListScope.myCopy(state: BookUiState, viewModel: BookViewModel) {
     val mine = state.myItem ?: return
     item(key = "mine-header") { SectionHeader(title = stringResource(R.string.edition_my_inventory)) }
-    item(key = "mine-notes:${mine.item.id}") { MyNotesCell(mine) { viewModel.commitNotes(mine.item.id, it) } }
-    item(key = "mine-details:${mine.item.id}") { MyCopyDetailsCell(mine) { viewModel.updateTransaction(mine.item.id, it) } }
+    InventoryItemTextAttribute.entries.forEach { attribute ->
+        item(key = "mine-text-${attribute.name}:${mine.item.id}") {
+            MyCopyTextCell(mine, attribute) { viewModel.commitText(mine.item.id, attribute, it) }
+        }
+    }
+    item(key = "mine-transaction:${mine.item.id}") { MyCopyTransactionCell(mine) { viewModel.updateTransaction(mine.item.id, it) } }
 }
 
 /** `BookAnchor.stableId`: the same book is one entry however it was labelled. */

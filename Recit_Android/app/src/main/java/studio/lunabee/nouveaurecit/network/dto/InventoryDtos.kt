@@ -34,6 +34,8 @@ data class ItemDto(
     val entity: String,
     val transaction: String,
     val details: String? = null,
+    /** The Note privée: sent to its owner alone. */
+    val notes: String? = null,
     val visibility: List<String>? = null,
     val owner: String,
     val created: Double,

@@ -40,6 +40,8 @@
     <string name="edition_my_inventory">Dans mon inventaire</string>
     <string name="inventory_item_write_notes">Écrire un commentaire</string>
     <string name="inventory_item_my_notes">Ce que j\'en pense</string>
+    <string name="inventory_item_write_private_note">Écrire une note privée</string>
+    <string name="inventory_item_private_note">Ce que je garde pour moi</string>
     <string name="inventory_item_created_date">Créé le %1$s</string>
     <string name="inventory_item_transaction_mode">Mode de transaction</string>
 

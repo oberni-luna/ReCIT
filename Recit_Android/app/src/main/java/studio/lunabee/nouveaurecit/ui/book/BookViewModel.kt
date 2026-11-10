@@ -22,6 +22,7 @@ import studio.lunabee.nouveaurecit.data.db.EditionEntity
 import studio.lunabee.nouveaurecit.data.db.EditionWithWorks
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.data.db.WorkEntity
+import studio.lunabee.nouveaurecit.data.inventory.InventoryItemTextAttribute
 import studio.lunabee.nouveaurecit.data.model.TransactionType
 import studio.lunabee.nouveaurecit.data.transactions.TransactionRequestTarget
 import studio.lunabee.nouveaurecit.network.NetworkError
@@ -212,8 +213,8 @@ class BookViewModel(
 
     // Actions ---------------------------------------------------------------------------------
 
-    fun commitNotes(itemId: String, details: String) {
-        backgroundScope.launch { container.inventory.updateDetails(itemId, details) }
+    fun commitText(itemId: String, attribute: InventoryItemTextAttribute, text: String) {
+        backgroundScope.launch { container.inventory.updateText(itemId, attribute, text) }
     }
 
     fun updateTransaction(itemId: String, type: TransactionType) {

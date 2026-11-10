@@ -86,6 +86,27 @@ class MergesTest {
     }
 
     @Test
+    fun an_item_keeps_its_private_note_when_the_payload_has_none_and_takes_a_new_one() {
+        val dto = ItemDto(
+            id = "i1",
+            rev = "1",
+            entity = "isbn:1",
+            transaction = "inventorying",
+            owner = "u1",
+            created = 1.0,
+            snapshot = EntitySnapshotDto(title = "Dune"),
+            notes = "Prêté à Léa",
+        )
+        val item = Merges.item(null, dto, "olive")
+        assertEquals("Prêté à Léa", item.notes)
+        assertEquals("", Merges.item(null, dto.copy(notes = null), "olive").notes)
+        val sparse = Merges.item(item, dto.copy(notes = null, details = "Superbe"), "olive")
+        assertEquals("Prêté à Léa", sparse.notes)
+        assertEquals("Superbe", sparse.details)
+        assertEquals("Rendu", Merges.item(item, dto.copy(notes = "Rendu"), "olive").notes)
+    }
+
+    @Test
     fun a_snapshot_edition_splits_its_authors() {
         val edition = Merges.edition("isbn:1", EntitySnapshotDto(title = "T", authors = "A, B", image = "x.jpg"))
         assertEquals(listOf("A", "B"), edition.authorNames)

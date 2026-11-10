@@ -66,6 +66,8 @@ Port of the « Modifier le profil » third of iOS [0055](../wiki/features/0055-p
 - Wiki: nothing task-specific; the sprint's feature doc is written with #101.
 - Screenshots: none — `verify.platform: ios`, this task is Android.
 
+- Landing — rebased onto `sprint/android-1-4-0` after #99: #99 had moved `MenuLine` into `ImageSourceMenu.kt`; the copy in `EditionFormSections.kt` dropped and `ImageSourceMenu`'s `MenuLine` made `internal` for the profile photo's menu (it has a Gravatar line, so not `ImageSourceMenu` itself). Build ✅, 672 tests, 0 failures.
+
 ## Verification
 
 manual validation — not run by agent (no inventaire.io credentials; build + unit tests are the proof)

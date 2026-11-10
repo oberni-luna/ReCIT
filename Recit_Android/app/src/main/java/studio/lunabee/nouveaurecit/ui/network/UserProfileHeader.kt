@@ -67,13 +67,14 @@ internal fun UserProfileHeader(
         Spacer(Modifier.height(metrics.topExpanded - UserProfileHeaderMetrics.BarRise * fold))
         Box(Modifier.size(pictureSize), contentAlignment = Alignment.Center) {
             // Folded, the picture sits in the bar's row and opens nothing, as on iOS.
-            EnlargeablePhoto(url = user.avatarUrl, isEnabled = fold == 0f) { memoryCacheKey ->
+            EnlargeablePhoto(url = user.avatarUrl, isEnabled = fold == 0f) { memoryCacheKey, onLoad ->
                 CellThumbnail(
                     url = user.avatarUrl,
                     size = ThumbnailSize.XLarge,
                     shape = ThumbnailShape.Circle,
                     fallbackName = user.username,
                     memoryCacheKey = memoryCacheKey,
+                    onLoad = onLoad,
                     modifier = Modifier
                         .requiredSize(UserProfileHeaderMetrics.PictureExpanded)
                         .graphicsLayer {

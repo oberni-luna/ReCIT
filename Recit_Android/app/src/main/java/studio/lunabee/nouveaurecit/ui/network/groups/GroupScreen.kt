@@ -347,8 +347,8 @@ private fun GroupHeader(group: ReaderGroup) {
         modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        EnlargeablePhoto(url = group.pictureUrl) { memoryCacheKey ->
-            GroupThumbnail(url = group.pictureUrl, size = ThumbnailSize.Large, memoryCacheKey = memoryCacheKey)
+        EnlargeablePhoto(url = group.pictureUrl) { memoryCacheKey, onLoad ->
+            GroupThumbnail(url = group.pictureUrl, size = ThumbnailSize.Large, memoryCacheKey = memoryCacheKey, onLoad = onLoad)
         }
         Text(group.name, style = RecitTheme.typography.title50, color = RecitTheme.colors.foregroundDefault)
         if (group.description.isNotEmpty()) {

@@ -241,7 +241,8 @@ enum class ThumbnailShape { Square, Portrait, Circle }
  * `CellThumbnail` — a remote image with the placeholder background and the light shadow. A
  * portrait is a book cover, 2:3. Given a [fallbackName], a circle without a picture — or whose
  * picture fails — shows that name's initials instead of an empty disc. Given a [memoryCacheKey], the
- * picture is kept in memory under it, for a Plein écran to open on.
+ * picture is kept in memory under it, for a Plein écran to open on. [onLoad] is called once the picture
+ * has loaded.
  */
 @Composable
 fun CellThumbnail(
@@ -252,6 +253,7 @@ fun CellThumbnail(
     cornerRadius: Dp = CornerRadius.minimal,
     fallbackName: String? = null,
     memoryCacheKey: String? = null,
+    onLoad: () -> Unit = {},
 ) {
     val height: Dp = if (shape == ThumbnailShape.Portrait) size.width * 3 / 2 else size.width
     val clip: Shape = if (shape == ThumbnailShape.Circle) CircleShape else RoundedCornerShape(cornerRadius)
@@ -283,6 +285,7 @@ fun CellThumbnail(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
+                onSuccess = { onLoad() },
             )
         }
     }

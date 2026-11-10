@@ -80,13 +80,14 @@ private fun AuthorHeader(author: AuthorEntity) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        EnlargeablePhoto(url = author.image) { memoryCacheKey ->
+        EnlargeablePhoto(url = author.image) { memoryCacheKey, onLoad ->
             CellThumbnail(
                 url = author.image,
                 size = ThumbnailSize.XLarge,
                 shape = ThumbnailShape.Circle,
                 fallbackName = author.name,
                 memoryCacheKey = memoryCacheKey,
+                onLoad = onLoad,
             )
         }
         Text(author.name, style = RecitTheme.typography.title200, color = RecitTheme.colors.foregroundDefault, textAlign = TextAlign.Center)

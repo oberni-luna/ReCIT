@@ -1,6 +1,6 @@
 ---
 issue: 98
-status: to-test
+status: to-close
 wiki: [[features/0081-a-friends-and-a-groups-photo-full-screen]], [[features/0085-author-photos-full-screen]], [[features/0029-full-screen-cover]], [[features/0052-android-cover-zoom-edition-editing-context-menu]]
 note: Rattrapage iOS 1.10.0 (features 0081 and 0085). Android has FullScreenCoverDialog for covers only, on black.
 created: 2026-11-09
@@ -45,6 +45,19 @@ Port of iOS [0081](../wiki/features/0081-a-friends-and-a-groups-photo-full-scree
 - Runtime not run: no inventaire.io credentials for the agent. Blur radius and 70 % alpha are unseen guesses.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: `origin/sprint/android-1-4-0...wa/98-open-android-photos-full-screen`.
+- Findings (all 🟡 minor), fixed by autofix, re-verified clean:
+  - [correctness] The photo's `clickable` took touches from the `HorizontalPager` on a friend's profile: the tap is now `onTapSharedWithSiblings` (`ui/common/TapSharedWithSiblings.kt`), sharing input with its siblings and consuming no move, so a scroll or swipe from the photo moves the page. Supersedes the « side effect to check » above and the `clickable` named in Implementation.
+  - [correctness] A photo whose image failed (initials / glyph showing) still opened an empty Plein écran: opening is gated on the thumbnail's `onSuccess`.
+  - [elegance] The Android 12 blur decision lived in three places: `FullScreenBackdrop.of(SDK_INT, window != null && blurEnabled)` is the only decider.
+  - [style] Import order in `GroupComponents.kt`.
+- Final: `LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓` — clean. Build ✅, 605 tests, 0 failures. Android lint (NewApi) not run.
+- ⚠️ Code changed since the user's test: tapping a friend's, a group's or an author's photo, and the full-screen backdrop.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
 
 ## Verification
 

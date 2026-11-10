@@ -48,8 +48,8 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.TagLabel
 import studio.lunabee.nouveaurecit.designsystem.TagStyle
-import studio.lunabee.nouveaurecit.designsystem.rememberImageModel
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
+import studio.lunabee.nouveaurecit.designsystem.rememberImageModel
 import studio.lunabee.nouveaurecit.ui.network.FirstSyncState
 import studio.lunabee.nouveaurecit.ui.network.ReaderCell
 
@@ -57,10 +57,17 @@ import studio.lunabee.nouveaurecit.ui.network.ReaderCell
  * `AvatarThumbnail(.group)`: a group's picture as a square with rounded corners, where a reader's is
  * a circle — a group should never be read as a person at a glance. Without a picture, or when it
  * will not load, the square shows the groups glyph on the tinted fill. Given a [memoryCacheKey], the
- * picture is kept in memory under it, for a Plein écran to open on.
+ * picture is kept in memory under it, for a Plein écran to open on. [onLoad] is called once the picture
+ * has loaded.
  */
 @Composable
-fun GroupThumbnail(url: String?, size: ThumbnailSize, modifier: Modifier = Modifier, memoryCacheKey: String? = null) {
+fun GroupThumbnail(
+    url: String?,
+    size: ThumbnailSize,
+    modifier: Modifier = Modifier,
+    memoryCacheKey: String? = null,
+    onLoad: () -> Unit = {},
+) {
     val shape: Shape = RoundedCornerShape(CornerRadius.medium)
     Box(
         modifier = modifier
@@ -82,6 +89,7 @@ fun GroupThumbnail(url: String?, size: ThumbnailSize, modifier: Modifier = Modif
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
+                onSuccess = { onLoad() },
             )
         }
     }

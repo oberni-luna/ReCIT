@@ -14,6 +14,7 @@ import studio.lunabee.nouveaurecit.data.db.UserEntity
 import studio.lunabee.nouveaurecit.data.groups.GroupPeople
 import studio.lunabee.nouveaurecit.data.model.Merges
 import studio.lunabee.nouveaurecit.data.model.UserRelation
+import studio.lunabee.nouveaurecit.data.user.MyProfileStore
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.NetworkError
 import studio.lunabee.nouveaurecit.network.dto.OkStatusDto
@@ -29,7 +30,7 @@ class UserRepository(
     private val db: AppDatabase,
     private val runner: OptimisticRunner,
     private val preferences: UserPreferences,
-) : GroupPeople {
+) : GroupPeople, MyProfileStore {
     private val dao = db.userDao()
 
     private val _myUserId: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -55,6 +56,12 @@ class UserRepository(
     val receivedRequestCount: Flow<Int> = _myUserId.flatMapLatest { id -> dao.observeReceivedRequestCount(id.orEmpty()) }
 
     suspend fun myUser(): UserEntity? = _myUserId.value?.let { dao.get(it) }
+
+    /** What « Modifier le profil » writes once the server has taken it (feature 0055). */
+    override suspend fun updateMyUser(transform: (UserEntity) -> UserEntity) {
+        val me: UserEntity = myUser() ?: return
+        dao.upsert(listOf(transform(me)))
+    }
 
     /** Puts back the id of the last session's user, when its row is still in the store. */
     suspend fun restoreMyUserId() {

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.TextLocale
 import studio.lunabee.nouveaurecit.data.creation.ClaimLiteral
 import studio.lunabee.nouveaurecit.data.creation.EditionProperties
 import studio.lunabee.nouveaurecit.data.creation.EditionProperty
@@ -41,7 +42,7 @@ import java.util.Locale
  */
 @Composable
 fun EntityLabelRows(edit: EntityEdit, fieldName: @Composable (String) -> String, addTitle: String, actions: EntityFormActions) {
-    val locale: Locale = Locale.getDefault()
+    val locale: Locale = TextLocale.current
     edit.labels.forEach { label ->
         key(label.language) {
             FormTextRow(

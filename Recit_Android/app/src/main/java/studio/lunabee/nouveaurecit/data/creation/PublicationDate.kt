@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.data.creation
 
+import studio.lunabee.nouveaurecit.data.TextLocale
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -31,7 +32,7 @@ data class PublicationDate(
         }
 
     /** The date as the form prints it, at its own precision: « 2023 », « mars 2023 », « 15 mars 2023 ». */
-    fun displayed(locale: Locale = Locale.getDefault()): String {
+    fun displayed(locale: Locale = TextLocale.current): String {
         val date: LocalDate = toLocalDate() ?: return claim
         return when (precision) {
             Precision.Year -> year.toString()

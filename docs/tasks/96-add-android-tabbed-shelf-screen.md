@@ -1,6 +1,6 @@
 ---
 issue: 96
-status: to-test
+status: to-close
 wiki: [[features/0089-tabbed-shelf-screen]], [[features/0073-a-lists-presentation-tab]], [[features/0077-android-catches-up-with-1-9-0]], [[adr/0001-swiftdata-reactive-optimistic]]
 note: Rattrapage iOS 1.10.0 (feature 0089). ShelfScreen is a plain list; AddBooksToShelfSheet toggles one book per tap.
 created: 2026-11-09
@@ -35,7 +35,7 @@ Port of iOS [0089](../wiki/features/0089-tabbed-shelf-screen.md). Builds on #95:
 
 ## Implementation
 
-stacked on: wa/95-hide-android-tab-bar-on-push @ 0bba5e8
+stacked on: wa/95-hide-android-tab-bar-on-push @ 1356ad4
 
 - New `data/shelves/`: `ShelfMembershipStore` (+ `RoomShelfMembershipStore`) and `ShelfMembership` — `add` (one optimistic `add-items` for the books not yet on the étagère, nothing sent when none left; revert checks only the étagère still exists, as iOS; errors to `ErrorReporter`), `remove`, `addNow`, `removeNow`, `send`. Separate class so the batch add is testable without Robolectric (pattern of `GroupRepository`'s ledger).
 - `data/ShelfRepository.kt`: membership through `ShelfMembership`; `addItem` → `addItems(shelfId, itemIds)`; `removeItem`, `addItemsNow`, `removeItemsNow` unchanged; `createShelf` calls `membership.send`. `ui/book/BookActions.kt`: the « … » menu calls `addItems(id, listOf(itemId))`.
@@ -47,6 +47,21 @@ stacked on: wa/95-hide-android-tab-bar-on-push @ 0bba5e8
 - Runtime not run: no inventaire.io credentials for the agent.
 
 ## Review
+
+### Round validation — 2026-11-10
+
+- Scope: from the stack point, `origin/wa/95-hide-android-tab-bar-on-push...wa/96-add-android-tabbed-shelf-screen`; rebased onto #95's reviewed tip (`1356ad4`) first.
+- Findings, fixed by autofix in two rounds:
+  - 🟠 [correctness] A page swipe on « Livres » could take a book off the étagère (56 dp threshold, a fling counted): removal now needs half the row width and a fling short of it springs back (`rememberDeliberateDismissState`, Material3 1.4.0's deprecated constructor on purpose — one deprecation warning, explained in its KDoc). A flick that starts on one of my rows still goes to the row, not the pager — as on iOS 0089 (`.swipeActions` inside `TabPager`); off the rows, on the capsule and on Présentation it changes the tab.
+  - 🟡 [correctness] The add sheet's ticks read as checkboxes to TalkBack (`Role.Checkbox`, `toggleableState`).
+  - 🟡 [structure] `ShelfMembership` injected into `ShelfRepository` from `AppContainer`.
+  - 🟡 [structure] `PresentationPage` and `ListCard` moved to `ui/common` (round 2: `ListCard` too, so `common` imports no feature).
+  - 🟡 [style] Explicit types (`GroupedCell`, `ShelfMembershipTest`); block bodies for `addItemsNow` / `removeItemsNow`.
+- Final: all fixed; round 2's move and KDoc checked by hand. Build ✅, 614 tests, 0 failures.
+- ⚠️ Code changed since the user's test: swiping a book off an étagère now needs half the row.
+- Wiki: nothing task-specific; the sprint's feature doc is written with #101.
+- Screenshots: none — `verify.platform: ios`, this task is Android.
+- ⛔ Lands after #95: PR stays draft on `wa/95-…` until #95 merges, then rebase onto the sprint branch and `gh pr edit --base`.
 
 ## Verification
 

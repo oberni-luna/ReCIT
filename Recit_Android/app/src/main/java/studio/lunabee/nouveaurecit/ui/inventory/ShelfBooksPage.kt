@@ -20,11 +20,13 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Density
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ItemRow
 import studio.lunabee.nouveaurecit.designsystem.EmptyState
@@ -90,7 +92,7 @@ internal fun ShelfBooksPage(
  */
 @Composable
 private fun RemovableRow(row: ItemRow, shelfName: String, onOpen: () -> Unit, onPush: (Destination) -> Unit, onRemove: () -> Unit) {
-    val dismissState: SwipeToDismissBoxState = rememberSwipeToDismissBoxState()
+    val dismissState: SwipeToDismissBoxState = rememberDeliberateDismissState()
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = false,
@@ -121,5 +123,21 @@ private fun RemovableRow(row: ItemRow, shelfName: String, onOpen: () -> Unit, on
             onPush = onPush,
             modifier = Modifier.background(RecitTheme.colors.backgroundGroupedCell),
         )
+    }
+}
+
+/** Deprecated constructor on purpose: removal needs half the width and a fling short of it is refused, which the current one cannot do. */
+@Composable
+private fun rememberDeliberateDismissState(): SwipeToDismissBoxState {
+    val density: Density = LocalDensity.current
+    return remember(density) {
+        lateinit var state: SwipeToDismissBoxState
+        state = SwipeToDismissBoxState(
+            initialValue = SwipeToDismissBoxValue.Settled,
+            density = density,
+            confirmValueChange = { value -> value != SwipeToDismissBoxValue.EndToStart || state.targetValue == value },
+            positionalThreshold = { distance -> distance / 2 },
+        )
+        state
     }
 }

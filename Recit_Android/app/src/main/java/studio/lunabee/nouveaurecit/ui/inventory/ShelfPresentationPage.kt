@@ -6,7 +6,7 @@ import androidx.compose.ui.res.stringResource
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.ShelfEntity
 import studio.lunabee.nouveaurecit.ui.common.Formatting
-import studio.lunabee.nouveaurecit.ui.lists.PresentationPage
+import studio.lunabee.nouveaurecit.ui.common.PresentationPage
 
 /**
  * `ShelfPresentationPage` (iOS feature 0089): the étagère's description, links live, or « Cette étagère n'a pas

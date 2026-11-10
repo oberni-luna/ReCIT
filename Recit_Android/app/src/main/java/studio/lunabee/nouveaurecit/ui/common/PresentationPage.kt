@@ -1,4 +1,4 @@
-package studio.lunabee.nouveaurecit.ui.lists
+package studio.lunabee.nouveaurecit.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +24,6 @@ import studio.lunabee.nouveaurecit.designsystem.EmptyState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.designsystem.WithLabel
-import studio.lunabee.nouveaurecit.ui.common.WebLinks
 
 /**
  * A « Présentation » page (iOS features 0073 and 0089): a description, whole, in one card — the owner's own

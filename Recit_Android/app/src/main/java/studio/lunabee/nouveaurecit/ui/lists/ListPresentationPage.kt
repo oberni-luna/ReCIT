@@ -6,6 +6,7 @@ import androidx.compose.ui.res.stringResource
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.db.EntityListEntity
 import studio.lunabee.nouveaurecit.ui.common.Formatting
+import studio.lunabee.nouveaurecit.ui.common.PresentationPage
 
 /**
  * `ListPresentationPage` (iOS feature 0073): a list's description, whole, in one card — the list's own words,

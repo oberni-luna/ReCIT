@@ -18,6 +18,7 @@ import kotlinx.serialization.json.jsonObject
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -54,7 +55,7 @@ class ShelfMembershipTest {
         server.start()
         val client: OkHttpClient = OkHttpClient.Builder()
             .addInterceptor { chain ->
-                val redirected = chain.request().url.newBuilder().scheme("http").host(server.hostName).port(server.port).build()
+                val redirected: HttpUrl = chain.request().url.newBuilder().scheme("http").host(server.hostName).port(server.port).build()
                 chain.proceed(chain.request().newBuilder().url(redirected).build())
             }
             .build()

@@ -40,8 +40,6 @@ Port of iOS [0079](../wiki/features/0079-the-lists-a-book-is-in.md), whole, arri
 
 ## Implementation
 
-stacked on: wa/94-add-android-private-notes @ 83722e6
-
 - Pure rules, `data/lists/`: `BookListEntry.entries(lists, workUris, myUserId, friends)` (mine or a friend's lists of works; a recueil once, focused on its lowest `ordinal`; `lastChanged` desc, then id) and `ListArrivalFocus` (Waiting → Arriving(Scroll|Jump) → Highlighted → Done, `landingFeedbackUri`, `jumpUri`).
 - Data: `EntityListEntity.lastChanged` + `friendCreator(myUserId, friendsById)` (now also used by `ListsTabSections`, unchanged behaviour); `ListDao.observeHolding(uris)` Flow — no migration, no index; `ListRepository.observeListsHolding(uris)`.
 - Fiche livre: `BookUiState.inLists` built reactively from the works' uris, friends (`observeByRelation(Friend)`) and `myUserId`, starts empty; `BookListsSection.kt` (`bookLists` + `BookListRow`), the Lists tab's `ListRow` drawn on `backgroundFormCell` with `ListRowDivider`; one line in `BookScreen` between `myCopy` and `bibliographicData`. `ListRowFeed` fetches missing preview covers, as the Lists tab — the only network traffic.
@@ -67,7 +65,7 @@ stacked on: wa/94-add-android-private-notes @ 83722e6
 - ⚠️ Code changed since the user's test: coming back to a Fiche livre from a list.
 - Wiki: nothing task-specific; the sprint's feature doc is written with #101.
 - Screenshots: none — `verify.platform: ios`, this task is Android.
-- ⛔ Lands after #94: PR stays draft on `wa/94-…` until #94 merges, then rebase onto the sprint branch and `gh pr edit --base`.
+- Landing — #94 merged; rebased onto `sprint/android-1-4-0` after #96, which had moved `ListCard` out of `EntityListScreen.kt`: import conflict only, both sides kept, the three imports `ListCard` alone used dropped. Build ✅, 701 tests, 0 failures.
 
 ## Verification
 

@@ -50,10 +50,10 @@ import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
 
 /**
- * `ProfileView`: the account, « Réglages » with « Compte et connexion » (feature 0055), « À propos
- * d’inventaire.io » (feature 0034), signing out, the door to deleting the account (feature 0017) under
- * signing out, and the version. Rows run full width on the sheet's raised background, as the rest of the
- * Android app does.
+ * `ProfileView`: the account, « Réglages » with « Compte et connexion » and « Notifications par e-mail »
+ * (feature 0055), « À propos d’inventaire.io » (feature 0034), signing out, the door to deleting the
+ * account (feature 0017) under signing out, and the version. Rows run full width on the sheet's raised
+ * background, as the rest of the Android app does.
  *
  * It lives in the profile sheet (feature 0038), closed by « Fermer » at the top left. Signing out
  * needs no navigation: the root swaps the tabs, sheet included, for the welcome screen as soon as the
@@ -107,6 +107,13 @@ fun ProfileScreen(navigator: Navigator) {
                         text = stringResource(R.string.profile_account_settings),
                         onClick = { navigator.push(Destination.AccountSettings) },
                         modifier = Modifier.testTag("e2e.profile.account"),
+                    )
+                }
+                item(key = "notificationSettings") {
+                    ProfileLinkRow(
+                        text = stringResource(R.string.profile_notification_settings),
+                        onClick = { navigator.push(Destination.NotificationSettings) },
+                        modifier = Modifier.testTag("e2e.profile.notifications"),
                     )
                 }
             }

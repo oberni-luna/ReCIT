@@ -13,9 +13,10 @@ import studio.lunabee.nouveaurecit.network.dto.PasswordChangePayload
 import studio.lunabee.nouveaurecit.network.dto.UserDto
 
 /**
- * `UserModel+Account` (iOS feature 0055): « Compte et connexion », the owner's half of the account.
+ * `UserModel+Account` (iOS feature 0055): « Compte et connexion » and « Notifications par e-mail », the
+ * owner's half of the account.
  *
- * The language and the switches write themselves, optimistic (ADR 0001): [settings] changes at once, the
+ * The language, the switches and the summary's frequency write themselves, optimistic (ADR 0001): [settings] changes at once, the
  * `PUT /api/user` follows in its [RequestPacer] slot through [profile], and only that one value goes back if
  * the server refuses — two switches flipped in a row are two writes, and the first failing must not undo
  * the second. The address and the password are server first: each has a screen of its own, and a wrong
@@ -54,6 +55,13 @@ class AccountRepository(
 
     suspend fun setAnonymizesContributions(isOn: Boolean): Job? =
         write(UserAttributeUpdate.of(ANONYMIZE, isOn), isOn, AccountSettings::anonymizesContributions) { copy(anonymizesContributions = it) }
+
+    /** One e-mail switch, sent as its own `settings.notifications.<key>`. */
+    suspend fun setNotification(setting: NotificationSetting, isOn: Boolean): Job? =
+        write(UserAttributeUpdate.of(setting.attribute, isOn), isOn, { it.isEnabled(setting) }) { with(setting, it) }
+
+    suspend fun setSummaryPeriodicity(days: Int): Job? =
+        write(UserAttributeUpdate.of(SUMMARY_PERIODICITY, days), days, AccountSettings::summaryPeriodicity) { copy(summaryPeriodicity = it) }
 
     /**
      * Moves the account to a new address, server first. The server mails a confirmation link to it and
@@ -105,6 +113,7 @@ class AccountRepository(
         const val LANGUAGE: String = "language"
         const val FEDIVERSABLE: String = "fediversable"
         const val ANONYMIZE: String = "settings.contributions.anonymize"
+        const val SUMMARY_PERIODICITY: String = "summaryPeriodicity"
         const val EMAIL: String = "email"
         const val EMAIL_CONFIRMATION_PATH: String = "/api/auth/email-confirmation"
         const val PASSWORD_PATH: String = "/api/auth/password"

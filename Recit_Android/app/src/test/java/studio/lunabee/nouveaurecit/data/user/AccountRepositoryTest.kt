@@ -153,6 +153,73 @@ class AccountRepositoryTest {
     }
 
     @Test
+    fun aNotificationMovesAtOnceAndSendsOnlyItsOwnAttribute() = runTest {
+        val repository: AccountRepository = repository()
+        answer("""{"ok":true}""")
+
+        assertNull("already on: nothing to send", repository.setNotification(NotificationSetting.GroupJoinRequest, true))
+        val write: Job? = repository.setNotification(NotificationSetting.GroupJoinRequest, false)
+        assertFalse("off before the server answers", repository.current.isEnabled(NotificationSetting.GroupJoinRequest))
+        write?.join()
+
+        val request: RecordedRequest = server.takeRequest()
+        assertEquals("PUT", request.method)
+        assertEquals("/api/user", request.url.encodedPath)
+        assertEquals(update("settings.notifications.group_join_request", "false"), request.json())
+        assertEquals(1, server.requestCount)
+        assertFalse(repository.current.isEnabled(NotificationSetting.GroupJoinRequest))
+        assertTrue(reported.isEmpty())
+    }
+
+    @Test
+    fun aRefusedNotificationGoesBackAloneAndIsReported() = runTest {
+        val repository: AccountRepository = repository()
+        answer("""{"status":400}""", code = 400)
+        answer("""{"ok":true}""")
+
+        val first: Job? = repository.setNotification(NotificationSetting.FriendshipRequest, false)
+        val second: Job? = repository.setNotification(NotificationSetting.UpdateOnYourItem, false)
+        first?.join()
+        second?.join()
+
+        assertTrue("the refused switch is back on", repository.current.isEnabled(NotificationSetting.FriendshipRequest))
+        assertFalse("the other one keeps its new value", repository.current.isEnabled(NotificationSetting.UpdateOnYourItem))
+        assertEquals(1, reported.size)
+        assertTrue(reported.single() is NetworkError.BadStatus)
+        assertEquals(update("settings.notifications.friendship_request", "false"), server.takeRequest().json())
+        assertEquals(update("settings.notifications.update_on_your_item", "false"), server.takeRequest().json())
+    }
+
+    @Test
+    fun theSummaryFrequencyIsSentAsANumberAndTheSameOneSendsNothing() = runTest {
+        val repository: AccountRepository = repository()
+        answer("""{"ok":true}""")
+
+        assertNull("20 days is already the account's", repository.setSummaryPeriodicity(20))
+        repository.setSummaryPeriodicity(7)?.join()
+
+        assertEquals(1, server.requestCount)
+        assertEquals(update("summaryPeriodicity", "7"), server.takeRequest().json())
+        assertEquals(7, repository.current.summaryPeriodicity)
+    }
+
+    @Test
+    fun aNotificationAndTheFrequencyInARowLeaveASecondApart() = runTest {
+        val repository: AccountRepository = repository()
+        answer("""{"ok":true}""")
+        answer("""{"ok":true}""")
+
+        val first: Job? = repository.setNotification(NotificationSetting.Global, false)
+        val second: Job? = repository.setSummaryPeriodicity(30)
+        first?.join()
+        second?.join()
+
+        assertEquals(2, sentAt.size)
+        assertTrue("the second PUT waits for its slot: ${sentAt[1] - sentAt[0]} ms", sentAt[1] - sentAt[0] >= 1_000)
+        assertTrue(reported.isEmpty())
+    }
+
+    @Test
     fun theLanguageIsWrittenAndTheSameOneSendsNothing() = runTest {
         val repository: AccountRepository = repository()
         answer("""{"ok":true}""")

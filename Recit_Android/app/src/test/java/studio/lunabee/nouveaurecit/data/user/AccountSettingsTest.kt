@@ -46,8 +46,65 @@ class AccountSettingsTest {
                 language = "fr",
                 isFediversable = true,
                 anonymizesContributions = false,
-            ),
+            )
+                .with(NotificationSetting.Global, false)
+                .with(NotificationSetting.GroupInvite, true),
             settings,
         )
+    }
+
+    @Test
+    fun anAbsentNotificationReadsAsOnAndAnAbsentPeriodicityAsTwentyDays() {
+        val settings: AccountSettings = decoded(
+            """{"_id":"u1","username":"lectrice","settings":{"notifications":{"group_join_request":false,"newsletters":false}}}""",
+        )
+
+        assertFalse(settings.isEnabled(NotificationSetting.GroupJoinRequest))
+        NotificationSetting.entries.filter { it != NotificationSetting.GroupJoinRequest }.forEach { setting: NotificationSetting ->
+            assertTrue("${setting.key} is on until set to false", settings.isEnabled(setting))
+        }
+        assertEquals(20, settings.summaryPeriodicity)
+        assertTrue(decoded("""{"_id":"u1","username":"lectrice"}""").isEnabled(NotificationSetting.Global))
+    }
+
+    @Test
+    fun theServersPeriodicityIsTaken() {
+        assertEquals(7, decoded("""{"_id":"u1","username":"lectrice","summaryPeriodicity":7}""").summaryPeriodicity)
+    }
+
+    @Test
+    fun theGeneralSwitchOffGreysEveryOtherOneWithoutChangingThem() {
+        val settings: AccountSettings = decoded(
+            """{"_id":"u1","username":"lectrice","settings":{"notifications":{"global":false,"friendship_request":false}}}""",
+        )
+
+        assertTrue("the general switch itself stays editable", settings.canEdit(NotificationSetting.Global))
+        NotificationSetting.entries.filter { it != NotificationSetting.Global }.forEach { setting: NotificationSetting ->
+            assertFalse("${setting.key} is greyed", settings.canEdit(setting))
+        }
+        assertFalse(settings.canEditSummaryPeriodicity)
+        assertFalse("each keeps its value", settings.isEnabled(NotificationSetting.FriendshipRequest))
+        assertTrue(settings.isEnabled(NotificationSetting.GroupInvite))
+
+        val back: AccountSettings = settings.with(NotificationSetting.Global, true)
+        assertTrue(NotificationSetting.entries.all { back.canEdit(it) })
+        assertTrue(back.canEditSummaryPeriodicity)
+    }
+
+    @Test
+    fun theFrequencyIsGreyedWhileTheSummaryIsOff() {
+        val settings: AccountSettings = decoded(
+            """{"_id":"u1","username":"lectrice","settings":{"notifications":{"inventories_activity_summary":false}}}""",
+        )
+
+        assertTrue(settings.canEdit(NotificationSetting.InventoriesActivitySummary))
+        assertFalse(settings.canEditSummaryPeriodicity)
+    }
+
+    @Test
+    fun eachNotificationIsItsOwnAttribute() {
+        assertEquals(10, NotificationSetting.entries.size)
+        assertEquals("settings.notifications.group_acceptRequest", NotificationSetting.GroupAcceptRequest.attribute)
+        assertEquals("settings.notifications.global", NotificationSetting.Global.attribute)
     }
 }

@@ -19,6 +19,7 @@ Decided in [ADR 0001](adr/0001-swiftdata-reactive-optimistic.md):
 - **UI bound to SwiftData.** A view never displays what a method returned.
 - **Server → app: upsert in place.** Object identity survives a sync, so open screens stay live. Feature [0030](features/0030-entities-upserted-in-place.md) extended it to works, authors and editions.
 - **App → server: optimistic.** Local write first, request in the background, reconcile or revert; failures reach a SnackBar through `AppErrorReporter`.
+- **Measured.** Each phase of the launch sync and each inventory sync is a signpost interval under `asso.recits`; the cost of the first sync is in [performance](performance.md).
 
 ## Sessions
 
@@ -50,3 +51,4 @@ Each tab root and modal flow owns its `NavigationStack`; `NavigationDestination`
 - [Plateformes et design system](platform-and-design.md)
 - [Android](android.md)
 - [Tests et scénario end-to-end](testing.md)
+- [Performance iOS](performance.md) — sync and screen signposts, how a trace is recorded, the baseline

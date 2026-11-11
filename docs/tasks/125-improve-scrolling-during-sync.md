@@ -1,6 +1,6 @@
 ---
 issue: 125
-status: todo
+status: to-test
 wiki: [[architecture]], [[performance]], [[shelves]], [[network]]
 note: Second of the 2026-11-10 perf pass. Baseline from #124. Split on 2026-11-11 — the other sync domains are #135.
 created: 2026-11-11
@@ -40,8 +40,28 @@ The baseline of #124 (`docs/wiki/performance.md`) puts the lag on the first sync
 
 ## Implementation
 
+Round 1 (2026-11-11, autopilot).
+
+- `AppModels/Inventory/InventorySync.swift`, `AppModels/Entity/EntitySync.swift` — model actors on a background `ModelContext` of the shared container (`modelContext.container`, no RootView change). `EntitySync` shares `InventorySync`'s executor and context, so works link to items without a save of their own. Both conform to `ModelActor` by hand: `@ModelActor` always generates `init(modelContainer:)`.
+- Entered through a `@concurrent nonisolated func sync(userID:progress:)` that never awaits the main actor: a probe on the iOS 27.2 simulator showed `DefaultSerialModelExecutor` runs each job on the calling thread, so an actor called from the main actor runs on the main thread.
+- Saves when ≥ 1 s since the last one, plus once at the end (interval injectable for tests). Progress goes to `InventoryModel` through an `AsyncStream` read on the main actor; `firstSyncProgress` and the 0027 bars unchanged.
+- `InventoryModel.syncInventory(forUser:modelContext:)` kept as the main-actor facade (3 callers unchanged): early return, « Inventory sync » signpost and end message kept; re-fetches the synced user afterwards (a model the main context already holds keeps stale values after a background save; `@Query` sees it at once).
+- `AppModels/Common/InFlightWrites.swift` — `Mutex` of `PersistentIdentifier` counts. `OptimisticMutating` enters its `subjects`; shelf membership writes enter the étagère and its books. `ShelfModel.isMembershipWriteInFlight` removed. An item in flight is skipped whole by the sync.
+- `APIService` / `APIServicing` nonisolated + Sendable; inventory/entity DTOs `nonisolated` (on its own line where the declaration is in the SwiftLint baseline); `Entity` protocol nonisolated. `APIServicing+Entities.swift` holds the actor-side entity fetch.
+- Logs: sync `print`s → `Logger` (names `.private`); `debug: true` gone from `getOrFetchAuthors`.
+- Removed as dead: `InventoryModel.start(entityModel:errorReporter:)`, `UserDataSync.entityModel`.
+- A failure fetching one author or its works skips that author (was: a store error aborted the whole sync).
+- Docs: ADR 0009 `sync-off-the-main-actor`, pointer in ADR 0001, Data flow line in `architecture.md`, #125 row in `performance.md` (After owed).
+- Known limits (ADR 0009): a write made after the sync merged an item but before its next save (≤ 1 s) can still be overwritten; 62 new `IsolatedConformances` warnings where other domains' main-actor DTOs are decoded by the nonisolated `APIService` — #135 makes them nonisolated; `EntityModel.fetchEntities` / `getOrFetchAuthors` still duplicate the actor path (file pinned by the length baseline).
+- Tests: `InventorySyncTests` (synced items in store and linked, main context clean; in-flight item keeps the reader's comment; saves throttled), `InFlightWritesTests`, `OptimisticRunnerTests` (subjects in flight during request / revert). `MockAPIService` stays main-actor: tests prove what the sync writes and skips, not the thread.
+- Proof: clean Debug simulator build with SwiftLint ✅; full `ReCIT_iOSTests` 1197 passed, 1 skipped (gated integration), 0 failed. `RequestPacerTests/runsInOrder` flaked once, passes on rerun and on the untouched tree.
+- Smoke launch on the simulator (already signed in): opens on Inventaire with its books, alive after 26 s. Not a proof of the sync.
+- Open: the acceptance measurements need a Release trace on an iPhone (scenario 1).
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent. Device trace owed: scenario 1 of `docs/wiki/performance.md`.
 
 ## Feedback

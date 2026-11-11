@@ -19,6 +19,7 @@ Decided in [ADR 0001](adr/0001-swiftdata-reactive-optimistic.md):
 - **UI bound to SwiftData.** A view never displays what a method returned.
 - **Server → app: upsert in place.** Object identity survives a sync, so open screens stay live. Feature [0030](features/0030-entities-upserted-in-place.md) extended it to works, authors and editions.
 - **App → server: optimistic.** Local write first, request in the background, reconcile or revert; failures reach a SnackBar through `AppErrorReporter`.
+- **Syncs off the main actor.** [ADR 0009](adr/0009-sync-off-the-main-actor.md): the inventory sync decodes and upserts in its own model actor, saves at most once a second, and leaves alone what a write in flight holds (`InFlightWrites`). The other domains follow in #135.
 - **Measured.** Each phase of the launch sync and each inventory sync is a signpost interval under `asso.recits`; the cost of the first sync is in [performance](performance.md).
 
 ## Sessions

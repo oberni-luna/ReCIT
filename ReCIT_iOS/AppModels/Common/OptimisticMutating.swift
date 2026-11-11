@@ -11,6 +11,9 @@
 //  failure the local change is reverted and the error is surfaced through the
 //  shared `AppErrorReporter`.
 //
+//  The subjects stay in `InFlightWrites` from the local change until the cycle ends, so a sync
+//  landing in between leaves them as the reader made them (ADR 0009).
+//
 
 import Foundation
 import SwiftData
@@ -40,7 +43,7 @@ extension OptimisticMutating {
     ///     the book deleted, the account signed out. Writing a persisted property of a model
     ///     with no row is a trap, not a nil (issues 0065, 0067), so when any subject has left
     ///     the store neither closure runs: there is nothing left to align, and nothing to put
-    ///     back. A failure is still reported.
+    ///     back. A failure is still reported. They are in `InFlightWrites` until the task ends.
     /// - Returns: The background task, so callers (and tests) can await completion.
     @discardableResult
     func optimistic(
@@ -54,11 +57,14 @@ extension OptimisticMutating {
         apply()
         try? modelContext.save()
 
+        let written: [PersistentIdentifier] = subjects.map { $0.persistentModelID }
+        InFlightWrites.shared.begin(written)
         let subjectsAreStillThere: () -> Bool = {
             subjects.allSatisfy { $0.isStillInTheStore }
         }
 
         return Task { [weak self] in
+            defer { InFlightWrites.shared.end(written) }
             do {
                 try await request()
                 guard subjectsAreStillThere() else { return }

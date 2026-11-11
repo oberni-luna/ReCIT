@@ -72,7 +72,7 @@ One row per task, measured with the protocol above, on the scenario it targets.
 
 | Task | Scenario | Measure | Before | After |
 |---|---|---|---|---|
-| #125 Move sync off main actor | | | | |
+| #125 Move sync off main actor | 1 | Scroll hitches during the first sync | 241 ms/s | — (device trace owed) |
 | #126 Batch inventory sync requests | | | | |
 | #127 Speed up the Lists tab | | | | |
 | #128 Speed up the Réseau tab | | | | |

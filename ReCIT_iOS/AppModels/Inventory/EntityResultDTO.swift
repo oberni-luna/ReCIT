@@ -7,10 +7,12 @@
 
 import Foundation
 
+nonisolated
 struct EntityResultsDTO: Codable {
     let entities: [String: EntityResultDTO]
 }
 
+nonisolated
 struct EntityResultDTO: Codable {
     let uri: String
     /// The id of the entity's inventaire.io document, for an entity that has one. Its `inv:` uri
@@ -27,17 +29,20 @@ struct EntityResultDTO: Codable {
     let claims: [String: [ClaimValue]]
 }
 
+nonisolated
 struct EntityImageDTO: Codable {
     let url: String?
     let file: String?
     let credit: EntityImageCreditDTO?
 }
 
+nonisolated
 struct EntityImageCreditDTO: Codable {
     let text: String
     let url: String
 }
 
+nonisolated
 enum ClaimValue: Codable {
     case string(String)
     case bool(Bool)

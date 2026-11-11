@@ -56,6 +56,14 @@ Round 1 (2026-11-11).
 - Proof: Debug and Release builds ✅ (iPhone 17 simulator, SwiftLint in the build); full `ReCIT_iOSTests` ✅, 1321 tests, `UserDataSyncTests` and `InventorySyncProgressTests` included.
 - Open: the baseline needs Olivier's two Release traces from his iPhone; the agent then reads them with `xctrace export` and fills the page.
 
+Round 2 (2026-11-11) — the baseline.
+
+- First two traces (SwiftUI template + Hangs + Hitches + os_signpost): over a gigabyte each, nothing in them to tell which screen a hitch is on, and the sync signposts only partly there. `swiftui-updates` exports to more than 11 GB.
+- `AppModels/Common/ScreenSignpost.swift` — one « Screen » event (`asso.recits` / `screen`) each time Réseau › Amis, Réseau › Groupes or Listes comes on display: `NetworkView` on appear and on segment change, `EntityListView` on appear. Name of the screen only. A deviation from « nothing else instrumented », agreed with Olivier: without it the scroll hitches can't be split by screen.
+- Re-recorded both scenarios with Hangs, Hitches and os_signpost only (18–25 MB a trace). Screens and hitches captured; the sync intervals still not. Likely cause: `APIService` logs every response body at `debug` under `asso.recits`, drowning the subsystem's signposts while the sync runs. Left to #125.
+- `docs/wiki/performance.md` — protocol updated (light recording, the keychain survives a reinstall), baseline filled: no hang over 250 ms; 241 ms/s of scroll hitches during the first sync; Listes at 65.5 ms/s on a warm store, Réseau under 10; sync phases partial.
+- Proof: Release device build ✅ (SwiftLint in the build); full `ReCIT_iOSTests` ✅ on the iPhone 17 simulator.
+
 ## Review
 
 ## Verification

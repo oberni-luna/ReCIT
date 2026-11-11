@@ -63,6 +63,7 @@ struct EntityListView: View {
                     )
                 }
             }
+            .onAppear { ScreenSignpost.lists.emit() }
             .navigationDestination(for: NavigationDestination.self) { destination in
                 destination.viewForDestination($path)
             }

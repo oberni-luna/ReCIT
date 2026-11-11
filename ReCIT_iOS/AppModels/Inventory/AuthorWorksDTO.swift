@@ -7,11 +7,13 @@
 
 import Foundation
 
+nonisolated
 struct AuthorWorkDTO: Codable {
     let uri: String
     let score: Int?
 }
 
+nonisolated
 struct AuthorWorksDTO: Codable {
     let works: [AuthorWorkDTO]
 }

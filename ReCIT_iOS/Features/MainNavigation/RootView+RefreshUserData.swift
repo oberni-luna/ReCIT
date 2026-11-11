@@ -22,7 +22,6 @@ extension RootView {
             userModel: userModel,
             shelfModel: shelfModel,
             inventoryModel: inventoryModel,
-            entityModel: entityModel,
             transactionModel: transactionModel,
             groupModel: groupModel,
             listModel: listModel,

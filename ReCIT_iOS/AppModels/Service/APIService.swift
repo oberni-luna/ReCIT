@@ -8,7 +8,7 @@
 import Foundation
 import OSLog
 
-final class APIService: APIServicing {
+nonisolated final class APIService: APIServicing {
     private static let logger: Logger = .init(subsystem: "asso.recits", category: "network")
 
     private let session: URLSession

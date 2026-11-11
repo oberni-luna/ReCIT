@@ -18,6 +18,13 @@
 //  when the gated inventory sync skips (its own linking only runs on a real refresh).
 //  See ADR 0003.
 //
+//  Both passes, and the inventory sync's own assignment of an item's étagères, replace the
+//  relation wholesale with server state. While a membership write is waiting on the server
+//  that state is one round trip behind it, and a sync landing in that window would take the
+//  book back off the étagère the reader has just put it on. So every membership write enters
+//  its étagère and its books in `InFlightWrites` for its whole cycle, and the syncs leave
+//  them alone until it settles (PRD 0004, ADR 0009).
+//
 
 import Foundation
 import SwiftData
@@ -38,35 +45,6 @@ final class ShelfModel: OptimisticMutating {
 
     /// Most recent optimistic background task, exposed so tests can await it.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
-
-    /// Raised while an optimistic membership write is waiting on the server.
-    ///
-    /// The `Shelf ⇄ InventoryItem` relation has two independent *wholesale* writers —
-    /// `linkItems` below and `InventoryModel.syncInventory`'s per-item assignment — and
-    /// both replace it outright with server state that is one round-trip behind. A sync
-    /// landing in that window would visibly take the book back off the étagère the user
-    /// just put it on, so both writers stand down until the write settles. App-scoped
-    /// rather than instance-scoped because the two writers live in two different models.
-    /// Derived from `membershipWriteDepth` rather than assigned, so overlapping writes
-    /// cannot open the gate on each other. See PRD 0004.
-    private(set) static var isMembershipWriteInFlight: Bool = false
-
-    /// How many membership writes are outstanding. A depth rather than a flag because
-    /// the auto-sort apply issues one write per étagère in a row (PRD 0006): a
-    /// menu-driven single-book write settling inside that run would otherwise lower
-    /// the gate while the run is still going, and a sync would take the books back off
-    /// the étagère they had just been filed onto.
-    private static var membershipWriteDepth: Int = 0
-
-    private static func raiseMembershipGate() {
-        membershipWriteDepth += 1
-        isMembershipWriteInFlight = true
-    }
-
-    private static func lowerMembershipGate() {
-        membershipWriteDepth = max(0, membershipWriteDepth - 1)
-        isMembershipWriteInFlight = membershipWriteDepth > 0
-    }
 
     init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
         self.apiService = apiService
@@ -235,7 +213,7 @@ final class ShelfModel: OptimisticMutating {
             modelContext,
             action: "add-items",
             shelf: shelf,
-            itemIds: newItems.map(\._id),
+            items: newItems,
             apply: { shelf.items.append(contentsOf: newItems) },
             revert: { shelf.items.removeAll { newIds.contains($0._id) } }
         )
@@ -258,7 +236,7 @@ final class ShelfModel: OptimisticMutating {
             modelContext,
             action: "remove-items",
             shelf: shelf,
-            itemIds: [itemId],
+            items: [item],
             apply: { shelf.items.removeAll { $0._id == itemId } },
             revert: { if item.isStillInTheStore { shelf.items.append(item) } }
         )
@@ -267,20 +245,24 @@ final class ShelfModel: OptimisticMutating {
     /// The half both membership actions share: `add-items` and `remove-items` take the
     /// same payload and answer with the same shape, so only the local mutation and the
     /// action name differ. Kept in one place so the two directions cannot drift apart —
-    /// above all on the gate, whose window is easy to get subtly wrong.
+    /// above all on what `InFlightWrites` holds, whose window is easy to get subtly wrong.
     ///
-    /// The gate stays raised for the whole cycle, revert included (the runner performs it
-    /// after `request` has thrown): both wholesale writers of this relation would
-    /// otherwise replace the user's change with server state one round-trip behind.
+    /// The étagère and its books stay in `InFlightWrites` for the whole cycle, revert included
+    /// (the runner performs it after `request` has thrown): both wholesale writers of this
+    /// relation — `linkItems` below and the inventory sync — would otherwise replace the user's
+    /// change with server state one round-trip behind. See PRD 0004.
+    ///
+    /// The runner enters the étagère, the write's subject; the books are entered here.
     private func membershipWrite(
         _ modelContext: ModelContext,
         action: String,
         shelf: Shelf,
-        itemIds: [String],
+        items: [InventoryItem],
         apply: () -> Void,
         revert: @escaping () -> Void
     ) {
-        Self.raiseMembershipGate()
+        let writtenItems: [PersistentIdentifier] = items.map(\.persistentModelID)
+        InFlightWrites.shared.begin(writtenItems)
 
         let cycle: Task<Void, Never> = optimistic(
             modelContext,
@@ -288,11 +270,10 @@ final class ShelfModel: OptimisticMutating {
             apply: apply,
             revert: revert,
             request: { [weak self] in
-                guard let self else { return }
-                try await self.sendMembership(
+                try await self?.sendMembership(
                     action: action,
                     shelf: shelf,
-                    itemIds: itemIds,
+                    itemIds: items.map(\._id),
                     modelContext: modelContext
                 )
             }
@@ -300,7 +281,7 @@ final class ShelfModel: OptimisticMutating {
 
         inFlightTask = Task {
             await cycle.value
-            Self.lowerMembershipGate()
+            InFlightWrites.shared.end(writtenItems)
         }
     }
 
@@ -437,15 +418,14 @@ final class ShelfModel: OptimisticMutating {
         let itemIds: [String] = items.map(\._id).filter { !alreadyOnShelf.contains($0) }
         guard itemIds.isEmpty == false else { return }
 
-        Self.raiseMembershipGate()
-        defer { Self.lowerMembershipGate() }
-
-        try await sendMembership(
-            action: "add-items",
-            shelf: shelf,
-            itemIds: itemIds,
-            modelContext: modelContext
-        )
+        try await whileInFlight(shelf, items) {
+            try await sendMembership(
+                action: "add-items",
+                shelf: shelf,
+                itemIds: itemIds,
+                modelContext: modelContext
+            )
+        }
         try modelContext.save()
     }
 
@@ -472,15 +452,14 @@ final class ShelfModel: OptimisticMutating {
         let itemIds: [String] = items.map(\._id).filter { onShelf.contains($0) }
         guard itemIds.isEmpty == false else { return }
 
-        Self.raiseMembershipGate()
-        defer { Self.lowerMembershipGate() }
-
-        try await sendMembership(
-            action: "remove-items",
-            shelf: shelf,
-            itemIds: itemIds,
-            modelContext: modelContext
-        )
+        try await whileInFlight(shelf, items) {
+            try await sendMembership(
+                action: "remove-items",
+                shelf: shelf,
+                itemIds: itemIds,
+                modelContext: modelContext
+            )
+        }
         try modelContext.save()
     }
 
@@ -496,7 +475,7 @@ final class ShelfModel: OptimisticMutating {
         // was asked about, so an unscoped `deleteMissing` would read every *other* owner's
         // étagères as gone — syncing a friend's shelves would delete mine.
         let ownerId: String = forUser._id
-        try modelContext.upsert(
+        let shelves: [Shelf] = try modelContext.upsert(
             dtos,
             dtoID: { $0._id },
             modelID: { (shelf: Shelf) in shelf._id },
@@ -507,10 +486,13 @@ final class ShelfModel: OptimisticMutating {
         )
         try modelContext.save()
 
-        // 2. Membership. Stand down while a membership write is still unconfirmed: this
-        // pass assigns the relation wholesale from state the server has not applied the
-        // user's change to yet. See PRD 0004.
-        guard Self.isMembershipWriteInFlight == false else { return }
+        // 2. Membership. Stand down while a write on one of these étagères is still
+        // unconfirmed: this pass assigns the relation wholesale from state the server has
+        // not applied the user's change to yet. See PRD 0004.
+        //
+        // These étagères only: a friend's, synced while I file a book on one of mine, holds
+        // nothing of my write and has no reason to wait for it.
+        guard shelves.allSatisfy({ InFlightWrites.shared.contains($0.persistentModelID) == false }) else { return }
 
         if Self.useFakeMembership {
             applyFakeMembership(ownerId: forUser._id, modelContext: modelContext)
@@ -561,6 +543,24 @@ final class ShelfModel: OptimisticMutating {
             shelf.items = localItems(ids: dto.items ?? [], modelContext: modelContext)
         }
         try modelContext.save()
+    }
+
+    /// Runs an awaiting membership write with the étagère and its books in `InFlightWrites`,
+    /// so no sync lands on them before the server has answered.
+    ///
+    /// The auto-sort and sorting applies (PRD 0006, PRD 0008) issue one such write per étagère
+    /// in a row, while a single-book write from a menu may settle in the middle of the run.
+    /// `InFlightWrites` counts its entries, so the one settling does not free the étagère or
+    /// the books the run still holds.
+    private func whileInFlight(
+        _ shelf: Shelf,
+        _ items: [InventoryItem],
+        _ write: () async throws -> Void
+    ) async rethrows {
+        let written: [PersistentIdentifier] = [shelf.persistentModelID] + items.map(\.persistentModelID)
+        InFlightWrites.shared.begin(written)
+        defer { InFlightWrites.shared.end(written) }
+        try await write()
     }
 
     private func localShelf(id: String, modelContext: ModelContext) -> Shelf? {

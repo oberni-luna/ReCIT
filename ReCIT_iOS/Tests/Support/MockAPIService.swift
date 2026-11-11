@@ -27,7 +27,7 @@ final class MockAPIService: APIServicing {
     var uploadFailure: Error?
     private(set) var uploadedImageSizes: [Int] = []
     private(set) var recordedRequests: [(endpoint: String, method: String)] = []
-    var baseURLValue: String = "https://test.local"
+    nonisolated let baseURLValue: String = "https://test.local"
     /// Called with each fetched endpoint before its stub answers — the moment a test can change
     /// the store under a model that is waiting on the network.
     var onFetch: ((String) -> Void)?
@@ -67,16 +67,19 @@ final class MockAPIService: APIServicing {
     }
 
     // MARK: - APIServicing
+    // `APIServicing` is nonisolated: each async witness says `@MainActor`, or it would follow the
+    // protocol off the actor its stubs live on.
 
-    func baseUrl() -> String {
+    nonisolated func baseUrl() -> String {
         baseURLValue
     }
 
-    func absoluteImageUrl(_ path: String?) -> String? {
+    nonisolated func absoluteImageUrl(_ path: String?) -> String? {
         guard let path else { return nil }
         return path.hasPrefix("http") ? path : "\(baseURLValue)\(path)"
     }
 
+    @MainActor
     func send<T: Codable, U: Codable>(
         toEndpoint endpoint: String,
         method: String,
@@ -91,6 +94,7 @@ final class MockAPIService: APIServicing {
         return try decodeStub(for: endpoint)
     }
 
+    @MainActor
     func send<U: Codable>(
         toEndpoint endpoint: String,
         method: String,
@@ -100,6 +104,7 @@ final class MockAPIService: APIServicing {
         return try decodeStub(for: endpoint)
     }
 
+    @MainActor
     func fetchData<T: Codable>(
         fromEndpoint endpoint: String,
         debug: Bool
@@ -109,6 +114,7 @@ final class MockAPIService: APIServicing {
         return try decodeStub(for: endpoint)
     }
 
+    @MainActor
     func upload(
         imageData: Data,
         fileName: String,

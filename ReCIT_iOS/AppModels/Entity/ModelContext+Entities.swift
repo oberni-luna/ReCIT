@@ -25,7 +25,7 @@
 import Foundation
 import SwiftData
 
-extension ModelContext {
+nonisolated extension ModelContext {
 
     /// Merges `dtos` into the store's authors, and answers them in order.
     @discardableResult

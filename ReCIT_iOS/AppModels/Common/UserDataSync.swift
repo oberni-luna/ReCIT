@@ -27,11 +27,11 @@ import SwiftData
 @MainActor
 struct UserDataSync {
     private static let signposter: OSSignposter = .init(subsystem: "asso.recits", category: "sync")
+    private static let logger: Logger = .init(subsystem: "asso.recits", category: "sync")
 
     let userModel: UserModel
     let shelfModel: ShelfModel
     let inventoryModel: InventoryModel
-    let entityModel: EntityModel
     let transactionModel: TransactionModel
     let groupModel: GroupModel
     let listModel: ListModel
@@ -48,11 +48,9 @@ struct UserDataSync {
             syncStatus.markStarted(domain)
         }
         do {
-            print("## Sync my user ")
             try await signposted("My user") { try await userModel.syncMyUser(modelContext: modelContext) }
-            print(" --> done \(userModel.myUser?.username ?? "<Empty>")")
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during user sync: \(error)")
+            Self.logger.error("My user sync failed: \(error)")
             // A session the server no longer honours is not a sync that failed: nothing
             // below can succeed either, so the tabs would keep their first-sync
             // placeholders for ever with nothing to tap — the shape of issue 0068. Drop
@@ -71,7 +69,6 @@ struct UserDataSync {
             failEveryDomain()
             return
         }
-        inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
         // Accepting an invitation pulls the new friend's books, and the étagères they
         // share, on the spot — which is the one thing `UserModel` needs either of these
         // two for.
@@ -83,7 +80,7 @@ struct UserDataSync {
         do {
             try await signposted("My shelves") { try await shelfModel.syncShelves(forUser: myUser, modelContext: modelContext) }
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during shelves sync: \(error)")
+            Self.logger.error("My shelves sync failed: \(error)")
         }
 
         // Each domain drives its own first-sync marker so an unsynced screen
@@ -109,7 +106,7 @@ struct UserDataSync {
         do {
             try await signposted("My inventory") { try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext) }
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during inventory sync: \(error)")
+            Self.logger.error("My inventory sync failed: \(error)")
         }
 
         await sync(.lists, signpostedAs: "Lists") {
@@ -125,7 +122,7 @@ struct UserDataSync {
         do {
             try await signposted("Network lists") { try await listModel.syncNetworkLists(of: userModel.friends(modelContext: modelContext), modelContext: modelContext) }
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during network lists sync: \(error)")
+            Self.logger.error("Network lists sync failed: \(error)")
         }
 
         await signposted("Friends inventories") { await syncFriendsInventories(modelContext: modelContext) }
@@ -156,12 +153,12 @@ struct UserDataSync {
             do {
                 try await shelfModel.syncShelves(forUser: user, modelContext: modelContext)
             } catch {
-                print("⚠️⚠️⚠️⚠️⚠️ Error during shelves sync for \(user.username): \(error)")
+                Self.logger.error("Shelves sync failed for \(user.username, privacy: .private): \(error)")
             }
             do {
                 try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
             } catch {
-                print("⚠️⚠️⚠️⚠️⚠️ Error during inventory sync for \(user.username): \(error)")
+                Self.logger.error("Inventory sync failed for \(user.username, privacy: .private): \(error)")
             }
         }
     }
@@ -185,7 +182,7 @@ struct UserDataSync {
             try await signposted(name, operation)
             syncStatus.markCompleted(domain)
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during \(domain.rawValue) sync: \(error)")
+            Self.logger.error("\(domain.rawValue, privacy: .public) sync failed: \(error)")
             syncStatus.markFailed(domain)
         }
     }

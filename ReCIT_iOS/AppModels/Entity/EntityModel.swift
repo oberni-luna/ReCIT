@@ -243,7 +243,7 @@ final class EntityModel {
             }
         }
 
-        guard let authorsDto = try await fetchEntities(modelContext: modelContext, uris: urisToFetch, debug: true) else {
+        guard let authorsDto = try await fetchEntities(modelContext: modelContext, uris: urisToFetch) else {
             return authors
         }
 

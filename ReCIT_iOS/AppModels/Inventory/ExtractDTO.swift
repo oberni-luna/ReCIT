@@ -7,15 +7,18 @@
 
 import Foundation
 
+nonisolated
 struct ExtractDTO: Codable {
     let extract: String
     let url: String
 }
 
+nonisolated
 struct SummariesDTO: Codable {
     let summaries: [SummaryDTO]
 }
 
+nonisolated
 struct SummaryDTO: Codable {
     let key: String
     let name: String
@@ -25,6 +28,7 @@ struct SummaryDTO: Codable {
     let text: String?
 }
 
+nonisolated
 struct SitelinkDTO: Codable {
     let title: String
     let lang: String

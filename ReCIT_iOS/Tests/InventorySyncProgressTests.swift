@@ -94,10 +94,10 @@ struct InventoryModelFirstSyncTests {
         let context: ModelContext = try TestStore.makeContext()
         let friend: User = Fixture.user(id: "friend", username: "Camille")
         context.insert(friend)
+        try context.save()
         let mock: MockAPIService = .init()
         mock.stub("/api/items/inventory-view", json: inventoryView)
         let model: InventoryModel = .init(apiService: mock)
-        model.start(entityModel: .init(apiService: mock), errorReporter: .init())
 
         try await model.syncInventory(forUser: friend, modelContext: context)
 
@@ -111,6 +111,7 @@ struct InventoryModelFirstSyncTests {
         let context: ModelContext = try TestStore.makeContext()
         let friend: User = Fixture.user(id: "friend", username: "Camille")
         context.insert(friend)
+        try context.save()
         let mock: MockAPIService = .init()
         mock.stub("/api/items/inventory-view", error: NetworkError.badResponse)
         let model: InventoryModel = .init(apiService: mock)

@@ -90,4 +90,42 @@ struct OptimisticRunnerTests {
         #expect(reconciled == false)
         #expect(runner.errorReporter?.lastFailure == nil)
     }
+
+    @Test
+    func `a subject is in flight while its request runs, and out of it once it lands`() async throws {
+        let (context, item): (ModelContext, InventoryItem) = try storedItem()
+        let runner: Runner = .init()
+        let id: PersistentIdentifier = item.persistentModelID
+        var inFlightDuringRequest: Bool = false
+
+        await runner.optimistic(
+            context,
+            subjects: [item],
+            apply: { item.details = "new" },
+            revert: {},
+            request: { inFlightDuringRequest = InFlightWrites.shared.contains(id) }
+        ).value
+
+        #expect(inFlightDuringRequest)
+        #expect(InFlightWrites.shared.contains(id) == false)
+    }
+
+    @Test
+    func `a subject is out of flight once its request has failed and been reverted`() async throws {
+        let (context, item): (ModelContext, InventoryItem) = try storedItem()
+        let runner: Runner = .init()
+        let id: PersistentIdentifier = item.persistentModelID
+        var inFlightDuringRevert: Bool = false
+
+        await runner.optimistic(
+            context,
+            subjects: [item],
+            apply: { item.details = "new" },
+            revert: { inFlightDuringRevert = InFlightWrites.shared.contains(id) },
+            request: { throw Refused() }
+        ).value
+
+        #expect(inFlightDuringRevert)
+        #expect(InFlightWrites.shared.contains(id) == false)
+    }
 }

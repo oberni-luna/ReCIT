@@ -17,15 +17,6 @@ enum ScreenSignpost: String {
 
     private static let signposter: OSSignposter = .init(subsystem: "asso.recits", category: "screen")
 
-    init(_ segment: NetworkSegment) {
-        switch segment {
-        case .friends:
-            self = .networkFriends
-        case .groups:
-            self = .networkGroups
-        }
-    }
-
     func emit() {
         Self.signposter.emitEvent("Screen", "\(rawValue, privacy: .public)")
     }

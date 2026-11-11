@@ -1,6 +1,6 @@
 ---
 issue: 124
-status: to-test
+status: to-close
 wiki: [[architecture]], [[network]], [[lists]], [[performance]]
 note: First of the 2026-11-10 perf pass — lag felt in Réseau and Listes. #125–#131 are blocked by it.
 created: 2026-11-10
@@ -65,6 +65,13 @@ Round 2 (2026-11-11) — the baseline.
 - Proof: Release device build ✅ (SwiftLint in the build); full `ReCIT_iOSTests` ✅ on the iPhone 17 simulator.
 
 ## Review
+
+Round `validation` (2026-11-11), cumulative diff from `origin/sprint/ios-perf`.
+
+- 🟠 `ScreenSignpost.swift` — [structure] `init(_ segment: NetworkSegment)` made AppModels depend on Features → mapping moved to `Features/Network/NetworkSegment+ScreenSignpost.swift` (`segment.screenSignpost`). Fixed.
+- 🟡 `InventoryModel.swift` — [structure] announced-item count computed twice → one `InventorySyncProgress` per sync, its `total` read for the signpost. Fixed (no DTO property: `InventorySyncProgress.init(workUriItemsMap:)` takes a bare map, used by tests and previews).
+- Re-verify: ✅ clean, four lenses. Debug build with SwiftLint ✅; InventorySyncProgressTests, InventoryFirstSyncStateTests, InventoryModelFirstSyncTests, UserDataSyncTests ✅.
+- Screenshots: none, no screen changed.
 
 ## Verification
 

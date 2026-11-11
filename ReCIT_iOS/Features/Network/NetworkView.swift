@@ -50,8 +50,8 @@ struct NetworkView: View {
                 }
             }
             .applyListBackground(.backgroundGrouped)
-            .onAppear { ScreenSignpost(segment).emit() }
-            .onChange(of: segment) { ScreenSignpost(segment).emit() }
+            .onAppear { segment.screenSignpost.emit() }
+            .onChange(of: segment) { segment.screenSignpost.emit() }
             .navigationTitle("nav.network")
             .toolbar { toolbarContent }
             .navigationDestination(for: NavigationDestination.self) { destination in

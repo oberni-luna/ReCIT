@@ -74,10 +74,11 @@ final class InventoryModel: OptimisticMutating {
 
         let result: InventoryResultDTO? = try await apiService.fetchData(fromEndpoint: "/api/items/inventory-view?user=\(forUser._id)")
         guard let result else { return }
-        announcedItemCount = Set(result.workUriItemsMap.values.joined()).count
+        let announced: InventorySyncProgress = .init(workUriItemsMap: result.workUriItemsMap)
+        announcedItemCount = announced.total ?? 0
 
         if isFirstSync {
-            firstSyncProgress[userId] = .init(workUriItemsMap: result.workUriItemsMap)
+            firstSyncProgress[userId] = announced
         }
 
         // Each author's works, then at once the items of those works — rather than every work

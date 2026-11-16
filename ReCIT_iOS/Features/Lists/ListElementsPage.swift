@@ -199,7 +199,7 @@ struct ListElementsPage: View {
                             isCommentFocused: isCommentFocused
                         )
 
-                        ListShareRow(item: selectedItem, list: list)
+                        ListShareRow(item: selectedItem, list: list, isMine: isMine)
                     }
                 }
 
@@ -222,7 +222,7 @@ struct ListElementsPage: View {
                 }
 
                 Section {
-                    ListShareRow(item: selectedItem, list: list)
+                    ListShareRow(item: selectedItem, list: list, isMine: isMine)
                 }
             }
 

@@ -273,20 +273,23 @@ struct UserDetailView: View {
     }
 
     /// A "…" holding what one can do *about* someone rather than with them. On my own profile,
-    /// « Partager » alone: there is nobody to report, and nobody to remove.
+    /// « Partager » alone: there is nobody to report, and nobody to remove — and no "…" at all
+    /// when my username makes no link.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .confirmationAction) {
-            Menu {
-                // Same neutral menu as a book's « … »: glyphs in the label colour rather
-                // than the app's green, and no red line of its own — the confirmation
-                // behind « Retirer du réseau » is what guards it. See `BookDetailView`.
-                menuContent
-                    .tint(.foregroundDefault)
-            } label: {
-                Label("action.more", systemImage: "ellipsis")
+        if isMe == false || DeepLink.user(username: user.username).url != nil {
+            ToolbarItem(placement: .confirmationAction) {
+                Menu {
+                    // Same neutral menu as a book's « … »: glyphs in the label colour rather
+                    // than the app's green, and no red line of its own — the confirmation
+                    // behind « Retirer du réseau » is what guards it. See `BookDetailView`.
+                    menuContent
+                        .tint(.foregroundDefault)
+                } label: {
+                    Label("action.more", systemImage: "ellipsis")
+                }
+                .accessibilityIdentifier(AccessibilityID.menu)
             }
-            .accessibilityIdentifier(AccessibilityID.menu)
         }
     }
 }

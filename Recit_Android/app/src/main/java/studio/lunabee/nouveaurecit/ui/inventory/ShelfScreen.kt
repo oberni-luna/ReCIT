@@ -57,7 +57,7 @@ fun ShelfScreen(destination: Destination.Shelf, navigator: Navigator) {
                 containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
                     val shelf: ShelfEntity? = state.shelf?.shelf
-                    if (shelf != null && !shelf.isVisibleToOwnerAlone) {
+                    if (shelf != null && shelf.isShareable(state.isMine)) {
                         ShareLinkButton(DeepLink.Shelf(shelf.id), shelf.name)
                     }
                     if (state.isMine) {

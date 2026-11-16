@@ -110,7 +110,7 @@ struct ShelfDetailView: View {
         .navigationTitle(shelf?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if let shelf, shelf.isVisibleToOwnerAlone == false {
+            if let shelf, shelf.isShareable(isMine: isMine) {
                 ToolbarItem(placement: .primaryAction) {
                     DeepLinkShareLink(.shelf(id: shelf._id), subject: shelf.name)
                         .accessibilityIdentifier(AccessibilityID.share)

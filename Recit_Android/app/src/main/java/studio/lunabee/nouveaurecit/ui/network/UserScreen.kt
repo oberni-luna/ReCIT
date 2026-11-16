@@ -117,9 +117,13 @@ fun UserScreen(destination: Destination.User, navigator: Navigator) {
     }
 }
 
-/** « Partager » for any reader, me included; « Retirer du réseau » for a friend, when [onRemove] is given. */
+/**
+ * « Partager » for any reader, me included; « Retirer du réseau » for a friend, when [onRemove] is given. No « … » at
+ * all when it would hold neither.
+ */
 @Composable
 private fun UserMenu(user: UserEntity, onRemove: (() -> Unit)?) {
+    if (DeepLink.User(user.username).url == null && onRemove == null) return
     var expanded: Boolean by rememberSaveable { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }) {

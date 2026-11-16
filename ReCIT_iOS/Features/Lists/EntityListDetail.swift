@@ -82,7 +82,7 @@ struct EntityListDetail: View {
         .navigationTitle(list?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if let list, list.isVisibleToCreatorAlone == false {
+            if let list, list.isShareable(isMine: isMine) {
                 ToolbarItem(placement: .primaryAction) {
                     DeepLinkShareLink(.list(id: list._id, elementId: nil), subject: list.name)
                         .accessibilityIdentifier(AccessibilityID.share)

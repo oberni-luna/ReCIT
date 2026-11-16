@@ -1,6 +1,6 @@
 ---
 issue: 144
-status: to-test
+status: to-close
 wiki: [[features/0092-entity-deep-links]], [[book-and-editions]], [[lists]], [[network]], [[shelves]]
 note: Last task of the « Deep links » sprint. Builds on #140, #141 and #142: every link it shares must already open in the app. Split from #65 (decision 6).
 created: 2026-11-16
@@ -46,7 +46,7 @@ created: 2026-11-16
 
 ## Implementation
 
-stacked on: wa/142-add-inventory-deep-links @ f00bcdb5
+stacked on: wa/142-add-inventory-deep-links @ fc2f7ffd
 
 Autopilot round 1, 2026-11-16.
 
@@ -69,6 +69,19 @@ Autopilot round 1, 2026-11-16.
   - Android build green; DeepLinkTest 17, SharingVisibilityTest 2, TabRouterTest 9, AppDatabaseSchemaTest 1.
 
 ## Review
+
+### Round validation — 2026-11-16
+
+Rebased onto the reviewed #142 (`fc2f7ffd`). Spec validated by Olivier (sprint-wide go-ahead; retest on the sprint branch to follow).
+
+LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. Two 🟠 and five 🟡, fixed in 2 autofix rounds, re-verified clean:
+- 🟠 [correctness] a friend's étagère: `visibility` may be absent for non-owners, stored `[]`, so « Partager » never showed (iOS `ShelfDetailView`, Android `ShelfScreen`) → the private rule applies to mine only: pure `isShareable(isMine:)` (`isMine == false || visibility.isEmpty == false`) on `Shelf`/`EntityList` (iOS) and `ShelfEntity`/`EntityListEntity` (Android), replacing `isVisibleToOwnerAlone` / `isVisibleToCreatorAlone`.
+- 🟡 [correctness] a friend's list seen through one group (its `group:` key dropped) read as private → same rule, iOS `EntityListDetail`, `ListShareRow` (takes `isMine:`), Android `EntityListScreen` (mine = `!isReadOnly`).
+- 🟡 [structure] Work/Author queries + title copied from `ListSelectedTitle` → `ListElementReader` (Features/Lists) + `ListElementEntity` (Model/UserData, `title`, `byline`), used by both. New `ListElementEntityTests` (3).
+- 🟡 [correctness] empty « … » on my own profile when the share link is nil → shown only when not me or the link builds (iOS `UserDetailView`, Android `UserMenu`).
+- Tests: `SharingVisibilityTests` / `SharingVisibilityTest` gain « a friend's étagère/list without visibility is still shareable ».
+
+Proof after autofix: iOS build green, 53 tests pass (DeepLinkTests, SharingVisibilityTests, ListVisibilityTests, LinkedInventoryItemAndShelfTests, LinkedListTests, TabRouterTests, ListElementEntityTests); Android build green, SharingVisibilityTest 4, DeepLinkTest 17, TabRouterTest 9.
 
 ## Verification
 

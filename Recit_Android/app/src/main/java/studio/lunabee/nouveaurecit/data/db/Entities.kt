@@ -120,10 +120,11 @@ data class ShelfEntity(
     val updated: Double? = null,
 ) {
     /**
-     * `Shelf.isVisibleToOwnerAlone`: no one but its owner may open it, so a link to it would open nothing for whoever
-     * receives it, and the étagère offers none.
+     * `Shelf.isShareable(isMine:)`: whether the étagère offers « Partager ». One of mine without a visibility key is
+     * mine alone, so a link to it would open nothing for whoever receives it. A friend's always offers it: I see it,
+     * and inventaire.io may send its keys to its owner alone.
      */
-    val isVisibleToOwnerAlone: Boolean get() = visibility.isEmpty()
+    fun isShareable(isMine: Boolean): Boolean = !isMine || visibility.isNotEmpty()
 }
 
 @Entity(
@@ -165,10 +166,11 @@ data class EntityListEntity(
     val lastChanged: Double get() = updated ?: created
 
     /**
-     * `EntityList.isVisibleToCreatorAlone`: no one but its creator may open it, so a link to it, or to one of its
-     * elements, would open nothing for whoever receives it, and the list offers none.
+     * `EntityList.isShareable(isMine:)`: whether the list, and each of its elements, offers « Partager ». One of mine
+     * without a visibility key is mine alone, so a link to it would open nothing for whoever receives it. A friend's
+     * always offers it: I see it, and a list seen through one group arrives without its `group:` key.
      */
-    val isVisibleToCreatorAlone: Boolean get() = visibility.isEmpty()
+    fun isShareable(isMine: Boolean): Boolean = !isMine || visibility.isNotEmpty()
 
     /**
      * `EntityList.friendCreator(myUserId:friendsById:)`: the friend who made this list — `null` for one of

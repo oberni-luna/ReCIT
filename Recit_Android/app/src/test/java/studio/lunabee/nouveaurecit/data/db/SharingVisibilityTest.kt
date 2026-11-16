@@ -5,22 +5,35 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import studio.lunabee.nouveaurecit.data.model.Visibility
 
-/** iOS `SharingVisibilityTests`: a list or an étagère without a visibility key offers no « Partager ». */
+/**
+ * iOS `SharingVisibilityTests`: a list or an étagère of mine without a visibility key offers no « Partager »; a
+ * friend's always does.
+ */
 class SharingVisibilityTest {
     @Test
-    fun a_list_without_a_visibility_key_is_its_creators_alone() {
-        assertTrue(list(emptyList()).isVisibleToCreatorAlone)
-        assertFalse(list(listOf(Visibility.Friends)).isVisibleToCreatorAlone)
-        assertFalse(list(listOf(Visibility.Groups)).isVisibleToCreatorAlone)
-        assertFalse(list(listOf(Visibility.Public)).isVisibleToCreatorAlone)
+    fun a_list_of_mine_without_a_visibility_key_is_not_shareable() {
+        assertFalse(list(emptyList()).isShareable(isMine = true))
+        assertTrue(list(listOf(Visibility.Friends)).isShareable(isMine = true))
+        assertTrue(list(listOf(Visibility.Groups)).isShareable(isMine = true))
+        assertTrue(list(listOf(Visibility.Public)).isShareable(isMine = true))
     }
 
     @Test
-    fun a_shelf_without_a_visibility_key_is_its_owners_alone() {
-        assertTrue(shelf(emptyList()).isVisibleToOwnerAlone)
-        assertFalse(shelf(listOf(Visibility.Friends)).isVisibleToOwnerAlone)
-        assertFalse(shelf(listOf(Visibility.Groups)).isVisibleToOwnerAlone)
-        assertFalse(shelf(listOf(Visibility.Public)).isVisibleToOwnerAlone)
+    fun a_friends_list_without_a_visibility_key_is_still_shareable() {
+        assertTrue(list(emptyList()).isShareable(isMine = false))
+    }
+
+    @Test
+    fun a_shelf_of_mine_without_a_visibility_key_is_not_shareable() {
+        assertFalse(shelf(emptyList()).isShareable(isMine = true))
+        assertTrue(shelf(listOf(Visibility.Friends)).isShareable(isMine = true))
+        assertTrue(shelf(listOf(Visibility.Groups)).isShareable(isMine = true))
+        assertTrue(shelf(listOf(Visibility.Public)).isShareable(isMine = true))
+    }
+
+    @Test
+    fun a_friends_shelf_without_a_visibility_key_is_still_shareable() {
+        assertTrue(shelf(emptyList()).isShareable(isMine = false))
     }
 
     private fun list(visibility: List<Visibility>): EntityListEntity =

@@ -127,7 +127,7 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 onBack = navigator::pop,
                 containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
-                    if (list != null && !list.isVisibleToCreatorAlone) {
+                    if (list != null && list.isShareable(isMine = !state.isReadOnly)) {
                         ShareLinkButton(DeepLink.EntityList(list.id), list.name)
                     }
                     if (state.list != null && !state.isReadOnly) {
@@ -367,7 +367,7 @@ private fun ListCoverFlowContent(
             }
         }
         // Decided here rather than in the row: an absent item must not leave its spacing behind.
-        val elementUrl: String? = selected?.takeUnless { list.isVisibleToCreatorAlone }?.let { DeepLink.EntityList(list.id, it.elementId).url }
+        val elementUrl: String? = selected?.takeIf { list.isShareable(isMine = !state.isReadOnly) }?.let { DeepLink.EntityList(list.id, it.elementId).url }
         if (selected != null && elementUrl != null) {
             item(key = "share") {
                 ListShareRow(url = elementUrl, subject = selected.title)

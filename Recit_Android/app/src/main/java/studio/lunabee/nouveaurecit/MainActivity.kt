@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val container: AppContainer = (application as RecitApplication).container
         E2EHooks.read(intent)
+        // Not on a re-creation: the link that launched the activity has been opened already.
+        if (savedInstanceState == null) container.incomingLinks.value = intent?.dataString
         setContent {
             val messenger: Messenger = remember { Messenger() }
             CompositionLocalProvider(
@@ -34,5 +37,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /** A link opened while the app runs: `singleTask` hands it to this activity rather than starting another. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        (application as RecitApplication).container.incomingLinks.value = intent.dataString
     }
 }

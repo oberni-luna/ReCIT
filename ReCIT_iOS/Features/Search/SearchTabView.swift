@@ -99,10 +99,18 @@ struct SearchTabView: View {
         }
         // On appearing as well as on change: the first request made is usually the one that
         // builds this tab, and it is already standing by the time the tab exists to see it.
-        .onAppear(perform: raiseFieldIfAsked)
+        .onAppear {
+            raiseFieldIfAsked()
+            openLinkIfAsked()
+        }
         .onChange(of: router.wantsSearchField) { _, wants in
             if wants {
                 raiseFieldIfAsked()
+            }
+        }
+        .onChange(of: router.pendingLink) { _, link in
+            if link != nil {
+                openLinkIfAsked()
             }
         }
         .onChange(of: router.searchRootRequest) { _, _ in
@@ -115,6 +123,13 @@ struct SearchTabView: View {
         guard let createdBookURI else { return }
         self.createdBookURI = nil
         path.append(NavigationDestination.book(anchor: .edition(uri: createdBookURI)))
+    }
+
+    /// Pushes the screen an Ex-libris link asked for, alone above the search.
+    private func openLinkIfAsked() {
+        guard let destination = router.consumePendingLink() else { return }
+        path = .init()
+        path.append(destination)
     }
 
     private func raiseFieldIfAsked() {

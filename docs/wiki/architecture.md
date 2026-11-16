@@ -36,7 +36,7 @@ A failed sign-in reaches the screen as one of a few sentences owned by `AuthFail
 
 ## Navigation
 
-Each tab root and modal flow owns its `NavigationStack`; `NavigationDestination` is the single enum of detail screens. Cross-tab requests go through `TabRouter` (features [0037](features/0037-search-tab.md), [0038](features/0038-profile-behind-the-avatar.md)).
+Each tab root and modal flow owns its `NavigationStack`; `NavigationDestination` is the single enum of detail screens. Cross-tab requests go through `TabRouter` (features [0037](features/0037-search-tab.md), [0038](features/0038-profile-behind-the-avatar.md)). A link from outside the app (`DeepLink`) goes through it too, as `pendingLink` pushed on Recherche ([0092](features/0092-entity-deep-links.md)).
 
 ## Subsystems
 

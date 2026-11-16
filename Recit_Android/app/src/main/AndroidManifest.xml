@@ -20,10 +20,22 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Ex-libris links: a book, a work or an author by its inventaire.io uri (ui/navigation/DeepLink.kt).
+                 Verified against https://link.exlibris.lunabee.ovh/.well-known/assetlinks.json, scripts/deeplinks/. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="link.exlibris.lunabee.ovh"
+                    android:pathPrefix="/entity/" />
             </intent-filter>
         </activity>
 

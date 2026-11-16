@@ -128,4 +128,39 @@ struct ShelfModelTests {
         // …and the friend's étagère the server no longer lists is the one that goes.
         #expect(ids.contains("theirs-old") == false)
     }
+
+    // MARK: - Writes in flight (ADR 0009)
+
+    @Test
+    func `the membership pass leaves an étagère alone while a write on it is in flight`() async throws {
+        #expect(try await shelvedItemIDsAfterSync(whileTheShelfIsInFlight: true).isEmpty)
+    }
+
+    @Test
+    func `the membership pass rebuilds an étagère with no write in flight`() async throws {
+        #expect(try await shelvedItemIDsAfterSync(whileTheShelfIsInFlight: false) == ["item-1"])
+    }
+
+    /// Syncs my one étagère, empty in the store, which inventaire.io says holds `item-1`.
+    private func shelvedItemIDsAfterSync(whileTheShelfIsInFlight: Bool) async throws -> [String] {
+        let context: ModelContext = try TestStore.makeContext()
+        let user: User = Fixture.user()
+        let shelf: Shelf = .mock()
+        context.insert(user)
+        context.insert(shelf)
+        context.insert(Fixture.inventoryItem(edition: Fixture.edition()))
+        try context.save()
+        let writes: InFlightWrites = .init()
+        if whileTheShelfIsInFlight {
+            writes.begin([shelf.persistentModelID])
+        }
+        let mock: MockAPIService = .init()
+        mock.stub("action=by-owners", json: shelvesByOwnerJSON(id: "shelf-1", name: "Polars", owner: "user-1"))
+        mock.stub("action=by-ids", json: #"{ "shelves": { "shelf-1": { "_id": "shelf-1", "items": ["item-1"] } } }"#)
+        let model: ShelfModel = .init(apiService: mock, inFlightWrites: writes)
+
+        try await model.syncShelves(forUser: user, modelContext: context)
+
+        return shelf.items.map(\._id)
+    }
 }

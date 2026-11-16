@@ -13,14 +13,6 @@ import Testing
 @MainActor
 @Suite
 struct InFlightWritesTests {
-    private func storedItemID() throws -> PersistentIdentifier {
-        let context: ModelContext = try TestStore.makeContext()
-        let item: InventoryItem = Fixture.inventoryItem(edition: Fixture.edition())
-        context.insert(item)
-        try context.save()
-        return item.persistentModelID
-    }
-
     @Test
     func `a model is in flight from the start of its write to its end`() throws {
         let writes: InFlightWrites = .init()
@@ -45,5 +37,13 @@ struct InFlightWritesTests {
 
         writes.end([id])
         #expect(writes.contains(id) == false)
+    }
+
+    private func storedItemID() throws -> PersistentIdentifier {
+        let context: ModelContext = try TestStore.makeContext()
+        let item: InventoryItem = Fixture.inventoryItem(edition: Fixture.edition())
+        context.insert(item)
+        try context.save()
+        return item.persistentModelID
     }
 }

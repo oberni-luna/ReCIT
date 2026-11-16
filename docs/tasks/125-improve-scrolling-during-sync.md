@@ -1,6 +1,6 @@
 ---
 issue: 125
-status: to-test
+status: to-close
 wiki: [[architecture]], [[performance]], [[shelves]], [[network]]
 note: Second of the 2026-11-10 perf pass. Baseline from #124. Split on 2026-11-11 — the other sync domains are #135.
 created: 2026-11-11
@@ -65,6 +65,19 @@ Round 2 (2026-11-16, after the device traces).
 - `SyncStatusStore.defaultsKey` moved above the instance properties (type contents order).
 
 ## Review
+
+Round validation (2026-11-16), 3 verifier passes, autofix 2 rounds.
+
+- 🟠 [correctness] refresh claim outlived the session: sign-out mid-sync then sign-in → no sync → fixed: `SyncStatusStore.RefreshClaim` generation token, `reset()` drops the claim, `endRefresh(claim)` clears only a match.
+- 🟡 [structure] `ShelfModel` used `InFlightWrites.shared` directly → fixed: injected through `init`.
+- 🟡 [correctness] no test that a shelf change survives a sync → fixed: `ShelfModelTests` (membership pass stands down while its étagère is in flight / runs otherwise), `InventorySyncTests` (book under a membership write keeps its étagères).
+- 🟡 [style] `isRefreshing` `private(set)` → fixed: replaced by `private` `refreshClaim` / `refreshGeneration`.
+- 🟡 [style] test helpers above `@Test`s in `InFlightWritesTests`, `SyncStatusStoreRefreshTests` → fixed.
+- 🟡 [style] `ShelfModel.init` on one line → fixed: vertical, `whileInFlight` moved to `ShelfModel+InFlightWrites.swift`.
+- 🟡 [structure] runner entered subjects in `.shared`, `ShelfModel` in its own registry → fixed: `OptimisticMutating.inFlightWrites` requirement, default `.shared`.
+- 🔴 [style] `.swiftlint.baseline` edited → accepted by Olivier: only `ShelfModel.swift` length pins lowered (578 → 564 lines, 345 → 339 body), 4145 entries before and after.
+- Not fixed, by design: the old sync run is not cancelled on sign-out, only its claim released.
+- Proof: simulator build with SwiftLint ✅, full `ReCIT_iOSTests` 1334 passed, 0 failed, 1 skipped (gated integration).
 
 ## Verification
 

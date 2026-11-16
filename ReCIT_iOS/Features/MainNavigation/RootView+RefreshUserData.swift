@@ -12,8 +12,8 @@ extension RootView {
     /// A call while a sync runs does nothing: that sync already pulls everything.
     func refreshUserData() {
         Task {
-            guard authModel.isAuthenticated, syncStatus.beginRefresh() else { return }
-            defer { syncStatus.endRefresh() }
+            guard authModel.isAuthenticated, let claim = syncStatus.beginRefresh() else { return }
+            defer { syncStatus.endRefresh(claim) }
             await userDataSync.run(modelContext: modelContext)
         }
     }

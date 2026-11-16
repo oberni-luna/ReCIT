@@ -30,9 +30,17 @@ enum OptimisticID {
 protocol OptimisticMutating: AnyObject {
     /// Shared channel used to surface a background failure to the UI.
     var errorReporter: AppErrorReporter? { get }
+
+    /// Where the runner enters a write's subjects for as long as it runs, so a sync leaves them
+    /// alone (ADR 0009).
+    var inFlightWrites: InFlightWrites { get }
 }
 
 extension OptimisticMutating {
+    var inFlightWrites: InFlightWrites {
+        .shared
+    }
+
     /// - Parameters:
     ///   - apply: Mutates the local store (called synchronously, before the network).
     ///   - revert: Undoes `apply` if the request fails.
@@ -58,13 +66,14 @@ extension OptimisticMutating {
         try? modelContext.save()
 
         let written: [PersistentIdentifier] = subjects.map { $0.persistentModelID }
-        InFlightWrites.shared.begin(written)
+        let inFlightWrites: InFlightWrites = inFlightWrites
+        inFlightWrites.begin(written)
         let subjectsAreStillThere: () -> Bool = {
             subjects.allSatisfy { $0.isStillInTheStore }
         }
 
         return Task { [weak self] in
-            defer { InFlightWrites.shared.end(written) }
+            defer { inFlightWrites.end(written) }
             do {
                 try await request()
                 guard subjectsAreStillThere() else { return }

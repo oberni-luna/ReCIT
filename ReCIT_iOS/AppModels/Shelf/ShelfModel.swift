@@ -42,13 +42,19 @@ final class ShelfModel: OptimisticMutating {
 
     /// Shared channel used to surface a background failure to the UI.
     var errorReporter: AppErrorReporter?
+    let inFlightWrites: InFlightWrites
 
     /// Most recent optimistic background task, exposed so tests can await it.
     @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
 
-    init(apiService: APIServicing, errorReporter: AppErrorReporter? = nil) {
+    init(
+        apiService: APIServicing,
+        errorReporter: AppErrorReporter? = nil,
+        inFlightWrites: InFlightWrites = .shared
+    ) {
         self.apiService = apiService
         self.errorReporter = errorReporter
+        self.inFlightWrites = inFlightWrites
     }
 
     /// Optimistically creates a shelf: a placeholder appears at once (slotting into the
@@ -262,7 +268,7 @@ final class ShelfModel: OptimisticMutating {
         revert: @escaping () -> Void
     ) {
         let writtenItems: [PersistentIdentifier] = items.map(\.persistentModelID)
-        InFlightWrites.shared.begin(writtenItems)
+        inFlightWrites.begin(writtenItems)
 
         let cycle: Task<Void, Never> = optimistic(
             modelContext,
@@ -281,7 +287,7 @@ final class ShelfModel: OptimisticMutating {
 
         inFlightTask = Task {
             await cycle.value
-            InFlightWrites.shared.end(writtenItems)
+            inFlightWrites.end(writtenItems)
         }
     }
 
@@ -492,7 +498,7 @@ final class ShelfModel: OptimisticMutating {
         //
         // These étagères only: a friend's, synced while I file a book on one of mine, holds
         // nothing of my write and has no reason to wait for it.
-        guard shelves.allSatisfy({ InFlightWrites.shared.contains($0.persistentModelID) == false }) else { return }
+        guard shelves.allSatisfy({ inFlightWrites.contains($0.persistentModelID) == false }) else { return }
 
         if Self.useFakeMembership {
             applyFakeMembership(ownerId: forUser._id, modelContext: modelContext)
@@ -545,24 +551,6 @@ final class ShelfModel: OptimisticMutating {
         try modelContext.save()
     }
 
-    /// Runs an awaiting membership write with the étagère and its books in `InFlightWrites`,
-    /// so no sync lands on them before the server has answered.
-    ///
-    /// The auto-sort and sorting applies (PRD 0006, PRD 0008) issue one such write per étagère
-    /// in a row, while a single-book write from a menu may settle in the middle of the run.
-    /// `InFlightWrites` counts its entries, so the one settling does not free the étagère or
-    /// the books the run still holds.
-    private func whileInFlight(
-        _ shelf: Shelf,
-        _ items: [InventoryItem],
-        _ write: () async throws -> Void
-    ) async rethrows {
-        let written: [PersistentIdentifier] = [shelf.persistentModelID] + items.map(\.persistentModelID)
-        InFlightWrites.shared.begin(written)
-        defer { InFlightWrites.shared.end(written) }
-        try await write()
-    }
-
     private func localShelf(id: String, modelContext: ModelContext) -> Shelf? {
         let descriptor: FetchDescriptor<Shelf> = .init(predicate: #Predicate { $0._id == id })
         return try? modelContext.fetch(descriptor).first
@@ -570,9 +558,7 @@ final class ShelfModel: OptimisticMutating {
 
     private func localItems(ids: [String], modelContext: ModelContext) -> [InventoryItem] {
         guard ids.isEmpty == false else { return [] }
-        let descriptor: FetchDescriptor<InventoryItem> = .init(
-            predicate: #Predicate { ids.contains($0._id) }
-        )
+        let descriptor: FetchDescriptor<InventoryItem> = .init(predicate: #Predicate { ids.contains($0._id) })
         return (try? modelContext.fetch(descriptor)) ?? []
     }
 }

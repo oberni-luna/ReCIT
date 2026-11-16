@@ -54,6 +54,34 @@ struct InventorySyncTests {
     }
 
     @Test
+    func `a book under a membership write keeps its étagères`() async throws {
+        let container: ModelContainer = try TestStore.makeContainer()
+        let context: ModelContext = container.mainContext
+        _ = try storedUser(in: context)
+        let shelf: Shelf = .mock()
+        let filed: InventoryItem = Fixture.inventoryItem(id: "item-1", edition: Fixture.edition())
+        let settled: InventoryItem = Fixture.inventoryItem(id: "item-2", edition: Fixture.edition(uri: "isbn:item-2"))
+        context.insert(shelf)
+        context.insert(filed)
+        context.insert(settled)
+        shelf.items = [filed, settled]
+        try context.save()
+        let writes: InFlightWrites = .init()
+        writes.begin([filed.persistentModelID])
+        let sync: InventorySync = .init(
+            modelContainer: container,
+            apiService: stubbedInventory(),
+            inFlightWrites: writes
+        )
+
+        _ = try await sync.sync(userID: "user-1", progress: AsyncStream<InventorySyncProgress>.makeStream().continuation)
+
+        let stored: [String: [String]] = try storedShelfIDs(in: container)
+        #expect(stored["item-1"] == ["shelf-1"])
+        #expect(stored["item-2"] == [])
+    }
+
+    @Test
     func `a sync saves no more often than its interval, and always once at the end`() async throws {
         #expect(try await progressReports(savingEvery: .seconds(3600)) == 2)
         #expect(try await progressReports(savingEvery: .zero) == 5)
@@ -91,6 +119,12 @@ struct InventorySyncTests {
     private func storedDetails(in container: ModelContainer) throws -> [String: String] {
         let items: [InventoryItem] = try ModelContext(container).fetch(FetchDescriptor<InventoryItem>())
         return .init(uniqueKeysWithValues: items.map { ($0._id, $0.details) })
+    }
+
+    /// Each item's étagères as the store holds them, read through a context of its own.
+    private func storedShelfIDs(in container: ModelContainer) throws -> [String: [String]] {
+        let items: [InventoryItem] = try ModelContext(container).fetch(FetchDescriptor<InventoryItem>())
+        return .init(uniqueKeysWithValues: items.map { ($0._id, $0.shelves.map(\._id)) })
     }
 
     /// Three authors, a work each, a copy of each work.

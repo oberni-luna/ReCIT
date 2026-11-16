@@ -255,6 +255,7 @@ struct SearchContent: View {
                             myItems: myItems,
                             friendsItems: friendsItems
                         )
+                        SearchListsFriendsGroupsSections(localQuery, myUserId: user._id)
                     }
 
                     SearchFriendsSection(
@@ -393,15 +394,5 @@ struct SearchContent: View {
             query: submission.query,
             entityTypes: submission.entityTypes
         )
-    }
-}
-
-extension SearchContent {
-    /// One go at one query. It is the `.task` key, and it holds the attempt count so that
-    /// « Réessayer » — which changes nothing about what is being searched for — still reads as
-    /// a different call to run.
-    struct SearchAttempt: Equatable, Sendable {
-        let submission: SearchSuggestion
-        let count: Int
     }
 }

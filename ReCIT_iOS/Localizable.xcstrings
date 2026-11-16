@@ -11291,18 +11291,18 @@
         }
       }
     },
-    "inventory.search.results.empty.add_book" : {
+    "inventory.search.results.add_edition" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add this book"
+            "state" : "needs_review",
+            "value" : "Add an edition"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajouter ce livre"
+            "value" : "Ajouter une édition"
           }
         }
       }
@@ -11371,6 +11371,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Livres · %lld"
+          }
+        }
+      }
+    },
+    "inventory.search.section.friends" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Friends"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ami·es"
+          }
+        }
+      }
+    },
+    "inventory.search.section.groups" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Groups"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Groupes"
+          }
+        }
+      }
+    },
+    "inventory.search.section.lists" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Lists"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listes"
           }
         }
       }

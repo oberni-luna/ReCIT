@@ -1,6 +1,6 @@
 ---
 issue: 119
-status: todo
+status: to-test
 wiki: [[search]], [[lists]], [[network]], [[features/0037-search-tab]], [[features/0087-book-creation-from-search]]
 note: Mockups in Figma S7IvC6GvlcUFe5IgbtvQq6, page Search, section « Recherche · Listes, ami·es et groupes » (1018:808) — S1 1018:809, S2 1018:6682, spec 1019:1216.
 created: 2026-11-16
@@ -45,3 +45,17 @@ Recherche finds more than books in the store: my lists and my friends' lists, my
 - No remote result → the empty state with no button, then « Ajouter une édition ».
 - Remote call failed → « Réessayer », no « Ajouter une édition ».
 - Unit tests cover the matching, filtering and caps of the three sections.
+
+## Implementation
+
+- **Pure matching** in `Model/SearchResult/`: `LocalSearchMatches<Element>` (items, totalCount, `isCapped`; one `matching(_:limit:find:)` holds the trim, blank-query and cap rules), `+Friends` (`relation == .friend`, username), `+Groups` (over `MyGroups.mine`, name). Lists in `Features/Search/LocalSearchMatches+Lists.swift` over `ListsTabSections` (mine by name, then network), with `ListSearchMatch` (list + owner).
+- **Sections**: `SearchListsFriendsGroupsSections` (own `@Query`s) inserted after `SearchLocalSection` in `SearchContent`; one generic `SearchMatchesSection`, rows `SearchListRow`, `SearchFriendRow`, `SearchGroupRow` reusing `ListRowView`, `UserCellView`, `GroupRowView`. Headers keys `inventory.search.section.lists|friends|groups`.
+- **« Tout voir »**: `NavigationDestination.localSearchResults(query:kind:)` with `LocalSearchKind` (books default); no new case, so `viewForDestination` complexity stays at its baseline. `SearchAllMatchesView` routes books to `SearchAllLocalView`, the rest to `SearchAllMatchesList`. `SearchLocalHeader` takes the kind.
+- **« Ajouter une édition »**: `SearchAddEditionRow` in its own section after the results and after the no-result empty state (which lost its button); none on failure. Key `inventory.search.results.add_edition` replaces `inventory.search.results.empty.add_book`; id `e2e.searchAddEdition`.
+- `SearchContent` down to 398 lines (`SearchAttempt` moved to `SearchContent+SearchAttempt.swift`).
+- Build green (SwiftLint clean); tests: LocalSearchMatches (4 suites), InventorySearchRanking, ListsTabSections, MyGroups, RemoteSearchState → 53 passed.
+- Android `strings_create_book.xml` still says « Ajouter ce livre » and names the removed iOS key in a comment: Android catch-up.
+
+## Verification
+
+manual validation — not run by agent

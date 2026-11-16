@@ -19,6 +19,8 @@
 import SwiftUI
 
 struct SearchLocalHeader: View {
+    /// Which section this heads: its title, and the screen « Tout voir » opens.
+    let kind: LocalSearchKind
     /// The query the full listing will answer. Carried into the destination rather than read
     /// back from the field, so the screen shows the search this header was drawn for.
     let query: String
@@ -27,18 +29,18 @@ struct SearchLocalHeader: View {
 
     var body: some View {
         HStack {
-            Text("inventory.search.local_section")
+            Text(kind.title)
 
             Spacer()
 
             if showsSeeAll {
                 NavigationLink(
                     "inventory.search.see_all",
-                    value: NavigationDestination.localSearchResults(query: query)
+                    value: NavigationDestination.localSearchResults(query: query, kind: kind)
                 )
                 .buttonStyle(.plain)
                 .foregroundStyle(.foregroundTinted)
-                .accessibilityIdentifier("e2e.searchLocal.seeAll")
+                .accessibilityIdentifier(kind.seeAllAccessibilityID)
             }
         }
     }

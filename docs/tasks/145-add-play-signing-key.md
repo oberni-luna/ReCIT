@@ -1,6 +1,6 @@
 ---
 issue: 145
-status: todo
+status: to-test
 wiki: [[features/0092-entity-deep-links]], [[android]]
 note: Last task of the « Deep links » sprint. Criterion left open by #138: assetlinks.json carries only the upload and debug keys.
 created: 2026-11-16
@@ -31,8 +31,16 @@ Google re-signs every Play build with its app signing key, so a Play-installed E
 
 ## Implementation
 
+Round 1, 2026-11-16, base `sprint/deep-links`.
+
+- `scripts/deeplinks/assetlinks.json`: `4E:C2:…:69:FD` (Play app signing key) appended to `studio.lunabee.exlibris.android`'s `sha256_cert_fingerprints`, after the upload key; `.dev` unchanged.
+- Proof: `python3 -m json.tool` passes.
+- Not deployed: `scripts/deeplinks/deploy.sh` is Olivier's. Docs (0092 pitfall, CLAUDE.md line) at close.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent (needs `deploy.sh`, then Google's statements API and a Play-installed build).
 
 ## Feedback

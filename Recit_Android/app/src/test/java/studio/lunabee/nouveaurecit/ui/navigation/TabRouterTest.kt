@@ -64,10 +64,19 @@ class TabRouterTest {
     }
 
     @Test
-    fun a_link_opens_recherche_with_the_field_down_and_the_profile_closed() {
+    fun a_link_opens_the_tab_it_names_with_the_field_down_and_the_profile_closed() {
         val router = TabRouter(selected = AppTab.Lists, isProfilePresented = true)
-        router.openLink()
+        router.openLink(AppTab.Search)
         assertEquals(AppTab.Search, router.selected)
+        assertFalse(router.isProfilePresented)
+        assertFalse(router.consumeSearchField())
+    }
+
+    @Test
+    fun a_reader_or_group_link_opens_reseau_with_the_profile_closed() {
+        val router = TabRouter(selected = AppTab.Search, isProfilePresented = true)
+        router.openLink(AppTab.Network)
+        assertEquals(AppTab.Network, router.selected)
         assertFalse(router.isProfilePresented)
         assertFalse(router.consumeSearchField())
     }

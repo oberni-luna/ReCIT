@@ -62,6 +62,7 @@ struct NetworkView: View {
             }
         }
         .hidesTabBarWhenPushed(on: path)
+        .opensPendingLink(on: .community, path: $path)
     }
 
     /// The « + » follows the segment: a friend to find on one side, a group on the other.

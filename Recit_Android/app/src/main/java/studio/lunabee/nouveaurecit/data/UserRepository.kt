@@ -90,6 +90,18 @@ class UserRepository(
         return merged
     }
 
+    /**
+     * The reader inventaire.io knows under [username], in any case, stored like any other; `null` when nobody goes
+     * by it. `by-usernames` answers under the lower-cased name, so its key is matched without regard to case; the
+     * id it gives goes through `by-ids`, the request that stores every other reader.
+     */
+    suspend fun getOrFetchUser(username: String): UserEntity? {
+        val answer: UsersDto = api.get("/api/users/by-usernames", "usernames" to username)
+        val match: UserDto = answer.users.entries.firstOrNull { it.key.equals(username, ignoreCase = true) }?.value
+            ?: return null
+        return getOrFetchUsers(listOf(match.id)).firstOrNull()
+    }
+
     /** `User.upsert(_:baseUrl:in:)`: readers a group's `by-id` answer sends along, already shaped as users. */
     override suspend fun store(users: List<UserDto>) {
         if (users.isEmpty()) return

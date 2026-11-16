@@ -8,8 +8,8 @@ import studio.lunabee.nouveaurecit.network.dto.EntityResultDto
 class DeepLinkTest {
     @Test
     fun an_entity_link_carries_its_uri_whatever_its_prefix() {
-        assertEquals("isbn:9782070360024", DeepLink.entityUri("https://link.exlibris.lunabee.ovh/entity/isbn:9782070360024"))
-        assertEquals("wd:Q535", DeepLink.entityUri("https://link.exlibris.lunabee.ovh/entity/wd:Q535"))
+        assertEquals(DeepLink.Entity("isbn:9782070360024"), DeepLink.parse("https://link.exlibris.lunabee.ovh/entity/isbn:9782070360024"))
+        assertEquals(DeepLink.Entity("wd:Q535"), DeepLink.parse("https://link.exlibris.lunabee.ovh/entity/wd:Q535"))
     }
 
     @Test
@@ -17,7 +17,7 @@ class DeepLinkTest {
         listOf(
             "https://inventaire.io/entity/wd:Q535",
             "http://link.exlibris.lunabee.ovh/entity/wd:Q535",
-            "https://link.exlibris.lunabee.ovh/users/olivier",
+            "https://link.exlibris.lunabee.ovh/shelves/olivier",
             "https://link.exlibris.lunabee.ovh/entity/Q535",
             "https://link.exlibris.lunabee.ovh/entity/wd:",
             "https://link.exlibris.lunabee.ovh/entity/wd:Q535/edit",
@@ -26,12 +26,65 @@ class DeepLinkTest {
             "https://link.exlibris.lunabee.ovh/entity/wd:Q1%26autocreate=true",
             "https://link.exlibris.lunabee.ovh/entity/foo:bar",
             "not a url",
-        ).forEach { url -> assertNull(url, DeepLink.entityUri(url)) }
+        ).forEach { url -> assertNull(url, DeepLink.parse(url)) }
+    }
+
+    @Test
+    fun a_reader_link_carries_the_username_as_typed() {
+        mapOf(
+            "https://link.exlibris.lunabee.ovh/users/OlivierB_test4" to "OlivierB_test4",
+            "https://link.exlibris.lunabee.ovh/users/maxlath" to "maxlath",
+            "https://link.exlibris.lunabee.ovh/users/Ana%C3%AFs" to "Anaïs",
+            "https://link.exlibris.lunabee.ovh/users/ab" to "ab",
+        ).forEach { (url, username) -> assertEquals(url, DeepLink.User(username), DeepLink.parse(url)) }
+    }
+
+    @Test
+    fun a_group_link_carries_its_slug() {
+        mapOf(
+            "https://link.exlibris.lunabee.ovh/groups/le-club-de-lecture" to "le-club-de-lecture",
+            "https://link.exlibris.lunabee.ovh/groups/le-club-de-lecture.2" to "le-club-de-lecture.2",
+            "https://link.exlibris.lunabee.ovh/groups/lecture-%C3%A0-chamb%C3%A9ry" to "lecture-à-chambéry",
+        ).forEach { (url, slug) -> assertEquals(url, DeepLink.Group(slug), DeepLink.parse(url)) }
+    }
+
+    @Test
+    fun a_username_or_a_slug_outside_inventaires_rule_is_not_a_link() {
+        listOf(
+            "https://link.exlibris.lunabee.ovh/users/a%7Cb",
+            "https://link.exlibris.lunabee.ovh/users/a%26usernames=b",
+            "https://link.exlibris.lunabee.ovh/users/a",
+            "https://link.exlibris.lunabee.ovh/users/abcdefghijklmnopqrstu",
+            "https://link.exlibris.lunabee.ovh/users/max.lath",
+            "https://link.exlibris.lunabee.ovh/users/max-lath",
+            "https://link.exlibris.lunabee.ovh/users/maxlath/inventory",
+            "https://link.exlibris.lunabee.ovh/users",
+            "http://link.exlibris.lunabee.ovh/users/maxlath",
+            "https://inventaire.io/users/maxlath",
+            "https://link.exlibris.lunabee.ovh/groups/a%26b",
+            "https://link.exlibris.lunabee.ovh/groups/a%7Cb",
+            "https://link.exlibris.lunabee.ovh/groups/a%3Fslug=b",
+            "https://link.exlibris.lunabee.ovh/groups/le%20club",
+            "https://link.exlibris.lunabee.ovh/groups/le-club.",
+            "https://link.exlibris.lunabee.ovh/groups/le-club/members",
+            "https://link.exlibris.lunabee.ovh/groups",
+            "http://link.exlibris.lunabee.ovh/groups/le-club-de-lecture",
+            "https://inventaire.io/groups/le-club-de-lecture",
+        ).forEach { url -> assertNull(url, DeepLink.parse(url)) }
     }
 
     @Test
     fun a_link_falls_back_to_the_same_page_on_inventaire() {
-        assertEquals("https://inventaire.io/entity/wd:Q535", DeepLink.webUrl("wd:Q535"))
+        assertEquals("https://inventaire.io/entity/wd:Q535", DeepLink.Entity("wd:Q535").webUrl)
+        assertEquals("https://inventaire.io/users/maxlath", DeepLink.User("maxlath").webUrl)
+        assertEquals("https://inventaire.io/groups/le-club-de-lecture", DeepLink.Group("le-club-de-lecture").webUrl)
+    }
+
+    @Test
+    fun a_reader_opens_their_profile_on_reseau_and_my_own_name_the_profil_sheet() {
+        assertEquals(LinkTarget.Screen(AppTab.Network, Destination.User("reader")), DeepLink.userTarget("reader", "me"))
+        assertEquals(LinkTarget.Screen(AppTab.Network, Destination.User("reader")), DeepLink.userTarget("reader", null))
+        assertEquals(LinkTarget.Profile, DeepLink.userTarget("me", "me"))
     }
 
     @Test

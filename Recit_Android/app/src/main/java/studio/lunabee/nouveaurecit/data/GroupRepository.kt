@@ -139,6 +139,12 @@ class GroupRepository(
         return group
     }
 
+    /**
+     * The id of the group inventaire.io knows under [slug]; a [NetworkError.BadStatus] `404` when no group has it.
+     * Nothing kept: the group's screen reads it afresh on arrival, as it does for a group found by name.
+     */
+    suspend fun groupId(slug: String): String = api.get<GroupByIdDto>("/api/groups/by-slug", "slug" to slug).group.id
+
     /** Groups whose name or description matches, best match first. Only the searchable ones: the server leaves the others out. */
     suspend fun searchGroups(query: String, limit: Int = 20): List<GroupSearchResult> {
         val trimmed: String = query.trim()

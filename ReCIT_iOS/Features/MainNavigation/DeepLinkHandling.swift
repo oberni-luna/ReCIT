@@ -8,16 +8,20 @@
 import SwiftData
 import SwiftUI
 
-/// Opens an Ex-libris link (`DeepLink`) the system hands the app: the screen it names is pushed on
-/// the Recherche tab, the one stack that belongs to no particular place in the app. A link the app
-/// cannot open — unknown entity, network down — goes to the same page on inventaire.io in Safari,
-/// which is what the link does when the app is not installed.
+/// Opens an Ex-libris link (`DeepLink`) the system hands the app: a book or an author is pushed on
+/// the Recherche tab, the one stack that belongs to no particular place in the app; a reader or a
+/// group on Réseau, where they are found otherwise. My own username opens the Profil sheet, as the
+/// avatar does. A link the app cannot open — unknown entity, reader or group, network down — goes
+/// to the same page on inventaire.io in Safari, which is what the link does when the app is not
+/// installed.
 ///
 /// On `MainTabView` only: a link opened before signing in has no tabs to land on, and is dropped.
 struct DeepLinkHandling: ViewModifier {
     let router: TabRouter
 
     @Environment(EntityModel.self) private var entityModel: EntityModel
+    @Environment(UserModel.self) private var userModel: UserModel
+    @Environment(GroupModel.self) private var groupModel: GroupModel
     @Environment(\.modelContext) private var modelContext: ModelContext
     @Environment(\.openURL) private var openURL: OpenURLAction
 
@@ -30,14 +34,30 @@ struct DeepLinkHandling: ViewModifier {
     }
 
     private func open(_ link: DeepLink) async {
+        if await openInApp(link) {
+            return
+        }
+        if let webURL = link.webURL {
+            openURL(webURL)
+        }
+    }
+
+    /// Whether the screen the link names was found, and opened.
+    private func openInApp(_ link: DeepLink) async -> Bool {
         switch link {
         case let .entity(uri):
-            if let destination = await destination(forLinkedURI: uri) {
-                router.open(destination)
-            } else if let webURL = link.webURL {
-                openURL(webURL)
+            guard let destination = await destination(forLinkedURI: uri) else { return false }
+            router.open(destination, on: .search)
+        case let .user(username):
+            guard let user = try? await userModel.getOrFetchUser(username: username, modelContext: modelContext) else {
+                return false
             }
+            router.open(linkedUser: user, myUserId: userModel.myUser?._id)
+        case let .group(slug):
+            guard let id = try? await groupModel.groupId(slug: slug) else { return false }
+            router.open(.group(id: id), on: .community)
         }
+        return true
     }
 
     /// An `isbn:` uri is an edition by construction; any other one — `wd:`, `inv:` — may be a work,

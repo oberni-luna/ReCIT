@@ -26,7 +26,7 @@ struct DeepLinkTests {
         let urls: [String] = [
             "https://inventaire.io/entity/wd:Q535",
             "http://link.exlibris.lunabee.ovh/entity/wd:Q535",
-            "https://link.exlibris.lunabee.ovh/users/olivier",
+            "https://link.exlibris.lunabee.ovh/shelves/olivier",
             "https://link.exlibris.lunabee.ovh/entity/Q535",
             "https://link.exlibris.lunabee.ovh/entity/wd:",
             "https://link.exlibris.lunabee.ovh/entity/wd:Q535/edit",
@@ -43,8 +43,72 @@ struct DeepLinkTests {
     }
 
     @Test
+    func `a reader link carries the username as typed`() throws {
+        let urls: [String: String] = [
+            "https://link.exlibris.lunabee.ovh/users/OlivierB_test4": "OlivierB_test4",
+            "https://link.exlibris.lunabee.ovh/users/maxlath": "maxlath",
+            "https://link.exlibris.lunabee.ovh/users/Ana%C3%AFs": "Anaïs",
+            "https://link.exlibris.lunabee.ovh/users/ab": "ab"
+        ]
+
+        for (string, username) in urls {
+            let url: URL = try #require(URL(string: string))
+            #expect(DeepLink(url: url) == .user(username: username), "\(string)")
+        }
+    }
+
+    @Test
+    func `a group link carries its slug`() throws {
+        let urls: [String: String] = [
+            "https://link.exlibris.lunabee.ovh/groups/le-club-de-lecture": "le-club-de-lecture",
+            "https://link.exlibris.lunabee.ovh/groups/le-club-de-lecture.2": "le-club-de-lecture.2",
+            "https://link.exlibris.lunabee.ovh/groups/lecture-%C3%A0-chamb%C3%A9ry": "lecture-à-chambéry"
+        ]
+
+        for (string, slug) in urls {
+            let url: URL = try #require(URL(string: string))
+            #expect(DeepLink(url: url) == .group(slug: slug), "\(string)")
+        }
+    }
+
+    @Test
+    func `a username or a slug outside inventaire.io's rule is not a link`() throws {
+        let urls: [String] = [
+            "https://link.exlibris.lunabee.ovh/users/a%7Cb",
+            "https://link.exlibris.lunabee.ovh/users/a%26usernames=b",
+            "https://link.exlibris.lunabee.ovh/users/a",
+            "https://link.exlibris.lunabee.ovh/users/abcdefghijklmnopqrstu",
+            "https://link.exlibris.lunabee.ovh/users/max.lath",
+            "https://link.exlibris.lunabee.ovh/users/max-lath",
+            "https://link.exlibris.lunabee.ovh/users/maxlath/inventory",
+            "https://link.exlibris.lunabee.ovh/users",
+            "http://link.exlibris.lunabee.ovh/users/maxlath",
+            "https://inventaire.io/users/maxlath",
+            "https://link.exlibris.lunabee.ovh/groups/a%26b",
+            "https://link.exlibris.lunabee.ovh/groups/a%7Cb",
+            "https://link.exlibris.lunabee.ovh/groups/a%3Fslug=b",
+            "https://link.exlibris.lunabee.ovh/groups/le%20club",
+            "https://link.exlibris.lunabee.ovh/groups/le-club.",
+            "https://link.exlibris.lunabee.ovh/groups/le-club/members",
+            "https://link.exlibris.lunabee.ovh/groups",
+            "http://link.exlibris.lunabee.ovh/groups/le-club-de-lecture",
+            "https://inventaire.io/groups/le-club-de-lecture"
+        ]
+
+        for string in urls {
+            let url: URL = try #require(URL(string: string))
+            #expect(DeepLink(url: url) == nil, "\(string)")
+        }
+    }
+
+    @Test
     func `a link falls back to the same page on inventaire.io`() {
         #expect(DeepLink.entity(uri: "wd:Q535").webURL?.absoluteString == "https://inventaire.io/entity/wd:Q535")
+        #expect(DeepLink.user(username: "maxlath").webURL?.absoluteString == "https://inventaire.io/users/maxlath")
+        #expect(
+            DeepLink.group(slug: "le-club-de-lecture").webURL?.absoluteString
+                == "https://inventaire.io/groups/le-club-de-lecture"
+        )
     }
 
     @Test

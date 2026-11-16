@@ -31,14 +31,6 @@ final class ShelfModel: OptimisticMutating {
     /// `/api/shelves` membership call. Now using real server membership.
     static let useFakeMembership: Bool = false
 
-    private let apiService: APIServicing
-
-    /// Shared channel used to surface a background failure to the UI.
-    var errorReporter: AppErrorReporter?
-
-    /// Most recent optimistic background task, exposed so tests can await it.
-    @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
-
     /// Raised while an optimistic membership write is waiting on the server.
     ///
     /// The `Shelf ⇄ InventoryItem` relation has two independent *wholesale* writers —
@@ -57,6 +49,14 @@ final class ShelfModel: OptimisticMutating {
     /// the gate while the run is still going, and a sync would take the books back off
     /// the étagère they had just been filed onto.
     private static var membershipWriteDepth: Int = 0
+
+    let apiService: APIServicing
+
+    /// Shared channel used to surface a background failure to the UI.
+    var errorReporter: AppErrorReporter?
+
+    /// Most recent optimistic background task, exposed so tests can await it.
+    @ObservationIgnored private(set) var inFlightTask: Task<Void, Never>?
 
     private static func raiseMembershipGate() {
         membershipWriteDepth += 1
@@ -548,27 +548,27 @@ final class ShelfModel: OptimisticMutating {
     }
 
     private func linkItems(shelfIds: [String], modelContext: ModelContext) async throws {
-        guard shelfIds.isEmpty == false else { return }
-
-        let idsParam: String = shelfIds.joined(separator: "|")
-        let withItems: ShelvesWithItemsResponseDTO? = try await apiService.fetchData(
-            fromEndpoint: "/api/shelves?action=by-ids&ids=\(idsParam)&with-items=true"
-        )
-        guard let withItems else { return }
-
-        for (shelfId, dto) in withItems.shelves {
+        for (shelfId, itemIds) in try await fetchItemIds(ofShelves: shelfIds) {
             guard let shelf = localShelf(id: shelfId, modelContext: modelContext) else { continue }
-            shelf.items = localItems(ids: dto.items ?? [], modelContext: modelContext)
+            shelf.items = localItems(ids: itemIds, modelContext: modelContext)
         }
         try modelContext.save()
     }
 
-    private func localShelf(id: String, modelContext: ModelContext) -> Shelf? {
+    /// Reads the ids of the copies on each of `shelfIds` from inventaire.io, without writing to the store.
+    func fetchItemIds(ofShelves shelfIds: [String]) async throws -> [String: [String]] {
+        guard shelfIds.isEmpty == false else { return [:] }
+        let endpoint: String = "/api/shelves?action=by-ids&ids=\(shelfIds.joined(separator: "|"))&with-items=true"
+        let withItems: ShelvesWithItemsResponseDTO? = try await apiService.fetchData(fromEndpoint: endpoint)
+        return withItems?.shelves.mapValues { $0.items ?? [] } ?? [:]
+    }
+
+    func localShelf(id: String, modelContext: ModelContext) -> Shelf? {
         let descriptor: FetchDescriptor<Shelf> = .init(predicate: #Predicate { $0._id == id })
         return try? modelContext.fetch(descriptor).first
     }
 
-    private func localItems(ids: [String], modelContext: ModelContext) -> [InventoryItem] {
+    func localItems(ids: [String], modelContext: ModelContext) -> [InventoryItem] {
         guard ids.isEmpty == false else { return [] }
         let descriptor: FetchDescriptor<InventoryItem> = .init(
             predicate: #Predicate { ids.contains($0._id) }

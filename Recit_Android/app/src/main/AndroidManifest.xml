@@ -40,6 +40,8 @@
                 <data android:pathPrefix="/users/" />
                 <data android:pathPrefix="/groups/" />
                 <data android:pathPrefix="/lists/" />
+                <data android:pathPrefix="/items/" />
+                <data android:pathPrefix="/shelves/" />
             </intent-filter>
         </activity>
 

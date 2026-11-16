@@ -10,10 +10,11 @@ import SwiftUI
 
 /// Opens an Ex-libris link (`DeepLink`) the system hands the app: a book or an author is pushed on
 /// the Recherche tab, the one stack that belongs to no particular place in the app; a reader or a
-/// group on Réseau, where they are found otherwise; a list on Listes. My own username opens the
-/// Profil sheet, as the avatar does. A link the app cannot open — unknown entity, reader, group or
-/// list, a list I may not see, network down — goes to the same page on inventaire.io in Safari,
-/// which is what the link does when the app is not installed.
+/// group on Réseau, where they are found otherwise; a list on Listes; a copy of a book or an
+/// étagère on Inventaire. My own username opens the Profil sheet, as the avatar does. A link the
+/// app cannot open — unknown entity, reader, group, list, copy or étagère, one I may not see, a
+/// stranger's étagère, network down — goes to the same page on inventaire.io in Safari, which is
+/// what the link does when the app is not installed.
 ///
 /// On `MainTabView` only: a link opened before signing in has no tabs to land on, and is dropped.
 struct DeepLinkHandling: ViewModifier {
@@ -23,8 +24,16 @@ struct DeepLinkHandling: ViewModifier {
     @Environment(UserModel.self) private var userModel: UserModel
     @Environment(GroupModel.self) private var groupModel: GroupModel
     @Environment(ListModel.self) private var listModel: ListModel
+    @Environment(InventoryModel.self) private var inventoryModel: InventoryModel
+    @Environment(ShelfModel.self) private var shelfModel: ShelfModel
     @Environment(\.modelContext) private var modelContext: ModelContext
     @Environment(\.openURL) private var openURL: OpenURLAction
+
+    /// Me and my friends: the readers whose étagères may enter the store.
+    private var shelfOwnersOpenedInApp: Set<String> {
+        let friends: [String] = userModel.friends(modelContext: modelContext).map(\._id)
+        return .init(friends + [userModel.myUser?._id].compactMap(\.self))
+    }
 
     func body(content: Content) -> some View {
         content
@@ -47,20 +56,44 @@ struct DeepLinkHandling: ViewModifier {
     private func openInApp(_ link: DeepLink) async -> Bool {
         switch link {
         case let .entity(uri):
-            guard let destination = await destination(forLinkedURI: uri) else { return false }
-            router.open(destination, on: .search)
+            return open(await destination(forLinkedURI: uri), on: .search)
         case let .user(username):
             guard let user = try? await userModel.getOrFetchUser(username: username, modelContext: modelContext) else {
                 return false
             }
             router.open(linkedUser: user, myUserId: userModel.myUser?._id)
+            return true
         case let .group(slug):
-            guard let id = try? await groupModel.groupId(slug: slug) else { return false }
-            router.open(.group(id: id), on: .community)
+            let id: String? = try? await groupModel.groupId(slug: slug)
+            return open(id.map { .group(id: $0) }, on: .community)
         case let .list(id, elementId):
-            guard let list = await linkedList(id: id) else { return false }
-            router.open(.init(linkedList: list, elementId: elementId), on: .lists)
+            let list: EntityList? = await linkedList(id: id)
+            return open(list.map { .init(linkedList: $0, elementId: elementId) }, on: .lists)
+        case let .item(id):
+            let destination: NavigationDestination? = await .linkedItem(
+                id: id,
+                inventoryModel: inventoryModel,
+                modelContext: modelContext
+            )
+            return open(destination, on: .inventory)
+        case let .shelf(id):
+            let destination: NavigationDestination? = await .linkedShelf(
+                id: id,
+                ownedByOneOf: shelfOwnersOpenedInApp,
+                shelfModel: shelfModel,
+                modelContext: modelContext
+            )
+            return open(destination, on: .inventory)
         }
+    }
+
+    /// Pushes `destination` on `tab`, and says whether there was one to push.
+    private func open(
+        _ destination: NavigationDestination?,
+        on tab: MainTabView.TabConfig
+    ) -> Bool {
+        guard let destination else { return false }
+        router.open(destination, on: tab)
         return true
     }
 

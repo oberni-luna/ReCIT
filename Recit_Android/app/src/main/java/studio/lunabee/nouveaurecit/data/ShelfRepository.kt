@@ -14,6 +14,7 @@ import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.dto.IdsPayload
 import studio.lunabee.nouveaurecit.network.dto.NewShelfDto
 import studio.lunabee.nouveaurecit.network.dto.OkStatusDto
+import studio.lunabee.nouveaurecit.network.dto.ShelfDto
 import studio.lunabee.nouveaurecit.network.dto.ShelfResponseDto
 import studio.lunabee.nouveaurecit.network.dto.ShelvesResponseDto
 import studio.lunabee.nouveaurecit.network.dto.ShelvesWithItemsResponseDto
@@ -48,18 +49,50 @@ class ShelfRepository(
             dao.delete(gone)
         }
         if (dtos.isEmpty()) return
-        val withItems: ShelvesWithItemsResponseDto = api.get(
-            "/api/shelves",
-            "action" to "by-ids",
-            "ids" to dtos.joinToString("|") { it.id },
-            "with-items" to "true",
-        )
+        linkItems(dtos.map { it.id })
+    }
+
+    /** Whether Room holds the étagère [id] names: mine or a friend's. */
+    suspend fun isStored(id: String): Boolean = dao.get(id) != null
+
+    /**
+     * `ShelfModel.fetchShelf`: an étagère Room does not hold, read from inventaire.io and upserted beside the others
+     * when one of [owners] owns it — me and my friends —, holding those of its books Room holds. Anyone else's is not
+     * stored, and `null`: its books would be taken for mine or a friend's by the local search and « Chez mes amis ».
+     * Its books are read first, and the étagère and its books written in one transaction: a failure leaves Room as it
+     * was. Throws [studio.lunabee.nouveaurecit.network.NetworkError.BadStatus] 404 when the étagère is unknown, 401 when it
+     * is not mine to see.
+     */
+    suspend fun fetchShelf(id: String, owners: Set<String>): ShelfEntity? {
+        val response: ShelvesResponseDto = api.get("/api/shelves/by-ids", "ids" to id)
+        val dto: ShelfDto = response.shelves[id]?.takeIf { it.owner in owners } ?: return null
+        val withItems: ShelvesWithItemsResponseDto = fetchMembership(listOf(id))
         db.withTransaction {
-            for (dto in dtos) {
-                val itemIds: List<String> = withItems.shelves[dto.id]?.items.orEmpty()
-                val known: Set<String> = db.inventoryDao().get(itemIds).map { it.id }.toSet()
-                dao.replaceItems(dto.id, itemIds.filter { it in known })
-            }
+            dao.upsert(listOf(Merges.shelf(dao.get(id), dto)))
+            replaceItems(listOf(id), withItems)
+        }
+        return dao.get(id)
+    }
+
+    /** Membership from `?action=by-ids`: each of [shelfIds] holds those of its books Room holds. */
+    private suspend fun linkItems(shelfIds: List<String>) {
+        val withItems: ShelvesWithItemsResponseDto = fetchMembership(shelfIds)
+        db.withTransaction { replaceItems(shelfIds, withItems) }
+    }
+
+    private suspend fun fetchMembership(shelfIds: List<String>): ShelvesWithItemsResponseDto = api.get(
+        "/api/shelves",
+        "action" to "by-ids",
+        "ids" to shelfIds.joinToString("|"),
+        "with-items" to "true",
+    )
+
+    /** Inside a transaction: each of [shelfIds] holds those of its books, per [withItems], that Room holds. */
+    private suspend fun replaceItems(shelfIds: List<String>, withItems: ShelvesWithItemsResponseDto) {
+        for (shelfId in shelfIds) {
+            val itemIds: List<String> = withItems.shelves[shelfId]?.items.orEmpty()
+            val known: Set<String> = db.inventoryDao().get(itemIds).map { it.id }.toSet()
+            dao.replaceItems(shelfId, itemIds.filter { it in known })
         }
     }
 

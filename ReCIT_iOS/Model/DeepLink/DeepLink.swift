@@ -22,6 +22,10 @@ enum DeepLink: Equatable, Sendable {
     case group(slug: String)
     /// A list, opened on its first element, or on the element `elementId` names when it has one.
     case list(id: String, elementId: String?)
+    /// A copy of a book, mine, a friend's or a stranger's, by its id.
+    case item(id: String)
+    /// An étagère, by its id.
+    case shelf(id: String)
 
     /// The domain the links live on. The app claims it in its entitlements, and the server sends
     /// the two files that tie it to the iOS and Android apps.
@@ -40,6 +44,10 @@ enum DeepLink: Equatable, Sendable {
             URL(string: "https://inventaire.io/lists/\(id)")
         case let .list(id, elementId?):
             URL(string: "https://inventaire.io/lists/\(id)/element/\(elementId)")
+        case let .item(id):
+            URL(string: "https://inventaire.io/items/\(id)")
+        case let .shelf(id):
+            URL(string: "https://inventaire.io/shelves/\(id)")
         }
     }
 
@@ -81,7 +89,8 @@ private extension DeepLink {
         }
     }
 
-    /// `entity/<uri>`, `users/<username>`, `groups/<slug>`: a page named by one segment.
+    /// `entity/<uri>`, `users/<username>`, `groups/<slug>`, `items/<id>`, `shelves/<id>`: a page
+    /// named by one segment.
     static func page(at components: [String]) -> DeepLink? {
         guard components.count == 2 else { return nil }
 
@@ -93,6 +102,10 @@ private extension DeepLink {
             return .user(username: value)
         case "groups" where value.wholeMatch(of: Self.slug) != nil:
             return .group(slug: value)
+        case "items" where isCouchId(value):
+            return .item(id: value)
+        case "shelves" where isCouchId(value):
+            return .shelf(id: value)
         default:
             return nil
         }

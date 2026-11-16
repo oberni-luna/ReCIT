@@ -1,6 +1,6 @@
 ---
 issue: 145
-status: to-test
+status: to-close
 wiki: [[features/0092-entity-deep-links]], [[android]]
 note: Last task of the « Deep links » sprint. Criterion left open by #138: assetlinks.json carries only the upload and debug keys.
 created: 2026-11-16
@@ -39,8 +39,14 @@ Round 1, 2026-11-16, base `sprint/deep-links`.
 
 ## Review
 
+### Round validation — 2026-11-16
+
+LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. Clean: valid JSON, Digital Asset Links format, three uppercase 32-byte fingerprints, the new one byte for byte, upload key kept, `.dev` unchanged. The Play-build criterion deferred by agreement, not a finding.
+
 ## Verification
 
-manual validation — not run by agent (needs `deploy.sh`, then Google's statements API and a Play-installed build).
+- ✅ Olivier ran `deploy.sh`; the live `assetlinks.json` holds `4E:C2…` (PM `curl`).
+- ✅ Google's statements API lists `74:6B` and `4E:C2` for `studio.lunabee.exlibris.android`, `00:CE` for `.dev` (PM + Olivier).
+- ⏸ Play-installed build: **deferred to the first Play release that ships the sprint.** Play's 1.4.0 on Olivier's Pixel 9 Pro (installer `com.android.vending`) declares no link domain: `pm get-app-links` answers nothing, the intent filter came with #138, unreleased.
 
 ## Feedback

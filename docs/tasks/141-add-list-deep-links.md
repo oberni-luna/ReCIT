@@ -1,6 +1,6 @@
 ---
 issue: 141
-status: todo
+status: to-test
 wiki: [[features/0092-entity-deep-links]], [[lists]], [[features/0079-the-lists-a-book-is-in]], [[features/0068-lists-in-my-network]]
 note: Third task of the « Deep links » sprint. Builds on #140, which teaches TabRouter to push a link on a given tab. Split from #65.
 created: 2026-11-16
@@ -48,8 +48,35 @@ A link to a list, or to one book in a list, opens that list in Ex-libris, on the
 
 ## Implementation
 
+stacked on: wa/140-add-network-deep-links @ 51fad68d
+
+Autopilot round 1, 2026-11-16.
+
+- iOS
+  - `DeepLink`: `.list(id:elementId:)`, ids whole match `[0-9a-f]{32}` (checked on real lists and elements); `init?(url:)` split into `list(at:)` / `page(at:)`.
+  - `AppModels/List/ListModel+DeepLink.swift` (new): `storedList(id:)`, `fetchList(id:)` → `by-ids?ids=&with-elements=true`, upsert of that list alone (no deleteMissing); no `creator` in the answer → not stored (an unstamped list passes for mine). `ListsByIdDTO.swift` (new): `{ lists: [id: ListDTO] }`.
+  - `ListModel.swift`: `apiService` internal for the extension; `creatorsPerRequest` moved to the top, fixing its baselined `type_contents_order` (baseline entry now stale, left in place).
+  - `NavigationDestination(linkedList:elementId:)`: element `_id` → its `uri` as `focusURI`, missing → nil (first element).
+  - `DeepLinkHandling`: store first, else `fetchList`, creator via `getOrFetchUsers` (`try?`), `router.open(…, on: .lists)`. `EntityListView`: `.opensPendingLink(on: .lists, path:)`.
+- Android
+  - `DeepLink.EntityList(id, elementId)` (not `List`: shadows `kotlin.collections.List`), `listDestination(list, elementId)` pure.
+  - `ListRepository.storedList(id)`, `fetchList(id)` (skipped without creator, `Merges.list` + `mergeElements` in one transaction, no pruning). `ListsByIdDto`. Manifest `pathPrefix="/lists/"`.
+- Server: AASA file gains `/lists/*`. Not deployed.
+- Decisions
+  - A stored list linked on an element added since its last sync opens on its first element (no refetch).
+  - A stranger's list stays in the store until sign-out, like one opened from their profile; `ListsTabSections` shows it nowhere (no filter change needed).
+- Proof
+  - iOS build green; DeepLinkTests 10, TabRouterTests, LinkedListTests 6: all pass.
+  - Android build green; DeepLinkTest 12/12, TabRouterTest 9/9.
+
 ## Review
 
 ## Verification
+
+Agent, iPhone 17 simulator, signed in:
+- ✅ launch; `/entity/isbn:9782070360024` still opens on Recherche.
+- ✅ `/lists/<id>` → Safari on inventaire.io's list page (AASA not deployed); server `302` checked for `/lists/<id>/element/<eid>`.
+- ❌ Listes tab not tapped through, list links not opened in app on screen: unit tests only.
+- Android: no emulator, build + unit tests only.
 
 ## Feedback

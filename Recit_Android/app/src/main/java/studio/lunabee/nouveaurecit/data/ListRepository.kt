@@ -3,6 +3,7 @@ package studio.lunabee.nouveaurecit.data
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import studio.lunabee.nouveaurecit.data.db.AppDatabase
 import studio.lunabee.nouveaurecit.data.db.EntityListEntity
@@ -21,6 +22,7 @@ import studio.lunabee.nouveaurecit.network.dto.AddToListResponseDto
 import studio.lunabee.nouveaurecit.network.dto.DeleteListElementsDto
 import studio.lunabee.nouveaurecit.network.dto.ListDto
 import studio.lunabee.nouveaurecit.network.dto.ListElementDto
+import studio.lunabee.nouveaurecit.network.dto.ListsByIdDto
 import studio.lunabee.nouveaurecit.network.dto.ListsDto
 import studio.lunabee.nouveaurecit.network.dto.NewListDto
 import studio.lunabee.nouveaurecit.network.dto.NewListResponseDto
@@ -72,6 +74,25 @@ class ListRepository(
      */
     suspend fun syncNetworkLists(friendIds: List<String>) {
         ListCreatorBatches.of(friendIds).forEach { syncLists(creatorIds = it, claimsUnstamped = false) }
+    }
+
+    /** The list [id] names, as Room holds it with its elements, or `null`. */
+    suspend fun storedList(id: String): ListWithElements? = dao.observeList(id).first()
+
+    /**
+     * `ListModel.fetchList`: one list and its elements, whoever made it, upserted beside the others without pruning
+     * any. It is stamped with its creator, so a stranger's list is never taken for mine
+     * ([EntityListEntity.isCreatedByMe]): an answer that does not name one is not stored. Throws
+     * [NetworkError.BadStatus] 404 when the list is unknown or not mine to see.
+     */
+    suspend fun fetchList(id: String): ListWithElements? {
+        val response: ListsByIdDto = api.get("/api/lists/by-ids", "ids" to id, "with-elements" to "true")
+        val dto: ListDto = response.lists[id]?.takeIf { it.creator != null } ?: return null
+        db.withTransaction {
+            dao.upsert(listOf(Merges.list(dao.get(id), dto)))
+            mergeElements(dto)
+        }
+        return storedList(id)
     }
 
     /** Upsert in place, the missing lists of [creatorIds] deleted ([ListSyncPlan]); each list's elements likewise. */

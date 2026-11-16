@@ -48,6 +48,10 @@ data class ShelfItemsDto(val id: String, val items: List<String>)
 @Serializable
 data class ListsDto(val total: Int = 0, val lists: List<ListDto> = emptyList())
 
+/** `GET /api/lists/by-ids`: the lists asked for, keyed by id, where `by-creators` answers a list. */
+@Serializable
+data class ListsByIdDto(val lists: Map<String, ListDto> = emptyMap())
+
 @Serializable
 data class ListDto(
     @SerialName("_id") val id: String,

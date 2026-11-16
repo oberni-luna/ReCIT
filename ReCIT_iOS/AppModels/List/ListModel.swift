@@ -11,8 +11,10 @@ import SwiftData
 @MainActor
 @Observable
 final class ListModel: OptimisticMutating {
+    /// Ids are 32 characters: fifty of them keep the address well under any server's limit.
+    private static let creatorsPerRequest: Int = 50
 
-    private let apiService: APIServicing
+    let apiService: APIServicing
 
     /// Shared channel used to surface a background optimistic failure to the UI.
     var errorReporter: AppErrorReporter?
@@ -47,9 +49,6 @@ final class ListModel: OptimisticMutating {
             try await syncLists(createdBy: batch, claimsUnstamped: false, modelContext: modelContext)
         }
     }
-
-    /// Ids are 32 characters: fifty of them keep the address well under any server's limit.
-    private static let creatorsPerRequest: Int = 50
 
     private func syncLists(createdBy creatorId: String, claimsUnstamped: Bool, modelContext: ModelContext) async throws {
         try await syncLists(createdBy: [creatorId], claimsUnstamped: claimsUnstamped, modelContext: modelContext)

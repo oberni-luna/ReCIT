@@ -11,6 +11,8 @@ import Testing
 
 @Suite("DeepLink")
 struct DeepLinkTests {
+    private static let listId: String = "88b00676d608d9d53c5974fd9bc1009a"
+    private static let elementId: String = "88b00676d608d9d53c5974fd9bc8a871"
 
     @Test
     func `an entity link carries its uri whatever its prefix`() throws {
@@ -102,12 +104,56 @@ struct DeepLinkTests {
     }
 
     @Test
+    func `a list link carries its id and the element it names if any`() throws {
+        let list: URL = try #require(URL(string: "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)"))
+        let element: URL = try #require(
+            URL(string: "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/element/\(Self.elementId)")
+        )
+
+        #expect(DeepLink(url: list) == .list(id: Self.listId, elementId: nil))
+        #expect(DeepLink(url: element) == .list(id: Self.listId, elementId: Self.elementId))
+    }
+
+    @Test
+    func `a list id or an element id that is not a couchdb id is not a link`() throws {
+        let urls: [String] = [
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)%7C\(Self.listId)",
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/element/a%26b",
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/element/\(Self.elementId)%26ids=x",
+            "https://link.exlibris.lunabee.ovh/lists/88B00676D608D9D53C5974FD9BC1009A",
+            "https://link.exlibris.lunabee.ovh/lists/88b00676d608d9d53c5974fd9bc1009",
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)0",
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/element",
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/elements/\(Self.elementId)",
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/element/\(Self.elementId)/edit",
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/\(Self.elementId)",
+            "https://link.exlibris.lunabee.ovh/lists",
+            "https://link.exlibris.lunabee.ovh/list/\(Self.listId)",
+            "http://link.exlibris.lunabee.ovh/lists/\(Self.listId)",
+            "https://inventaire.io/lists/\(Self.listId)"
+        ]
+
+        for string in urls {
+            let url: URL = try #require(URL(string: string))
+            #expect(DeepLink(url: url) == nil, "\(string)")
+        }
+    }
+
+    @Test
     func `a link falls back to the same page on inventaire.io`() {
         #expect(DeepLink.entity(uri: "wd:Q535").webURL?.absoluteString == "https://inventaire.io/entity/wd:Q535")
         #expect(DeepLink.user(username: "maxlath").webURL?.absoluteString == "https://inventaire.io/users/maxlath")
         #expect(
             DeepLink.group(slug: "le-club-de-lecture").webURL?.absoluteString
                 == "https://inventaire.io/groups/le-club-de-lecture"
+        )
+        #expect(
+            DeepLink.list(id: Self.listId, elementId: nil).webURL?.absoluteString
+                == "https://inventaire.io/lists/\(Self.listId)"
+        )
+        #expect(
+            DeepLink.list(id: Self.listId, elementId: Self.elementId).webURL?.absoluteString
+                == "https://inventaire.io/lists/\(Self.listId)/element/\(Self.elementId)"
         )
     }
 

@@ -94,6 +94,20 @@ sealed interface DeepLink {
             return list(components) ?: page(components)
         }
 
+        /**
+         * The same page on inventaire.io for a URL on the app's domain, link or not: its path and query as they came,
+         * which is what the link's server answers when the app is not installed. Where a URL the app claims but does
+         * not open goes. Read off the string, as the server reads its request line: a character [URI] refuses is still
+         * a page inventaire.io may answer. `null` for a URL on any other domain.
+         */
+        fun inventaireUrl(url: String): String? {
+            val origin: String = "https://$HOST"
+            if (!url.startsWith(origin)) return null
+            val pathAndQuery: String = url.substring(origin.length)
+            if (pathAndQuery.isNotEmpty() && pathAndQuery.first() !in "/?#") return null
+            return "https://inventaire.io" + pathAndQuery.substringBefore('#')
+        }
+
         /** `lists/<id>`, or `lists/<id>/element/<elementId>`: the two paths inventaire.io's web client gives a list. */
         private fun list(components: List<String>): DeepLink? {
             if (components.firstOrNull() != "lists" || components.size < 2 || !COUCH_ID.matches(components[1])) return null

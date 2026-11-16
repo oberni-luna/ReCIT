@@ -7,8 +7,8 @@
 //  « show me my profile », from the avatar at the top of Inventaire, Listes and Réseau.
 //  `RootView` owns it and injects it, rather than `MainTabView`, for the one thing in it that
 //  means something before the tabs exist: an Ex-libris link opened signed out, which waits here
-//  for the session (issue 143). Everything else only means something while the tabs are on
-//  screen, so a sign-out replaces the router with a fresh one.
+//  for the session and my user (issue 143). Everything else only means something while the tabs
+//  are on screen, so a sign-out replaces the router with a fresh one, which keeps the link.
 //
 //  It exists because the search left the inventory for a tab of its own (PRD 0020). The empty
 //  shelf's « Rechercher » tag used to raise a field on its own screen; now it has to change
@@ -53,10 +53,17 @@ final class TabRouter {
     /// arrives before the tab is built. Consumed once, by `consumePendingLink(for:)`.
     private(set) var pendingLink: PendingLink?
 
-    /// An Ex-libris link opened signed out, waiting to be opened once signed in or up. In memory
-    /// only: a link that dies with the app is opened again from where it was. A newer one
-    /// replaces it.
-    private(set) var linkAwaitingSignIn: DeepLink?
+    /// An Ex-libris link opened before my user is known — signed out, or on a launch that has not
+    /// read it from inventaire.io yet —, waiting to be opened once it is: my own username and my
+    /// étagères are told apart by my id. In memory only: a link that dies with the app is opened
+    /// again from where it was. A newer one replaces it.
+    private(set) var waitingLink: DeepLink?
+
+    /// - Parameter waitingLink: The link the router this one replaces was keeping: a session that
+    ///   ends while a link waits for my user leaves it waiting for the next one.
+    init(waitingLink: DeepLink? = nil) {
+        self.waitingLink = waitingLink
+    }
 
     /// A tap on a tab. Tapping Recherche while it is already showing is the way back to a fresh
     /// search: its stack goes back to the root, and the field comes up.
@@ -86,20 +93,23 @@ final class TabRouter {
         isProfilePresented = true
     }
 
-    /// An Ex-libris link the system hands the app: the one to open now, or `nil` when there is no
-    /// session yet to open it in, and it waits for one.
-    func receive(_ link: DeepLink, isSignedIn: Bool) -> DeepLink? {
-        guard isSignedIn else {
-            linkAwaitingSignIn = link
+    /// An Ex-libris link the system hands the app: the one to open now, or `nil` when it waits.
+    /// - Parameters:
+    ///   - link: The link the system handed the app.
+    ///   - isMyUserKnown: Whether there is a session, and my user read from inventaire.io in it.
+    /// - Returns: The link to open now, or `nil` when it waits for my user.
+    func receive(_ link: DeepLink, isMyUserKnown: Bool) -> DeepLink? {
+        guard isMyUserKnown else {
+            waitingLink = link
             return nil
         }
         return link
     }
 
-    /// The link that waited for the session, forgetting it in the same move so it is opened once.
-    func takeLinkAwaitingSignIn() -> DeepLink? {
-        defer { linkAwaitingSignIn = nil }
-        return linkAwaitingSignIn
+    /// The link that waited for my user, forgetting it in the same move so it is opened once.
+    func takeWaitingLink() -> DeepLink? {
+        defer { waitingLink = nil }
+        return waitingLink
     }
 
     /// A screen an Ex-libris link names. Pushed on `tab` over whatever it showed when nothing

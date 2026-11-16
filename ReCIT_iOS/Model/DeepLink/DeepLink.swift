@@ -56,6 +56,27 @@ enum DeepLink: Equatable, Sendable {
         guard let link = Self.list(at: components) ?? Self.page(at: components) else { return nil }
         self = link
     }
+
+    /// The same page on inventaire.io for a URL on the app's domain, link or not: its path and
+    /// query as they came, which is what the link's server answers when the app is not installed.
+    /// Where a URL the app claims but does not open goes.
+    /// - Parameter url: The URL the system handed the app.
+    /// - Returns: `nil` for a URL on any other domain.
+    static func inventaireURL(for url: URL) -> URL? {
+        guard
+            url.scheme == "https",
+            url.host() == host,
+            let linked = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else {
+            return nil
+        }
+        var components: URLComponents = .init()
+        components.scheme = "https"
+        components.host = "inventaire.io"
+        components.percentEncodedPath = linked.percentEncodedPath
+        components.percentEncodedQuery = linked.percentEncodedQuery
+        return components.url
+    }
 }
 
 private extension DeepLink {

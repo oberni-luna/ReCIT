@@ -49,7 +49,7 @@ struct AuthFlowView: View {
                 onSignIn: { path = [.signIn] },
                 onCreateAccount: { path = [.createAccount] }
             )
-            .linkWaiting(router.linkAwaitingSignIn != nil)
+            .linkWaiting(router.waitingLink != nil)
             .navigationDestination(for: AuthDestination.self) { destination in
                 view(for: destination)
             }

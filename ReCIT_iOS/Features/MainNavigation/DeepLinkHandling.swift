@@ -14,12 +14,15 @@ import SwiftUI
 /// étagère on Inventaire. My own username opens the Profil sheet, as the avatar does. A link the
 /// app cannot open — unknown entity, reader, group, list, copy or étagère, one I may not see, a
 /// stranger's étagère, network down — goes to the same page on inventaire.io in Safari, which is
-/// what the link does when the app is not installed.
+/// what the link does when the app is not installed; so does a URL on the links' domain that is no
+/// link at all, signed in or not.
 ///
-/// On `RootView`, around both branches (issue 143): a link opened signed out waits in the router
-/// and opens once signed in or up, with the same rules. A link opened while a modal covers the
-/// tabs opens in a `LinkSheet` over it, presented by `LinkSheetPresenter` with
-/// `sheetEnvironment`, rather than pushed on a tab hidden underneath.
+/// On `RootView`, around both branches (issue 143): a link waits in the router until my user is
+/// known — signed out, until signed in or up; on a launch, until inventaire.io has answered with
+/// it, so that my own username and étagères are not taken for a stranger's — then opens with the
+/// same rules. A link opened while a modal covers the tabs opens in a `LinkSheet` over it,
+/// presented by `LinkSheetPresenter` with `sheetEnvironment`, rather than pushed on a tab hidden
+/// underneath.
 struct DeepLinkHandling: ViewModifier {
     let router: TabRouter
     /// What the link sheet's screens read: UIKit presents it with an empty environment.
@@ -35,6 +38,11 @@ struct DeepLinkHandling: ViewModifier {
     @Environment(\.modelContext) private var modelContext: ModelContext
     @Environment(\.openURL) private var openURL: OpenURLAction
 
+    /// Whether a link can be opened now: there is a session, and my user in it.
+    private var isMyUserKnown: Bool {
+        authModel.isAuthenticated && userModel.myUser != nil
+    }
+
     /// Me and my friends: the readers whose étagères may enter the store.
     private var shelfOwnersOpenedInApp: Set<String> {
         let friends: [String] = userModel.friends(modelContext: modelContext).map(\._id)
@@ -44,16 +52,17 @@ struct DeepLinkHandling: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onOpenURL { url in
-                guard
-                    let link = DeepLink(url: url),
-                    let linkToOpen = router.receive(link, isSignedIn: authModel.isAuthenticated)
-                else {
+                guard let link = DeepLink(url: url) else {
+                    if let webURL = DeepLink.inventaireURL(for: url) {
+                        openURL(webURL)
+                    }
                     return
                 }
+                guard let linkToOpen = router.receive(link, isMyUserKnown: isMyUserKnown) else { return }
                 Task { await open(linkToOpen) }
             }
-            .onChange(of: authModel.isAuthenticated) { _, isAuthenticated in
-                guard isAuthenticated, let link = router.takeLinkAwaitingSignIn() else { return }
+            .onChange(of: userModel.myUser?._id) { _, myUserId in
+                guard myUserId != nil, let link = router.takeWaitingLink() else { return }
                 Task { await open(link) }
             }
     }

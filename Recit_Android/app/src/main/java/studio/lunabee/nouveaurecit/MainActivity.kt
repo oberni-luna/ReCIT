@@ -11,10 +11,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.core.net.toUri
 import studio.lunabee.nouveaurecit.e2e.E2EHooks
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.root.RootScreen
 
 class MainActivity : ComponentActivity() {
@@ -24,7 +26,7 @@ class MainActivity : ComponentActivity() {
         val container: AppContainer = (application as RecitApplication).container
         E2EHooks.read(intent)
         // Not on a re-creation: the link that launched the activity has been opened already.
-        if (savedInstanceState == null) container.incomingLinks.value = intent?.dataString
+        if (savedInstanceState == null) receive(intent)
         setContent {
             val messenger: Messenger = remember { Messenger() }
             CompositionLocalProvider(
@@ -43,6 +45,20 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        (application as RecitApplication).container.incomingLinks.value = intent.dataString
+        receive(intent)
+    }
+
+    /**
+     * Hands the shell the URL [intent] carries. One on the links' domain that is no link at all goes straight to the
+     * same page on inventaire.io in the browser, signed in or not, as it would without the app, and never waits.
+     */
+    private fun receive(intent: Intent?) {
+        val url: String? = intent?.dataString
+        val webUrl: String? = url?.takeIf { DeepLink.parse(it) == null }?.let(DeepLink::inventaireUrl)
+        if (webUrl == null) {
+            (application as RecitApplication).container.incomingLinks.value = url
+        } else {
+            runCatching { startActivity(Intent(Intent.ACTION_VIEW, webUrl.toUri())) }
+        }
     }
 }

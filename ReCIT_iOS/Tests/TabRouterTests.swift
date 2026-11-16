@@ -15,18 +15,6 @@ import Testing
 @MainActor
 @Suite("TabRouter")
 struct TabRouterTests {
-    private static func user(id: String, username: String) -> User {
-        .init(
-            _id: id,
-            _rev: "1",
-            username: username,
-            email: nil,
-            position: nil,
-            avatarURLValue: nil,
-            itemCount: 0
-        )
-    }
-
     @Test("The app opens on the inventory, with no request waiting")
     func startsOnTheInventory() {
         let router: TabRouter = .init()
@@ -198,7 +186,7 @@ struct TabRouterTests {
     @Test
     func `a reader link opens their profile on Réseau`() {
         let router: TabRouter = .init()
-        let reader: User = Self.user(id: "reader", username: "maxlath")
+        let reader: User = .mock(id: "reader", username: "maxlath")
 
         #expect(router.open(linkedUser: reader, myUserId: "me", isModalUp: false) == nil)
 
@@ -210,7 +198,7 @@ struct TabRouterTests {
     @Test
     func `a reader link opened over a modal goes in a sheet`() {
         let router: TabRouter = .init()
-        let reader: User = Self.user(id: "reader", username: "maxlath")
+        let reader: User = .mock(id: "reader", username: "maxlath")
 
         let sheet: LinkSheetContent? = router.open(linkedUser: reader, myUserId: "me", isModalUp: true)
 
@@ -222,7 +210,7 @@ struct TabRouterTests {
     func `my own username opens the Profil sheet and pushes nothing`() {
         let router: TabRouter = .init()
         router.select(.lists)
-        let myself: User = Self.user(id: "me", username: "OlivierB_test4")
+        let myself: User = .mock(id: "me", username: "OlivierB_test4")
 
         #expect(router.open(linkedUser: myself, myUserId: "me", isModalUp: false) == nil)
 
@@ -234,7 +222,7 @@ struct TabRouterTests {
     @Test
     func `my own username over another modal opens the Profil in a sheet`() {
         let router: TabRouter = .init()
-        let myself: User = Self.user(id: "me", username: "OlivierB_test4")
+        let myself: User = .mock(id: "me", username: "OlivierB_test4")
 
         #expect(router.open(linkedUser: myself, myUserId: "me", isModalUp: true) == .profile)
         #expect(router.isProfilePresented == false)
@@ -244,39 +232,47 @@ struct TabRouterTests {
     func `my own username with the Profil up opens nothing more`() {
         let router: TabRouter = .init()
         router.openProfile()
-        let myself: User = Self.user(id: "me", username: "OlivierB_test4")
+        let myself: User = .mock(id: "me", username: "OlivierB_test4")
 
         #expect(router.open(linkedUser: myself, myUserId: "me", isModalUp: true) == nil)
         #expect(router.isProfilePresented)
     }
 
     @Test
-    func `a link opened signed out waits and is handed over once signed in`() {
+    func `a link opened before my user is known waits and is handed over once it is`() {
         let router: TabRouter = .init()
 
-        #expect(router.receive(.entity(uri: "isbn:9782070360024"), isSignedIn: false) == nil)
-        #expect(router.linkAwaitingSignIn == .entity(uri: "isbn:9782070360024"))
+        #expect(router.receive(.entity(uri: "isbn:9782070360024"), isMyUserKnown: false) == nil)
+        #expect(router.waitingLink == .entity(uri: "isbn:9782070360024"))
 
-        #expect(router.takeLinkAwaitingSignIn() == .entity(uri: "isbn:9782070360024"))
-        #expect(router.linkAwaitingSignIn == nil)
-        #expect(router.takeLinkAwaitingSignIn() == nil)
+        #expect(router.takeWaitingLink() == .entity(uri: "isbn:9782070360024"))
+        #expect(router.waitingLink == nil)
+        #expect(router.takeWaitingLink() == nil)
     }
 
     @Test
     func `a newer link replaces the one waiting`() {
         let router: TabRouter = .init()
 
-        _ = router.receive(.entity(uri: "isbn:9782070360024"), isSignedIn: false)
-        _ = router.receive(.user(username: "maxlath"), isSignedIn: false)
+        _ = router.receive(.entity(uri: "isbn:9782070360024"), isMyUserKnown: false)
+        _ = router.receive(.user(username: "maxlath"), isMyUserKnown: false)
 
-        #expect(router.takeLinkAwaitingSignIn() == .user(username: "maxlath"))
+        #expect(router.takeWaitingLink() == .user(username: "maxlath"))
     }
 
     @Test
-    func `a link opened signed in opens at once and waits for nothing`() {
+    func `a router that replaces another keeps the link it was waiting with`() {
+        let router: TabRouter = .init(waitingLink: .user(username: "maxlath"))
+
+        #expect(router.takeWaitingLink() == .user(username: "maxlath"))
+        #expect(router.selectedTab == .inventory)
+    }
+
+    @Test
+    func `a link opened with my user known opens at once and waits for nothing`() {
         let router: TabRouter = .init()
 
-        #expect(router.receive(.group(slug: "lecteurs"), isSignedIn: true) == .group(slug: "lecteurs"))
-        #expect(router.linkAwaitingSignIn == nil)
+        #expect(router.receive(.group(slug: "lecteurs"), isMyUserKnown: true) == .group(slug: "lecteurs"))
+        #expect(router.waitingLink == nil)
     }
 }

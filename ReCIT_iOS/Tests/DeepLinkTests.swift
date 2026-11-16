@@ -196,6 +196,43 @@ struct DeepLinkTests {
     }
 
     @Test
+    func `a url on the links' domain that is no link goes to the same path and query on inventaire.io`() throws {
+        let refused: [String: String] = [
+            "https://link.exlibris.lunabee.ovh/users/a%7Cb": "https://inventaire.io/users/a%7Cb",
+            "https://link.exlibris.lunabee.ovh/users/maxlath/inventory": "https://inventaire.io/users/maxlath/inventory",
+            "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/elements/x?lang=fr":
+                "https://inventaire.io/lists/\(Self.listId)/elements/x?lang=fr"
+        ]
+
+        for (linked, web) in refused {
+            let url: URL = try #require(URL(string: linked))
+            #expect(DeepLink(url: url) == nil)
+            #expect(DeepLink.inventaireURL(for: url)?.absoluteString == web)
+        }
+    }
+
+    @Test
+    func `a link goes to the same page on inventaire.io as its fallback`() throws {
+        let url: URL = try #require(URL(string: "https://link.exlibris.lunabee.ovh/entity/wd:Q535"))
+
+        #expect(DeepLink.inventaireURL(for: url) == DeepLink(url: url)?.webURL)
+    }
+
+    @Test
+    func `a url on another domain or scheme has no page on inventaire.io`() throws {
+        let urls: [String] = [
+            "https://inventaire.io/users/maxlath",
+            "http://link.exlibris.lunabee.ovh/users/maxlath",
+            "exlibris://link.exlibris.lunabee.ovh/users/maxlath"
+        ]
+
+        for string in urls {
+            let url: URL = try #require(URL(string: string))
+            #expect(DeepLink.inventaireURL(for: url) == nil)
+        }
+    }
+
+    @Test
     func `every link built then read gives itself back`() throws {
         let links: [DeepLink] = [
             .entity(uri: "isbn:9782070360024"),

@@ -81,3 +81,19 @@ iPhone 17 simulator, signed in (implementer: no UI tool; PM checked the modal ca
 - Android: no emulator, build + unit tests only.
 
 ## Feedback
+
+### Round 1 — 2026-11-16 · #140 review findings, deferred here by Olivier
+
+Asked: the three 🟡 of #140's validation review, for every link kind.
+
+- Cold launch, my user unknown
+  - iOS: `TabRouter.waitingLink` (was `linkAwaitingSignIn`), `receive(_:isMyUserKnown:)`, `takeWaitingLink()`. `DeepLinkHandling` passes `isAuthenticated && myUser != nil`; `.onChange(of: userModel.myUser?._id)` opens the waiting link (sign-in, sign-up and cold launch alike). Welcome line reads `router.waitingLink != nil`.
+  - iOS, beyond the brief: on sign-out `RootView` builds the new router with `.init(waitingLink: router.waitingLink)`, so a cold launch whose session the server refuses keeps its link for the next sign-in.
+  - iOS limit accepted: `syncMyUser` failing (offline cold launch) leaves the link waiting until a later sync succeeds.
+  - Android was not safe (`restoreMyUserId` races the collector; after sign-in the pref is empty until `syncMyUser`): `MainScaffold` suspends on `users.myUserId.filterNotNull().first()`, then clears with `compareAndSet(url, null)` so a newer link wins.
+- Refused URL on the link domain → same path + query on inventaire.io, at once, signed in or out, never waits
+  - iOS `DeepLink.inventaireURL(for:)` (keeps percent-encoding, drops fragment, nil for other host/scheme), used in `onOpenURL` when `DeepLink(url:)` is nil.
+  - Android `DeepLink.inventaireUrl(url)` on the raw string; `MainActivity.receive(intent)` (onCreate + onNewIntent) opens the browser and never puts it in `incomingLinks`.
+- `User.mock(...)` in `User.swift`; `TabRouterTests` and `Fixture.user` use it.
+- Proof: iOS build green, 56 tests pass (4 new). Android build green, DeepLinkTest 20 (3 new), TabRouterTest 14.
+- Not driven on a device.

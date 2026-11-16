@@ -59,6 +59,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
@@ -138,10 +139,13 @@ fun MainScaffold() {
     // my own name; inventaire.io's page in the browser when the app cannot open it — unknown entity, reader, group,
     // list, copy or étagère, one I may not see, a stranger's étagère, network down — as when the app is not installed.
     // Over an overlay, the screen goes in the link dialog instead (issue 143). A link opened signed out has waited in
-    // `incomingLinks`, and is taken here once signed in.
+    // `incomingLinks`, and is taken here once signed in — once my user id is known, too: the last session's, put back
+    // at launch, or the one the first sync reads, without which my own name and étagères would be a stranger's. A
+    // newer link that arrived meanwhile replaces it; a session that ends meanwhile leaves it waiting for the next.
     LaunchedEffect(Unit) {
         container.incomingLinks.filterNotNull().collect { url ->
-            container.incomingLinks.value = null
+            container.users.myUserId.filterNotNull().first()
+            if (!container.incomingLinks.compareAndSet(url, null)) return@collect
             val link: DeepLink = DeepLink.parse(url) ?: return@collect
             val target: LinkTarget? = try {
                 DeepLink.target(

@@ -53,7 +53,8 @@ struct RootView: View {
     @State var donationModel: DonationModel
     /// The tab on screen and the requests between tabs. Owned here rather than by `MainTabView`
     /// for an Ex-libris link opened signed out, which waits in it for the session (issue 143);
-    /// replaced by a fresh one on signing out, so a new session opens on Inventaire.
+    /// replaced by a fresh one on signing out, so a new session opens on Inventaire, keeping
+    /// only a link still waiting.
     @State var router: TabRouter = .init()
 
     @Environment(\.modelContext) var modelContext
@@ -162,7 +163,7 @@ struct RootView: View {
         .onChange(of: authModel.isAuthenticated, initial: true) { wasAuthenticated, isAuthenticated in
             guard isAuthenticated == false else { return }
             if wasAuthenticated {
-                router = .init()
+                router = .init(waitingLink: router.waitingLink)
             }
             Task { await forgetSignedOutUser() }
         }

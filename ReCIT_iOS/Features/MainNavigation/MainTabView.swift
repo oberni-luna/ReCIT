@@ -87,9 +87,9 @@ struct MainTabView: View {
         }
     }
 
-    /// The tab on screen, and the empty shelf's way into the search field. Owned here and
-    /// injected, like `shelfFocus`: what it holds only means something while the tabs exist.
-    @State private var router: TabRouter = .init()
+    /// The tab on screen, and the empty shelf's way into the search field. Owned by `RootView`,
+    /// where an Ex-libris link opened signed out waits for the tabs to exist.
+    @Environment(TabRouter.self) private var router: TabRouter
     /// The book being pressed on the bookshelf, if any. Owned here because the focus overlay
     /// it drives has to reach over the nav bar and the tab bar. See ADR 0006.
     @State private var shelfFocus: ShelfFocusModel = .init()
@@ -103,6 +103,8 @@ struct MainTabView: View {
     }
 
     var body: some View {
+        @Bindable var router: TabRouter = router
+
         TabView(selection: selection) {
             ForEach(TabConfig.allCases, id: \.self) { tabConfig in
                 if !tabConfig.isHidden {
@@ -122,14 +124,12 @@ struct MainTabView: View {
                 }
             }
         }
-        // Inside the two injections below, so the profile's screens get them too: a transaction
-        // leads to a reader's shelves, which need a router and a focus. See `ProfileSheet`.
+        // The profile's screens get the router from `RootView`, and a focus of their own from
+        // `ProfileSheet` (`ownsShelfFocus()`): the veil of the one below would sit under the sheet.
         .sheet(isPresented: $router.isProfilePresented) {
             ProfileSheet()
         }
-        .modifier(DeepLinkHandling(router: router))
         .environment(shelfFocus)
-        .environment(router)
         .overlay {
             if shelfFocus.isPressing {
                 ShelfFocusOverlayView(focus: shelfFocus)

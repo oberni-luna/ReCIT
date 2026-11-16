@@ -38,6 +38,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.ShareLinkMenuItem
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
@@ -157,6 +158,7 @@ private fun UserMenu(user: UserEntity, onRemove: (() -> Unit)?) {
  */
 @Composable
 private fun RelationRequestSheet(user: UserEntity, onSend: () -> Unit, onDismiss: () -> Unit) {
+    CoversTabs()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = RecitTheme.colors.backgroundRaised,

@@ -17,9 +17,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.CoverWallRepository
 import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
@@ -29,16 +31,21 @@ import studio.lunabee.nouveaurecit.designsystem.SecondaryButton
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.auth.coverwall.CoverWall
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 
 /**
  * `WelcomeView`: what the app is for, before asking who you are (feature 0011). The covers of the
  * books last published on inventaire.io drift behind a green veil (feature 0013); the text sits on
- * the bottom of the screen, where the veil closes.
+ * the bottom of the screen, where the veil closes. An Ex-libris link opened signed out waits for the session, and
+ * one line under the buttons says so, in the screen's « vous » (issue 143).
  */
 @Composable
 fun WelcomeScreen(onSignIn: () -> Unit, onCreateAccount: () -> Unit) {
-    val coverWall: CoverWallRepository = LocalAppContainer.current.coverWall
+    val container: AppContainer = LocalAppContainer.current
+    val coverWall: CoverWallRepository = container.coverWall
     val paths: List<String> by coverWall.paths.collectAsStateWithLifecycle()
+    val incomingLink: String? by container.incomingLinks.waiting.collectAsStateWithLifecycle()
+    val isLinkWaiting: Boolean = incomingLink?.let { DeepLink.parse(it) } != null
     LaunchedEffect(Unit) { coverWall.refresh() }
 
     Box(Modifier.fillMaxSize()) {
@@ -81,6 +88,15 @@ fun WelcomeScreen(onSignIn: () -> Unit, onCreateAccount: () -> Unit) {
             Column(modifier = Modifier.padding(horizontal = Spacing.medium), horizontalAlignment = Alignment.CenterHorizontally) {
                 PrimaryButton(text = stringResource(R.string.login_button_signin), onClick = onSignIn)
                 SecondaryButton(text = stringResource(R.string.login_button_create_account), onClick = onCreateAccount)
+            }
+            if (isLinkWaiting) {
+                Text(
+                    text = stringResource(R.string.welcome_link_waiting),
+                    style = RecitTheme.typography.content300,
+                    color = RecitTheme.colors.foregroundDefault,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium).testTag("e2e.welcome.linkWaiting"),
+                )
             }
             Text(
                 text = stringResource(R.string.welcome_footnote),

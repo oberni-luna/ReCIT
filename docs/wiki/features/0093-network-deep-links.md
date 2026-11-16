@@ -43,5 +43,5 @@ inventaire.io. Tested on Olivier's iPhone; Android built and unit-tested, never 
 
 ## Known limits
 
-- My own link on a cold launch, before `syncMyUser` returns, and a refused URL on the link domain: fixed in #143.
+- My own link on a cold launch, before `syncMyUser` returns, and a refused URL on the link domain: fixed in [0097](0097-hidden-link-opening.md).
 - A group's members, invitations or settings are not link targets.

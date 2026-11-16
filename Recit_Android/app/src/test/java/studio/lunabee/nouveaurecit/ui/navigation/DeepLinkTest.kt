@@ -34,6 +34,37 @@ class DeepLinkTest {
     }
 
     @Test
+    fun a_url_on_the_links_domain_that_is_no_link_goes_to_the_same_path_and_query_on_inventaire_io() {
+        mapOf(
+            "https://link.exlibris.lunabee.ovh/users/a%7Cb" to "https://inventaire.io/users/a%7Cb",
+            "https://link.exlibris.lunabee.ovh/users/a|b" to "https://inventaire.io/users/a|b",
+            "https://link.exlibris.lunabee.ovh/users/maxlath/inventory" to "https://inventaire.io/users/maxlath/inventory",
+            "https://link.exlibris.lunabee.ovh/lists/$LIST_ID/elements/x?lang=fr" to
+                "https://inventaire.io/lists/$LIST_ID/elements/x?lang=fr",
+        ).forEach { (url, web) ->
+            assertNull(url, DeepLink.parse(url))
+            assertEquals(url, web, DeepLink.inventaireUrl(url))
+        }
+    }
+
+    @Test
+    fun a_link_goes_to_the_same_page_on_inventaire_io_as_its_fallback() {
+        val url: String = "https://link.exlibris.lunabee.ovh/entity/wd:Q535"
+        assertEquals(DeepLink.parse(url)?.webUrl, DeepLink.inventaireUrl(url))
+    }
+
+    @Test
+    fun a_url_on_another_domain_or_scheme_has_no_page_on_inventaire_io() {
+        listOf(
+            "https://inventaire.io/users/maxlath",
+            "http://link.exlibris.lunabee.ovh/users/maxlath",
+            "https://link.exlibris.lunabee.ovh.example.com/users/maxlath",
+            "https://link.exlibris.lunabee.ovh@example.com/users/maxlath",
+            "not a url",
+        ).forEach { url -> assertNull(url, DeepLink.inventaireUrl(url)) }
+    }
+
+    @Test
     fun a_reader_link_carries_the_username_as_typed() {
         mapOf(
             "https://link.exlibris.lunabee.ovh/users/OlivierB_test4" to "OlivierB_test4",

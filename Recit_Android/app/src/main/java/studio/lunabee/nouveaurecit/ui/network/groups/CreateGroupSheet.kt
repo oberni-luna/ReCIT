@@ -34,6 +34,7 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SheetHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /**
  * `CreateGroupView`: starting a group, as a sheet like the étagère and list forms.
@@ -75,6 +76,7 @@ fun CreateGroupSheet(onDismiss: () -> Unit, onCreated: (String) -> Unit) {
         }
     }
 
+    CoversTabs()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

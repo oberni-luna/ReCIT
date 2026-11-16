@@ -42,6 +42,7 @@ import studio.lunabee.nouveaurecit.designsystem.WithLabel
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /**
  * `ShelfFormView`, as a sheet: create (`shelfId == null`), edit (`shelfId` set), or create and file
@@ -108,6 +109,7 @@ fun ShelfFormSheet(
         }
     }
 
+    CoversTabs()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

@@ -3,6 +3,7 @@ package studio.lunabee.nouveaurecit.ui.createbook
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /**
  * Recherche's « Nouveau livre » (iOS feature 0087), full height above the tabs: the iOS sheet. The scanner
@@ -14,6 +15,7 @@ import androidx.compose.ui.window.DialogProperties
  */
 @Composable
 fun CreateBookDialog(session: CreateBookSession, onClose: () -> Unit) {
+    CoversTabs()
     Dialog(
         onDismissRequest = onClose,
         properties = DialogProperties(

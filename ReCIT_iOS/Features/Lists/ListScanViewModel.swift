@@ -12,7 +12,9 @@
 //  works to the list and the scanner closes.
 //
 //  An edition with no work behind it cannot go in a list, so it is told like an edition
-//  inventaire.io does not have: the row says so, and the next barcode takes its place.
+//  inventaire.io does not have. Neither is final: a cold lookup times out, or the work it hangs
+//  on fails to come back, and the same book answers a moment later. So the row offers to look it
+//  up again, and the next barcode still takes its place.
 //
 //  See PRD 0029.
 //
@@ -31,7 +33,7 @@ final class ListScanViewModel {
     /// The works of the book the row is offering, in the edition's order.
     private(set) var works: [ListWorkOption] = []
 
-    @ObservationIgnored private var lookupTask: Task<Void, Never>?
+    @ObservationIgnored private(set) var lookupTask: Task<Void, Never>?
 
     var state: BatchScanState {
         machine.state
@@ -42,13 +44,15 @@ final class ListScanViewModel {
         guard code.count == 13 else { return }
         guard machine.apply(.codeSeen(code)) else { return }
 
-        Haptics.Impact.soft.play()
-        works = []
+        startLookUp(code: code, entityModel: entityModel, modelContext: modelContext)
+    }
 
-        lookupTask?.cancel()
-        lookupTask = Task { [weak self] in
-            await self?.lookUp(code: code, entityModel: entityModel, modelContext: modelContext)
-        }
+    /// « Réessayer », on the row that says the book was not found: the same code, looked up again
+    /// from the start.
+    func retry(entityModel: EntityModel, modelContext: ModelContext) {
+        guard case .notFound(let code) = state, machine.apply(.retried(code: code)) else { return }
+
+        startLookUp(code: code, entityModel: entityModel, modelContext: modelContext)
     }
 
     /// Gives the screen back to the camera — after « Continuer », when the book was already there.
@@ -56,6 +60,16 @@ final class ListScanViewModel {
         lookupTask?.cancel()
         works = []
         machine.apply(.cleared)
+    }
+
+    private func startLookUp(code: String, entityModel: EntityModel, modelContext: ModelContext) {
+        Haptics.Impact.soft.play()
+        works = []
+
+        lookupTask?.cancel()
+        lookupTask = Task { [weak self] in
+            await self?.lookUp(code: code, entityModel: entityModel, modelContext: modelContext)
+        }
     }
 
     private func lookUp(code: String, entityModel: EntityModel, modelContext: ModelContext) async {

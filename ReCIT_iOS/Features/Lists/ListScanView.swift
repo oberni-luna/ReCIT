@@ -14,6 +14,9 @@
 //    work once per list and would ignore the request. « Le voir » closes the scanner on it,
 //    « Continuer » goes back to the camera.
 //
+//  A book the lookup could not find offers « Réessayer » on its row, which looks the same ISBN up
+//  again (`ListScanViewModel.retry`).
+//
 //  The camera is gated on permission and fed by the simulated barcode under the end-to-end
 //  scenario, exactly as in the batch scanner (`BatchScanCameraView`), whose pieces it reuses.
 //
@@ -65,7 +68,11 @@ struct ListScanView: View {
 
                     Group {
                         if viewModel.state.showsRow {
-                            ListScanResultRow(state: viewModel.state, onAdd: add)
+                            ListScanResultRow(
+                                state: viewModel.state,
+                                onAdd: add,
+                                onRetry: retry
+                            )
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                         } else {
                             ScanHintView()
@@ -191,6 +198,10 @@ struct ListScanView: View {
         } else {
             finish(works.map(\.uri))
         }
+    }
+
+    private func retry() {
+        viewModel.retry(entityModel: entityModel, modelContext: modelContext)
     }
 
     private func finish(_ uris: [String]) {

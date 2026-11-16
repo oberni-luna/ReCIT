@@ -8,6 +8,9 @@
 //  and a user who cannot tell those apart re-aims at a book that will never resolve and
 //  concludes the scanner is broken.
 //
+//  The list's scanner says its own not-found sentence (`notFoundCaption(_:)`): it offers a retry,
+//  not a creation, so « this edition does not exist » would be the wrong promise.
+//
 //  The caption doubles as the book's authors when there is nothing else to report, so the
 //  layout is the same two lines throughout and nothing jumps between states.
 //
@@ -18,6 +21,11 @@ import SwiftUI
 
 struct ScanResultLabelView: View {
     let state: BatchScanState
+    private var notFoundCaption: LocalizedStringKey = "edition.no_result"
+
+    init(state: BatchScanState) {
+        self.state = state
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: .xSmall) {
@@ -55,7 +63,7 @@ struct ScanResultLabelView: View {
         case .idle, .lookingUp, .resolved, .adding:
             Text((state.book ?? .placeholder).authorsLine)
         case .notFound:
-            Text("edition.no_result")
+            Text(notFoundCaption)
         case .alreadyOwned:
             Text("edition.my_inventory")
         case .added:
@@ -74,5 +82,15 @@ struct ScanResultLabelView: View {
         case .alreadyOwned, .added:
             ScanOverlayPalette.tint
         }
+    }
+}
+
+extension ScanResultLabelView {
+    /// What the row says under the code when the lookup came back empty. Defaults to the batch
+    /// scanner's sentence, that inventaire.io has no such edition.
+    func notFoundCaption(_ caption: LocalizedStringKey) -> Self {
+        var copy: Self = self
+        copy.notFoundCaption = caption
+        return copy
     }
 }

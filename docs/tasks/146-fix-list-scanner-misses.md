@@ -1,6 +1,6 @@
 ---
 issue: 146
-status: todo
+status: to-test
 wiki: [[0060-list-cover-flow]], [[0007-batch-scanner]]
 note: Aqua (ISBN 979-10-329-3202-5) scanned from a Liste said « Cette édition n'existe pas sur inventaire.io »; the inventory scanner then found it, and a second list scan worked.
 created: 2026-11-16
@@ -39,8 +39,20 @@ created: 2026-11-16
 
 ## Implementation
 
+- `BatchScanEvent.retried(code:)`: `BatchScanStateMachine.retry(code:)` moves `.notFound(code)` to `.lookingUp(code)` for that code only, refused elsewhere.
+  - `apply` is pinned at complexity 17 by the SwiftLint baseline: the case delegates to a helper, and `.cleared` returns `state.showsRow` instead of a guard (same behaviour).
+- `ListScanViewModel.retry(entityModel:modelContext:)`, sharing `startLookUp` with `codeSeen` (soft haptic, `works` emptied, task relaunched). `lookupTask` is `private(set)` for tests.
+- `ListScanResultRow`: in `.notFound`, a round `arrow.clockwise` « Réessayer » (`e2e.list.scan.retry`) replaces the « + »; caption `list.add.not_found`. Identifiers in `AccessibilityID`.
+- `ScanResultLabelView.notFoundCaption(_:)`, default `edition.no_result`: the inventory scanner is unchanged.
+- Strings `list.add.not_found` (« Introuvable pour l’instant » / « Not found for now »), `list.add.retry` (« Réessayer » / « Try again »).
+- Tests: 4 in `BatchScanStateMachineTests`, new `ListScanViewModelTests` (3, `MockAPIService`): failed work fetch → `.notFound`, retry → `.resolved` with the work; retry failing again; same barcode does not relaunch.
+- Proof: app build green (SwiftLint included); `ReCIT_iOSTests` 1342 passed, 0 failed.
+- Left: the `accessibility_id_constant` baseline entry for `ListScanResultRow.swift` is now stale (literal moved to a constant); can be deleted from `.swiftlint.baseline`.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent
 
 ## Feedback

@@ -11613,6 +11613,23 @@
         }
       }
     },
+    "list.add.not_found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not found for now"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Introuvable pour l’instant"
+          }
+        }
+      }
+    },
     "list.add.owner %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11626,6 +11643,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chez %@"
+          }
+        }
+      }
+    },
+    "list.add.retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
           }
         }
       }

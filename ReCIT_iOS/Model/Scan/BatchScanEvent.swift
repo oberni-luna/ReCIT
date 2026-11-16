@@ -23,6 +23,11 @@ enum BatchScanEvent: Equatable {
     /// network that never answers is not a database that has no answer — even though the row
     /// says the same thing about both.
     case lookupTimedOut(code: String)
+    /// The reader asked for the unknown edition on the row to be looked up again. A lookup
+    /// that failed has often only failed — a cold path, a slow answer — and the code is gated,
+    /// so holding the book up again cannot retry it. Only the list's scanner sends it; the
+    /// batch scanner answers the same row by offering to create the book.
+    case retried(code: String)
     case addStarted
     case addFinished
     case addFailed

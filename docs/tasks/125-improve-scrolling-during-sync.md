@@ -58,10 +58,21 @@ Round 1 (2026-11-11, autopilot).
 - Smoke launch on the simulator (already signed in): opens on Inventaire with its books, alive after 26 s. Not a proof of the sync.
 - Open: the acceptance measurements need a Release trace on an iPhone (scenario 1).
 
+Round 2 (2026-11-16, after the device traces).
+
+- `APIService.perform` no longer logs response bodies (they went out `.public`); `debug:` now only logs the request line.
+- `SyncStatusStore.beginRefresh()` / `endRefresh()`: one `UserDataSync` at a time. `refreshUserData()` is called by `onAppear` and by pull-to-refresh; two runs side by side synced every inventory twice. Tests: `SyncStatusStoreRefreshTests`.
+- `SyncStatusStore.defaultsKey` moved above the instance properties (type contents order).
+
 ## Review
 
 ## Verification
 
-manual validation — not run by agent. Device trace owed: scenario 1 of `docs/wiki/performance.md`.
+Scenario 1 of `docs/wiki/performance.md`, iPhone 18 Pro, iOS 27.2, Release, 2026-11-16.
+
+- Trace 1 (round 1): scroll hitches 17.1 ms/s over the whole trace (≤ 30 ✅, baseline 241), 0 hang > 250 ms (4 between 111 and 139 ms) ✅, 285 hitches, longest 42 ms. 19 « Inventory sync » intervals.
+- Trace 2 (response log removed): 34 « Inventory sync », in pairs — two `UserDataSync` side by side; 41.1 ms/s during the sync, 29.3 ms/s over the trace, 0 hang > 250 ms. Fixed in round 2; no trace after the fix, by choice, to ship the sprint.
+- Not met: the nine phase signposts are absent from both traces; removing the response log did not bring them back. Left to a follow-up.
+- Not checked on the device: books appearing during a friend's first sync, a shelf change or comment surviving a sync.
 
 ## Feedback

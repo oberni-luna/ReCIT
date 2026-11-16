@@ -51,7 +51,7 @@ nonisolated final class APIService: APIServicing {
 
         log(request: url, method: method, debug: debug)
 
-        let responseData: Data = try await perform(request: request, debug: debug)
+        let responseData: Data = try await perform(request: request)
 
         do {
             return try JSONDecoder().decode(U.self, from: responseData)
@@ -80,7 +80,7 @@ nonisolated final class APIService: APIServicing {
 
         log(request: url, method: method, debug: debug)
 
-        let responseData: Data = try await perform(request: request, debug: debug)
+        let responseData: Data = try await perform(request: request)
 
         do {
             return try JSONDecoder().decode(U.self, from: responseData)
@@ -101,7 +101,7 @@ nonisolated final class APIService: APIServicing {
         log(request: url, method: "GET", debug: debug)
 
         let request: URLRequest = .init(url: url)
-        let data: Data = try await perform(request: request, debug: debug)
+        let data: Data = try await perform(request: request)
 
         do {
             return try JSONDecoder().decode(T.self, from: data)
@@ -146,7 +146,7 @@ nonisolated final class APIService: APIServicing {
 
         log(request: url, method: "POST", debug: debug)
 
-        let responseData: Data = try await perform(request: request, debug: debug)
+        let responseData: Data = try await perform(request: request)
 
         do {
             let urlsByFieldName: [String: String] = try JSONDecoder().decode([String: String].self, from: responseData)
@@ -161,17 +161,13 @@ nonisolated final class APIService: APIServicing {
 
     /// Performs the request using the injected session and validates the HTTP
     /// status, surfacing typed `NetworkError`s instead of swallowing failures.
-    private func perform(request: URLRequest, debug: Bool) async throws -> Data {
+    private func perform(request: URLRequest) async throws -> Data {
         let data: Data
         let response: URLResponse
         do {
             (data, response) = try await session.data(for: request)
         } catch {
             throw NetworkError.transport(underlying: error)
-        }
-
-        if debug {
-            Self.logger.debug("Response: \(String(decoding: data, as: UTF8.self), privacy: .public)")
         }
 
         guard let httpResponse = response as? HTTPURLResponse else {

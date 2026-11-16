@@ -66,13 +66,17 @@ What it says:
 
 The sync phases were not captured. Signposts of category `sync` arrived, in part, in two of the five traces recorded, never in the three others; the « Screen » events, added for the last two, arrived in both. The likeliest cause: `APIService` logs every response body at `debug` under the same subsystem (`APIService.swift`, `logger.debug("Response: …")`), and while the sync runs that volume drowns the subsystem's signposts. The figures above for the sync come from the two first traces (SwiftUI template), kept on the Mac. Silencing it goes with #125, which already takes the `print`s out of the sync; its first trace fills these rows.
 
+#125 removed that log (2026-11-16) and the phases still did not arrive: in both of its traces the only `asso.recits` intervals were « Inventory sync », and « Friends inventories » showed its end without its beginning. The log was not the cause; the phase rows stay empty until it is found.
+
+#125's first trace (2026-11-16, iOS 27.2, Release, iPhone 18 Pro, same reader) gives the row below. Its second trace, before the fix that lets only one `UserDataSync` run at a time, synced every inventory twice side by side and hitched at 41.1 ms/s; no trace was recorded after that fix.
+
 ## Before / after
 
 One row per task, measured with the protocol above, on the scenario it targets.
 
 | Task | Scenario | Measure | Before | After |
 |---|---|---|---|---|
-| #125 Move sync off main actor | 1 | Scroll hitches during the first sync | 241 ms/s | — (device trace owed) |
+| #125 Move sync off main actor | 1 | Scroll hitches during the first sync | 241 ms/s | 17.1 ms/s (168 hitches over 122 s of scrolling), 0 hang > 250 ms, 285 hitches in the whole trace, longest 42 ms |
 | #126 Batch inventory sync requests | | | | |
 | #127 Speed up the Lists tab | | | | |
 | #128 Speed up the Réseau tab | | | | |

@@ -50,6 +50,8 @@ final class SyncStatusStore {
         case failed
     }
 
+    private static let defaultsKey: String = "SyncStatusStore.completedDomains"
+
     /// Domains whose first sync has ever completed. Mirrored to `UserDefaults`
     /// and kept as an observed property so views react when it changes.
     private var completedDomains: Set<Domain>
@@ -57,8 +59,10 @@ final class SyncStatusStore {
     /// In-launch phase for domains that have not yet completed a first sync.
     private var activePhases: [Domain: Phase] = [:]
 
+    /// Whether a whole `UserDataSync` is running. Not observed: no screen shows it.
+    @ObservationIgnored private(set) var isRefreshing: Bool = false
+
     private let defaults: UserDefaults
-    private static let defaultsKey: String = "SyncStatusStore.completedDomains"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -111,6 +115,19 @@ final class SyncStatusStore {
     func markFailed(_ domain: Domain) {
         guard !completedDomains.contains(domain) else { return }
         activePhases[domain] = .failed
+    }
+
+    /// Claims the one `UserDataSync` that may run at a time. `false` while another runs: two
+    /// side by side would sync every inventory twice, each in its own background context.
+    func beginRefresh() -> Bool {
+        guard !isRefreshing else { return false }
+        isRefreshing = true
+        return true
+    }
+
+    /// Releases what `beginRefresh()` claimed.
+    func endRefresh() {
+        isRefreshing = false
     }
 
     /// Clears all persisted first-sync markers, e.g. on logout / account switch.

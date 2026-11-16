@@ -32,15 +32,24 @@ struct DeepLinkHandling: ViewModifier {
     private func open(_ link: DeepLink) async {
         switch link {
         case let .entity(uri):
-            let destination: NavigationDestination? = try? await entityModel.destination(
-                forLinkedURI: uri,
-                modelContext: modelContext
-            )
-            if let destination {
+            if let destination = await destination(forLinkedURI: uri) {
                 router.open(destination)
             } else if let webURL = link.webURL {
                 openURL(webURL)
             }
         }
+    }
+
+    /// An `isbn:` uri is an edition by construction; any other one — `wd:`, `inv:` — may be a work,
+    /// an edition or a person, and only inventaire.io knows which, so it is asked through `by-uris`,
+    /// the same request the book screen makes.
+    private func destination(forLinkedURI uri: String) async -> NavigationDestination? {
+        if let edition = NavigationDestination(linkedISBN: uri) {
+            return edition
+        }
+        guard let entity = try? await entityModel.fetchEntities(modelContext: modelContext, uris: [uri])?.first else {
+            return nil
+        }
+        return .init(linkedEntity: entity)
     }
 }

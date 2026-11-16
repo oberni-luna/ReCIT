@@ -1,6 +1,6 @@
 ---
 issue: 138
-status: to-test
+status: to-close
 wiki: [[features/0037-search-tab]], [[features/0031-android-app]]
 note: First slice of #65 (Add deep links), which builds on it for the other paths, the backend page and « Partager ». Written and deployed on 2026-11-15 before the grill, left uncommitted in the main checkout of sprint/ios-perf-test; /wa-code carries those files over to this branch. The server part is already live.
 created: 2026-11-15
@@ -31,7 +31,7 @@ A link `https://link.exlibris.lunabee.ovh/entity/<uri>` opens the book or the au
 8. **iOS**:
    - `ReCIT-iOS.entitlements`: `applinks:link.exlibris.lunabee.ovh`, set on the app target in Debug and Release.
    - `Model/DeepLink/DeepLink.swift`: parses the URL and gives the inventaire.io fallback.
-   - `AppModels/Entity/EntityModel+DeepLink.swift`: picks the screen.
+   - `Features/EntityBrowser/NavigationDestination+DeepLink.swift`: picks the screen (`init?(linkedISBN:)`, `init?(linkedEntity:)`); `DeepLinkHandling` fetches the entity.
    - `Features/MainNavigation/DeepLinkHandling.swift`: `onOpenURL`, applied on `MainTabView`.
    - `TabRouter.open(_:)` / `pendingLink`, read by `SearchTabView` like the search field request: on a cold launch the link arrives before the tab exists.
 9. **Android**:
@@ -69,23 +69,36 @@ A link `https://link.exlibris.lunabee.ovh/entity/<uri>` opens the book or the au
 - Server: `scripts/deeplinks/` (nginx site, `apple-app-site-association`, `assetlinks.json`, `deploy.sh`), live on the VPS since 2026-11-15, certificate valid until 2027-02-13. Google's statements API and Apple's CDN both read the files.
 - iOS:
   - `ReCIT-iOS.entitlements`, `CODE_SIGN_ENTITLEMENTS` on the app target (Debug, Release).
-  - `Model/DeepLink/DeepLink.swift`: `DeepLink` (`Sendable`), `init?(url:)`, `webURL`.
-  - `AppModels/Entity/EntityModel+DeepLink.swift`: `destination(for:)` (pure, by type) and `destination(forLinkedURI:modelContext:)`.
+  - `Model/DeepLink/DeepLink.swift`: `DeepLink` (`Sendable`), `init?(url:)` accepting only `(isbn|wd|inv):[A-Za-z0-9-]+`, `webURL`.
+  - `Features/EntityBrowser/NavigationDestination+DeepLink.swift`: `init?(linkedISBN:)` (no request) and `init?(linkedEntity:)` (by type); the `by-uris` fetch sits in `DeepLinkHandling`.
   - `Features/MainNavigation/DeepLinkHandling.swift`: `ViewModifier`, `onOpenURL`, applied in `MainTabView`.
   - `TabRouter.pendingLink` / `open(_:)` / `consumePendingLink()`, read by `SearchTabView.openLinkIfAsked()` on appear and on change.
 - Android:
   - Manifest: `singleTask`, `intent-filter` with `autoVerify` on `/entity/`.
-  - `ui/navigation/DeepLink.kt`, `TabRouter.openLink()`.
+  - `ui/navigation/DeepLink.kt` (same uri pattern), `TabRouter.openLink()`.
   - `AppContainer.incomingLinks`, set by `MainActivity` (create, not re-creation, and `onNewIntent`), consumed by `MainScaffold`.
   - `RootScreen`: signed out, a waiting or arriving link is cleared (decision 7).
 - Implementer pass: header prose moved to doc comments, `case let` patterns, `Sendable`, view member order; no behaviour change.
-- Tests: iOS `DeepLinkTests` 4/4, `TabRouterTests` 11/11 (2 new for `open` / `consumePendingLink`); Android `DeepLinkTest` 5/5, `TabRouterTest` 7/7, `assembleDebug` green. SwiftLint clean.
+- Tests: iOS `DeepLinkTests` 5/5, `TabRouterTests` 11/11 (2 new for `open` / `consumePendingLink`); Android `DeepLinkTest` 4/4, `TabRouterTest` 8/8, `assembleDebug` green. SwiftLint clean.
 - Notes:
   - CLAUDE.md says no type on `@Environment`; SwiftLint `explicit_type_interface` requires it on new code. Kept the types.
   - New iOS tests use backtick names (`test_name_backticks`), older ones in `TabRouterTests` keep the string style.
   - `:app:lintDebug` has 12 errors that predate this task, none in its files.
 
 ## Review
+
+### Round validation (2026-11-16)
+
+Round 1, 7 findings, autofixed:
+- 🟠 [correctness] `DeepLink.swift`: the uri was only checked for `:`. `pathComponents` decodes `%7C` and `%26`, and `fetchEntities` pastes the uri raw into `by-uris?uris=…`, so `/entity/wd:Q1%7Cisbn:…%26autocreate=true` made the signed-in session autocreate on inventaire.io. → only `(isbn|wd|inv):[A-Za-z0-9-]+`, injection cases tested.
+- 🟡 [correctness] `DeepLink.kt`: same loose check (`|` fetched two entities, one picked at random) → same pattern and tests.
+- 🟡 [correctness] `MainScaffold.kt`: `runCatching` swallowed `CancellationException` and opened the browser → rethrown.
+- 🟡 [structure] `AppModels/` returned `NavigationDestination` → mapping moved to `Features/EntityBrowser/NavigationDestination+DeepLink.swift`, `EntityModel+DeepLink.swift` deleted.
+- 🟡 [style] test helper → `EntityResultDTO.mock(…)` in the model file.
+- 🟡 [structure] Android `openLink` test → `TabRouterTest.kt`.
+- 🟡 [correctness] accepted, not fixed: `TabRouter.open` / `openLink` close only the profile sheet; a link arriving under another sheet or cover pushes beneath it. Known limit, for #65.
+
+Round 2, 2 findings, fixed: stale references to `EntityModel+DeepLink` in `DeepLink.kt`'s KDoc and in this file.
 
 ## Verification
 

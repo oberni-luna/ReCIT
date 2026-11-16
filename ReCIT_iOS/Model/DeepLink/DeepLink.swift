@@ -34,13 +34,7 @@ enum DeepLink: Equatable, Sendable {
         guard components.count == 2, components[0] == "entity" else { return nil }
 
         let uri: String = components[1]
-        guard
-            let separator = uri.firstIndex(of: ":"),
-            separator != uri.startIndex,
-            uri.index(after: separator) != uri.endIndex
-        else {
-            return nil
-        }
+        guard uri.wholeMatch(of: /(?:isbn|wd|inv):[A-Za-z0-9-]+/) != nil else { return nil }
 
         self = .entity(uri: uri)
     }

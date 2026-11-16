@@ -10,7 +10,6 @@ import Testing
 @testable import ReCIT_iOS
 
 @Suite("DeepLink")
-@MainActor
 struct DeepLinkTests {
 
     @Test
@@ -31,7 +30,10 @@ struct DeepLinkTests {
             "https://link.exlibris.lunabee.ovh/entity/Q535",
             "https://link.exlibris.lunabee.ovh/entity/wd:",
             "https://link.exlibris.lunabee.ovh/entity/wd:Q535/edit",
-            "https://link.exlibris.lunabee.ovh/"
+            "https://link.exlibris.lunabee.ovh/",
+            "https://link.exlibris.lunabee.ovh/entity/wd:Q1%7Cwd:Q2",
+            "https://link.exlibris.lunabee.ovh/entity/wd:Q1%26autocreate=true",
+            "https://link.exlibris.lunabee.ovh/entity/foo:bar"
         ]
 
         for string in urls {
@@ -46,27 +48,20 @@ struct DeepLinkTests {
     }
 
     @Test
-    func `an edition opens its book a work the book of its best edition a person their screen`() {
-        #expect(EntityModel.destination(for: entity(uri: "inv:abc", type: "edition")) == .book(anchor: .edition(uri: "inv:abc")))
-        #expect(EntityModel.destination(for: entity(uri: "wd:Q1", type: "work")) == .book(
-            anchor: .bestEditionOfWork(uri: "wd:Q1", title: "Titre", imageUrl: nil)
-        ))
-        #expect(EntityModel.destination(for: entity(uri: "wd:Q535", type: "human")) == .author(uri: "wd:Q535"))
-        #expect(EntityModel.destination(for: entity(uri: "wd:Q2", type: "serie")) == nil)
-        #expect(EntityModel.destination(for: entity(uri: "wd:Q3", type: nil)) == nil)
+    func `an isbn opens its book without asking inventaire.io and nothing else does`() {
+        #expect(NavigationDestination(linkedISBN: "isbn:9782070360024") == .book(anchor: .edition(uri: "isbn:9782070360024")))
+        #expect(NavigationDestination(linkedISBN: "wd:Q535") == nil)
     }
 
-    private func entity(uri: String, type: String?) -> EntityResultDTO {
-        .init(
-            uri: uri,
-            invId: nil,
-            lastrevid: nil,
-            type: type,
-            originalLang: nil,
-            labels: ["fr": "Titre"],
-            descriptions: nil,
-            image: nil,
-            claims: [:]
+    @Test
+    func `an edition opens its book a work the book of its best edition a person their screen`() {
+        #expect(NavigationDestination(linkedEntity: .mock(uri: "inv:abc", type: "edition")) == .book(anchor: .edition(uri: "inv:abc")))
+        #expect(
+            NavigationDestination(linkedEntity: .mock(uri: "wd:Q1", type: "work"))
+                == .book(anchor: .bestEditionOfWork(uri: "wd:Q1", title: "Titre", imageUrl: nil))
         )
+        #expect(NavigationDestination(linkedEntity: .mock(uri: "wd:Q535", type: "human")) == .author(uri: "wd:Q535"))
+        #expect(NavigationDestination(linkedEntity: .mock(uri: "wd:Q2", type: "serie")) == nil)
+        #expect(NavigationDestination(linkedEntity: .mock(uri: "wd:Q3", type: nil)) == nil)
     }
 }

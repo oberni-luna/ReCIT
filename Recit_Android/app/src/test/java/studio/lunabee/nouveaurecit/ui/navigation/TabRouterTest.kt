@@ -62,4 +62,13 @@ class TabRouterTest {
         assertEquals(AppTab.Network, router.selected)
         assertFalse(router.isProfilePresented)
     }
+
+    @Test
+    fun a_link_opens_recherche_with_the_field_down_and_the_profile_closed() {
+        val router = TabRouter(selected = AppTab.Lists, isProfilePresented = true)
+        router.openLink()
+        assertEquals(AppTab.Search, router.selected)
+        assertFalse(router.isProfilePresented)
+        assertFalse(router.consumeSearchField())
+    }
 }

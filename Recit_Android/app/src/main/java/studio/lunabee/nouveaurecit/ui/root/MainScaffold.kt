@@ -52,6 +52,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -132,7 +133,13 @@ fun MainScaffold() {
         container.incomingLinks.filterNotNull().collect { url ->
             container.incomingLinks.value = null
             val entityUri: String = DeepLink.entityUri(url) ?: return@collect
-            val destination: Destination? = runCatching { DeepLink.destination(entityUri, container.entities) }.getOrNull()
+            val destination: Destination? = try {
+                DeepLink.destination(entityUri, container.entities)
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                null
+            }
             if (destination == null) {
                 runCatching { uriHandler.openUri(DeepLink.webUrl(entityUri)) }
                 return@collect

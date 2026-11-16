@@ -22,6 +22,9 @@ class DeepLinkTest {
             "https://link.exlibris.lunabee.ovh/entity/wd:",
             "https://link.exlibris.lunabee.ovh/entity/wd:Q535/edit",
             "https://link.exlibris.lunabee.ovh/",
+            "https://link.exlibris.lunabee.ovh/entity/wd:Q1%7Cwd:Q2",
+            "https://link.exlibris.lunabee.ovh/entity/wd:Q1%26autocreate=true",
+            "https://link.exlibris.lunabee.ovh/entity/foo:bar",
             "not a url",
         ).forEach { url -> assertNull(url, DeepLink.entityUri(url)) }
     }
@@ -41,15 +44,6 @@ class DeepLinkTest {
         assertEquals(Destination.Author("wd:Q535"), DeepLink.destination(entity("wd:Q535", "human")))
         assertNull(DeepLink.destination(entity("wd:Q2", "serie")))
         assertNull(DeepLink.destination(entity("wd:Q3", null)))
-    }
-
-    @Test
-    fun a_link_opens_recherche_with_the_field_down_and_the_profile_closed() {
-        val router = TabRouter(selected = AppTab.Lists, isProfilePresented = true)
-        router.openLink()
-        assertEquals(AppTab.Search, router.selected)
-        assertEquals(false, router.isProfilePresented)
-        assertEquals(false, router.consumeSearchField())
     }
 
     private fun entity(uri: String, type: String?): EntityResultDto =

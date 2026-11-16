@@ -6,7 +6,7 @@ import studio.lunabee.nouveaurecit.network.dto.EntityResultDto
 import java.net.URI
 
 /**
- * iOS `DeepLink` and `EntityModel+DeepLink`: an Ex-libris link, `https://link.exlibris.lunabee.ovh/entity/<uri>`,
+ * iOS `DeepLink`, `NavigationDestination+DeepLink` and `DeepLinkHandling`: an Ex-libris link, `https://link.exlibris.lunabee.ovh/entity/<uri>`,
  * and the screen it opens. The path is inventaire.io's own, so the link's server only has to send the same path to
  * inventaire.io when the app is not installed (`scripts/deeplinks/`). The manifest claims the domain, and its
  * `assetlinks.json` vouches for the app.
@@ -14,15 +14,15 @@ import java.net.URI
 object DeepLink {
     const val HOST: String = "link.exlibris.lunabee.ovh"
 
+    private val ENTITY_URI: Regex = Regex("(isbn|wd|inv):[A-Za-z0-9-]+")
+
     /** The inventaire.io uri a link names — `isbn:…`, `wd:Q…`, `inv:…` — or `null` for any other URL. */
     fun entityUri(url: String): String? {
         val parsed: URI = runCatching { URI(url) }.getOrNull() ?: return null
         if (parsed.scheme != "https" || parsed.host != HOST) return null
         val components: List<String> = parsed.path.orEmpty().split("/").filter { it.isNotEmpty() }
         if (components.size != 2 || components[0] != "entity") return null
-        val uri: String = components[1]
-        val separator: Int = uri.indexOf(':')
-        return uri.takeIf { separator > 0 && separator < uri.lastIndex }
+        return components[1].takeIf(ENTITY_URI::matches)
     }
 
     /** The same page on inventaire.io: where the link goes when the app cannot open it. */

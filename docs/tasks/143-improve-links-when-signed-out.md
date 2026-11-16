@@ -45,8 +45,6 @@ Two cases where an Ex-libris link seems to do nothing today: the app is signed o
 
 ## Implementation
 
-stacked on: wa/144-add-share-links @ d2d57ec6
-
 Autopilot round 1, 2026-11-16.
 
 - iOS, waiting link

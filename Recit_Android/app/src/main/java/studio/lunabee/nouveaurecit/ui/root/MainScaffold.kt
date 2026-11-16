@@ -38,6 +38,8 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
@@ -52,6 +54,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
@@ -68,6 +71,8 @@ import studio.lunabee.nouveaurecit.ui.flow.SortFlowHost
 import studio.lunabee.nouveaurecit.ui.flow.SortFlowPresentation
 import studio.lunabee.nouveaurecit.ui.flow.SortFlowStart
 import studio.lunabee.nouveaurecit.ui.navigation.AppTab
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
+import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.LocalTabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
@@ -95,6 +100,7 @@ fun MainScaffold() {
     val container: AppContainer = LocalAppContainer.current
     val messenger: Messenger = LocalMessenger.current
     val context: Context = LocalContext.current
+    val uriHandler: UriHandler = LocalUriHandler.current
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val router: TabRouter = rememberSaveable(saver = TabRouter.Saver) { TabRouter() }
     val sortFlow: SortFlowPresentation = rememberSaveable(saver = sortFlowSaver) { SortFlowPresentation() }
@@ -117,6 +123,25 @@ fun MainScaffold() {
             snackbarHostState.currentSnackbarData?.dismiss()
             val result: SnackbarResult = snackbarHostState.showSnackbar(RecitSnackbarVisuals(message))
             if (result == SnackbarResult.ActionPerformed) message.onAction?.invoke()
+        }
+    }
+
+    // An Ex-libris link: the screen it names, alone above Recherche's root; inventaire.io's page in the browser when
+    // the app cannot open it — unknown entity, network down — as when the app is not installed.
+    LaunchedEffect(Unit) {
+        container.incomingLinks.filterNotNull().collect { url ->
+            container.incomingLinks.value = null
+            val entityUri: String = DeepLink.entityUri(url) ?: return@collect
+            val destination: Destination? = runCatching { DeepLink.destination(entityUri, container.entities) }.getOrNull()
+            if (destination == null) {
+                runCatching { uriHandler.openUri(DeepLink.webUrl(entityUri)) }
+                return@collect
+            }
+            router.openLink()
+            Navigator(stacks.getValue(AppTab.Search)).run {
+                popToRoot()
+                push(destination)
+            }
         }
     }
 

@@ -127,6 +127,7 @@ struct MainTabView: View {
         .sheet(isPresented: $router.isProfilePresented) {
             ProfileSheet()
         }
+        .modifier(DeepLinkHandling(router: router))
         .environment(shelfFocus)
         .environment(router)
         .overlay {

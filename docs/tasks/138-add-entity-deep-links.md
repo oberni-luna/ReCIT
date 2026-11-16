@@ -1,6 +1,6 @@
 ---
 issue: 138
-status: todo
+status: to-test
 wiki: [[features/0037-search-tab]], [[features/0031-android-app]]
 note: First slice of #65 (Add deep links), which builds on it for the other paths, the backend page and « Partager ». Written and deployed on 2026-11-15 before the grill, left uncommitted in the main checkout of sprint/ios-perf-test; /wa-code carries those files over to this branch. The server part is already live.
 created: 2026-11-15
@@ -65,8 +65,34 @@ A link `https://link.exlibris.lunabee.ovh/entity/<uri>` opens the book or the au
 
 ## Implementation
 
+- Written before the grill on top of `sprint/ios-perf-test`, carried over uncommitted to this branch (none of its files differ from `main`).
+- Server: `scripts/deeplinks/` (nginx site, `apple-app-site-association`, `assetlinks.json`, `deploy.sh`), live on the VPS since 2026-11-15, certificate valid until 2027-02-13. Google's statements API and Apple's CDN both read the files.
+- iOS:
+  - `ReCIT-iOS.entitlements`, `CODE_SIGN_ENTITLEMENTS` on the app target (Debug, Release).
+  - `Model/DeepLink/DeepLink.swift`: `DeepLink` (`Sendable`), `init?(url:)`, `webURL`.
+  - `AppModels/Entity/EntityModel+DeepLink.swift`: `destination(for:)` (pure, by type) and `destination(forLinkedURI:modelContext:)`.
+  - `Features/MainNavigation/DeepLinkHandling.swift`: `ViewModifier`, `onOpenURL`, applied in `MainTabView`.
+  - `TabRouter.pendingLink` / `open(_:)` / `consumePendingLink()`, read by `SearchTabView.openLinkIfAsked()` on appear and on change.
+- Android:
+  - Manifest: `singleTask`, `intent-filter` with `autoVerify` on `/entity/`.
+  - `ui/navigation/DeepLink.kt`, `TabRouter.openLink()`.
+  - `AppContainer.incomingLinks`, set by `MainActivity` (create, not re-creation, and `onNewIntent`), consumed by `MainScaffold`.
+  - `RootScreen`: signed out, a waiting or arriving link is cleared (decision 7).
+- Implementer pass: header prose moved to doc comments, `case let` patterns, `Sendable`, view member order; no behaviour change.
+- Tests: iOS `DeepLinkTests` 4/4, `TabRouterTests` 11/11 (2 new for `open` / `consumePendingLink`); Android `DeepLinkTest` 5/5, `TabRouterTest` 7/7, `assembleDebug` green. SwiftLint clean.
+- Notes:
+  - CLAUDE.md says no type on `@Environment`; SwiftLint `explicit_type_interface` requires it on new code. Kept the types.
+  - New iOS tests use backtick names (`test_name_backticks`), older ones in `TabRouterTests` keep the string style.
+  - `:app:lintDebug` has 12 errors that predate this task, none in its files.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent
+
+- Before the grill, on the iPhone 17 simulator, signed in, links tapped from Safari: `isbn:9782070360024` → Recherche, Fiche livre of *L'étranger*; `wd:Q535` → Recherche, Auteur·ice Victor Hugo.
+- `curl` checks of the server criteria: AASA and assetlinks `200 application/json`, `/entity/…` → `302` inventaire.io, HTTP → `301`.
+- Still owed: work uri, unknown uri, profile sheet up, Android emulator, Play app signing key.
 
 ## Feedback

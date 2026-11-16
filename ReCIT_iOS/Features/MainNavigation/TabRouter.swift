@@ -42,6 +42,11 @@ final class TabRouter {
     /// a swipe down — writes it back through a binding.
     var isProfilePresented: Bool = false
 
+    /// The screen an Ex-libris link asked for, waiting for the Recherche tab to push it. A flag the
+    /// tab consumes, like the field request, for the same reason: on a cold launch the link
+    /// arrives before the tab is built. Consumed once, by `consumePendingLink()`.
+    private(set) var pendingLink: NavigationDestination?
+
     /// A tap on a tab. Tapping Recherche while it is already showing is the way back to a fresh
     /// search: its stack goes back to the root, and the field comes up.
     func select(_ tab: MainTabView.TabConfig) {
@@ -68,6 +73,19 @@ final class TabRouter {
     /// The profile sheet — what the avatar at the top of the three main tabs opens.
     func openProfile() {
         isProfilePresented = true
+    }
+
+    /// A screen an Ex-libris link names, pushed on the Recherche tab over whatever it showed.
+    func open(_ destination: NavigationDestination) {
+        isProfilePresented = false
+        selectedTab = .search
+        pendingLink = destination
+    }
+
+    /// The screen a link asked for, forgetting it in the same move so it is pushed once.
+    func consumePendingLink() -> NavigationDestination? {
+        defer { pendingLink = nil }
+        return pendingLink
     }
 
     /// Whether the field was asked for, forgetting the request in the same move so it is acted

@@ -114,4 +114,28 @@ struct TabRouterTests {
         #expect(router.isProfilePresented == false)
         #expect(router.selectedTab == .search)
     }
+
+    @Test
+    func `a link opens Recherche with the field down and the profile closed`() {
+        let router: TabRouter = .init()
+        router.select(.lists)
+        router.openProfile()
+
+        router.open(.author(uri: "wd:Q535"))
+
+        #expect(router.selectedTab == .search)
+        #expect(router.isProfilePresented == false)
+        #expect(router.wantsSearchField == false)
+        #expect(router.pendingLink == .author(uri: "wd:Q535"))
+    }
+
+    @Test
+    func `a link is pushed once`() {
+        let router: TabRouter = .init()
+        router.open(.author(uri: "wd:Q535"))
+
+        #expect(router.consumePendingLink() == .author(uri: "wd:Q535"))
+        #expect(router.consumePendingLink() == nil)
+        #expect(router.pendingLink == nil)
+    }
 }

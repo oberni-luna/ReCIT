@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "studio.lunabee.exlibris.android",
+      "sha256_cert_fingerprints": [
+        "74:6B:86:ED:41:DE:3F:2A:B7:4D:EA:3D:D9:E6:33:B8:1B:46:8A:2F:CA:E1:3F:F3:6B:90:CF:02:F7:75:0E:AC"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "studio.lunabee.exlibris.android.dev",
+      "sha256_cert_fingerprints": [
+        "00:CE:2E:58:5E:73:79:D1:97:C8:12:0B:62:B8:DB:F4:20:B4:EA:9D:F3:68:45:B1:28:45:6B:C3:AD:E6:A9:3F"
+      ]
+    }
+  }
+]

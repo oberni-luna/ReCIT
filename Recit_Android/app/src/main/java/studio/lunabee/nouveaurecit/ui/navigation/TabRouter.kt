@@ -62,6 +62,12 @@ class TabRouter(selected: AppTab = AppTab.Inventory, isProfilePresented: Boolean
         isProfilePresented = false
     }
 
+    /** An Ex-libris link ([DeepLink]): Recherche, field down, where the shell pushes the screen it names. */
+    fun openLink() {
+        selected = AppTab.Search
+        isProfilePresented = false
+    }
+
     /** Takes the field request, once: `true` when the Recherche tab is to focus its field now. */
     fun consumeSearchField(): Boolean {
         if (!wantsSearchField) return false

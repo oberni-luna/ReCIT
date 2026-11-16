@@ -8,6 +8,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.OkHttpClient
 import studio.lunabee.nouveaurecit.auth.AuthRepository
 import studio.lunabee.nouveaurecit.auth.AuthService
@@ -145,6 +146,13 @@ class AppContainer(context: Context) {
         sortSession = sortSession,
         syncStatus = syncStatus,
     )
+
+    /**
+     * The last Ex-libris link the system handed [MainActivity] (`ui.navigation.DeepLink`), until the shell takes
+     * it. Held here rather than in the activity because a link that launches the app arrives before the shell, and
+     * waits for it. Signed out, `RootScreen` drops it.
+     */
+    val incomingLinks: MutableStateFlow<String?> = MutableStateFlow(null)
 
     /** Coil over the session-less client: covers are public, and must not touch the session. */
     fun imageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)

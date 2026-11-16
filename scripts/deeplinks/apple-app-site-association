@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["VH79XGK7M2.studio.lunabee.nouveau-recit"],
+        "components": [
+          { "/": "/entity/*", "comment": "A book, a work or an author, by its inventaire.io uri" }
+        ]
+      }
+    ]
+  }
+}

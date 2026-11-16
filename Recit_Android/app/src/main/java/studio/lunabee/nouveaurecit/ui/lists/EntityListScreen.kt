@@ -57,8 +57,10 @@ import studio.lunabee.nouveaurecit.ui.common.ListCard
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
+import studio.lunabee.nouveaurecit.ui.common.ShareLinkButton
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.common.rememberReducesMotion
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
@@ -125,6 +127,9 @@ fun EntityListScreen(destination: Destination.EntityList, navigator: Navigator) 
                 onBack = navigator::pop,
                 containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
+                    if (list != null && list.isShareable(isMine = !state.isReadOnly)) {
+                        ShareLinkButton(DeepLink.EntityList(list.id), list.name)
+                    }
                     if (state.list != null && !state.isReadOnly) {
                         IconButton(onClick = { showsForm = true }) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
@@ -359,6 +364,13 @@ private fun ListCoverFlowContent(
                         }
                     },
                 )
+            }
+        }
+        // Decided here rather than in the row: an absent item must not leave its spacing behind.
+        val elementUrl: String? = selected?.takeIf { list.isShareable(isMine = !state.isReadOnly) }?.let { DeepLink.EntityList(list.id, it.elementId).url }
+        if (selected != null && elementUrl != null) {
+            item(key = "share") {
+                ListShareRow(url = elementUrl, subject = selected.title)
             }
         }
         item(key = "remove") {

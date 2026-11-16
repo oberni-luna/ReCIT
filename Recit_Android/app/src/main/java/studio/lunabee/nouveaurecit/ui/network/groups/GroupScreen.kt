@@ -58,7 +58,9 @@ import studio.lunabee.nouveaurecit.designsystem.TagStyle
 import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.ui.common.EnlargeablePhoto
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
+import studio.lunabee.nouveaurecit.ui.common.ShareLinkMenuItem
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.network.LinkRow
@@ -90,8 +92,12 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
                 title = current?.name.orEmpty(),
                 onBack = navigator::pop,
                 actions = {
-                    if (current != null && myRole?.belongs == true) {
+                    val link: DeepLink? = current?.slug?.let { DeepLink.Group(it) }?.takeIf { it.url != null }
+                    if (current != null && (myRole?.belongs == true || link != null)) {
                         GroupMenu(
+                            name = current.name,
+                            link = link,
+                            isMember = myRole?.belongs == true,
                             isAdmin = myRole == GroupRole.Admin,
                             canLeave = myUserId?.let(current::canLeave) == true,
                             onSettings = { isEditingSettings = true },
@@ -151,11 +157,15 @@ fun GroupScreen(destination: Destination.Group, navigator: Navigator) {
 }
 
 /**
- * The « … » of a group I belong to: its settings for an admin, inviting for anyone, and « Quitter »,
- * greyed for the last admin of a group with members.
+ * The « … » of a group: « Partager » for whoever sees it, a member or not, when it has a [link]; then, for a
+ * member, its settings for an admin, inviting for anyone, and « Quitter », greyed for the last admin of a group
+ * with members.
  */
 @Composable
 private fun GroupMenu(
+    name: String,
+    link: DeepLink?,
+    isMember: Boolean,
     isAdmin: Boolean,
     canLeave: Boolean,
     onSettings: () -> Unit,
@@ -172,36 +182,41 @@ private fun GroupMenu(
             onDismissRequest = { expanded = false },
             containerColor = RecitTheme.colors.backgroundDefault,
         ) {
-            if (isAdmin) {
+            if (link != null) {
+                ShareLinkMenuItem(link, name, onClick = { expanded = false })
+            }
+            if (isMember) {
+                if (isAdmin) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.groups_settings)) },
+                        leadingIcon = { Icon(Icons.Outlined.Tune, contentDescription = null) },
+                        colors = menuItemColors(),
+                        onClick = {
+                            expanded = false
+                            onSettings()
+                        },
+                    )
+                }
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.groups_settings)) },
-                    leadingIcon = { Icon(Icons.Outlined.Tune, contentDescription = null) },
+                    text = { Text(stringResource(R.string.groups_invite)) },
+                    leadingIcon = { Icon(Icons.Outlined.PersonAdd, contentDescription = null) },
                     colors = menuItemColors(),
                     onClick = {
                         expanded = false
-                        onSettings()
+                        onInvite()
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.groups_leave)) },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
+                    enabled = canLeave,
+                    colors = menuItemColors(),
+                    onClick = {
+                        expanded = false
+                        onLeave()
                     },
                 )
             }
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.groups_invite)) },
-                leadingIcon = { Icon(Icons.Outlined.PersonAdd, contentDescription = null) },
-                colors = menuItemColors(),
-                onClick = {
-                    expanded = false
-                    onInvite()
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.groups_leave)) },
-                leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
-                enabled = canLeave,
-                colors = menuItemColors(),
-                onClick = {
-                    expanded = false
-                    onLeave()
-                },
-            )
         }
     }
 }

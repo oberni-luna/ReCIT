@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.ui.book
 
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -7,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.RemoveCircleOutline
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -21,11 +23,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
+import studio.lunabee.nouveaurecit.ui.common.shareLink
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 
 /** One line of the « … » menu: an action, or a submenu of étagères / lists (`MembershipMenu`). */
 internal sealed interface MenuLine {
@@ -47,6 +52,18 @@ internal sealed interface MenuLine {
         val onToggle: (MembershipEntry) -> Unit,
         val onCreate: () -> Unit,
     ) : MenuLine
+}
+
+/** « Partager » as a line of the « … » menu (`ShareLink`), `null` when [link] cannot be built. */
+@Composable
+internal fun shareMenuLine(link: DeepLink, subject: String): MenuLine? {
+    val url: String = link.url ?: return null
+    val context: Context = LocalContext.current
+    return MenuLine.Action(
+        label = stringResource(R.string.action_share),
+        icon = Icons.Filled.Share,
+        onClick = { context.shareLink(url, subject) },
+    )
 }
 
 /**

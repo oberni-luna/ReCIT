@@ -103,8 +103,15 @@ struct BookActionsModifier: ViewModifier {
                             // Glyphs in the label colour rather than the app's green, and titles
                             // already are: the framework's own menus read that way, and an accent on
                             // the icons alone made every line look like a link. See `foregroundDefault`.
-                            menuContent(edition: edition)
-                                .tint(.foregroundDefault)
+                            Group {
+                                // The edition, whoever's copy this is: the link names a book, not a copy.
+                                Section {
+                                    DeepLinkShareLink(.entity(uri: edition.uri), subject: edition.title)
+                                        .accessibilityIdentifier(AccessibilityID.share)
+                                }
+                                menuContent(edition: edition)
+                            }
+                            .tint(.foregroundDefault)
                         } label: {
                             Label("action.more", systemImage: "ellipsis")
                         }
@@ -244,5 +251,11 @@ struct BookActionsModifier: ViewModifier {
         } catch {
             snackBar.show { SnackBarView.error(error) }
         }
+    }
+}
+
+private extension BookActionsModifier {
+    enum AccessibilityID {
+        static let share: String = "e2e.book.share"
     }
 }

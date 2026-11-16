@@ -31,24 +31,21 @@ enum DeepLink: Equatable, Sendable {
     /// the two files that tie it to the iOS and Android apps.
     static let host: String = "link.exlibris.lunabee.ovh"
 
+    /// The link itself, `https://link.exlibris.lunabee.ovh/<path>`: what « Partager » hands the
+    /// share sheet. `nil` when the case holds a value no link can carry — an id inventaire.io has
+    /// not given yet, a username outside its rule —, which `init?(url:)` would not open either.
+    var url: URL? {
+        var components: URLComponents = .init()
+        components.scheme = "https"
+        components.host = Self.host
+        components.path = path
+        guard let url = components.url, DeepLink(url: url) == self else { return nil }
+        return url
+    }
+
     /// The same page on inventaire.io: where the link goes when the app cannot open it.
     var webURL: URL? {
-        switch self {
-        case let .entity(uri):
-            URL(string: "https://inventaire.io/entity/\(uri)")
-        case let .user(username):
-            URL(string: "https://inventaire.io/users/\(username)")
-        case let .group(slug):
-            URL(string: "https://inventaire.io/groups/\(slug)")
-        case let .list(id, nil):
-            URL(string: "https://inventaire.io/lists/\(id)")
-        case let .list(id, elementId?):
-            URL(string: "https://inventaire.io/lists/\(id)/element/\(elementId)")
-        case let .item(id):
-            URL(string: "https://inventaire.io/items/\(id)")
-        case let .shelf(id):
-            URL(string: "https://inventaire.io/shelves/\(id)")
-        }
+        URL(string: "https://inventaire.io\(path)")
     }
 
     /// `nil` for any URL that is not one of the app's links, or one of a shape it does not open.
@@ -72,6 +69,26 @@ private extension DeepLink {
     /// then the `.1`, `.2`… it appends when the slug is taken. Digits as well, as in the uris.
     static var slug: Regex<Substring> {
         /[\p{Letter}0-9-]+(?:\.[0-9]+)?/.matchingSemantics(.unicodeScalar)
+    }
+
+    /// The page's path, the same on the app's domain and on inventaire.io.
+    var path: String {
+        switch self {
+        case let .entity(uri):
+            "/entity/\(uri)"
+        case let .user(username):
+            "/users/\(username)"
+        case let .group(slug):
+            "/groups/\(slug)"
+        case let .list(id, nil):
+            "/lists/\(id)"
+        case let .list(id, elementId?):
+            "/lists/\(id)/element/\(elementId)"
+        case let .item(id):
+            "/items/\(id)"
+        case let .shelf(id):
+            "/shelves/\(id)"
+        }
     }
 
     /// `lists/<id>`, or `lists/<id>/element/<elementId>`: the two paths inventaire.io's web client

@@ -1,6 +1,7 @@
 package studio.lunabee.nouveaurecit.ui.navigation
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 import studio.lunabee.nouveaurecit.data.db.EntityListEntity
@@ -156,6 +157,53 @@ class DeepLinkTest {
         )
         assertEquals("https://inventaire.io/items/$ITEM_ID", DeepLink.Item(ITEM_ID).webUrl)
         assertEquals("https://inventaire.io/shelves/$SHELF_ID", DeepLink.Shelf(SHELF_ID).webUrl)
+    }
+
+    @Test
+    fun every_link_built_then_read_gives_itself_back() {
+        listOf(
+            DeepLink.Entity("isbn:9782070360024"),
+            DeepLink.Entity("wd:Q535"),
+            DeepLink.Entity("inv:$ITEM_ID"),
+            DeepLink.User("OlivierB_test4"),
+            DeepLink.User("Anaïs"),
+            DeepLink.Group("le-club-de-lecture.2"),
+            DeepLink.Group("lecture-à-chambéry"),
+            DeepLink.EntityList(LIST_ID),
+            DeepLink.EntityList(LIST_ID, ELEMENT_ID),
+            DeepLink.Item(ITEM_ID),
+            DeepLink.Shelf(SHELF_ID),
+        ).forEach { link ->
+            val url: String? = link.url
+            assertNotNull(link.toString(), url)
+            assertEquals(url, link, DeepLink.parse(url.orEmpty()))
+        }
+    }
+
+    @Test
+    fun a_link_is_built_on_the_apps_domain_with_inventaires_path() {
+        assertEquals(
+            "https://link.exlibris.lunabee.ovh/entity/isbn:9782070360024",
+            DeepLink.Entity("isbn:9782070360024").url,
+        )
+        assertEquals("https://link.exlibris.lunabee.ovh/users/Ana%C3%AFs", DeepLink.User("Anaïs").url)
+        assertEquals(
+            "https://link.exlibris.lunabee.ovh/lists/$LIST_ID/element/$ELEMENT_ID",
+            DeepLink.EntityList(LIST_ID, ELEMENT_ID).url,
+        )
+        assertEquals("https://link.exlibris.lunabee.ovh/shelves/$SHELF_ID", DeepLink.Shelf(SHELF_ID).url)
+    }
+
+    @Test
+    fun a_value_no_link_can_carry_builds_no_link() {
+        listOf(
+            DeepLink.EntityList("optimistic:$LIST_ID"),
+            DeepLink.EntityList(LIST_ID, "optimistic:$ELEMENT_ID"),
+            DeepLink.Shelf("optimistic:$SHELF_ID"),
+            DeepLink.User("a"),
+            DeepLink.Group("le club"),
+            DeepLink.Entity("Q535"),
+        ).forEach { link -> assertNull(link.toString(), link.url) }
     }
 
     @Test

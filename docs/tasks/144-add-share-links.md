@@ -46,8 +46,6 @@ created: 2026-11-16
 
 ## Implementation
 
-stacked on: wa/142-add-inventory-deep-links @ fc2f7ffd
-
 Autopilot round 1, 2026-11-16.
 
 - Builder

@@ -21,6 +21,7 @@ import SwiftUI
 
 struct ScanResultLabelView: View {
     let state: BatchScanState
+
     private var notFoundCaption: LocalizedStringKey = "edition.no_result"
 
     init(state: BatchScanState) {

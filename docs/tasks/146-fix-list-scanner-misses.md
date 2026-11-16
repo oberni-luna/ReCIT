@@ -1,6 +1,6 @@
 ---
 issue: 146
-status: to-test
+status: to-close
 wiki: [[0060-list-cover-flow]], [[0007-batch-scanner]]
 note: Aqua (ISBN 979-10-329-3202-5) scanned from a Liste said « Cette édition n'existe pas sur inventaire.io »; the inventory scanner then found it, and a second list scan worked.
 created: 2026-11-16
@@ -50,6 +50,12 @@ created: 2026-11-16
 - Left: the `accessibility_id_constant` baseline entry for `ListScanResultRow.swift` is now stale (literal moved to a constant); can be deleted from `.swiftlint.baseline`.
 
 ## Review
+
+Round `validation` (lenses: style ✓ · elegance ✓ · structure ✓ · correctness ✓)
+- 🟡 [correctness] `ListScanViewModel.lookUp` applied a cancelled lookup's result: after a retry on the same code, a late `.lookupFailed` could flip the new `.lookingUp` and cancel it → fixed: `guard Task.isCancelled == false` before every result. No test: would need a fetch hold and an injectable timeout for tests only (yagni).
+- 🟡 [style] `ScanResultLabelView`: blank line between access subgroups → fixed.
+- 🟡 [style] stale `accessibility_id_constant` baseline entry for `ListScanResultRow.swift` → removed (4145 → 4144 entries).
+- Re-verify: clean. Autofix changed code after the user's device test (the cancellation guard).
 
 ## Verification
 

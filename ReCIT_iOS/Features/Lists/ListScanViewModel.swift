@@ -83,11 +83,13 @@ final class ListScanViewModel {
         do {
             // Asked with `autocreate`, as the batch scanner does: inventaire.io writes the
             // editions its book-facts service knows, works included.
-            guard let edition = try await entityModel.refreshEdition(
+            let edition: Edition? = try await entityModel.refreshEdition(
                 modelContext: modelContext,
                 uri: "isbn:\(code)",
                 autocreate: true
-            ), edition.works.isEmpty == false else {
+            )
+            guard Task.isCancelled == false else { return }
+            guard let edition, edition.works.isEmpty == false else {
                 fail(.lookupFailed(code: code))
                 return
             }
@@ -105,6 +107,7 @@ final class ListScanViewModel {
             guard machine.apply(.lookupResolved(book)) else { return }
             works = options
         } catch {
+            guard Task.isCancelled == false else { return }
             fail(.lookupFailed(code: code))
         }
     }

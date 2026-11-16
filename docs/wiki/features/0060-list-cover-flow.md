@@ -30,7 +30,9 @@ aside.
 - **Scanner**: the camera full screen, the recognised book rising with its cover and the round « + » of the inventory
   scanner. « + » adds the edition's work. A collection asks which of its works, with « Toutes les œuvres » last. A book
   the list already holds raises « Ce livre est déjà dans « … » » — « Le voir » lands on it, « Continuer » scans
-  another. An edition inventaire.io does not have, or one without a work, is said on the row and nothing more.
+  another. A lookup that finds nothing (an edition inventaire.io does not have, one without a work, a timeout, a work
+  that failed to load) says « Introuvable pour l'instant » on the row, with a round « Réessayer » in place of the « + »
+  that looks the same ISBN up again ([#146](https://github.com/oberni-luna/ReCIT/issues/146)).
 - **Rechercher**: a sheet. From three characters, « Dans mes livres et chez mes amis » (five at most), then « Œuvres
   sur inventaire.io » — or « Auteur·ices sur inventaire.io » alone for a list of authors. A small « + » at the right of
   each result adds it; what the list already holds carries a check instead. A copy is added as its work.
@@ -65,10 +67,12 @@ aside.
   edition does not know its works yet.
 - **`ListScanView`**, **`ListScanViewModel`**, **`ListScanResultRow`** — `CodeScannerView`, `CameraAccess`,
   `ScanHintView`, `ScanOverlayPalette`, `ScanResultCoverView`, `ScanResultLabelView` and `BatchScanStateMachine`'s
-  lookup half, reused from the batch scanner; `refreshEdition(isbn:, autocreate: true)`.
+  lookup half, reused from the batch scanner; `refreshEdition(isbn:, autocreate: true)`. « Réessayer » sends
+  `BatchScanEvent.retried(code:)`, the one way past the gate for the code the failed row holds; a lookup cancelled by
+  a retry applies nothing. `ScanResultLabelView.notFoundCaption(_:)` gives the list its own sentence.
 - **`ListAdditionPlan`**, **`ListWorkOption`**, **`ListWorkChoice`** (`Model/Lists/`) — which uris to send, or which
   to show; tested.
-- 34 strings (`list.detail.*`, `list.add.*`), fr and en.
+- 36 strings (`list.detail.*`, `list.add.*`), fr and en.
 
 ## Notable decisions
 
@@ -86,6 +90,11 @@ aside.
 - **« Retirer de la liste » is red**, like every removal in the app since the swipes were tinted — the mockup drew it
   green.
 - **No « Créer ce livre » from this scanner**: `NewBookFlowView` files the created book into the inventory as well.
+- **« Réessayer » rather than a precise cause** (#146): a cold lookup chains the edition, its work and its authors
+  under one 10 s watchdog, and `resolveEditionWorks` swallows a failed work fetch, so a book that exists could land on
+  « not found » and the same barcode stayed gated. The causes still share `.notFound`; a retry is what the reader
+  needed. `EntityModel` is untouched, shared with the book screen, Recherche and the duplicates screen. The inventory
+  scanner's « Créer ce livre » on a timeout is #154; Android is #155.
 - **The growing comment is kept above the keyboard from UIKit.** Below the comment the list ended at « Retirer de la
   liste », so it was already scrolled as far as it goes and each new line went under the keyboard; and neither
   `ScrollViewReader` nor `ScrollPosition` moved this `List`. While the comment is focused, a transparent row as tall as

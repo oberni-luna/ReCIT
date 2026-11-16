@@ -38,6 +38,7 @@ import studio.lunabee.nouveaurecit.data.scan.BatchScanState
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 import studio.lunabee.nouveaurecit.ui.scan.BarcodeCameraPreview
 import studio.lunabee.nouveaurecit.ui.scan.CameraAccess
 import studio.lunabee.nouveaurecit.ui.scan.CameraAccessState
@@ -63,6 +64,7 @@ internal fun ListScanScreen(
     onShow: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    CoversTabs()
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),

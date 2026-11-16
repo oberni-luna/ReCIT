@@ -1,6 +1,6 @@
 ---
 issue: 143
-status: todo
+status: to-test
 wiki: [[features/0092-entity-deep-links]], [[features/0011-ex-libris-pre-login-onboarding]], [[features/0038-profile-behind-the-avatar]], [[architecture]]
 note: Fifth task of the « Deep links » sprint. Comes after #140, #141 and #142, which add the other links and the per-tab push; it changes the same files (TabRouter, DeepLinkHandling, MainScaffold). Split from #65, plus the limit accepted in #138's review.
 created: 2026-11-16
@@ -45,8 +45,39 @@ Two cases where an Ex-libris link seems to do nothing today: the app is signed o
 
 ## Implementation
 
+stacked on: wa/144-add-share-links @ 920ac245
+
+Autopilot round 1, 2026-11-16.
+
+- iOS, waiting link
+  - `TabRouter` now owned by `RootView` (`@State var router`), read from the environment by `MainTabView`; a sign-out (true → false) replaces it with a fresh one.
+  - `TabRouter.linkAwaitingSignIn: DeepLink?`, `receive(_:isSignedIn:) -> DeepLink?` (held signed out, newer replaces), `takeLinkAwaitingSignIn()`.
+  - `DeepLinkHandling` moved to `RootView` around both branches; `onChange(of: authModel.isAuthenticated)` opens the waiting link → sign-in and sign-up take the same path.
+  - `WelcomeView`: line under the buttons, key `welcome.link_waiting` « Connectez-vous pour ouvrir ce lien. » (screen still in « vous »), en « Sign in to open this link. », id `e2e.welcome.linkWaiting`.
+- iOS, over a modal
+  - `LinkSheetPresenter.swift` (new, the one UIKit type): key window root → `presentedViewController` chain, skipping one being dismissed; anything presented = modal up (Profil and alerts included). Presents a `UIHostingController` page sheet.
+  - Pure decision `TabRouter.open(_:on:isModalUp:) -> LinkSheetContent?`: modal up or Profil presented → `.destination`; else push as before → nil. `LinkSheetContent.swift` (new).
+  - `LinkSheet.swift` (new): own `NavigationStack`, destination at root, « Fermer » (`action.close`, `e2e.linkSheet.close`), own shelf focus via new `View+ownsShelfFocus.swift` (also used by `ProfileSheet`).
+  - Own username: Profil up → nothing; no modal → Profil sheet; another modal → `ProfileSheet` in the link sheet. Links no longer close the Profil.
+  - `AppEnvironment.swift` (new): one modifier with every shared model, `authModel`, router, `syncUserData`, `.modelContext`, `.tint(.foregroundTinted)` (moved out of `ReCIT.swift`); used by `RootView` and the link sheet. SnackBar draws in its own window: nothing needed.
+- Android
+  - `RootScreen` no longer clears `incomingLinks` (StateFlow keeps the newest); `WelcomeScreen` line `R.string.welcome_link_waiting` when it parses.
+  - `TabRouter.openLink(target): LinkLanding?` → `OnTab`, `InDialog`, null; covered = Profil presented or `overlayCount > 0`, fed by `CoversTabs()` (DisposableEffect) in every signed-in overlay (list form, list add search, relation request, group settings, create group, transaction request, shelf add books, shelf form, summary sheet, full-screen cover, create book, list scan, sort flow, link dialog). Any future bottom sheet needs a `CoversTabs()` line.
+  - `ui/root/LinkDialog.kt` (new): full-screen `Dialog`, own Nav3 back stack, `LocalStackClose` turns the root top bar's back arrow into « Fermer »; back on root closes; a newer link replaces it (`key(target)`).
+- Proof
+  - iOS build green, no new SwiftLint violations; DeepLinkTests, TabRouterTests (23, 9 new), LinkedListTests, LinkedInventoryItemAndShelfTests, SharingVisibilityTests pass.
+  - Android build green; TabRouterTest 14 (7 new), DeepLinkTest 17. No Android test for « waits signed out » (StateFlow simply not cleared).
+
 ## Review
 
 ## Verification
+
+iPhone 17 simulator, signed in (implementer: no UI tool; PM checked the modal case):
+- ✅ no modal, `/entity/isbn:9782070360024` → Fiche livre pushed on Recherche (implementer).
+- ✅ Profil sheet up, same link → link sheet over the Profil with the Fiche livre and « Fermer » (PM).
+- ✅ « Fermer » → the Profil as it was; the Profil's own close still works (PM).
+- ❌ « Modifier l'édition » and « Ranger mes livres » cases not run.
+- ❌ signed-out cases not run (simulator account must stay signed in): unit tests only.
+- Android: no emulator, build + unit tests only.
 
 ## Feedback

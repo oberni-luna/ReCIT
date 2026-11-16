@@ -150,7 +150,7 @@ class AppContainer(context: Context) {
     /**
      * The last Ex-libris link the system handed [MainActivity] (`ui.navigation.DeepLink`), until the shell takes
      * it. Held here rather than in the activity because a link that launches the app arrives before the shell, and
-     * waits for it. Signed out, `RootScreen` drops it.
+     * waits for it. Signed out, it waits for the session, and a newer one replaces it (issue 143).
      */
     val incomingLinks: MutableStateFlow<String?> = MutableStateFlow(null)
 

@@ -33,9 +33,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -74,6 +77,7 @@ import studio.lunabee.nouveaurecit.ui.flow.SortFlowStart
 import studio.lunabee.nouveaurecit.ui.navigation.AppTab
 import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
+import studio.lunabee.nouveaurecit.ui.navigation.LinkLanding
 import studio.lunabee.nouveaurecit.ui.navigation.LinkTarget
 import studio.lunabee.nouveaurecit.ui.navigation.LocalTabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
@@ -114,6 +118,7 @@ fun MainScaffold() {
     }
     val badge: Int by badgeCount.collectAsState(initial = 0)
     val genericError: String = stringResource(R.string.error_generic)
+    var linkDialogTarget: LinkTarget? by remember { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
         launch {
@@ -132,6 +137,8 @@ fun MainScaffold() {
     // Réseau for a reader or a group, Listes for a list, Inventaire for a copy or an étagère — or the Profil sheet for
     // my own name; inventaire.io's page in the browser when the app cannot open it — unknown entity, reader, group,
     // list, copy or étagère, one I may not see, a stranger's étagère, network down — as when the app is not installed.
+    // Over an overlay, the screen goes in the link dialog instead (issue 143). A link opened signed out has waited in
+    // `incomingLinks`, and is taken here once signed in.
     LaunchedEffect(Unit) {
         container.incomingLinks.filterNotNull().collect { url ->
             container.incomingLinks.value = null
@@ -151,16 +158,17 @@ fun MainScaffold() {
             } catch (_: Exception) {
                 null
             }
-            when (target) {
-                null -> runCatching { uriHandler.openUri(link.webUrl) }
-                LinkTarget.Profile -> router.openProfile()
-                is LinkTarget.Screen -> {
-                    router.openLink(target.tab)
-                    Navigator(stacks.getValue(target.tab)).run {
-                        popToRoot()
-                        push(target.destination)
-                    }
+            if (target == null) {
+                runCatching { uriHandler.openUri(link.webUrl) }
+                return@collect
+            }
+            when (val landing: LinkLanding? = router.openLink(target)) {
+                is LinkLanding.OnTab -> Navigator(stacks.getValue(landing.tab)).run {
+                    popToRoot()
+                    push(landing.destination)
                 }
+                is LinkLanding.InDialog -> linkDialogTarget = landing.target
+                null -> Unit
             }
         }
     }
@@ -184,6 +192,12 @@ fun MainScaffold() {
                 exit = slideOutVertically { it },
             ) {
                 ProfileSheet(onClose = router::closeProfile, snackbarHostState = snackbarHostState)
+            }
+            linkDialogTarget?.let { target: LinkTarget ->
+                // A newer link over the dialog replaces it, with a stack of its own.
+                key(target) {
+                    LinkDialog(target = target, onClose = { linkDialogTarget = null }, snackbarHostState = snackbarHostState)
+                }
             }
         }
     }

@@ -5,8 +5,10 @@
 //  Which tab is showing, and the requests one tab makes of another: « take me to the search
 //  field », from the empty shelf, « take me to Réseau », from the search's invitation, and
 //  « show me my profile », from the avatar at the top of Inventaire, Listes and Réseau.
-//  `MainTabView` owns it and injects it, like `ShelfFocusModel`, because what it holds only
-//  means something while the tabs are on screen — a sign-out drops it with them.
+//  `RootView` owns it and injects it, rather than `MainTabView`, for the one thing in it that
+//  means something before the tabs exist: an Ex-libris link opened signed out, which waits here
+//  for the session (issue 143). Everything else only means something while the tabs are on
+//  screen, so a sign-out replaces the router with a fresh one.
 //
 //  It exists because the search left the inventory for a tab of its own (PRD 0020). The empty
 //  shelf's « Rechercher » tag used to raise a field on its own screen; now it has to change
@@ -19,7 +21,11 @@
 //  The profile is a sheet rather than a tab since feature 0038: it is about the account, not
 //  about the books, and the tab bar has room for four things a reader goes back to.
 //
-//  See PRD 0020, issue 0116 and feature 0038.
+//  A link opened while something covers the tabs — a form's sheet, « Ranger mes livres », the
+//  Profil — is not pushed on a tab hidden under it: the router hands its screen back, to open in
+//  a sheet of its own above, so that what was up stays as it was (issue 143).
+//
+//  See PRD 0020, issue 0116, feature 0038 and issue 143.
 //
 
 import Observation
@@ -46,6 +52,11 @@ final class TabRouter {
     /// tab consumes, like the field request, for the same reason: on a cold launch the link
     /// arrives before the tab is built. Consumed once, by `consumePendingLink(for:)`.
     private(set) var pendingLink: PendingLink?
+
+    /// An Ex-libris link opened signed out, waiting to be opened once signed in or up. In memory
+    /// only: a link that dies with the app is opened again from where it was. A newer one
+    /// replaces it.
+    private(set) var linkAwaitingSignIn: DeepLink?
 
     /// A tap on a tab. Tapping Recherche while it is already showing is the way back to a fresh
     /// search: its stack goes back to the root, and the field comes up.
@@ -75,22 +86,61 @@ final class TabRouter {
         isProfilePresented = true
     }
 
-    /// A screen an Ex-libris link names, pushed on `tab` over whatever it showed.
-    func open(_ destination: NavigationDestination, on tab: MainTabView.TabConfig) {
-        isProfilePresented = false
-        selectedTab = tab
-        pendingLink = .init(destination: destination, tab: tab)
+    /// An Ex-libris link the system hands the app: the one to open now, or `nil` when there is no
+    /// session yet to open it in, and it waits for one.
+    func receive(_ link: DeepLink, isSignedIn: Bool) -> DeepLink? {
+        guard isSignedIn else {
+            linkAwaitingSignIn = link
+            return nil
+        }
+        return link
     }
 
-    /// A reader an Ex-libris link names: their profile on Réseau, or the Profil sheet when it is me,
-    /// with nothing pushed. Told apart by id rather than by name: inventaire.io still answers to a
-    /// reader's former name, which a link may carry.
-    func open(linkedUser user: User, myUserId: String?) {
-        if user._id == myUserId {
-            openProfile()
-        } else {
-            open(.user(user: user), on: .community)
+    /// The link that waited for the session, forgetting it in the same move so it is opened once.
+    func takeLinkAwaitingSignIn() -> DeepLink? {
+        defer { linkAwaitingSignIn = nil }
+        return linkAwaitingSignIn
+    }
+
+    /// A screen an Ex-libris link names. Pushed on `tab` over whatever it showed when nothing
+    /// covers the tabs; else handed back, to open in a sheet over what does.
+    /// - Parameters:
+    ///   - destination: The screen the link names.
+    ///   - tab: The tab whose stack pushes it.
+    ///   - isModalUp: Whether anything is presented over the tabs. The Profil sheet counts
+    ///     whatever this says.
+    /// - Returns: What the link sheet shows, or `nil` when the screen is pushed on its tab.
+    func open(
+        _ destination: NavigationDestination,
+        on tab: MainTabView.TabConfig,
+        isModalUp: Bool
+    ) -> LinkSheetContent? {
+        guard isModalUp == false, isProfilePresented == false else {
+            return .destination(destination)
         }
+        selectedTab = tab
+        pendingLink = .init(destination: destination, tab: tab)
+        return nil
+    }
+
+    /// A reader an Ex-libris link names: their profile, on Réseau or in a link sheet as any other
+    /// screen. Me: the Profil sheet, in a link sheet over another modal, and nothing more when it
+    /// is already up. Told apart by id rather than by name: inventaire.io still answers to a
+    /// reader's former name, which a link may carry.
+    /// - Returns: What the link sheet shows, or `nil` when nothing goes in one.
+    func open(
+        linkedUser user: User,
+        myUserId: String?,
+        isModalUp: Bool
+    ) -> LinkSheetContent? {
+        guard user._id == myUserId else {
+            return open(.user(user: user), on: .community, isModalUp: isModalUp)
+        }
+        guard isModalUp, isProfilePresented == false else {
+            openProfile()
+            return nil
+        }
+        return .profile
     }
 
     /// The screen a link asked of `tab`, forgetting it in the same move so it is pushed once. A

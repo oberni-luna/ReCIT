@@ -51,6 +51,10 @@ struct RootView: View {
     /// Donations to Ex-libris, through the App Store. Built here rather than by the sheet that
     /// sells them: the transactions it has to finish can arrive at any time from launch on.
     @State var donationModel: DonationModel
+    /// The tab on screen and the requests between tabs. Owned here rather than by `MainTabView`
+    /// for an Ex-libris link opened signed out, which waits in it for the session (issue 143);
+    /// replaced by a fresh one on signing out, so a new session opens on Inventaire.
+    @State var router: TabRouter = .init()
 
     @Environment(\.modelContext) var modelContext
 
@@ -123,8 +127,8 @@ struct RootView: View {
                 AuthFlowView(authModel: authModel, coverWall: coverWallModel)
             } else {
                 MainTabView(authModel: authModel)
-                    // **Innermost of the three, on purpose.** Pull-to-refresh belongs to the tabs
-                    // and to nothing else: an action set here reaches every `ScrollView` *inside*
+                    // **Innermost, on purpose.** Pull-to-refresh belongs to the tabs and to
+                    // nothing else: an action set here reaches every `ScrollView` *inside*
                     // `MainTabView`, and stops short of the cover declared above it. Applied
                     // outside the cover it would reach the sorting flow's scroll views too, where a
                     // downward drag is a book being filed and not a refresh — and
@@ -132,13 +136,11 @@ struct RootView: View {
                     .refreshable {
                         refreshUserData()
                     }
-                    // The same sync, for a screen with nothing to pull: « Tout »'s « Réessayer ».
-                    .environment(\.syncUserData, .init { refreshUserData() })
                     // The sorting flow: **above the refreshable, below the models.** Above, so the
                     // flow's scroll views keep their downward drags; below, so its screens actually
                     // find the models — a cover's content inherits what its ancestors inject, and a
-                    // cover attached outside the `.environment` calls sees none of them (which is a
-                    // crash, not a degradation).
+                    // cover attached outside `AppEnvironment` sees none of them (which is a crash,
+                    // not a degradation).
                     //
                     // One presentation for every entry point (PRD 0009): the étagères toolbar, the
                     // empty-shelf card, the settings row and its debug twin open it at the surface,
@@ -146,37 +148,54 @@ struct RootView: View {
                     .fullScreenCover(isPresented: presentsSortFlow) {
                         SortFlowView(start: sortFlowPresentation.start)
                     }
-                    .environment(userModel)
-                    .environment(listModel)
-                    .environment(entityModel)
-                    .environment(editionDuplicatesModel)
-                    .environment(searchModel)
-                    .environment(inventoryModel)
-                    .environment(shelfModel)
-                    .environment(transactionModel)
-                    .environment(groupModel)
-                    .environment(entityCreationModel)
-                    .environment(genreEnrichmentModel)
-                    .environment(autoSortModel)
-                    .environment(sortSessionModel)
-                    .environment(sortFlowPresentation)
-                    .environment(errorReporter)
-                    .environment(syncStatus)
-                    .environment(onboardingStore)
-                    .environment(tipsStore)
-                    .environment(recentSearchStore)
-                    .environment(donationModel)
-                    .environment(authModel)
                     .onAppear {
                         refreshUserData()
                     }
             }
         }
+        // Around both branches: a link opened signed out waits for the session, and the
+        // welcome screen says so.
+        .modifier(DeepLinkHandling(router: router, sheetEnvironment: appEnvironment))
+        .modifier(appEnvironment)
         // `initial`, so a launch that finds no session empties the store as a sign-out would:
         // a session can end while the app is not running to see it go.
-        .onChange(of: authModel.isAuthenticated, initial: true) { _, isAuthenticated in
+        .onChange(of: authModel.isAuthenticated, initial: true) { wasAuthenticated, isAuthenticated in
             guard isAuthenticated == false else { return }
+            if wasAuthenticated {
+                router = .init()
+            }
             Task { await forgetSignedOutUser() }
         }
+    }
+
+    /// The models this view owns, and the rest of what the app's screens read, for the app and
+    /// for the sheet a link opens over a modal.
+    private var appEnvironment: AppEnvironment {
+        .init(
+            authModel: authModel,
+            router: router,
+            userModel: userModel,
+            listModel: listModel,
+            entityModel: entityModel,
+            editionDuplicatesModel: editionDuplicatesModel,
+            searchModel: searchModel,
+            inventoryModel: inventoryModel,
+            shelfModel: shelfModel,
+            transactionModel: transactionModel,
+            groupModel: groupModel,
+            entityCreationModel: entityCreationModel,
+            genreEnrichmentModel: genreEnrichmentModel,
+            autoSortModel: autoSortModel,
+            sortSessionModel: sortSessionModel,
+            sortFlowPresentation: sortFlowPresentation,
+            errorReporter: errorReporter,
+            syncStatus: syncStatus,
+            onboardingStore: onboardingStore,
+            tipsStore: tipsStore,
+            recentSearchStore: recentSearchStore,
+            donationModel: donationModel,
+            syncUserData: .init { refreshUserData() },
+            modelContext: modelContext
+        )
     }
 }

@@ -77,6 +77,7 @@ import studio.lunabee.nouveaurecit.network.ImageUrl
 import java.util.function.Consumer
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /*
  * iOS `FullScreenCoverView` + `FullScreenCoverImage` (features 0029, 0081 and 0085), the Plein écran: a
@@ -102,6 +103,7 @@ private val BackdropBlurRadius: Dp = 30.dp
 /** The Plein écran of [url], which TalkBack reads as [contentDescription] — « Couverture », « Photo ». */
 @Composable
 internal fun FullScreenCoverDialog(url: String, contentDescription: String, onDismiss: () -> Unit) {
+    CoversTabs()
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),

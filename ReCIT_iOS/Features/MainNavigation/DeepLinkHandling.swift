@@ -16,10 +16,16 @@ import SwiftUI
 /// stranger's étagère, network down — goes to the same page on inventaire.io in Safari, which is
 /// what the link does when the app is not installed.
 ///
-/// On `MainTabView` only: a link opened before signing in has no tabs to land on, and is dropped.
+/// On `RootView`, around both branches (issue 143): a link opened signed out waits in the router
+/// and opens once signed in or up, with the same rules. A link opened while a modal covers the
+/// tabs opens in a `LinkSheet` over it, presented by `LinkSheetPresenter` with
+/// `sheetEnvironment`, rather than pushed on a tab hidden underneath.
 struct DeepLinkHandling: ViewModifier {
     let router: TabRouter
+    /// What the link sheet's screens read: UIKit presents it with an empty environment.
+    let sheetEnvironment: AppEnvironment
 
+    @Environment(AuthModel.self) private var authModel: AuthModel
     @Environment(EntityModel.self) private var entityModel: EntityModel
     @Environment(UserModel.self) private var userModel: UserModel
     @Environment(GroupModel.self) private var groupModel: GroupModel
@@ -38,7 +44,16 @@ struct DeepLinkHandling: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onOpenURL { url in
-                guard let link = DeepLink(url: url) else { return }
+                guard
+                    let link = DeepLink(url: url),
+                    let linkToOpen = router.receive(link, isSignedIn: authModel.isAuthenticated)
+                else {
+                    return
+                }
+                Task { await open(linkToOpen) }
+            }
+            .onChange(of: authModel.isAuthenticated) { _, isAuthenticated in
+                guard isAuthenticated, let link = router.takeLinkAwaitingSignIn() else { return }
                 Task { await open(link) }
             }
     }
@@ -61,7 +76,13 @@ struct DeepLinkHandling: ViewModifier {
             guard let user = try? await userModel.getOrFetchUser(username: username, modelContext: modelContext) else {
                 return false
             }
-            router.open(linkedUser: user, myUserId: userModel.myUser?._id)
+            present(
+                router.open(
+                    linkedUser: user,
+                    myUserId: userModel.myUser?._id,
+                    isModalUp: LinkSheetPresenter.isModalUp
+                )
+            )
             return true
         case let .group(slug):
             let id: String? = try? await groupModel.groupId(slug: slug)
@@ -87,14 +108,27 @@ struct DeepLinkHandling: ViewModifier {
         }
     }
 
-    /// Pushes `destination` on `tab`, and says whether there was one to push.
+    /// Opens `destination` on `tab`, or in a link sheet over the modal that covers it, and says
+    /// whether there was one to open.
     private func open(
         _ destination: NavigationDestination?,
         on tab: MainTabView.TabConfig
     ) -> Bool {
         guard let destination else { return false }
-        router.open(destination, on: tab)
+        present(router.open(destination, on: tab, isModalUp: LinkSheetPresenter.isModalUp))
         return true
+    }
+
+    /// The link sheet the router asked for, if any, over the modal on top.
+    private func present(_ content: LinkSheetContent?) {
+        switch content {
+        case let .destination(destination):
+            LinkSheetPresenter.present(LinkSheet(destination).modifier(sheetEnvironment))
+        case .profile:
+            LinkSheetPresenter.present(ProfileSheet().modifier(sheetEnvironment))
+        case nil:
+            break
+        }
     }
 
     /// An `isbn:` uri is an edition by construction; any other one — `wd:`, `inv:` — may be a work,

@@ -30,6 +30,7 @@ import studio.lunabee.nouveaurecit.designsystem.PrimaryButton
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SheetHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /**
  * `GroupSettingsView`: what an admin can change about a group, as a sheet like « Modifier
@@ -65,6 +66,7 @@ fun GroupSettingsSheet(
         onDismiss()
     }
 
+    CoversTabs()
     ModalBottomSheet(
         onDismissRequest = { leave(GroupSettingsExit.Dismiss) },
         sheetState = sheetState,

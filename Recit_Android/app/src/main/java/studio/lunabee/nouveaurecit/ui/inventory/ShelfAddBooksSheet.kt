@@ -44,6 +44,7 @@ import studio.lunabee.nouveaurecit.designsystem.SheetHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.BookRow
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /**
  * `ShelfAddBooksSheet` (iOS feature 0089), opened by « Ajouter des livres »: every book of mine not on the
@@ -69,6 +70,7 @@ fun ShelfAddBooksSheet(shelfId: String, shelfName: String, onDismiss: () -> Unit
         )
     }
 
+    CoversTabs()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),

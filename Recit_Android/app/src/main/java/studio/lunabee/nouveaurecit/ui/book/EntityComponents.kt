@@ -49,6 +49,7 @@ import studio.lunabee.nouveaurecit.designsystem.rememberImageModel
 import studio.lunabee.nouveaurecit.ui.common.BookRow
 import studio.lunabee.nouveaurecit.ui.common.FullScreenCoverDialog
 import studio.lunabee.nouveaurecit.ui.common.fullScreenMemoryCacheKey
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /*
  * The pieces the book, work and author screens share: `EntityHeaderView` + `EntityImageView`,
@@ -165,6 +166,7 @@ internal fun SummaryRow(summary: SummaryState) {
                 }
             }
             if (showsAll) {
+                CoversTabs()
                 ModalBottomSheet(
                     onDismissRequest = { showsAll = false },
                     sheetState = rememberModalBottomSheetState(),

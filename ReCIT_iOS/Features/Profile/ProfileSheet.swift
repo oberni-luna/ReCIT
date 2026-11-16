@@ -12,15 +12,8 @@
 import SwiftUI
 
 struct ProfileSheet: View {
-    @State private var shelfFocus: ShelfFocusModel = .init()
-
     var body: some View {
         ProfileView()
-            .environment(shelfFocus)
-            .overlay {
-                if shelfFocus.isPressing {
-                    ShelfFocusOverlayView(focus: shelfFocus)
-                }
-            }
+            .ownsShelfFocus()
     }
 }

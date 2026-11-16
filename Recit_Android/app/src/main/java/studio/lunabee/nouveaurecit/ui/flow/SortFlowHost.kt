@@ -25,6 +25,7 @@ import studio.lunabee.nouveaurecit.data.sorting.SortSectionId
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.ui.common.RecitSnackbar
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.appEntries
@@ -80,6 +81,7 @@ fun SortFlowHost(start: SortFlowStart, onClose: () -> Unit, snackbarHostState: S
         backStack.add(destination)
     }
 
+    CoversTabs()
     Box(
         Modifier
             .fillMaxSize()

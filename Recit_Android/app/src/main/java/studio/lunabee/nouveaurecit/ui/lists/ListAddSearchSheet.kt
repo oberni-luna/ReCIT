@@ -56,6 +56,7 @@ import studio.lunabee.nouveaurecit.designsystem.SheetHeader
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.BookRow
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 import studio.lunabee.nouveaurecit.ui.search.InventorySearchRanking
 
 /** One work an edition holds, as the reader picks it when the edition holds several — `ListWorkOption`. */
@@ -143,6 +144,7 @@ internal fun ListAddSearchSheet(
         }
     }
 
+    CoversTabs()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

@@ -2,7 +2,7 @@
 //  SearchLocalHeader.swift
 //  ReCIT_iOS
 //
-//  The local section's header, and the way past its cap.
+//  The header of every local section of Recherche, and the way past its cap.
 //
 //  Same shape as the recents' header — a title, and one action pushed to the trailing edge —
 //  because the two sections sit one under the other and a header that behaved differently in
@@ -10,8 +10,8 @@
 //
 //  The action is a `NavigationLink`, not a `Button`: « Tout voir » goes somewhere, and the link
 //  appends onto the search tab's own `NavigationPath` the same way every row of the section
-//  below it does. It is drawn only when the cap hides something — the caller passes the answer,
-//  because only the ranking knows the uncapped total.
+//  below it does. It is drawn only when the cap hides something — the caller says whether it
+//  does, from the uncapped total its section was matched with.
 //
 //  See PRD 0012 and issue 0075.
 //

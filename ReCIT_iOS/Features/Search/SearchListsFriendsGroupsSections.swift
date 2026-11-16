@@ -5,7 +5,6 @@
 //  Created by Olivier Berni on 16/11/2026.
 //
 
-import SwiftData
 import SwiftUI
 
 /// Recherche's Listes, Ami·es and Groupes, in that order, between my books and inventaire.io.
@@ -13,14 +12,6 @@ import SwiftUI
 struct SearchListsFriendsGroupsSections: View {
     private let query: String
     private let myUserId: String
-
-    @Environment(GroupModel.self) private var groupModel: GroupModel
-
-    @Query private var lists: [EntityList]
-    /// Every reader in the store. Friends are told apart in Swift: `relation` is computed, and a
-    /// `#Predicate` cannot see it.
-    @Query private var users: [User]
-    @Query private var storedGroups: [StoredGroup]
 
     init(
         _ query: String,
@@ -30,34 +21,19 @@ struct SearchListsFriendsGroupsSections: View {
         self.myUserId = myUserId
     }
 
-    private var listMatches: LocalSearchMatches<ListSearchMatch> {
-        .lists(
-            lists,
-            myUserId: myUserId,
-            friends: users.filter { $0.relation == .friend },
-            matching: query
-        )
-    }
-
-    private var friendMatches: LocalSearchMatches<User> {
-        .friends(in: users, matching: query)
-    }
-
-    private var groupMatches: LocalSearchMatches<ReaderGroup> {
-        .groups(in: groupModel.myGroups(from: storedGroups), matching: query)
-    }
-
     var body: some View {
-        SearchMatchesSection(.lists, query: query, matches: listMatches) { match in
-            SearchListRow(match)
-        }
+        LocalSearchSectionsReader(query, myUserId: myUserId) { sections in
+            SearchMatchesSection(.lists, query: query, matches: sections.lists) { match in
+                SearchListRow(match)
+            }
 
-        SearchMatchesSection(.friends, query: query, matches: friendMatches) { user in
-            SearchFriendRow(user)
-        }
+            SearchMatchesSection(.friends, query: query, matches: sections.friends) { user in
+                SearchFriendRow(user)
+            }
 
-        SearchMatchesSection(.groups, query: query, matches: groupMatches) { group in
-            SearchGroupRow(group)
+            SearchMatchesSection(.groups, query: query, matches: sections.groups) { group in
+                SearchGroupRow(group)
+            }
         }
     }
 }

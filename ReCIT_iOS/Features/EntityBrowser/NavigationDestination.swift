@@ -25,7 +25,7 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// query is the whole payload: the search field stays on the screen below, so the
     /// destination has to carry what it answers.
     /// `kind` names the section whose « Tout voir » pushed it: books, lists, friends or groups.
-    case localSearchResults(query: String, kind: LocalSearchKind = .books)
+    case localSearchResults(query: String, kind: LocalSearchKind)
     /// Every book my friends have, most recent first. Where « Tout voir » leads from the
     /// Recherche tab's « Chez mes amis » (PRD 0020); it carries nothing.
     case friendsLatestBooks

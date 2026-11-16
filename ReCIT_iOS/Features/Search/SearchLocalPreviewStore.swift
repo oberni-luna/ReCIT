@@ -93,10 +93,12 @@ struct SearchLocalPreviewStore: PreviewModifier {
         userModel.myUser = try? context.mainContext
             .fetch(FetchDescriptor<User>(predicate: #Predicate { $0._id == myUserId }))
             .first
+        let groupDefaults: UserDefaults = .init(suiteName: "search-local-preview") ?? .standard
+        groupDefaults.set(myUserId, forKey: GroupModel.signedInReaderKey)
         return content
             .modelContainer(context)
             .environment(userModel)
             .environment(InventoryModel(apiService: apiService))
-            .environment(GroupModel(apiService: apiService))
+            .environment(GroupModel(apiService: apiService, defaults: groupDefaults))
     }
 }

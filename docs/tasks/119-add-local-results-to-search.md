@@ -1,6 +1,6 @@
 ---
 issue: 119
-status: to-test
+status: to-close
 wiki: [[search]], [[lists]], [[network]], [[features/0037-search-tab]], [[features/0087-book-creation-from-search]]
 note: Mockups in Figma S7IvC6GvlcUFe5IgbtvQq6, page Search, section « Recherche · Listes, ami·es et groupes » (1018:808) — S1 1018:809, S2 1018:6682, spec 1019:1216.
 created: 2026-11-16
@@ -55,6 +55,19 @@ Recherche finds more than books in the store: my lists and my friends' lists, my
 - `SearchContent` down to 398 lines (`SearchAttempt` moved to `SearchContent+SearchAttempt.swift`).
 - Build green (SwiftLint clean); tests: LocalSearchMatches (4 suites), InventorySearchRanking, ListsTabSections, MyGroups, RemoteSearchState → 53 passed.
 - Android `strings_create_book.xml` still says « Ajouter ce livre » and names the removed iOS key in a comment: Android catch-up.
+
+## Review
+
+Round validation (3 verifier passes, autofix):
+- Fixed 🟡 [structure] « Tout voir » router repeated the sections' 3 queries → `LocalSearchSections` + `LocalSearchSectionsReader`, router holds no query
+- Fixed 🟡 [elegance] `.lists(friends:)` made callers pre-filter → `.lists(users:)`, `User.isStoredFriend` shared with `.friends`
+- Fixed 🟡 [structure] 3rd copy of the trim / blank / cap rule → `InventorySearchRanking.rank` goes through `LocalSearchMatches.matching`; `Outcome.none` removed
+- Fixed 🟡 [elegance] unused `kind` default on `localSearchResults` dropped
+- Fixed 🟡 [style] stale `SearchLocalHeader` file comment
+- Fixed 🟡 [style] previews showed no group → seeded `UserDefaults` suite, `GroupModel.signedInReaderKey` made internal
+- Fixed 🟡 [style] stale `file_length` baseline entry for `SearchContent.swift` removed
+- Accepted: typed `@Environment(X.self) private var x: X` (lint `explicit_type_interface` is an error; CLAUDE.md says otherwise)
+- Final: clean, all four lenses. Build green, 53 tests green.
 
 ## Verification
 

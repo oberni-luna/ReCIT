@@ -14,7 +14,7 @@ extension LocalSearchMatches where Element == ListSearchMatch {
     /// - Parameters:
     ///   - lists: Every list in the store.
     ///   - myUserId: The signed-in reader.
-    ///   - friends: The readers whose relation is `.friend`, as the Lists tab passes them.
+    ///   - users: Every reader in the store. Only my friends' lists are kept.
     ///   - query: What the reader typed.
     ///   - limit: How many lists the section shows; `InventorySearchRanking.noLimit` for
     ///     « Tout voir ».
@@ -22,7 +22,7 @@ extension LocalSearchMatches where Element == ListSearchMatch {
     static func lists(
         _ lists: [EntityList],
         myUserId: String?,
-        friends: [User],
+        users: [User],
         matching query: String,
         limit: Int = InventorySearchRanking.displayLimit
     ) -> Self {
@@ -30,7 +30,7 @@ extension LocalSearchMatches where Element == ListSearchMatch {
             let sections: ListsTabSections = .init(
                 lists: lists,
                 myUserId: myUserId,
-                friends: friends,
+                friends: users.filter(\.isStoredFriend),
                 searchText: text
             )
             let mine: [ListSearchMatch] = sections.mine.map { .init(list: $0, owner: nil) }

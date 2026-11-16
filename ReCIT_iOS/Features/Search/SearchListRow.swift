@@ -5,7 +5,6 @@
 //  Created by Olivier Berni on 16/11/2026.
 //
 
-import SwiftData
 import SwiftUI
 
 /// A list found by Recherche, drawn as in the Lists tab — a friend's headed by their picture
@@ -34,20 +33,12 @@ private extension SearchListRow {
 }
 
 #Preview(traits: .modifier(SearchLocalPreviewStore())) {
-    @Previewable @Query var lists: [EntityList]
-    @Previewable @Query var users: [User]
     NavigationStack {
         List {
-            ForEach(
-                LocalSearchMatches<ListSearchMatch>.lists(
-                    lists,
-                    myUserId: SearchLocalPreviewStore.myUserId,
-                    friends: users.filter { $0.relation == .friend },
-                    matching: "bel"
-                )
-                .items
-            ) { match in
-                SearchListRow(match)
+            LocalSearchSectionsReader("bel", myUserId: SearchLocalPreviewStore.myUserId) { sections in
+                ForEach(sections.lists.items) { match in
+                    SearchListRow(match)
+                }
             }
         }
     }

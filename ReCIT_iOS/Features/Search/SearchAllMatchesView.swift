@@ -5,7 +5,6 @@
 //  Created by Olivier Berni on 16/11/2026.
 //
 
-import SwiftData
 import SwiftUI
 
 /// Where a local section's « Tout voir » leads: the same rows, uncapped. Books keep
@@ -17,11 +16,6 @@ struct SearchAllMatchesView: View {
     private let kind: LocalSearchKind
 
     @Environment(UserModel.self) private var userModel: UserModel
-    @Environment(GroupModel.self) private var groupModel: GroupModel
-
-    @Query private var lists: [EntityList]
-    @Query private var users: [User]
-    @Query private var storedGroups: [StoredGroup]
 
     init(
         query: String,
@@ -31,49 +25,40 @@ struct SearchAllMatchesView: View {
         self.kind = kind
     }
 
-    private var listMatches: LocalSearchMatches<ListSearchMatch> {
-        .lists(
-            lists,
-            myUserId: userModel.myUser?._id,
-            friends: users.filter { $0.relation == .friend },
-            matching: query,
-            limit: InventorySearchRanking.noLimit
-        )
-    }
-
-    private var friendMatches: LocalSearchMatches<User> {
-        .friends(
-            in: users,
-            matching: query,
-            limit: InventorySearchRanking.noLimit
-        )
-    }
-
-    private var groupMatches: LocalSearchMatches<ReaderGroup> {
-        .groups(
-            in: groupModel.myGroups(from: storedGroups),
-            matching: query,
-            limit: InventorySearchRanking.noLimit
-        )
-    }
-
     var body: some View {
         switch kind {
         case .books:
             SearchAllLocalView(query: query)
         case .lists:
-            SearchAllMatchesList(.lists, items: listMatches.items) { match in
-                SearchListRow(match)
+            everyMatch { sections in
+                SearchAllMatchesList(.lists, items: sections.lists.items) { match in
+                    SearchListRow(match)
+                }
             }
         case .friends:
-            SearchAllMatchesList(.friends, items: friendMatches.items) { user in
-                SearchFriendRow(user)
+            everyMatch { sections in
+                SearchAllMatchesList(.friends, items: sections.friends.items) { user in
+                    SearchFriendRow(user)
+                }
             }
         case .groups:
-            SearchAllMatchesList(.groups, items: groupMatches.items) { group in
-                SearchGroupRow(group)
+            everyMatch { sections in
+                SearchAllMatchesList(.groups, items: sections.groups.items) { group in
+                    SearchGroupRow(group)
+                }
             }
         }
+    }
+
+    private func everyMatch<Content: View>(
+        @ViewBuilder _ content: @escaping (LocalSearchSections) -> Content
+    ) -> some View {
+        LocalSearchSectionsReader(
+            query,
+            myUserId: userModel.myUser?._id,
+            limit: InventorySearchRanking.noLimit,
+            content: content
+        )
     }
 }
 

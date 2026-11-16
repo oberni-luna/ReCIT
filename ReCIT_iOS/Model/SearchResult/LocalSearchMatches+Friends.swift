@@ -24,8 +24,7 @@ extension LocalSearchMatches where Element == User {
     ) -> Self {
         matching(query, limit: limit) { text in
             users
-                .filter { $0.isStillInTheStore && $0.relation == .friend }
-                .filter { $0.username.localizedStandardContains(text) }
+                .filter { $0.isStoredFriend && $0.username.localizedStandardContains(text) }
                 .sorted { lhs, rhs in
                     switch lhs.username.localizedStandardCompare(rhs.username) {
                     case .orderedAscending: true

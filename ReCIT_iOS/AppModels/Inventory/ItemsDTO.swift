@@ -7,16 +7,19 @@
 
 import Foundation
 
+nonisolated
 struct ItemsDTO: Codable {
     let items: [ItemDTO]
     let total: Int
     let offset: Int
 }
 
+nonisolated
 struct PostItemResponseDTO: Codable {
     let item: ItemDTO
 }
 
+nonisolated
 struct ItemDTO: Codable {
     let _id: String
     let _rev: String
@@ -33,6 +36,7 @@ struct ItemDTO: Codable {
     let snapshot: EntitySnapshotDTO
 }
 
+nonisolated
 struct EntitySnapshotDTO: Codable {
     let `entity:title`: String
     let `entity:subtitle`: String?

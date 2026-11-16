@@ -61,4 +61,4 @@ an emulator.
 
 - A link that arrives while another sheet or a `fullScreenCover` is up is pushed beneath it: #143.
 - Links opened signed out are dropped: #143.
-- Other paths (`/users`, `/groups`, `/lists`, `/items`, `/shelves`) and « Partager »: #140, #141, #142, #144.
+- Other paths: `/users`, `/groups` in [0093](0093-network-deep-links.md); `/lists`, `/items`, `/shelves` and « Partager »: #141, #142, #144.

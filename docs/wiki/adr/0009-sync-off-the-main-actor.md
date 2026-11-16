@@ -39,7 +39,13 @@ author, each save a refetch of every `@Query` on screen.
    whole cycle, the étagère membership writes their étagère and books. The inventory sync skips
    those items; the étagère sync skips its membership pass when one of its étagères is held. It
    replaces `ShelfModel.isMembershipWriteInFlight`, an app-wide flag that a friend's sync waited
-   on too.
+   on too. Each `OptimisticMutating` conformer reads its registry from `inFlightWrites`, `.shared`
+   by default; `ShelfModel` takes it through its `init`, so a test can hand it its own.
+7. **One user data sync at a time.** `refreshUserData()` runs on `onAppear` and on
+   pull-to-refresh; two runs side by side synced every inventory twice, each in its own
+   background context. It claims a `SyncStatusStore.RefreshClaim` first and gives up when a run
+   holds it. Sign-out's `reset()` drops the claim, so the next session syncs at once; the old
+   run is not cancelled, and its end never frees a newer claim.
 6. **ADR 0001's upsert in place still holds**, in the background context: an item is updated by
    its `_id`, never deleted and inserted again, so identity survives the save.
 
@@ -76,5 +82,5 @@ Found while building it, in tests on the iOS 27.2 simulator.
   does for the screens: `EntityModel`'s length is pinned by the SwiftLint baseline.
 - In tests, `MockAPIService` stays on the main actor, so the actor resumes there after each stub:
   the tests prove what the sync writes and skips, not which thread it runs on.
-- The hitch rate after the move is owed: scenario 1 of [performance](../performance.md), on an
-  iPhone.
+- Measured on an iPhone, scenario 1 of [performance](../performance.md): 241 ms/s of scroll
+  hitches during the first sync before, 17.1 ms/s after, no hang over 250 ms.

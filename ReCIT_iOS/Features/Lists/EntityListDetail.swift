@@ -82,6 +82,12 @@ struct EntityListDetail: View {
         .navigationTitle(list?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            if let list, list.isVisibleToCreatorAlone == false {
+                ToolbarItem(placement: .primaryAction) {
+                    DeepLinkShareLink(.list(id: list._id, elementId: nil), subject: list.name)
+                        .accessibilityIdentifier(AccessibilityID.share)
+                }
+            }
             if isMine {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("action.edit", systemImage: "pencil") {
@@ -96,5 +102,11 @@ struct EntityListDetail: View {
             }
         }
         .onChange(of: matchingLists.isEmpty, popIfTheListIsGone)
+    }
+}
+
+private extension EntityListDetail {
+    enum AccessibilityID {
+        static let share: String = "e2e.list.share"
     }
 }

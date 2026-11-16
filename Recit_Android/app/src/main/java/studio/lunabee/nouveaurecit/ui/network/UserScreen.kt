@@ -36,7 +36,9 @@ import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.SecondaryButton
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
+import studio.lunabee.nouveaurecit.ui.common.ShareLinkMenuItem
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
@@ -78,8 +80,11 @@ fun UserScreen(destination: Destination.User, navigator: Navigator) {
                 onBack = navigator::pop,
                 containerColor = Color.Transparent,
                 actions = {
-                    if (current != null && !isMe && current.relation == UserRelation.Friend) {
-                        UserMenu(onRemove = { isConfirmingRemoval = true })
+                    if (current != null) {
+                        UserMenu(
+                            user = current,
+                            onRemove = { isConfirmingRemoval = true }.takeIf { !isMe && current.relation == UserRelation.Friend },
+                        )
                     }
                 },
             )
@@ -112,8 +117,9 @@ fun UserScreen(destination: Destination.User, navigator: Navigator) {
     }
 }
 
+/** « Partager » for any reader, me included; « Retirer du réseau » for a friend, when [onRemove] is given. */
 @Composable
-private fun UserMenu(onRemove: () -> Unit) {
+private fun UserMenu(user: UserEntity, onRemove: (() -> Unit)?) {
     var expanded: Boolean by rememberSaveable { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }) {
@@ -124,16 +130,19 @@ private fun UserMenu(onRemove: () -> Unit) {
             onDismissRequest = { expanded = false },
             containerColor = RecitTheme.colors.backgroundDefault,
         ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.network_remove), color = RecitTheme.colors.foregroundDefault) },
-                leadingIcon = {
-                    Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null, tint = RecitTheme.colors.foregroundDefault)
-                },
-                onClick = {
-                    expanded = false
-                    onRemove()
-                },
-            )
+            ShareLinkMenuItem(DeepLink.User(user.username), user.username, onClick = { expanded = false })
+            if (onRemove != null) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.network_remove), color = RecitTheme.colors.foregroundDefault) },
+                    leadingIcon = {
+                        Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null, tint = RecitTheme.colors.foregroundDefault)
+                    },
+                    onClick = {
+                        expanded = false
+                        onRemove()
+                    },
+                )
+            }
         }
     }
 }

@@ -196,6 +196,58 @@ struct DeepLinkTests {
     }
 
     @Test
+    func `every link built then read gives itself back`() throws {
+        let links: [DeepLink] = [
+            .entity(uri: "isbn:9782070360024"),
+            .entity(uri: "wd:Q535"),
+            .entity(uri: "inv:\(Self.itemId)"),
+            .user(username: "OlivierB_test4"),
+            .user(username: "Anaïs"),
+            .group(slug: "le-club-de-lecture.2"),
+            .group(slug: "lecture-à-chambéry"),
+            .list(id: Self.listId, elementId: nil),
+            .list(id: Self.listId, elementId: Self.elementId),
+            .item(id: Self.itemId),
+            .shelf(id: Self.shelfId)
+        ]
+
+        for link in links {
+            let url: URL = try #require(link.url, "\(link)")
+            #expect(DeepLink(url: url) == link, "\(url)")
+        }
+    }
+
+    @Test
+    func `a link is built on the app's domain with inventaire.io's path`() {
+        #expect(
+            DeepLink.entity(uri: "isbn:9782070360024").url?.absoluteString
+                == "https://link.exlibris.lunabee.ovh/entity/isbn:9782070360024"
+        )
+        #expect(DeepLink.user(username: "Anaïs").url?.absoluteString == "https://link.exlibris.lunabee.ovh/users/Ana%C3%AFs")
+        #expect(
+            DeepLink.list(id: Self.listId, elementId: Self.elementId).url?.absoluteString
+                == "https://link.exlibris.lunabee.ovh/lists/\(Self.listId)/element/\(Self.elementId)"
+        )
+        #expect(DeepLink.shelf(id: Self.shelfId).url?.absoluteString == "https://link.exlibris.lunabee.ovh/shelves/\(Self.shelfId)")
+    }
+
+    @Test
+    func `a value no link can carry builds no link`() {
+        let links: [DeepLink] = [
+            .list(id: "optimistic:\(Self.listId)", elementId: nil),
+            .list(id: Self.listId, elementId: "optimistic:\(Self.elementId)"),
+            .shelf(id: "optimistic:\(Self.shelfId)"),
+            .user(username: "a"),
+            .group(slug: "le club"),
+            .entity(uri: "Q535")
+        ]
+
+        for link in links {
+            #expect(link.url == nil, "\(link)")
+        }
+    }
+
+    @Test
     func `an isbn opens its book without asking inventaire.io and nothing else does`() {
         #expect(NavigationDestination(linkedISBN: "isbn:9782070360024") == .book(anchor: .edition(uri: "isbn:9782070360024")))
         #expect(NavigationDestination(linkedISBN: "wd:Q535") == nil)

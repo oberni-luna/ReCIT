@@ -28,7 +28,9 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.CapsuleTab
 import studio.lunabee.nouveaurecit.ui.common.CapsuleTabs
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
+import studio.lunabee.nouveaurecit.ui.common.ShareLinkButton
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
@@ -54,6 +56,10 @@ fun ShelfScreen(destination: Destination.Shelf, navigator: Navigator) {
                 onBack = navigator::pop,
                 containerColor = RecitTheme.colors.backgroundGrouped,
                 actions = {
+                    val shelf: ShelfEntity? = state.shelf?.shelf
+                    if (shelf != null && !shelf.isVisibleToOwnerAlone) {
+                        ShareLinkButton(DeepLink.Shelf(shelf.id), shelf.name)
+                    }
                     if (state.isMine) {
                         IconButton(onClick = { isEditing = true }) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.shelf_detail_edit))

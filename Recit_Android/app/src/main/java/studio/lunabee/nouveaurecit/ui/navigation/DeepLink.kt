@@ -22,38 +22,51 @@ import java.net.URI
  * what inventaire.io allows makes the URL no link at all.
  */
 sealed interface DeepLink {
+    /** The page's path, the same on the app's domain and on inventaire.io. */
+    val path: String
+
     /** The same page on inventaire.io: where the link goes when the app cannot open it. */
-    val webUrl: String
+    val webUrl: String get() = "https://inventaire.io$path"
+
+    /**
+     * The link itself, `https://link.exlibris.lunabee.ovh/<path>`: what « Partager » hands the share sheet. `null`
+     * when the link holds a value no link can carry — an id inventaire.io has not given yet, a username outside its
+     * rule —, which [parse] would not open either.
+     */
+    val url: String?
+        get() {
+            val built: String = runCatching { URI("https", HOST, path, null).toASCIIString() }.getOrNull() ?: return null
+            return built.takeIf { parse(it) == this }
+        }
 
     /** A book, a work or an author, by its inventaire.io uri: `isbn:…`, `wd:…`, `inv:…`. */
     data class Entity(val uri: String) : DeepLink {
-        override val webUrl: String get() = "https://inventaire.io/entity/$uri"
+        override val path: String get() = "/entity/$uri"
     }
 
     /** A reader, by their username, in whatever case it was typed. */
     data class User(val username: String) : DeepLink {
-        override val webUrl: String get() = "https://inventaire.io/users/$username"
+        override val path: String get() = "/users/$username"
     }
 
     /** A group, by its slug. */
     data class Group(val slug: String) : DeepLink {
-        override val webUrl: String get() = "https://inventaire.io/groups/$slug"
+        override val path: String get() = "/groups/$slug"
     }
 
     /** A list, opened on its first element, or on the element [elementId] names when it has one. */
     data class EntityList(val id: String, val elementId: String? = null) : DeepLink {
-        override val webUrl: String
-            get() = "https://inventaire.io/lists/$id" + elementId?.let { "/element/$it" }.orEmpty()
+        override val path: String get() = "/lists/$id" + elementId?.let { "/element/$it" }.orEmpty()
     }
 
     /** A copy of a book, mine, a friend's or a stranger's, by its id. */
     data class Item(val id: String) : DeepLink {
-        override val webUrl: String get() = "https://inventaire.io/items/$id"
+        override val path: String get() = "/items/$id"
     }
 
     /** An étagère, by its id. */
     data class Shelf(val id: String) : DeepLink {
-        override val webUrl: String get() = "https://inventaire.io/shelves/$id"
+        override val path: String get() = "/shelves/$id"
     }
 
     companion object {

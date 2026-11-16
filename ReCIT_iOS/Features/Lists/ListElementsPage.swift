@@ -17,7 +17,7 @@
 //  covers above follow the finger at every frame.
 //
 //  **A friend's list is read, not written**: no add bar, no « Mon commentaire », « Déplacer » or
-//  « Retirer de la liste » — their comment and the day the element was added.
+//  « Retirer de la liste » — their comment, the day the element was added, and « Partager ».
 //
 
 import SwiftUI
@@ -198,6 +198,8 @@ struct ListElementsPage: View {
                             list: list,
                             isCommentFocused: isCommentFocused
                         )
+
+                        ListShareRow(item: selectedItem, list: list)
                     }
                 }
 
@@ -210,11 +212,17 @@ struct ListElementsPage: View {
                         .foregroundStyle(.foregroundError)
                     }
                 }
-            } else if let selectedItem, selectedItem.comment.isEmpty == false {
-                Section {
-                    ListCrossFade(id: selectedItem.uri) {
-                        ListReadOnlyCommentRow(comment: selectedItem.comment)
+            } else if let selectedItem {
+                if selectedItem.comment.isEmpty == false {
+                    Section {
+                        ListCrossFade(id: selectedItem.uri) {
+                            ListReadOnlyCommentRow(comment: selectedItem.comment)
+                        }
                     }
+                }
+
+                Section {
+                    ListShareRow(item: selectedItem, list: list)
                 }
             }
 

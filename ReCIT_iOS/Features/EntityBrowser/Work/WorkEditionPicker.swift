@@ -68,6 +68,7 @@ struct WorkEditionPicker: View {
         .navigationBarTitleDisplayMode(.inline)
         .workActions(
             workUri: work.uri,
+            title: work.title,
             placement: .toolbar
         )
         .onChange(of: nextEntityDestination) { _, destination in

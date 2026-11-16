@@ -110,6 +110,12 @@ struct ShelfDetailView: View {
         .navigationTitle(shelf?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            if let shelf, shelf.isVisibleToOwnerAlone == false {
+                ToolbarItem(placement: .primaryAction) {
+                    DeepLinkShareLink(.shelf(id: shelf._id), subject: shelf.name)
+                        .accessibilityIdentifier(AccessibilityID.share)
+                }
+            }
             if isMine {
                 ToolbarItem(placement: .primaryAction) {
                     // No identifier: the e2e scenario finds it by its « Modifier » label, as the list screen's pencil.
@@ -129,6 +135,12 @@ struct ShelfDetailView: View {
     private func leaveIfShelfWasDeleted() {
         guard shelfWasDeleted, path.isEmpty == false else { return }
         path.removeLast()
+    }
+}
+
+private extension ShelfDetailView {
+    enum AccessibilityID {
+        static let share: String = "e2e.shelf.share"
     }
 }
 

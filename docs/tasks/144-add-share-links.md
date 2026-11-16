@@ -1,6 +1,6 @@
 ---
 issue: 144
-status: todo
+status: to-test
 wiki: [[features/0092-entity-deep-links]], [[book-and-editions]], [[lists]], [[network]], [[shelves]]
 note: Last task of the « Deep links » sprint. Builds on #140, #141 and #142: every link it shares must already open in the app. Split from #65 (decision 6).
 created: 2026-11-16
@@ -46,8 +46,37 @@ created: 2026-11-16
 
 ## Implementation
 
+stacked on: wa/142-add-inventory-deep-links @ f00bcdb5
+
+Autopilot round 1, 2026-11-16.
+
+- Builder
+  - iOS `DeepLink.url: URL?` (URLComponents), Android `DeepLink.url: String?` (`URI.toASCIIString()`), both from one `path` that `webURL` shares. Returns the URL only when parsing it gives the same case back → round trip by construction; `optimistic:` ids, usernames outside the rule, a group without slug → nil → no button.
+  - Round-trip tests on 11 samples incl. `Anaïs`, `lecture-à-chambéry` (`users/Ana%C3%AFs`), both platforms.
+- Private rule: `EntityList.isVisibleToCreatorAlone`, `Shelf.isVisibleToOwnerAlone` (`visibility` empty); any key counts as shared. Edge: iOS store drops `group:<id>` keys on decode, so a list shared with one group only reads as private (no button).
+- iOS placements
+  - `Features/Components/DeepLinkShareLink.swift` (new): `ShareLink(item:subject:preview:)`, system label (« Partager… »), nothing when `url` is nil.
+  - Fiche livre: first entry of the « … » (own Section), `/entity/<edition uri>`, title as subject. Not added to book rows' long press.
+  - Œuvre: first entry of `WorkEditionPicker`'s « … » (`workActions` takes `title:`).
+  - Auteur·ice, list (`EntityListDetail`), étagère (`ShelfDetailView`): share icon at `.primaryAction`.
+  - `UserDetailView`: « Partager » first; the « … » now shows on my own profile too (only entry; « Signaler » hidden for me). Profil sheet (`ProfileView`) unchanged.
+  - Group: « Partager » first; the « … » also shows for non-members when the group has a slug.
+  - List element: `ListShareRow.swift` (new) under « Déplacer… » on my lists; own section under the comment on a friend's list. Subject = work title or author name.
+  - New identifiers `e2e.*.share`; re-indented baselined literals (`e2e.user.menu`/`report`, `e2e.group.menu`/`settings`/`leave`) moved to constants, baseline entries now stale.
+- Android: `ui/common/ShareLink.kt` (new: `Context.shareLink`, `ShareLinkButton`, `ShareLinkMenuItem`), `ui/lists/ListShareRow.kt` (new), `MoreActionsMenu.shareMenuLine`; same placements; `UserMenu` always shows. `strings.xml` `action_share` « Partager » (no English catalogue on Android).
+- Proof
+  - iOS build green; 47 tests pass (DeepLinkTests, TabRouterTests, LinkedListTests, LinkedInventoryItemAndShelfTests, SharingVisibilityTests, ListVisibilityTests).
+  - Android build green; DeepLinkTest 17, SharingVisibilityTest 2, TabRouterTest 9, AppDatabaseSchemaTest 1.
+
 ## Review
 
 ## Verification
+
+Implementer had no UI automation. PM check, iPhone 17 simulator, signed in:
+- ✅ `/entity/isbn:9782070360024` → Fiche livre; « … » shows « Partager… » first, then Liste, Ajouter à l'inventaire.
+- ✅ « Partager… » → share sheet titled « L'étranger ».
+- ❌ link text in the sheet not read (copy to pasteboard did not land). URL proven by round-trip tests.
+- ❌ other screens (œuvre, auteur·ice, profile, group, list, element, étagère) not seen.
+- Android: no emulator, build + unit tests only.
 
 ## Feedback

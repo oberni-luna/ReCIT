@@ -31,7 +31,9 @@ import studio.lunabee.nouveaurecit.designsystem.ThumbnailSize
 import studio.lunabee.nouveaurecit.ui.common.EnlargeablePhoto
 import studio.lunabee.nouveaurecit.ui.common.Formatting
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
+import studio.lunabee.nouveaurecit.ui.common.ShareLinkButton
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
@@ -45,7 +47,13 @@ fun AuthorScreen(destination: Destination.Author, navigator: Navigator) {
     val state: AuthorUiState by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { RecitTopBar(title = stringResource(R.string.nav_author), onBack = navigator::pop) },
+        topBar = {
+            RecitTopBar(
+                title = stringResource(R.string.nav_author),
+                onBack = navigator::pop,
+                actions = { state.author?.let { ShareLinkButton(DeepLink.Entity(it.uri), it.name) } },
+            )
+        },
         containerColor = RecitTheme.colors.backgroundDefault,
     ) { padding: PaddingValues ->
         Box(Modifier.fillMaxSize().padding(padding)) {

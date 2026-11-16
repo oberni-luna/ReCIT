@@ -118,7 +118,13 @@ data class ShelfEntity(
     val color: String? = null,
     val created: Double = 0.0,
     val updated: Double? = null,
-)
+) {
+    /**
+     * `Shelf.isVisibleToOwnerAlone`: no one but its owner may open it, so a link to it would open nothing for whoever
+     * receives it, and the étagère offers none.
+     */
+    val isVisibleToOwnerAlone: Boolean get() = visibility.isEmpty()
+}
 
 @Entity(
     tableName = "shelf_items",
@@ -157,6 +163,12 @@ data class EntityListEntity(
      * holding a book, are ordered by, the most recent first.
      */
     val lastChanged: Double get() = updated ?: created
+
+    /**
+     * `EntityList.isVisibleToCreatorAlone`: no one but its creator may open it, so a link to it, or to one of its
+     * elements, would open nothing for whoever receives it, and the list offers none.
+     */
+    val isVisibleToCreatorAlone: Boolean get() = visibility.isEmpty()
 
     /**
      * `EntityList.friendCreator(myUserId:friendsById:)`: the friend who made this list — `null` for one of

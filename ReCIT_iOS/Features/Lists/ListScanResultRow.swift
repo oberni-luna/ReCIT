@@ -6,6 +6,11 @@
 //  « + » that adds it to the list. The batch scanner's row, minus what only an inventory needs —
 //  no book screen behind the text, no « create this book », no « already in my inventory ».
 //
+//  A book the lookup could not find shows its ISBN, « Introuvable pour l’instant », and a round
+//  « Réessayer » in place of the « + »: the lookup fails on a cold path more often than the book
+//  is missing, and the same barcode in frame is gated, so the button is the only way to ask again.
+//  A different barcode still takes the row.
+//
 //  Its cover, its words and its colours are the batch scanner's (`ScanResultCoverView`,
 //  `ScanResultLabelView`, `ScanOverlayPalette`), so the two scanners read as one.
 //
@@ -17,22 +22,27 @@ import SwiftUI
 struct ListScanResultRow: View {
     let state: BatchScanState
     let onAdd: () -> Void
+    let onRetry: () -> Void
 
     var body: some View {
         HStack(spacing: .sMedium) {
             ScanResultCoverView(imageUrl: (state.book ?? .placeholder).coverImageUrl)
 
             ScanResultLabelView(state: state)
+                .notFoundCaption("list.add.not_found")
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // An edition inventaire.io does not have, or one with no work, has nothing to add:
-            // the row only says so, and the next barcode takes its place.
-            if isNotFound == false {
+            if isNotFound {
+                Button("list.add.retry", systemImage: "arrow.clockwise", action: onRetry)
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(.circularIcon)
+                    .accessibilityIdentifier(AccessibilityID.retry)
+            } else {
                 Button("list.add.action", systemImage: "plus", action: onAdd)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.circularIcon)
                     .disabled(isResolved == false)
-                    .accessibilityIdentifier("e2e.list.scan.add")
+                    .accessibilityIdentifier(AccessibilityID.add)
             }
         }
         .padding(.horizontal, .medium)
@@ -64,5 +74,12 @@ struct ListScanResultRow: View {
         } else {
             false
         }
+    }
+}
+
+private extension ListScanResultRow {
+    enum AccessibilityID {
+        static let add: String = "e2e.list.scan.add"
+        static let retry: String = "e2e.list.scan.retry"
     }
 }

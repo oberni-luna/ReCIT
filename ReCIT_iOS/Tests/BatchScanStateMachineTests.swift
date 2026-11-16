@@ -385,6 +385,87 @@ struct BatchScanStateMachineTests {
         #expect(machine.state == .notFound(code: firstCode))
     }
 
+    /// The list's « Réessayer »: the gated code is looked up again, and the answer it was
+    /// waiting for lands as it would have the first time.
+    @Test
+    func `a retry looks the unknown edition up again and its answer lands`() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupFailed(code: firstCode))
+
+        let retried: Bool = machine.apply(.retried(code: firstCode))
+        #expect(retried == true)
+        #expect(machine.state == .lookingUp(code: firstCode))
+
+        machine.apply(.lookupResolved(book(firstCode)))
+        #expect(machine.state == .resolved(book: book(firstCode)))
+    }
+
+    @Test
+    func `a retry that fails again says so again and can be retried`() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupFailed(code: firstCode))
+        machine.apply(.retried(code: firstCode))
+        machine.apply(.lookupTimedOut(code: firstCode))
+        #expect(machine.state == .notFound(code: firstCode))
+
+        let retriedAgain: Bool = machine.apply(.retried(code: firstCode))
+        #expect(retriedAgain == true)
+        #expect(machine.state == .lookingUp(code: firstCode))
+    }
+
+    @Test
+    func `a retry for another code than the unknown one is refused`() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        machine.apply(.codeSeen(firstCode))
+        machine.apply(.lookupFailed(code: firstCode))
+
+        let retried: Bool = machine.apply(.retried(code: secondCode))
+        #expect(retried == false)
+        #expect(machine.state == .notFound(code: firstCode))
+    }
+
+    /// Only the row that says « not found » has anything to retry: a lookup under way, a book
+    /// on offer or being filed, and a row that reports are all left as they are.
+    @Test
+    func `a retry is refused from every state but an unknown edition`() {
+        let clock: TestClock = .init()
+        var machine: BatchScanStateMachine = makeMachine(clock: clock)
+
+        #expect(machine.apply(.retried(code: firstCode)) == false)
+        #expect(machine.state == .idle)
+
+        machine.apply(.codeSeen(firstCode))
+        #expect(machine.apply(.retried(code: firstCode)) == false)
+        #expect(machine.state == .lookingUp(code: firstCode))
+
+        machine.apply(.lookupResolved(book(firstCode)))
+        #expect(machine.apply(.retried(code: firstCode)) == false)
+        #expect(machine.state == .resolved(book: book(firstCode)))
+
+        machine.apply(.addStarted)
+        #expect(machine.apply(.retried(code: firstCode)) == false)
+        #expect(machine.state == .adding(book: book(firstCode)))
+
+        machine.apply(.addFinished)
+        #expect(machine.apply(.retried(code: firstCode)) == false)
+        #expect(machine.state == .added(book: book(firstCode)))
+
+        machine.apply(.cleared)
+        clock.advance(by: 0.4)
+        machine.apply(.codeSeen(secondCode))
+        machine.apply(.lookupResolvedAlreadyOwned(book(secondCode)))
+        #expect(machine.apply(.retried(code: secondCode)) == false)
+        #expect(machine.state == .alreadyOwned(book: book(secondCode)))
+    }
+
     /// A book created from the row is filed like any other, so it confirms like any other and
     /// counts like any other.
     @Test("Creating the missing edition confirms on the row and counts in the session")

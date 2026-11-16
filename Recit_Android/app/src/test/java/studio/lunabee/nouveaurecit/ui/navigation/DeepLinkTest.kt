@@ -106,6 +106,32 @@ class DeepLinkTest {
     }
 
     @Test
+    fun a_copy_link_and_an_etagere_link_carry_their_id() {
+        assertEquals(DeepLink.Item(ITEM_ID), DeepLink.parse("https://link.exlibris.lunabee.ovh/items/$ITEM_ID"))
+        assertEquals(DeepLink.Shelf(SHELF_ID), DeepLink.parse("https://link.exlibris.lunabee.ovh/shelves/$SHELF_ID"))
+    }
+
+    @Test
+    fun a_copy_id_or_an_etagere_id_that_is_not_a_couchdb_id_is_not_a_link() {
+        listOf(
+            "https://link.exlibris.lunabee.ovh/items/$ITEM_ID%7C$ITEM_ID",
+            "https://link.exlibris.lunabee.ovh/items/$ITEM_ID%26ids=$ITEM_ID",
+            "https://link.exlibris.lunabee.ovh/shelves/$SHELF_ID%7C$SHELF_ID",
+            "https://link.exlibris.lunabee.ovh/shelves/$SHELF_ID%26with-items-ids=true",
+            "https://link.exlibris.lunabee.ovh/items/D3E1127CFC074506949A3C9396E4BCCB",
+            "https://link.exlibris.lunabee.ovh/items/${ITEM_ID}0",
+            "https://link.exlibris.lunabee.ovh/shelves/2b8c1752cc1195dafc3a8910f80822d",
+            "https://link.exlibris.lunabee.ovh/items/$ITEM_ID/edit",
+            "https://link.exlibris.lunabee.ovh/shelves/$SHELF_ID/items",
+            "https://link.exlibris.lunabee.ovh/items",
+            "https://link.exlibris.lunabee.ovh/item/$ITEM_ID",
+            "https://link.exlibris.lunabee.ovh/shelf/$SHELF_ID",
+            "http://link.exlibris.lunabee.ovh/items/$ITEM_ID",
+            "https://inventaire.io/shelves/$SHELF_ID",
+        ).forEach { url -> assertNull(url, DeepLink.parse(url)) }
+    }
+
+    @Test
     fun an_element_id_opens_the_list_on_that_elements_entity() {
         val list = listWithElements("e1" to "wd:Q1", "e2" to "wd:Q2", "e3" to "wd:Q3")
         assertEquals(Destination.EntityList(LIST_ID, "wd:Q3"), DeepLink.listDestination(list, "e3"))
@@ -128,6 +154,8 @@ class DeepLinkTest {
             "https://inventaire.io/lists/$LIST_ID/element/$ELEMENT_ID",
             DeepLink.EntityList(LIST_ID, ELEMENT_ID).webUrl,
         )
+        assertEquals("https://inventaire.io/items/$ITEM_ID", DeepLink.Item(ITEM_ID).webUrl)
+        assertEquals("https://inventaire.io/shelves/$SHELF_ID", DeepLink.Shelf(SHELF_ID).webUrl)
     }
 
     @Test
@@ -160,5 +188,7 @@ class DeepLinkTest {
     private companion object {
         const val LIST_ID: String = "88b00676d608d9d53c5974fd9bc1009a"
         const val ELEMENT_ID: String = "88b00676d608d9d53c5974fd9bc8a871"
+        const val ITEM_ID: String = "d3e1127cfc074506949a3c9396e4bccb"
+        const val SHELF_ID: String = "2b8c1752cc1195dafc3a8910f80822df"
     }
 }

@@ -1,6 +1,6 @@
 ---
 issue: 142
-status: todo
+status: to-test
 wiki: [[features/0092-entity-deep-links]], [[shelves]], [[features/0019-a-friends-shared-shelves]], [[features/0089-tabbed-shelf-screen]]
 note: Fourth task of the « Deep links » sprint. Builds on #140, which teaches TabRouter to push a link on a given tab. Split from #65.
 created: 2026-11-16
@@ -51,8 +51,35 @@ A link to a copy of a book or to an étagère opens it in Ex-libris, on the Inve
 
 ## Implementation
 
+stacked on: wa/141-add-list-deep-links @ 0f710554
+
+Autopilot round 1, 2026-11-16.
+
+- iOS
+  - `DeepLink`: `.item(id:)`, `.shelf(id:)`, parsed in `page(at:)` with `isCouchId` (item and shelf ids: 32 lowercase hex, checked live).
+  - `AppModels/Inventory/InventoryModel+DeepLink.swift` (new): `fetchEditionURI(ofItem:)` → `GET /api/items/by-ids?ids=`, stores nothing.
+  - `AppModels/Shelf/ShelfModel+DeepLink.swift` (new): `fetchShelf(id:ownedByOneOf:)` → `GET /api/shelves/by-ids?ids=` (`ShelvesResponseDTO`); owner outside the set → nothing stored, nil; else upsert without deleteMissing, then existing `linkItems`.
+  - `InventoryModel`/`ShelfModel`: `apiService` internal (ShelfModel's moved below the statics: baseline entry l.34 now unused), `linkItems`/`localShelf` internal.
+  - `NavigationDestination.linkedItem(id:…)` / `linkedShelf(id:ownedByOneOf:…)`: static async, stored copy → `.item`, else `.edition(uri:)`, else nil; stored shelf → `.shelf`, else fetch, else nil (fallback).
+  - `DeepLinkHandling`: both cases on `.inventory`, owners = me + `friends(modelContext:)`; helper `open(_:on:) -> Bool` keeps cyclomatic complexity under 12. `ShelvesView`: `.opensPendingLink(on: .inventory, …)`.
+- Android: `DeepLink.Item`, `DeepLink.Shelf` → `AppTab.Inventory`; `InventoryRepository.isStored`, `fetchEditionUri` (no store); `ShelfRepository.isStored`, `fetchShelf(id, owners)`, membership extracted to private `linkItems`. Manifest `/items/`, `/shelves/`.
+- Server: AASA file gains `/items/*`, `/shelves/*`. Not deployed.
+- Decisions
+  - A friend's shelf not stored opens with the friend's books already in the store; none fetched (they arrive with the friend's inventory sync). Smaller than decision 5's « with the items it needs ».
+  - A friend's copy not stored yet opens its edition (decision 4).
+  - `with-items` is deprecated server-side (renamed `with-items-ids`); existing `?action=by-ids&with-items=true` calls left unchanged.
+- Proof
+  - iOS build green; 44 tests pass (DeepLinkTests, TabRouterTests, LinkedListTests, LinkedInventoryItemAndShelfTests 7, ShelfModelTests, ShelfModelAddItemsTests).
+  - Android build green; DeepLinkTest 14, TabRouterTest 9.
+
 ## Review
 
 ## Verification
+
+Agent, iPhone 17 simulator, signed in:
+- ✅ launch on Inventaire (carousel, « Tous les livres · 7 »).
+- ✅ `/entity/isbn:9782070360024` → Fiche livre on Recherche.
+- ❌ `/items/…`, `/shelves/…` not opened on screen: AASA not deployed. Unit tests only.
+- Android: no emulator, build + unit tests only.
 
 ## Feedback

@@ -46,6 +46,17 @@ class InventoryRepository(
 
     fun observeCountOf(ownerId: String): Flow<Int> = dao.observeCountOf(ownerId)
 
+    /** Whether Room holds the copy [id] names: mine or a friend's. */
+    suspend fun isStored(id: String): Boolean = dao.get(id) != null
+
+    /**
+     * `InventoryModel.fetchEditionURI`: the uri of the edition a copy is of, read from inventaire.io for a copy Room
+     * does not hold, or `null` when inventaire.io shows no such copy. Nothing of the answer is stored: a stranger's
+     * copy in Room would be found by the local search and « Chez mes amis » as mine or a friend's.
+     */
+    suspend fun fetchEditionUri(itemId: String): String? =
+        api.get<ItemsDto>("/api/items/by-ids", "ids" to itemId).items.firstOrNull { it.id == itemId }?.entity
+
     /**
      * `/api/items/inventory-view`, then each author's works, then each work's items. Skipped when
      * nothing was added since the last sync. Every row is merged in place, never re-inserted.

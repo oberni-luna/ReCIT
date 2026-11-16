@@ -13,7 +13,7 @@ import AsyncAlgorithms
 @Observable
 final class InventoryModel: OptimisticMutating {
     private static let unkownAuthorId: String = "unknown"
-    private let apiService: APIServicing
+    let apiService: APIServicing
     private var entityModel: EntityModel?
 
     /// Shared channel used to surface a background optimistic failure to the UI.

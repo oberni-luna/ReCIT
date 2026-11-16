@@ -13,6 +13,7 @@ import studio.lunabee.nouveaurecit.data.shelves.ShelfMembership
 import studio.lunabee.nouveaurecit.network.ApiService
 import studio.lunabee.nouveaurecit.network.dto.IdsPayload
 import studio.lunabee.nouveaurecit.network.dto.NewShelfDto
+import studio.lunabee.nouveaurecit.network.dto.ShelfDto
 import studio.lunabee.nouveaurecit.network.dto.OkStatusDto
 import studio.lunabee.nouveaurecit.network.dto.ShelfResponseDto
 import studio.lunabee.nouveaurecit.network.dto.ShelvesResponseDto
@@ -48,17 +49,40 @@ class ShelfRepository(
             dao.delete(gone)
         }
         if (dtos.isEmpty()) return
+        linkItems(dtos.map { it.id })
+    }
+
+    /** Whether Room holds the étagère [id] names: mine or a friend's. */
+    suspend fun isStored(id: String): Boolean = dao.get(id) != null
+
+    /**
+     * `ShelfModel.fetchShelf`: an étagère Room does not hold, read from inventaire.io and upserted beside the others
+     * when one of [owners] owns it — me and my friends —, holding those of its books Room holds. Anyone else's is not
+     * stored, and `null`: its books would be taken for mine or a friend's by the local search and « Chez mes amis ».
+     * Throws [studio.lunabee.nouveaurecit.network.NetworkError.BadStatus] 404 when the étagère is unknown, 401 when it
+     * is not mine to see.
+     */
+    suspend fun fetchShelf(id: String, owners: Set<String>): ShelfEntity? {
+        val response: ShelvesResponseDto = api.get("/api/shelves/by-ids", "ids" to id)
+        val dto: ShelfDto = response.shelves[id]?.takeIf { it.owner in owners } ?: return null
+        dao.upsert(listOf(Merges.shelf(dao.get(id), dto)))
+        linkItems(listOf(id))
+        return dao.get(id)
+    }
+
+    /** Membership from `?action=by-ids`: each of [shelfIds] holds those of its books Room holds. */
+    private suspend fun linkItems(shelfIds: List<String>) {
         val withItems: ShelvesWithItemsResponseDto = api.get(
             "/api/shelves",
             "action" to "by-ids",
-            "ids" to dtos.joinToString("|") { it.id },
+            "ids" to shelfIds.joinToString("|"),
             "with-items" to "true",
         )
         db.withTransaction {
-            for (dto in dtos) {
-                val itemIds: List<String> = withItems.shelves[dto.id]?.items.orEmpty()
+            for (shelfId in shelfIds) {
+                val itemIds: List<String> = withItems.shelves[shelfId]?.items.orEmpty()
                 val known: Set<String> = db.inventoryDao().get(itemIds).map { it.id }.toSet()
-                dao.replaceItems(dto.id, itemIds.filter { it in known })
+                dao.replaceItems(shelfId, itemIds.filter { it in known })
             }
         }
     }

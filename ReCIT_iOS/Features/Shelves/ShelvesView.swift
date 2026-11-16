@@ -59,5 +59,6 @@ struct ShelvesView: View {
             }
         }
         .hidesTabBarWhenPushed(on: path)
+        .opensPendingLink(on: .inventory, path: $path)
     }
 }

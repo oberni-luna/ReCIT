@@ -3,7 +3,9 @@ package studio.lunabee.nouveaurecit.ui.navigation
 import kotlinx.coroutines.CancellationException
 import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.GroupRepository
+import studio.lunabee.nouveaurecit.data.InventoryRepository
 import studio.lunabee.nouveaurecit.data.ListRepository
+import studio.lunabee.nouveaurecit.data.ShelfRepository
 import studio.lunabee.nouveaurecit.data.UserRepository
 import studio.lunabee.nouveaurecit.data.db.ListWithElements
 import studio.lunabee.nouveaurecit.data.model.EntityLabel
@@ -44,6 +46,16 @@ sealed interface DeepLink {
             get() = "https://inventaire.io/lists/$id" + elementId?.let { "/element/$it" }.orEmpty()
     }
 
+    /** A copy of a book, mine, a friend's or a stranger's, by its id. */
+    data class Item(val id: String) : DeepLink {
+        override val webUrl: String get() = "https://inventaire.io/items/$id"
+    }
+
+    /** An étagère, by its id. */
+    data class Shelf(val id: String) : DeepLink {
+        override val webUrl: String get() = "https://inventaire.io/shelves/$id"
+    }
+
     companion object {
         const val HOST: String = "link.exlibris.lunabee.ovh"
 
@@ -80,7 +92,7 @@ sealed interface DeepLink {
             }
         }
 
-        /** `entity/<uri>`, `users/<username>`, `groups/<slug>`: a page named by one segment. */
+        /** `entity/<uri>`, `users/<username>`, `groups/<slug>`, `items/<id>`, `shelves/<id>`: a page named by one segment. */
         private fun page(components: List<String>): DeepLink? {
             if (components.size != 2) return null
             val value: String = components[1]
@@ -88,14 +100,16 @@ sealed interface DeepLink {
                 "entity" -> Entity(value).takeIf { ENTITY_URI.matches(value) }
                 "users" -> User(value).takeIf { USERNAME.matches(value) }
                 "groups" -> Group(value).takeIf { SLUG.matches(value) }
+                "items" -> Item(value).takeIf { COUCH_ID.matches(value) }
+                "shelves" -> Shelf(value).takeIf { COUCH_ID.matches(value) }
                 else -> null
             }
         }
 
         /**
-         * Where [link] lands, or `null` when inventaire.io knows no such entity, reader, group or list, or the entity is
-         * of a type the app has no screen for. Books and authors on Recherche, readers and groups on Réseau, lists on
-         * Listes.
+         * Where [link] lands, or `null` when inventaire.io knows no such entity, reader, group, list, copy or étagère,
+         * the entity is of a type the app has no screen for, or the étagère is a stranger's. Books and authors on
+         * Recherche, readers and groups on Réseau, lists on Listes, copies and étagères on Inventaire.
          */
         suspend fun target(
             link: DeepLink,
@@ -103,6 +117,8 @@ sealed interface DeepLink {
             users: UserRepository,
             groups: GroupRepository,
             lists: ListRepository,
+            inventory: InventoryRepository,
+            shelves: ShelfRepository,
         ): LinkTarget? = when (link) {
             is Entity -> destination(link.uri, entities)?.let { LinkTarget.Screen(AppTab.Search, it) }
             is User -> users.getOrFetchUser(link.username)?.let { userTarget(it.id, users.myUserId.value) }
@@ -110,6 +126,27 @@ sealed interface DeepLink {
             is EntityList -> linkedList(link.id, lists, users)?.let {
                 LinkTarget.Screen(AppTab.Lists, listDestination(it, link.elementId))
             }
+            is Item -> itemDestination(link.id, inventory)?.let { LinkTarget.Screen(AppTab.Inventory, it) }
+            is Shelf -> shelfDestination(link.id, shelves, users)?.let { LinkTarget.Screen(AppTab.Inventory, it) }
+        }
+
+        /**
+         * A linked copy: the Fiche livre anchored on it when Room holds it, mine or a friend's, which says whose it is
+         * and offers « Emprunter à… » on a friend's; else the Fiche livre of its edition, which neither shows nor
+         * stores anything of a stranger's copy.
+         */
+        private suspend fun itemDestination(id: String, inventory: InventoryRepository): Destination? =
+            if (inventory.isStored(id)) {
+                Destination.Book(BookAnchor.Item(id))
+            } else {
+                inventory.fetchEditionUri(id)?.let { Destination.Book(BookAnchor.Edition(it)) }
+            }
+
+        /** A linked étagère, mine or a friend's: from Room, else loaded into it. Anyone else's stays out, and `null`. */
+        private suspend fun shelfDestination(id: String, shelves: ShelfRepository, users: UserRepository): Destination? {
+            if (shelves.isStored(id)) return Destination.Shelf(id)
+            val owners: Set<String> = (users.friends().map { it.id } + listOfNotNull(users.myUserId.value)).toSet()
+            return shelves.fetchShelf(id, owners)?.let { Destination.Shelf(it.id) }
         }
 
         /**

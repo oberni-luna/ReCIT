@@ -31,8 +31,6 @@ final class ShelfModel: OptimisticMutating {
     /// `/api/shelves` membership call. Now using real server membership.
     static let useFakeMembership: Bool = false
 
-    private let apiService: APIServicing
-
     /// Shared channel used to surface a background failure to the UI.
     var errorReporter: AppErrorReporter?
 
@@ -57,6 +55,8 @@ final class ShelfModel: OptimisticMutating {
     /// the gate while the run is still going, and a sync would take the books back off
     /// the étagère they had just been filed onto.
     private static var membershipWriteDepth: Int = 0
+
+    let apiService: APIServicing
 
     private static func raiseMembershipGate() {
         membershipWriteDepth += 1
@@ -547,7 +547,7 @@ final class ShelfModel: OptimisticMutating {
         try? modelContext.save()
     }
 
-    private func linkItems(shelfIds: [String], modelContext: ModelContext) async throws {
+    func linkItems(shelfIds: [String], modelContext: ModelContext) async throws {
         guard shelfIds.isEmpty == false else { return }
 
         let idsParam: String = shelfIds.joined(separator: "|")
@@ -563,7 +563,7 @@ final class ShelfModel: OptimisticMutating {
         try modelContext.save()
     }
 
-    private func localShelf(id: String, modelContext: ModelContext) -> Shelf? {
+    func localShelf(id: String, modelContext: ModelContext) -> Shelf? {
         let descriptor: FetchDescriptor<Shelf> = .init(predicate: #Predicate { $0._id == id })
         return try? modelContext.fetch(descriptor).first
     }

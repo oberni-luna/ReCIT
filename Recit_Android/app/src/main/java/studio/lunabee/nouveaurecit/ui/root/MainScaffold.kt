@@ -74,6 +74,7 @@ import studio.lunabee.nouveaurecit.ui.flow.SortFlowStart
 import studio.lunabee.nouveaurecit.ui.navigation.AppTab
 import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
+import studio.lunabee.nouveaurecit.ui.navigation.LinkTarget
 import studio.lunabee.nouveaurecit.ui.navigation.LocalTabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
@@ -127,27 +128,30 @@ fun MainScaffold() {
         }
     }
 
-    // An Ex-libris link: the screen it names, alone above Recherche's root; inventaire.io's page in the browser when
-    // the app cannot open it — unknown entity, network down — as when the app is not installed.
+    // An Ex-libris link: the screen it names, alone above the root of its tab — Recherche for a book or an author,
+    // Réseau for a reader or a group — or the Profil sheet for my own name; inventaire.io's page in the browser when
+    // the app cannot open it — unknown entity, reader or group, network down — as when the app is not installed.
     LaunchedEffect(Unit) {
         container.incomingLinks.filterNotNull().collect { url ->
             container.incomingLinks.value = null
-            val entityUri: String = DeepLink.entityUri(url) ?: return@collect
-            val destination: Destination? = try {
-                DeepLink.destination(entityUri, container.entities)
+            val link: DeepLink = DeepLink.parse(url) ?: return@collect
+            val target: LinkTarget? = try {
+                DeepLink.target(link, container.entities, container.users, container.groups)
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (_: Exception) {
                 null
             }
-            if (destination == null) {
-                runCatching { uriHandler.openUri(DeepLink.webUrl(entityUri)) }
-                return@collect
-            }
-            router.openLink()
-            Navigator(stacks.getValue(AppTab.Search)).run {
-                popToRoot()
-                push(destination)
+            when (target) {
+                null -> runCatching { uriHandler.openUri(link.webUrl) }
+                LinkTarget.Profile -> router.openProfile()
+                is LinkTarget.Screen -> {
+                    router.openLink(target.tab)
+                    Navigator(stacks.getValue(target.tab)).run {
+                        popToRoot()
+                        push(target.destination)
+                    }
+                }
             }
         }
     }

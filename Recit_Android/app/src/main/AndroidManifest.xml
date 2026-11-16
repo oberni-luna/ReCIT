@@ -26,7 +26,8 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Ex-libris links: a book, a work or an author by its inventaire.io uri (ui/navigation/DeepLink.kt).
+            <!-- Ex-libris links: a book, a work or an author by its inventaire.io uri, a reader by their username, a group
+                 by its slug (ui/navigation/DeepLink.kt).
                  Verified against https://link.exlibris.lunabee.ovh/.well-known/assetlinks.json, scripts/deeplinks/. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -36,6 +37,8 @@
                     android:scheme="https"
                     android:host="link.exlibris.lunabee.ovh"
                     android:pathPrefix="/entity/" />
+                <data android:pathPrefix="/users/" />
+                <data android:pathPrefix="/groups/" />
             </intent-filter>
         </activity>
 

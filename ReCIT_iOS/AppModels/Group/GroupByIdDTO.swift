@@ -2,7 +2,8 @@
 //  GroupByIdDTO.swift
 //  ReCIT_iOS
 //
-//  `GET /api/groups/by-id`: the group, and the people it names, already shaped as users.
+//  `GET /api/groups/by-id` and `/api/groups/by-slug`: the group, and the people it names, already
+//  shaped as users.
 //
 
 import Foundation

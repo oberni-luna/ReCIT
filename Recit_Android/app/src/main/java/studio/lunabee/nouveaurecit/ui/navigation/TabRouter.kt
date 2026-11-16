@@ -62,9 +62,9 @@ class TabRouter(selected: AppTab = AppTab.Inventory, isProfilePresented: Boolean
         isProfilePresented = false
     }
 
-    /** An Ex-libris link ([DeepLink]): Recherche, field down, where the shell pushes the screen it names. */
-    fun openLink() {
-        selected = AppTab.Search
+    /** An Ex-libris link ([DeepLink]): [tab], field down, where the shell pushes the screen it names. */
+    fun openLink(tab: AppTab) {
+        selected = tab
         isProfilePresented = false
     }
 

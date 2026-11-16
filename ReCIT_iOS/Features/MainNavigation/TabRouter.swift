@@ -42,10 +42,10 @@ final class TabRouter {
     /// a swipe down — writes it back through a binding.
     var isProfilePresented: Bool = false
 
-    /// The screen an Ex-libris link asked for, waiting for the Recherche tab to push it. A flag the
+    /// The screen an Ex-libris link asked for, waiting for the tab it names to push it. A flag the
     /// tab consumes, like the field request, for the same reason: on a cold launch the link
-    /// arrives before the tab is built. Consumed once, by `consumePendingLink()`.
-    private(set) var pendingLink: NavigationDestination?
+    /// arrives before the tab is built. Consumed once, by `consumePendingLink(for:)`.
+    private(set) var pendingLink: PendingLink?
 
     /// A tap on a tab. Tapping Recherche while it is already showing is the way back to a fresh
     /// search: its stack goes back to the root, and the field comes up.
@@ -75,17 +75,30 @@ final class TabRouter {
         isProfilePresented = true
     }
 
-    /// A screen an Ex-libris link names, pushed on the Recherche tab over whatever it showed.
-    func open(_ destination: NavigationDestination) {
+    /// A screen an Ex-libris link names, pushed on `tab` over whatever it showed.
+    func open(_ destination: NavigationDestination, on tab: MainTabView.TabConfig) {
         isProfilePresented = false
-        selectedTab = .search
-        pendingLink = destination
+        selectedTab = tab
+        pendingLink = .init(destination: destination, tab: tab)
     }
 
-    /// The screen a link asked for, forgetting it in the same move so it is pushed once.
-    func consumePendingLink() -> NavigationDestination? {
-        defer { pendingLink = nil }
-        return pendingLink
+    /// A reader an Ex-libris link names: their profile on Réseau, or the Profil sheet when it is me,
+    /// with nothing pushed. Told apart by id rather than by name: inventaire.io still answers to a
+    /// reader's former name, which a link may carry.
+    func open(linkedUser user: User, myUserId: String?) {
+        if user._id == myUserId {
+            openProfile()
+        } else {
+            open(.user(user: user), on: .community)
+        }
+    }
+
+    /// The screen a link asked of `tab`, forgetting it in the same move so it is pushed once. A
+    /// link meant for another tab stays where it is, for that tab to take.
+    func consumePendingLink(for tab: MainTabView.TabConfig) -> NavigationDestination? {
+        guard let pendingLink, pendingLink.tab == tab else { return nil }
+        self.pendingLink = nil
+        return pendingLink.destination
     }
 
     /// Whether the field was asked for, forgetting the request in the same move so it is acted

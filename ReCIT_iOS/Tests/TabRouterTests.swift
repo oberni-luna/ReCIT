@@ -116,26 +116,88 @@ struct TabRouterTests {
     }
 
     @Test
-    func `a link opens Recherche with the field down and the profile closed`() {
+    func `a link opens the tab it names with the field down and the profile closed`() {
         let router: TabRouter = .init()
         router.select(.lists)
         router.openProfile()
 
-        router.open(.author(uri: "wd:Q535"))
+        router.open(.group(id: "g1"), on: .community)
 
-        #expect(router.selectedTab == .search)
+        #expect(router.selectedTab == .community)
         #expect(router.isProfilePresented == false)
         #expect(router.wantsSearchField == false)
-        #expect(router.pendingLink == .author(uri: "wd:Q535"))
+        #expect(router.pendingLink == .init(destination: .group(id: "g1"), tab: .community))
     }
 
     @Test
     func `a link is pushed once`() {
         let router: TabRouter = .init()
-        router.open(.author(uri: "wd:Q535"))
+        router.open(.author(uri: "wd:Q535"), on: .search)
 
-        #expect(router.consumePendingLink() == .author(uri: "wd:Q535"))
-        #expect(router.consumePendingLink() == nil)
+        #expect(router.consumePendingLink(for: .search) == .author(uri: "wd:Q535"))
+        #expect(router.consumePendingLink(for: .search) == nil)
+        #expect(router.pendingLink == nil)
+    }
+
+    @Test
+    func `a link is pushed only by the tab it names`() {
+        let router: TabRouter = .init()
+        router.open(.group(id: "g1"), on: .community)
+
+        #expect(router.consumePendingLink(for: .search) == nil)
+        #expect(router.pendingLink?.tab == .community)
+        #expect(router.consumePendingLink(for: .community) == .group(id: "g1"))
+        #expect(router.pendingLink == nil)
+    }
+
+    @Test
+    func `a book link still waits for Recherche`() {
+        let router: TabRouter = .init()
+        router.open(.author(uri: "wd:Q535"), on: .search)
+
+        #expect(router.selectedTab == .search)
+        #expect(router.consumePendingLink(for: .community) == nil)
+        #expect(router.consumePendingLink(for: .search) == .author(uri: "wd:Q535"))
+    }
+
+    @Test
+    func `a reader link opens their profile on Réseau`() {
+        let router: TabRouter = .init()
+        let reader: User = .init(
+            _id: "reader",
+            _rev: "1",
+            username: "maxlath",
+            email: nil,
+            position: nil,
+            avatarURLValue: nil,
+            itemCount: 0
+        )
+
+        router.open(linkedUser: reader, myUserId: "me")
+
+        #expect(router.selectedTab == .community)
+        #expect(router.isProfilePresented == false)
+        #expect(router.consumePendingLink(for: .community) == .user(user: reader))
+    }
+
+    @Test
+    func `my own username opens the Profil sheet and pushes nothing`() {
+        let router: TabRouter = .init()
+        router.select(.lists)
+        let myself: User = .init(
+            _id: "me",
+            _rev: "1",
+            username: "OlivierB_test4",
+            email: nil,
+            position: nil,
+            avatarURLValue: nil,
+            itemCount: 0
+        )
+
+        router.open(linkedUser: myself, myUserId: "me")
+
+        #expect(router.isProfilePresented)
+        #expect(router.selectedTab == .lists)
         #expect(router.pendingLink == nil)
     }
 }

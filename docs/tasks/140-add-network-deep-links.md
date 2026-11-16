@@ -1,6 +1,6 @@
 ---
 issue: 140
-status: todo
+status: to-test
 wiki: [[features/0092-entity-deep-links]], [[network]], [[features/0038-profile-behind-the-avatar]]
 note: Second task of the « Deep links » sprint, on the pattern of #138 (feature 0092). Split from #65 with #141 (lists), #142 (items, étagères), #143 (signed out, open sheets), #144 (Partager).
 created: 2026-11-16
@@ -52,8 +52,39 @@ A link to a reader or a group opens their screen in Ex-libris, on the Réseau ta
 
 ## Implementation
 
+Autopilot round 1, 2026-11-16, base `sprint/deep-links`.
+
+- iOS
+  - `Model/DeepLink/DeepLink.swift`: `.user(username:)`, `.group(slug:)`, whole-match regexes, `webURL` per case.
+  - `Features/MainNavigation/PendingLink.swift` (new): destination + tab. `TabRouter`: `pendingLink: PendingLink?`, `open(_:on:)`, `consumePendingLink(for:)`, `open(linkedUser:myUserId:)` (mine → Profil sheet, compared by id).
+  - `Features/MainNavigation/View+opensPendingLink.swift` (new): consume on appear + on change, used by `SearchTabView` (`.search`) and `NetworkView` (`.community`).
+  - `DeepLinkHandling`: user → `UserModel.getOrFetchUser(username:)`, group → `GroupModel.groupId(slug:)`, not found → `webURL` in Safari.
+  - `AppModels/User/UserModel+Username.swift`, `AppModels/Group/GroupModel+Slug.swift` (new; baseline pins both models' length). `by-usernames` reuses `UsersDTO`, key matched lowercased; `by-slug` reuses `GroupByIdDTO`.
+- Android
+  - `ui/navigation/DeepLink.kt`: sealed `Entity` / `User` / `Group`, `parse`, `webUrl`, `target`, `userTarget`. `LinkTarget.kt` (new): `Screen(tab, destination)` or `Profile`.
+  - `TabRouter.openLink(tab)`; `MainScaffold` pushes on `stacks.getValue(target.tab)`, or opens the Profil sheet.
+  - `UserRepository.getOrFetchUser(username)`, `GroupRepository.groupId(slug)`. Manifest: `pathPrefix` `/users/`, `/groups/`.
+- Server: `scripts/deeplinks/apple-app-site-association` gains `/users/*`, `/groups/*`. **`deploy.sh` not run**: deploy refused to the agent, owed by the user.
+- Decisions
+  - Username rule from inventaire.io `server/lib/regex.ts`: `[\p{Letter}\p{Number}_]{2,20}` (any script, not ASCII); iOS matches by Unicode scalar like JS.
+  - Slug rule: server `slugify` keeps letters of any script and `-`, adds `.1`, `.2` on collision → `[\p{Letter}0-9-]+(?:\.[0-9]+)?`.
+  - `by-usernames` also answers a former name (`stableUsername`): "is it me" compares ids.
+  - Lookup = `by-usernames` then `by-ids` (`getOrFetchUsers`), as the spec says; one request could be saved by storing the `by-usernames` answer.
+  - Android keeps no pending link: every tab stack exists up front.
+- Proof
+  - iOS build green (SwiftLint on); DeepLinkTests + TabRouterTests 21/21.
+  - Android `assembleDebug` green; DeepLinkTest 8/8, TabRouterTest 9/9.
+
 ## Review
 
 ## Verification
+
+Agent, iPhone 17 simulator, signed in:
+- ✅ launch signed in.
+- ✅ `/entity/isbn:9782070360024` → Fiche livre on Recherche (router change keeps entity links there).
+- ✅ `/entity/wd:Q535` → Auteur·ice on Recherche (first try fell back to Safari: `by-uris` failed once, retry fine; path unchanged by this task).
+- ❌ `/users/…`, `/groups/…` not opened on screen: AASA not deployed, Safari. Covered by unit tests.
+- ❌ Réseau / Profil sheet not tapped through (no UI automation). Covered by TabRouter tests.
+- Android: no emulator, build + unit tests only.
 
 ## Feedback

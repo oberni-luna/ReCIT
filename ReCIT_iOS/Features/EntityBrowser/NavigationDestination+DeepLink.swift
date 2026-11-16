@@ -38,4 +38,15 @@ extension NavigationDestination {
             return nil
         }
     }
+
+    /// A linked list, springing to the element linked as « Dans les listes » does, by that
+    /// element's entity uri. An element no longer in the list, or none linked, opens the list on
+    /// its first element.
+    init(
+        linkedList list: EntityList,
+        elementId: String?
+    ) {
+        let focused: EntityListItem? = list.elements.first { $0._id == elementId }
+        self = .entityList(id: list._id, focusURI: focused?.uri)
+    }
 }

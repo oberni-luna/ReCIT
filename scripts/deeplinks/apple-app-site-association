@@ -6,7 +6,8 @@
         "components": [
           { "/": "/entity/*", "comment": "A book, a work or an author, by its inventaire.io uri" },
           { "/": "/users/*", "comment": "A reader, by their username" },
-          { "/": "/groups/*", "comment": "A group, by its slug" }
+          { "/": "/groups/*", "comment": "A group, by its slug" },
+          { "/": "/lists/*", "comment": "A list, or one of its elements, by their ids" }
         ]
       }
     ]

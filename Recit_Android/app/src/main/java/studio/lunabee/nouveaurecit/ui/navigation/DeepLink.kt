@@ -1,8 +1,11 @@
 package studio.lunabee.nouveaurecit.ui.navigation
 
+import kotlinx.coroutines.CancellationException
 import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.GroupRepository
+import studio.lunabee.nouveaurecit.data.ListRepository
 import studio.lunabee.nouveaurecit.data.UserRepository
+import studio.lunabee.nouveaurecit.data.db.ListWithElements
 import studio.lunabee.nouveaurecit.data.model.EntityLabel
 import studio.lunabee.nouveaurecit.network.dto.EntityResultDto
 import java.net.URI
@@ -35,6 +38,12 @@ sealed interface DeepLink {
         override val webUrl: String get() = "https://inventaire.io/groups/$slug"
     }
 
+    /** A list, opened on its first element, or on the element [elementId] names when it has one. */
+    data class EntityList(val id: String, val elementId: String? = null) : DeepLink {
+        override val webUrl: String
+            get() = "https://inventaire.io/lists/$id" + elementId?.let { "/element/$it" }.orEmpty()
+    }
+
     companion object {
         const val HOST: String = "link.exlibris.lunabee.ovh"
 
@@ -49,11 +58,30 @@ sealed interface DeepLink {
          */
         private val SLUG: Regex = Regex("[\\p{L}0-9-]+(\\.[0-9]+)?")
 
+        /** A document id in inventaire.io's CouchDB: 32 lower-case hexadecimal digits. */
+        private val COUCH_ID: Regex = Regex("[0-9a-f]{32}")
+
         /** The link [url] is, or `null` for any URL that is not one of the app's links, or one of a shape it does not open. */
         fun parse(url: String): DeepLink? {
             val parsed: URI = runCatching { URI(url) }.getOrNull() ?: return null
             if (parsed.scheme != "https" || parsed.host != HOST) return null
             val components: List<String> = parsed.path.orEmpty().split("/").filter { it.isNotEmpty() }
+            return list(components) ?: page(components)
+        }
+
+        /** `lists/<id>`, or `lists/<id>/element/<elementId>`: the two paths inventaire.io's web client gives a list. */
+        private fun list(components: List<String>): DeepLink? {
+            if (components.firstOrNull() != "lists" || components.size < 2 || !COUCH_ID.matches(components[1])) return null
+            return when {
+                components.size == 2 -> EntityList(components[1])
+                components.size == 4 && components[2] == "element" && COUCH_ID.matches(components[3]) ->
+                    EntityList(components[1], components[3])
+                else -> null
+            }
+        }
+
+        /** `entity/<uri>`, `users/<username>`, `groups/<slug>`: a page named by one segment. */
+        private fun page(components: List<String>): DeepLink? {
             if (components.size != 2) return null
             val value: String = components[1]
             return when (components[0]) {
@@ -65,19 +93,46 @@ sealed interface DeepLink {
         }
 
         /**
-         * Where [link] lands, or `null` when inventaire.io knows no such entity, reader or group, or the entity is of a
-         * type the app has no screen for. Books and authors on Recherche, readers and groups on Réseau.
+         * Where [link] lands, or `null` when inventaire.io knows no such entity, reader, group or list, or the entity is
+         * of a type the app has no screen for. Books and authors on Recherche, readers and groups on Réseau, lists on
+         * Listes.
          */
         suspend fun target(
             link: DeepLink,
             entities: EntityRepository,
             users: UserRepository,
             groups: GroupRepository,
+            lists: ListRepository,
         ): LinkTarget? = when (link) {
             is Entity -> destination(link.uri, entities)?.let { LinkTarget.Screen(AppTab.Search, it) }
             is User -> users.getOrFetchUser(link.username)?.let { userTarget(it.id, users.myUserId.value) }
             is Group -> LinkTarget.Screen(AppTab.Network, Destination.Group(groups.groupId(link.slug)))
+            is EntityList -> linkedList(link.id, lists, users)?.let {
+                LinkTarget.Screen(AppTab.Lists, listDestination(it, link.elementId))
+            }
         }
+
+        /**
+         * The list Room holds, mine or a friend's; else inventaire.io's, stored with its creator read alongside, so
+         * that it opens read-only like a friend's. The creator failing to come leaves the list to open all the same.
+         */
+        private suspend fun linkedList(id: String, lists: ListRepository, users: UserRepository): ListWithElements? =
+            lists.storedList(id) ?: lists.fetchList(id)?.also { fetched ->
+                val creatorId: String = fetched.list.creatorId ?: return@also
+                try {
+                    users.getOrFetchUsers(listOf(creatorId))
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                }
+            }
+
+        /**
+         * A linked list, springing to the element linked as « Dans les listes » does, by that element's entity uri.
+         * An element no longer in the list, or none linked, opens the list on its first element.
+         */
+        fun listDestination(list: ListWithElements, elementId: String?): Destination =
+            Destination.EntityList(list.list.id, list.elements.firstOrNull { it.id == elementId }?.uri)
 
         /**
          * A reader's profile on Réseau, or the Profil sheet when the reader is me. Told apart by id rather than by

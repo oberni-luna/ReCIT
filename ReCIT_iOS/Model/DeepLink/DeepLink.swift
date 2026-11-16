@@ -20,6 +20,8 @@ enum DeepLink: Equatable, Sendable {
     case user(username: String)
     /// A group, by its slug.
     case group(slug: String)
+    /// A list, opened on its first element, or on the element `elementId` names when it has one.
+    case list(id: String, elementId: String?)
 
     /// The domain the links live on. The app claims it in its entitlements, and the server sends
     /// the two files that tie it to the iOS and Android apps.
@@ -34,6 +36,10 @@ enum DeepLink: Equatable, Sendable {
             URL(string: "https://inventaire.io/users/\(username)")
         case let .group(slug):
             URL(string: "https://inventaire.io/groups/\(slug)")
+        case let .list(id, nil):
+            URL(string: "https://inventaire.io/lists/\(id)")
+        case let .list(id, elementId?):
+            URL(string: "https://inventaire.io/lists/\(id)/element/\(elementId)")
         }
     }
 
@@ -42,19 +48,8 @@ enum DeepLink: Equatable, Sendable {
         guard url.scheme == "https", url.host() == Self.host else { return nil }
 
         let components: [String] = url.pathComponents.filter { $0 != "/" }
-        guard components.count == 2 else { return nil }
-
-        let value: String = components[1]
-        switch components[0] {
-        case "entity" where value.wholeMatch(of: /(?:isbn|wd|inv):[A-Za-z0-9-]+/) != nil:
-            self = .entity(uri: value)
-        case "users" where value.wholeMatch(of: Self.username) != nil:
-            self = .user(username: value)
-        case "groups" where value.wholeMatch(of: Self.slug) != nil:
-            self = .group(slug: value)
-        default:
-            return nil
-        }
+        guard let link = Self.list(at: components) ?? Self.page(at: components) else { return nil }
+        self = link
     }
 }
 
@@ -69,5 +64,42 @@ private extension DeepLink {
     /// then the `.1`, `.2`… it appends when the slug is taken. Digits as well, as in the uris.
     static var slug: Regex<Substring> {
         /[\p{Letter}0-9-]+(?:\.[0-9]+)?/.matchingSemantics(.unicodeScalar)
+    }
+
+    /// `lists/<id>`, or `lists/<id>/element/<elementId>`: the two paths inventaire.io's web client
+    /// gives a list.
+    static func list(at components: [String]) -> DeepLink? {
+        guard components.first == "lists", components.count > 1, isCouchId(components[1]) else { return nil }
+
+        switch components.count {
+        case 2:
+            return .list(id: components[1], elementId: nil)
+        case 4 where components[2] == "element" && isCouchId(components[3]):
+            return .list(id: components[1], elementId: components[3])
+        default:
+            return nil
+        }
+    }
+
+    /// `entity/<uri>`, `users/<username>`, `groups/<slug>`: a page named by one segment.
+    static func page(at components: [String]) -> DeepLink? {
+        guard components.count == 2 else { return nil }
+
+        let value: String = components[1]
+        switch components[0] {
+        case "entity" where value.wholeMatch(of: /(?:isbn|wd|inv):[A-Za-z0-9-]+/) != nil:
+            return .entity(uri: value)
+        case "users" where value.wholeMatch(of: Self.username) != nil:
+            return .user(username: value)
+        case "groups" where value.wholeMatch(of: Self.slug) != nil:
+            return .group(slug: value)
+        default:
+            return nil
+        }
+    }
+
+    /// A document id in inventaire.io's CouchDB: 32 lower-case hexadecimal digits.
+    static func isCouchId(_ segment: String) -> Bool {
+        segment.wholeMatch(of: /[0-9a-f]{32}/) != nil
     }
 }

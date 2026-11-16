@@ -39,6 +39,7 @@
                     android:pathPrefix="/entity/" />
                 <data android:pathPrefix="/users/" />
                 <data android:pathPrefix="/groups/" />
+                <data android:pathPrefix="/lists/" />
             </intent-filter>
         </activity>
 

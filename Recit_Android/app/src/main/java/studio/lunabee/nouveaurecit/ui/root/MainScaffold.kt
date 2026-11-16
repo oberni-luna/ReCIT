@@ -129,14 +129,15 @@ fun MainScaffold() {
     }
 
     // An Ex-libris link: the screen it names, alone above the root of its tab — Recherche for a book or an author,
-    // Réseau for a reader or a group — or the Profil sheet for my own name; inventaire.io's page in the browser when
-    // the app cannot open it — unknown entity, reader or group, network down — as when the app is not installed.
+    // Réseau for a reader or a group, Listes for a list — or the Profil sheet for my own name; inventaire.io's page
+    // in the browser when the app cannot open it — unknown entity, reader, group or list, a list I may not see,
+    // network down — as when the app is not installed.
     LaunchedEffect(Unit) {
         container.incomingLinks.filterNotNull().collect { url ->
             container.incomingLinks.value = null
             val link: DeepLink = DeepLink.parse(url) ?: return@collect
             val target: LinkTarget? = try {
-                DeepLink.target(link, container.entities, container.users, container.groups)
+                DeepLink.target(link, container.entities, container.users, container.groups, container.lists)
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (_: Exception) {

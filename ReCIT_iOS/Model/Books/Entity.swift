@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol Entity: Identifiable {
+nonisolated protocol Entity: Identifiable {
     var uri: String {get}
     var extract: WpExtract? {get set}
     var image: String? {get}

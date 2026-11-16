@@ -81,7 +81,8 @@ comme pour ses livres.
 
 Le portillon d'appartenance (`ShelfModel.isMembershipWriteInFlight`) n'a pas bougé : il est global
 à l'app, et une synchronisation des étagères d'un ami est un lecteur de plus qui a raison de se
-tenir tranquille pendant qu'une écriture optimiste sur les miennes attend sa réponse.
+tenir tranquille pendant qu'une écriture optimiste sur les miennes attend sa réponse. (#125 l'a
+remplacé par `InFlightWrites`, par étagère : voir l'ADR 0009.)
 
 **La bande** (issue 0092) — `Features/Community/UserShelvesSection.swift`, une `Section` dont le
 corps est le carrousel. `ShelfRowView` est repris **tel quel**, et c'est tout l'argument pour le

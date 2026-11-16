@@ -16,6 +16,7 @@ Living knowledge base for Ex-libris. Pages link to each other and to tasks with 
 - [platform-and-design](platform-and-design.md) — iOS 18, iPhone Duo, dark mode, design system
 - [android](android.md) — the Android port
 - [testing](testing.md) — test suites and the end-to-end scenario
+- [performance](performance.md) — how iOS is measured, the baseline, before/after per perf task
 
 ## Folders
 

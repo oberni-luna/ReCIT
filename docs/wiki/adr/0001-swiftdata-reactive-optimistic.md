@@ -111,6 +111,7 @@ mid-way would leave a worse state than a clearly reported partial one.
   duplicate `_id` traps.
 - Heavy syncs stay on `@MainActor`; move to a background `ModelActor` only if measured to
   jank — do not pre-optimize.
+  Measured by #124: [ADR 0009](0009-sync-off-the-main-actor.md) moves the inventory sync off it.
 - Tests: mock `APIService`, in-memory store with a unique per-container URL, suites
   `.serialized`.
 

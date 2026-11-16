@@ -9,9 +9,11 @@ import Foundation
 
 extension RootView {
     /// Pulls everything of the signed-in reader's from inventaire.io, in `UserDataSync`'s order.
+    /// A call while a sync runs does nothing: that sync already pulls everything.
     func refreshUserData() {
         Task {
-            guard authModel.isAuthenticated else { return }
+            guard authModel.isAuthenticated, let claim = syncStatus.beginRefresh() else { return }
+            defer { syncStatus.endRefresh(claim) }
             await userDataSync.run(modelContext: modelContext)
         }
     }
@@ -22,7 +24,6 @@ extension RootView {
             userModel: userModel,
             shelfModel: shelfModel,
             inventoryModel: inventoryModel,
-            entityModel: entityModel,
             transactionModel: transactionModel,
             groupModel: groupModel,
             listModel: listModel,

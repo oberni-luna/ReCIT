@@ -26,8 +26,8 @@ an emulator.
     Let's Encrypt certificate from certbot (first one valid until 2027-02-13, renewed by the system timer). Its own
     subdomain, apart from the backend's `exlibris.lunabee.ovh` (#93), whose site sends every path to the backend.
   - `apple-app-site-association`: app `VH79XGK7M2.studio.lunabee.nouveau-recit`, components `/entity/*`.
-  - `assetlinks.json`: `studio.lunabee.exlibris.android` (upload key) and `studio.lunabee.exlibris.android.dev`
-    (debug key).
+  - `assetlinks.json`: `studio.lunabee.exlibris.android` (upload key and Play app signing key) and
+    `studio.lunabee.exlibris.android.dev` (debug key).
   - `deploy.sh`: copies the files, asks certbot on a first run, `nginx -t` before every reload, then checks with
     `curl`. Run it again after editing any of them.
 - **iOS**
@@ -54,8 +54,9 @@ an emulator.
   session call `by-uris` with `autocreate=true`. Any new path that ends in a request needs the same whole-match check.
 - **Safari's address bar never opens the app.** Only a link touched from another app or another domain does; on the
   simulator, `xcrun simctl openurl` works once `swcd` has fetched the file, about 30 s after the install.
-- **The Play build is not verified yet.** Google re-signs it, so `assetlinks.json` needs the Play app signing key's
-  SHA-256 (Play Console › Intégrité de l'app) before Play-installed apps open the links: #145.
+- **Google re-signs the Play build**, so `assetlinks.json` names the Play app signing key (Play Console › Intégrité de
+  l'app › Signature de l'app, `4E:C2…`) beside the upload key (#145). Google's statements API lists both; the first Play
+  release that ships the links is still to be checked with `adb shell pm get-app-links studio.lunabee.exlibris.android`.
 
 ## Known limits
 

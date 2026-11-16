@@ -165,7 +165,7 @@ struct TabRouterTests {
 
         let sheet: LinkSheetContent? = router.open(.book(anchor: .edition(uri: "isbn:9782070360024")), on: .search, isModalUp: true)
 
-        #expect(sheet == .destination(.book(anchor: .edition(uri: "isbn:9782070360024"))))
+        #expect(sheet == .destination(.book(anchor: .edition(uri: "isbn:9782070360024")), tab: .search))
         #expect(router.selectedTab == .lists)
         #expect(router.pendingLink == nil)
     }
@@ -177,9 +177,31 @@ struct TabRouterTests {
 
         let sheet: LinkSheetContent? = router.open(.entityList(id: "l1"), on: .lists, isModalUp: false)
 
-        #expect(sheet == .destination(.entityList(id: "l1")))
+        #expect(sheet == .destination(.entityList(id: "l1"), tab: .lists))
         #expect(router.isProfilePresented)
         #expect(router.selectedTab == .inventory)
+        #expect(router.pendingLink == nil)
+    }
+
+    @Test
+    func `a link sheet that could not be presented pushes on its tab and closes the Profil`() {
+        let router: TabRouter = .init()
+        router.openProfile()
+
+        router.openWithoutSheet(.destination(.entityList(id: "l1"), tab: .lists))
+
+        #expect(router.isProfilePresented == false)
+        #expect(router.selectedTab == .lists)
+        #expect(router.consumePendingLink(for: .lists) == .entityList(id: "l1"))
+    }
+
+    @Test
+    func `my Profil in a link sheet that could not be presented opens the Profil sheet`() {
+        let router: TabRouter = .init()
+
+        router.openWithoutSheet(.profile)
+
+        #expect(router.isProfilePresented)
         #expect(router.pendingLink == nil)
     }
 
@@ -202,7 +224,7 @@ struct TabRouterTests {
 
         let sheet: LinkSheetContent? = router.open(linkedUser: reader, myUserId: "me", isModalUp: true)
 
-        #expect(sheet == .destination(.user(user: reader)))
+        #expect(sheet == .destination(.user(user: reader), tab: .community))
         #expect(router.pendingLink == nil)
     }
 

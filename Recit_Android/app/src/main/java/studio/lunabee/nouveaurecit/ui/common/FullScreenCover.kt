@@ -74,10 +74,10 @@ import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.network.ImageUrl
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 import java.util.function.Consumer
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /*
  * iOS `FullScreenCoverView` + `FullScreenCoverImage` (features 0029, 0081 and 0085), the Plein écran: a

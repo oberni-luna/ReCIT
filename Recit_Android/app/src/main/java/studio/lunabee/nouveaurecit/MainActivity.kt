@@ -53,10 +53,10 @@ class MainActivity : ComponentActivity() {
      * same page on inventaire.io in the browser, signed in or not, as it would without the app, and never waits.
      */
     private fun receive(intent: Intent?) {
-        val url: String? = intent?.dataString
-        val webUrl: String? = url?.takeIf { DeepLink.parse(it) == null }?.let(DeepLink::inventaireUrl)
+        val url: String = intent?.dataString ?: return
+        val webUrl: String? = url.takeIf { DeepLink.parse(it) == null }?.let(DeepLink::inventaireUrl)
         if (webUrl == null) {
-            (application as RecitApplication).container.incomingLinks.value = url
+            (application as RecitApplication).container.incomingLinks.receive(url)
         } else {
             runCatching { startActivity(Intent(Intent.ACTION_VIEW, webUrl.toUri())) }
         }

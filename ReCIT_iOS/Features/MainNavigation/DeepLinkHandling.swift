@@ -22,13 +22,13 @@ import SwiftUI
 /// it, so that my own username and étagères are not taken for a stranger's — then opens with the
 /// same rules. A link opened while a modal covers the tabs opens in a `LinkSheet` over it,
 /// presented by `LinkSheetPresenter` with `sheetEnvironment`, rather than pushed on a tab hidden
-/// underneath.
+/// underneath; pushed on its tab after all when no sheet could be presented.
 struct DeepLinkHandling: ViewModifier {
-    let router: TabRouter
     /// What the link sheet's screens read: UIKit presents it with an empty environment.
     let sheetEnvironment: AppEnvironment
 
     @Environment(AuthModel.self) private var authModel: AuthModel
+    @Environment(TabRouter.self) private var router: TabRouter
     @Environment(EntityModel.self) private var entityModel: EntityModel
     @Environment(UserModel.self) private var userModel: UserModel
     @Environment(GroupModel.self) private var groupModel: GroupModel
@@ -61,8 +61,8 @@ struct DeepLinkHandling: ViewModifier {
                 guard let linkToOpen = router.receive(link, isMyUserKnown: isMyUserKnown) else { return }
                 Task { await open(linkToOpen) }
             }
-            .onChange(of: userModel.myUser?._id) { _, myUserId in
-                guard myUserId != nil, let link = router.takeWaitingLink() else { return }
+            .onChange(of: userModel.myUser?._id) {
+                guard isMyUserKnown, let link = router.takeWaitingLink() else { return }
                 Task { await open(link) }
             }
     }
@@ -128,15 +128,18 @@ struct DeepLinkHandling: ViewModifier {
         return true
     }
 
-    /// The link sheet the router asked for, if any, over the modal on top.
+    /// The link sheet the router asked for, if any, over the modal on top; opened on the tabs
+    /// when there is none to present it from.
     private func present(_ content: LinkSheetContent?) {
-        switch content {
-        case let .destination(destination):
+        guard let content else { return }
+        let isPresented: Bool = switch content {
+        case let .destination(destination, _):
             LinkSheetPresenter.present(LinkSheet(destination).modifier(sheetEnvironment))
         case .profile:
             LinkSheetPresenter.present(ProfileSheet().modifier(sheetEnvironment))
-        case nil:
-            break
+        }
+        if isPresented == false {
+            router.openWithoutSheet(content)
         }
     }
 

@@ -44,7 +44,7 @@ fun WelcomeScreen(onSignIn: () -> Unit, onCreateAccount: () -> Unit) {
     val container: AppContainer = LocalAppContainer.current
     val coverWall: CoverWallRepository = container.coverWall
     val paths: List<String> by coverWall.paths.collectAsStateWithLifecycle()
-    val incomingLink: String? by container.incomingLinks.collectAsStateWithLifecycle()
+    val incomingLink: String? by container.incomingLinks.waiting.collectAsStateWithLifecycle()
     val isLinkWaiting: Boolean = incomingLink?.let { DeepLink.parse(it) } != null
     LaunchedEffect(Unit) { coverWall.refresh() }
 

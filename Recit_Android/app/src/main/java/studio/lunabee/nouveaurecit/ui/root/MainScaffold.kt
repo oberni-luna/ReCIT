@@ -58,9 +58,8 @@ import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.sorting.SortApplyFailure
@@ -119,7 +118,7 @@ fun MainScaffold() {
     }
     val badge: Int by badgeCount.collectAsState(initial = 0)
     val genericError: String = stringResource(R.string.error_generic)
-    var linkDialogTarget: LinkTarget? by remember { mutableStateOf(null) }
+    var linkDialogTarget: LinkTarget? by rememberSaveable(stateSaver = linkTargetSaver) { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
         launch {
@@ -138,14 +137,10 @@ fun MainScaffold() {
     // Réseau for a reader or a group, Listes for a list, Inventaire for a copy or an étagère — or the Profil sheet for
     // my own name; inventaire.io's page in the browser when the app cannot open it — unknown entity, reader, group,
     // list, copy or étagère, one I may not see, a stranger's étagère, network down — as when the app is not installed.
-    // Over an overlay, the screen goes in the link dialog instead (issue 143). A link opened signed out has waited in
-    // `incomingLinks`, and is taken here once signed in — once my user id is known, too: the last session's, put back
-    // at launch, or the one the first sync reads, without which my own name and étagères would be a stranger's. A
-    // newer link that arrived meanwhile replaces it; a session that ends meanwhile leaves it waiting for the next.
+    // Over an overlay, the screen goes in the link dialog instead (issue 143). A link waits in `incomingLinks` until
+    // my user id is known; a session that ends meanwhile leaves it waiting for the next.
     LaunchedEffect(Unit) {
-        container.incomingLinks.filterNotNull().collect { url ->
-            container.users.myUserId.filterNotNull().first()
-            if (!container.incomingLinks.compareAndSet(url, null)) return@collect
+        container.incomingLinks.toOpen(container.users.myUserId).collect { url ->
             val link: DeepLink = DeepLink.parse(url) ?: return@collect
             val target: LinkTarget? = try {
                 DeepLink.target(
@@ -307,6 +302,12 @@ private fun failureMessage(context: Context, error: Throwable): String? = when (
     is SortApplyFailure.BooksNoLongerInInventory -> context.getString(R.string.sort_error_books_missing, error.shelfName)
     else -> error.localizedMessage
 }
+
+/** The link dialog survives a configuration change, as the tabs do: the activity declares no `configChanges`. */
+private val linkTargetSaver: Saver<LinkTarget?, String> = Saver(
+    save = { target -> target?.let { Json.encodeToString(LinkTarget.serializer(), it) } },
+    restore = { saved -> Json.decodeFromString(LinkTarget.serializer(), saved) },
+)
 
 /** The flow survives a configuration change at its start route; its own stack does not. */
 private val sortFlowSaver: Saver<SortFlowPresentation, String> = Saver(

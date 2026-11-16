@@ -124,8 +124,8 @@ struct MainTabView: View {
                 }
             }
         }
-        // Inside the injection below, so the profile's screens get it too: a transaction leads
-        // to a reader's shelves, which need a focus. See `ProfileSheet`.
+        // The profile's screens get the router from `RootView`, and a focus of their own from
+        // `ProfileSheet` (`ownsShelfFocus()`): the veil of the one below would sit under the sheet.
         .sheet(isPresented: $router.isProfilePresented) {
             ProfileSheet()
         }

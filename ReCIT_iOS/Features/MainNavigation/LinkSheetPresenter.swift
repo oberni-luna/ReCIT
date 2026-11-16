@@ -35,11 +35,13 @@ enum LinkSheetPresenter {
         return presented.last
     }
 
-    /// Presents `sheet` as a page sheet over the modal on top. Nothing happens when none is up:
-    /// the link is pushed on its tab then.
-    static func present<Sheet: View>(_ sheet: Sheet) {
-        guard let modalOnTop else { return }
+    /// Presents `sheet` as a page sheet over the modal on top.
+    /// - Parameter sheet: What the sheet shows.
+    /// - Returns: Whether it was presented: `false` when no modal is up to present it from.
+    static func present<Sheet: View>(_ sheet: Sheet) -> Bool {
+        guard let modalOnTop else { return false }
         let host: UIHostingController<Sheet> = .init(rootView: sheet)
         modalOnTop.present(host, animated: true)
+        return true
     }
 }

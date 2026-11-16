@@ -156,7 +156,7 @@ struct RootView: View {
         }
         // Around both branches: a link opened signed out waits for the session, and the
         // welcome screen says so.
-        .modifier(DeepLinkHandling(router: router, sheetEnvironment: appEnvironment))
+        .modifier(DeepLinkHandling(sheetEnvironment: appEnvironment))
         .modifier(appEnvironment)
         // `initial`, so a launch that finds no session empties the store as a sign-out would:
         // a session can end while the app is not running to see it go.

@@ -126,10 +126,9 @@ final class TabRouter {
         isModalUp: Bool
     ) -> LinkSheetContent? {
         guard isModalUp == false, isProfilePresented == false else {
-            return .destination(destination)
+            return .destination(destination, tab: tab)
         }
-        selectedTab = tab
-        pendingLink = .init(destination: destination, tab: tab)
+        push(destination, on: tab)
         return nil
     }
 
@@ -153,6 +152,18 @@ final class TabRouter {
         return .profile
     }
 
+    /// A link sheet the router asked for that could not be presented — the Profil's flag still
+    /// up while its sheet goes, a modal gone in between: its screen pushed on its tab, the
+    /// Profil closed so the tab shows; the Profil sheet itself for my own username.
+    func openWithoutSheet(_ content: LinkSheetContent) {
+        switch content {
+        case let .destination(destination, tab):
+            push(destination, on: tab)
+        case .profile:
+            openProfile()
+        }
+    }
+
     /// The screen a link asked of `tab`, forgetting it in the same move so it is pushed once. A
     /// link meant for another tab stays where it is, for that tab to take.
     func consumePendingLink(for tab: MainTabView.TabConfig) -> NavigationDestination? {
@@ -166,5 +177,11 @@ final class TabRouter {
     func consumeSearchFieldRequest() -> Bool {
         defer { wantsSearchField = false }
         return wantsSearchField
+    }
+
+    private func push(_ destination: NavigationDestination, on tab: MainTabView.TabConfig) {
+        isProfilePresented = false
+        selectedTab = tab
+        pendingLink = .init(destination: destination, tab: tab)
     }
 }

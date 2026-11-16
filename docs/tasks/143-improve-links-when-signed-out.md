@@ -1,6 +1,6 @@
 ---
 issue: 143
-status: to-test
+status: to-close
 wiki: [[features/0092-entity-deep-links]], [[features/0011-ex-libris-pre-login-onboarding]], [[features/0038-profile-behind-the-avatar]], [[architecture]]
 note: Fifth task of the « Deep links » sprint. Comes after #140, #141 and #142, which add the other links and the per-tab push; it changes the same files (TabRouter, DeepLinkHandling, MainScaffold). Split from #65, plus the limit accepted in #138's review.
 created: 2026-11-16
@@ -45,7 +45,7 @@ Two cases where an Ex-libris link seems to do nothing today: the app is signed o
 
 ## Implementation
 
-stacked on: wa/144-add-share-links @ 920ac245
+stacked on: wa/144-add-share-links @ d2d57ec6
 
 Autopilot round 1, 2026-11-16.
 
@@ -69,6 +69,23 @@ Autopilot round 1, 2026-11-16.
   - Android build green; TabRouterTest 14 (7 new), DeepLinkTest 17. No Android test for « waits signed out » (StateFlow simply not cleared).
 
 ## Review
+
+### Round validation — 2026-11-16
+
+Rebased onto the reviewed #144 (`d2d57ec6`). Spec validated by Olivier (sprint-wide go-ahead; retest on the sprint branch to follow).
+
+LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. One 🟠 and eight 🟡, fixed in autofix round 1, plus one 🟡 from round 1 fixed in round 2; re-verified clean:
+- 🟠 [correctness] Android: under `singleTask` the launcher's MAIN intent (null data) overwrote a link waiting signed out → `MainActivity.receive` returns on null `dataString`.
+- 🟡 [correctness] iOS `onChange(of: myUser?._id)` checked the user, not the session → guards on `isMyUserKnown`.
+- 🟡 [correctness] a sheet asked while no controller is presented (Profil mid swipe-down) dropped the link → `LinkSheetPresenter.present` returns `Bool`, fallback `TabRouter.openWithoutSheet` (push on the tab, or the Profil); `LinkSheetContent.destination(_, tab:)`; 2 tests.
+- 🟡 [correctness] Android link dialog lost on rotation → `rememberSaveable` with a JSON saver, `LinkTarget` `@Serializable`.
+- 🟡 [structure] Android waiting / newer-replaces logic untested in a composable → plain `ui/navigation/IncomingLinks` (`receive`, `waiting`, `toOpen(myUserId)` with `compareAndSet`), `IncomingLinksTest` (3, snake_case after round 2).
+- 🟡 [style] `linkWaitingLine` computed subview → `WelcomeLinkWaitingLine.swift`.
+- 🟡 [style] stale `MainTabView` comment → names `ownsShelfFocus()`.
+- 🟡 [elegance] router passed twice → `DeepLinkHandling` reads it from the environment only.
+- 🟡 [style] import order (`FullScreenCover.kt`).
+
+Proof after autofix: iOS build green, DeepLinkTests, TabRouterTests (+2), LinkedListTests, LinkedInventoryItemAndShelfTests, SharingVisibilityTests, ListElementEntityTests pass; Android build green, IncomingLinksTest 3, DeepLinkTest 20, TabRouterTest 14.
 
 ## Verification
 

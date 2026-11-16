@@ -109,7 +109,7 @@ struct WelcomeView: View {
             actions
 
             if isLinkWaiting {
-                linkWaitingLine
+                WelcomeLinkWaitingLine()
             }
 
             note
@@ -162,16 +162,6 @@ struct WelcomeView: View {
         .padding(.horizontal, .medium)
     }
 
-    /// The link opened before signing in, which opens once signed in.
-    private var linkWaitingLine: some View {
-        Text("welcome.link_waiting")
-            .textStyle(.content300)
-            .foregroundStyle(.foregroundDefault)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, .medium)
-            .accessibilityIdentifier(AccessibilityID.linkWaiting)
-    }
-
     /// Where the covers come from, and where the account will live.
     private var note: some View {
         Text("welcome.footnote")
@@ -191,12 +181,6 @@ extension WelcomeView {
         var copy: Self = self
         copy.isLinkWaiting = isLinkWaiting
         return copy
-    }
-}
-
-private extension WelcomeView {
-    enum AccessibilityID {
-        static let linkWaiting: String = "e2e.welcome.linkWaiting"
     }
 }
 

@@ -1,6 +1,6 @@
 ---
 issue: 141
-status: to-test
+status: to-close
 wiki: [[features/0092-entity-deep-links]], [[lists]], [[features/0079-the-lists-a-book-is-in]], [[features/0068-lists-in-my-network]]
 note: Third task of the « Deep links » sprint. Builds on #140, which teaches TabRouter to push a link on a given tab. Split from #65.
 created: 2026-11-16
@@ -48,8 +48,6 @@ A link to a list, or to one book in a list, opens that list in Ex-libris, on the
 
 ## Implementation
 
-stacked on: wa/140-add-network-deep-links @ 51fad68d
-
 Autopilot round 1, 2026-11-16.
 
 - iOS
@@ -70,6 +68,16 @@ Autopilot round 1, 2026-11-16.
   - Android build green; DeepLinkTest 12/12, TabRouterTest 9/9.
 
 ## Review
+
+### Round validation — 2026-11-16
+
+Rebased onto `sprint/deep-links` after #140 landed (PR #147); no longer stacked. Spec validated by Olivier on his iPhone.
+
+LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. Two 🟡, both fixed by autofix round 1, re-verified clean:
+- 🟡 `ListModel+DeepLink.swift:45` [structure] upsert closures duplicated `syncLists`' → `ListModel+Upsert.swift` (new) `upsertLists(_:deleteMissing:scope:modelContext:)`, used by both; `syncLists` keeps `deleteMissing: true` + creator scope, `fetchList` no deletion. Class body now 249 lines: the `type_body_length` baseline entry (255) is unused, baseline untouched.
+- 🟡 Android `DeepLink.kt:120` [correctness] `runCatching` swallowed `CancellationException` → try/catch rethrowing it.
+
+Proof after autofix: iOS build green, DeepLinkTests + LinkedListTests + TabRouterTests pass; Android build green, DeepLinkTest 12, TabRouterTest 9.
 
 ## Verification
 

@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.ui.navigation
 
+import kotlinx.coroutines.CancellationException
 import studio.lunabee.nouveaurecit.data.EntityRepository
 import studio.lunabee.nouveaurecit.data.GroupRepository
 import studio.lunabee.nouveaurecit.data.ListRepository
@@ -117,7 +118,13 @@ sealed interface DeepLink {
          */
         private suspend fun linkedList(id: String, lists: ListRepository, users: UserRepository): ListWithElements? =
             lists.storedList(id) ?: lists.fetchList(id)?.also { fetched ->
-                fetched.list.creatorId?.let { creatorId -> runCatching { users.getOrFetchUsers(listOf(creatorId)) } }
+                val creatorId: String = fetched.list.creatorId ?: return@also
+                try {
+                    users.getOrFetchUsers(listOf(creatorId))
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                }
             }
 
         /**

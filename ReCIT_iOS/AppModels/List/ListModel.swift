@@ -68,18 +68,12 @@ final class ListModel: OptimisticMutating {
             listsDTO.lists.filter { $0.creator.map(creatorIds.contains) ?? false }
         }
 
-        let baseUrl: String = apiService.baseUrl()
         // Upsert in place (never delete+reinsert) so any open list view stays reactive.
-        let synced: [EntityList] = try modelContext.upsert(
+        let synced: [EntityList] = try upsertLists(
             dtos,
-            dtoID: { $0._id },
-            modelID: { (list: EntityList) in list._id },
-            make: { EntityList(listDTO: $0, baseUrl: baseUrl) },
-            update: { list, dto in list.update(listDTO: dto, baseUrl: baseUrl, modelContext: modelContext) },
             deleteMissing: true,
-            scope: { list in
-                list.creatorId.map(creatorIds.contains) ?? claimsUnstamped
-            }
+            scope: { $0.creatorId.map(creatorIds.contains) ?? claimsUnstamped },
+            modelContext: modelContext
         )
         // Stamped from the request when the answer does not say and only one reader was asked
         // about: these are that reader's lists.

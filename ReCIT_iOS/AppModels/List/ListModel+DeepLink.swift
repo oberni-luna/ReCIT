@@ -41,14 +41,7 @@ extension ListModel {
         )
         guard let dto = answer?.lists[id], dto.creator != nil else { return nil }
 
-        let baseUrl: String = apiService.baseUrl()
-        let lists: [EntityList] = try modelContext.upsert(
-            [dto],
-            dtoID: { $0._id },
-            modelID: { (list: EntityList) in list._id },
-            make: { EntityList(listDTO: $0, baseUrl: baseUrl) },
-            update: { list, dto in list.update(listDTO: dto, baseUrl: baseUrl, modelContext: modelContext) }
-        )
+        let lists: [EntityList] = try upsertLists([dto], modelContext: modelContext)
         try modelContext.save()
         return lists.first
     }

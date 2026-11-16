@@ -29,7 +29,7 @@ import SwiftData
 @Observable
 final class GroupModel: OptimisticMutating {
 
-    private static let signedInReaderKey: String = "groups.signedInReader"
+    static let signedInReaderKey: String = "groups.signedInReader"
     /// The roles that make a group one of mine, and so a group the store keeps. A declined
     /// invitation is not one: `GET /api/groups` stops naming the group, and so does the device.
     private static let storedRoles: Set<GroupRole> = [.admin, .member, .invited, .requested]

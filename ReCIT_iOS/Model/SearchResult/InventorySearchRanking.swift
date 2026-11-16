@@ -41,8 +41,6 @@ enum InventorySearchRanking {
         let matches: [Candidate]
         /// Every match, counted before the cap.
         let totalCount: Int
-
-        static let none: Outcome = .init(matches: [], totalCount: 0)
     }
 
     /// How many matches the section shows. Three, because the keyboard covers everything below
@@ -66,21 +64,20 @@ enum InventorySearchRanking {
         matching query: String,
         limit: Int = displayLimit
     ) -> Outcome {
-        let trimmed: String = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return .none }
-
-        // `localizedStandardContains` is the app's matching rule everywhere a user types:
-        // case- and diacritic-insensitive, so « emile zola » finds « Émile Zola ».
-        let matches: [Candidate] = candidates
-            .filter { $0.searchIndex.localizedStandardContains(trimmed) }
-            .sorted { first, second in
-                if first.isMine != second.isMine { return first.isMine }
-                return first.created > second.created
-            }
+        let found: LocalSearchMatches<Candidate> = .matching(query, limit: limit) { text in
+            // `localizedStandardContains` is the app's matching rule everywhere a user types:
+            // case- and diacritic-insensitive, so « emile zola » finds « Émile Zola ».
+            candidates
+                .filter { $0.searchIndex.localizedStandardContains(text) }
+                .sorted { first, second in
+                    if first.isMine != second.isMine { return first.isMine }
+                    return first.created > second.created
+                }
+        }
 
         return .init(
-            matches: Array(matches.prefix(max(limit, 0))),
-            totalCount: matches.count
+            matches: found.items,
+            totalCount: found.totalCount
         )
     }
 }

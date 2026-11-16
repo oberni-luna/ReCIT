@@ -1,6 +1,6 @@
 ---
 issue: 140
-status: to-test
+status: to-close
 wiki: [[features/0092-entity-deep-links]], [[network]], [[features/0038-profile-behind-the-avatar]]
 note: Second task of the « Deep links » sprint, on the pattern of #138 (feature 0092). Split from #65 with #141 (lists), #142 (items, étagères), #143 (signed out, open sheets), #144 (Partager).
 created: 2026-11-16
@@ -76,6 +76,16 @@ Autopilot round 1, 2026-11-16, base `sprint/deep-links`.
   - Android `assembleDebug` green; DeepLinkTest 8/8, TabRouterTest 9/9.
 
 ## Review
+
+### Round validation — 2026-11-16
+
+LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. Spec validated by Olivier on his iPhone (links open once the AASA was read in developer mode).
+
+- 🟡 `DeepLinkHandling.swift:55` [correctness] cold launch: `myUser` nil until `syncMyUser` returns, my own link pushes my profile instead of the Profil sheet → **deferred to #143** (Olivier).
+- 🟡 `DeepLinkHandling.swift:31` [correctness] URL on `DeepLink.host` the parser refuses (`/users/a%7Cb`, `/users/x/inventory`) opens the app and does nothing; should open the same path on inventaire.io; Android `MainScaffold.kt:137` too → **deferred to #143** (Olivier).
+- 🟡 `TabRouterTests.swift:166` [style] `User` built by hand twice → `User.mock(...)` → **deferred to #143** (Olivier).
+
+Deferred rather than fixed here: #141, #142, #144, #143 are stacked on this branch and rewrote these files (#143 moved `DeepLinkHandling` to `RootView`); fixing here would force a conflicting rebase of the whole stack.
 
 ## Verification
 

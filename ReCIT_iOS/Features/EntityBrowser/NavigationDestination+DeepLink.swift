@@ -90,9 +90,7 @@ extension NavigationDestination {
         if shelfModel.localShelf(id: id, modelContext: modelContext) != nil {
             return .shelf(id: id)
         }
-        guard (try? await shelfModel.fetchShelf(id: id, ownedByOneOf: owners, modelContext: modelContext)) != nil else {
-            return nil
-        }
-        return .shelf(id: id)
+        let shelf: Shelf? = try? await shelfModel.fetchShelf(id: id, ownedByOneOf: owners, modelContext: modelContext)
+        return shelf.map { .shelf(id: $0._id) }
     }
 }

@@ -12,7 +12,8 @@ extension ShelfModel {
     /// Reads an étagère the store does not hold from inventaire.io, and upserts it beside the others
     /// when one of `owners` owns it, holding those of its books the store holds. Anyone else's is not
     /// stored: its books would be taken for mine or a friend's by the local search and « Chez mes
-    /// amis ».
+    /// amis ». Its books are read first, then the étagère and its books are written in one save: when
+    /// reading them fails, the store is left as it was.
     /// - Parameters:
     ///   - id: The étagère's inventaire.io id.
     ///   - owners: The readers whose étagères may enter the store: me and my friends.
@@ -28,6 +29,7 @@ extension ShelfModel {
         let answer: ShelvesResponseDTO? = try await apiService.fetchData(fromEndpoint: "/api/shelves/by-ids?ids=\(id)")
         guard let dto = answer?.shelves[id], owners.contains(dto.owner) else { return nil }
 
+        let itemIds: [String] = try await fetchItemIds(ofShelves: [id])[id] ?? []
         let shelves: [Shelf] = try modelContext.upsert(
             [dto],
             dtoID: { $0._id },
@@ -35,8 +37,9 @@ extension ShelfModel {
             make: { Shelf(dto: $0) },
             update: { shelf, dto in shelf.update(from: dto) }
         )
+        let shelf: Shelf? = shelves.first
+        shelf?.items = localItems(ids: itemIds, modelContext: modelContext)
         try modelContext.save()
-        try await linkItems(shelfIds: [id], modelContext: modelContext)
-        return shelves.first
+        return shelf
     }
 }

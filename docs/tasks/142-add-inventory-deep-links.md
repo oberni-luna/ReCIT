@@ -1,6 +1,6 @@
 ---
 issue: 142
-status: to-test
+status: to-close
 wiki: [[features/0092-entity-deep-links]], [[shelves]], [[features/0019-a-friends-shared-shelves]], [[features/0089-tabbed-shelf-screen]]
 note: Fourth task of the « Deep links » sprint. Builds on #140, which teaches TabRouter to push a link on a given tab. Split from #65.
 created: 2026-11-16
@@ -51,8 +51,6 @@ A link to a copy of a book or to an étagère opens it in Ex-libris, on the Inve
 
 ## Implementation
 
-stacked on: wa/141-add-list-deep-links @ 0f710554
-
 Autopilot round 1, 2026-11-16.
 
 - iOS
@@ -73,6 +71,20 @@ Autopilot round 1, 2026-11-16.
   - Android build green; DeepLinkTest 14, TabRouterTest 9.
 
 ## Review
+
+### Round validation — 2026-11-16
+
+Rebased onto `sprint/deep-links` after #141 landed (PR #148); no longer stacked. Spec validated by Olivier (sprint-wide go-ahead; retest on the sprint branch to follow).
+
+LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. Six 🟡, then two rounds of follow-ups on the fixes; all fixed in 3 autofix rounds, re-verified clean:
+- [correctness] iOS étagère saved before `linkItems`: a failed book read left an empty étagère stored → `fetchShelf` reads the books first (`fetchItemIds(ofShelves:)`), then upserts, sets `items` and saves once in the caller's context, no await in between. A first fix through a second `ModelContext` was dropped (could leave `InventoryItem.shelves` stale). New test: books unreadable → nil, nothing stored.
+- [correctness] Android same partial write → membership fetched first, `upsert` + `replaceItems` in one `db.withTransaction`.
+- [structure] one `with-items` request: `fetchItemIds(ofShelves:)` shared by `linkItems` (private again) and `fetchShelf`; ShelfModel.swift kept at 578 lines for its pinned baseline counts. `linkItems` now saves even with no change (harmless).
+- [style] ShelfModel instance properties together below the statics; 3 stale `type_contents_order` baseline entries removed.
+- [elegance] resolver uses the returned shelf (`shelf.map { .shelf(id: $0._id) }`).
+- [style] tests `.init(apiService:)`; Android import order.
+
+Proof after autofix: iOS build green, DeepLinkTests, LinkedInventoryItemAndShelfTests, ShelfModelTests, ShelfModelAddItemsTests, LinkedListTests, TabRouterTests pass; Android build green, DeepLinkTest, TabRouterTest pass.
 
 ## Verification
 

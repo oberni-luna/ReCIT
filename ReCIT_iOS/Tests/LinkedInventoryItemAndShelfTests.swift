@@ -94,11 +94,12 @@ struct LinkedInventoryItemAndShelfTests {
         context.insert(Shelf.mock(id: Self.shelfId, ownerId: Self.friend))
         try context.save()
         let mock: MockAPIService = .init()
+        let shelfModel: ShelfModel = .init(apiService: mock)
 
         let destination: NavigationDestination? = await .linkedShelf(
             id: Self.shelfId,
             ownedByOneOf: [Self.myId],
-            shelfModel: ShelfModel(apiService: mock),
+            shelfModel: shelfModel,
             modelContext: context
         )
 
@@ -114,11 +115,12 @@ struct LinkedInventoryItemAndShelfTests {
         let mock: MockAPIService = .init()
         mock.stub("/api/shelves/by-ids", json: Self.shelfAnswer(owner: Self.friend))
         mock.stub("action=by-ids", json: Self.membershipAnswer)
+        let shelfModel: ShelfModel = .init(apiService: mock)
 
         let destination: NavigationDestination? = await .linkedShelf(
             id: Self.shelfId,
             ownedByOneOf: [Self.myId, Self.friend],
-            shelfModel: ShelfModel(apiService: mock),
+            shelfModel: shelfModel,
             modelContext: context
         )
 
@@ -134,11 +136,12 @@ struct LinkedInventoryItemAndShelfTests {
         let mock: MockAPIService = .init()
         mock.stub("/api/shelves/by-ids", json: Self.shelfAnswer(owner: "stranger"))
         mock.stub("action=by-ids", json: Self.membershipAnswer)
+        let shelfModel: ShelfModel = .init(apiService: mock)
 
         let destination: NavigationDestination? = await .linkedShelf(
             id: Self.shelfId,
             ownedByOneOf: [Self.myId, Self.friend],
-            shelfModel: ShelfModel(apiService: mock),
+            shelfModel: shelfModel,
             modelContext: context
         )
 
@@ -152,11 +155,31 @@ struct LinkedInventoryItemAndShelfTests {
         let context: ModelContext = try TestStore.makeContext()
         let mock: MockAPIService = .init()
         mock.stub("/api/shelves/by-ids", error: NetworkError.badStatus(code: 401, message: "unauthorized shelves access"))
+        let shelfModel: ShelfModel = .init(apiService: mock)
 
         let destination: NavigationDestination? = await .linkedShelf(
             id: Self.shelfId,
             ownedByOneOf: [Self.myId],
-            shelfModel: ShelfModel(apiService: mock),
+            shelfModel: shelfModel,
+            modelContext: context
+        )
+
+        #expect(destination == nil)
+        #expect(try context.fetch(FetchDescriptor<Shelf>()).isEmpty)
+    }
+
+    @Test
+    func `an étagère whose books cannot be read falls back to inventaire.io and stores nothing`() async throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let mock: MockAPIService = .init()
+        mock.stub("/api/shelves/by-ids", json: Self.shelfAnswer(owner: Self.friend))
+        mock.stub("action=by-ids", error: NetworkError.badStatus(code: 500, message: "internal error"))
+        let shelfModel: ShelfModel = .init(apiService: mock)
+
+        let destination: NavigationDestination? = await .linkedShelf(
+            id: Self.shelfId,
+            ownedByOneOf: [Self.myId, Self.friend],
+            shelfModel: shelfModel,
             modelContext: context
         )
 

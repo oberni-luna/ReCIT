@@ -5,6 +5,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:link.exlibris.lunabee.ovh</string>
+		<string>applinks:link.exlibris.lunabee.ovh?mode=developer</string>
 	</array>
 </dict>
 </plist>

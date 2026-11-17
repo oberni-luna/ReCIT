@@ -13,11 +13,13 @@ import SwiftUI
 extension View {
     func workActions(
         workUri: String,
+        title: String,
         placement: ActionsPlacement
     ) -> some View {
         modifier(
             WorkActionsModifier(
                 workUri: workUri,
+                title: title,
                 placement: placement
             )
         )
@@ -26,6 +28,7 @@ extension View {
 
 struct WorkActionsModifier: ViewModifier {
     let workUri: String
+    let title: String
     let placement: ActionsPlacement
 
     /// What the menu asks to create. Held here rather than by the menu: a `.sheet` placed
@@ -45,8 +48,14 @@ struct WorkActionsModifier: ViewModifier {
                 ToolbarItem(placement: .confirmationAction) {
                     Menu {
                         // Glyphs in the label colour rather than the app's green — see BookActions.
-                        menuContent
-                            .tint(.foregroundDefault)
+                        Group {
+                            Section {
+                                DeepLinkShareLink(.entity(uri: workUri), subject: title)
+                                    .accessibilityIdentifier(AccessibilityID.share)
+                            }
+                            menuContent
+                        }
+                        .tint(.foregroundDefault)
                     } label: {
                         Label("action.more", systemImage: "ellipsis")
                     }
@@ -67,5 +76,11 @@ struct WorkActionsModifier: ViewModifier {
             identifier: "e2e.work.addToList",
             creationRequest: $creationRequest
         )
+    }
+}
+
+private extension WorkActionsModifier {
+    enum AccessibilityID {
+        static let share: String = "e2e.work.share"
     }
 }

@@ -97,6 +97,7 @@ struct SearchTabView: View {
                 onKeepDraft: { newBookDrafts.remember($0, for: origin) }
             )
         }
+        .opensPendingLink(on: .search, path: $path)
         // On appearing as well as on change: the first request made is usually the one that
         // builds this tab, and it is already standing by the time the tab exists to see it.
         .onAppear(perform: raiseFieldIfAsked)

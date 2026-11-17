@@ -16,6 +16,10 @@ import androidx.compose.runtime.staticCompositionLocalOf
  *
  * Plain Compose state, so it is driven by values in a JVM test. `MainScaffold` owns it and hands it
  * down through [LocalTabRouter].
+ *
+ * An Ex-libris link opened while something covers the tabs — the Profil, « Ranger mes livres », a bottom sheet
+ * or a full-screen dialog — goes in a dialog of its own over it rather than on a tab hidden underneath (issue
+ * 143). The Profil is known here; « Ranger mes livres » and every other overlay say so with [CoversTabs].
  */
 @Stable
 class TabRouter(selected: AppTab = AppTab.Inventory, isProfilePresented: Boolean = false) {
@@ -34,6 +38,10 @@ class TabRouter(selected: AppTab = AppTab.Inventory, isProfilePresented: Boolean
 
     /** Bumped each time the Recherche tab is to go back to its root; the shell owns its stack. */
     var searchRootRequest: Int by mutableIntStateOf(0)
+        private set
+
+    /** The overlays up over the tabs but the Profil — sort flow, bottom sheets, dialogs —, counted by [CoversTabs]. */
+    var overlayCount: Int by mutableIntStateOf(0)
         private set
 
     /**
@@ -60,6 +68,37 @@ class TabRouter(selected: AppTab = AppTab.Inventory, isProfilePresented: Boolean
     fun openNetwork() {
         selected = AppTab.Network
         isProfilePresented = false
+    }
+
+    /**
+     * An Ex-libris link's [target]: on its tab when nothing covers the tabs, else in the link dialog over what does.
+     * My own name opens the Profil — in the dialog over another overlay, and nothing more when the Profil is up.
+     * Returns `null` when the router has done all there was to do.
+     */
+    fun openLink(target: LinkTarget): LinkLanding? {
+        val isCovered: Boolean = isProfilePresented || overlayCount > 0
+        return when {
+            target == LinkTarget.Profile && isProfilePresented -> null
+            isCovered -> LinkLanding.InDialog(target)
+            target is LinkTarget.Screen -> {
+                selected = target.tab
+                LinkLanding.OnTab(target.tab, target.destination)
+            }
+            else -> {
+                openProfile()
+                null
+            }
+        }
+    }
+
+    /** An overlay has come up over the tabs. */
+    fun overlayShown() {
+        overlayCount += 1
+    }
+
+    /** One has gone. */
+    fun overlayHidden() {
+        overlayCount -= 1
     }
 
     /** Takes the field request, once: `true` when the Recherche tab is to focus its field now. */

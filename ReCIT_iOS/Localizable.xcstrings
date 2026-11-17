@@ -18529,6 +18529,23 @@
         }
       }
     },
+    "welcome.link_waiting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to open this link."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez-vous pour ouvrir ce lien."
+          }
+        }
+      }
+    },
     "welcome.pitch" : {
       "extractionState" : "manual",
       "localizations" : {

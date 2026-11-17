@@ -56,6 +56,11 @@ struct GroupDetailView: View {
         group?.role(of: groupModel.myUserId)
     }
 
+    /// The group's link, `nil` while inventaire.io has not said its slug.
+    private var sharedLink: DeepLink? {
+        group?.slug.map { .group(slug: $0) }
+    }
+
     private var usersByID: [String: User] {
         .init(allUsers.map { ($0._id, $0) }, uniquingKeysWith: { first, _ in first })
     }
@@ -225,30 +230,26 @@ struct GroupDetailView: View {
         }
     }
 
+    /// A member's « … » holds what they may do in the group; anyone who sees the group may
+    /// share it, a member or not.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
             if isDeleting {
                 ProgressView()
-            } else if myRole?.belongs == true {
+            } else if let group, myRole?.belongs == true || sharedLink?.url != nil {
                 Menu {
                     Group {
-                        if myRole == .admin {
-                            Button("groups.settings", systemImage: "slider.horizontal.3") {
-                                isEditingSettings = true
+                        if let sharedLink {
+                            Section {
+                                DeepLinkShareLink(sharedLink, subject: group.name)
+                                    .accessibilityIdentifier(AccessibilityID.share)
                             }
-                            .accessibilityIdentifier("e2e.group.settings")
                         }
 
-                        Button("groups.invite", systemImage: "person.badge.plus") {
-                            path.append(NavigationDestination.inviteToGroup(id: groupId))
+                        if myRole?.belongs == true {
+                            memberActions
                         }
-
-                        Button("groups.leave", systemImage: "rectangle.portrait.and.arrow.right") {
-                            isConfirmingLeave = true
-                        }
-                        .disabled(group.map { $0.canLeave(groupModel.myUserId ?? "") } == false)
-                        .accessibilityIdentifier("e2e.group.leave")
                     }
                     .tint(.foregroundDefault)
 
@@ -260,9 +261,29 @@ struct GroupDetailView: View {
                 } label: {
                     Label("action.more", systemImage: "ellipsis")
                 }
-                .accessibilityIdentifier("e2e.group.menu")
+                .accessibilityIdentifier(AccessibilityID.menu)
             }
         }
+    }
+
+    @ViewBuilder
+    private var memberActions: some View {
+        if myRole == .admin {
+            Button("groups.settings", systemImage: "slider.horizontal.3") {
+                isEditingSettings = true
+            }
+            .accessibilityIdentifier(AccessibilityID.settings)
+        }
+
+        Button("groups.invite", systemImage: "person.badge.plus") {
+            path.append(NavigationDestination.inviteToGroup(id: groupId))
+        }
+
+        Button("groups.leave", systemImage: "rectangle.portrait.and.arrow.right") {
+            isConfirmingLeave = true
+        }
+        .disabled(group.map { $0.canLeave(groupModel.myUserId ?? "") } == false)
+        .accessibilityIdentifier(AccessibilityID.leave)
     }
 
     private var deleteButton: some View {
@@ -277,5 +298,14 @@ struct GroupDetailView: View {
         }
         .disabled(canDelete == false)
         .accessibilityIdentifier("e2e.group.delete")
+    }
+}
+
+private extension GroupDetailView {
+    enum AccessibilityID {
+        static let menu: String = "e2e.group.menu"
+        static let share: String = "e2e.group.share"
+        static let settings: String = "e2e.group.settings"
+        static let leave: String = "e2e.group.leave"
     }
 }

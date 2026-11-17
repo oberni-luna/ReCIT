@@ -50,6 +50,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /**
  * `TransactionFormView` for a new request, full height: « Emprunter Dune à Anne », the sentence
@@ -118,6 +119,7 @@ fun TransactionRequestSheet(itemId: String, onDismiss: () -> Unit) {
         }
     }
 
+    CoversTabs()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

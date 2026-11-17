@@ -154,3 +154,31 @@ public class User: Identifiable, Equatable {
         )
     }
 }
+
+extension User {
+    static func mock(
+        id: String = "user-1",
+        rev: String = "1",
+        username: String = "maxlath",
+        email: String? = nil,
+        position: Coordinates? = nil,
+        avatarURLValue: String? = nil,
+        itemCount: Int = 0,
+        lastItemAdded: Double = 0,
+        created: Double? = nil,
+        bio: String? = nil
+    ) -> User {
+        .init(
+            _id: id,
+            _rev: rev,
+            username: username,
+            email: email,
+            position: position,
+            avatarURLValue: avatarURLValue,
+            itemCount: itemCount,
+            lastItemAdded: lastItemAdded,
+            created: created,
+            bio: bio
+        )
+    }
+}

@@ -58,15 +58,7 @@ enum Fixture {
         username: String = "tester",
         relation: UserRelation = .none
     ) -> User {
-        let user: User = .init(
-            _id: id,
-            _rev: "rev-1",
-            username: username,
-            email: nil,
-            position: nil,
-            avatarURLValue: nil,
-            itemCount: 0
-        )
+        let user: User = .mock(id: id, rev: "rev-1", username: username)
         user.relation = relation
         return user
     }

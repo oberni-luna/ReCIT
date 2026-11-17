@@ -99,6 +99,12 @@ struct AuthorDetailView: View {
             .applyListBackground()
             .readableContentMargins()
             .navigationTitle("nav.author")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    DeepLinkShareLink(.entity(uri: author.uri), subject: author.name)
+                        .accessibilityIdentifier(AccessibilityID.share)
+                }
+            }
         case .error(error: let error):
             Text("error.with_message \(error.localizedDescription)")
         }
@@ -145,6 +151,7 @@ struct AuthorDetailView: View {
 private extension AuthorDetailView {
     enum AccessibilityID {
         static let photo: String = "e2e.author.photo"
+        static let share: String = "e2e.author.share"
     }
 }
 

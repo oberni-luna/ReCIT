@@ -37,6 +37,7 @@ import studio.lunabee.nouveaurecit.data.user.AccountRepository
 import studio.lunabee.nouveaurecit.data.user.ProfileRepository
 import studio.lunabee.nouveaurecit.data.user.RequestPacer
 import studio.lunabee.nouveaurecit.network.ApiService
+import studio.lunabee.nouveaurecit.ui.navigation.IncomingLinks
 
 /**
  * The composition root — `ReCIT.swift` plus `RootView`'s `@State` models. One instance per process,
@@ -145,6 +146,13 @@ class AppContainer(context: Context) {
         sortSession = sortSession,
         syncStatus = syncStatus,
     )
+
+    /**
+     * The last Ex-libris link the system handed [MainActivity] (`ui.navigation.DeepLink`), until the shell takes
+     * it. Held here rather than in the activity because a link that launches the app arrives before the shell, and
+     * waits for it. Signed out, it waits for the session, and a newer one replaces it (issue 143).
+     */
+    val incomingLinks: IncomingLinks = IncomingLinks()
 
     /** Coil over the session-less client: covers are public, and must not touch the session. */
     fun imageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)

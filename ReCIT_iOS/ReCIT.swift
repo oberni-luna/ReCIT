@@ -36,7 +36,6 @@ struct ReCIT: App {
                 RootView()
                     .environment(authModel)
                     .modelContainer(sharedModelContainer)
-                    .tint(.foregroundTinted)
             } else {
                 // Test host: no UI, no container, no startup networking.
                 EmptyView()

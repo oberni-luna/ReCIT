@@ -24,7 +24,7 @@ Living knowledge base for Ex-libris. Pages link to each other and to tasks with 
 - `features/` — one write-up per shipped feature: what it turned out to be. The index with one line each is in `CLAUDE.md` → "Shipped features".
 - `prd/` — what a feature is meant to be before it ships, deleted once its feature doc exists ([README](prd/README.md))
 - `design-system/` — the Figma library and its divergences from code ([figma-library.md](design-system/figma-library.md))
-- `integrations/` — Apple app-site-association, Google Play
+- `integrations/` — inventaire.io's Apple app-site-association (password autofill), Google Play. The link domain's own files live in `scripts/deeplinks/` ([0092](features/0092-entity-deep-links.md))
 - `grill-me/` — decisions and design extraction of the Réseau graph grilling (2026-10-13); the graph was removed in [0048](features/0048-network-graph-removed.md)
 
 ## How to read

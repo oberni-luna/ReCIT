@@ -5,8 +5,9 @@ import studio.lunabee.nouveaurecit.BuildConfig
 
 /**
  * `UITestHooks`: the seams the end-to-end scenario (`Recit_Android/e2e/`, feature 0065) needs in the
- * app, inert unless the activity is started with [EXTRA_BARCODES], and inert in a release build
- * whatever it is started with.
+ * app, inert unless the activity is started with [EXTRA_BARCODES], and inert in the release build
+ * whatever it is started with: `BuildConfig.E2E_SEAMS` is on in `debug` and in the scenario's R8-minified
+ * `e2eRelease`, off in `release` alone.
  *
  * The emulator's camera films a virtual room, not a book, so the scanner cannot read a barcode there.
  * Under the scenario it reads the ones it was handed instead, one after the other — see
@@ -22,7 +23,7 @@ object E2EHooks {
     val isScanningScripted: Boolean get() = barcodes.isNotEmpty()
 
     fun read(intent: Intent?) {
-        if (!BuildConfig.DEBUG) return
+        if (!BuildConfig.E2E_SEAMS) return
         val codes: String = intent?.getStringExtra(EXTRA_BARCODES) ?: return
         barcodes = codes.split(',').map(String::trim).filter(String::isNotEmpty)
     }

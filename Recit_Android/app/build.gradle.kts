@@ -11,6 +11,8 @@ android {
     compileSdk = 37
 
     defaultConfig {
+        // The end-to-end scenario's seams (`e2e/E2EHooks`): off unless a build type the scenario plays turns them on.
+        buildConfigField("boolean", "E2E_SEAMS", "false")
         applicationId = "studio.lunabee.exlibris.android"
         minSdk = 28
         targetSdk = 37
@@ -36,6 +38,7 @@ android {
         debug {
             applicationIdSuffix = ".dev"
             buildConfigField("String", "SESSION_STORE_NAME", "\"asso.recits.auth.cookies.dev\"")
+            buildConfigField("boolean", "E2E_SEAMS", "true")
         }
         release {
             isMinifyEnabled = true
@@ -46,6 +49,20 @@ android {
             )
             signingConfig = signingConfigs.findByName("upload")
             buildConfigField("String", "SESSION_STORE_NAME", "\"asso.recits.auth.cookies\"")
+        }
+        // The end-to-end scenario's build (feature 0065, `E2E_BUILD=release scripts/e2e-android.sh`): `release`
+        // itself, R8 included, so the scenario plays what the Play Store ships rather than a debug build that never
+        // meets R8. It differs only where the runner needs it: the `.dev` package the runner targets, the debug key
+        // (no upload key on the machine that runs it), and the scenario's seams.
+        create("e2eRelease") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".dev"
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            // The debug build's store: both builds are the same `.dev` package, so a session signed in on one survives
+            // the other installed over it — what `e2eKeepSession` relies on when switching between them.
+            buildConfigField("String", "SESSION_STORE_NAME", "\"asso.recits.auth.cookies.dev\"")
+            buildConfigField("boolean", "E2E_SEAMS", "true")
         }
     }
 

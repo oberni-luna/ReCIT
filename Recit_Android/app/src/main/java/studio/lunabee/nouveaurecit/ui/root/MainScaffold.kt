@@ -33,11 +33,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
@@ -50,9 +55,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import studio.lunabee.nouveaurecit.AppContainer
 import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.data.sorting.SortApplyFailure
@@ -68,6 +75,10 @@ import studio.lunabee.nouveaurecit.ui.flow.SortFlowHost
 import studio.lunabee.nouveaurecit.ui.flow.SortFlowPresentation
 import studio.lunabee.nouveaurecit.ui.flow.SortFlowStart
 import studio.lunabee.nouveaurecit.ui.navigation.AppTab
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
+import studio.lunabee.nouveaurecit.ui.navigation.Destination
+import studio.lunabee.nouveaurecit.ui.navigation.LinkLanding
+import studio.lunabee.nouveaurecit.ui.navigation.LinkTarget
 import studio.lunabee.nouveaurecit.ui.navigation.LocalTabRouter
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 import studio.lunabee.nouveaurecit.ui.navigation.TabRouter
@@ -95,6 +106,7 @@ fun MainScaffold() {
     val container: AppContainer = LocalAppContainer.current
     val messenger: Messenger = LocalMessenger.current
     val context: Context = LocalContext.current
+    val uriHandler: UriHandler = LocalUriHandler.current
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val router: TabRouter = rememberSaveable(saver = TabRouter.Saver) { TabRouter() }
     val sortFlow: SortFlowPresentation = rememberSaveable(saver = sortFlowSaver) { SortFlowPresentation() }
@@ -106,6 +118,7 @@ fun MainScaffold() {
     }
     val badge: Int by badgeCount.collectAsState(initial = 0)
     val genericError: String = stringResource(R.string.error_generic)
+    var linkDialogTarget: LinkTarget? by rememberSaveable(stateSaver = linkTargetSaver) { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
         launch {
@@ -117,6 +130,45 @@ fun MainScaffold() {
             snackbarHostState.currentSnackbarData?.dismiss()
             val result: SnackbarResult = snackbarHostState.showSnackbar(RecitSnackbarVisuals(message))
             if (result == SnackbarResult.ActionPerformed) message.onAction?.invoke()
+        }
+    }
+
+    // An Ex-libris link: the screen it names, alone above the root of its tab — Recherche for a book or an author,
+    // Réseau for a reader or a group, Listes for a list, Inventaire for a copy or an étagère — or the Profil sheet for
+    // my own name; inventaire.io's page in the browser when the app cannot open it — unknown entity, reader, group,
+    // list, copy or étagère, one I may not see, a stranger's étagère, network down — as when the app is not installed.
+    // Over an overlay, the screen goes in the link dialog instead (issue 143). A link waits in `incomingLinks` until
+    // my user id is known; a session that ends meanwhile leaves it waiting for the next.
+    LaunchedEffect(Unit) {
+        container.incomingLinks.toOpen(container.users.myUserId).collect { url ->
+            val link: DeepLink = DeepLink.parse(url) ?: return@collect
+            val target: LinkTarget? = try {
+                DeepLink.target(
+                    link,
+                    container.entities,
+                    container.users,
+                    container.groups,
+                    container.lists,
+                    container.inventory,
+                    container.shelves,
+                )
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                null
+            }
+            if (target == null) {
+                runCatching { uriHandler.openUri(link.webUrl) }
+                return@collect
+            }
+            when (val landing: LinkLanding? = router.openLink(target)) {
+                is LinkLanding.OnTab -> Navigator(stacks.getValue(landing.tab)).run {
+                    popToRoot()
+                    push(landing.destination)
+                }
+                is LinkLanding.InDialog -> linkDialogTarget = landing.target
+                null -> Unit
+            }
         }
     }
 
@@ -139,6 +191,12 @@ fun MainScaffold() {
                 exit = slideOutVertically { it },
             ) {
                 ProfileSheet(onClose = router::closeProfile, snackbarHostState = snackbarHostState)
+            }
+            linkDialogTarget?.let { target: LinkTarget ->
+                // A newer link over the dialog replaces it, with a stack of its own.
+                key(target) {
+                    LinkDialog(target = target, onClose = { linkDialogTarget = null }, snackbarHostState = snackbarHostState)
+                }
             }
         }
     }
@@ -244,6 +302,12 @@ private fun failureMessage(context: Context, error: Throwable): String? = when (
     is SortApplyFailure.BooksNoLongerInInventory -> context.getString(R.string.sort_error_books_missing, error.shelfName)
     else -> error.localizedMessage
 }
+
+/** The link dialog survives a configuration change, as the tabs do: the activity declares no `configChanges`. */
+private val linkTargetSaver: Saver<LinkTarget?, String> = Saver(
+    save = { target -> target?.let { Json.encodeToString(LinkTarget.serializer(), it) } },
+    restore = { saved -> Json.decodeFromString(LinkTarget.serializer(), saved) },
+)
 
 /** The flow survives a configuration change at its start route; its own stack does not. */
 private val sortFlowSaver: Saver<SortFlowPresentation, String> = Saver(

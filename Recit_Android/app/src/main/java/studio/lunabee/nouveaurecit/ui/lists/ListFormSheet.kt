@@ -45,6 +45,7 @@ import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 import studio.lunabee.nouveaurecit.ui.common.LocalMessenger
 import studio.lunabee.nouveaurecit.ui.common.Messenger
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 
 /**
  * `ListFormView`, as a sheet: create (`listId == null`), edit (`listId` set), or create a work list
@@ -132,6 +133,7 @@ fun ListFormSheet(
         }
     }
 
+    CoversTabs()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

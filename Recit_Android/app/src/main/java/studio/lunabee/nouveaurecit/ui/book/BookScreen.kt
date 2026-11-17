@@ -49,6 +49,7 @@ import studio.lunabee.nouveaurecit.ui.common.Messenger
 import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
@@ -103,13 +104,15 @@ internal fun BookDetail(anchor: BookAnchor, navigator: Navigator) {
                 actions = {
                     val actionsState: BookActionsState? = state.actions
                     if (state.phase is BookPhase.Loaded && actionsState != null) {
+                        // The edition, whoever's copy this is: the link names a book, not a copy.
+                        val share: MenuLine? = state.edition?.let { shareMenuLine(DeepLink.Entity(it.uri), it.title) }
                         BookActionsHost(
                             actions = viewModel.actions,
                             state = actionsState,
                             onPush = navigator::push,
                             onRemoved = navigator::pop,
                         ) { lines ->
-                            MoreActionsMenu(lines)
+                            MoreActionsMenu(listOfNotNull(share) + lines)
                         }
                     }
                 },

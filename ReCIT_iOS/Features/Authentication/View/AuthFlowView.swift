@@ -40,6 +40,8 @@ struct AuthFlowView: View {
 
     @State private var path: [AuthDestination] = []
 
+    @Environment(TabRouter.self) private var router: TabRouter
+
     var body: some View {
         NavigationStack(path: $path) {
             WelcomeView(
@@ -47,6 +49,7 @@ struct AuthFlowView: View {
                 onSignIn: { path = [.signIn] },
                 onCreateAccount: { path = [.createAccount] }
             )
+            .linkWaiting(router.waitingLink != nil)
             .navigationDestination(for: AuthDestination.self) { destination in
                 view(for: destination)
             }
@@ -71,4 +74,5 @@ struct AuthFlowView: View {
         authModel: .init(authService: .init(config: .init(keychainKey: "preview"))),
         coverWall: .init(apiService: APIService(env: .production))
     )
+    .environment(TabRouter())
 }

@@ -102,6 +102,7 @@ struct EntityListView: View {
             .applyListBackground(.backgroundGrouped)
         }
         .hidesTabBarWhenPushed(on: path)
+        .opensPendingLink(on: .lists, path: $path)
     }
 }
 

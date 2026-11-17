@@ -16,6 +16,7 @@
     <!-- Common actions -->
     <string name="action_back">Retour</string>
     <string name="action_more">Plus</string>
+    <string name="action_share">Partager</string>
     <string name="action_add">Ajouter</string>
     <string name="action_edit">Modifier</string>
     <string name="action_delete">Supprimer</string>
@@ -48,6 +49,7 @@
     <string name="welcome_app_name">Ex-libris</string>
     <string name="welcome_tagline">Vos livres, et ceux qui voyagent.</string>
     <string name="welcome_pitch">Organisez vos livres, partagez-les avec vos proches.</string>
+    <string name="welcome_link_waiting">Connectez-vous pour ouvrir ce lien.</string>
     <string name="welcome_footnote">Votre compte et vos livres sont hébergés par inventaire.io, la base open data.</string>
 
     <!-- Sign in -->

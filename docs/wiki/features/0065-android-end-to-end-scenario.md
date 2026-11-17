@@ -8,8 +8,8 @@ row per step, a screenshot, what the step acted on, **OK / KO / non joué**.
 scripts/e2e-android.sh
 ```
 
-It asks for the test account's password, finds or starts an emulator, builds and installs the debug app and the
-runner, plays the scenario, and opens `build/e2e-android/<timestamp>/report.html`. The HTML is rendered by the iOS
+It asks for the test account's password, finds or starts an emulator, builds and installs the app — debug, or the
+R8-minified `e2eRelease` with `E2E_BUILD=release` — and the runner, plays the scenario, and opens `build/e2e-android/<timestamp>/report.html`. The HTML is rendered by the iOS
 run's own `scripts/e2e_report.py`: the Android runner writes `report.json` in the same shape.
 
 ## The journey
@@ -29,7 +29,23 @@ The iOS one, step for step, wherever Android has the screen:
 6. « Ranger mes livres »: two new étagères, a book **dragged** onto each, « Enregistrer », the cross;
 7. a list from the Listes tab's « + », two works put in it from their book screen's « … » › « Liste », its row
    checked for « 2 œuvres »;
-8. delete all of it — the list by a swipe, each étagère from « Modifier » › « Supprimer l'étagère », **every** book
+8. Ex-libris links ([0092](0092-entity-deep-links.md)–[0097](0097-hidden-link-opening.md)), each opened from the
+   shell (`am start -a VIEW -d <url>`) from a tab's root, all non-critical:
+   - « Lien ouvert sans nommer l'app »: the book link with no package named, so Android chooses — KO unless the app
+     takes it; the detail quotes `pm get-app-links` for `link.exlibris.lunabee.ovh`. Every other link names the
+     app's package, so it reaches the app whether or not the emulator verified its App Links;
+   - « Lien vers un livre » (`/entity/isbn:9782370493002`, « Lucioles » on Recherche), « Lien vers un·e auteur·ice »
+     (`/entity/wd:Q535`, Victor Hugo with his works), « Lien vers un·e ami·e » (`/users/OlivierB`, his profile pushed
+     on Réseau), « Lien vers mon profil » (`/users/<the account>`, the Profil, closed by « Fermer »);
+   - « Lien par-dessus le Profil »: the book link with the Profil up opens the link dialog; its « Fermer » gives the
+     Profil back;
+   - « Partager une liste puis ouvrir son lien », « Partager une étagère puis ouvrir son lien »: the run's list, then
+     its first étagère, made visible to friends in its own form (« Visible par › Mes ami·es », « Visibilité › Ami·es »:
+     a private one has no « Partager »), its « Partager » touched, the link read from the system share sheet's text
+     preview, the sheet closed, and the link opened from another tab — the list on Listes, the étagère on Inventaire;
+   - « Lien illisible » (`/users/x/inventory`): handed to the browser, which must come in front; the app is then
+     brought back (`am start -n`, its task kept);
+9. delete all of it — the list by a swipe, each étagère from « Modifier » › « Supprimer l'étagère », **every** book
    of the inventory from its « … » — and sign out from the profile.
 
 Names carry a timestamp (`E2E Romans 1030-130831`), as on iOS. The account defaults to `OlivierB_test4`.
@@ -46,7 +62,17 @@ E2E_AVD=Pixel_8_API_35 scripts/e2e-android.sh   # which AVD to start when none i
 E2E_RESET_ACCOUNT=1 scripts/e2e-android.sh      # empty the account first (scripts/e2e_reset_account.py)
 E2E_SKIP_BUILD=1 scripts/e2e-android.sh         # reuse the APKs already installed
 E2E_SERIAL=emulator-5556 scripts/e2e-android.sh # which device; by default the first emulator, never a phone
+E2E_BUILD=release scripts/e2e-android.sh        # the R8-minified e2eRelease build instead of debug
 ```
+
+**On the release build.** R8 breaks nothing at compile time: a class it strips or renames under reflection, or a
+serializer it drops, only shows when a screen decodes the server's answer. `E2E_BUILD=release` plays the journey on
+`e2eRelease`, a build type of `:app` made with `initWith(release)` — R8, resource shrinking and `proguard-rules.pro`
+(#123) as shipped — under the `.dev` package the runner targets, signed with the debug key, and with the scanner seam
+on. `:e2e` has an `e2eRelease` build type of its own, so `:e2e:assembleE2eRelease` targets that variant; the runner
+itself is not minified. The APKs are `app/build/outputs/apk/e2eRelease/app-e2eRelease.apk` and
+`e2e/build/outputs/apk/e2eRelease/e2e-e2eRelease.apk`; the report's title ends in « build release ». Its session
+store is the debug build's: both are the same package, so a session survives switching from one to the other.
 
 **Working on the scenario itself** does not need the password, nor a sign-in each time — inventaire.io rate-limits
 those. Once the app on the emulator is signed in (a first run, or by hand), play it on that session:
@@ -73,7 +99,7 @@ and drives the app from outside with UI Automator, the way XCUITest drives the i
 - `E2EScenarioTest` — the journey, one `driver.step` per line of the report.
 - `E2EDriver` — `step` (a throw is a KO with its reason; `critical` turns the rest into SKIP), `waitFor`,
   `waitForAny`, `waitUntil`, `tap`, `tapUntil`, `type`, `scrollTo`, `longPressDrag`, `launch`,
-  `restartKeepingSession`. Nothing fails the JUnit test, as on iOS. After a KO with the app no longer on screen the
+  `restartKeepingSession`, `openLink`, `bringToFront`, `appLinksState`. Nothing fails the JUnit test, as on iOS. After a KO with the app no longer on screen the
   message says it probably crashed, and the app is started again on its session.
 - `E2EReport` — `report.json` and one PNG per step, rewritten after every step.
 
@@ -83,7 +109,8 @@ emulator's process list while the run lasts. The APKs go in with `adb install`, 
 `installDebug` pushes a copy to `/data/local/tmp` first, and a nearly full emulator refuses a 110 MB debug APK.
 
 **App seams** — `app/…/e2e/E2EHooks.kt` and `E2EBarcodeFeed.kt`, inert unless the activity is started with the
-`e2e.barcodes` extra, and in a release build whatever it is started with:
+`e2e.barcodes` extra, and whatever it is started with unless `BuildConfig.E2E_SEAMS` — on in `debug` and
+`e2eRelease`, off in `release`:
 
 - The emulator's camera films a virtual room. Under the scenario the scanner draws a black feed
   (`e2e.scan.feed`) instead of CameraX, and **a tap on it holds the next barcode in front of the camera** — reported
@@ -97,7 +124,7 @@ emulator's process list while the run lasts. The APKs go in with `adb install`, 
 **Test tags** — `MainActivity` sets `testTagsAsResourceId`, so a `testTag` reaches UI Automator as a resource id:
 `e2e.inventory.item`, `e2e.searchSuggestion.<works|humans|everything>`, `e2e.searchResult.<works|humans>`,
 `e2e.authorWork`, `e2e.workEdition`, `e2e.book.otherEditions`, `e2e.sortBook`, `e2e.sortShelf.<name>`,
-`e2e.sortNewShelf`, `e2e.scan.feed`. Everything else is found by the French on screen — the app has no other locale —
+`e2e.sortNewShelf`, `e2e.scan.feed`, `e2e.book`, `e2e.profile.account`. Everything else is found by the French on screen — the app has no other locale —
 or by a `contentDescription` (« Plus », « Retour », « Fermer », « Ajouter », « Profil »). Dialogs, menus and sheets
 are windows of their own, where `testTagsAsResourceId` does not reach: those are found by their words.
 
@@ -124,6 +151,12 @@ are windows of their own, where `testTagsAsResourceId` does not reach: those are
 - **The étagères carousel only scrolls from its cards**, not from the paper labels under them, and only one card's
   label is exposed, the one snapped in the middle. A slow swipe over two thirds of the screen moves it by exactly one
   card; a short one does nothing, a fast one flings past several.
+- **A pushed screen hides the tab bar** in Inventaire, Listes and Réseau (iOS 0088, on Android since 0091), the Profil
+  covers it in the same window — the bar is still read beneath it, out of reach — and the link dialog covers it as a
+  window of its own. A tab change first leaves them by their own « Retour » or « Fermer », the Profil first; back is
+  still only pressed for what back closes.
+- **A shell command is not a shell.** `executeShellCommand` splits its line on spaces and reads no quotes: a URL in
+  quotes reaches `am` with them. The links go in bare.
 - **A menu left open hides everything else.** A `DropdownMenu` is a window of its own and UI Automator then reads
   only it; a step that failed with its « … » open took every later step down. Each tab change first closes what
   covers the tab bar.
@@ -137,6 +170,13 @@ are windows of their own, where `testTagsAsResourceId` does not reach: those are
   gesture.
 
 ## Known limits
+
+- **First whole run on the minified build** (2026-11-17, `build/e2e-android/20261117-113243/`, `NoGMS_API_35`):
+  37 OK / 1 KO. Sign-in, restart, the scan (ML Kit's registrars kept by #123's rule), the searches, sorting, the
+  list, all nine link steps and the cleanup passed under R8. The KO was « Recherche 2 · Victor Hugo », a
+  `StaleObjectException` from UI Automator on a list redrawn under it — the step was already the flakiest, not R8.
+  The share sheet's text preview is Android 10+; the App Links step depends on the emulator having fetched
+  `assetlinks.json` for the debug key of the Mac that built the APK.
 
 - **Not yet seen whole.** On 2026-10-30 the steps were played on the app's session (`e2eKeepSession`): 25 of 27 OK
   in the best full run, and « Suppression de l'étagère » OK on its own (`e2eOnly`) once its carousel swipes were

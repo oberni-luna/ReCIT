@@ -15,7 +15,7 @@ import OSLog
 final class InventoryModel: OptimisticMutating {
     private static let signposter: OSSignposter = .init(subsystem: "asso.recits", category: "sync")
     private static let logger: Logger = .init(subsystem: "asso.recits", category: "inventory")
-    private let apiService: APIServicing
+    let apiService: APIServicing
 
     /// Shared channel used to surface a background optimistic failure to the UI.
     var errorReporter: AppErrorReporter?

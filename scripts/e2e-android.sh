@@ -9,11 +9,14 @@
 #   E2E_RESET_ACCOUNT=1 scripts/e2e-android.sh   # empty the account first, after a run died halfway
 #   E2E_SKIP_BUILD=1 scripts/e2e-android.sh      # reuse the APKs already installed
 #   E2E_SERIAL=emulator-5556 scripts/e2e-android.sh  # which device, when several are connected
+#   E2E_BUILD=release scripts/e2e-android.sh     # plays the R8-minified `e2eRelease` build instead of debug
 #
-# What it does, in order: finds (or starts) an emulator, builds and installs the debug app and the
-# `:e2e` runner, runs `E2EScenarioTest` through `am instrument`, pulls the report the scenario wrote
-# into the runner's external files back to `build/e2e-android/<timestamp>/`, and renders it with the
-# same `scripts/e2e_report.py` as the iOS run.
+# What it does, in order: finds (or starts) an emulator, builds and installs the app — debug by
+# default, or with E2E_BUILD=release the `e2eRelease` build type: release's R8 shrinking and
+# obfuscation, signed with the debug key, same `.dev` package — and the `:e2e` runner, runs
+# `E2EScenarioTest` through `am instrument`, pulls the report the scenario wrote into the runner's
+# external files back to `build/e2e-android/<timestamp>/`, and renders it with the same
+# `scripts/e2e_report.py` as the iOS run.
 #
 # The password is never written to disk and never appears on this machine's command lines: the
 # `am instrument` line that carries it is fed to `adb shell` on its standard input. It does show in
@@ -37,6 +40,16 @@ TEST_CLASS="studio.lunabee.nouveaurecit.e2e.E2EScenarioTest"
 REMOTE_REPORT="/sdcard/Android/data/$RUNNER_PACKAGE/files/e2e-report"
 
 E2E_USERNAME="${E2E_USERNAME:-OlivierB_test4}"
+
+# Which build of the app is played: debug (default) or release, the R8-minified `e2eRelease` variant.
+E2E_BUILD="${E2E_BUILD:-debug}"
+case "$E2E_BUILD" in
+  debug)   VARIANT="debug";      GRADLE_VARIANT="Debug" ;;
+  release) VARIANT="e2eRelease"; GRADLE_VARIANT="E2eRelease" ;;
+  *) echo "E2E_BUILD doit valoir debug ou release, pas « $E2E_BUILD »." >&2; exit 2 ;;
+esac
+APP_APK="$ANDROID_ROOT/app/build/outputs/apk/$VARIANT/app-$VARIANT.apk"
+RUNNER_APK="$ANDROID_ROOT/e2e/build/outputs/apk/$VARIANT/e2e-$VARIANT.apk"
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/build/e2e-android/$STAMP"
@@ -90,14 +103,14 @@ until [[ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" =
 # ------------------------------------------------------------------ installation
 
 if [[ "${E2E_SKIP_BUILD:-0}" != "1" ]]; then
-  say "Compilation et installation de l'app et du runner"
-  (cd "$ANDROID_ROOT" && ./gradlew -q :app:assembleDebug :e2e:assembleDebug)
+  say "Compilation et installation de l'app ($E2E_BUILD) et du runner"
+  (cd "$ANDROID_ROOT" && ./gradlew -q ":app:assemble$GRADLE_VARIANT" ":e2e:assemble$GRADLE_VARIANT")
   # `adb install` streams the APK; Gradle's install pushes a copy to /data/local/tmp first, which a
   # nearly full emulator refuses for a 110 MB debug APK. The app goes first, too: replacing it needs
   # room for both copies, and the scenario wipes its data anyway.
   "$ADB" uninstall "$APP_PACKAGE" >/dev/null 2>&1 || true
-  "$ADB" install -t "$ANDROID_ROOT/app/build/outputs/apk/debug/app-debug.apk" >/dev/null
-  "$ADB" install -r -t "$ANDROID_ROOT/e2e/build/outputs/apk/debug/e2e-debug.apk" >/dev/null
+  "$ADB" install -t "$APP_APK" >/dev/null
+  "$ADB" install -r -t "$RUNNER_APK" >/dev/null
 fi
 
 mkdir -p "$OUT_DIR"
@@ -107,8 +120,8 @@ mkdir -p "$OUT_DIR"
 say "Exécution du scénario (comptez 10 à 15 minutes)"
 quote() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
 set +e
-printf 'am instrument -w -r -e e2eUsername %s -e e2ePassword %s -e class %s %s/androidx.test.runner.AndroidJUnitRunner\nexit\n' \
-    "$(quote "$E2E_USERNAME")" "$(quote "$E2E_PASSWORD")" "$TEST_CLASS" "$RUNNER_PACKAGE" \
+printf 'am instrument -w -r -e e2eUsername %s -e e2ePassword %s -e e2eBuild %s -e class %s %s/androidx.test.runner.AndroidJUnitRunner\nexit\n' \
+    "$(quote "$E2E_USERNAME")" "$(quote "$E2E_PASSWORD")" "$E2E_BUILD" "$TEST_CLASS" "$RUNNER_PACKAGE" \
   | "$ADB" shell > "$OUT_DIR/instrument.log" 2>&1
 set -e
 

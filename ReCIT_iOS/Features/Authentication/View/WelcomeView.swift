@@ -41,7 +41,10 @@
 //  Every colour here is a token; they simply resolve to their dark values, which is how the
 //  primary button comes out cream (`background/tinted-inverse` is `green/200` in the dark).
 //
-//  See PRD 0010, PRD 0011, issue 0056, and the `Accueil` frames in the Figma library.
+//  An Ex-libris link opened signed out waits for the session (issue 143), and one line under the
+//  buttons says so, in the screen's « vous » until the whole app turns to « tu ».
+//
+//  See PRD 0010, PRD 0011, issue 0056, issue 143, and the `Accueil` frames in the Figma library.
 //
 
 import SwiftUI
@@ -50,6 +53,19 @@ struct WelcomeView: View {
     let coverWall: CoverWallModel
     let onSignIn: () -> Void
     let onCreateAccount: () -> Void
+
+    /// Whether an Ex-libris link waits for the session.
+    private var isLinkWaiting: Bool = false
+
+    init(
+        coverWall: CoverWallModel,
+        onSignIn: @escaping () -> Void,
+        onCreateAccount: @escaping () -> Void
+    ) {
+        self.coverWall = coverWall
+        self.onSignIn = onSignIn
+        self.onCreateAccount = onCreateAccount
+    }
 
     var body: some View {
         GeometryReader { proxy in
@@ -91,6 +107,10 @@ struct WelcomeView: View {
             headline
 
             actions
+
+            if isLinkWaiting {
+                WelcomeLinkWaitingLine()
+            }
 
             note
         }
@@ -154,6 +174,16 @@ struct WelcomeView: View {
     }
 }
 
+extension WelcomeView {
+    /// Says, under the buttons, that a link waits for the session.
+    /// - Parameter isLinkWaiting: Whether one does.
+    func linkWaiting(_ isLinkWaiting: Bool = true) -> Self {
+        var copy: Self = self
+        copy.isLinkWaiting = isLinkWaiting
+        return copy
+    }
+}
+
 #Preview {
     NavigationStack {
         WelcomeView(
@@ -161,6 +191,18 @@ struct WelcomeView: View {
             onSignIn: {},
             onCreateAccount: {}
         )
+    }
+    .preferredColorScheme(.dark)
+}
+
+#Preview("A link waiting") {
+    NavigationStack {
+        WelcomeView(
+            coverWall: .init(apiService: APIService(env: .production)),
+            onSignIn: {},
+            onCreateAccount: {}
+        )
+        .linkWaiting()
     }
     .preferredColorScheme(.dark)
 }

@@ -11,8 +11,10 @@ import SwiftData
 @MainActor
 @Observable
 final class ListModel: OptimisticMutating {
+    /// Ids are 32 characters: fifty of them keep the address well under any server's limit.
+    private static let creatorsPerRequest: Int = 50
 
-    private let apiService: APIServicing
+    let apiService: APIServicing
 
     /// Shared channel used to surface a background optimistic failure to the UI.
     var errorReporter: AppErrorReporter?
@@ -48,9 +50,6 @@ final class ListModel: OptimisticMutating {
         }
     }
 
-    /// Ids are 32 characters: fifty of them keep the address well under any server's limit.
-    private static let creatorsPerRequest: Int = 50
-
     private func syncLists(createdBy creatorId: String, claimsUnstamped: Bool, modelContext: ModelContext) async throws {
         try await syncLists(createdBy: [creatorId], claimsUnstamped: claimsUnstamped, modelContext: modelContext)
     }
@@ -69,18 +68,12 @@ final class ListModel: OptimisticMutating {
             listsDTO.lists.filter { $0.creator.map(creatorIds.contains) ?? false }
         }
 
-        let baseUrl: String = apiService.baseUrl()
         // Upsert in place (never delete+reinsert) so any open list view stays reactive.
-        let synced: [EntityList] = try modelContext.upsert(
+        let synced: [EntityList] = try upsertLists(
             dtos,
-            dtoID: { $0._id },
-            modelID: { (list: EntityList) in list._id },
-            make: { EntityList(listDTO: $0, baseUrl: baseUrl) },
-            update: { list, dto in list.update(listDTO: dto, baseUrl: baseUrl, modelContext: modelContext) },
             deleteMissing: true,
-            scope: { list in
-                list.creatorId.map(creatorIds.contains) ?? claimsUnstamped
-            }
+            scope: { $0.creatorId.map(creatorIds.contains) ?? claimsUnstamped },
+            modelContext: modelContext
         )
         // Stamped from the request when the answer does not say and only one reader was asked
         // about: these are that reader's lists.

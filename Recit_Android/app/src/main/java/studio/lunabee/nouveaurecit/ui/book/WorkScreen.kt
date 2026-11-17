@@ -35,6 +35,7 @@ import studio.lunabee.nouveaurecit.ui.common.RecitTopBar
 import studio.lunabee.nouveaurecit.ui.common.recitViewModel
 import studio.lunabee.nouveaurecit.ui.lists.ListFormSheet
 import studio.lunabee.nouveaurecit.ui.navigation.BookAnchor
+import studio.lunabee.nouveaurecit.ui.navigation.DeepLink
 import studio.lunabee.nouveaurecit.ui.navigation.Destination
 import studio.lunabee.nouveaurecit.ui.navigation.Navigator
 
@@ -69,9 +70,11 @@ private fun EditionPicker(state: WorkUiState, viewModel: WorkViewModel, navigato
                 title = stringResource(R.string.nav_editions),
                 onBack = navigator::pop,
                 actions = {
-                    if (state.work != null) {
+                    val work: WorkEntity? = state.work
+                    if (work != null) {
                         MoreActionsMenu(
-                            listOf(
+                            listOfNotNull(
+                                shareMenuLine(DeepLink.Entity(work.uri), work.title),
                                 listMenuLine(
                                     resources = resources,
                                     entries = state.myLists,

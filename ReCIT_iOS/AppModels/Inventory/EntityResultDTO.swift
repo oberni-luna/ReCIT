@@ -29,6 +29,32 @@ struct EntityResultDTO: Codable {
     let claims: [String: [ClaimValue]]
 }
 
+extension EntityResultDTO {
+    static func mock(
+        uri: String = "wd:Q1",
+        invId: String? = nil,
+        lastrevid: Int? = nil,
+        type: String? = "work",
+        originalLang: String? = nil,
+        labels: [String: String] = ["fr": "Titre"],
+        descriptions: [String: String]? = nil,
+        image: EntityImageDTO? = nil,
+        claims: [String: [ClaimValue]] = [:]
+    ) -> EntityResultDTO {
+        .init(
+            uri: uri,
+            invId: invId,
+            lastrevid: lastrevid,
+            type: type,
+            originalLang: originalLang,
+            labels: labels,
+            descriptions: descriptions,
+            image: image,
+            claims: claims
+        )
+    }
+}
+
 nonisolated
 struct EntityImageDTO: Codable {
     let url: String?

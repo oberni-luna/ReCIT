@@ -12,6 +12,8 @@ import studio.lunabee.nouveaurecit.ui.common.LocalAppContainer
 /**
  * `RootView`: signed out → the account flow, pinned to dark as iOS pins it; signed in → the tabs,
  * with the sync started. Every way a session ends forgets the user and keeps the books (feature 0025).
+ * An Ex-libris link opened signed out waits in `AppContainer.incomingLinks` for the session, the welcome screen
+ * says so, and the shell opens it once signed in or up (issue 143).
  */
 @Composable
 fun RootScreen() {

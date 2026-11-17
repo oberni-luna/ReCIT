@@ -1,6 +1,8 @@
 package studio.lunabee.nouveaurecit.ui.common
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,7 +49,7 @@ fun RecitLargeTopBar(
         title = {
             Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
-        navigationIcon = { if (onBack != null) BackButton(onBack) else navigationIcon() },
+        navigationIcon = { LeadingButton(onBack, navigationIcon) },
         actions = actions,
         scrollBehavior = scrollBehavior,
         colors = recitTopBarColors(containerColor, RecitTheme.colors.foregroundDefault),
@@ -69,7 +71,7 @@ fun RecitTopBar(
         title = {
             Text(text = title, style = RecitTheme.typography.title50, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
-        navigationIcon = { if (onBack != null) BackButton(onBack) else navigationIcon() },
+        navigationIcon = { LeadingButton(onBack, navigationIcon) },
         actions = actions,
         scrollBehavior = scrollBehavior,
         colors = recitTopBarColors(containerColor, contentColor),
@@ -85,6 +87,19 @@ private fun recitTopBarColors(containerColor: Color, contentColor: Color): TopAp
     actionIconContentColor = if (contentColor == RecitTheme.colors.foregroundDefault) RecitTheme.colors.foregroundTinted else contentColor,
     navigationIconContentColor = contentColor,
 )
+
+/** « Fermer » at the root of a stack shown in a dialog ([LocalStackClose]); else the chevron, or [navigationIcon]. */
+@Composable
+private fun LeadingButton(onBack: (() -> Unit)?, navigationIcon: @Composable () -> Unit) {
+    val close: (() -> Unit)? = LocalStackClose.current
+    when {
+        close != null -> IconButton(onClick = close) {
+            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_close))
+        }
+        onBack != null -> BackButton(onBack)
+        else -> navigationIcon()
+    }
+}
 
 @Composable
 fun BackButton(onBack: () -> Unit) {

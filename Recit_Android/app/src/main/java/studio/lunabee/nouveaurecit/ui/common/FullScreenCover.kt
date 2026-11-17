@@ -74,6 +74,7 @@ import studio.lunabee.nouveaurecit.R
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
 import studio.lunabee.nouveaurecit.network.ImageUrl
+import studio.lunabee.nouveaurecit.ui.navigation.CoversTabs
 import java.util.function.Consumer
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -102,6 +103,7 @@ private val BackdropBlurRadius: Dp = 30.dp
 /** The Plein écran of [url], which TalkBack reads as [contentDescription] — « Couverture », « Photo ». */
 @Composable
 internal fun FullScreenCoverDialog(url: String, contentDescription: String, onDismiss: () -> Unit) {
+    CoversTabs()
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),

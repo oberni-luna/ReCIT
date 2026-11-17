@@ -248,6 +248,11 @@ struct UserDetailView: View {
 
     @ViewBuilder
     private var menuContent: some View {
+        Section {
+            DeepLinkShareLink(.user(username: user.username), subject: user.username)
+                .accessibilityIdentifier(AccessibilityID.share)
+        }
+
         if user.relation == .friend {
             Button("network.remove", systemImage: "person.badge.minus") {
                 isConfirmingRemoval = true
@@ -255,22 +260,25 @@ struct UserDetailView: View {
             .accessibilityIdentifier("e2e.user.removeFromNetwork")
         }
 
-        ReportButton(
-            draft: .init(
-                reportedUsername: user.username,
-                reportedUserId: user._id,
-                reporterUsername: userModel.myUser?.username
+        if isMe == false {
+            ReportButton(
+                draft: .init(
+                    reportedUsername: user.username,
+                    reportedUserId: user._id,
+                    reporterUsername: userModel.myUser?.username
+                )
             )
-        )
-        .accessibilityIdentifier("e2e.user.report")
+            .accessibilityIdentifier(AccessibilityID.report)
+        }
     }
 
-    /// A "…" holding what one can do *about* someone rather than with them.
-    /// Hidden on my own profile: there is nobody to report, and nobody to remove.
+    /// A "…" holding what one can do *about* someone rather than with them. On my own profile,
+    /// « Partager » alone: there is nobody to report, and nobody to remove — and no "…" at all
+    /// when my username makes no link.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .confirmationAction) {
-            if user._id != userModel.myUser?._id {
+        if isMe == false || DeepLink.user(username: user.username).url != nil {
+            ToolbarItem(placement: .confirmationAction) {
                 Menu {
                     // Same neutral menu as a book's « … »: glyphs in the label colour rather
                     // than the app's green, and no red line of its own — the confirmation
@@ -280,9 +288,17 @@ struct UserDetailView: View {
                 } label: {
                     Label("action.more", systemImage: "ellipsis")
                 }
-                .accessibilityIdentifier("e2e.user.menu")
+                .accessibilityIdentifier(AccessibilityID.menu)
             }
         }
+    }
+}
+
+private extension UserDetailView {
+    enum AccessibilityID {
+        static let menu: String = "e2e.user.menu"
+        static let share: String = "e2e.user.share"
+        static let report: String = "e2e.user.report"
     }
 }
 

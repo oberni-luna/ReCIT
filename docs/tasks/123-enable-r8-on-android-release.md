@@ -1,6 +1,6 @@
 ---
 issue: 123
-status: to-test
+status: to-close
 wiki: [[features/0031-android-app]], [[features/0065-android-end-to-end-scenario]]
 note: Play Console on the production release — « L'optimisation du code DEX est inférieure à notre seuil … Obscurcissement (0 %) »
 created: 2026-11-10
@@ -66,6 +66,11 @@ created: 2026-11-10
   images through Coil); no crash, no serialization / reflection error in logcat. Not signed in.
 
 ## Review
+
+Round `validation` (2026-11-17), cumulative diff: clean — style ✓ · elegance ✓ · structure ✓ · correctness ✓.
+No R8 hazard found in the app code: JSON through explicit serializers, no `Class.forName` or class
+names of its own, enum `.name` persisted in three places (kept by R8). Still open, not code: the
+signed-in pass of the minified release, handed to the Android e2e run against `e2eRelease`.
 
 ## Verification
 

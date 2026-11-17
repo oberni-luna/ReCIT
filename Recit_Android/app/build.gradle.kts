@@ -50,16 +50,13 @@ android {
             signingConfig = signingConfigs.findByName("upload")
             buildConfigField("String", "SESSION_STORE_NAME", "\"asso.recits.auth.cookies\"")
         }
-        // The end-to-end scenario's build (feature 0065, `E2E_BUILD=release scripts/e2e-android.sh`): shrunk and
-        // optimised by R8 like `release` — its R8 lines are kept the same as release's — so the scenario plays what
-        // the Play Store ships rather than a debug build that never meets R8. It differs where the runner needs it:
-        // the `.dev` package the runner targets, the debug key (no upload key on the machine that runs it), and the
-        // scenario's seams.
+        // The end-to-end scenario's build (feature 0065, `E2E_BUILD=release scripts/e2e-android.sh`): `release`
+        // itself, R8 included, so the scenario plays what the Play Store ships rather than a debug build that never
+        // meets R8. It differs only where the runner needs it: the `.dev` package the runner targets, the debug key
+        // (no upload key on the machine that runs it), and the scenario's seams.
         create("e2eRelease") {
+            initWith(getByName("release"))
             applicationIdSuffix = ".dev"
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
             // The debug build's store: both builds are the same `.dev` package, so a session signed in on one survives

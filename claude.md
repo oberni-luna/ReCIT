@@ -108,13 +108,13 @@ compte-rendu — one row per step, with a screenshot, what it acted on, and OK /
 scripts/e2e.sh
 ```
 
-It asks for the test account's password (`OlivierB_test2` by default; `E2E_PASSWORD` and
+It asks for the test account's password (`OlivierB_test4` by default; `E2E_PASSWORD` and
 `E2E_USERNAME` override, `E2E_SIMULATOR` picks the device, `E2E_RESET_ACCOUNT=1` empties the
 account first). The report lands in `build/e2e/<timestamp>/report.html`. **inventaire.io
 rate-limits sign-ins**, so several runs in quick succession will meet a `429` and report a KO on
 the connexion step — wait a few minutes rather than retrying at once. The scheme is `ReCIT_iOSE2E`; the scenario itself is
 `UITests/E2EScenarioTests.swift`, and it signs in, **restarts the app and checks it is still
-signed in**, scans, searches, sorts, lists, **deletes everything it created**, and signs out. Its first complete run reproduced — and so got fixed —
+signed in**, scans, searches, sorts, lists, opens eight Ex-libris links, **deletes everything it created**, and signs out. Its first complete run reproduced — and so got fixed —
 a crash that had been unreproducible for two days (issue 0065, now in git history), and turned up
 a second one still open
 ([issue 0067](https://github.com/oberni-luna/ReCIT/issues/8)), which is

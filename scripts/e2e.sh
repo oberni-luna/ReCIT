@@ -33,7 +33,7 @@ APP_BUNDLE_ID="studio.lunabee.nouveau-recit"
 RUNNER_BUNDLE_ID="fr.association.ReCIT-iOSUITests.xctrunner"
 
 SIMULATOR_NAME="${E2E_SIMULATOR:-iPhone 17}"
-E2E_USERNAME="${E2E_USERNAME:-OlivierB_test2}"
+E2E_USERNAME="${E2E_USERNAME:-OlivierB_test4}"
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/build/e2e/$STAMP"
@@ -104,7 +104,7 @@ mkdir -p "$OUT_DIR"
 
 # ------------------------------------------------------------------- test run
 
-say "Exécution du scénario (comptez 5 à 10 minutes)"
+say "Exécution du scénario (comptez 10 à 15 minutes)"
 set +e
 xcodebuild test \
   -project "$PROJECT" \
@@ -114,6 +114,7 @@ xcodebuild test \
   -only-testing:"$TEST_ID" \
   -resultBundlePath "$RESULT_BUNDLE" \
   -test-timeouts-enabled YES \
+  -default-test-execution-time-allowance 1800 \
   -maximum-test-execution-time-allowance 1800 \
   > "$OUT_DIR/xcodebuild.log" 2>&1
 XCODEBUILD_STATUS=$?

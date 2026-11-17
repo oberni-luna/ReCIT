@@ -34,8 +34,10 @@ The journey, in order:
    three to the inventory;
 5. open « Ranger mes livres », create two étagères, drag a book onto each, apply;
 6. create a list and put two works in it;
-7. delete all of it — the list, the two étagères, every book;
-8. sign out.
+7. open eight Ex-libris links (0092–0097) through the system, as a link touched in another app — see
+   *The links* below;
+8. delete all of it — the list, the two étagères, every book;
+9. sign out.
 
 Every name the run creates carries a timestamp (`E2E Romans 0829-141207`), so a run that failed
 halfway and left an étagère behind cannot block the next one.
@@ -54,7 +56,7 @@ E2E_RESET_ACCOUNT=1 scripts/e2e.sh          # empty the account first
 the account over the API and deletes every book, étagère and list. Off by default — it removes
 real data — and only needed after a run died halfway through its own cleanup.
 
-The account defaults to `OlivierB_test2`. **The password is never stored**: it is read into the
+The account defaults to `OlivierB_test4` (`OlivierB_test2` was deleted on 2026-10-23). **The password is never stored**: it is read into the
 environment and handed to the test runner through `TEST_RUNNER_E2E_PASSWORD`, which `xcodebuild`
 forwards into the runner process with the prefix stripped — so it appears in no file, and on no
 command line.
@@ -262,6 +264,38 @@ suggestion and only that one. The searches now cover all four ways:
   found by its label (title and owner), then opens it. Nothing is added: the copy is a friend's.
 - **Recherches 2 to 4** each tap one suggestion by its identifier,
   `e2e.searchSuggestion.<humans|everything|works>`, and then walk to a book and add it as before.
+
+## The links (2026-11-17)
+
+Between « Vérification du contenu de la liste » and the deletions, `E2EScenarioTests+Links.swift`
+plays eight non-critical steps, each opening a `https://link.exlibris.lunabee.ovh/…` link with
+`XCUIDevice.shared.system.open(_:)`: the system hands it to the app only if it has associated the
+domain, as from Notes or Messages.
+
+1. « Lien vers un livre » — `/entity/isbn:9782370493002` opens « Lucioles » on Recherche. **The step
+   that says whether iOS read the `apple-app-site-association`**: a link that lands in Safari is a
+   KO saying so, and every link step after it fails the same way.
+2. « Lien vers un·e auteur·ice » — `/entity/wd:Q535`, Victor Hugo, read through `by-uris`.
+3. « Lien vers un·e ami·e » — `/users/OlivierB`, his profile on Réseau.
+4. « Lien vers mon profil » — the account's own name opens the Profil sheet, nothing pushed.
+5. « Lien par-dessus le Profil » — the book link with the Profil open: the link sheet over it,
+   « Fermer » gives the Profil back (0097).
+6. « Partage de la liste, puis son lien » — the run's list set to « Mes ami·es » (a private list
+   offers no « Partager »), « Partager » › « Copier », the link opened, the list on Listes.
+7. The same for the first étagère (« Visibilité » › « Ami·es »), opened on Inventaire.
+8. « Lien illisible, rendu à inventaire.io » — `/users/x/inventory` ends in Safari. Only meaningful
+   when step 1 is OK: unassociated, Safari opens the link itself and the server's `302` lands on the
+   same page.
+
+The list's and the étagère's ids are on no screen, and OlivierB has no public list, étagère or copy
+to point at: their links are taken from « Partager ». The runner cannot read the pasteboard — iOS
+would raise its paste prompt over a blocked main thread — so the link is pasted into Recherche's
+field through its edit menu (« Coller », a paste the user asked for, no prompt) and read from there.
+
+Groups and `/items/` are not linked: the test account is in no group, and no screen shares a copy.
+
+The run now takes longer than XCTest's default ten-minute allowance, which used to stop it around
+its last step: `scripts/e2e.sh` passes `-default-test-execution-time-allowance 1800`.
 
 ## Known limits
 

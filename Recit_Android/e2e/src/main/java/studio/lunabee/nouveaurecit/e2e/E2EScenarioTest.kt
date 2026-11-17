@@ -29,7 +29,9 @@ import java.util.regex.Pattern
  * 4. open another edition of a book;
  * 5. « Ranger mes livres »: two new étagères, a book dragged onto each, « Enregistrer »;
  * 6. a list, two works in it, checked from the Listes tab;
- * 7. delete all of it — the list, the étagères, every book — and sign out.
+ * 7. open Ex-libris links (features 0092–0097): a book, an author, a friend, me, a book over the Profil, the run's
+ *    list and one of its étagères through what « Partager » hands the share sheet, and a URL the app cannot read;
+ * 8. delete all of it — the list, the étagères, every book — and sign out.
  *
  * It signs into a real inventaire.io account and writes to it; every name it creates carries a
  * timestamp, so a run that died halfway cannot block the next one. Run it with
@@ -49,6 +51,9 @@ class E2EScenarioTest {
         val password: String = arguments.getString("e2ePassword").orEmpty()
         // For working on the scenario itself: start on the session already in the app, and keep it.
         keepsSession = arguments.getString("e2eKeepSession") == "true"
+        // Which build of the app is played, said in the report's title: `scripts/e2e-android.sh` passes `release` for
+        // the R8-minified `e2eRelease`.
+        val build: String = arguments.getString("e2eBuild") ?: "debug"
         // With e2eOnly, a run that died halfway can be finished: e2eStamp names what it created.
         arguments.getString("e2eStamp")?.let { stamp = it }
         // The welcome screen's wall of covers never stops moving, so the default ten seconds of
@@ -58,7 +63,7 @@ class E2EScenarioTest {
         val directory = File(instrumentation.context.getExternalFilesDir(null), "e2e-report")
         driver = E2EDriver(
             instrumentation = instrumentation,
-            report = E2EReport(directory, SCENARIO, deviceDescription(), username.ifEmpty { "?" }),
+            report = E2EReport(directory, "$SCENARIO · build $build", deviceDescription(), username.ifEmpty { "?" }),
         )
         driver.barcodes = SCANNED_BOOKS.map(ScanTarget::barcode)
 
@@ -257,6 +262,8 @@ class E2EScenarioTest {
             count
         }
 
+        playLinks(username, listName, shelfNames.first())
+
         driver.step("Suppression de la liste", critical = false) {
             openTab(TAB_LISTS)
             val row: UiObject2 = driver.waitFor(By.clickable(true).hasDescendant(By.text(listName)), "la liste « $listName »")
@@ -312,6 +319,165 @@ class E2EScenarioTest {
             driver.waitFor(button(CREATE_ACCOUNT), "l'écran d'accueil", E2EDriver.NETWORK_TIMEOUT)
             "retour à l'écran d'accueil"
         }
+    }
+
+    // ---------------------------------------------------------------------------------------- links
+
+    /**
+     * Ex-libris links (features 0092–0097), opened from the shell as a link touched in another app. Each step starts
+     * from a tab's root and lands on the screen the link names; the next one's [openTab] closes what it left — a
+     * pushed screen, the Profil, the link dialog.
+     *
+     * Played while the run's list and étagères still exist: two of the links are the ones « Partager » hands the
+     * share sheet for them.
+     */
+    private fun playLinks(username: String, listName: String, shelfName: String) {
+        val bookLink = "$LINK_ROOT/entity/isbn:${LINKED_BOOK.barcode}"
+
+        driver.step("Lien ouvert sans nommer l'app", critical = false) {
+            openTab(TAB_INVENTORY)
+            val verification: String = driver.appLinksState()
+            // No package named: Android picks, as for a link touched in a mail. Verified App Links pick the app.
+            driver.openLink(bookLink, toApp = false)
+            val landed: Boolean = runCatching {
+                driver.waitUntil("La Fiche livre", E2EDriver.NETWORK_TIMEOUT) { driver.isAppInForeground() && isLinkedBook() }
+            }.isSuccess
+            if (!landed) {
+                val front: String = driver.device.currentPackageName ?: "?"
+                if (!driver.isAppInForeground()) driver.bringToFront()
+                throw E2EFailure("Le lien a mené à $front, pas à la Fiche livre de l'app — App Links : $verification.")
+            }
+            "l'app a pris le lien d'elle-même — App Links : $verification"
+        }
+
+        driver.step("Lien vers un livre", critical = false) {
+            openTab(TAB_INVENTORY)
+            driver.openLink(bookLink)
+            driver.waitUntil("La Fiche livre de « ${LINKED_BOOK.title} »", E2EDriver.NETWORK_TIMEOUT) { isLinkedBook() }
+            "« ${LINKED_BOOK.title} » ouvert sur l'onglet Recherche"
+        }
+
+        driver.step("Lien vers un·e auteur·ice", critical = false) {
+            openTab(TAB_INVENTORY)
+            driver.openLink("$LINK_ROOT/entity/${LINKED_AUTHOR.uri}")
+            // Recherche's recent searches may name him too: his works are what only his screen shows.
+            driver.waitUntil("L'écran de ${LINKED_AUTHOR.name}", E2EDriver.NETWORK_TIMEOUT) {
+                driver.exists(By.res(AUTHOR_WORK)) && driver.exists(By.text(LINKED_AUTHOR.name))
+            }
+            "${LINKED_AUTHOR.name}, ses œuvres listées"
+        }
+
+        driver.step("Lien vers un·e ami·e", critical = false) {
+            openTab(TAB_INVENTORY)
+            driver.openLink("$LINK_ROOT/users/$LINKED_FRIEND")
+            // Réseau's root names my friends too; a reader's profile is pushed, and a pushed screen hides the tab bar.
+            driver.waitUntil("Le profil de $LINKED_FRIEND", E2EDriver.NETWORK_TIMEOUT) {
+                !driver.exists(tabBar()) && driver.exists(By.text(LINKED_FRIEND)) && driver.exists(By.text(READER_PROFILE_TAB))
+            }
+            "profil de $LINKED_FRIEND ouvert sur Réseau"
+        }
+
+        if (username.isEmpty()) {
+            driver.skip("Lien vers mon profil", "Nom d'utilisateur·ice inconnu : avec e2eKeepSession, passez aussi -e e2eUsername.")
+        } else {
+            driver.step("Lien vers mon profil", critical = false) {
+                openTab(TAB_INVENTORY)
+                driver.openLink("$LINK_ROOT/users/$username")
+                driver.waitFor(By.res(PROFILE_ACCOUNT), "le Profil", E2EDriver.NETWORK_TIMEOUT)
+                openTab(TAB_INVENTORY)
+                if (driver.exists(By.res(PROFILE_ACCOUNT))) throw E2EFailure("Le Profil ne s'est pas refermé par « $CLOSE ».")
+                "le Profil s'est ouvert, refermé par « $CLOSE »"
+            }
+        }
+
+        driver.step("Lien par-dessus le Profil", critical = false) {
+            openTab(TAB_INVENTORY)
+            driver.tap(By.desc(PROFILE), "l'avatar du profil")
+            driver.waitFor(By.res(PROFILE_ACCOUNT), "le Profil")
+            driver.openLink(bookLink)
+            // The link dialog is a window of its own: test tags do not reach it, and the Profil under it is not read.
+            driver.waitUntil("La Fiche livre dans le dialogue du lien", E2EDriver.NETWORK_TIMEOUT) {
+                !driver.exists(By.res(PROFILE_ACCOUNT)) && driver.exists(By.textContains(LINKED_BOOK.title)) &&
+                    driver.exists(By.desc(MORE)) && driver.exists(By.desc(CLOSE))
+            }
+            driver.tap(By.desc(CLOSE), "« $CLOSE » du dialogue du lien")
+            driver.waitFor(By.res(PROFILE_ACCOUNT), "le Profil, toujours là sous le dialogue")
+            openTab(TAB_INVENTORY)
+            "« ${LINKED_BOOK.title} » ouvert par-dessus le Profil, « $CLOSE » rend le Profil"
+        }
+
+        driver.step("Partager une liste puis ouvrir son lien", critical = false) {
+            openTab(TAB_LISTS)
+            driver.tap(By.text(listName), "la liste « $listName »")
+            driver.waitFor(By.desc(EDIT), "le crayon de la liste")
+            // A list only I may see offers no « Partager »: its link would open nothing for anyone else.
+            if (!driver.exists(By.desc(SHARE))) {
+                driver.tapUntil(By.desc(EDIT), "le crayon de la liste") { driver.exists(By.text(LIST_EDIT_TITLE)) }
+                driver.tap(By.text(LIST_VISIBILITY_PRIVATE), "« Visible par »")
+                driver.tap(By.text(LIST_VISIBILITY_FRIENDS), LIST_VISIBILITY_FRIENDS)
+                driver.scrollTo(button(SAVE), SAVE).click()
+                driver.waitGone(By.text(LIST_EDIT_TITLE), "le formulaire de la liste", E2EDriver.NETWORK_TIMEOUT)
+            }
+            val url: String = shareAndReadLink("/lists/")
+            openTab(TAB_INVENTORY)
+            driver.openLink(url)
+            // Listes' root names the list too: the list's own screen is pushed, without the tab bar.
+            driver.waitUntil("« $listName » ouverte par son lien", E2EDriver.NETWORK_TIMEOUT) {
+                !driver.exists(tabBar()) && driver.exists(By.text(listName)) && driver.exists(By.desc(SHARE))
+            }
+            "visible par « $LIST_VISIBILITY_FRIENDS », $url rouvert sur Listes"
+        }
+
+        driver.step("Partager une étagère puis ouvrir son lien", critical = false) {
+            openTab(TAB_INVENTORY)
+            findShelfInCarousel(shelfName).click()
+            driver.waitFor(By.desc(EDIT), "le crayon « $EDIT »", E2EDriver.NETWORK_TIMEOUT)
+            if (!driver.exists(By.desc(SHARE))) {
+                driver.tapUntil(By.desc(EDIT), "le crayon « $EDIT »") { driver.exists(By.text(SHELF_FORM_TITLE)) }
+                driver.tap(By.text(SHELF_VISIBILITY_FRIENDS), SHELF_VISIBILITY_FRIENDS)
+                driver.scrollTo(button(SAVE), SAVE).click()
+                driver.waitGone(By.text(SHELF_FORM_TITLE), "le formulaire de l'étagère", E2EDriver.NETWORK_TIMEOUT)
+            }
+            val url: String = shareAndReadLink("/shelves/")
+            openTab(TAB_LISTS)
+            driver.openLink(url)
+            driver.waitUntil("« $shelfName » ouverte par son lien", E2EDriver.NETWORK_TIMEOUT) {
+                !driver.exists(tabBar()) && driver.exists(By.text(shelfName)) && driver.exists(By.desc(EDIT))
+            }
+            "visible par « $SHELF_VISIBILITY_FRIENDS », $url rouvert sur Inventaire"
+        }
+
+        driver.step("Lien illisible", critical = false) {
+            openTab(TAB_INVENTORY)
+            driver.openLink(UNREADABLE_LINK)
+            // The app does not hold it: the same page on inventaire.io, in whatever answers a web link.
+            var front = ""
+            driver.waitUntil("Une autre app au premier plan") {
+                front = driver.device.currentPackageName.orEmpty()
+                front.isNotEmpty() && front != E2EDriver.APP_PACKAGE
+            }
+            driver.bringToFront()
+            openTab(TAB_INVENTORY)
+            "confié à $front, puis l'app ramenée au premier plan"
+        }
+    }
+
+    /** The Fiche livre of [LINKED_BOOK], in the main window — where test tags reach. */
+    private fun isLinkedBook(): Boolean = driver.exists(By.res(BOOK)) && driver.exists(By.textContains(LINKED_BOOK.title))
+
+    /**
+     * Touches the screen's « Partager », reads the link from the system share sheet's preview of the text it was
+     * handed (Android 10 and later show it), and closes the sheet.
+     */
+    private fun shareAndReadLink(path: String): String {
+        driver.tap(By.desc(SHARE), "« $SHARE »", E2EDriver.NETWORK_TIMEOUT)
+        val preview: UiObject2 = driver.waitFor(By.textStartsWith("$LINK_ROOT$path"), "le lien dans la feuille de partage")
+        val url: String = preview.text.trim()
+        // The share sheet is another app's activity: back closes it, and cannot leave ours.
+        if (!driver.isAppInForeground()) driver.back()
+        driver.waitUntil("Le retour dans l'app après la feuille de partage") { driver.isAppInForeground() }
+        if (!Regex("$LINK_ROOT$path[0-9a-f]{32}").matches(url)) throw E2EFailure("« $url » n'est pas un lien $path attendu.")
+        return url
     }
 
     // ------------------------------------------------------------------------------------- journeys
@@ -545,13 +711,34 @@ class E2EScenarioTest {
      * A menu, sheet or dialog a failed step left open is a window of its own, and UI Automator then sees
      * nothing else — the tab bar included. Back closes it; back is only pressed while the bar is hidden,
      * since at a tab's root it would leave the app.
+     *
+     * The bar is hidden by other things too, which back is not trusted with: a screen pushed in Inventaire, Listes
+     * or Réseau (feature 0088) and the link dialog (0097) are left by their own « Retour » or « Fermer ». The Profil
+     * is drawn over the tabs in the same window, so the bar is still read beneath it, out of reach: its « Fermer »
+     * goes first.
      */
     private fun uncoverTabBar() {
-        repeat(4) {
+        repeat(MAX_UNCOVER) {
+            if (!driver.isAppInForeground()) return
+            if (driver.exists(By.res(PROFILE_ACCOUNT))) {
+                closeBy(By.desc(CLOSE))
+                return@repeat
+            }
             if (driver.device.wait(Until.hasObject(tabBar()), 2_000)) return
-            if (!driver.isAppInForeground() || !driver.isCovered()) return
-            driver.back()
+            when {
+                driver.isCovered() -> driver.back()
+                driver.exists(By.desc(BACK)) -> closeBy(By.desc(BACK))
+                driver.exists(By.desc(CLOSE)) -> closeBy(By.desc(CLOSE))
+                else -> return
+            }
         }
+    }
+
+    /** Touches a screen's own way out, then leaves it the time to go: Navigation 3 keeps it in the tree while it exits. */
+    private fun closeBy(selector: BySelector) {
+        driver.find(selector)?.let { runCatching { it.click() } }
+        driver.device.waitForIdle(1_500)
+        SystemClock.sleep(SETTLE_MILLIS)
     }
 
     private fun sortGridArea(): Rect = Rect(0, driver.device.displayHeight / 6, driver.device.displayWidth, driver.device.displayHeight / 2)
@@ -606,6 +793,8 @@ class E2EScenarioTest {
 
     private data class Search(val query: String, val suggestion: String, val resultTag: String)
 
+    private data class LinkedAuthor(val uri: String, val name: String)
+
     private companion object {
         const val SCENARIO: String = "Ex-libris Android — parcours complet"
 
@@ -614,6 +803,17 @@ class E2EScenarioTest {
             ScanTarget("9782370493002", "Lucioles"),
             ScanTarget("9782413013518", "Penss et les plis du monde"),
         )
+
+        // Links (features 0092–0097). The book is the first one scanned, so it is in the inventory by then.
+        const val LINK_ROOT: String = "https://${E2EDriver.LINK_DOMAIN}"
+        val LINKED_BOOK: ScanTarget = SCANNED_BOOKS.first()
+        val LINKED_AUTHOR: LinkedAuthor = LinkedAuthor("wd:Q535", "Victor Hugo")
+
+        /** A friend of the test account — the owner of « Dans la forêt » too. */
+        const val LINKED_FRIEND: String = "OlivierB"
+
+        /** On the link domain, but no path the app reads: the app sends it to inventaire.io. */
+        const val UNREADABLE_LINK: String = "$LINK_ROOT/users/x/inventory"
 
         const val FRIEND_BOOK_QUERY: String = "Dans la forêt"
         val SEARCHES: List<Search> = listOf(
@@ -631,6 +831,7 @@ class E2EScenarioTest {
         const val MAX_GRID_SWIPES: Int = 12
         const val MIN_CARD_HEIGHT: Int = 200
         const val SETTLE_MILLIS: Long = 1_000
+        const val MAX_UNCOVER: Int = 6
 
         const val TEXT_VIEW: String = "android.widget.TextView"
 
@@ -671,6 +872,11 @@ class E2EScenarioTest {
         const val SHELF_FORM_TITLE: String = "Modifier l'étagère"
         const val DELETE: String = "Supprimer"
         const val LOGOUT: String = "Se déconnecter"
+        const val READER_PROFILE_TAB: String = "Présentation"
+        const val LIST_EDIT_TITLE: String = "Modifier la liste"
+        const val LIST_VISIBILITY_PRIVATE: String = "Moi seul·e"
+        const val LIST_VISIBILITY_FRIENDS: String = "Mes ami·es"
+        const val SHELF_VISIBILITY_FRIENDS: String = "Ami·es"
 
         // Content descriptions
         const val BACK: String = "Retour"
@@ -678,9 +884,11 @@ class E2EScenarioTest {
         const val CLOSE: String = "Fermer"
         const val ADD: String = "Ajouter"
         const val PROFILE: String = "Profil"
+        const val SHARE: String = "Partager"
 
         // Test tags (resource ids)
         const val SCAN_FEED: String = "e2e.scan.feed"
+        const val PROFILE_ACCOUNT: String = "e2e.profile.account"
         const val INVENTORY_ITEM: String = "e2e.inventory.item"
         const val BOOK: String = "e2e.book"
         const val OTHER_EDITIONS: String = "e2e.book.otherEditions"

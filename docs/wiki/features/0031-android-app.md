@@ -79,6 +79,9 @@ ADR 0001 and ADR 0008 hold as written:
 - Build: `cd Recit_Android && ./gradlew :app:assembleDebug :app:testDebugUnitTest`.
   - AGP 9.4.1, Kotlin 2.4.10, Gradle 9.7.1, compile and target SDK 37, min SDK 28.
   - A `local.properties` with `sdk.dir` is needed and git-ignored.
+  - Build types: `debug` (`.dev`), `release`, and `e2eRelease` — release's R8 shrinking and obfuscation under the
+    `.dev` package and the debug key, with the scenario's seams on (`BuildConfig.E2E_SEAMS`): what
+    `E2E_BUILD=release scripts/e2e-android.sh` plays ([0065](0065-android-end-to-end-scenario.md)).
 - Single module `:app`, package `studio.lunabee.nouveaurecit`. The debug build is
   `studio.lunabee.nouveaurecit.dev` and uses its own session namespace, as `Env` does on iOS.
 - Dependencies: androidx (Compose BOM 2026.09, Material 3, Navigation 3, Lifecycle, Room 2.8,

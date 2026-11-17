@@ -18,7 +18,7 @@ class E2EFailure(message: String) : Exception(message)
 
 /**
  * `E2EDriver`, Android side: the vocabulary the scenario is written in — [step], [waitFor], [tap],
- * [type], [scrollTo], [longPressDrag], [launch], [restartKeepingSession].
+ * [type], [scrollTo], [longPressDrag], [launch], [restartKeepingSession], [openLink], [bringToFront].
  *
  * **Nothing here fails the JUnit test.** A step that throws is recorded KO with its reason and the
  * run carries on, because the deliverable is a compte-rendu of the whole journey. `step(critical = true)`
@@ -116,6 +116,38 @@ class E2EDriver(private val instrumentation: Instrumentation, val report: E2ERep
         SystemClock.sleep(1_000)
         launch(reset = false)
     }
+
+    /**
+     * Brings the app's task back in front as it was — no data wiped, no task cleared, nothing pushed: what touching
+     * its icon does. For when another app (the browser, the share sheet) took the screen.
+     */
+    fun bringToFront() {
+        device.executeShellCommand("am start -W -n $APP_PACKAGE/$APP_ACTIVITY")
+        if (!device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)) {
+            throw E2EFailure("L'app n'est pas revenue au premier plan en ${LAUNCH_TIMEOUT / 1000} s.")
+        }
+    }
+
+    /**
+     * Opens [url] as a link touched in another app would. [toApp] names the app's package, so the link reaches it
+     * whether or not Android has verified its App Links — on an emulator it often has not; without it, Android
+     * decides, which is what verification is about.
+     *
+     * `executeShellCommand` reads no shell syntax — it splits on spaces — so the URL goes in unquoted: quotes would
+     * reach `am` as part of it. None of the scenario's URLs holds a space.
+     */
+    fun openLink(url: String, toApp: Boolean = true) {
+        val target: String = if (toApp) " $APP_PACKAGE" else ""
+        val answer: String = device.executeShellCommand("am start -W -a android.intent.action.VIEW -d $url$target")
+        if (answer.contains("Error")) throw E2EFailure("Le lien $url n'a pas pu être ouvert : ${answer.trim()}")
+        device.waitForIdle(IDLE_TIMEOUT)
+    }
+
+    /** What Android says of the app's claim on the links' domain: `verified`, `none`, `1024`… (`pm get-app-links`). */
+    fun appLinksState(): String = device.executeShellCommand("pm get-app-links $APP_PACKAGE").lines()
+        .map(String::trim)
+        .firstOrNull { it.startsWith("$LINK_DOMAIN:") }
+        ?: "aucun état de vérification pour $LINK_DOMAIN"
 
     fun isAppInForeground(): Boolean = runCatching { device.currentPackageName == APP_PACKAGE }.getOrDefault(false)
 
@@ -290,6 +322,7 @@ class E2EDriver(private val instrumentation: Instrumentation, val report: E2ERep
         const val EXTRA_BARCODES: String = "e2e.barcodes"
         const val EDIT_TEXT: String = "android.widget.EditText"
         const val SHEET_SCRIM: String = "Close sheet"
+        const val LINK_DOMAIN: String = "link.exlibris.lunabee.ovh"
 
         const val DEFAULT_TIMEOUT: Long = 15_000
         const val NETWORK_TIMEOUT: Long = 30_000

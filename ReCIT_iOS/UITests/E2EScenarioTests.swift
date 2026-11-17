@@ -515,6 +515,18 @@ final class E2EScenarioTests: XCTestCase {
             return "\(driver.all("e2e.listItemRow").count) œuvre(s) présentes dans « \(listName) »"
         }
 
+        // MARK: Links
+
+        // Ex-libris links (features 0092–0097), while the list and the étagères still exist:
+        // two of them are shared and their links opened. See `E2EScenarioTests+Links.swift`.
+        Self.playLinkSteps(
+            driver: driver,
+            app: app,
+            username: username,
+            listName: listName,
+            shelfName: firstShelfName
+        )
+
         // MARK: 23. Delete the list
 
         driver.step("Suppression de la liste", critical: false) {
@@ -794,8 +806,15 @@ final class E2EScenarioTests: XCTestCase {
         // The row rises redacted while the edition is fetched, with its action disabled: waiting
         // for the button to become live is waiting for the *real* book rather than the
         // placeholder, so the title read below is the one that was filed.
+        //
+        // **Asked as one query, never as `exists` then `isEnabled`.** The row can clear between
+        // the two reads — a book the account already owns leaves at once — and `isEnabled` on an
+        // element that has gone raises inside XCTest and ends the whole run, not the step.
+        let liveAdd: XCUIElement = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@ AND enabled == true", "e2e.scan.add"))
+            .firstMatch
         try driver.waitUntil("la résolution de l'édition scannée", timeout: 45) {
-            add.exists && add.isEnabled
+            liveAdd.exists
         }
 
         let title: String = driver.any("e2e.scan.title").label

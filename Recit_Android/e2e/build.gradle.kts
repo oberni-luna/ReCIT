@@ -3,7 +3,7 @@ plugins {
 }
 
 /**
- * The end-to-end scenario (feature 0065): UI Automator driving the debug app on an emulator, against
+ * The end-to-end scenario (feature 0065): UI Automator driving the debug — or R8-minified `e2eRelease` — app on an emulator, against
  * the real inventaire.io. A separate, self-instrumenting module rather than `app/src/androidTest`,
  * because a test running inside the app's process dies with it — and the scenario has to kill the
  * app and start it again to check the session survives.
@@ -18,6 +18,15 @@ android {
         minSdk = 28
         targetSdk = 37
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // `e2eRelease` plays the scenario on the app's R8-minified `e2eRelease` variant, matched by build type name;
+    // the runner itself stays a plain, debug-signed test APK.
+    buildTypes {
+        create("e2eRelease") {
+            initWith(getByName("debug"))
+            matchingFallbacks += listOf("debug")
+        }
     }
 
     targetProjectPath = ":app"

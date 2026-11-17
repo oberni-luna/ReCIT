@@ -94,6 +94,11 @@ extension E2EScenarioTests {
     /// link that lands in Safari here means every step after it is about Safari, not the app.
     @MainActor
     private static func openBookLink(driver: E2EDriver, app: XCUIApplication) throws -> String {
+        // The searches left a book pushed on Recherche: walked back first, so the book screen
+        // waited for below is the link's and not that one.
+        let searchTab: XCUIElement = app.tabBars.buttons[E2EDriver.Tab.search.rawValue]
+        try driver.tap(searchTab, "l'onglet « Recherche »", until: { searchTab.isSelected })
+        try driver.popBack(to: .search)
         try settle(driver: driver)
         let url: URL = try link(linkedBook.path)
 
@@ -101,9 +106,10 @@ extension E2EScenarioTests {
             driver.exists("e2e.book.menu")
         }
         let title: XCUIElement = driver.any("e2e.entityTitle")
-        try driver.waitUntil("le titre du livre", timeout: E2EDriver.defaultTimeout) {
-            title.label.isEmpty == false
-        }
+        _ = driver.holds(
+            { title.label.localizedStandardContains(linkedBook.title) },
+            within: E2EDriver.defaultTimeout
+        )
         let shown: String = title.label
         let onSearch: Bool = app.tabBars.buttons[E2EDriver.Tab.search.rawValue].isSelected
         try settle(driver: driver)
@@ -467,9 +473,16 @@ extension E2EScenarioTests {
             within: 5
         )
 
-        let cancel: XCUIElement = app.buttons["Annuler"]
-        if cancel.exists {
-            cancel.tap()
+        // iOS 26 closes an active search with a cross beside the field, iOS 18 with « Annuler ».
+        // Left active, the search keeps the keyboard over the tab bar and every later tab change
+        // taps nothing.
+        let close: XCUIElement = app.buttons
+            .matching(NSPredicate(format: "label IN %@", ["Annuler", "Fermer", "Close", "Cancel"]))
+            .firstMatch
+        if close.exists {
+            try driver.tap(close, "la fermeture de la recherche", until: {
+                app.keyboards.count == 0
+            })
         }
         return value
     }

@@ -687,8 +687,9 @@ final class E2EScenarioTests: XCTestCase {
             try driver.tap(
                 driver.any("e2e.profile.open"),
                 "l'avatar du profil",
-                until: { driver.exists("e2e.profile.logout") }
+                until: { driver.exists("e2e.profile.close") }
             )
+            try Self.revealLogout(driver: driver, app: app)
             try driver.tap(
                 driver.any("e2e.profile.logout"),
                 "le bouton « Se déconnecter »",
@@ -1127,6 +1128,20 @@ final class E2EScenarioTests: XCTestCase {
             within: 10
         )
         return true
+    }
+
+    /// Scrolls the Profil down to « Se déconnecter », its last row.
+    ///
+    /// The sheet is a lazy list, and since « Un café pour Ex-libris » sits at its head the row is
+    /// below the fold on a phone: it is not in the hierarchy at all until scrolled to.
+    @MainActor
+    private static func revealLogout(driver: E2EDriver, app: XCUIApplication) throws {
+        for _ in 0..<8 where driver.isReachable(driver.any("e2e.profile.logout")) == false {
+            app.swipeUp()
+        }
+        guard driver.exists("e2e.profile.logout") else {
+            throw E2EFailure("« Se déconnecter » n'est pas apparu en faisant défiler le Profil.")
+        }
     }
 
     /// Opens the inventory's book at `bookIndex` and files its work into `listName`.

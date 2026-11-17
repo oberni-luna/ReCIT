@@ -67,8 +67,8 @@ E2E_BUILD=release scripts/e2e-android.sh        # the R8-minified e2eRelease bui
 
 **On the release build.** R8 breaks nothing at compile time: a class it strips or renames under reflection, or a
 serializer it drops, only shows when a screen decodes the server's answer. `E2E_BUILD=release` plays the journey on
-`e2eRelease`, a build type of `:app` with release's R8 settings (`isMinifyEnabled`, `isShrinkResources`, the same
-`proguardFiles`), under the `.dev` package the runner targets, signed with the debug key, and with the scanner seam
+`e2eRelease`, a build type of `:app` made with `initWith(release)` — R8, resource shrinking and `proguard-rules.pro`
+(#123) as shipped — under the `.dev` package the runner targets, signed with the debug key, and with the scanner seam
 on. `:e2e` has an `e2eRelease` build type of its own, so `:e2e:assembleE2eRelease` targets that variant; the runner
 itself is not minified. The APKs are `app/build/outputs/apk/e2eRelease/app-e2eRelease.apk` and
 `e2e/build/outputs/apk/e2eRelease/e2e-e2eRelease.apk`; the report's title ends in « build release ». Its session
@@ -171,9 +171,12 @@ are windows of their own, where `testTagsAsResourceId` does not reach: those are
 
 ## Known limits
 
-- **The link steps have never run** (2026-11-17): written against the screens' code and compiled, not played — the
-  emulator's app was never signed in. The share sheet's text preview is Android 10+; the App Links step depends on
-  the emulator having fetched `assetlinks.json` for the debug key of the Mac that built the APK.
+- **First whole run on the minified build** (2026-11-17, `build/e2e-android/20261117-113243/`, `NoGMS_API_35`):
+  37 OK / 1 KO. Sign-in, restart, the scan (ML Kit's registrars kept by #123's rule), the searches, sorting, the
+  list, all nine link steps and the cleanup passed under R8. The KO was « Recherche 2 · Victor Hugo », a
+  `StaleObjectException` from UI Automator on a list redrawn under it — the step was already the flakiest, not R8.
+  The share sheet's text preview is Android 10+; the App Links step depends on the emulator having fetched
+  `assetlinks.json` for the debug key of the Mac that built the APK.
 
 - **Not yet seen whole.** On 2026-10-30 the steps were played on the app's session (`e2eKeepSession`): 25 of 27 OK
   in the best full run, and « Suppression de l'étagère » OK on its own (`e2eOnly`) once its carousel swipes were

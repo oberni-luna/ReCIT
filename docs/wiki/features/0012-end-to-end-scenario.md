@@ -294,6 +294,20 @@ field through its edit menu (« Coller », a paste the user asked for, no prompt
 
 Groups and `/items/` are not linked: the test account is in no group, and no screen shares a copy.
 
+What the first run (2026-11-17, `build/e2e/20261117-110812/`, iPhone 17 Pro, iOS 26.5) taught, fixed since and not
+yet replayed:
+
+- **iOS 26 closes an active search with a cross**, not « Annuler »: left open, the keyboard covered the tab bar and
+  every step after the list share failed on « l'onglet … a été touché 3 fois ». The paste helper now closes it by any
+  of « Annuler », « Fermer », « Close », « Cancel ».
+- **The searches leave a book pushed on Recherche**: the book link's step read that book's title before the link's
+  arrived. It now walks Recherche back to its root first and waits for « Lucioles ».
+- Copy, paste and reading the field worked: the run read `…/lists/<id>` back from Recherche.
+
+Two fixes outside the links, from the same runs: « Déconnexion » scrolls the Profil to « Se déconnecter », now
+below « Un café pour Ex-libris »; and the scan step waits on one query for an enabled « + », since `exists` then
+`isEnabled` on a row that cleared in between raised inside XCTest and ended the whole run at step 6.
+
 The run now takes longer than XCTest's default ten-minute allowance, which used to stop it around
 its last step: `scripts/e2e.sh` passes `-default-test-execution-time-allowance 1800`.
 

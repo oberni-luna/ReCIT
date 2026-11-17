@@ -24,7 +24,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
     /// Where « Tout voir » leads from the merged search's local section (issue 0075). The
     /// query is the whole payload: the search field stays on the screen below, so the
     /// destination has to carry what it answers.
-    case localSearchResults(query: String)
+    /// `kind` names the section whose « Tout voir » pushed it: books, lists, friends or groups.
+    case localSearchResults(query: String, kind: LocalSearchKind)
     /// Every book my friends have, most recent first. Where « Tout voir » leads from the
     /// Recherche tab's « Chez mes amis » (PRD 0020); it carries nothing.
     case friendsLatestBooks
@@ -80,8 +81,8 @@ enum NavigationDestination: Equatable, Hashable, Identifiable {
             return focusURI.map { "entityList:\(id):\($0)" } ?? "entityList:\(id)"
         case .shelf(let id):
             return "shelf:\(id)"
-        case .localSearchResults(let query):
-            return "localSearchResults:\(query)"
+        case let .localSearchResults(query, kind):
+            return "localSearchResults:\(kind.rawValue):\(query)"
         case .friendsLatestBooks:
             return "friendsLatestBooks"
         case .addFriends:
@@ -180,8 +181,8 @@ extension NavigationDestination {
           EntityListDetail(listId: id, focusURI: focusURI, path: path)
       case .shelf(let id):
           ShelfDetailView(shelfId: id, path: path)
-      case .localSearchResults(let query):
-          SearchAllLocalView(query: query)
+      case let .localSearchResults(query, kind):
+          SearchAllMatchesView(query: query, kind: kind)
       case .friendsLatestBooks:
           FriendsLatestBooksView()
       case .addFriends:

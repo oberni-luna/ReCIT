@@ -11,7 +11,7 @@
 
 import Foundation
 
-struct InventorySyncProgress: Equatable, Sendable {
+nonisolated struct InventorySyncProgress: Equatable, Sendable {
     /// Items announced by `inventory-view`. `nil` until that first answer lands — the only
     /// moment of the sync where there is nothing honest to measure against.
     let total: Int?

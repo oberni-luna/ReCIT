@@ -25,7 +25,6 @@ struct UserDataSyncTests {
             userModel: .init(apiService: mock),
             shelfModel: .init(apiService: mock),
             inventoryModel: .init(apiService: mock),
-            entityModel: .init(apiService: mock),
             transactionModel: .init(apiService: mock),
             groupModel: .init(apiService: mock, ledger: .init(defaults: defaults), defaults: defaults),
             listModel: .init(apiService: mock),

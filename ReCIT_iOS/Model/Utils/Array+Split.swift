@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Array {
+nonisolated extension Array {
     func splitInSubArrays(of size: Int) -> [[Element]] {
         let numberOfSubarrays = Int((CGFloat(count)/CGFloat(size)).rounded(.up))
         return (0..<numberOfSubarrays).map {

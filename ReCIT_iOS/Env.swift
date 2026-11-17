@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Env {
+nonisolated enum Env: Sendable {
     case development
     case production
 

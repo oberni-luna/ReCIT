@@ -67,6 +67,7 @@ struct SearchLocalSection: View {
                 }
             } header: {
                 SearchLocalHeader(
+                    kind: .books,
                     query: query,
                     showsSeeAll: ranked.totalCount > InventorySearchRanking.displayLimit
                 )

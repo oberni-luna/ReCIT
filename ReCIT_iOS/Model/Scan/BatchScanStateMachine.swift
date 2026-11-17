@@ -94,6 +94,9 @@ struct BatchScanStateMachine {
             state = .notFound(code: code)
             return true
 
+        case .retried(let code):
+            return retry(code: code)
+
         case .addStarted:
             guard case .resolved(let book) = state else { return false }
             state = .adding(book: book)
@@ -126,9 +129,9 @@ struct BatchScanStateMachine {
             return true
 
         case .cleared:
-            guard state != .idle else { return false }
+            let wasShowingRow: Bool = state.showsRow
             state = .idle
-            return true
+            return wasShowingRow
         }
     }
 
@@ -153,6 +156,15 @@ struct BatchScanStateMachine {
 
         gatedCode = code
         gatedCodeLastSeen = timestamp
+        state = .lookingUp(code: code)
+        return true
+    }
+
+    /// The one way past the gate for the code it holds: the reader asking, from the row that
+    /// says the edition was not found, for that same code to be looked up again. Any other
+    /// state, or any other code, has nothing to retry.
+    private mutating func retry(code: String) -> Bool {
+        guard case .notFound(let pending) = state, pending == code else { return false }
         state = .lookingUp(code: code)
         return true
     }

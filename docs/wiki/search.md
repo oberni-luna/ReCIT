@@ -1,6 +1,6 @@
 # Recherche
 
-One field for my books, my friends' and inventaire.io. At rest, recent searches and what friends just shelved. A result opens a book, the best edition of its work.
+One field for my books, my friends', my lists and my friends' lists, my friends, my groups, and inventaire.io. At rest, recent searches and what friends just shelved. A result opens a book, the best edition of its work.
 
 ## Code
 
@@ -19,3 +19,4 @@ One field for my books, my friends' and inventaire.io. At rest, recent searches 
 - [0092 Links to a book or an author](features/0092-entity-deep-links.md) — a `link.exlibris.lunabee.ovh/entity/<uri>` link pushes the Fiche livre or the Auteur·ice on Recherche, alone above its root
 - [0040 Recherche's field always there, a list's detail on black](features/0040-search-field-pinned-list-detail-on-black.md) — on iOS 27 the search tab sits in the bar and its field is pinned under the title (`.navigationBarDrawer(.always)`), iOS 26 unchanged; `EntityListDetail` on `backgroundGrouped`; real app unseen on iOS 27, list detail unseen
 - [0087 Nouveau livre from Recherche, with an optional ISBN](features/0087-book-creation-from-search.md) — the « Sur inventaire.io » absence offers « Ajouter ce livre », which opens « Nouveau livre » on the query; the ISBN typed or left empty, its check digit holding back « Publier »; drafts kept by query in memory; the Fiche livre pushed once published; nothing published, e2e not run
+- [0098 Lists, friends and groups in Recherche, and « Ajouter une édition » under every answer](features/0098-lists-friends-and-groups-in-search.md) — Listes, Ami·es, Groupes after the books from three characters, three rows and « Tout voir »; friends only, my groups only, lists by name; « Ajouter une édition » closes inventaire.io's answer with or without results (amends 0087); iOS only, e2e not run

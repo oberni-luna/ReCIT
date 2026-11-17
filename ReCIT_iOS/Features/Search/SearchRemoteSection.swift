@@ -25,9 +25,9 @@
 //  The failure carries the way out: the SnackBar says what went wrong and then goes away, so
 //  the screen keeps the only thing still actionable — a button that sends the same query again.
 //
-//  The absence carries a way out too: « Ajouter ce livre » opens « Nouveau livre » on the query,
-//  whatever « Mes livres » or « Chez mes amis » found above it. Only here: under results, a work
-//  found means adding an edition to it, which is another gesture.
+//  « Ajouter une édition » always closes inventaire.io's answer, results or none, in a card of
+//  its own: a result may not be the book searched for. It opens « Nouveau livre » on the query,
+//  which looks for the work first (feature 0047). A failure has no answer to close, so no row.
 //
 //  Its copy is its own, never the recents' one: a query that found nothing and a history that
 //  holds nothing are two different silences, and one text for both would say neither.
@@ -46,8 +46,6 @@ struct SearchRemoteSection: View {
     /// Sends the same query again. The only thing left to do after a failure.
     let onRetry: () -> Void
 
-    @Environment(\.openNewBook) private var openNewBook: OpenNewBookAction
-
     var body: some View {
         switch state.sign {
         case .loading:
@@ -55,21 +53,22 @@ struct SearchRemoteSection: View {
                 .accessibilityIdentifier("e2e.searchLoading")
 
         case .noResult:
-            EmptyStateView(
-                glyph: "magnifyingglass",
-                title: "inventory.search.results.empty.title",
-                message: "inventory.search.results.empty.message \(query)",
-                action: .init(
-                    title: "inventory.search.results.empty.add_book",
-                    accessibilityIdentifier: AccessibilityID.addBook,
-                    handler: { openNewBook(.search(query: query)) }
+            Section {
+                EmptyStateView(
+                    glyph: "magnifyingglass",
+                    title: "inventory.search.results.empty.title",
+                    message: "inventory.search.results.empty.message \(query)"
                 )
-            )
-            // An absence is a statement about the whole answer, not one of its lines: no
-            // separator under it, and room around it so it does not read as a result.
-            .padding(.vertical, .large)
-            .listRowSeparator(.hidden)
-            .accessibilityIdentifier("e2e.searchNoResult")
+                // An absence is a statement about the whole answer, not one of its lines: no
+                // separator under it, and room around it so it does not read as a result.
+                .padding(.vertical, .large)
+                .listRowSeparator(.hidden)
+                .accessibilityIdentifier(AccessibilityID.noResult)
+            }
+
+            Section {
+                SearchAddEditionRow(query)
+            }
 
         case .failure:
             EmptyStateView(
@@ -85,13 +84,17 @@ struct SearchRemoteSection: View {
         case nil:
             SearchResultsSection(results: state.results)
                 .textCase(nil)
+
+            Section {
+                SearchAddEditionRow(query)
+            }
         }
     }
 }
 
 private extension SearchRemoteSection {
     enum AccessibilityID {
-        static let addBook: String = "e2e.searchNoResult.addBook"
+        static let noResult: String = "e2e.searchNoResult"
     }
 }
 

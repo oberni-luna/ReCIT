@@ -146,8 +146,8 @@ struct InventorySearchRankingTests {
 
     @Test("An empty query matches nothing rather than everything")
     func anEmptyQueryMatchesNothing() {
-        #expect(InventorySearchRanking.rank(library, matching: "") == .none)
-        #expect(InventorySearchRanking.rank(library, matching: "   ") == .none)
+        #expect(InventorySearchRanking.rank(library, matching: "") == .init(matches: [], totalCount: 0))
+        #expect(InventorySearchRanking.rank(library, matching: "   ") == .init(matches: [], totalCount: 0))
     }
 
     @Test("A query nobody owns comes back empty, with a total of zero")
@@ -163,6 +163,6 @@ struct InventorySearchRankingTests {
 
     @Test("An empty library answers an honest question with an empty section")
     func anEmptyLibraryComesBackEmpty() {
-        #expect(InventorySearchRanking.rank([], matching: "monte") == .none)
+        #expect(InventorySearchRanking.rank([], matching: "monte") == .init(matches: [], totalCount: 0))
     }
 }

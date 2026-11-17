@@ -50,6 +50,13 @@ final class SyncStatusStore {
         case failed
     }
 
+    /// What `beginRefresh()` hands the run it lets start, to give back to `endRefresh(_:)`.
+    struct RefreshClaim: Equatable, Sendable {
+        fileprivate let generation: Int
+    }
+
+    private static let defaultsKey: String = "SyncStatusStore.completedDomains"
+
     /// Domains whose first sync has ever completed. Mirrored to `UserDefaults`
     /// and kept as an observed property so views react when it changes.
     private var completedDomains: Set<Domain>
@@ -57,8 +64,14 @@ final class SyncStatusStore {
     /// In-launch phase for domains that have not yet completed a first sync.
     private var activePhases: [Domain: Phase] = [:]
 
+    /// The claim of the running `UserDataSync`, `nil` while none runs. Not observed: no screen
+    /// shows it.
+    @ObservationIgnored private var refreshClaim: RefreshClaim?
+
+    /// Bumped by each claim, so a run's claim never matches the one of a run started after it.
+    @ObservationIgnored private var refreshGeneration: Int = 0
+
     private let defaults: UserDefaults
-    private static let defaultsKey: String = "SyncStatusStore.completedDomains"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -113,8 +126,27 @@ final class SyncStatusStore {
         activePhases[domain] = .failed
     }
 
-    /// Clears all persisted first-sync markers, e.g. on logout / account switch.
+    /// Claims the one `UserDataSync` that may run at a time. `nil` while another holds the claim:
+    /// two side by side would sync every inventory twice, each in its own background context.
+    func beginRefresh() -> RefreshClaim? {
+        guard refreshClaim == nil else { return nil }
+        refreshGeneration += 1
+        let claim: RefreshClaim = .init(generation: refreshGeneration)
+        refreshClaim = claim
+        return claim
+    }
+
+    /// Releases `claim`, unless `reset()` has already released it and another run holds the
+    /// claim since.
+    func endRefresh(_ claim: RefreshClaim) {
+        guard refreshClaim == claim else { return }
+        refreshClaim = nil
+    }
+
+    /// Clears all persisted first-sync markers, e.g. on logout / account switch. Releases the
+    /// refresh claim too: the next session's sync starts without waiting for the old one to end.
     func reset() {
+        refreshClaim = nil
         activePhases.removeAll()
         completedDomains.removeAll()
         persist()

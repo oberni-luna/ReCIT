@@ -21,14 +21,17 @@
 //
 
 import Foundation
+import OSLog
 import SwiftData
 
 @MainActor
 struct UserDataSync {
+    private static let signposter: OSSignposter = .init(subsystem: "asso.recits", category: "sync")
+    private static let logger: Logger = .init(subsystem: "asso.recits", category: "sync")
+
     let userModel: UserModel
     let shelfModel: ShelfModel
     let inventoryModel: InventoryModel
-    let entityModel: EntityModel
     let transactionModel: TransactionModel
     let groupModel: GroupModel
     let listModel: ListModel
@@ -45,11 +48,9 @@ struct UserDataSync {
             syncStatus.markStarted(domain)
         }
         do {
-            print("## Sync my user ")
-            try await userModel.syncMyUser(modelContext: modelContext)
-            print(" --> done \(userModel.myUser?.username ?? "<Empty>")")
+            try await signposted("My user") { try await userModel.syncMyUser(modelContext: modelContext) }
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during user sync: \(error)")
+            Self.logger.error("My user sync failed: \(error)")
             // A session the server no longer honours is not a sync that failed: nothing
             // below can succeed either, so the tabs would keep their first-sync
             // placeholders for ever with nothing to tap — the shape of issue 0068. Drop
@@ -68,7 +69,6 @@ struct UserDataSync {
             failEveryDomain()
             return
         }
-        inventoryModel.start(entityModel: entityModel, errorReporter: errorReporter)
         // Accepting an invitation pulls the new friend's books, and the étagères they
         // share, on the spot — which is the one thing `UserModel` needs either of these
         // two for.
@@ -78,9 +78,9 @@ struct UserDataSync {
         // Shelves must sync BEFORE inventory so items can resolve their shelf
         // membership into the Shelf ⇄ InventoryItem relation. See ADR 0003.
         do {
-            try await shelfModel.syncShelves(forUser: myUser, modelContext: modelContext)
+            try await signposted("My shelves") { try await shelfModel.syncShelves(forUser: myUser, modelContext: modelContext) }
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during shelves sync: \(error)")
+            Self.logger.error("My shelves sync failed: \(error)")
         }
 
         // Each domain drives its own first-sync marker so an unsynced screen
@@ -90,42 +90,42 @@ struct UserDataSync {
         // friend's books as well, so the Profil kept its friends behind a spinner until the
         // last inventory had landed. The friends now show as soon as they are known, and
         // their books follow below, each cell carrying its own bar.
-        await sync(.community) {
+        await sync(.community, signpostedAs: "Relations") {
             try await userModel.syncRelations(modelContext: modelContext)
         }
 
         // Right after the relations, which fetch the members of my groups along with my friends
         // (`network`): most of the names the groups need are in the store by then. And before my
         // inventory, so the network is whole in seconds on a first launch (Q11c).
-        await sync(.groups) {
+        await sync(.groups, signpostedAs: "Groups") {
             try await groupModel.syncMyGroups(myUserId: myUser._id, modelContext: modelContext)
         }
 
         // My inventory is gated per-user via `User.lastInventorySync`, not the
         // SyncStatusStore, so it syncs outside the domain tracking.
         do {
-            try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext)
+            try await signposted("My inventory") { try await inventoryModel.syncInventory(forUser: myUser, modelContext: modelContext) }
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during inventory sync: \(error)")
+            Self.logger.error("My inventory sync failed: \(error)")
         }
 
-        await sync(.lists) {
+        await sync(.lists, signpostedAs: "Lists") {
             try await listModel.syncLists(forUser: myUser, modelContext: modelContext)
         }
 
-        await sync(.transactions) {
+        await sync(.transactions, signpostedAs: "Transactions") {
             try await transactionModel.syncTransactions(modelContext: modelContext)
         }
 
         // Before the friends' books: one request for every friend, where the books take minutes.
         // Outside the domain tracking, as the Lists tab's placeholder waits on my lists alone.
         do {
-            try await listModel.syncNetworkLists(of: userModel.friends(modelContext: modelContext), modelContext: modelContext)
+            try await signposted("Network lists") { try await listModel.syncNetworkLists(of: userModel.friends(modelContext: modelContext), modelContext: modelContext) }
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during network lists sync: \(error)")
+            Self.logger.error("Network lists sync failed: \(error)")
         }
 
-        await syncFriendsInventories(modelContext: modelContext)
+        await signposted("Friends inventories") { await syncFriendsInventories(modelContext: modelContext) }
     }
 
     /// Friends' étagères and books, one friend at a time — last, because each is the longest
@@ -153,12 +153,12 @@ struct UserDataSync {
             do {
                 try await shelfModel.syncShelves(forUser: user, modelContext: modelContext)
             } catch {
-                print("⚠️⚠️⚠️⚠️⚠️ Error during shelves sync for \(user.username): \(error)")
+                Self.logger.error("Shelves sync failed for \(user.username, privacy: .private): \(error)")
             }
             do {
                 try await inventoryModel.syncInventory(forUser: user, modelContext: modelContext)
             } catch {
-                print("⚠️⚠️⚠️⚠️⚠️ Error during inventory sync for \(user.username): \(error)")
+                Self.logger.error("Inventory sync failed for \(user.username, privacy: .private): \(error)")
             }
         }
     }
@@ -174,15 +174,27 @@ struct UserDataSync {
     /// screen can tell "not synced yet" from "synced and empty".
     private func sync(
         _ domain: SyncStatusStore.Domain,
+        signpostedAs name: StaticString,
         _ operation: () async throws -> Void
     ) async {
         syncStatus.markStarted(domain)
         do {
-            try await operation()
+            try await signposted(name, operation)
             syncStatus.markCompleted(domain)
         } catch {
-            print("⚠️⚠️⚠️⚠️⚠️ Error during \(domain.rawValue) sync: \(error)")
+            Self.logger.error("\(domain.rawValue, privacy: .public) sync failed: \(error)")
             syncStatus.markFailed(domain)
         }
+    }
+
+    /// Runs one phase of the sync inside an `asso.recits` signpost interval named `name`, ended
+    /// however the phase ends, so Instruments shows how long each phase takes.
+    private func signposted(
+        _ name: StaticString,
+        _ phase: () async throws -> Void
+    ) async rethrows {
+        let state: OSSignpostIntervalState = Self.signposter.beginInterval(name, id: Self.signposter.makeSignpostID())
+        defer { Self.signposter.endInterval(name, state) }
+        try await phase()
     }
 }

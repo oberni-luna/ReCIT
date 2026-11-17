@@ -9,7 +9,10 @@ import Foundation
 
 /// Abstraction over the network layer so app models can be tested against a
 /// mock implementation instead of hitting the live `inventaire.io` backend.
-protocol APIServicing {
+///
+/// `nonisolated` and `Sendable`: the inventory sync calls it from its own actor, and the answers
+/// are decoded there rather than on the main actor (ADR 0009).
+nonisolated protocol APIServicing: Sendable {
     func baseUrl() -> String
     func absoluteImageUrl(_ path: String?) -> String?
 
@@ -54,7 +57,7 @@ protocol APIServicing {
 
 // MARK: - Convenience overloads (default arguments)
 
-extension APIServicing {
+nonisolated extension APIServicing {
     func send<T: Codable, U: Codable>(
         toEndpoint endpoint: String,
         payload: T

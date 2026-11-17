@@ -1,0 +1,1 @@
+Ex-libris links open in the app: a book, an author, a reader, a group, a list, a shelf or a copy, even when received in a message. "Share" sends the link to a book, a list, a shelf, a profile or a group. The app is lighter to download.

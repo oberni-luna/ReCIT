@@ -17,7 +17,7 @@ android {
         minSdk = 28
         targetSdk = 37
         versionCode = 7
-        versionName = "1.4.1"
+        versionName = "1.5.0"
     }
 
     // The upload key lives outside the repository: its path and passwords are read from

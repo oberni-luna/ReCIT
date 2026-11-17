@@ -12,6 +12,6 @@
     "keywords": "livres,lecture,bibliothèque,emprunt,prêt,inventaire,partage,ami·es,romans,BD",
     "supportUrl": "https://inventaire.io/",
     "marketingUrl": "https://inventaire.io/",
-    "whatsNew": "Nouveautés de la 1.11 :\n• Sur une liste d'œuvres, « Où trouver ce livre ? » montre les ami·es qui l'ont, à qui le demander d'un appui long, et le cherche sur Recyclivre ou Chez mon libraire\n• Sur iOS 18, les onglets d'un profil, d'une liste et d'une étagère s'affichent enfin correctement, et les titres de section ne sont plus en capitales"
+    "whatsNew": "Nouveautés de la 1.12 :\n• Les liens Ex-libris s'ouvrent dans l'app : un livre, un·e auteur·ice, un·e lecteur·ice, un groupe, une liste ou une étagère, même depuis un message ou une note\n• « Partager » envoie le lien d'un livre, d'une liste, d'une étagère, d'un profil ou d'un groupe\n• La Recherche trouve aussi les listes, les ami·es et les groupes\n• L'app reste fluide pendant la synchronisation, et le scanner d'une liste rate moins de livres"
   }
 }

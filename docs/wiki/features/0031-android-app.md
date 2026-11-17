@@ -107,6 +107,12 @@ ADR 0001 and ADR 0008 hold as written:
 - **The empty-shelf card offered only « Rechercher »**, since nothing scanned or sorted yet. With books
   but no shelf, it showed its heading and body with no tag. Since
   [0042](0042-android-scan-and-sort.md) it carries iOS's three tags.
+- **The release build goes through R8** since 1.4.1 (issue #123): shrunk, optimised, obfuscated,
+  unused resources removed; `debug` stays unminified. `app/proguard-rules.pro` holds one rule, ML Kit's
+  `ComponentRegistrar` constructors, which R8's full mode strips and the scanner needs. A rule goes
+  there only for a break seen in the minified build. Navigation 3 restores its back stack by class
+  name through `Class.forName`: covered by kotlinx.serialization's consumer rules, proven only by a
+  process-death restore.
 
 ## Not done, or not verified
 

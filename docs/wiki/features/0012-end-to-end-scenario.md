@@ -282,7 +282,8 @@ domain, as from Notes or Messages.
    « Fermer » gives the Profil back (0097).
 6. « Partage de la liste, puis son lien » — the run's list set to « Mes ami·es » (a private list
    offers no « Partager »), « Partager » › « Copier », the link opened, the list on Listes.
-7. The same for the first étagère (« Visibilité » › « Ami·es »), opened on Inventaire.
+7. The same for an étagère (« Visibilité » › « Ami·es »), opened on Inventaire: the first by name, the one
+   the carousel centres, since the others' labels are off screen.
 8. « Lien illisible, rendu à inventaire.io » — `/users/x/inventory` ends in Safari. Only meaningful
    when step 1 is OK: unassociated, Safari opens the link itself and the server's `302` lands on the
    same page.
@@ -294,12 +295,16 @@ field through its edit menu (« Coller », a paste the user asked for, no prompt
 
 Groups and `/items/` are not linked: the test account is in no group, and no screen shares a copy.
 
-What the first run (2026-11-17, `build/e2e/20261117-110812/`, iPhone 17 Pro, iOS 26.5) taught, fixed since and not
-yet replayed:
+Four runs on 2026-11-17 (iPhone 17 Pro, iOS 27.0). The last, `build/e2e/20261117-153643/`, ended 31 OK / 6 KO:
+seven of the eight link steps OK, the étagère's KO on a label off screen (fixed since, not replayed); the other
+KOs are #24's list submenu (three) and Victor Hugo's works, with the drag that lacked the book it would have
+added. What the runs taught:
 
-- **iOS 26 closes an active search with a cross**, not « Annuler »: left open, the keyboard covered the tab bar and
-  every step after the list share failed on « l'onglet … a été touché 3 fois ». The paste helper now closes it by any
-  of « Annuler », « Fermer », « Close », « Cancel ».
+- **iOS 26 closes an active search with a cross**, not « Annuler », **and on iOS 27 selecting Recherche activates its
+  field**: left open, the keyboard covered the tab bar and every later step failed on « l'onglet … a été touché 3
+  fois ». Every link step now closes an active search first, by any of « Annuler », « Fermer », « Close », « Cancel ».
+- **A property read on a missing element ends the whole run**, not the step: `isSelected` on a tab of a hidden tab
+  bar (0088), `label` on a title a push just replaced. The link steps ask one predicate query instead.
 - **The searches leave a book pushed on Recherche**: the book link's step read that book's title before the link's
   arrived. It now walks Recherche back to its root first and waits for « Lucioles ».
 - Copy, paste and reading the field worked: the run read `…/lists/<id>` back from Recherche.

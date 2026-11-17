@@ -519,12 +519,14 @@ final class E2EScenarioTests: XCTestCase {
 
         // Ex-libris links (features 0092–0097), while the list and the étagères still exist:
         // two of them are shared and their links opened. See `E2EScenarioTests+Links.swift`.
+        // The étagère is the one the carousel centres, the first by name: the others' labels are
+        // off screen.
         Self.playLinkSteps(
             driver: driver,
             app: app,
             username: username,
             listName: listName,
-            shelfName: firstShelfName
+            shelfName: min(firstShelfName, secondShelfName)
         )
 
         // MARK: 23. Delete the list

@@ -96,8 +96,9 @@ extension E2EScenarioTests {
     private static func openBookLink(driver: E2EDriver, app: XCUIApplication) throws -> String {
         // The searches left a book pushed on Recherche: walked back first, so the book screen
         // waited for below is the link's and not that one.
+        try settle(driver: driver)
         let searchTab: XCUIElement = app.tabBars.buttons[E2EDriver.Tab.search.rawValue]
-        try driver.tap(searchTab, "l'onglet « Recherche »", until: { searchTab.isSelected })
+        try driver.tap(searchTab, "l'onglet « Recherche »", until: { isSelected(.search, app: app) })
         try driver.popBack(to: .search)
         try settle(driver: driver)
         let url: URL = try link(linkedBook.path)
@@ -105,16 +106,24 @@ extension E2EScenarioTests {
         try open(url, driver: driver, app: app, "la fiche du livre") {
             driver.exists("e2e.book.menu")
         }
+        // One query for « this title, on screen »: reading `label` of an element that a push has
+        // just replaced raises inside XCTest.
+        let linked: XCUIElement = app.descendants(matching: .any)
+            .matching(
+                NSPredicate(
+                    format: "identifier == %@ AND label CONTAINS[cd] %@",
+                    "e2e.entityTitle",
+                    linkedBook.title
+                )
+            )
+            .firstMatch
+        let found: Bool = linked.waitForExistence(timeout: E2EDriver.defaultTimeout)
         let title: XCUIElement = driver.any("e2e.entityTitle")
-        _ = driver.holds(
-            { title.label.localizedStandardContains(linkedBook.title) },
-            within: E2EDriver.defaultTimeout
-        )
-        let shown: String = title.label
-        let onSearch: Bool = app.tabBars.buttons[E2EDriver.Tab.search.rawValue].isSelected
+        let shown: String = found ? linkedBook.title : (title.exists ? title.label : "(aucun titre)")
+        let onSearch: Bool = isSelected(.search, app: app)
         try settle(driver: driver)
 
-        guard shown.localizedStandardContains(linkedBook.title) else {
+        guard found else {
             throw E2EFailure("Le lien \(url.path()) a ouvert « \(shown) », pas « \(linkedBook.title) ».")
         }
         guard onSearch else {
@@ -263,8 +272,7 @@ extension E2EScenarioTests {
         try open(url, driver: driver, app: app, "la liste « \(listName) »") {
             driver.exists("e2e.list.share") && app.staticTexts[listName].exists
         }
-        let onLists: Bool = app.tabBars.buttons[E2EDriver.Tab.lists.rawValue].isSelected
-            || app.tabBars.buttons.count == 0
+        let onLists: Bool = isSelected(.lists, app: app) || app.tabBars.count == 0
         try settle(driver: driver)
 
         guard onLists else {
@@ -320,8 +328,7 @@ extension E2EScenarioTests {
         }
         let named: Bool = app.navigationBars.staticTexts[shelfName].exists
             || app.staticTexts[shelfName].exists
-        let onInventory: Bool = app.tabBars.buttons[E2EDriver.Tab.inventory.rawValue].isSelected
-            || app.tabBars.buttons.count == 0
+        let onInventory: Bool = isSelected(.inventory, app: app) || app.tabBars.count == 0
         try settle(driver: driver)
 
         guard named else {
@@ -444,7 +451,7 @@ extension E2EScenarioTests {
     @MainActor
     private static func pasteIntoSearch(driver: E2EDriver, app: XCUIApplication) throws -> String {
         let tab: XCUIElement = app.tabBars.buttons[E2EDriver.Tab.search.rawValue]
-        try driver.tap(tab, "l'onglet « Recherche »", until: { tab.isSelected })
+        try driver.tap(tab, "l'onglet « Recherche »", until: { isSelected(.search, app: app) })
         try driver.popBack(to: .search)
 
         let field: XCUIElement = app.searchFields.firstMatch
@@ -485,6 +492,18 @@ extension E2EScenarioTests {
             })
         }
         return value
+    }
+
+    /// Whether `tab` is the selected tab, asked as one query.
+    ///
+    /// **Never `buttons[…].isSelected`**: a pushed screen hides the tab bar (0088), and reading a
+    /// property of an element that is not there raises inside XCTest and ends the whole run.
+    @MainActor
+    private static func isSelected(_ tab: E2EDriver.Tab, app: XCUIApplication) -> Bool {
+        app.tabBars.buttons
+            .matching(NSPredicate(format: "label == %@ AND selected == true", tab.rawValue))
+            .firstMatch
+            .exists
     }
 
     /// Back to the inventory's root with nothing over it: the next step starts from there.

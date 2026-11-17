@@ -480,17 +480,7 @@ extension E2EScenarioTests {
             within: 5
         )
 
-        // iOS 26 closes an active search with a cross beside the field, iOS 18 with « Annuler ».
-        // Left active, the search keeps the keyboard over the tab bar and every later tab change
-        // taps nothing.
-        let close: XCUIElement = app.buttons
-            .matching(NSPredicate(format: "label IN %@", ["Annuler", "Fermer", "Close", "Cancel"]))
-            .firstMatch
-        if close.exists {
-            try driver.tap(close, "la fermeture de la recherche", until: {
-                app.keyboards.count == 0
-            })
-        }
+        try closeSearch(driver: driver, app: app)
         return value
     }
 
@@ -506,9 +496,25 @@ extension E2EScenarioTests {
             .exists
     }
 
+    /// Leaves an active search, if one is: iOS 26 closes it with a cross beside the field, iOS 18
+    /// with « Annuler ». Left active, its keyboard covers the tab bar and every later tab change
+    /// taps nothing — and on iOS 27 merely selecting Recherche activates its field.
+    @MainActor
+    private static func closeSearch(driver: E2EDriver, app: XCUIApplication) throws {
+        guard app.keyboards.count > 0 else { return }
+
+        let close: XCUIElement = app.buttons
+            .matching(NSPredicate(format: "label IN %@", ["Annuler", "Fermer", "Close", "Cancel"]))
+            .firstMatch
+        guard close.exists else { return }
+
+        try driver.tap(close, "la fermeture de la recherche", until: { app.keyboards.count == 0 })
+    }
+
     /// Back to the inventory's root with nothing over it: the next step starts from there.
     @MainActor
     private static func settle(driver: E2EDriver) throws {
+        try closeSearch(driver: driver, app: driver.app)
         if driver.exists("e2e.linkSheet.close") {
             driver.any("e2e.linkSheet.close").tap()
         }

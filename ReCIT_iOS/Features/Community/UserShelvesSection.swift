@@ -94,6 +94,7 @@ struct UserShelvesSection: View {
         }
         .scrollTargetBehavior(.viewAligned)
         .scrollIndicators(.hidden)
+        .listRowScrollClipDisabled()
         .scrollDisabled(focus.isArmed)
         .onGeometryChange(for: CGFloat.self) { proxy in
             proxy.size.width

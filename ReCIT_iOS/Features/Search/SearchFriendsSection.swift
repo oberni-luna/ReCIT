@@ -93,6 +93,7 @@ struct SearchFriendsSection: View {
             containerWidth = width
         }
         .scrollIndicators(.hidden)
+        .listRowScrollClipDisabled()
         .listRowInsets(.init())
         .listRowBackground(Color.clear)
         .listRowSeparator(.hidden)

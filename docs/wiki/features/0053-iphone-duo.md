@@ -73,6 +73,26 @@ Sur iPhone et déplié en portrait, la liste reste sur une colonne, inchangée.
 
 La colonne système sur le bord droit : le propriétaire l'a acceptée telle quelle.
 
+## Sous la colonne système (#159, 2026-11-18)
+
+Plié, les rangées horizontales s'arrêtaient au bord de la safe area : la carte suivante était coupée net, environ
+30 pt avant la colonne. Depuis #159, trois endroits passent sous elle, jusqu'au bord de l'écran :
+
+- « Chez mes ami·es » dans Recherche et les étagères sur le profil d'un·e ami·e. Ce sont des rangées de `List` dont
+  la section est bord à bord (`listSectionHorizontalMargins(0)`). Une ligne de liste ne reçoit aucune safe area à
+  ignorer, donc `ignoresSafeArea` n'y fait rien : `listRowScrollClipDisabled()` (dans `View+listMargins.swift`) coupe
+  le clip du défilement. Les cartes gardent leur largeur, la première ne bouge pas, et en fin de rangée la dernière
+  s'arrête entière avant la colonne. Avant iOS 26, la section garde ses marges et le clip reste : le Duo, lui, est en
+  iOS 27.
+- Le carrousel d'étagères de l'onglet Inventaire passait déjà sous la colonne, sans changement : son `ScrollView`
+  vertical va jusque sous la safe area.
+- Dans « Ranger mes livres », le flou et le dégradé du panneau « À ranger », et le trait au-dessus de ses boutons,
+  ignorent la safe area horizontale.
+
+Le défilement passe sous la colonne, pas les touches : une carte dessinée sous la colonne ne se touche pas là. Vu sur
+le simulateur plié (Recherche, Inventaire, « Ranger mes livres ») et déplié en paysage (« Ranger mes livres »). Le
+profil d'un·e ami·e n'a pas été vu ; le scénario e2e n'a pas été lancé.
+
 ## Tests
 
 - `SortGridMetricsTests` couvre les largeurs du Duo. Les cartes d'un iPhone restent sur trois colonnes ; un écran

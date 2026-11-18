@@ -131,6 +131,7 @@ struct SortUnshelvedPanelView<Tip: View, BarTip: View>: View {
             .overlay(alignment: .top) {
                 DesignSystem.Color.borderDefault.color
                     .frame(height: 1)
+                    .ignoresSafeArea(edges: .horizontal)
             }
         }
         .padding(.top, .medium)
@@ -155,7 +156,7 @@ struct SortUnshelvedPanelView<Tip: View, BarTip: View>: View {
                     endPoint: .bottom
                 )
             }
-            .ignoresSafeArea(edges: .bottom)
+            .ignoresSafeArea(edges: [.horizontal, .bottom])
         }
     }
 

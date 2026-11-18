@@ -27,6 +27,7 @@ Product objects and notions, their states, roles, plans. Users see these: one co
 | Auteur·ice | Author | écrivain | Auteur | `Author` | person who wrote a work |
 | Ami·e | Friend | contact, lecteur·ice | Follower, Ami | `UserRelation`, `User` | reader linked both ways → [[features/0018-reader-network]] |
 | Groupe | Group | — | Communauté | `StoredGroup` | readers sharing their books → [[features/0028-network-tab-and-groups]] |
+| Invitation par e-mail | Email invitation | inviter hors de l'app | — | `EmailInvitation` | inventaire.io email asking an address to befriend me or join a group |
 | Échange | Transaction | demande, prêt | Order | `UserTransaction` | give, lend or sell request on a copy → [[features/0071-a-request-names-what-it-asks-for]] |
 | Données bibliographiques | Bibliographic data | métadonnées | — | `EditionBibliographicClaims` | an edition's claims on inventaire.io → [[features/0050-every-bibliographic-datum]] |
 | Commentaire | Comment | — | — | `InventoryItem.details` | labelled « Ce que j'en pense », seen by whoever sees the book |
@@ -46,6 +47,7 @@ One precise screen. Team names, in the discussion language. UI projects only.
 | Liste | list detail | `EntityListDetail` | one list as a cover flow, Livres / Présentation |
 | Réseau | Community | `NetworkView` | Amis / Groupes |
 | Réglages du groupe | group settings | `GroupSettingsView` | what an admin changes about a group |
+| Inviter par e-mail | invite by email | `EmailInvitationSheet` | sheet of addresses and a message, from the two reader searches |
 | Recherche | — | `SearchTabView` | unified search: mine, friends, inventaire.io |
 | Profil | Settings | `ProfileView` | sheet behind the avatar → [[features/0038-profile-behind-the-avatar]] |
 | Fiche livre | book screen | `BookDetailView` | one edition: cover, work, copies, actions |

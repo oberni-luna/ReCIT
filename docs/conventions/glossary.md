@@ -31,6 +31,7 @@ Product objects and notions, their states, roles, plans. Users see these: one co
 | Données bibliographiques | Bibliographic data | métadonnées | — | `EditionBibliographicClaims` | an edition's claims on inventaire.io → [[features/0050-every-bibliographic-datum]] |
 | Commentaire | Comment | — | — | `InventoryItem.details` | labelled « Ce que j'en pense », seen by whoever sees the book |
 | Note privée | Private note | — | — | `InventoryItem.notes` | labelled « Ce que je garde pour moi », seen by me alone |
+| Aperçu de lien | Link preview | carte | — | `scripts/deeplinks/preview` | what a messaging app shows for a shared Ex-libris link: image, title, description → #161 |
 
 
 ## Screens

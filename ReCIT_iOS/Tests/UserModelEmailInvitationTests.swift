@@ -26,7 +26,7 @@ struct UserModelEmailInvitationTests {
         let model: UserModel = .init(apiService: mock)
         let list: EmailInvitationList = .init("A@b.fr, a@b.fr; c@d.fr Moi@example.org", excluding: "moi@example.org")
 
-        _ = try await model.sendEmailInvitations(list, message: "", groupId: nil)
+        _ = try await model.sendEmailInvitations(list, message: "", to: .friends)
 
         #expect(mock.recordedRequests.map(\.endpoint) == [Self.endpoint])
         #expect(mock.recordedRequests.map(\.method) == ["POST"])
@@ -45,7 +45,7 @@ struct UserModelEmailInvitationTests {
         _ = try await model.sendEmailInvitations(
             .init("a@b.fr", excluding: nil),
             message: "Viens voir mes livres",
-            groupId: "group-1"
+            to: .group(id: "group-1")
         )
 
         let body: [String: Any] = try Self.body(mock)
@@ -59,7 +59,7 @@ struct UserModelEmailInvitationTests {
         mock.stub(Self.endpoint, json: #"{"users":[],"emails":["a@b.fr"]}"#)
         let model: UserModel = .init(apiService: mock)
 
-        _ = try await model.sendEmailInvitations(.init("a@b.fr", excluding: nil), message: " \n ", groupId: nil)
+        _ = try await model.sendEmailInvitations(.init("a@b.fr", excluding: nil), message: " \n ", to: .friends)
 
         #expect(try Self.body(mock)["message"] == nil)
     }
@@ -76,10 +76,10 @@ struct UserModelEmailInvitationTests {
         let outcome: EmailInvitationOutcome = try await model.sendEmailInvitations(
             .init("a@b.fr, c@d.fr", excluding: nil),
             message: "",
-            groupId: "group-1"
+            to: .group(id: "group-1")
         )
 
-        #expect(outcome == .init(invitedAddresses: ["a@b.fr"], existingUsernames: ["camille.b"], isForGroup: true))
+        #expect(outcome == .init(invitedAddresses: ["a@b.fr"], existingUsernames: ["camille.b"], target: .group(id: "group-1")))
         #expect(outcome.hasExistingAccounts)
     }
 
@@ -92,10 +92,10 @@ struct UserModelEmailInvitationTests {
         let outcome: EmailInvitationOutcome = try await model.sendEmailInvitations(
             .init("a@b.fr", excluding: nil),
             message: "",
-            groupId: nil
+            to: .friends
         )
 
-        #expect(outcome == .init(invitedAddresses: [], existingUsernames: [], isForGroup: false))
+        #expect(outcome == .init(invitedAddresses: [], existingUsernames: [], target: .friends))
     }
 
     @Test
@@ -105,7 +105,7 @@ struct UserModelEmailInvitationTests {
         let model: UserModel = .init(apiService: mock)
 
         do throws(EmailInvitationFailure) {
-            _ = try await model.sendEmailInvitations(.init("a@b.fr", excluding: nil), message: "", groupId: nil)
+            _ = try await model.sendEmailInvitations(.init("a@b.fr", excluding: nil), message: "", to: .friends)
             Issue.record("Expected the quota to be thrown")
         } catch .rateLimited {
             return

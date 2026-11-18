@@ -18,8 +18,8 @@ nonisolated struct EmailInvitationOutcome: Equatable, Sendable {
     let invitedAddresses: [String]
     /// The readers already on inventaire.io, who got a friend request or a group invitation.
     let existingUsernames: [String]
-    /// Whether the invitations were to a group rather than to be friends.
-    let isForGroup: Bool
+    /// What the invitations were to.
+    let target: EmailInvitationTarget
 
     /// Whether a reader already on inventaire.io was sent something, which the store only learns
     /// from a fresh sync of the relations, or of the group.
@@ -36,9 +36,10 @@ nonisolated struct EmailInvitationOutcome: Equatable, Sendable {
                 : "network.email_invitation.sent \(emailCount)"
         }
 
-        return isForGroup
-            ? groupInvitationMessage(username: username, emailCount: emailCount)
-            : friendRequestMessage(username: username, emailCount: emailCount)
+        return switch target {
+        case .friends: friendRequestMessage(username: username, emailCount: emailCount)
+        case .group: groupInvitationMessage(username: username, emailCount: emailCount)
+        }
     }
 
     private func friendRequestMessage(

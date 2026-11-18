@@ -97,7 +97,7 @@ struct ReaderSearchView: View {
                 }
 
                 if isQuerying {
-                    EmailInvitationSection(note: "network.email_invitation.section.note_friend") {
+                    EmailInvitationSection(.friends) {
                         isInvitingByEmail = true
                     }
                 }
@@ -108,7 +108,7 @@ struct ReaderSearchView: View {
         .sheet(isPresented: $isInvitingByEmail) {
             EmailInvitationSheet(
                 initialAddresses: EmailInvitationList.initialText(fromSearch: query),
-                groupId: nil
+                target: .friends
             )
         }
         .navigationTitle("network.add_friends")

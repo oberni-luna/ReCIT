@@ -34,9 +34,17 @@ struct InviteToGroupView: View {
         allUsers.filter { $0.relation == .friend && $0._id != userModel.myUser?._id }
     }
 
+    private var trimmedQuery: String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var isQuerying: Bool {
+        trimmedQuery.isEmpty == false
+    }
+
     private var friends: [User] {
-        guard query.isEmpty == false else { return myFriends }
-        return myFriends.filter { $0.username.localizedStandardContains(query) }
+        guard isQuerying else { return myFriends }
+        return myFriends.filter { $0.username.localizedStandardContains(trimmedQuery) }
     }
 
     var body: some View {
@@ -44,7 +52,7 @@ struct InviteToGroupView: View {
             Group {
                 if friends.isEmpty {
                     Section {
-                        emptyState
+                        InviteToGroupEmptyState(hasFriends: myFriends.isEmpty == false, query: trimmedQuery)
                             .padding(.vertical, .large)
                     }
                     .listRowBackground(Color.clear)
@@ -67,8 +75,8 @@ struct InviteToGroupView: View {
                     }
                 }
 
-                if query.isEmpty == false {
-                    EmailInvitationSection(note: "network.email_invitation.section.note_group") {
+                if isQuerying {
+                    EmailInvitationSection(.group(id: groupId)) {
                         isInvitingByEmail = true
                     }
                 }
@@ -79,7 +87,7 @@ struct InviteToGroupView: View {
         .sheet(isPresented: $isInvitingByEmail) {
             EmailInvitationSheet(
                 initialAddresses: EmailInvitationList.initialText(fromSearch: query),
-                groupId: groupId
+                target: .group(id: groupId)
             )
         }
         .navigationTitle("groups.invite")
@@ -89,23 +97,6 @@ struct InviteToGroupView: View {
             placement: .navigationBarDrawer(displayMode: .always),
             prompt: Text("groups.invite.prompt")
         )
-    }
-
-    @ViewBuilder
-    private var emptyState: some View {
-        if myFriends.isEmpty {
-            EmptyStateView(
-                glyph: "person.2",
-                title: "groups.invite.no_friends",
-                message: "groups.invite.no_friends.message"
-            )
-        } else {
-            EmptyStateView(
-                glyph: "magnifyingglass",
-                title: "groups.invite.no_match",
-                message: "groups.invite.no_match.message \(query)"
-            )
-        }
     }
 
     @ViewBuilder

@@ -2,6 +2,20 @@
 
 Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ; Figma en est le reflet.
 
+- **Proposition du 2026-11-18 — `Réseau · Inviter par e-mail`** (section `1118:5596`, page `Réseau`, à droite de
+  `Réseau · Ajouter des amis lecteurs`, clair seul, tâche #162) : « Inviter par e-mail » au bas des deux recherches de
+  lecteur·ices. Une section « Pas encore sur inventaire.io ? » (`Section Header` + `Row / Link` Tinted + `Note`) ferme
+  la liste, avec ou sans résultat, et n'apparaît qu'au premier caractère tapé. `I1 · Ajouter des ami·es · Résultats`
+  (`1118:5597`, clone de `N3`), `I2 · … · Aucun résultat` (`1118:5705`, clone de `N2`, `Empty State` puis la section),
+  `I3 · Inviter des ami·es · Résultats` (`1118:5811`, clone de `A10`, « ca » filtre à Camille), `I3b · … · Aucun·e
+  ami·e de ce nom` (`1118:5967`), et deux feuilles sur le modèle de `E3` : `I4 · Inviter par e-mail · Ami·e`
+  (`1118:6124`) et `I5 · … · Groupe` (`1118:6186`), « Adresses e-mail », « Message (facultatif) », une `Note` qui dit
+  que les adresses partent chez inventaire.io, `Button / Large` « Envoyer l'invitation » épinglé. Panneau
+  `Spec · Inviter par e-mail` (`1118:6245`). Plus de barre d'onglets sur ces écrans poussés (feature 0088). Aucun
+  composant ni token nouveau. **Implémentée le même jour** ([feature 0099](../features/0099-email-invitations.md)).
+  Écarts, le code faisant foi : « Adresses e-mail » est l'en-tête de la section du champ et non un libellé de `Field` ;
+  « Message (facultatif) » est le placeholder de son champ ; sous les adresses, la note laisse la place à l'adresse mal
+  formée ou à la limite de 50, en rouge.
 - **Proposition du 2026-11-07 — `B3 · Liste · Où trouver ce livre ?`** (`992:1760`, page `Liste`, section
   `Liste détails · Description de la liste`, à droite de `B2`, clair seul, toute la longueur : 393 × 1 379, la barre
   « Ajouter un livre » reste en bas) : clone de `B1`. Sous « Ajouté le … », une section `section · Où trouver ce
@@ -1117,7 +1131,7 @@ retoucher un seul nœud.
 | `Screens · Components` | `20:3` | Les 23 composites de feature et de chrome |
 | `Inventaire` | `737:22197` | `Étagères` (`734:22155`), `Étagère vide · Première étape` (`734:22157`), `Ranger mes livres` (`97:3755`), `Astuces · Ranger mes livres` (`314:8069`), `Synchronisation · Inventaire` (`495:13490`), `Œuvre & édition` (`351:9412`), `Fiche livre · Données bibliographiques` (`744:2382`, proposition, avec `Dans les listes` en seconde rangée), `Modifier l'édition · Toutes les données` (`750:2508`, proposition), `Doublons · ISBN et signalement` (`767:4172`), `Modifier l'édition, l'œuvre et l'auteur·ice · V2` (`814:5090`, proposition), `Éditions · Filtre par langue` (`831:7654`, proposition), `Étagère détails · V2` (`973:8195`, proposition) |
 | `Liste` | `737:22198` | `Listes` (`735:22155`), `Listes · Aucune liste` (`735:22157`), `Liste ouverte, vide` (`735:22159`) |
-| `Réseau` | `737:22199` | `Réseau · Onglet & Groupes` (`499:14069`), `Réseau · Ajouter des amis lecteurs` (`407:10422`), `Synchronisation · Amis` (`735:22163`), `Réseau · Graphe` (`512:15486`) |
+| `Réseau` | `737:22199` | `Réseau · Onglet & Groupes` (`499:14069`), `Réseau · Ajouter des amis lecteurs` (`407:10422`), `Synchronisation · Amis` (`735:22163`), `Réseau · Graphe` (`512:15486`), `Réseau · Inviter par e-mail` (`1118:5596`) |
 | `Profil` | `737:22200` | `Profil` (`588:17841`), `Transactions` (`735:22166`) |
 | `Search` | `737:22201` | `Recherche unifiée` (`334:8624`), `Recherche · Aucun résultat` (`736:22156`) |
 | `Scan et ajout` | `737:22202` | `Scanner` (`327:8637`), `Mise en route` (`73:2829`), `Nouveau livre · Tel que livré` (`704:20545`), `Nouveau livre v2` (`712:21292`, en cours, rien d'implémenté) |

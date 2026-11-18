@@ -10084,7 +10084,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun·e de vos ami·es ne s'appelle « %@ »."
+            "value" : "Aucun·e de vos ami·es ne s’appelle « %@ »."
           }
         }
       }
@@ -14400,7 +14400,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trop d'invitations envoyées. Réessayez plus tard."
+            "value" : "Trop d’invitations envoyées. Réessayez plus tard."
           }
         }
       }
@@ -14944,7 +14944,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plusieurs adresses, séparées par des virgules. Elles sont envoyées à inventaire.io, qui écrit à chacune. Une adresse déjà inscrite reçoit une demande d'ami·e, sans e-mail."
+            "value" : "Plusieurs adresses, séparées par des virgules. Elles sont envoyées à inventaire.io, qui écrit à chacune. Une adresse déjà inscrite reçoit une demande d’ami·e, sans e-mail."
           }
         }
       }
@@ -14962,7 +14962,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plusieurs adresses, séparées par des virgules. Elles sont envoyées à inventaire.io, qui écrit à chacune. Une adresse déjà inscrite reçoit l'invitation au groupe, sans e-mail."
+            "value" : "Plusieurs adresses, séparées par des virgules. Elles sont envoyées à inventaire.io, qui écrit à chacune. Une adresse déjà inscrite reçoit l’invitation au groupe, sans e-mail."
           }
         }
       }
@@ -15088,7 +15088,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "inventaire.io lui envoie un e-mail. Dès son inscription avec cette adresse, votre demande d'ami·e l'attend dans Réseau."
+            "value" : "inventaire.io lui envoie un e-mail. Dès son inscription avec cette adresse, votre demande d’ami·e l’attend dans Réseau."
           }
         }
       }
@@ -15106,7 +15106,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une personne invitée par e-mail trouve l'invitation dans Réseau › Groupes dès son inscription sur inventaire.io."
+            "value" : "Une personne invitée par e-mail trouve l’invitation dans Réseau › Groupes dès son inscription sur inventaire.io."
           }
         }
       }
@@ -15124,7 +15124,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Envoyer l'invitation"
+            "value" : "Envoyer l’invitation"
           }
         }
       }

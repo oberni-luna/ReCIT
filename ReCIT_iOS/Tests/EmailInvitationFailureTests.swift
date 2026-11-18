@@ -18,15 +18,14 @@ struct EmailInvitationFailureTests {
     }
 
     @Test
-    func `a 429 is the quota, with a sentence of its own`() throws {
+    func `a 429 is the quota, with a sentence of its own`() {
         let failure: EmailInvitationFailure = .init(error: NetworkError.badStatus(code: 429, message: nil))
 
         guard case .rateLimited = failure else {
             Issue.record("Expected .rateLimited, got \(failure)")
             return
         }
-        let message: LocalizedStringResource = try #require(failure.message)
-        #expect(Self.french(message) == "Trop d'invitations envoyées. Réessayez plus tard.")
+        #expect(Self.french(EmailInvitationFailure.rateLimitedMessage) == "Trop d’invitations envoyées. Réessayez plus tard.")
     }
 
     @Test(
@@ -36,7 +35,7 @@ struct EmailInvitationFailureTests {
             NetworkError.transport(underlying: URLError(.notConnectedToInternet))
         ]
     )
-    func `anything else keeps its error and has no sentence of its own`(error: NetworkError) {
+    func `anything else keeps its error`(error: NetworkError) {
         let failure: EmailInvitationFailure = .init(error: error)
 
         guard case let .other(kept) = failure else {
@@ -44,6 +43,5 @@ struct EmailInvitationFailureTests {
             return
         }
         #expect(kept is NetworkError)
-        #expect(failure.message == nil)
     }
 }

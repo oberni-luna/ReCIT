@@ -1,6 +1,6 @@
 ---
 issue: 162
-status: to-test
+status: to-close
 wiki: [[network]], [[features/0018-reader-network]], [[features/0028-network-tab-and-groups]], [[design-system/figma-library]]
 note: Inviter par e-mail un·e ami·e ou dans un groupe, via POST /api/invitations/by-emails d'inventaire.io, en bas des recherches « Ajouter des ami·es lecteur·ices » et « Inviter des ami·es ». Maquette Figma : section « Réseau · Inviter par e-mail » (1118:5596), page Réseau.
 created: 2026-11-18
@@ -84,7 +84,7 @@ Vérifié le 2026-11-18 sur la spec en ligne (v6.0.2) et sur le code Codeberg (`
   - lecture du champ (séparateurs, casse, doublons, mon adresse, adresse mal formée, limite de 50) ;
   - texte de la SnackBar depuis `{ users, emails }` ;
   - le `429` ;
-  - la requête (méthode, chemin, corps) par `MockURLProtocol`.
+  - la requête (méthode, chemin, corps) par `MockAPIService`, comme `UserModelAccountTests`.
 
 ## Implementation
 
@@ -109,6 +109,21 @@ Two bricks, one implementer. Build ✅ (SwiftLint clean), the four invitation su
 - New views type their `@Environment` (`explicit_type_interface`), like recent views.
 
 ## Review
+
+### Round validation (2026-11-18)
+
+LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓. 8 minor findings, all fixed by autofix in one round, re-verified clean.
+
+- [style] Straight apostrophes in the new French strings → ’, test expectation updated.
+- [style] `InviteToGroupView.emptyState` computed `@ViewBuilder` → `InviteToGroupEmptyState(hasFriends:query:)`.
+- [style] Close button of the sheet without an id → `e2e.emailInvitation.close`.
+- [style] `_ =` before `fetchGroup` dropped.
+- [elegance] `report(_:)` → exhaustive `switch failure`; `EmailInvitationFailure.message` → `static rateLimitedMessage`.
+- [elegance] Friend versus group encoded three ways → `EmailInvitationTarget { case friends; case group(id:) }` everywhere; `sendEmailInvitations(_:message:to:)`.
+- [correctness] `InviteToGroupView` untrimmed query → trimmed `isQuerying` for the section, the filter and the empty state.
+- [correctness] Criterion named `MockURLProtocol` → amended to `MockAPIService` (equivalent coverage, project pattern).
+
+Build ✅ and the four invitation suites ✅ after autofix.
 
 ## Verification
 

@@ -10,18 +10,25 @@ import SwiftUI
 /// « Pas encore sur inventaire.io ? », the section closing the two reader searches: one row
 /// opening « Inviter par e-mail », and a note saying where the invitation waits once accepted.
 struct EmailInvitationSection: View {
-    private let note: LocalizedStringKey
+    private let target: EmailInvitationTarget
     private let action: () -> Void
 
     /// - Parameters:
-    ///   - note: The footnote: what becomes of the invitation once the address signs up.
+    ///   - target: What the invitation is to, which decides the note.
     ///   - action: Opens « Inviter par e-mail ».
     init(
-        note: LocalizedStringKey,
+        _ target: EmailInvitationTarget,
         action: @escaping () -> Void
     ) {
-        self.note = note
+        self.target = target
         self.action = action
+    }
+
+    private var note: LocalizedStringKey {
+        switch target {
+        case .friends: "network.email_invitation.section.note_friend"
+        case .group: "network.email_invitation.section.note_group"
+        }
     }
 
     var body: some View {
@@ -50,7 +57,7 @@ private extension EmailInvitationSection {
 
 #Preview("Ami·e") {
     List {
-        EmailInvitationSection(note: "network.email_invitation.section.note_friend") {}
+        EmailInvitationSection(.friends) {}
     }
     .textCase(nil)
     .applyListBackground()
@@ -58,7 +65,7 @@ private extension EmailInvitationSection {
 
 #Preview("Groupe") {
     List {
-        EmailInvitationSection(note: "network.email_invitation.section.note_group") {}
+        EmailInvitationSection(.group(id: "group-1")) {}
     }
     .textCase(nil)
     .applyListBackground()

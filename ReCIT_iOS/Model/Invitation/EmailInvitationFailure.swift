@@ -14,6 +14,9 @@ nonisolated enum EmailInvitationFailure: Error {
     case rateLimited
     case other(Error)
 
+    /// What the SnackBar says of `rateLimited`. The others go through `SnackBarView.error`.
+    static let rateLimitedMessage: LocalizedStringResource = "network.email_invitation.failure.rate_limited"
+
     /// Classifies what the call threw.
     /// - Parameter error: The error thrown by the request, usually a `NetworkError`.
     init(error: Error) {
@@ -21,15 +24,6 @@ nonisolated enum EmailInvitationFailure: Error {
             self = .rateLimited
         } else {
             self = .other(error)
-        }
-    }
-
-    /// The sentence of its own, when the failure has one; `nil` for the others, which the
-    /// SnackBar shows through `SnackBarView.error`.
-    var message: LocalizedStringResource? {
-        switch self {
-        case .rateLimited: "network.email_invitation.failure.rate_limited"
-        case .other: nil
         }
     }
 }

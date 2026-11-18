@@ -14,13 +14,13 @@ struct EmailInvitationOutcomeTests {
     private static func message(
         emails: Int = 0,
         usernames: [String] = [],
-        isForGroup: Bool = false,
+        target: EmailInvitationTarget = .friends,
         language: String = "fr"
     ) -> String {
         let outcome: EmailInvitationOutcome = .init(
             invitedAddresses: (0..<emails).map { "reader\($0)@example.org" },
             existingUsernames: usernames,
-            isForGroup: isForGroup
+            target: target
         )
         var resource: LocalizedStringResource = outcome.message
         resource.locale = .init(identifier: language)
@@ -31,7 +31,7 @@ struct EmailInvitationOutcomeTests {
     func `counts the addresses mailed`() {
         #expect(Self.message(emails: 1) == "Invitation envoyée à 1 adresse")
         #expect(Self.message(emails: 2) == "Invitation envoyée à 2 adresses")
-        #expect(Self.message(emails: 2, isForGroup: true) == "Invitation envoyée à 2 adresses")
+        #expect(Self.message(emails: 2, target: .group(id: "group-1")) == "Invitation envoyée à 2 adresses")
         #expect(Self.message(emails: 2, language: "en") == "Invitation sent to 2 addresses")
     }
 
@@ -45,7 +45,7 @@ struct EmailInvitationOutcomeTests {
     func `names the one reader already on inventaire.io`() {
         #expect(Self.message(usernames: ["camille.b"]) == "camille.b est déjà sur inventaire.io\u{202F}: demande envoyée")
         #expect(
-            Self.message(usernames: ["camille.b"], isForGroup: true)
+            Self.message(usernames: ["camille.b"], target: .group(id: "group-1"))
                 == "camille.b est déjà sur inventaire.io\u{202F}: invitation au groupe envoyée"
         )
         #expect(Self.message(usernames: ["camille.b"], language: "en") == "camille.b is already on inventaire.io: request sent")
@@ -57,7 +57,7 @@ struct EmailInvitationOutcomeTests {
 
         #expect(Self.message(usernames: usernames) == "2 lecteur·ices déjà sur inventaire.io\u{202F}: demandes envoyées")
         #expect(
-            Self.message(usernames: usernames, isForGroup: true)
+            Self.message(usernames: usernames, target: .group(id: "group-1"))
                 == "2 lecteur·ices déjà sur inventaire.io\u{202F}: invitations envoyées"
         )
         #expect(Self.message(usernames: usernames, language: "en") == "2 readers already on inventaire.io: requests sent")
@@ -70,7 +70,7 @@ struct EmailInvitationOutcomeTests {
                 == "Invitation envoyée à 2 adresses, et demande envoyée à camille.b"
         )
         #expect(
-            Self.message(emails: 1, usernames: ["camille.b"], isForGroup: true)
+            Self.message(emails: 1, usernames: ["camille.b"], target: .group(id: "group-1"))
                 == "Invitation envoyée à 1 adresse, et invitation au groupe envoyée à camille.b"
         )
         #expect(
@@ -88,11 +88,11 @@ struct EmailInvitationOutcomeTests {
                 == "Invitation envoyée à 1 adresse, et demandes envoyées à 3 lecteur·ices"
         )
         #expect(
-            Self.message(emails: 2, usernames: usernames, isForGroup: true)
+            Self.message(emails: 2, usernames: usernames, target: .group(id: "group-1"))
                 == "Invitation envoyée à 2 adresses, et invitations au groupe envoyées à 3 lecteur·ices"
         )
         #expect(
-            Self.message(emails: 2, usernames: usernames, isForGroup: true, language: "en")
+            Self.message(emails: 2, usernames: usernames, target: .group(id: "group-1"), language: "en")
                 == "Invitation sent to 2 addresses, and group invitations sent to 3 readers"
         )
     }
@@ -102,12 +102,12 @@ struct EmailInvitationOutcomeTests {
         let mailedOnly: EmailInvitationOutcome = .init(
             invitedAddresses: ["a@b.fr"],
             existingUsernames: [],
-            isForGroup: false
+            target: .friends
         )
         let withAccount: EmailInvitationOutcome = .init(
             invitedAddresses: [],
             existingUsernames: ["camille.b"],
-            isForGroup: true
+            target: .group(id: "group-1")
         )
 
         #expect(mailedOnly.hasExistingAccounts == false)

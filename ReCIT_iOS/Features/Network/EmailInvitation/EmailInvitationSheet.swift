@@ -18,7 +18,7 @@ import SwiftUI
 struct EmailInvitationSheet: View {
     private static let logger: Logger = .init(subsystem: "asso.recits", category: "emailInvitation")
 
-    private let groupId: String?
+    private let target: EmailInvitationTarget
 
     @State private var addresses: String
     @State private var message: String = ""
@@ -31,12 +31,12 @@ struct EmailInvitationSheet: View {
 
     /// - Parameters:
     ///   - initialAddresses: What « Adresses e-mail » opens on.
-    ///   - groupId: The group to invite to, `nil` for a friend request.
+    ///   - target: To be friends, or into a group.
     init(
         initialAddresses: String,
-        groupId: String?
+        target: EmailInvitationTarget
     ) {
-        self.groupId = groupId
+        self.target = target
         _addresses = State(initialValue: initialAddresses)
     }
 
@@ -61,7 +61,7 @@ struct EmailInvitationSheet: View {
                         .textStyle(.action200)
                         .foregroundStyle(.foregroundSecondary)
                 } footer: {
-                    EmailInvitationAddressesFooter(list, isForGroup: groupId != nil)
+                    EmailInvitationAddressesFooter(list, target: target)
                 }
 
                 Section {
@@ -91,6 +91,7 @@ struct EmailInvitationSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.close", systemImage: "xmark") { dismiss() }
+                        .accessibilityIdentifier(AccessibilityID.close)
                 }
             }
         }
@@ -99,7 +100,7 @@ struct EmailInvitationSheet: View {
     private func send() async {
         let outcome: EmailInvitationOutcome
         do throws(EmailInvitationFailure) {
-            outcome = try await userModel.sendEmailInvitations(list, message: message, groupId: groupId)
+            outcome = try await userModel.sendEmailInvitations(list, message: message, to: target)
         } catch {
             report(error)
             return
@@ -116,9 +117,10 @@ struct EmailInvitationSheet: View {
 
     private func report(_ failure: EmailInvitationFailure) {
         snackBar.show {
-            if let message = failure.message {
-                SnackBarView(title: String(localized: message), onDismiss: nil)
-            } else if case let .other(error) = failure {
+            switch failure {
+            case .rateLimited:
+                SnackBarView(title: String(localized: EmailInvitationFailure.rateLimitedMessage), onDismiss: nil)
+            case let .other(error):
                 SnackBarView.error(error)
             }
         }
@@ -128,10 +130,11 @@ struct EmailInvitationSheet: View {
     /// failure is logged, not shown: the invitation itself has left.
     private func refreshInvitedAccounts() async {
         do {
-            if let groupId {
-                _ = try await groupModel.fetchGroup(id: groupId, modelContext: modelContext)
-            } else {
+            switch target {
+            case .friends:
                 try await userModel.syncRelations(modelContext: modelContext)
+            case let .group(id):
+                try await groupModel.fetchGroup(id: id, modelContext: modelContext)
             }
         } catch {
             Self.logger.error("Refresh after an email invitation failed: \(error, privacy: .public)")
@@ -144,17 +147,18 @@ private extension EmailInvitationSheet {
         static let addresses: String = "e2e.emailInvitation.addresses"
         static let message: String = "e2e.emailInvitation.message"
         static let send: String = "e2e.emailInvitation.send"
+        static let close: String = "e2e.emailInvitation.close"
     }
 }
 
 #Preview("Ami·e") {
-    EmailInvitationSheet(initialAddresses: "marie@exemple.fr", groupId: nil)
+    EmailInvitationSheet(initialAddresses: "marie@exemple.fr", target: .friends)
         .environment(UserModel(apiService: APIService(env: .production)))
         .environment(GroupModel(apiService: APIService(env: .production)))
 }
 
 #Preview("Groupe, adresse mal formée") {
-    EmailInvitationSheet(initialAddresses: "marie@", groupId: "group-1")
+    EmailInvitationSheet(initialAddresses: "marie@", target: .group(id: "group-1"))
         .environment(UserModel(apiService: APIService(env: .production)))
         .environment(GroupModel(apiService: APIService(env: .production)))
 }

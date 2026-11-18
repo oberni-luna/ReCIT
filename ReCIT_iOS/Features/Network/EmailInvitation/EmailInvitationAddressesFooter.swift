@@ -11,17 +11,24 @@ import SwiftUI
 /// sending, and otherwise where the addresses go.
 struct EmailInvitationAddressesFooter: View {
     private let list: EmailInvitationList
-    private let isForGroup: Bool
+    private let target: EmailInvitationTarget
 
     /// - Parameters:
     ///   - list: The addresses read from the field.
-    ///   - isForGroup: Whether the invitation is to a group rather than to be friends.
+    ///   - target: What the invitation is to, which decides the note.
     init(
         _ list: EmailInvitationList,
-        isForGroup: Bool
+        target: EmailInvitationTarget
     ) {
         self.list = list
-        self.isForGroup = isForGroup
+        self.target = target
+    }
+
+    private var note: LocalizedStringKey {
+        switch target {
+        case .friends: "network.email_invitation.addresses.note_friend"
+        case .group: "network.email_invitation.addresses.note_group"
+        }
     }
 
     var body: some View {
@@ -38,26 +45,22 @@ struct EmailInvitationAddressesFooter: View {
                 .textStyle(.footnote200)
                 .foregroundStyle(.foregroundError)
         } else {
-            GroupNote(
-                isForGroup
-                    ? "network.email_invitation.addresses.note_group"
-                    : "network.email_invitation.addresses.note_friend"
-            )
+            GroupNote(note)
         }
     }
 }
 
 #Preview("Note") {
-    EmailInvitationAddressesFooter(.init("marie@exemple.fr", excluding: nil), isForGroup: false)
+    EmailInvitationAddressesFooter(.init("marie@exemple.fr", excluding: nil), target: .friends)
         .padding()
 }
 
 #Preview("Une adresse mal formée") {
-    EmailInvitationAddressesFooter(.init("marie@, lea@exemple.fr", excluding: nil), isForGroup: false)
+    EmailInvitationAddressesFooter(.init("marie@, lea@exemple.fr", excluding: nil), target: .friends)
         .padding()
 }
 
 #Preview("Plusieurs adresses mal formées") {
-    EmailInvitationAddressesFooter(.init("marie@ @exemple.fr", excluding: nil), isForGroup: true)
+    EmailInvitationAddressesFooter(.init("marie@ @exemple.fr", excluding: nil), target: .group(id: "group-1"))
         .padding()
 }

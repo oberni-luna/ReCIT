@@ -18,18 +18,18 @@ extension UserModel {
     /// - Parameters:
     ///   - list: The addresses to invite, read from the field.
     ///   - message: The text added to the mail; a blank one is not sent.
-    ///   - groupId: The group to invite to, `nil` for a friend request.
+    ///   - target: To be friends, or into a group.
     /// - Returns: Who got a mail and who got a request.
     /// - Throws: `EmailInvitationFailure.rateLimited` past the quota, `.other` otherwise.
     func sendEmailInvitations(
         _ list: EmailInvitationList,
         message: String,
-        groupId: String?
+        to target: EmailInvitationTarget
     ) async throws(EmailInvitationFailure) -> EmailInvitationOutcome {
         let payload: EmailInvitationPayload = .init(
             emails: list.addresses,
             message: message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : message,
-            group: groupId
+            group: target.groupId
         )
 
         let answer: EmailInvitationDTO?
@@ -46,7 +46,7 @@ extension UserModel {
         return .init(
             invitedAddresses: answer?.emails ?? [],
             existingUsernames: answer?.users.map(\.username) ?? [],
-            isForGroup: groupId != nil
+            target: target
         )
     }
 }

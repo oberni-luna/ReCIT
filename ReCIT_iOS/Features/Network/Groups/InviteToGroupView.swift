@@ -24,15 +24,19 @@ struct InviteToGroupView: View {
     let groupId: String
 
     @State private var query: String = ""
+    @State private var isInvitingByEmail: Bool = false
 
     private var group: ReaderGroup? {
         groupModel.group(id: groupId, among: storedGroups)
     }
 
+    private var myFriends: [User] {
+        allUsers.filter { $0.relation == .friend && $0._id != userModel.myUser?._id }
+    }
+
     private var friends: [User] {
-        let friends: [User] = allUsers.filter { $0.relation == .friend && $0._id != userModel.myUser?._id }
-        guard query.isEmpty == false else { return friends }
-        return friends.filter { $0.username.localizedStandardContains(query) }
+        guard query.isEmpty == false else { return myFriends }
+        return myFriends.filter { $0.username.localizedStandardContains(query) }
     }
 
     var body: some View {
@@ -40,12 +44,8 @@ struct InviteToGroupView: View {
             Group {
                 if friends.isEmpty {
                     Section {
-                        EmptyStateView(
-                            glyph: "person.2",
-                            title: "groups.invite.no_friends",
-                            message: "groups.invite.no_friends.message"
-                        )
-                        .padding(.vertical, .large)
+                        emptyState
+                            .padding(.vertical, .large)
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -66,10 +66,22 @@ struct InviteToGroupView: View {
                         GroupNote("groups.invite.footer")
                     }
                 }
+
+                if query.isEmpty == false {
+                    EmailInvitationSection(note: "network.email_invitation.section.note_group") {
+                        isInvitingByEmail = true
+                    }
+                }
             }
             .textCase(nil)
         }
         .applyListBackground()
+        .sheet(isPresented: $isInvitingByEmail) {
+            EmailInvitationSheet(
+                initialAddresses: EmailInvitationList.initialText(fromSearch: query),
+                groupId: groupId
+            )
+        }
         .navigationTitle("groups.invite")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(
@@ -77,6 +89,23 @@ struct InviteToGroupView: View {
             placement: .navigationBarDrawer(displayMode: .always),
             prompt: Text("groups.invite.prompt")
         )
+    }
+
+    @ViewBuilder
+    private var emptyState: some View {
+        if myFriends.isEmpty {
+            EmptyStateView(
+                glyph: "person.2",
+                title: "groups.invite.no_friends",
+                message: "groups.invite.no_friends.message"
+            )
+        } else {
+            EmptyStateView(
+                glyph: "magnifyingglass",
+                title: "groups.invite.no_match",
+                message: "groups.invite.no_match.message \(query)"
+            )
+        }
     }
 
     @ViewBuilder

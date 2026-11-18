@@ -1,6 +1,6 @@
 ---
 issue: 162
-status: todo
+status: to-test
 wiki: [[network]], [[features/0018-reader-network]], [[features/0028-network-tab-and-groups]], [[design-system/figma-library]]
 note: Inviter par e-mail un·e ami·e ou dans un groupe, via POST /api/invitations/by-emails d'inventaire.io, en bas des recherches « Ajouter des ami·es lecteur·ices » et « Inviter des ami·es ». Maquette Figma : section « Réseau · Inviter par e-mail » (1118:5596), page Réseau.
 created: 2026-11-18
@@ -88,8 +88,30 @@ Vérifié le 2026-11-18 sur la spec en ligne (v6.0.2) et sur le code Codeberg (`
 
 ## Implementation
 
+Two bricks, one implementer. Build ✅ (SwiftLint clean), the four invitation suites ✅ (36 cases). App not run.
+
+- Pure types, `Model/Invitation/`:
+  - `EmailInvitationList`: parses the field, drops own address, `canSend`, `maximumCount = 50`, `initialText(fromSearch:)` for the @ pre-fill;
+  - `EmailInvitationOutcome`: SnackBar sentence from `{ users, emails }`, friend and group variants, `hasExistingAccounts`;
+  - `EmailInvitationFailure`: `429` → `.rateLimited` with its sentence, else `.other`.
+- Network, `AppModels/User/`:
+  - `EmailInvitationPayload`: request, nil and blank message left out;
+  - `EmailInvitationDTO` + `EmailInvitationUserDTO`: response, missing keys read as empty;
+  - `UserModel+EmailInvitation`: `sendEmailInvitations(_:message:groupId:) async throws(EmailInvitationFailure)`, `POST /api/invitations/by-emails`, server-first. `UserModel.swift` untouched (its baseline pins 416 lines).
+- Views, `Features/Network/EmailInvitation/`:
+  - `EmailInvitationSection`: header, tinted row, note;
+  - `EmailInvitationSheet`: built like `CreateGroupView`. Success → SnackBar, dismiss, then `syncRelations` or `GroupModel.fetchGroup` when accounts existed. A failed resync is only logged. Failure → the sheet stays open;
+  - `EmailInvitationAddressesFooter`: malformed addresses, then over 50, else the note.
+- `ReaderSearchView`: the section while querying, after the results or the placeholder.
+- `InviteToGroupView`: the section while querying. New empty state « Aucun·e ami·e de ce nom » when friends exist but none matches; `no_friends` kept for no friends at all.
+- `Localizable.xcstrings`: 27 keys, fr + en, plurals through substitutions.
+- Tests: `EmailInvitationListTests`, `EmailInvitationOutcomeTests`, `EmailInvitationFailureTests`, `UserModelEmailInvitationTests`. The last uses `MockAPIService`, like `UserModelAccountTests`, not `MockURLProtocol`.
+- New views type their `@Environment` (`explicit_type_interface`), like recent views.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent
 
 ## Feedback

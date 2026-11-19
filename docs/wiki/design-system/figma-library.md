@@ -12,7 +12,7 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   (`1118:6124`) et `I5 · … · Groupe` (`1118:6186`), « Adresses e-mail », « Message (facultatif) », une `Note` qui dit
   que les adresses partent chez inventaire.io, `Button / Large` « Envoyer l'invitation » épinglé. Panneau
   `Spec · Inviter par e-mail` (`1118:6245`). Plus de barre d'onglets sur ces écrans poussés (feature 0088). Aucun
-  composant ni token nouveau. **Implémentée le même jour** ([feature 0099](../features/0099-email-invitations.md)).
+  composant ni token nouveau. **Implémentée le même jour** ([feature 0100](../features/0100-email-invitations.md)).
   Écarts, le code faisant foi : « Adresses e-mail » est l'en-tête de la section du champ et non un libellé de `Field` ;
   « Message (facultatif) » est le placeholder de son champ ; sous les adresses, la note laisse la place à l'adresse mal
   formée ou à la limite de 50, en rouge.

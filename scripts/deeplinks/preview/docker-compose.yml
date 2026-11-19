@@ -1,0 +1,19 @@
+# The link-preview service of link.exlibris.lunabee.ovh, on Lunabee's shared VPS. nginx sends it
+# the link-preview robots and /og/; it listens on the loopback only.
+name: exlibris-preview
+
+services:
+  preview:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8620:8620"
+    volumes:
+      - covers:/var/cache/exlibris-preview
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  covers:

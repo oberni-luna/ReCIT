@@ -1,0 +1,14 @@
+{
+    "users": {
+        "a3f1c2d4e5b60718293a4b5c6d7e8f90": {
+            "_id": "a3f1c2d4e5b60718293a4b5c6d7e8f90",
+            "username": "lea",
+            "bio": "Lectrice de polars, prête volontiers ses livres",
+            "snapshot": {
+                "public": {
+                    "items:count": 23
+                }
+            }
+        }
+    }
+}

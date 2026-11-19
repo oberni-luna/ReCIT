@@ -1,0 +1,13 @@
+{
+    "users": {
+        "remi": {
+            "_id": "b7e2d1c0f9a8b7c6d5e4f3a2b1c0d9e8",
+            "username": "remi",
+            "snapshot": {
+                "public": {
+                    "items:count": 125
+                }
+            }
+        }
+    }
+}

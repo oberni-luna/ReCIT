@@ -1,0 +1,611 @@
+{
+    "entities": {
+        "wd:Q163297": {
+            "uri": "wd:Q163297",
+            "wdId": "Q163297",
+            "lastrevid": 2563965853,
+            "type": "work",
+            "originalLang": "fr",
+            "labels": {
+                "zh-hans": "局外人",
+                "zh-hant": "異鄉人",
+                "zh-hk": "異鄉人",
+                "zh-cn": "异乡人",
+                "zh-sg": "异乡人",
+                "zh-tw": "異鄉人",
+                "jv": "Wong NJaba",
+                "pl": "Obcy",
+                "eu": "Arrotza",
+                "bs": "Stranac",
+                "es": "El extranjero",
+                "oc": "L'Estrangièr",
+                "ms": "L'Étranger",
+                "hu": "Közöny",
+                "et": "Võõras",
+                "el": "Ο ξένος (μυθιστόρημα)",
+                "sv": "Främlingen",
+                "ar": "الغريب",
+                "nl": "De vreemdeling",
+                "pt": "L'étranger",
+                "eo": "La fremdulo",
+                "ru": "Посторонний",
+                "sr-el": "Stranac",
+                "sr-ec": "Странац",
+                "tr": "Yabancı",
+                "mk": "Странецот",
+                "fi": "Sivullinen",
+                "uk": "Сторонній",
+                "be-tarask": "Чужаніца",
+                "hr": "Stranac",
+                "da": "Den fremmede",
+                "gsw": "Der Fremde",
+                "he": "הזר",
+                "fr": "L'Étranger",
+                "ko": "이방인",
+                "lv": "Svešinieks",
+                "it": "L'Étranger",
+                "gl": "O estranxeiro",
+                "id": "Orang Asing",
+                "de": "L'Étranger",
+                "ja": "異邦人",
+                "vi": "Người xa lạ",
+                "en": "The Stranger",
+                "sh": "L’Étranger",
+                "sk": "Cudzinec",
+                "ro": "Străinul",
+                "ca": "L'estrany",
+                "la": "L'Étranger",
+                "cy": "L'Étranger",
+                "sl": "Tujec",
+                "cs": "Cizinec",
+                "bg": "Чужденецът",
+                "fa": "بیگانه",
+                "lt": "Svetimas",
+                "zh": "異鄉人",
+                "sr": "Странац",
+                "sq": "I Huaj",
+                "nb": "Den fremmede",
+                "bn": "লেত্রঁজে",
+                "ml": "ദ സ്ട്രേഞ്ജർ",
+                "pa": "ਅਜਨਬੀ",
+                "az": "Yad",
+                "azb": "یابانجی",
+                "hy": "Օտարը",
+                "ne": "द स्ट्रेन्जर",
+                "ka": "უცხო",
+                "mn": "Хөндлөнгийн хүн",
+                "mg": "Vahiny",
+                "gu": "ધી આઉટસાઇડર",
+                "be": "Чужаніца",
+                "wuu": "异乡人",
+                "lld": "L fulestier",
+                "ckb": "نامۆ",
+                "avk": "Diveik",
+                "ga": "L'Étranger",
+                "shi": "Liṭṛunji (adlis)",
+                "uz": "Begona (Kamyu romani)",
+                "mzn": "بیگانه",
+                "pwn": "tjumaljiaqaljan a caucau",
+                "is": "Útlendingurinn",
+                "fy": "L'Étranger",
+                "yue": "異鄉人",
+                "arz": "الغريب (روايه)",
+                "ur": "دی اسٹرینجر (کاموس ناول)",
+                "zgh": "ⵉⵎⵣⵣⵉ"
+            },
+            "descriptions": {
+                "it": "romanzo scritto da Albert Camus",
+                "en": "1942 novel by Albert Camus",
+                "fr": "roman d’Albert Camus",
+                "es": "novela de Albert Camus",
+                "de": "Roman von Albert Camus",
+                "nl": "boek van Albert Camus",
+                "he": "ספר מאת אלבר קאמי",
+                "ru": "роман Альбера Камю (1942)",
+                "ar": "كتاب من تأليف ألبير كامو",
+                "id": "novel tahun 1942 karya Albert Camus",
+                "jv": "novel taun 1942 karya Albert Camus",
+                "eo": "franclingva romano far Alberto Camus je 1942",
+                "fa": "رمانی از آلبر کامو",
+                "pl": "powieść Alberta Camus'a z 1942",
+                "be": "твор Альбера Камю (1942)",
+                "br": "romant",
+                "cs": "román Alberta Camuse",
+                "tr": "Fransız yazar Albert Camus'nün 1942 yılında yayımladığı eser",
+                "sv": "roman av Albert Camus",
+                "gl": "novela de Albert Camus",
+                "ko": "알베르 카뮈의 소설",
+                "zh": "法国作家加缪1942年小说",
+                "avk": "suterot",
+                "lld": "roman",
+                "ckb": "ڕۆمان",
+                "ja": "アルベール・カミュの小説",
+                "gu": "આલ્બેર કેમ્યૂ લિખિત ફ્રેન્ચ નવલકથા",
+                "be-tarask": "раман Альбэра Камю",
+                "vi": "tiểu thuyết của Albert Camus",
+                "ca": "novel·la d'Albert Camus",
+                "da": "roman af Albert Camus",
+                "is": "Skáldsaga eftir Albert Camus frá 1942",
+                "ary": "كتاب من تأليف ألبير كامو"
+            },
+            "claims": {
+                "wdt:P31": [
+                    "wd:Q7725634"
+                ],
+                "wdt:P136": [
+                    "wd:Q2016518",
+                    "wd:Q481315"
+                ],
+                "wdt:P179": [
+                    "wd:Q3008298"
+                ],
+                "wdt:P214": [
+                    "183847819"
+                ],
+                "wdt:P227": [
+                    "4236814-5"
+                ],
+                "wdt:P244": [
+                    "no2016030471"
+                ],
+                "wdt:P268": [
+                    "11958514w"
+                ],
+                "wdt:P269": [
+                    "027574091"
+                ],
+                "wdt:P407": [
+                    "wd:Q150"
+                ],
+                "wdt:P577": [
+                    "1942"
+                ],
+                "wdt:P648": [
+                    "OL1230613W"
+                ],
+                "wdt:P1085": [
+                    "2150"
+                ],
+                "wdt:P1274": [
+                    "1791073"
+                ],
+                "wdt:P3631": [
+                    "3874"
+                ],
+                "wdt:P5331": [
+                    "2517178012"
+                ],
+                "wdt:P7823": [
+                    "e5184a67-3cf7-4856-9081-fd303b9a2f05"
+                ],
+                "wdt:P7937": [
+                    "wd:Q8261"
+                ],
+                "wdt:P8383": [
+                    "3324344"
+                ],
+                "wdt:P50": [
+                    "wd:Q34670"
+                ],
+                "wdt:P674": [
+                    "wd:Q21933247",
+                    "wd:Q27077109",
+                    "wd:Q27077132",
+                    "wd:Q27077162"
+                ],
+                "wdt:P840": [
+                    "wd:Q262"
+                ],
+                "wdt:P1476": [
+                    "L'Étranger"
+                ],
+                "wdt:P155": [
+                    "wd:Q1125903"
+                ],
+                "wdt:P156": [
+                    "wd:Q1169773"
+                ],
+                "wdt:P166": [
+                    "wd:Q40734"
+                ],
+                "wdt:P18": [
+                    "L'Étranger - Albert Camus.jpg"
+                ],
+                "wdt:P1545": [
+                    "1"
+                ]
+            },
+            "image": {
+                "url": "/img/entities/969690a52b3a28628b52ab569d501880b1b0e62e"
+            }
+        },
+        "wd:Q34670": {
+            "uri": "wd:Q34670",
+            "wdId": "Q34670",
+            "lastrevid": 2563201256,
+            "type": "human",
+            "originalLang": "fr",
+            "labels": {
+                "lb": "Albert Camus",
+                "zh": "阿尔贝·加缪",
+                "bo": "ཨལ་བྷེར་ཀ་མུས།",
+                "jv": "Albert Camus",
+                "pl": "Albert Camus",
+                "eu": "Albert Camus",
+                "qu": "Albert Camus",
+                "gd": "Albert Camus",
+                "bs": "Albert Camus",
+                "uz": "Albert Camus",
+                "es": "Albert Camus",
+                "vo": "Albert Camus",
+                "ta": "அல்பேர்ட் காம்யு",
+                "af": "Albert Camus",
+                "oc": "Albert Camus",
+                "hu": "Albert Camus",
+                "ceb": "Albert Camus",
+                "sw": "Albert Camus",
+                "et": "Albert Camus",
+                "bn": "আলবের কাম্যু",
+                "br": "Albert Camus",
+                "sq": "Albert Camus",
+                "el": "Αλμπέρ Καμύ",
+                "ia": "Albert Camus",
+                "pnb": "البرٹ کامیو",
+                "ar": "ألبير كامو",
+                "nl": "Albert Camus",
+                "sv": "Albert Camus",
+                "pt": "Albert Camus",
+                "is": "Albert Camus",
+                "eo": "Albert Camus",
+                "ru": "Альбер Камю",
+                "ast": "Albert Camus",
+                "diq": "Albert Camus",
+                "sr": "Албер Ками",
+                "tr": "Albert Camus",
+                "mk": "Албер Ками",
+                "fi": "Albert Camus",
+                "uk": "Альбер Камю",
+                "be-tarask": "Альбэр Камю",
+                "nn": "Albert Camus",
+                "io": "Albert Camus",
+                "sco": "Albert Camus",
+                "mzn": "آلبر کامو",
+                "hr": "Albert Camus",
+                "az": "Alber Kamü",
+                "lmo": "Albert Camus",
+                "tl": "Albert Camus",
+                "an": "Albert Camus",
+                "da": "Albert Camus",
+                "kk": "Альберт Камю",
+                "nan": "Albert Camus",
+                "gsw": "Albert Camus",
+                "pms": "Albert Camus",
+                "be": "Альбер Камю",
+                "fr": "Albert Camus",
+                "ko": "알베르 카뮈",
+                "he": "אלבר קאמי",
+                "yo": "Albert Camus",
+                "lv": "Albērs Kamī",
+                "it": "Albert Camus",
+                "gl": "Albert Camus",
+                "ps": "البېرټ کامو",
+                "de": "Albert Camus",
+                "id": "Albert Camus",
+                "ml": "ആൽബർട്ട് കാമ്യു",
+                "ja": "アルベール・カミュ",
+                "mrj": "Камю",
+                "vi": "Albert Camus",
+                "en": "Albert Camus",
+                "sh": "Albert Camus",
+                "scn": "Albert Camus",
+                "hi": "आल्बेर कामु",
+                "ht": "Albert Camus",
+                "sk": "Albert Camus",
+                "ku": "Albert Camus",
+                "mn": "Альбер Камю",
+                "hy": "Ալբեր Քամյու",
+                "th": "อาลแบร์ กามูว์",
+                "ro": "Albert Camus",
+                "ca": "Albert Camus",
+                "la": "Albertus Camus",
+                "ilo": "Albert Camus",
+                "cy": "Albert Camus",
+                "sl": "Albert Camus",
+                "cs": "Albert Camus",
+                "bg": "Албер Камю",
+                "fa": "آلبر کامو",
+                "mr": "आल्बेर काम्यू",
+                "ka": "ალბერ კამიუ",
+                "ur": "البرٹ کامو",
+                "lt": "Albert Camus",
+                "ckb": "ئەلبێر کامو",
+                "arz": "البير كامو",
+                "nb": "Albert Camus",
+                "min": "Albert Camus",
+                "war": "Albert Camus",
+                "mg": "Albert Camus",
+                "pa": "ਅਲਬੇਅਰ ਕਾਮੂ",
+                "te": "ఆల్బర్ట్ కామూ",
+                "li": "Albert Camus",
+                "sc": "Albert Camus",
+                "fy": "Albert Camus",
+                "ga": "Albert Camus",
+                "my": "အယ်လ်ဘတ် ကမူး",
+                "azb": "آلبر کامو",
+                "ky": "Камү Альбер",
+                "kn": "ಆಲ್ಬರ್ಟ್ ಕಾಮೂ",
+                "yue": "卡繆",
+                "tt": "Альбер Камю",
+                "sd": "البرٽ ڪامو",
+                "bxr": "Альбер Камю",
+                "lrc": "آلبرکامو",
+                "ext": "Albert Camus",
+                "ay": "Albert Camus",
+                "am": "አልቤር ካሚው",
+                "olo": "Albert Camus",
+                "kbp": "Albert Camus",
+                "gu": "આલ્બેર કેમ્યૂ",
+                "zh-hans": "阿尔贝·加缪",
+                "zh-cn": "阿尔贝·加缪",
+                "zh-hant": "阿爾貝·卡繆",
+                "zh-tw": "阿爾貝·卡繆",
+                "zh-hk": "艾拔·卡繆",
+                "ms": "Albert Camus",
+                "lfn": "Albert Camus",
+                "ee": "Albert Camus",
+                "pt-br": "Albert Camus",
+                "en-gb": "Albert Camus",
+                "ban": "Albert Camus",
+                "fo": "Albert Camus",
+                "kl": "Albert Camus",
+                "wuu": "阿尔贝·加缪",
+                "bjn": "Albert Camus",
+                "tg": "Камю Албер",
+                "avk": "Albert Camus",
+                "frp": "Arbèrto Camus",
+                "pap": "Albert Camus",
+                "xmf": "ალბერ კამიუ",
+                "lld": "Albert Camus",
+                "kw": "Albert Camus",
+                "hak": "Albert Camus",
+                "as": "আলবেৰ কেমু",
+                "guw": "Albert Camus",
+                "pam": "Albert Camus",
+                "zgh": "ⴰⵍⴱⵉⵔ ⴽⴰⵎⵓ",
+                "kaa": "Albert Camus",
+                "ie": "Albert Camus",
+                "nrm": "Albert Camus",
+                "nov": "Albert Camus",
+                "shi": "Albir Kamu",
+                "kab": "Albert Camus",
+                "smn": "Albert Camus",
+                "ks": "البر کامو",
+                "mul": "Albert Camus",
+                "gor": "Albert Camus",
+                "tok": "jan Ape Kamu",
+                "dag": "Albert Camus",
+                "tw": "Albert Camus",
+                "kus": "Albert Camus",
+                "gur": "Albert Camus"
+            },
+            "descriptions": {
+                "ko": "프랑스의 소설가, 언론인, 철학자 (1913~1960)",
+                "en": "French philosopher, author, and journalist (1913–1960)",
+                "fr": "écrivain, philosophe et journaliste français",
+                "it": "scrittore, filosofo, saggista, drammaturgo, giornalista e attivista politico francese (1913-1960)",
+                "ilo": "Pranses a mannurat ken pilosopo",
+                "de": "französischer Schriftsteller, Philosoph und Journalist",
+                "eo": "franca verkisto kaj filozofo",
+                "es": "escritor, periodista y filósofo francés, de origen argelino",
+                "pl": "francuski pisarz, filozof, laureat Nagrody Nobla w dziedzinie literatury",
+                "sk": "francúzsky spisovateľ",
+                "ru": "французский писатель-экзистенциалист",
+                "he": "סופר ופילוסוף צרפתי-אלג׳יראי, מאבות פילוסופית האבסורד",
+                "ta": "பிரஞ்சு எழுத்தாளர்",
+                "ro": "scriitor, filozof și jurnalist francez (1913–1960)",
+                "nl": "Frans schrijver, filosoof en journalist (1913-1960)",
+                "el": "Γάλλος φιλόσοφος και συγγραφέας",
+                "hu": "francia író, újságíró, filozófus",
+                "br": "skrivagner gallek",
+                "uk": "французький романіст, філософ, публіцист, один з лідерів філософсько-мистецького напрямку екзистенціалізму",
+                "qu": "Ransiya mama llaqtayuq Yachay wayllukuq wan qillqaq",
+                "ay": "Phransiya jacha marka Lup'intawiri & qillqiri",
+                "ar": "فيلسوف ومؤلف وصحفي فرنسي",
+                "hr": "francuski književnik i filozof, dobitnik Nobelove nagrade za književnost 1957. godine",
+                "sv": "fransk författare och filosof",
+                "zh-cn": "二十世纪法国著名作家、哲学家、评论家。",
+                "gl": "Escritor e filósofo francés",
+                "hy": "ֆրանսիացի գրող",
+                "sd": "ناول نگار",
+                "fi": "ranskalainen kirjailija, toimittaja ja filosofi",
+                "lb": "franséische Schrëftsteller a Philosoph",
+                "fa": "نویسنده و روزنامه‌نگار اهل فرانسه",
+                "gsw": "französischä Schriftschteller und Philosoph",
+                "be": "французскі пісьменнік",
+                "sq": "shkrimtar dhe gazetar algjero-francez",
+                "bg": "Френски писател",
+                "zh": "法國作家（1913－1960）",
+                "nb": "fransk forfatter og filosof (1913–1960)",
+                "tr": "Fransız yazar ve filozof",
+                "az": "fransız yazıçı və filosofu",
+                "ca": "filòsof i escriptor francès (1913–1960)",
+                "bn": "সাহিত্যে নোবেল পুরষ্কার বিজয়ী",
+                "cs": "francouzský spisovatel",
+                "gu": "ફ્રેન્ચ સાહિત્યકાર અને પત્રકાર (1913-1960)",
+                "af": "Franse skrywer en filosoof",
+                "ja": "フランスの小説家、劇作家、哲学者 (1913-1960)",
+                "pap": "eskritor franses",
+                "pt": "filósofo e jornalista franco-argelino (1913–1960)",
+                "dv": "ލިޔުންތެރިއެއް",
+                "be-tarask": "францускі пісьменьнік",
+                "dag": "France karimba ŋun nyɛ doo",
+                "ckb": "نووسەر، فەیلەسووف، و ڕۆژنامەوانی فەڕەنسی",
+                "sr": "француски писац, филозоф и новинар",
+                "id": "filsuf, penulis, dan jurnalis Prancis (1913-1960)",
+                "cy": "athronydd, awdur a newyddiadurwr o Ffrainc (1913-1960)",
+                "io": "filozofo",
+                "tt": "француз язучысы",
+                "is": "franskur höfundur og heimspekingur (1913-1960)",
+                "bxr": "Франциин уран зохёолшо болон экзистенциалис сэдьхэгшэ",
+                "vi": "nhà văn, triết gia, nhà báo người Pháp",
+                "ks": "فلاسفر",
+                "et": "alžeeria-prantsuse kirjanik ja filosoof",
+                "gor": "filsuf, taa hemoluladu, jurnalis lo Prancis (1913-1960)",
+                "hi": "फ्रेंच लेखक, दार्शनिक एवम पत्रकर (1913-1960)",
+                "as": "ফৰাচী দাৰ্শনিক, লেখক আৰু সাংবাদিক (১৯১৩–১৯৬০)",
+                "kaa": "francuz jazıwshısı",
+                "ku": "nivîskar û fîlozofê fransî"
+            },
+            "claims": {
+                "wdt:P31": [
+                    "wd:Q5"
+                ],
+                "wdt:P135": [
+                    "wd:Q59104"
+                ],
+                "wdt:P213": [
+                    "0000000122832690"
+                ],
+                "wdt:P214": [
+                    "97000332"
+                ],
+                "wdt:P227": [
+                    "118518739"
+                ],
+                "wdt:P244": [
+                    "n79061368"
+                ],
+                "wdt:P268": [
+                    "118949856"
+                ],
+                "wdt:P269": [
+                    "026764644"
+                ],
+                "wdt:P349": [
+                    "00435195"
+                ],
+                "wdt:P569": [
+                    "1913-11-07"
+                ],
+                "wdt:P570": [
+                    "1960-01-04"
+                ],
+                "wdt:P648": [
+                    "OL124171A"
+                ],
+                "wdt:P742": [
+                    "Louis Neuville"
+                ],
+                "wdt:P737": [
+                    "wd:Q6512",
+                    "wd:Q151164",
+                    "wd:Q134189",
+                    "wd:Q9358",
+                    "wd:Q905",
+                    "wd:Q713743",
+                    "wd:Q47484",
+                    "wd:Q991",
+                    "wd:Q314189",
+                    "wd:Q48301",
+                    "wd:Q76509",
+                    "wd:Q7197",
+                    "wd:Q9364"
+                ],
+                "wdt:P906": [
+                    "44544"
+                ],
+                "wdt:P950": [
+                    "XX1721208"
+                ],
+                "wdt:P1006": [
+                    "068350694"
+                ],
+                "wdt:P1233": [
+                    "130822"
+                ],
+                "wdt:P1412": [
+                    "wd:Q150"
+                ],
+                "wdt:P2013": [
+                    "AlbertCamusAuthor"
+                ],
+                "wdt:P2607": [
+                    "1acd2e61-bc94-4d0a-b5e4-898dbb3fca90"
+                ],
+                "wdt:P2963": [
+                    "957894"
+                ],
+                "wdt:P3630": [
+                    "2615"
+                ],
+                "wdt:P5491": [
+                    "29487"
+                ],
+                "wdt:P5570": [
+                    "2147192806"
+                ],
+                "wdt:P7400": [
+                    "camusalbert"
+                ],
+                "wdt:P9707": [
+                    "59944"
+                ],
+                "wdt:P12430": [
+                    "e8db770c-b038-47fd-befc-cb5be5ca25a4"
+                ],
+                "wdt:P22": [
+                    "wd:Q109240592"
+                ],
+                "wdt:P26": [
+                    "wd:Q47484792",
+                    "wd:Q5479842"
+                ],
+                "wdt:P40": [
+                    "wd:Q47519747",
+                    "wd:Q47519771"
+                ],
+                "wdt:P27": [
+                    "wd:Q142"
+                ],
+                "wdt:P69": [
+                    "wd:Q1190852"
+                ],
+                "wdt:P103": [
+                    "wd:Q150"
+                ],
+                "wdt:P106": [
+                    "wd:Q36180",
+                    "wd:Q4964182",
+                    "wd:Q6625963",
+                    "wd:Q1930187",
+                    "wd:Q11774202",
+                    "wd:Q214917",
+                    "wd:Q23833535",
+                    "wd:Q49757",
+                    "wd:Q937857",
+                    "wd:Q6051619",
+                    "wd:Q33999"
+                ],
+                "wdt:P109": [
+                    "Albert Camus signature.svg"
+                ],
+                "wdt:P166": [
+                    "wd:Q37922",
+                    "wd:Q137970105"
+                ],
+                "wdt:P18": [
+                    "Albert Camus, gagnant de prix Nobel, portrait en buste, posé au bureau, faisant face à gauche, cigarette de tabagisme.jpg"
+                ]
+            },
+            "image": {
+                "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Albert%20Camus%2C%20gagnant%20de%20prix%20Nobel%2C%20portrait%20en%20buste%2C%20pos%C3%A9%20au%20bureau%2C%20faisant%20face%20%C3%A0%20gauche%2C%20cigarette%20de%20tabagisme.jpg?width=1280",
+                "file": "Albert Camus, gagnant de prix Nobel, portrait en buste, posé au bureau, faisant face à gauche, cigarette de tabagisme.jpg",
+                "credits": {
+                    "text": "Wikimedia Commons",
+                    "url": "https://commons.wikimedia.org/wiki/File:Albert Camus, gagnant de prix Nobel, portrait en buste, posé au bureau, faisant face à gauche, cigarette de tabagisme.jpg"
+                }
+            }
+        }
+    },
+    "redirects": {}
+}

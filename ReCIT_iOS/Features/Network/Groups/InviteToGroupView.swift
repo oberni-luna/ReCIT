@@ -24,15 +24,27 @@ struct InviteToGroupView: View {
     let groupId: String
 
     @State private var query: String = ""
+    @State private var isInvitingByEmail: Bool = false
 
     private var group: ReaderGroup? {
         groupModel.group(id: groupId, among: storedGroups)
     }
 
+    private var myFriends: [User] {
+        allUsers.filter { $0.relation == .friend && $0._id != userModel.myUser?._id }
+    }
+
+    private var trimmedQuery: String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var isQuerying: Bool {
+        trimmedQuery.isEmpty == false
+    }
+
     private var friends: [User] {
-        let friends: [User] = allUsers.filter { $0.relation == .friend && $0._id != userModel.myUser?._id }
-        guard query.isEmpty == false else { return friends }
-        return friends.filter { $0.username.localizedStandardContains(query) }
+        guard isQuerying else { return myFriends }
+        return myFriends.filter { $0.username.localizedStandardContains(trimmedQuery) }
     }
 
     var body: some View {
@@ -40,12 +52,8 @@ struct InviteToGroupView: View {
             Group {
                 if friends.isEmpty {
                     Section {
-                        EmptyStateView(
-                            glyph: "person.2",
-                            title: "groups.invite.no_friends",
-                            message: "groups.invite.no_friends.message"
-                        )
-                        .padding(.vertical, .large)
+                        InviteToGroupEmptyState(hasFriends: myFriends.isEmpty == false, query: trimmedQuery)
+                            .padding(.vertical, .large)
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -66,10 +74,22 @@ struct InviteToGroupView: View {
                         GroupNote("groups.invite.footer")
                     }
                 }
+
+                if isQuerying {
+                    EmailInvitationSection(.group(id: groupId)) {
+                        isInvitingByEmail = true
+                    }
+                }
             }
             .textCase(nil)
         }
         .applyListBackground()
+        .sheet(isPresented: $isInvitingByEmail) {
+            EmailInvitationSheet(
+                initialAddresses: EmailInvitationList.initialText(fromSearch: query),
+                target: .group(id: groupId)
+            )
+        }
         .navigationTitle("groups.invite")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(

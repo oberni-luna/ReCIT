@@ -40,6 +40,7 @@ struct ReaderSearchView: View {
     @State private var results: [User] = []
     @State private var isSearching: Bool = false
     @State private var hasSearched: Bool = false
+    @State private var isInvitingByEmail: Bool = false
 
     /// True from the first character typed, and not from the first result: the section has to go
     /// as the field fills, not once the server has answered.
@@ -94,10 +95,22 @@ struct ReaderSearchView: View {
                             .foregroundStyle(.foregroundSecondary)
                     }
                 }
+
+                if isQuerying {
+                    EmailInvitationSection(.friends) {
+                        isInvitingByEmail = true
+                    }
+                }
             }
             .textCase(nil)
         }
         .applyListBackground()
+        .sheet(isPresented: $isInvitingByEmail) {
+            EmailInvitationSheet(
+                initialAddresses: EmailInvitationList.initialText(fromSearch: query),
+                target: .friends
+            )
+        }
         .navigationTitle("network.add_friends")
         .navigationBarTitleDisplayMode(.inline)
         // Inline title and a list that does not scroll: left to its own devices the drawer

@@ -10053,6 +10053,42 @@
         }
       }
     },
+    "groups.invite.no_match" : {
+      "comment" : "Empty state of « Inviter des ami·es » when friends exist but none matches the search.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No friend by that name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun·e ami·e de ce nom"
+          }
+        }
+      }
+    },
+    "groups.invite.no_match.message %@" : {
+      "comment" : "Under « Aucun·e ami·e de ce nom », with the search typed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of your friends is called “%@”."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun·e de vos ami·es ne s’appelle « %@ »."
+          }
+        }
+      }
+    },
     "groups.invite.prompt" : {
       "localizations" : {
         "en" : {
@@ -14347,6 +14383,808 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter au réseau"
+          }
+        }
+      }
+    },
+    "network.email_invitation.failure.rate_limited" : {
+      "comment" : "SnackBar when « Inviter par e-mail » is refused for the quota of invitations (429).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too many invitations sent. Try again later."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop d’invitations envoyées. Réessayez plus tard."
+          }
+        }
+      }
+    },
+    "network.email_invitation.group_invite_many %lld" : {
+      "comment" : "SnackBar after « Inviter par e-mail », to a group: the readers already on inventaire.io, who got a group invitation, and no address mailed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reader already on inventaire.io: invitation sent"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld readers already on inventaire.io: invitations sent"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld lecteur·ice déjà sur inventaire.io : invitation envoyée"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld lecteur·ices déjà sur inventaire.io : invitations envoyées"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.email_invitation.group_invite_one %@" : {
+      "comment" : "SnackBar after « Inviter par e-mail », to a group: the one reader already on inventaire.io, by username, and no address mailed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is already on inventaire.io: group invitation sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ est déjà sur inventaire.io : invitation au groupe envoyée"
+          }
+        }
+      }
+    },
+    "network.email_invitation.request_many %lld" : {
+      "comment" : "SnackBar after « Inviter par e-mail », as friends: the readers already on inventaire.io, who got a friend request, and no address mailed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reader already on inventaire.io: request sent"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld readers already on inventaire.io: requests sent"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld lecteur·ice déjà sur inventaire.io : demande envoyée"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld lecteur·ices déjà sur inventaire.io : demandes envoyées"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.email_invitation.request_one %@" : {
+      "comment" : "SnackBar after « Inviter par e-mail », as friends: the one reader already on inventaire.io, by username, and no address mailed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is already on inventaire.io: request sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ est déjà sur inventaire.io : demande envoyée"
+          }
+        }
+      }
+    },
+    "network.email_invitation.sent" : {
+      "comment" : "SnackBar after « Inviter par e-mail », when inventaire.io names neither an address mailed nor an account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation sent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation envoyée"
+          }
+        }
+      }
+    },
+    "network.email_invitation.sent %lld" : {
+      "comment" : "SnackBar after « Inviter par e-mail », with the number of addresses inventaire.io mailed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Invitation sent to %lld address"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Invitation sent to %lld addresses"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Invitation envoyée à %lld adresse"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Invitation envoyée à %lld adresses"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.email_invitation.sent_and_group_invite_many %lld %lld" : {
+      "comment" : "SnackBar after « Inviter par e-mail », to a group: the number of addresses mailed, then of readers already on inventaire.io.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation sent to %#@emails@, and group invitations sent to %#@readers@"
+          },
+          "substitutions" : {
+            "emails" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg address"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg addresses"
+                    }
+                  }
+                }
+              }
+            },
+            "readers" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg reader"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg readers"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation envoyée à %#@emails@, et invitations au groupe envoyées à %#@readers@"
+          },
+          "substitutions" : {
+            "emails" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg adresse"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg adresses"
+                    }
+                  }
+                }
+              }
+            },
+            "readers" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg lecteur·ice"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg lecteur·ices"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.email_invitation.sent_and_group_invite_one %lld %@" : {
+      "comment" : "SnackBar after « Inviter par e-mail », to a group: the number of addresses mailed, then the one reader already on inventaire.io.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation sent to %#@emails@, and group invitation sent to %2$@"
+          },
+          "substitutions" : {
+            "emails" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg address"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg addresses"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation envoyée à %#@emails@, et invitation au groupe envoyée à %2$@"
+          },
+          "substitutions" : {
+            "emails" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg adresse"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg adresses"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.email_invitation.sent_and_request_many %lld %lld" : {
+      "comment" : "SnackBar after « Inviter par e-mail », as friends: the number of addresses mailed, then of readers already on inventaire.io.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation sent to %#@emails@, and requests sent to %#@readers@"
+          },
+          "substitutions" : {
+            "emails" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg address"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg addresses"
+                    }
+                  }
+                }
+              }
+            },
+            "readers" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg reader"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg readers"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation envoyée à %#@emails@, et demandes envoyées à %#@readers@"
+          },
+          "substitutions" : {
+            "emails" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg adresse"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg adresses"
+                    }
+                  }
+                }
+              }
+            },
+            "readers" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg lecteur·ice"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg lecteur·ices"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.email_invitation.sent_and_request_one %lld %@" : {
+      "comment" : "SnackBar after « Inviter par e-mail », as friends: the number of addresses mailed, then the one reader already on inventaire.io.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation sent to %#@emails@, and request sent to %2$@"
+          },
+          "substitutions" : {
+            "emails" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg address"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg addresses"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation envoyée à %#@emails@, et demande envoyée à %2$@"
+          },
+          "substitutions" : {
+            "emails" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg adresse"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg adresses"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "network.email_invitation.addresses" : {
+      "comment" : "« Inviter par e-mail » sheet: header of the addresses field.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email addresses"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresses e-mail"
+          }
+        }
+      }
+    },
+    "network.email_invitation.addresses.note_friend" : {
+      "comment" : "« Inviter par e-mail » sheet: note under the addresses, inviting to be friends.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separate several addresses with commas. They go to inventaire.io, which writes to each one. An address already signed up gets a friend request, without an email."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plusieurs adresses, séparées par des virgules. Elles sont envoyées à inventaire.io, qui écrit à chacune. Une adresse déjà inscrite reçoit une demande d’ami·e, sans e-mail."
+          }
+        }
+      }
+    },
+    "network.email_invitation.addresses.note_group" : {
+      "comment" : "« Inviter par e-mail » sheet: note under the addresses, inviting to a group.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separate several addresses with commas. They go to inventaire.io, which writes to each one. An address already signed up gets the group invitation, without an email."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plusieurs adresses, séparées par des virgules. Elles sont envoyées à inventaire.io, qui écrit à chacune. Une adresse déjà inscrite reçoit l’invitation au groupe, sans e-mail."
+          }
+        }
+      }
+    },
+    "network.email_invitation.addresses.prompt" : {
+      "comment" : "« Inviter par e-mail » sheet: placeholder of the addresses field.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "marie@example.com, …"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "marie@exemple.fr, …"
+          }
+        }
+      }
+    },
+    "network.email_invitation.malformed_many %@" : {
+      "comment" : "« Inviter par e-mail » sheet: error under the addresses, with the malformed ones listed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Addresses to fix: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresses mal formées : %@"
+          }
+        }
+      }
+    },
+    "network.email_invitation.malformed_one %@" : {
+      "comment" : "« Inviter par e-mail » sheet: error under the addresses, with the one malformed address.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Address to fix: “%@”"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse mal formée : « %@ »"
+          }
+        }
+      }
+    },
+    "network.email_invitation.message" : {
+      "comment" : "« Inviter par e-mail » sheet: placeholder of the message field.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Message (optional)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Message (facultatif)"
+          }
+        }
+      }
+    },
+    "network.email_invitation.open" : {
+      "comment" : "Row of « Pas encore sur inventaire.io ? » opening the « Inviter par e-mail » sheet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invite by email"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inviter par e-mail"
+          }
+        }
+      }
+    },
+    "network.email_invitation.section" : {
+      "comment" : "Header of the section closing the reader searches, for readers not on inventaire.io.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not on inventaire.io yet?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore sur inventaire.io ?"
+          }
+        }
+      }
+    },
+    "network.email_invitation.section.note_friend" : {
+      "comment" : "Note under « Inviter par e-mail » in « Ajouter des ami·es lecteur·ices ».",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io sends them an email. Once they sign up with that address, your friend request is waiting for them in Network."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inventaire.io lui envoie un e-mail. Dès son inscription avec cette adresse, votre demande d’ami·e l’attend dans Réseau."
+          }
+        }
+      }
+    },
+    "network.email_invitation.section.note_group" : {
+      "comment" : "Note under « Inviter par e-mail » in a group's « Inviter des ami·es ».",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Someone invited by email finds the invitation in Network › Groups once they sign up on inventaire.io."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une personne invitée par e-mail trouve l’invitation dans Réseau › Groupes dès son inscription sur inventaire.io."
+          }
+        }
+      }
+    },
+    "network.email_invitation.send" : {
+      "comment" : "« Inviter par e-mail » sheet: button pinned at the foot.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send invitation"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer l’invitation"
+          }
+        }
+      }
+    },
+    "network.email_invitation.title" : {
+      "comment" : "« Inviter par e-mail » sheet: navigation title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invite by email"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inviter par e-mail"
+          }
+        }
+      }
+    },
+    "network.email_invitation.too_many %lld" : {
+      "comment" : "« Inviter par e-mail » sheet: error under the addresses past the most one sending takes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No more than %lld address at a time."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No more than %lld addresses at a time."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld adresse au plus par envoi."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld adresses au plus par envoi."
+                }
+              }
+            }
           }
         }
       }

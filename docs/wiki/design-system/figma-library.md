@@ -16,6 +16,37 @@ Miroir Figma du design system iOS. **Le code Swift est la source de vérité** ;
   Écarts, le code faisant foi : « Adresses e-mail » est l'en-tête de la section du champ et non un libellé de `Field` ;
   « Message (facultatif) » est le placeholder de son champ ; sous les adresses, la note laisse la place à l'adresse mal
   formée ou à la limite de 50, en rouge.
+- **Proposition du 2026-11-18 — `Social Preview` · images Open Graph des liens Ex-libris** (page `Social Preview`
+  `1106:15270`, cadre `1110:2`, tâche #161) : deux images 1200 × 630 sur vert nuit. `OG · Livre` (`1120:30`) : la
+  couverture seule, 340 × 510, centrée, composée par le service pour un livre ou un exemplaire. `OG · Ex-libris`
+  (`1111:133`) : l'icône et « Ex-libris », un fichier statique pour tout le reste, objet privé compris. Le nom de
+  l'objet n'est jamais dans l'image : il passe par `og:title` et `og:description`, dont le bloc `Spec · Cartes Open
+  Graph` (`1111:143`) donne un exemple par type de lien ; la marque passe aussi par `og:site_name`, le favicon et
+  `apple-touch-icon`. **Deux composants nouveaux** sur `Screens · Components` : `Social Preview / Background`
+  (`1108:924`, `color/green/900`, mur de couvertures de l'Accueil flouté, voile dégradé aux valeurs du vert nuit écrites
+  en dur, une variable ne se lie pas à un arrêt de dégradé) et `Social Preview / Brand` (`1108:927`, l'icône claire et
+  « Ex-libris »). Proposition, rien d'implémenté.
+- **Proposition du 2026-11-18 — `Screens iPad` · revue iPad, Avant / Après** (page `Screens iPad` `548:17852`, vide
+  depuis la suppression des passes du 2026-10-06, clair seul) : les dix points marqués « Corriger » de la revue faite
+  sur le simulateur iPad Air 11" (M4), iOS 26.5. Un en-tête de page, puis une `SECTION` par point, empilées :
+  `1` (`1095:5`, réglage de projet, texte seul), `2` (`1095:16`), `3` (`1095:38`), `4` (`1095:62`), `6` (`1095:83`),
+  `7` (`1095:107`), `9` (`1095:131`), `10` (`1095:152`), `11` (`1095:176`), `13` (`1095:196`). Dans chacune : la
+  capture « Avant » collée telle quelle en image (points = pixels ÷ 2, 1 180 × 820 ou 820 × 1 180), la maquette
+  « Après » en calques éditables, et une carte `Spec · <id>` « Ce qui change dans le code ». Les « Après » :
+  `Auteur·ice · barre latérale` (`1095:30`), `Listes · colonne + détail` (`1095:55`, colonne de 360, ligne choisie sur
+  `background/tinted`, détail avec `Profile / Tabs` et un cover flow simplifié), `Inventaire · portrait` (`1095:76`,
+  carrousel centré), `Inventaire · paysage, barre latérale masquée` (`1095:100`, trois colonnes), `Recherche · au
+  repos` (`1095:124`, grille de cartes de 120) et `· résultats` (`1095:125`, deux colonnes par carte), `Ranger mes
+  livres · paysage` (`1095:145`, « À ranger » en colonne de 360 à droite, un livre en cours de glisser), `Fiche livre ·
+  Partager` (`1095:169`, feuille de partage en popover ancré au « … »), `Fiche livre · auteur·ices` (`1095:190`, une
+  ligne par nom, fondu au bord droit), `Profil · compteur` (`1095:210`). Couvertures : neuf vraies couvertures
+  découpées dans les captures, posées en override d'image. **Trois composants nouveaux** sur `Screens · Components` :
+  `Cover` (`1094:681`, 2:3, `radius/minimal`, `Shadow/Thumbnail`, image en override), `Chrome / Sidebar · iPad`
+  (`1094:682`, 300 × 788, quatre onglets en `Chrome / Sidebar Row · System` nommés `onglet · <Libellé>` — l'état
+  choisi se règle par instance —, sections « Étagères » et « Listes », bouton sidebar.left et avatar en
+  `Chrome / Glass Button`), `Card / Cover` (`1098:1586`, 120 de large, `Title`, `Owner`, `Show owner`). `Icon` gagne
+  `square.and.arrow.up` (`1096:939`, 38 variantes). Hors maquette : 8 et 12 (plus tard), 5 (ignoré). Proposition,
+  rien d'implémenté.
 - **Proposition du 2026-11-07 — `B3 · Liste · Où trouver ce livre ?`** (`992:1760`, page `Liste`, section
   `Liste détails · Description de la liste`, à droite de `B2`, clair seul, toute la longueur : 393 × 1 379, la barre
   « Ajouter un livre » reste en bas) : clone de `B1`. Sous « Ajouté le … », une section `section · Où trouver ce
@@ -1169,7 +1200,7 @@ la palette de l'app, elle se recolore avec l'OS.
 | `Chrome / Tab Bar` | `25:234` | Active ∈ {Inventaire, Listes, Réglages, Recherche} × Theme | — | 393 × 83. Teinte active **bindée** à `foreground/tinted` (`ReCIT.swift:31`) |
 | `Chrome / Nav Bar` | `26:162` | Style ∈ {Large, Inline, Inline + Back} × Theme | `Title#26:18`, `Action glyph#26:19`, `Show action#26:20` | Large 96, Inline 44. Titres **bindés** — l'app configure `UINavigationBarAppearance` |
 | `Chrome / Search Field` | `27:172` | State ∈ {Idle, Active} × Theme | `Placeholder#27:4` | 393 × 52. `Active` signifie aussi que le carrousel d'étagères a disparu |
-| `Icon` | `21:60` | Glyph ∈ 37 valeurs (la dernière, `arrow.up.right`, le 2026-11-07 pour `Cell / External Link`) | — | À consommer par `INSTANCE_SWAP`, jamais une variante par icône |
+| `Icon` | `21:60` | Glyph ∈ 38 valeurs (la dernière, `square.and.arrow.up`, le 2026-11-18 pour la revue iPad) | — | À consommer par `INSTANCE_SWAP`, jamais une variante par icône |
 
 ### Composites de feature
 

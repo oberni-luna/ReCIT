@@ -59,6 +59,9 @@ final class ShelfFocusModel {
     var growth: CGFloat = 1
     /// True once selection mode armed: the book's cell is shown and every scroll freezes.
     var isArmed: Bool = false
+    /// How far the grown book leans towards the finger, in screen points, on top of its place.
+    /// Zero outside selection mode. See `ShelfBookPull`.
+    var pull: CGSize = .zero
 
     /// True while a press is being drawn.
     var isPressing: Bool { book != nil }
@@ -71,5 +74,6 @@ final class ShelfFocusModel {
         progress = 0
         growth = 1
         isArmed = false
+        pull = .zero
     }
 }

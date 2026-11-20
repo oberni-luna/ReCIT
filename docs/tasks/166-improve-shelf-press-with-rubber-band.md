@@ -1,6 +1,6 @@
 ---
 issue: 166
-status: todo
+status: to-test
 wiki: [[features/0004-shelf-press-selection]], [[adr/0006-shelf-press-selection-scrim]]
 note: Sur l'étagère, en mode sélection, le livre grandi suit légèrement le doigt, comme accroché par un élastique à sa place. Vidéo de référence montrée pendant le grill (mode sélection actuel, 8,7 s).
 created: 2026-11-20
@@ -37,3 +37,23 @@ Today, in selection mode, the grown copy of the pressed book sits still at its p
 - Réduire les animations on → the grown book stays at its place whatever the finger does.
 - A friend's étagère → same behaviour.
 - Unit tests: rubber band is 0 at gap 0, monotonic, symmetric, never exceeds the cap; the cap is min(20, half the extra growth) per axis.
+
+## Implementation
+
+- `Features/Shelves/ShelfBookPull.swift` (new): pure type, CoreGraphics only. `cap` per axis = `min(20, max(0, (growth − 1) / 2 × side))`; `offset(towards:)` = `cap × gap / (cap + |gap|)` per axis.
+- `ShelfFocusModel.pull: CGSize`, cleared by `reset()`.
+- `ShelfFocusOverlayView.book(_:)`: `.offset(focus.pull)` after `.scaleEffect`, before `.position` (rotation and scale stay about the book centre, offset in screen points).
+- `ShelfRowView`:
+  - `lean(towards:)` springs the pull with `pullSpring` (`.interactiveSpring(response: 0.2, dampingFraction: 0.7)`). Gap measured from `frameInCard` centre, cap from `fullGrowth`. No-op under Reduce Motion, off the shelf or without a book.
+  - `moveTo`: same book → `lean`; book → book and off → on → `publish` then `lean` a frame later.
+  - `publish` zeroes the pull unanimated; `exitFocus` springs it back to zero.
+- Build: `ReCIT_iOS` on iPhone 17 green, SwiftLint clean.
+- Tests: `ShelfBookPullTests` 9/9, `ShelfBooksLayoutTests` 30/30.
+- Notes to check on device:
+  - cap uses `fullGrowth`, not the animated `growth`: just after arming, the copy may uncover the shelf book by a fraction of a point.
+  - leaning last spine: gap from the unrotated frame centre, off by a point or two.
+  - book → book assumes an unanimated write drops the in-flight spring; if the new book carries the old offset, look there.
+
+## Verification
+
+manual validation — not run by agent

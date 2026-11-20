@@ -103,7 +103,8 @@ struct ShelfFocusOverlayView: View {
             .ignoresSafeArea()
     }
 
-    /// The pressed book, sharp above the veil, grown about its centre. Nothing here animates
+    /// The pressed book, sharp above the veil, grown about its centre and leaning by
+    /// `focus.pull` towards the finger. Nothing here animates
     /// from one book to the next: the finger is picking, and a cover morphing into another
     /// cover reads as a glitch rather than a transition.
     ///
@@ -136,6 +137,7 @@ struct ShelfFocusOverlayView: View {
         }
         .rotationEffect(book.leaning ? .degrees(-ShelfBooksLayout.leanDegrees) : .zero, anchor: .bottomTrailing)
         .scaleEffect(focus.growth, anchor: .center)
+        .offset(focus.pull)
         .position(
             x: focus.cardOrigin.x + book.frameInCard.midX,
             y: focus.cardOrigin.y + book.frameInCard.midY

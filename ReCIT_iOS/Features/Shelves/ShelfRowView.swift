@@ -31,6 +31,7 @@ struct ShelfRowView: View {
     let width: CGFloat
     @Binding var path: NavigationPath
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
     @Environment(ShelfFocusModel.self) private var focus
 
     /// The book under the finger, grown. Nil when nothing is pressed, or when the finger has
@@ -61,6 +62,9 @@ struct ShelfRowView: View {
     /// The cell's own arrival and departure, softer than the book's.
     private let cellDuration: TimeInterval = 0.3
     private let cellBounce: Double = 0.2
+    /// How the book trails the finger in selection mode: short, so it keeps up, and damped
+    /// enough to settle without wobbling once the finger stops.
+    private let pullSpring: Animation = .interactiveSpring(response: 0.2, dampingFraction: 0.7)
 
     private var metrics: ShelfCardMetrics { .init(width: width) }
     private var books: [InventoryItem] { ShelfDrawnBooks.from(shelf.items) }
@@ -197,6 +201,8 @@ struct ShelfRowView: View {
     /// Only the frame within the card is computed here, so nothing has to run again when the
     /// page scrolls: from then on the origin alone moves, and `onGeometryChange` publishes it.
     private func publish(_ index: Int?) {
+        // Each book leans from its own place: the previous one's pull must not carry over.
+        focus.pull = .zero
         let drawn: (books: [InventoryItem], layout: ShelfBooksLayout) = drawn
         guard let index, drawn.books.indices.contains(index) else {
             focus.book = nil
@@ -283,6 +289,7 @@ struct ShelfRowView: View {
     private func exitFocus(over duration: TimeInterval) {
         withAnimation(.easeOut(duration: duration / 2)) { focus.progress = 0 }
         withAnimation(.spring(duration: cellDuration, bounce: cellBounce)) { focus.isArmed = false }
+        withAnimation(pullSpring) { focus.pull = .zero }
         withAnimation(.spring(duration: duration, bounce: bounce)) {
             focus.growth = 1
         } completion: {
@@ -294,10 +301,13 @@ struct ShelfRowView: View {
     }
 
     /// Selection mode: the finger moved, so the growth follows it onto another book — or off
-    /// the shelf entirely, where nothing is selected.
+    /// the shelf entirely, where nothing is selected. On a book, the book leans towards it.
     private func moveTo(_ location: CGPoint) {
         let index: Int? = book(at: location)
-        guard index != grownIndex else { return }
+        guard index != grownIndex else {
+            lean(towards: location)
+            return
+        }
         let wasOnShelf: Bool = grownIndex != nil
         grownIndex = index
 
@@ -306,6 +316,7 @@ struct ShelfRowView: View {
             // Book to book. Deliberately unanimated: the finger is picking, and morphing one
             // book's cover and title into the next one's reads as a glitch.
             publish(index)
+            onNextFrame { lean(towards: location) }
         case (true, false):
             // Off the shelf: nothing is selected any more, so selection mode unwinds. It was
             // fully wound up, so it unwinds over the whole hold.
@@ -313,9 +324,24 @@ struct ShelfRowView: View {
         case (false, true):
             publish(index)
             enterFocus()
+            onNextFrame { lean(towards: location) }
         case (false, false):
             break
         }
+    }
+
+    /// The grown book leans towards `location` (the card's coordinates), held to its place on
+    /// the shelf by a rubber band. A frame after `publish` when the book has just changed, so
+    /// the new book is first drawn at its place and the lean starts from there.
+    private func lean(towards location: CGPoint) {
+        guard !reduceMotion, grownIndex != nil, let book = focus.book else { return }
+        let rest: CGRect = book.frameInCard
+        let gap: CGSize = .init(
+            width: location.x - rest.midX,
+            height: location.y - rest.midY
+        )
+        let pull: ShelfBookPull = .init(bookSize: rest.size, growth: fullGrowth)
+        withAnimation(pullSpring) { focus.pull = pull.offset(towards: gap) }
     }
 
     /// The finger lifted in selection mode: open whatever it was on, if anything.

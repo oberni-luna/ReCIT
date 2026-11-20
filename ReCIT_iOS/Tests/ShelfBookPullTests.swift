@@ -65,13 +65,13 @@ struct ShelfBookPullTests {
     }
 
     @Test
-    func `caps a large book at twenty points`() {
-        #expect(cover.cap == .init(width: 20, height: 20))
+    func `caps a large book at ten points`() {
+        #expect(cover.cap == .init(width: 10, height: 10))
     }
 
     @Test
-    func `caps a thin spine at half its extra growth`() {
-        #expect(spine.cap == .init(width: 12.5, height: 20))
+    func `caps a thin spine at a quarter of its extra growth`() {
+        #expect(spine.cap == .init(width: 6.25, height: 10))
     }
 
     @Test

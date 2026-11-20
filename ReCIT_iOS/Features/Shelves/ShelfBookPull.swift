@@ -13,10 +13,10 @@ import CoreGraphics
 ///
 /// The cap is what keeps the copy over the shelf's own book, which shows through the
 /// half-strength veil. Travel further on an axis than the copy's extra growth covers and the
-/// shelf's book shows beside it, so the book reads twice. Hence half the extra growth per axis,
-/// and never more than `maximumPull` however large the book.
+/// shelf's book shows beside it, so the book reads twice. Hence a quarter of the extra growth per
+/// axis, half what would still cover it, and never more than `maximumPull` however large the book.
 struct ShelfBookPull {
-    static let maximumPull: CGFloat = 20
+    static let maximumPull: CGFloat = 10
 
     /// The book at rest, unscaled.
     let bookSize: CGSize
@@ -47,6 +47,6 @@ struct ShelfBookPull {
     }
 
     private func cap(of side: CGFloat) -> CGFloat {
-        min(Self.maximumPull, max(0, (growth - 1) / 2 * side))
+        min(Self.maximumPull, max(0, (growth - 1) / 4 * side))
     }
 }

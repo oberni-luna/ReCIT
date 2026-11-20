@@ -14,7 +14,7 @@ Today, in selection mode, the grown copy of the pressed book sits still at its p
 
 - **What pulls the book**: the gap between the finger and the centre of the book at rest, per axis. Each book has its own anchor. Not the finger's travel since the press: momentum would carry from one book to the next.
 - **Rubber band**: `offset = cap × gap / (cap + |gap|)` per axis. Small gaps follow almost 1:1, large ones tend to the cap.
-- **Cap per axis**: `min(20 pt, (growth − 1) / 2 × book size on that axis)`. The copy (×2) is drawn over the shelf's own book, which shows through the half-strength veil: past that limit the copy would uncover it and the book would read double. A 25 × 150 standing spine → x ≤ 12.5, y ≤ 20.
+- **Cap per axis**: `min(10 pt, (growth − 1) / 4 × book size on that axis)` (halved in feedback round 1 from `min(20, (growth − 1) / 2 × size)`). The copy (×2) is drawn over the shelf's own book, which shows through the half-strength veil: past that limit the copy would uncover it and the book would read double. A 25 × 150 standing spine → x ≤ 6.25, y ≤ 10.
 - **When**: only once selection mode is armed. Before that, `ShelfPressRecognizer` gives up past 10 pt (`slop`) and the carousel scrolls, so there is nothing to follow.
 - **Motion**: a short spring, around `.interactiveSpring(response: 0.2, dampingFraction: 0.7)`, so the book trails the finger slightly. Tunable constant.
   - Finger moves → pull springs to `rubberBand(gap)`.
@@ -36,11 +36,11 @@ Today, in selection mode, the grown copy of the pressed book sits still at its p
 - Quick tap and press released before arming → no movement, same as today.
 - Réduire les animations on → the grown book stays at its place whatever the finger does.
 - A friend's étagère → same behaviour.
-- Unit tests: rubber band is 0 at gap 0, monotonic, symmetric, never exceeds the cap; the cap is min(20, half the extra growth) per axis.
+- Unit tests: rubber band is 0 at gap 0, monotonic, symmetric, never exceeds the cap; the cap is min(10, a quarter of the extra growth) per axis.
 
 ## Implementation
 
-- `Features/Shelves/ShelfBookPull.swift` (new): pure type, CoreGraphics only. `cap` per axis = `min(20, max(0, (growth − 1) / 2 × side))`; `offset(towards:)` = `cap × gap / (cap + |gap|)` per axis.
+- `Features/Shelves/ShelfBookPull.swift` (new): pure type, CoreGraphics only. `cap` per axis = `min(10, max(0, (growth − 1) / 4 × side))` (round 1; was 20 and / 2); `offset(towards:)` = `cap × gap / (cap + |gap|)` per axis.
 - `ShelfFocusModel.pull: CGSize`, cleared by `reset()`.
 - `ShelfFocusOverlayView.book(_:)`: `.offset(focus.pull)` after `.scaleEffect`, before `.position` (rotation and scale stay about the book centre, offset in screen points).
 - `ShelfRowView`:
@@ -57,3 +57,12 @@ Today, in selection mode, the grown copy of the pressed book sits still at its p
 ## Verification
 
 manual validation — not run by agent
+round 1: manual validation — not run by agent
+
+### Round 1 — 2026-11-20
+
+- Asked: « Tu peux diviser par 2 l'amplitude du mouvement des livres ? »
+- Triage: adjustment. Criteria unchanged, cap figures in Context updated.
+- Change (inline): `ShelfBookPull.maximumPull` 20 → 10, coverage term `(growth − 1) / 2` → `/ 4`; `ShelfBookPullTests` caps 20 → 10, spine 12.5 × 20 → 6.25 × 10.
+- Build + `ShelfBookPullTests`, `ShelfBooksLayoutTests`: green.
+- Review: deferred → /wa-validate. Verify: manual, not run by agent. No rule captured.

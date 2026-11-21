@@ -22,13 +22,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import studio.lunabee.nouveaurecit.R
+import studio.lunabee.nouveaurecit.data.TextLocale
 import studio.lunabee.nouveaurecit.data.book.EditionLanguageFilter
 import studio.lunabee.nouveaurecit.designsystem.RecitTheme
 import studio.lunabee.nouveaurecit.designsystem.Spacing
@@ -47,7 +47,7 @@ internal fun EditionLanguageMenu(
     onChoose: (EditionLanguageFilter) -> Unit,
 ) {
     var expanded: Boolean by remember { mutableStateOf(false) }
-    val locale: Locale = LocalConfiguration.current.locales[0]
+    val locale: Locale = TextLocale.current
     val label: String = languageLabel(language, locale)
     val spoken: String = stringResource(R.string.editions_language_menu, label)
 

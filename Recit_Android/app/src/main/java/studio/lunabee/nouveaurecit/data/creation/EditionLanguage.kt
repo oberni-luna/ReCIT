@@ -1,5 +1,6 @@
 package studio.lunabee.nouveaurecit.data.creation
 
+import studio.lunabee.nouveaurecit.data.TextLocale
 import java.util.Locale
 
 /**
@@ -17,6 +18,6 @@ data class EditionLanguage(
     val code: String,
 ) {
     /** The language's name in the reader's language, or `null` rather than a bare code. */
-    fun displayName(locale: Locale = Locale.getDefault()): String? =
+    fun displayName(locale: Locale = TextLocale.current): String? =
         Locale.forLanguageTag(code).getDisplayLanguage(locale).takeIf { it.isNotBlank() && it != code }
 }

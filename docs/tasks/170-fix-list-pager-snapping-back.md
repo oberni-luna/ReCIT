@@ -1,6 +1,6 @@
 ---
 issue: 170
-status: todo
+status: to-test
 wiki: [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0066-a-friends-profile-tabs-as-pages]], [[features/0089-tabbed-shelf-screen]]
 note: Sur une liste, il arrive que quand je swipe vers la droite pour accéder à la description de la liste, l'écran revient tout à la première page. Bug antérieur à #168.
 created: 2026-11-21
@@ -31,8 +31,18 @@ created: 2026-11-21
 
 ## Implementation
 
+- `TabPager.swift` only. `Coordinator.lastSelection` holds the selection as the pager last saw or wrote it, set in `init`.
+- `follow(_:in:)`, called by `updateUIViewController` in place of `turn`: turns only when the selection differs from `lastSelection`, then records it.
+- `didFinishAnimating` records the page it settled on as `lastSelection`, so the update it causes does not turn the pager again.
+- `turn` queues `pendingTab` while the pages move: under a finger, decelerating, or turning to a tab chosen by name. The `setViewControllers` completion turns to it. Before, a tab chosen during a turn by name was dropped and caught by a later update, which `follow` no longer makes.
+- Known limit: touching the tab being left while a swipe away from it is still settling leaves the pager on the new page. The selection has not changed, so the pager cannot tell the touch from a stray update.
+- `.swiftlint.baseline` keeps a stale `multiline_condition_break` entry for the old `guard isTurningByName == false,` line (#17).
+- Build: `** BUILD SUCCEEDED **`, scheme `ReCIT_iOS`, iPhone 17 simulator, SwiftLint in the build. No unit test.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent
 
 ## Feedback

@@ -64,13 +64,16 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
         private var isTurningByName: Bool = false
         /// Held still by the screen.
         private var isFrozen: Bool = false
-        /// A tab chosen by its name while a swipe was still settling: turned to once it has, rather
-        /// than lost under the page the swipe lands on.
+        /// A tab chosen by its name while the pages were still moving — under a swipe, or turning to
+        /// another tab: turned to once they have settled, rather than lost under the page they land on.
         private var pendingTab: Tab?
+        /// The selection as the pager last saw or wrote it.
+        private var lastSelection: Tab
 
         init(selection: Binding<Tab>, position: any TabPagerPositionStore) {
             self.selection = selection
             self.position = position
+            lastSelection = selection.wrappedValue
         }
 
         func index(of tab: Tab) -> CGFloat {
@@ -129,15 +132,27 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
             scrollView?.isScrollEnabled = isFrozen == false && isTurningByName == false
         }
 
+        /// Turns to the selection if it changed since the pager last saw or wrote it — never because
+        /// it differs from the page on screen: from the moment a finger lets go, UIKit holds the page
+        /// the swipe lands on, the selection follows only once it has settled, and an update in
+        /// between turned the pager back.
+        func follow(_ selection: Tab, in controller: UIPageViewController) {
+            guard selection != lastSelection else { return }
+            lastSelection = selection
+            turn(controller, to: selection)
+        }
+
         /// Turns to the tab chosen by its name, if it is not the page on screen already.
         func turn(_ controller: UIPageViewController, to target: Tab) {
-            guard isTurningByName == false,
-                  let shown = tab(of: controller.viewControllers?.first),
-                  shown != target
-            else { return }
-
-            if let scrollView, scrollView.isDragging || scrollView.isDecelerating {
+            let isSwiping: Bool = scrollView.map { $0.isDragging || $0.isDecelerating } ?? false
+            if isTurningByName || isSwiping {
                 pendingTab = target
+                return
+            }
+            guard
+                let shown = tab(of: controller.viewControllers?.first),
+                shown != target
+            else {
                 return
             }
 
@@ -152,8 +167,13 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
                 direction: isForward ? .forward : .reverse,
                 animated: true
             ) { [weak self] _ in
-                self?.isTurningByName = false
-                self?.updateScrollEnabled()
+                guard let self else { return }
+                isTurningByName = false
+                updateScrollEnabled()
+                if let pendingTab {
+                    self.pendingTab = nil
+                    turn(controller, to: pendingTab)
+                }
             }
         }
 
@@ -181,7 +201,7 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
 
         /// A swipe that turned the page selects its tab — unless a tab was chosen by its name
         /// meanwhile, which is turned to now. The selection is the page on screen, whether the
-        /// swipe turned it or went back.
+        /// swipe turned it or went back, and the pager records it as its own.
         func pageViewController(
             _ pageViewController: UIPageViewController,
             didFinishAnimating finished: Bool,
@@ -201,6 +221,7 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
             if selection.wrappedValue != shown {
                 selection.wrappedValue = shown
             }
+            lastSelection = shown
         }
     }
 
@@ -268,7 +289,7 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
             )
         }
         coordinator.setFrozen(isFrozen)
-        coordinator.turn(controller, to: selection)
+        coordinator.follow(selection, in: controller)
     }
 
     private func hostingController(for tab: Tab, context: Context) -> UIHostingController<HostedPage> {

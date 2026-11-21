@@ -38,6 +38,8 @@ The Figma maquette is the section `Étagère détails · V2` (`973:8195`) of the
 - `Features/Shelves/Detail/`: `ShelfDetailView` (a `TabPager` with `ShelfDetailTabPicker` laid over it, as
   `ListCoverFlowScreen`), `ShelfBooksPage`, `ShelfBookRow`, `ShelfPresentationPage`, `ShelfAddBooksSheet`,
   `ShelfAddBookRow`, `ShelfDetailTab`, `ShelfPreviewStore`. The old plain-list `ShelfDetailView` is gone.
+  `ShelfDetailView` lays `backgroundForm` behind the pager, as the list and the profile do, so the bounce past the
+  first or last page shows grey, not white (#168).
 - **Routing.** `NavigationDestination.shelf(id:)` is unchanged and pushes the new screen. While both screens lived side
   by side, a `layout` parameter on that case chose one, because the SwiftLint baseline freezes the dispatch's
   complexity; it went with the old screen.

@@ -138,6 +138,9 @@ struct ListCoverFlowScreen: View {
                 .listDetailTabsBar()
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabsHeight = $0 }
             }
+            // The pages' ground, seen in the gap the pager's bounce opens past the first or last
+            // page, as on a friend's profile.
+            .background(.backgroundForm)
             .fullScreenCover(isPresented: $isPresentingScanner) {
                 ListScanView(
                     list: list,

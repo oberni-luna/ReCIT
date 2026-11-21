@@ -52,6 +52,8 @@ private API (App Review guideline 2.5.1), so the lens is rebuilt from public Swi
   tabs.
 - **`ListCoverFlowScreen`** — a `ZStack` holds the pager (edge to edge, like the profile's) and the tabs laid
   over it, measured. It also keeps the selection, the add sheets, the scanner and the fetch of the entities.
+  `backgroundForm` lies behind the pager, as on the profile: the pager and its pages are clear, and the gap its
+  bounce opens past the first or last page showed the window's white without it (#168).
 - **`ListElementsPage`** (new) — the Livres page. It holds the comment's `@FocusState`, the keyboard's frame and
   its « OK », the room for the keyboard and the add bar. A focus held by the screen does not reach into a page's
   `UIHostingController`. The page reports `isWritingComment` back, and the screen freezes the pager with it.

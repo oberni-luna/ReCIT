@@ -1,6 +1,6 @@
 ---
 issue: 168
-status: to-test
+status: to-close
 wiki: [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0089-tabbed-shelf-screen]], [[features/0066-a-friends-profile-tabs-as-pages]]
 note: Quand on swipe au-delà des pages, dans les écrans avec des tabs (Liste ou Étagère), on voit du blanc en background. Ce n'est pas le cas dans l'écran de profil. Aligner sur l'écran de profil.
 created: 2026-11-21
@@ -33,6 +33,13 @@ created: 2026-11-21
 - No unit test: visual change only.
 
 ## Review
+
+### validation · 2026-11-21
+
+- 🟡 [elegance] `ListCoverFlowScreen`, `ShelfDetailView`: closure re-implemented the token overload `background(_: DesignSystem.Color)` → `.background(.backgroundForm)`. Fixed by autofix.
+- 🟡 [style] both comments said "a reader's profile", a glossary Also word → "a friend's profile". Fixed by autofix.
+- Comment kept: spec-driven, gives a non-obvious why.
+- Autofix round 1 → clean. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
 
 ## Verification
 

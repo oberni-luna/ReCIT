@@ -1,6 +1,6 @@
 ---
 issue: 168
-status: todo
+status: to-test
 wiki: [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0089-tabbed-shelf-screen]], [[features/0066-a-friends-profile-tabs-as-pages]]
 note: Quand on swipe au-delà des pages, dans les écrans avec des tabs (Liste ou Étagère), on voit du blanc en background. Ce n'est pas le cas dans l'écran de profil. Aligner sur l'écran de profil.
 created: 2026-11-21
@@ -27,8 +27,15 @@ created: 2026-11-21
 
 ## Implementation
 
+- `ListCoverFlowScreen` and `ShelfDetailView`: `.background { DesignSystem.Color.backgroundForm.color.ignoresSafeArea() }` on the inner `ZStack(alignment: .top)` holding the `TabPager` and the tab picker, as `UserDetailView` does. One comment line each says why.
+- `TabPager`, `UserDetailView`, the SwiftLint baseline: untouched.
+- Build: `** BUILD SUCCEEDED **`, scheme `ReCIT_iOS`, iPhone 17 simulator, SwiftLint in the build. `swiftlint --fix` changed nothing.
+- No unit test: visual change only.
+
 ## Review
 
 ## Verification
+
+manual validation — not run by agent
 
 ## Feedback

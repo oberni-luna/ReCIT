@@ -102,6 +102,12 @@ struct ShelfDetailView: View {
                     .listDetailTabsBar()
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabsHeight = $0 }
                 }
+                // The pages' ground, seen in the gap the pager's bounce opens past the first or
+                // last page, as on a reader's profile.
+                .background {
+                    DesignSystem.Color.backgroundForm.color
+                        .ignoresSafeArea()
+                }
                 .sheet(isPresented: $isAddingBooks) {
                     ShelfAddBooksSheet(shelf: shelf)
                 }

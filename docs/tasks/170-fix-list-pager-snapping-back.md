@@ -1,6 +1,6 @@
 ---
 issue: 170
-status: to-test
+status: to-close
 wiki: [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0066-a-friends-profile-tabs-as-pages]], [[features/0089-tabbed-shelf-screen]]
 note: Sur une liste, il arrive que quand je swipe vers la droite pour accéder à la description de la liste, l'écran revient tout à la première page. Bug antérieur à #168.
 created: 2026-11-21
@@ -26,7 +26,7 @@ created: 2026-11-21
 - On a Liste, swipe from « Livres » to « Présentation » starting on the covers, ten times → each swipe stays on « Présentation ».
 - Same, swiping back to « Livres » → stays on « Livres ».
 - Touching a tab's name on a Liste, an Étagère and a friend's profile → the pager turns to that page, as before.
-- Touching a tab's name while a swipe is still settling → the pager ends on the touched tab.
+- Touching a tab's name while a swipe is still settling → the pager ends on the touched tab, except the tab the swipe is leaving: the pager then stays on the page the swipe lands on (accepted at review).
 - Swiping between pages on an Étagère and a friend's profile → unchanged, no turn back.
 
 ## Implementation
@@ -40,6 +40,12 @@ created: 2026-11-21
 - Build: `** BUILD SUCCEEDED **`, scheme `ReCIT_iOS`, iPhone 17 simulator, SwiftLint in the build. No unit test.
 
 ## Review
+
+### validation · 2026-11-21
+
+- 🟡 [correctness] A tab touched during an edge bounce queued `pendingTab` with no transition to drain it: pager stuck on the old page. Fixed by autofix: `scrolled(_:)` drains it on the next main-actor turn once the offset rests on a page with no finger down; the `setViewControllers` completion shares `turnToPendingTab()`.
+- 🟡 [correctness] Touching the tab being left mid-settle keeps the pager on the new page. Accepted by the user; criterion 4 names the exception.
+- Autofix round 1 → clean. LENSES: style ✓ · elegance ✓ · structure ✓ · correctness ✓.
 
 ## Verification
 

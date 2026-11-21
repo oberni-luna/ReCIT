@@ -73,6 +73,13 @@ private API (App Review guideline 2.5.1), so the lens is rebuilt from public Swi
   without ever reporting the turn's end. The pager then waited forever, and a tab chosen after did nothing. It
   showed on the list and the profile had the same race. The selection also follows the page on screen whenever a
   swipe ends.
+- **The pager turns only when the selection changes** (#170). From the moment a finger lets go, UIKit holds the page
+  the swipe lands on, while the selection follows only once it has settled. Any SwiftUI update in between, often
+  the cover flow writing `selectedURI` as its covers settle, made the pager take the stale selection for a tab
+  chosen by its name and turn back to « Livres ». `TabPager.Coordinator` keeps `lastSelection`, the selection as
+  it last saw or wrote it, and `follow(_:in:)` turns only when that changes. A tab chosen while the pages move
+  (under a finger, decelerating, or turning by name) waits in `pendingTab`. Touching the tab being left while a
+  swipe away from it settles leaves the pager on the new page: the selection has not changed.
 - **The add bar moves into Livres**, since the add bar, the keyboard and the comment belong together. On a
   swipe it slides away with its page rather than vanishing when the tab changes.
 

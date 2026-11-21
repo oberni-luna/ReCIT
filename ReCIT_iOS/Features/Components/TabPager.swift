@@ -118,6 +118,12 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
 
             let swiped: CGFloat = CGFloat(nearest.index) + (offset - nearest.minX) / width
             position.pagePosition = min(max(swiped, 0), CGFloat(pages.count - 1))
+
+            if pendingTab != nil, scrollView.isDragging == false, abs(offset - nearest.minX) < 1 {
+                Task { [weak self] in
+                    self?.turnToPendingTab()
+                }
+            }
         }
 
         func setFrozen(_ isFrozen: Bool) {
@@ -167,14 +173,16 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
                 direction: isForward ? .forward : .reverse,
                 animated: true
             ) { [weak self] _ in
-                guard let self else { return }
-                isTurningByName = false
-                updateScrollEnabled()
-                if let pendingTab {
-                    self.pendingTab = nil
-                    turn(controller, to: pendingTab)
-                }
+                self?.isTurningByName = false
+                self?.updateScrollEnabled()
+                self?.turnToPendingTab()
             }
+        }
+
+        private func turnToPendingTab() {
+            guard let controller, let pendingTab else { return }
+            self.pendingTab = nil
+            turn(controller, to: pendingTab)
         }
 
         // MARK: - UIPageViewControllerDataSource

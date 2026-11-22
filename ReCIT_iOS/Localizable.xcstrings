@@ -2185,18 +2185,104 @@
         }
       }
     },
-    "book.in_lists" : {
+    "book.friends_lists" : {
+      "comment" : "Section of the book screen's Dans le réseau tab: my friends' lists holding the book.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In lists"
+            "value" : "In my friends’ lists"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans les listes"
+            "value" : "Dans les listes de mes ami·es"
+          }
+        }
+      }
+    },
+    "book.my_copy.absent" : {
+      "comment" : "Under Mon exemplaire, on a book I own no copy of, above the button that adds it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This book is not in your inventory. Add it to note what you think of it, and to lend it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce livre n’est pas dans votre inventaire. Ajoutez-le pour y noter ce que vous en pensez, et pouvoir le prêter."
+          }
+        }
+      }
+    },
+    "book.my_copy.add_to_inventory" : {
+      "comment" : "Button under Mon exemplaire, on a book I own no copy of.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to my inventory"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à mon inventaire"
+          }
+        }
+      }
+    },
+    "book.my_lists" : {
+      "comment" : "Section of the book screen's Mon exemplaire tab: my lists holding the book.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In my lists"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans mes listes"
+          }
+        }
+      }
+    },
+    "book.my_lists.add" : {
+      "comment" : "Last row of « Dans mes listes », opening the menu of my lists.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to a list"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à une liste"
+          }
+        }
+      }
+    },
+    "book.network.empty" : {
+      "comment" : "Dans le réseau tab of the book screen, when no friend has the book in their inventory or a list.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of your friends has this book, in their inventory or in a list."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun·e de vos ami·es n’a ce livre, ni dans son inventaire ni dans une liste."
           }
         }
       }
@@ -2298,6 +2384,108 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible d’ouvrir ce livre"
+          }
+        }
+      }
+    },
+    "book.tab.my_copy" : {
+      "comment" : "Tab of the book screen: my copy, my notes and my lists.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My copy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon exemplaire"
+          }
+        }
+      }
+    },
+    "book.tab.network" : {
+      "comment" : "Tab of the book screen, when nobody in my network holds the book.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In my network"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans le réseau"
+          }
+        }
+      }
+    },
+    "book.tab.network %lld" : {
+      "comment" : "Tab of the book screen, with how many copies and lists my network holds of the book.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In my network • %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans le réseau • %lld"
+          }
+        }
+      }
+    },
+    "book.tab.network.accessibility %lld" : {
+      "comment" : "VoiceOver label of book.tab.network, read without its bullet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In my network, %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans le réseau, %lld"
+          }
+        }
+      }
+    },
+    "book.tab.presentation" : {
+      "comment" : "Tab of the book screen that shows its summary, authors and editions.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Présentation"
+          }
+        }
+      }
+    },
+    "book.tabs" : {
+      "comment" : "VoiceOver label of the tabs of the book screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Book pages"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pages du livre"
           }
         }
       }

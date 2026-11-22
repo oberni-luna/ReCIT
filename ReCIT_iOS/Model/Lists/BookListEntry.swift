@@ -16,6 +16,10 @@ struct BookListEntry: Identifiable {
 
     var id: PersistentIdentifier { list.id }
 
+    /// Mine, under Mon exemplaire, rather than a friend's, under Dans le réseau: a list of mine
+    /// has nobody to name.
+    var isMine: Bool { owner == nil }
+
     /// The lists of works holding a book's work, mine and my friends', the most recently changed
     /// first. A list holding two works of a recueil comes once, opened on the first in list order.
     ///

@@ -83,4 +83,13 @@ struct FoldingHeaderCollapseTests {
         #expect(FoldingHeaderCollapse.interpolate(from: 96, to: 40, progress: 0.5) == 68)
         #expect(FoldingHeaderCollapse.interpolate(from: 96, to: 40, progress: 1) == 40)
     }
+
+    @Test
+    func `a page shorter than the fold gets the room to fold, a long one none`() {
+        #expect(collapse.bottomRoom(scrollRange: 30, currentRoom: 0) == 70)
+        #expect(collapse.bottomRoom(scrollRange: -40, currentRoom: 0) == 140)
+        #expect(collapse.bottomRoom(scrollRange: 100, currentRoom: 70) == 70)
+        #expect(collapse.bottomRoom(scrollRange: 2_000, currentRoom: 0) == 0)
+        #expect(collapse.bottomRoom(scrollRange: 2_070, currentRoom: 70) == 0)
+    }
 }

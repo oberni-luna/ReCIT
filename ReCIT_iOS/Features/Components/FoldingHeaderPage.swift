@@ -36,6 +36,10 @@ struct FoldingHeaderPage<Tab: Hashable, UnderHeader: View, Content: View>: View 
     /// the header. So: whenever the page is at rest (`FoldingHeaderScrollOffset.isAtRest`), which
     /// holds through the screen's arrival and never during a gesture or a bounce.
     @State private var firstRowTop: CGFloat?
+    /// How far the page scrolls past its rest, `bottomRoom` included.
+    @State private var scrollRange: CGFloat = 0
+    /// Room under the content of a page too short to scroll the whole fold, so it can land folded.
+    @State private var bottomRoom: CGFloat = 0
 
     init(
         _ layout: FoldingHeaderPageLayout<Tab>,
@@ -90,6 +94,19 @@ struct FoldingHeaderPage<Tab: Hashable, UnderHeader: View, Content: View>: View 
         } action: { _, inset in
             scrollTopInset = inset
         }
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentSize.height
+                + geometry.contentInsets.top
+                + geometry.contentInsets.bottom
+                - geometry.containerSize.height
+        } action: { _, range in
+            scrollRange = range
+            fitBottomRoom()
+        }
+        .onChange(of: layout.collapse) {
+            fitBottomRoom()
+        }
+        .contentMargins(.bottom, bottomRoom, for: .scrollContent)
         .onScrollPhaseChange { _, phase in
             layout.scrollOffset.setScrollIdle(phase == .idle, of: layout.page)
         }
@@ -99,6 +116,13 @@ struct FoldingHeaderPage<Tab: Hashable, UnderHeader: View, Content: View>: View 
         // Frozen while a book is being picked off an étagère, so the slide moves the
         // selection and not the page — the same rule the inventory's own carousel follows.
         .scrollDisabled(layout.isFrozen)
+    }
+
+    /// Gives a page too short to scroll the whole fold the room it lacks, and a long one none.
+    private func fitBottomRoom() {
+        let room: CGFloat = layout.collapse.bottomRoom(scrollRange: scrollRange, currentRoom: bottomRoom)
+        guard abs(room - bottomRoom) > 0.5 else { return }
+        bottomRoom = room
     }
 }
 

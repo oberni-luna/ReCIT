@@ -116,6 +116,22 @@ struct BookListEntryTests {
     }
 
     @Test
+    func `tells my lists from my friends'`() throws {
+        let context: ModelContext = try TestStore.makeContext()
+        let lea: User = Fixture.user(id: "lea", username: "lea", relation: .friend)
+        let items: [EntityListItem] = [
+            Self.insert(list: .mock(id: "mine", creatorId: "me"), holding: ["wd:Q1"], in: context),
+            Self.insert(list: .mock(id: "unstamped"), holding: ["wd:Q1"], in: context),
+            Self.insert(list: .mock(id: "lea", creatorId: "lea"), holding: ["wd:Q1"], in: context)
+        ].flatMap(\.self)
+
+        let entries: [BookListEntry] = BookListEntry.entries(items: items, myUserId: "me", friends: [lea])
+
+        #expect(Set(entries.filter(\.isMine).map(\.list._id)) == ["mine", "unstamped"])
+        #expect(entries.filter { $0.isMine == false }.map(\.list._id) == ["lea"])
+    }
+
+    @Test
     func `drops an element once it is deleted`() throws {
         let context: ModelContext = try TestStore.makeContext()
         let kept: [EntityListItem] = Self.insert(list: .mock(id: "kept", creatorId: "me"), holding: ["wd:Q1"], in: context)

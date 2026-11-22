@@ -1,6 +1,6 @@
 ---
 issue: 172
-status: todo
+status: to-test
 wiki: [[features/0029-full-screen-cover]], [[features/0066-a-friends-profile-tabs-as-pages]], [[features/0067-a-friends-profile-presentation-tab]], [[features/0075-lens-tabs-and-a-lists-pager]], [[features/0079-the-lists-a-book-is-in]], [[features/0080-a-private-note-on-my-copy]], [[features/0089-tabbed-shelf-screen]], [[design-system/figma-library]]
 note: Figma « F · Fiche livre — en-tête qui se replie et trois capsules », file S7IvC6GvlcUFe5IgbtvQq6, section 1179:2811 (frames F1–F5 1180:3116, 1180:3195, 1180:3358, 1180:3522, 1180:3676; component Book / Header 1179:2907, states Rest / Folded). Builds on #173. Grilled 2026-11-22.
 created: 2026-11-22
@@ -48,8 +48,30 @@ Today the Fiche livre (`BookDetailView`) is one long list: header, summary and a
 
 ## Implementation
 
+stacked on: wa/173-extract-folding-header-pager @ 6db50a08
+
+- `BookDetailView` hosts `FoldingHeaderPager` (#173): sheets, creation sheet, measured title/byline heights, genre enrichment.
+- `Features/Book/Header/`: `BookHeader` (rest + folded, reads the fold), `BookHeaderMetrics` (cover 256 → 48, 62 pt rise, title to one `title50` line, byline), `BookHeaderCover` (Plein écran via `.enlargeablePhoto`, slide-up like the profile: a zoom source over `TabPager` vanishes), `BookHeaderCoverPlaceholder`, `BookHeaderTitle` (large title fades out over the first half of the fold, one-line copy fades in over the second), `BookHeaderByline`, `BookHeaderBackdrop`.
+- `Features/Book/Tabs/`: `BookTab`, `BookTabPicker`, `BookNetworkTabLabel`, `BookPresentationPage`, `BookOtherEditionsSection`, `BookMyCopyPage` (owns the notes' `@FocusState` and keyboard « OK »), `BookAbsentCopySection`, `BookNetworkPage`, `BookNetworkEmptyState`.
+- `Model/Books/BookNetworkHoldings`: others' copies + friends' lists, one count for capsule and page. `BookListEntry.isMine` splits the lists; `BookListEntriesReader` holds the queries, `BookListsSection` is now a plain section.
+- `AddToInventoryButton`: shared by the « … » menu and the F5 pill. `EntityListMenu` gains `.title(_:)` for the « Ajouter à une liste » row (shown when the edition has one work, as the menu).
+- `FoldingHeaderPage` (Components): a page shorter than the fold gets bottom room (`FoldingHeaderCollapse.bottomRoom`) so it can always fold; long pages get none.
+- 12 strings fr + en; `book.in_lists` removed. New ids: `e2e.book.tab.*`, `e2e.book.myCopy.addToInventory`, `e2e.book.myLists.addToList`.
+- Build ✅ (SwiftLint) · tests ✅ BookListEntryTests, BookNetworkHoldingsTests, FoldingHeaderCollapseTests: 18 passed.
+- Notes: `BookResolvingView` still shows the old left-aligned header while resolving, so the header jumps when the edition lands. Empty network page: sentence alone, no Figma frame. `e2e.book.tab.*` may be swallowed by `LensTabLabels`' `.accessibilityElement(children: .combine)`, unconfirmed.
+
 ## Review
 
 ## Verification
+
+Simulator iPhone 17, « Le Monde qui n'est pas » (my copy, also OlivierB's, in his « Livres à lire »):
+- ✅ rest header: large centred cover, two-line title, « Frank Tashlin », capsules, Présentation selected
+- ✅ Présentation: authors, « Données bibliographiques » last (no summary or other editions on this book)
+- ✅ tap « Mon exemplaire » → notes and status; swipe → Dans le réseau
+- ✅ « Dans mes listes » ends on « Ajouter à une liste »
+- ✅ Dans le réseau: OlivierB's copy, « Livres à lire » under « Dans les listes de mes ami·es », capsule « Dans le réseau • 2 »; L'étranger reads « Dans le réseau » without a count
+- ✅ round 2: one swipe up on the short Mon exemplaire lands folded (small cover, one title, capsules pinned); swipe down unfolds
+- ⚠️ round 1 seen stuck half folded on the first swipe right after a tab change; not reproduced after round 2
+- not run: note save with « OK », F5 pill (not tapped, would write), list row → Liste, cover full screen, « … » from each tab and removal, network empty page, profile regression
 
 ## Feedback

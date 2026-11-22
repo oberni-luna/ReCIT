@@ -145,7 +145,10 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
         func follow(_ selection: Tab, in controller: UIPageViewController) {
             guard selection != lastSelection else { return }
             lastSelection = selection
-            turn(controller, to: selection)
+            Task { @MainActor [weak self, weak controller] in
+                guard let self, let controller, lastSelection == selection else { return }
+                turn(controller, to: selection)
+            }
         }
 
         /// Turns to the tab chosen by its name, if it is not the page on screen already.
@@ -168,6 +171,7 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
             withAnimation(.snappy) {
                 position.pagePosition = index(of: target)
             }
+            controller.view.endEditing(true)
             controller.setViewControllers(
                 [page(for: target)],
                 direction: isForward ? .forward : .reverse,

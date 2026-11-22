@@ -60,6 +60,8 @@ stacked on: wa/173-extract-folding-header-pager @ 6db50a08
 - Build ✅ (SwiftLint) · tests ✅ BookListEntryTests, BookNetworkHoldingsTests, FoldingHeaderCollapseTests: 18 passed.
 - Notes: `BookResolvingView` still shows the old left-aligned header while resolving, so the header jumps when the edition lands. Empty network page: sentence alone, no Figma frame. `e2e.book.tab.*` may be swallowed by `LensTabLabels`' `.accessibilityElement(children: .combine)`, unconfirmed.
 
+- round 2 (feedback): `TabPager.Coordinator.follow` defers the name-driven turn to the next main-actor turn (`Task { @MainActor … }`, dropped if the selection moved meanwhile); `turn` ends editing before `setViewControllers`. Build ✅ · tests ✅ 1464 passed.
+
 ## Review
 
 ## Verification
@@ -74,4 +76,12 @@ Simulator iPhone 17, « Le Monde qui n'est pas » (my copy, also OlivierB's, in 
 - ⚠️ round 1 seen stuck half folded on the first swipe right after a tab change; not reproduced after round 2
 - not run: note save with « OK », F5 pill (not tapped, would write), list row → Liste, cover full screen, « … » from each tab and removal, network empty page, profile regression
 
+- round 3 (feedback): keyboard open on « Ce que j'en pense », tap « Présentation » → keyboard closes, page turns, no freeze ✅; keyboard on « Ce que je garde pour moi », tap « Dans le réseau » → same ✅ (simulator iPhone 17). Not run: a list's comment with the keyboard open; on device.
+
 ## Feedback
+
+### Round 3 — 2026-11-22
+- Asked: « Mon semble avoir crash, tu peux regarder les logs ? » → « Oui corrige ». Crash report from the iPhone: watchdog `0x8BADF00D` (scene-update, 10 s), AttributeGraph cycle. A capsule tapped while the keyboard is open on Mon exemplaire: `TabPager.updateUIViewController` → `follow` → `turn` → `setViewControllers(animated:)` removes the page, its `UITextView` resigns, the keyboard hides and re-enters the SwiftUI update.
+- Triage: defect (criteria unchanged). Implementer: concurrency change.
+- Changes: `ReCIT_iOS/Features/Components/TabPager.swift` — turn by name deferred out of the SwiftUI update; `endEditing(true)` before the turn.
+- Review: deferred → /wa-validate. Verify: ✅ on the simulator, both fields. Rule captured: none.

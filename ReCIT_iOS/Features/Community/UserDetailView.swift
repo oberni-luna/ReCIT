@@ -17,8 +17,8 @@ import SwiftData
 /// (`865:17783`).
 ///
 /// Each tab is a page of its own (`UserProfilePage`), an inset grouped `List` whose first row is
-/// as tall as the unfolded header, which lies over both. The pages sit in a pager: a tab is
-/// changed by a swipe as well as by its name.
+/// as tall as the unfolded header, which lies over both. The pages sit in a `FoldingHeaderPager`:
+/// a tab is changed by a swipe as well as by its name.
 struct UserDetailView: View {
     @Environment(UserModel.self) private var userModel
     @Environment(ListModel.self) private var listModel
@@ -30,14 +30,6 @@ struct UserDetailView: View {
     @State private var isConfirmingRemoval: Bool = false
     @State private var tab: UserProfileTab = .inventory
     @State private var listsLoad: UserListsTab.Load = .loading
-    /// The pages' scroll and the pager's position — never read by this body, so a scroll
-    /// redraws the header alone.
-    @State private var scrollOffset: ProfileScrollOffset = .init()
-    /// The header's height unfolded — what the pages are pushed down by.
-    @State private var expandedHeaderHeight: CGFloat = 0
-    /// Where the header starts on screen at rest, read only while the page on screen is settled
-    /// (see `UserProfilePage.firstRowTop`).
-    @State private var headerTop: CGFloat?
     /// The pages' width, which says whether their books go on one column or two.
     @State private var pagesWidth: CGFloat = 0
 
@@ -66,7 +58,7 @@ struct UserDetailView: View {
         .init(dynamicTypeSize: dynamicTypeSize)
     }
 
-    private var collapse: ProfileHeaderCollapse {
+    private var collapse: FoldingHeaderCollapse {
         metrics.collapse
     }
 
@@ -80,15 +72,6 @@ struct UserDetailView: View {
         pages
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
                 pagesWidth = width
-            }
-            .overlay(alignment: .top) {
-                header
-            }
-            // The header draws its own backdrop under the bar, once the page passes under it.
-            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
-            .background {
-                DesignSystem.Color.backgroundForm.color
-                    .ignoresSafeArea()
             }
             // The name heads the page; the bar keeps the way back and « … ». The title stays set
             // for what reads it elsewhere — the back button's long-press menu.
@@ -135,60 +118,32 @@ struct UserDetailView: View {
             }
     }
 
-    /// The pages side by side, a swipe or a tab's name apart. Someone whose books are closed to
-    /// me has no tabs, and a single page, their bio at its top.
-    @ViewBuilder
+    /// The pages side by side, a swipe or a tab's name apart, under the header.
     private var pages: some View {
-        if showsInventory {
-            TabPager(
-                selection: $tab,
-                tabs: tabs,
-                isFrozen: shelfFocus.isArmed,
-                position: scrollOffset
-            ) { page in
-                // The étagères are part of the library, so they go with the books, not with the
-                // lists or the bio.
-                profilePage(page, showsShelves: page == .inventory, showsBio: false) {
-                    tabContent(page)
-                }
-            }
-            // Edge to edge, so the pages run under the bars as a list does; UIKit hands each
-            // page the safe area, which its list keeps its rows clear of.
-            .ignoresSafeArea()
-        } else {
-            profilePage(.inventory, showsShelves: false, showsBio: true) {
-                Section {
-                    RelationActionsView(user: user)
-
-                    EmptyStateView(
-                        glyph: "person",
-                        title: "network.private_inventory.title",
-                        message: "network.private_inventory.message \(user.username)"
-                    )
-                    .padding(.vertical, .large)
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
+        FoldingHeaderPager(
+            selection: $tab,
+            tabs: tabs,
+            collapse: collapse
+        ) { scrollOffset in
+            header(scrollOffset)
+        } page: { layout in
+            page(layout)
         }
+        .frozen(shelfFocus.isArmed)
     }
 
     private func profilePage(
-        _ page: UserProfileTab,
+        _ layout: FoldingHeaderPageLayout<UserProfileTab>,
         showsShelves: Bool,
         showsBio: Bool,
         @ViewBuilder content: () -> some View
     ) -> some View {
         UserProfilePage(
             user: user,
-            page: page,
+            layout: layout,
             showsShelves: showsShelves,
             showsBio: showsBio,
-            holdsReadableWidth: showsInventory == false || page != .inventory || bookColumns == 1,
-            expandedHeaderHeight: expandedHeaderHeight,
-            headerTop: headerTop,
-            collapse: collapse,
-            scrollOffset: scrollOffset,
+            holdsReadableWidth: showsInventory == false || layout.page != .inventory || bookColumns == 1,
             path: $path,
             content: content
         )
@@ -207,25 +162,6 @@ struct UserDetailView: View {
             UserTransactionsTab(user: user)
         case .presentation:
             UserPresentationTab(user: user)
-        }
-    }
-
-    /// Under the navigation bar, in the safe area: an overlay of the pages, laid out where they
-    /// would be had they not run past it.
-    private var header: some View {
-        UserProfileStickyHeader(
-            user: user,
-            tab: showsInventory ? $tab : nil,
-            tabs: tabs,
-            listsLoad: listsLoad,
-            metrics: metrics,
-            collapse: collapse,
-            scrollOffset: scrollOffset
-        )
-        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-            guard scrollOffset.isSettled(tab, among: tabs) else { return }
-            headerTop = frame.minY
-            expandedHeaderHeight = frame.height
         }
     }
 
@@ -291,6 +227,46 @@ struct UserDetailView: View {
                 .accessibilityIdentifier(AccessibilityID.menu)
             }
         }
+    }
+
+    /// One page of the pager. Someone whose books are closed to me has no tabs, and a single
+    /// page, their bio at its top.
+    @ViewBuilder
+    private func page(_ layout: FoldingHeaderPageLayout<UserProfileTab>) -> some View {
+        if showsInventory {
+            // The étagères are part of the library, so they go with the books, not with the
+            // lists or the bio.
+            profilePage(layout, showsShelves: layout.page == .inventory, showsBio: false) {
+                tabContent(layout.page)
+            }
+        } else {
+            profilePage(layout, showsShelves: false, showsBio: true) {
+                Section {
+                    RelationActionsView(user: user)
+
+                    EmptyStateView(
+                        glyph: "person",
+                        title: "network.private_inventory.title",
+                        message: "network.private_inventory.message \(user.username)"
+                    )
+                    .padding(.vertical, .large)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+        }
+    }
+
+    private func header(_ scrollOffset: FoldingHeaderScrollOffset<UserProfileTab>) -> some View {
+        UserProfileStickyHeader(
+            user: user,
+            tab: showsInventory ? $tab : nil,
+            tabs: tabs,
+            listsLoad: listsLoad,
+            metrics: metrics,
+            collapse: collapse,
+            scrollOffset: scrollOffset
+        )
     }
 }
 

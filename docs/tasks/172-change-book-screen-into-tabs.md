@@ -60,7 +60,7 @@ stacked on: wa/173-extract-folding-header-pager @ 6db50a08
 - Build ✅ (SwiftLint) · tests ✅ BookListEntryTests, BookNetworkHoldingsTests, FoldingHeaderCollapseTests: 18 passed.
 - Notes: `BookResolvingView` still shows the old left-aligned header while resolving, so the header jumps when the edition lands. Empty network page: sentence alone, no Figma frame. `e2e.book.tab.*` may be swallowed by `LensTabLabels`' `.accessibilityElement(children: .combine)`, unconfirmed.
 
-- round 2 (feedback): `TabPager.Coordinator.follow` defers the name-driven turn to the next main-actor turn (`Task { @MainActor … }`, dropped if the selection moved meanwhile); `turn` ends editing before `setViewControllers`. Build ✅ · tests ✅ 1464 passed.
+- round 3 (feedback): `TabPager.Coordinator.follow` defers the name-driven turn to the next main-actor turn (`Task { @MainActor … }`, dropped if the selection moved meanwhile); `turn` ends editing before `setViewControllers`. Build ✅ · tests ✅ 1464 passed.
 
 ## Review
 

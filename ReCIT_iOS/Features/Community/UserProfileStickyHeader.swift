@@ -51,7 +51,7 @@ struct UserProfileStickyHeader: View {
             (1, foldedNameScale)
         }
 
-        var collapse: ProfileHeaderCollapse {
+        var collapse: FoldingHeaderCollapse {
             .init(
                 distance: (Self.avatar.rest - Self.avatar.folded)
                     + Self.barRise
@@ -68,9 +68,9 @@ struct UserProfileStickyHeader: View {
     /// Where the fetch of their lists stands, for the Listes tab's count.
     let listsLoad: UserListsTab.Load
     let metrics: Metrics
-    let collapse: ProfileHeaderCollapse
+    let collapse: FoldingHeaderCollapse
     /// Read here and nowhere else on the screen, so a scroll redraws this header only.
-    let scrollOffset: ProfileScrollOffset
+    let scrollOffset: FoldingHeaderScrollOffset<UserProfileTab>
 
     /// Blended between the two pages while the pager moves: each page is scrolled its own way.
     private var progress: CGFloat {
@@ -89,7 +89,7 @@ struct UserProfileStickyHeader: View {
     }
 
     private func folding(_ values: (rest: CGFloat, folded: CGFloat)) -> CGFloat {
-        ProfileHeaderCollapse.interpolate(from: values.rest, to: values.folded, progress: progress)
+        FoldingHeaderCollapse.interpolate(from: values.rest, to: values.folded, progress: progress)
     }
 
     var body: some View {

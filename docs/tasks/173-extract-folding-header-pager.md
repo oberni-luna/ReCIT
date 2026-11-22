@@ -1,6 +1,6 @@
 ---
 issue: 173
-status: todo
+status: to-test
 wiki: [[features/0064-a-friends-profile-with-tabs]], [[features/0066-a-friends-profile-tabs-as-pages]], [[features/0067-a-friends-profile-presentation-tab]], [[features/0075-lens-tabs-and-a-lists-pager]]
 note: Split from #172 (Fiche livre in tabs), which builds on it. Grilled 2026-11-22.
 created: 2026-11-22
@@ -32,8 +32,22 @@ The Profil d'un ami folds its header as the page scrolls: picture and name shrin
 
 ## Implementation
 
+- `Features/Components/` (new): `FoldingHeaderCollapse` (was `ProfileHeaderCollapse`), `FoldingHeaderScrollOffset<Tab>` (was `ProfileScrollOffset`), `FoldingHeaderSnapBehavior` (was `ProfileHeaderSnapBehavior`), `FoldingHeaderPageLayout`, `FoldingHeaderPage` (page shell from `UserProfilePage`), `FoldingHeaderPager` (container: scroll object, header measurement, overlay, `TabPager`, single-page path).
+- API: `FoldingHeaderPager(selection:tabs:collapse:) { scrollOffset in header } page: { layout in FoldingHeaderPage(layout) { rows } underHeader: { … }.holdsReadableWidth(_:) }.frozen(_:)`.
+- `Community/`: `UserDetailView` sits on the container; `UserProfilePage` thin wrapper (étagères in content, bio under header); `UserProfileStickyHeader` type names only. Old three files deleted.
+- `Tests/ProfileHeaderCollapseTests.swift` → `FoldingHeaderCollapseTests.swift`, pages as `[Int]`, no Community dependency.
+- Moved code made lint-clean (baseline keyed by path): `rest`/`folded` inner names, `.init(...)`, static before instance, strict headers. No baseline edit, no `swiftlint:disable`.
+- Build ✅ (SwiftLint strict) · tests ✅ FoldingHeaderCollapseTests + UserProfileTabTests, 10 passed.
+
 ## Review
 
 ## Verification
+
+Simulator iPhone 17, existing session, friend OlivierB:
+- ✅ profile opens with photo, name, Inventaire • 160 | Listes • 2 | Échanges • 3 | Présentation
+- ✅ scrolling Inventaire folds the header into the bar, tabs pinned under it
+- ✅ swipe from scrolled Inventaire to Listes unfolds the header
+- not run: halfway snap, étagère freeze, photo full screen, my own profile
+- ✅ no `Profile`/`User` type under `Features/Components/FoldingHeader*`
 
 ## Feedback

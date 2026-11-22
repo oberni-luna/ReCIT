@@ -62,6 +62,8 @@ stacked on: wa/173-extract-folding-header-pager @ 6db50a08
 
 - round 3 (feedback): `TabPager.Coordinator.follow` defers the name-driven turn to the next main-actor turn (`Task { @MainActor … }`, dropped if the selection moved meanwhile); `turn` ends editing before `setViewControllers`. Build ✅ · tests ✅ 1464 passed.
 
+- round 4 (feedback): `FoldingHeaderPager` lets the keyboard reach the pages — `TabPager` ignores the container safe area only (`.ignoresSafeArea(.container)`), not the keyboard, so each page's list brings the focused note above it. Build ✅ · tests ✅. Known: after « OK » the header can rest half folded until the next touch (keyboard scrolls never go through `FoldingHeaderSnapBehavior`).
+
 ## Review
 
 ## Verification
@@ -78,6 +80,8 @@ Simulator iPhone 17, « Le Monde qui n'est pas » (my copy, also OlivierB's, in 
 
 - round 3 (feedback): keyboard open on « Ce que j'en pense », tap « Présentation » → keyboard closes, page turns, no freeze ✅; keyboard on « Ce que je garde pour moi », tap « Dans le réseau » → same ✅ (simulator iPhone 17). Not run: a list's comment with the keyboard open; on device.
 
+- round 4 (feedback): focus « Ce que j'en pense » then « Ce que je garde pour moi » with the header at rest → page scrolls, field and cursor above the keyboard ✅; « OK » closes it ✅; header then rests half folded, back to rest at the next touch ⚠️ (simulator iPhone 17). Not run: on device, a long Mon exemplaire, friend profile regression.
+
 ## Feedback
 
 ### Round 3 — 2026-11-22
@@ -85,3 +89,10 @@ Simulator iPhone 17, « Le Monde qui n'est pas » (my copy, also OlivierB's, in 
 - Triage: defect (criteria unchanged). Implementer: concurrency change.
 - Changes: `ReCIT_iOS/Features/Components/TabPager.swift` — turn by name deferred out of the SwiftUI update; `endEditing(true)` before the turn.
 - Review: deferred → /wa-validate. Verify: ✅ on the simulator, both fields. Rule captured: none.
+
+### Round 4 — 2026-11-22
+- Asked: « quand je mets le focus sur un des champs de text de "dans mon inventaire" il faudrait que l'écran scroll pour que je vois le curseur. La c'est pas le cas »
+- Triage: defect — criterion « editing a note … as before ». Implementer (cause unknown), then main thread.
+- Cause: `contentInsets.bottom` stayed at 34 on focus — `.ignoresSafeArea()` on `TabPager` covered the keyboard region too, so the pages never knew the keyboard was up. A first guess (the snap behaviour pulling the scroll back) was tried and dropped: keyboard scrolls never reach `updateTarget`.
+- Changes: `ReCIT_iOS/Features/Components/FoldingHeaderPager.swift` — `.ignoresSafeArea(.container)` and its comment (`inline`).
+- Review: deferred → /wa-validate. Verify: ✅ simulator, both notes; ⚠️ half fold after « OK » until the next touch. Rule captured: none.

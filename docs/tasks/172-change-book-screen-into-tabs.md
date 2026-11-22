@@ -63,6 +63,7 @@ stacked on: wa/173-extract-folding-header-pager @ 6db50a08
 - round 3 (feedback): `TabPager.Coordinator.follow` defers the name-driven turn to the next main-actor turn (`Task { @MainActor … }`, dropped if the selection moved meanwhile); `turn` ends editing before `setViewControllers`. Build ✅ · tests ✅ 1464 passed.
 
 - round 4 (feedback): `FoldingHeaderPager` lets the keyboard reach the pages — `TabPager` ignores the container safe area only (`.ignoresSafeArea(.container)`), not the keyboard, so each page's list brings the focused note above it. Build ✅ · tests ✅. Known: after « OK » the header can rest half folded until the next touch (keyboard scrolls never go through `FoldingHeaderSnapBehavior`).
+- round 5 (feedback): `TabPager` turns to a tab chosen while the keyboard is up only once it has gone — `keyboardWillShow` / `keyboardDidHide` observed by the coordinator, the window's editing ended, the tab parked as pending. Since round 4 the keyboard resizes the pager, and an animated `setViewControllers` caught by that resize never called its completion: `isTurningByName` stayed `true`, the capsule moved and the page stayed. Build ✅ · tests ✅ (1317).
 
 ## Review
 
@@ -81,6 +82,7 @@ Simulator iPhone 17, « Le Monde qui n'est pas » (my copy, also OlivierB's, in 
 - round 3 (feedback): keyboard open on « Ce que j'en pense », tap « Présentation » → keyboard closes, page turns, no freeze ✅; keyboard on « Ce que je garde pour moi », tap « Dans le réseau » → same ✅ (simulator iPhone 17). Not run: a list's comment with the keyboard open; on device.
 
 - round 4 (feedback): focus « Ce que j'en pense » then « Ce que je garde pour moi » with the header at rest → page scrolls, field and cursor above the keyboard ✅; « OK » closes it ✅; header then rests half folded, back to rest at the next touch ⚠️ (simulator iPhone 17). Not run: on device, a long Mon exemplaire, friend profile regression.
+- round 5 (feedback): reproduced first (comment focused → « Dans le réseau »: capsule on Dans le réseau, Mon exemplaire shown, header unfolded over it); logs showed the turn's completion never called with the pager at 525 pt. After the fix: comment → Dans le réseau ✅, private note → Présentation ✅, plain tab tap and swipe ✅ (simulator iPhone 17). Not run: on device, list comment, friend profile.
 
 ## Feedback
 
@@ -96,3 +98,10 @@ Simulator iPhone 17, « Le Monde qui n'est pas » (my copy, also OlivierB's, in 
 - Cause: `contentInsets.bottom` stayed at 34 on focus — `.ignoresSafeArea()` on `TabPager` covered the keyboard region too, so the pages never knew the keyboard was up. A first guess (the snap behaviour pulling the scroll back) was tried and dropped: keyboard scrolls never reach `updateTarget`.
 - Changes: `ReCIT_iOS/Features/Components/FoldingHeaderPager.swift` — `.ignoresSafeArea(.container)` and its comment (`inline`).
 - Review: deferred → /wa-validate. Verify: ✅ simulator, both notes; ⚠️ half fold after « OK » until the next touch. Rule captured: none.
+
+### Round 5 — 2026-11-22
+- Asked: « J'ai réussi à faire ça. Je sais pas trop comment mais j'ai eu l'impression d'un lag puis cet état » (screenshot: « Dans le réseau » selected, Mon exemplaire shown, header over the card)
+- Triage: defect — criterion « tabs changed by a touch or a swipe ». Main thread.
+- Cause: round 4 lets the keyboard resize the pager; a tab touched while editing ended editing and started an animated turn, the resize under it made UIKit drop the completion, and the pager waited for it forever. Re-setting the page once the turn ended was tried and dropped: the completion never came.
+- Changes: `ReCIT_iOS/Features/Components/TabPager.swift` — `isKeyboardShown` and two notification tasks in the coordinator; `turn` parks the tab while the keyboard is up.
+- Review: deferred → /wa-validate. Verify: ✅ simulator, both directions. Rule captured: none.

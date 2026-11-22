@@ -69,11 +69,43 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
         private var pendingTab: Tab?
         /// The selection as the pager last saw or wrote it.
         private var lastSelection: Tab
+        /// While the keyboard is up. The pager grows back as it leaves, and a turn under way then
+        /// never ended — UIKit never called its completion, and every tab chosen afterwards waited
+        /// for it: the capsule moved, the page stayed. A tab chosen meanwhile is turned to once the
+        /// keyboard has gone.
+        private var isKeyboardShown: Bool = false
+        private var keyboardObservations: [Task<Void, Never>] = []
 
         init(selection: Binding<Tab>, position: any TabPagerPositionStore) {
             self.selection = selection
             self.position = position
             lastSelection = selection.wrappedValue
+            super.init()
+            observeKeyboard()
+        }
+
+        deinit {
+            keyboardObservations.forEach { $0.cancel() }
+        }
+
+        private func observeKeyboard() {
+            keyboardObservations = [
+                Task { [weak self] in
+                    for await _ in NotificationCenter.default.notifications(
+                        named: UIResponder.keyboardWillShowNotification
+                    ) {
+                        self?.isKeyboardShown = true
+                    }
+                },
+                Task { [weak self] in
+                    for await _ in NotificationCenter.default.notifications(
+                        named: UIResponder.keyboardDidHideNotification
+                    ) {
+                        self?.isKeyboardShown = false
+                        self?.turnToPendingTab()
+                    }
+                }
+            ]
         }
 
         func index(of tab: Tab) -> CGFloat {
@@ -154,7 +186,10 @@ struct TabPager<Tab: CaseIterable & Hashable, Page: View>: UIViewControllerRepre
         /// Turns to the tab chosen by its name, if it is not the page on screen already.
         func turn(_ controller: UIPageViewController, to target: Tab) {
             let isSwiping: Bool = scrollView.map { $0.isDragging || $0.isDecelerating } ?? false
-            if isTurningByName || isSwiping {
+            if isTurningByName || isSwiping || isKeyboardShown {
+                if isKeyboardShown {
+                    controller.view.window?.endEditing(true)
+                }
                 pendingTab = target
                 return
             }

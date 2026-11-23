@@ -58,6 +58,10 @@ struct AutosavingTextField<Field: Hashable>: View {
         .foregroundStyle(.foregroundDefault)
         .accessibilityIdentifier(identifier)
         .withLabel(label: String(localized: label))
+        .background {
+            // A long note brought into view by its top left its caret under the keyboard.
+            KeyboardReveal(isActive: isFocused, trigger: draft)
+        }
         .focused(focus, equals: field)
         .onChange(of: isFocused) { _, focused in
             if !focused {

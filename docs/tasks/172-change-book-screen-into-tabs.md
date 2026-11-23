@@ -65,6 +65,7 @@ stacked on: wa/173-extract-folding-header-pager @ 6db50a08
 - round 4 (feedback): `FoldingHeaderPager` lets the keyboard reach the pages — `TabPager` ignores the container safe area only (`.ignoresSafeArea(.container)`), not the keyboard, so each page's list brings the focused note above it. Build ✅ · tests ✅. Known: after « OK » the header can rest half folded until the next touch (keyboard scrolls never go through `FoldingHeaderSnapBehavior`).
 - round 5 (feedback): `TabPager` turns to a tab chosen while the keyboard is up only once it has gone — `keyboardWillShow` / `keyboardDidHide` observed by the coordinator, the window's editing ended, the tab parked as pending. Since round 4 the keyboard resizes the pager, and an animated `setViewControllers` caught by that resize never called its completion: `isTurningByName` stayed `true`, the capsule moved and the page stayed. Build ✅ · tests ✅ (1317).
 - round 6 (feedback): `ListKeyboardReveal` becomes the shared `Components/KeyboardReveal` — it reads the keyboard's frame itself and reveals when the field takes the focus, when the keyboard lands, and as the field grows. Behind `AutosavingTextField` (both notes) and the list's comment (`ListElementsPage`, whose `keyboardTop` goes). The list's comment never rose on `main` either: the focus bumped the trigger before `keyboardWillShow` had set the keyboard's top, the reveal found none, and the frame that followed did not ask again. Its 8 baseline entries go with the file. Build ✅ · tests ✅ (1317).
+- round 7 (feedback): the pager runs under the keyboard again (`FoldingHeaderPager`, `.ignoresSafeArea()` — round 4's `.container` cut the pages at the keyboard's top and showed the screen's ground as a band above it); `FoldingHeaderPage` makes room for the keyboard itself (`keyboardRoom`, added to the bottom content margin) and no longer measures its first row while the keyboard is up — `KeyboardReveal` scrolls through UIKit, the offset learns it late, and a row read mid-scroll left a gap under the folded header. Round 5's wait for the keyboard stays. Build ✅ · tests ✅ (1317).
 
 ## Review
 
@@ -85,6 +86,7 @@ Simulator iPhone 17, « Le Monde qui n'est pas » (my copy, also OlivierB's, in 
 - round 4 (feedback): focus « Ce que j'en pense » then « Ce que je garde pour moi » with the header at rest → page scrolls, field and cursor above the keyboard ✅; « OK » closes it ✅; header then rests half folded, back to rest at the next touch ⚠️ (simulator iPhone 17). Not run: on device, a long Mon exemplaire, friend profile regression.
 - round 5 (feedback): reproduced first (comment focused → « Dans le réseau »: capsule on Dans le réseau, Mon exemplaire shown, header unfolded over it); logs showed the turn's completion never called with the pager at 525 pt. After the fix: comment → Dans le réseau ✅, private note → Présentation ✅, plain tab tap and swipe ✅ (simulator iPhone 17). Not run: on device, list comment, friend profile.
 - round 6 (feedback): list « Romans », comment focused → rises above the keyboard ✅ (before: unmoved, same on `main`). Lucioles, private note after a scroll, 5 lines typed → caret above the keyboard as it grows ✅; OK, back to rest, tap on the last line → caret above the keyboard ✅; note erased afterwards (autosave wrote it to inventaire.io meanwhile). Simulator iPhone 17. Not run: on device, a long list comment.
+- round 7 (feedback): Lucioles, comment focused → no band, the page runs under « OK », field above the keyboard ✅; « OK » → header and page agree ✅ (first build without the measuring guard: header folded over a 286 pt gap ❌, fixed); comment focused → « Dans le réseau » turns ✅; private note typed long → caret above the keyboard ✅, note erased (written to inventaire.io meanwhile). One batch of simulated typing lost half its characters, the next arrived whole — taken for the simulator's injection, not proven. Simulator iPhone 17, light. Not run: on device, dark.
 
 ## Feedback
 
@@ -114,3 +116,10 @@ Simulator iPhone 17, « Le Monde qui n'est pas » (my copy, also OlivierB's, in 
 - Cause: a `List` brings a vertical field into view by its top — a long note's caret stayed under the keyboard; the list's own reveal lost a race with `keyboardWillShow`.
 - Changes: `Features/Components/KeyboardReveal.swift` (new, from `Lists/ListKeyboardReveal.swift`, removed), `Features/Book/AutosavingTextField.swift`, `Features/Lists/ListElementsPage.swift`, `.swiftlint.baseline` (−8).
 - Review: deferred → /wa-validate. Verify: ✅ simulator, list and both note cases. Rule captured: none.
+
+### Round 7 — 2026-11-23
+- Asked: « la barre grise opaque qui apparaît au-dessus du clavier, mais pas toujours » (screenshot: Le jour zéro, dark, a grey band between the card and the keyboard)
+- Triage: defect, introduced by round 4. Main thread.
+- Cause: `.ignoresSafeArea(.container)` stopped the pager at the keyboard's top, « OK » bar included; the pages were cut there and the screen's own ground showed.
+- Changes: `FoldingHeaderPager.swift` (`.ignoresSafeArea()` back, comment), `FoldingHeaderPage.swift` (`keyboardRoom`, first row not measured while the keyboard is up).
+- Review: deferred → /wa-validate. Verify: ✅ simulator. Rule captured: none.

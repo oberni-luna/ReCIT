@@ -75,9 +75,10 @@ struct FoldingHeaderPager<Tab: CaseIterable & Hashable, Header: View, Page: View
                 page(layout(of: tab))
             }
             // Edge to edge, so the pages run under the bars as a list does; UIKit hands each
-            // page the safe area, which its list keeps its rows clear of. The keyboard is left
-            // to the pages, whose lists bring the focused field above it.
-            .ignoresSafeArea(.container)
+            // page the safe area, which its list keeps its rows clear of. Under the keyboard too:
+            // stopped at it, the pager cut its pages there, and the screen's ground showed as a
+            // band above the keyboard. Each page makes room for the keyboard itself.
+            .ignoresSafeArea()
         } else if let tab = tabs.first {
             page(layout(of: tab))
         }

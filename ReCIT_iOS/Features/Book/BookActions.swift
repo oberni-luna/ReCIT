@@ -179,12 +179,10 @@ struct BookActionsModifier: ViewModifier {
 
             listMenu(edition: edition)
 
-            Button("action.add_to_inventory", systemImage: "plus") {
-                Task {
-                    await addToInventory(edition: edition)
-                }
+            AddToInventoryButton(edition: edition) {
+                Label("action.add_to_inventory", systemImage: "plus")
             }
-            .accessibilityIdentifier("e2e.book.addToInventory")
+            .accessibilityIdentifier(AccessibilityID.addToInventory)
         }
     }
 
@@ -231,31 +229,11 @@ struct BookActionsModifier: ViewModifier {
             snackBar.show { SnackBarView.error(error) }
         }
     }
-
-    @MainActor
-    private func addToInventory(edition: Edition) async {
-        guard let user = userModel.myUser else {
-            snackBar.show { SnackBarView(title: String(localized: "edition.error.no_user"), onDismiss: nil) }
-            return
-        }
-
-        do {
-            _ = try await inventoryModel.postNewItem(
-                modelContext: modelContext,
-                entityUri: edition.uri,
-                transaction: .inventorying,
-                visibility: [.friends],
-                forUser: user
-            )
-            snackBar.show { SnackBarView(title: String(localized: "edition.added_to_inventory"), onDismiss: nil) }
-        } catch {
-            snackBar.show { SnackBarView.error(error) }
-        }
-    }
 }
 
 private extension BookActionsModifier {
     enum AccessibilityID {
         static let share: String = "e2e.book.share"
+        static let addToInventory: String = "e2e.book.addToInventory"
     }
 }

@@ -18,7 +18,7 @@ Product objects and notions, their states, roles, plans. Users see these: one co
 
 | fr | en | Also | Never | Code | Means |
 |---|---|---|---|---|---|
-| Livre | Book | exemplaire, copie | Item | `InventoryItem` | a copy I own, on inventaire.io → [[features/0007-batch-scanner]] |
+| Livre | Book | copie | Item | `InventoryItem` | a copy I own, on inventaire.io; « exemplaire » when seen as an object → [[features/0007-batch-scanner]] |
 | Inventaire | Inventory | bibliothèque, collection | — | `InventoryItem` (all of mine) | every copy I own, the first tab |
 | Étagère | Shelf | rayon | Shelve | `Shelf` | a named group of my books, drawn as a shelf → [[features/0001-shelf-carousel-and-creation]] |
 | Liste | List | sélection | Collection | `EntityList`, `EntityListItem` | works or authors gathered, commented → [[features/0060-list-cover-flow]] |
@@ -50,7 +50,7 @@ One precise screen. Team names, in the discussion language. UI projects only.
 | Inviter par e-mail | invite by email | `EmailInvitationSheet` | sheet of addresses and a message, from the two reader searches |
 | Recherche | — | `SearchTabView` | unified search: mine, friends, inventaire.io |
 | Profil | Settings | `ProfileView` | sheet behind the avatar → [[features/0038-profile-behind-the-avatar]] |
-| Fiche livre | book screen | `BookDetailView` | one edition: cover, work, copies, actions |
+| Fiche livre | book screen | `BookDetailView` | one edition: folding header, Présentation / Mon exemplaire / Dans le réseau |
 | Plein écran | full screen cover | `FullScreenCoverView` | one picture alone over the blurred screen, zoomable → [[features/0029-full-screen-cover]] |
 | Profil d'un ami | reader profile | `UserDetailView` | Inventaire / Listes / Échanges / Présentation tabs |
 | Scanner | batch scanner | `BatchScanCameraView` | camera that stays open, books pile up |
@@ -69,6 +69,8 @@ A named piece of UI, reused or talked about on its own. UI projects only.
 | Étiquette papier | paper tag | — | Inventaire, Listes | tilted label naming a shelf or a first step |
 | SnackBar | toast | `SnackBarView` | everywhere | background write failed or done |
 | Dans les listes | in lists | `BookListsSection` | Fiche livre | the lists, mine and friends', holding the book's work → [[features/0079-the-lists-a-book-is-in]] |
+| Mon exemplaire | my copy | `BookTab.myCopy` | Fiche livre | tab: my notes, the status, my lists |
+| Dans le réseau | in my network | `BookTab.network` | Fiche livre | tab: friends' copies and lists, with their count |
 | Où trouver ce livre ? | where to find | `ListWhereToFindSection` | Liste | friends' copies of the work, then Recyclivre and Chez mon libraire |
 | Lien extérieur | external link | `ExternalLinkRow` | Liste | site logo, title, subtitle, arrow; opens Safari |
 

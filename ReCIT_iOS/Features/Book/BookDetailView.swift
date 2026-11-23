@@ -4,37 +4,42 @@
 //
 //  Created by Olivier Berni on 04/08/2026.
 //
-//  The unified book screen (ADR 0002, Move 1). Anchored on an Edition, it
-//  reaches parity with the old EditionDetailView: header, the works the edition
-//  contains, who owns it in the community, and my own copy. The ownership
-//  overlay is read-only here — folding in item editing (notes, transactions) is
-//  P3.
-//
 
 import SwiftUI
 import SwiftData
 
+/// The Fiche livre, anchored on an edition, shaped like a reader's profile: a header held at the
+/// top — the cover, the title, the authors and the subtitle, and the Présentation | Mon exemplaire
+/// | Dans le réseau tabs — that folds into the navigation bar as the page scrolls, and never stays
+/// half folded. Each tab is a page of its own in a `FoldingHeaderPager`, changed by a swipe as
+/// well as by its name. It always opens on Présentation.
 struct BookDetailView: View {
-    @Environment(EntityModel.self) private var entityModel
-    @Environment(UserModel.self) private var userModel
-    @Environment(GenreEnrichmentModel.self) private var genreEnrichmentModel
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-
     @State private var viewModel: BookViewModel
     @State private var nextEntityDestination: NavigationDestination?
     @State private var borrowFromItem: InventoryItem?
     /// The edition « Modifier » opened the form of, while the sheet is up.
     @State private var editedEdition: Edition?
+    /// What « Ajouter à une liste » asks to create, under Mon exemplaire.
+    @State private var creationRequest: ContainerCreationRequest?
     /// How many times this screen has been asked to load. Bumped by « Réessayer », and the
     /// `.task` key — which is how a retry re-runs a call that nothing else about the screen has
     /// changed. One way in, so loading, the book, the two absences and the failure are decided
     /// in one place. Same shape as `SearchContent`'s.
     @State private var attempt: Int = 0
-
-    @FocusState private var focusedText: InventoryItemTextAttribute?
+    @State private var tab: BookTab = .presentation
+    /// The header's title at rest and the line under it, measured: how far the header folds
+    /// depends on how many lines they take.
+    @State private var titleHeight: CGFloat = 0
+    @State private var bylineHeight: CGFloat = 0
 
     @Binding var path: NavigationPath
+
+    @Environment(\.modelContext) private var modelContext: ModelContext
+    @Environment(\.dismiss) private var dismiss: DismissAction
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize: DynamicTypeSize
+    @Environment(EntityModel.self) private var entityModel: EntityModel
+    @Environment(UserModel.self) private var userModel: UserModel
+    @Environment(GenreEnrichmentModel.self) private var genreEnrichmentModel: GenreEnrichmentModel
 
     init(
         anchor: BookAnchor,
@@ -45,19 +50,18 @@ struct BookDetailView: View {
     }
 
     private var loadedEdition: Edition? {
-        if case .loaded(let edition) = viewModel.viewState {
+        if case let .loaded(edition) = viewModel.viewState {
             return edition
         }
         return nil
     }
 
-    /// My copy of this edition, if I have one.
-    ///
-    /// The `isStillInTheStore` test comes first because this runs on the screen that does the
-    /// deleting: `edition.items` can still hold the copy that was just removed, and `ownerId` is
-    /// a persisted read that traps on it. See `PersistentModel+StillInTheStore` and issue 0065.
-    private func iOwn(_ edition: Edition) -> InventoryItem? {
-        edition.items.first { $0.isStillInTheStore && $0.ownerId == userModel.myUser?._id }
+    private var metrics: BookHeaderMetrics {
+        .init(
+            dynamicTypeSize: dynamicTypeSize,
+            titleHeight: titleHeight,
+            bylineHeight: bylineHeight
+        )
     }
 
     var body: some View {
@@ -72,37 +76,14 @@ struct BookDetailView: View {
                 } else {
                     ProgressView()
                 }
-            case .loaded(let edition):
-                // On the forms' ground and cards, so the screen and the edition form it opens
-                // stay one surface — and the cards stop following the system's grey.
-                List {
-                    Group {
-                        headerSection(edition: edition)
-                        otherEditionsSection()
-                        communitySection(edition: edition)
-                        myCopySection(edition: edition)
-                        BookListsSection(
-                            workUris: edition.workUris,
-                            myUserId: userModel.myUser?._id
-                        )
-                        bibliographicDataSection(edition: edition)
+            case let .loaded(edition):
+                pages(edition)
+                    // Keyed on the works rather than on the edition, because a cached edition can
+                    // gain a work when the background refresh lands, and that new work needs asking
+                    // about too.
+                    .task(id: edition.works.map(\.uri).sorted()) {
+                        await enrichGenres(for: edition)
                     }
-                    .listRowBackground(DesignSystem.Color.backgroundFormCell.color)
-                    .textCase(nil)
-                }
-                .applyListBackground(.backgroundForm)
-                .readableContentMargins()
-                .toolbar {
-                    KeyboardOKButton {
-                        focusedText = nil
-                    }
-                }
-                // Keyed on the works rather than on the edition, because a cached edition can
-                // gain a work when the background refresh lands, and that new work needs asking
-                // about too.
-                .task(id: edition.works.map(\.uri).sorted()) {
-                    await enrichGenres(for: edition)
-                }
             case .error:
                 BookAbsenceView(absence: .failed) { attempt += 1 }
             case .noResult:
@@ -125,6 +106,7 @@ struct BookDetailView: View {
         .sheet(item: $editedEdition) { edition in
             EditEditionFlowView(edition: edition)
         }
+        .containerCreationSheet($creationRequest)
         .task(id: attempt) {
             await viewModel.load(entityModel: entityModel, modelContext: modelContext)
         }
@@ -136,114 +118,56 @@ struct BookDetailView: View {
         }
     }
 
-    @ViewBuilder
-    func headerSection(edition: Edition) -> some View {
-        Section {
-            EntitySummaryView(
-                entityUri: edition.uri,
-                otherEntityUri: edition.works.first?.uri,
-                tags: genres(of: edition)
+    /// The three pages side by side, a swipe or a tab's name apart, under the header.
+    private func pages(_ edition: Edition) -> some View {
+        FoldingHeaderPager(
+            selection: $tab,
+            tabs: BookTab.allCases,
+            collapse: metrics.collapse
+        ) { scrollOffset in
+            BookHeader(
+                edition: edition,
+                tab: $tab,
+                tabs: BookTab.allCases,
+                myUserId: userModel.myUser?._id,
+                metrics: metrics,
+                scrollOffset: scrollOffset,
+                onMeasureTitle: { titleHeight = $0 },
+                onMeasureByline: { bylineHeight = $0 }
             )
-
-            EntityAuthorsView(
-                authors: edition.authors.sorted(by: { $0.name < $1.name }),
-                entityDestination: $nextEntityDestination
-            )
-        } header: {
-            EntityHeaderView(
-                title: edition.title,
-                subtitle: edition.subtitle,
-                imageUrl: edition.image
-            )
-        }
-    }
-
-    /// A link to the other editions of each underlying work that actually has
-    /// some. A work with only this one edition contributes no row; when no
-    /// underlying work has siblings the section is absent entirely. Tapping opens
-    /// the work's edition gateway (the picker). (ADR 0002)
-    @ViewBuilder
-    func otherEditionsSection() -> some View {
-        if !viewModel.worksWithOtherEditions.isEmpty {
-            Section {
-                ForEach(viewModel.worksWithOtherEditions.sorted(by: { $0.title < $1.title })) { work in
-                    Button {
-                        nextEntityDestination = NavigationDestination.work(uri: work.uri)
-                    } label: {
-                        NavigationLink(value: UUID()) {
-                            OtherEditionsCell(work: work)
-                                // The end-to-end scenario's way to the picker. Since Move 3 the
-                                // search no longer passes through it, so this row is the only
-                                // path left that exercises `WorkEditionPicker` at all.
-                                .accessibilityIdentifier("e2e.book.otherEditions")
-                        }
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+        } page: { layout in
+            page(layout, edition: edition)
         }
     }
 
     @ViewBuilder
-    func communitySection(edition: Edition) -> some View {
-        // Deleted copies are dropped before `ownerId` is read: the list can still hold the one
-        // this screen has just removed. See `PersistentModel+StillInTheStore` and issue 0065.
-        let othersItems: [InventoryItem] = edition.items
-            .filter { $0.isStillInTheStore && $0.ownerId != userModel.myUser?._id }
-        let requestRule: TransactionRequestRule = .init(
-            copies: edition.items.filter(\.isStillInTheStore).map { ($0.ownerId, edition.uri) },
-            myUserId: userModel.myUser?._id
-        )
-        if !othersItems.isEmpty {
-            Section("nav.community") {
-                ForEach(othersItems) { item in
-                    FriendItemRow(
-                        item,
-                        onOpenFriend: { nextEntityDestination = NavigationDestination.user(user: $0) },
-                        onRequest: { borrowFromItem = $0 }
-                    )
-                    .requestOffered(requestRule.isRequestOffered(forEditionURI: edition.uri))
-                }
-            }
-        }
-    }
-
-    /// Ownership overlay — editable. Delegates to `BookMyCopySection`, which owns
-    /// the `@Bindable` item so the transaction picker and optimistic writes keep
-    /// working after the fold. (ADR 0002, P3)
-    @ViewBuilder
-    func myCopySection(edition: Edition) -> some View {
-        if let item = iOwn(edition) {
-            BookMyCopySection(
-                item: item,
-                focus: $focusedText
+    private func page(
+        _ layout: FoldingHeaderPageLayout<BookTab>,
+        edition: Edition
+    ) -> some View {
+        switch layout.page {
+        case .presentation:
+            BookPresentationPage(
+                layout,
+                edition: edition,
+                worksWithOtherEditions: viewModel.worksWithOtherEditions,
+                entityDestination: $nextEntityDestination,
+                onEditBibliographicData: { editedEdition = edition }
+            )
+        case .myCopy:
+            BookMyCopyPage(
+                layout,
+                edition: edition,
+                creationRequest: $creationRequest
+            )
+        case .network:
+            BookNetworkPage(
+                layout,
+                edition: edition,
+                entityDestination: $nextEntityDestination,
+                onRequest: { borrowFromItem = $0 }
             )
         }
-    }
-
-    /// « Données bibliographiques », last: its one row opens the edition's form. Absent for a
-    /// Wikidata edition, which this app cannot write to.
-    @ViewBuilder
-    func bibliographicDataSection(edition: Edition) -> some View {
-        if EditionClaims.canEdit(uri: edition.uri) {
-            BookBibliographicDataSection {
-                editedEdition = edition
-            }
-        }
-    }
-
-    /// The genres to show as tags, read off the `Work` objects themselves rather than taken from
-    /// an enrichment call's return value — so the row appears on its own the moment the fetch
-    /// below writes them, and reappears after any later sync. (ADR 0001, invariant 1.)
-    ///
-    /// Works are sorted so a two-work edition draws its tags in a stable order; within a work
-    /// the stored order is the claims' own, which is the order the labels were resolved in.
-    private func genres(of edition: Edition) -> [String] {
-        var seen: Set<String> = []
-        return edition.works
-            .sorted(by: { $0.uri < $1.uri })
-            .flatMap(\.genres)
-            .filter { seen.insert($0).inserted }
     }
 
     /// Fills in the genres for the works behind this book, at most once each.

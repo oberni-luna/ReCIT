@@ -8,49 +8,58 @@
 import SwiftData
 import SwiftUI
 
-/// « Dans les listes » on the book screen: every list of works, mine or a friend's, holding one
-/// of the edition's works. Absent when there is none. A row opens the list on that work.
-struct BookListsSection: View {
-    let myUserId: String?
-
-    @Query private var items: [EntityListItem]
-    @Query private var users: [User]
+/// « Dans les listes » on the book screen, split in two: « Dans mes listes » under Mon exemplaire,
+/// « Dans les listes de mes ami·es » under Dans le réseau. A row opens the list on that work;
+/// `trailing` rows close the section.
+struct BookListsSection<Trailing: View>: View {
+    private let titleKey: LocalizedStringKey
+    private let entries: [BookListEntry]
+    private let trailing: Trailing
 
     init(
-        workUris: [String],
-        myUserId: String?
+        _ titleKey: LocalizedStringKey,
+        entries: [BookListEntry],
+        @ViewBuilder trailing: () -> Trailing
     ) {
-        self.myUserId = myUserId
-        _items = Query(filter: #Predicate<EntityListItem> { workUris.contains($0.uri) })
+        self.titleKey = titleKey
+        self.entries = entries
+        self.trailing = trailing()
     }
 
     var body: some View {
-        let entries: [BookListEntry] = BookListEntry.entries(
-            items: items,
-            myUserId: myUserId,
-            friends: users.filter { $0.relation == .friend }
-        )
-        if !entries.isEmpty {
-            Section("book.in_lists") {
-                ForEach(entries) { entry in
-                    NavigationLink(
-                        value: NavigationDestination.entityList(
-                            id: entry.list._id,
-                            focusURI: entry.focusURI
-                        )
-                    ) {
-                        ListRowView(list: entry.list, owner: entry.owner)
-                    }
-                    .accessibilityIdentifier(AccessibilityID.listRow)
+        Section(titleKey) {
+            ForEach(entries) { entry in
+                NavigationLink(
+                    value: NavigationDestination.entityList(
+                        id: entry.list._id,
+                        focusURI: entry.focusURI
+                    )
+                ) {
+                    ListRowView(list: entry.list, owner: entry.owner)
                 }
+                .accessibilityIdentifier(AccessibilityID.listRow)
             }
+
+            trailing
+        }
+    }
+}
+
+extension BookListsSection where Trailing == EmptyView {
+    init(
+        _ titleKey: LocalizedStringKey,
+        entries: [BookListEntry]
+    ) {
+        self.init(titleKey, entries: entries) {
+            EmptyView()
         }
     }
 }
 
 private extension BookListsSection {
+    /// Computed: a generic type holds no stored static.
     enum AccessibilityID {
-        static let listRow: String = "book.inLists.row"
+        static var listRow: String { "book.inLists.row" }
     }
 
     /// A store holding a work in one of my lists and in a friend's.
@@ -102,24 +111,22 @@ private extension BookListsSection {
     }
 }
 
-#Preview("Mine and a friend's", traits: .modifier(BookListsSection.PreviewStore())) {
+#Preview("Mine and a friend's", traits: .modifier(BookListsSection<EmptyView>.PreviewStore())) {
     List {
-        BookListsSection(
-            workUris: ["wd:Q1"],
-            myUserId: "me"
-        )
+        BookListEntriesReader(workUris: ["wd:Q1"], myUserId: "me") { entries in
+            BookListsSection("book.my_lists", entries: entries.filter(\.isMine)) {
+                Text(verbatim: "Ajouter à une liste")
+            }
+
+            BookListsSection("book.friends_lists", entries: entries.filter { $0.isMine == false })
+        }
     }
 }
 
-#Preview("In no list") {
+#Preview("In none of my lists") {
     List {
-        BookListsSection(
-            workUris: ["wd:Q1"],
-            myUserId: "me"
-        )
+        BookListsSection("book.my_lists", entries: []) {
+            Text(verbatim: "Ajouter à une liste")
+        }
     }
-    .modelContainer(
-        for: [EntityList.self, EntityListItem.self, User.self],
-        inMemory: true
-    )
 }

@@ -7,8 +7,9 @@
 
 import SwiftUI
 
-/// A reader's, a group's or an author's photo that opens in the Plein écran on a tap. Without a
-/// photo, the view is left as it is: nothing to open, nothing for VoiceOver to press.
+/// A reader's, a group's or an author's photo, or a book's cover, that opens in the Plein écran on
+/// a tap. Without a picture, the view is left as it is: nothing to open, nothing for VoiceOver to
+/// press.
 struct EnlargeablePhotoModifier: ViewModifier {
     /// How the Plein écran comes on screen.
     enum Opening {
@@ -21,6 +22,8 @@ struct EnlargeablePhotoModifier: ViewModifier {
 
     let url: URL?
     let opening: Opening
+    /// What VoiceOver says the tap does: a photo is enlarged, unless it is a cover.
+    let accessibilityLabel: LocalizedStringKey
 
     @State private var isShowingFullScreen: Bool = false
     @State private var sourceSize: CGSize = .zero
@@ -45,7 +48,7 @@ struct EnlargeablePhotoModifier: ViewModifier {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("photo.action.enlarge")
+        .accessibilityLabel(accessibilityLabel)
         .accessibilityAddTraits(.isButton)
         .accessibilityAction {
             isShowingFullScreen = true
@@ -90,8 +93,15 @@ extension View {
     /// Opens `url` in the Plein écran on a tap, the way `opening` says.
     func enlargeablePhoto(
         _ url: URL?,
-        opening: EnlargeablePhotoModifier.Opening = .slideUp
+        opening: EnlargeablePhotoModifier.Opening = .slideUp,
+        accessibilityLabel: LocalizedStringKey = "photo.action.enlarge"
     ) -> some View {
-        modifier(EnlargeablePhotoModifier(url: url, opening: opening))
+        modifier(
+            EnlargeablePhotoModifier(
+                url: url,
+                opening: opening,
+                accessibilityLabel: accessibilityLabel
+            )
+        )
     }
 }

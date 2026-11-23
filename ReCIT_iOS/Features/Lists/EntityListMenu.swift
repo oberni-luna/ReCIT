@@ -31,8 +31,20 @@ struct EntityListMenu: View {
     /// that mounts `containerCreationSheet(_:)`; `nil` on one that does not, and the menu then
     /// offers no creation line and hides itself when empty, exactly as before.
     var creationRequest: Binding<ContainerCreationRequest?>?
+    /// The menu's own line: « Liste » in a « … » menu, a sentence where it stands alone.
+    private var titleKey: LocalizedStringKey = "action.list"
 
     @Query(sort: \EntityList.name) private var storedLists: [EntityList]
+
+    init(
+        entityUri: String,
+        identifier: String,
+        creationRequest: Binding<ContainerCreationRequest?>? = nil
+    ) {
+        self.entityUri = entityUri
+        self.identifier = identifier
+        self.creationRequest = creationRequest
+    }
 
     /// Mine only: a friend's lists, stored for their profile, are not mine to file into.
     private var lists: [EntityList] {
@@ -61,7 +73,7 @@ struct EntityListMenu: View {
 
     var body: some View {
         MembershipMenu(
-            titleKey: "action.list",
+            titleKey: titleKey,
             systemImage: "list.clipboard",
             identifier: identifier,
             entries: entries,
@@ -109,5 +121,14 @@ struct EntityListMenu: View {
         snackBar.show {
             SnackBarView(title: title, onDismiss: nil)
         }
+    }
+}
+
+extension EntityListMenu {
+    /// Names the menu's own line otherwise than « Liste ».
+    func title(_ titleKey: LocalizedStringKey) -> Self {
+        var copy: Self = self
+        copy.titleKey = titleKey
+        return copy
     }
 }

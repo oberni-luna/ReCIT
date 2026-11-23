@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// One page under a folding header, as an inset grouped `List` of its own: room for the header,
 /// then the page's content. The pages sit side by side in a pager, so a tab is changed by a swipe
@@ -34,8 +35,18 @@ struct FoldingHeaderPage<Tab: Hashable, UnderHeader: View, Content: View>: View 
     /// the header folded, or sat 40 pt low after a bounce, then jumped back. Read only once, it
     /// caught the screen before the navigation bar had set its insets, and the list rose under
     /// the header. So: whenever the page is at rest (`FoldingHeaderScrollOffset.isAtRest`), which
-    /// holds through the screen's arrival and never during a gesture or a bounce.
+    /// holds through the screen's arrival and never during a gesture or a bounce — nor while the
+    /// keyboard is up: `KeyboardReveal` scrolls the list through UIKit, which the offset learns
+    /// late, and the first row read mid-scroll left a gap under the folded header.
     @State private var firstRowTop: CGFloat?
+    /// How far the page scrolls past its rest, `bottomRoom` included.
+    @State private var scrollRange: CGFloat = 0
+    /// Room under the content of a page too short to scroll the whole fold, so it can land folded.
+    @State private var bottomRoom: CGFloat = 0
+    /// Room under the content as tall as the keyboard, while it is up: the pager runs under the
+    /// keyboard, so the list does not make way for it, and a field brought above it
+    /// (`KeyboardReveal`) needs somewhere to scroll to.
+    @State private var keyboardRoom: CGFloat = 0
 
     init(
         _ layout: FoldingHeaderPageLayout<Tab>,
@@ -63,7 +74,7 @@ struct FoldingHeaderPage<Tab: Hashable, UnderHeader: View, Content: View>: View 
                     Color.clear
                         .frame(height: max(layout.expandedHeaderHeight - listTopRoom, 0))
                         .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
-                            guard layout.scrollOffset.isAtRest(layout.page) else { return }
+                            guard layout.scrollOffset.isAtRest(layout.page), keyboardRoom == 0 else { return }
                             firstRowTop = top
                         }
 
@@ -90,6 +101,34 @@ struct FoldingHeaderPage<Tab: Hashable, UnderHeader: View, Content: View>: View 
         } action: { _, inset in
             scrollTopInset = inset
         }
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentSize.height
+                + geometry.contentInsets.top
+                + geometry.contentInsets.bottom
+                - geometry.containerSize.height
+        } action: { _, range in
+            scrollRange = range
+            fitBottomRoom()
+        }
+        .onChange(of: layout.collapse) {
+            fitBottomRoom()
+        }
+        .contentMargins(.bottom, bottomRoom + keyboardRoom, for: .scrollContent)
+        .task {
+            for await notification in NotificationCenter.default.notifications(
+                named: UIResponder.keyboardWillShowNotification
+            ) {
+                let frame: CGRect? = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+                keyboardRoom = frame?.height ?? 0
+            }
+        }
+        .task {
+            for await _ in NotificationCenter.default.notifications(
+                named: UIResponder.keyboardWillHideNotification
+            ) {
+                keyboardRoom = 0
+            }
+        }
         .onScrollPhaseChange { _, phase in
             layout.scrollOffset.setScrollIdle(phase == .idle, of: layout.page)
         }
@@ -99,6 +138,13 @@ struct FoldingHeaderPage<Tab: Hashable, UnderHeader: View, Content: View>: View 
         // Frozen while a book is being picked off an étagère, so the slide moves the
         // selection and not the page — the same rule the inventory's own carousel follows.
         .scrollDisabled(layout.isFrozen)
+    }
+
+    /// Gives a page too short to scroll the whole fold the room it lacks, and a long one none.
+    private func fitBottomRoom() {
+        let room: CGFloat = layout.collapse.bottomRoom(scrollRange: scrollRange, currentRoom: bottomRoom)
+        guard abs(room - bottomRoom) > 0.5 else { return }
+        bottomRoom = room
     }
 }
 

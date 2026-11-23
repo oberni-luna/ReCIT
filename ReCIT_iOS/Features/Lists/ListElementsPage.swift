@@ -48,11 +48,8 @@ struct ListElementsPage: View {
     @FocusState private var isCommentFocused: Bool
     @AccessibilityFocusState private var isTitleFocused: Bool
     /// Bumped by every edit of the comment and by its focus: what makes the list follow the field
-    /// as it grows (`ListKeyboardReveal`).
+    /// as it grows (`KeyboardReveal`).
     @State private var commentEdits: Int = 0
-    /// The top of the keyboard on screen, `.infinity` when it is down. Read from UIKit: the list
-    /// keeps the keyboard to itself.
-    @State private var keyboardTop: CGFloat = .infinity
     /// The keyboard's height, for the room left under the list while the comment is written.
     @State private var keyboardHeight: CGFloat = 0
 
@@ -71,7 +68,7 @@ struct ListElementsPage: View {
 
                 // Room for the comment to rise into. What follows the comment — « Retirer de la liste »,
                 // and on a list of works « Où trouver ce livre ? » — can be shorter than the keyboard:
-                // the list then runs out of scroll, neither the caret nor `ListKeyboardReveal` can take
+                // the list then runs out of scroll, neither the caret nor `KeyboardReveal` can take
                 // the growing field any higher, and each new line goes under the keyboard. A
                 // transparent row as tall as the keyboard, while the comment is being written.
                 if isCommentFocused {
@@ -106,15 +103,7 @@ struct ListElementsPage: View {
                     named: UIResponder.keyboardWillShowNotification
                 ) {
                     let frame: CGRect? = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
-                    keyboardTop = frame?.minY ?? .infinity
                     keyboardHeight = frame?.height ?? 0
-                }
-            }
-            .task {
-                for await _ in NotificationCenter.default.notifications(
-                    named: UIResponder.keyboardWillHideNotification
-                ) {
-                    keyboardTop = .infinity
                 }
             }
             .onChange(of: highlightedURI) { _, uri in
@@ -189,7 +178,7 @@ struct ListElementsPage: View {
                             )
                         }
                         .background {
-                            ListKeyboardReveal(trigger: commentEdits, keyboardTop: keyboardTop)
+                            KeyboardReveal(isActive: isCommentFocused, trigger: commentEdits)
                         }
 
                         // No way to the element's page here: the cover in front opens it.

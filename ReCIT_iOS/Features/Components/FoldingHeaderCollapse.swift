@@ -51,6 +51,21 @@ struct FoldingHeaderCollapse: Equatable {
         return offset < distance / 2 ? 0 : distance
     }
 
+    /// The room a page adds under its content so that it scrolls at least the whole fold: a page
+    /// shorter than that ran out of rows with the header half folded, and could never land folded.
+    /// A page long enough needs none.
+    ///
+    /// - Parameters:
+    ///   - scrollRange: How far the page scrolls past its rest, `currentRoom` included.
+    ///   - currentRoom: The room the page already adds.
+    /// - Returns: The room that has the page scroll exactly the fold, or 0.
+    func bottomRoom(
+        scrollRange: CGFloat,
+        currentRoom: CGFloat
+    ) -> CGFloat {
+        max(currentRoom + distance - scrollRange, 0)
+    }
+
     /// The fold while the pager moves between pages, each scrolled its own way: the first page's
     /// at 0, the second's at 1, the third's at 2, and in between as much of the two pages the
     /// pager stands between as is on screen. The fold is what is blended, not the offsets —
